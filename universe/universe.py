@@ -5,6 +5,8 @@ class Universe:
         self.conflict_history = []
         self.conflict_pressure = 0
         self.threshold = 3
+        self.entities = []
+        self.entity_memory = {}
 
         self.light = False
         self.space = False
@@ -50,6 +52,7 @@ class Universe:
     # ⚖️ slabý tlak místo okamžité změny
         self.conflict_pressure += len(conflicts)
         self.check_threshold()
+        self.spawn_entities_from_conflicts(conflicts)
 
         print(f"⚠ Conflict pressure increased: {self.conflict_pressure}")
 
@@ -62,6 +65,37 @@ class Universe:
     def trigger_reality_shift(self):
         self.conflict_pressure = 0
         self.chaos = True
-        self.entities.append("ThresholdEvent")
 
-        print("new entity emerged: ThresholdEvent")
+        self.create_entity("TheresholdEvent", streght=3)
+
+
+        print("Reality Shifted new layer formed")
+
+    def create_entity(self, name, streght=1):
+
+        entity =  {
+            "name": name,
+            "streght": streght,
+            "age:": 0
+        }
+        self.entities.append(entity)
+        print("new entity created: ",  {name})
+        return entity
+
+    def spawn_entities_from_conflicts(self, conflicts):
+
+        if not conflicts:
+            return
+
+        for c in conflicts:
+
+            key = c["key"]
+
+            if key == "light" and self.conflict_pressure > 1:
+                self.create_entity("LightEcho", streght=1)
+
+            if key == "space" and self.conflict_pressure > 1:
+                self.create_entity("VoidRipple", streght=1)
+
+            if key == "deep" and self.conflict_pressure > 1:
+                self.create_entity("AbyssSeed", streght=1)
