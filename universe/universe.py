@@ -5,9 +5,13 @@ class Universe:
 
         self.light = False
         self.space = False
+        self.rules_modified = False
 
         self.chaos = True
         self.order = False
+
+        # DAY 3
+        self.deep = False
 
         print(f"Universe created: {self.id}")
         print("The universe exists.")
@@ -23,3 +27,12 @@ class Universe:
             self.chaos = False
             self.order = True
             print("Space is separated from chaos.")
+
+        # DAY 3 emergence
+        elif word.name == "LetThereBeDeep":
+            self.deep = True
+            print("The Deep emerges from void.")
+
+        elif word.name == "RewriteRule":
+            self.rules_modified = True
+            print("Reality rules are evolving...")

@@ -14,3 +14,10 @@ Replaying the same Chronicle must always produce the same Universe state.
 
 ## Rule 5 – Divergence is explicit
 Any fork or divergence must be declared via DivergenceInjector.
+
+## Rule 6 – Genesis Separation Rule
+
+Genesis (Day-based logic) must never live inside core/word.
+
+core/word = abstract model of reality
+core/genesis = historical sequence of creation

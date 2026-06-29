@@ -1,9 +1,11 @@
 from core.word.voice import Voice
 from core.word.words import LetThereBeLight
-from core.word.word_day2 import LetThereBeSpace
+from core.genesis.day2 import LetThereBeSpace
+from core.genesis.day3 import LetThereBeDeep
 from core.word.chronicle import Chronicle
 from universe.universe import Universe
-from core.reality.divergence import DivergenceInjector
+from core.observe.chronicle_viewer import ChronicleViewer
+from core.observe.universe_probe import UniverseProbe
 
 
 class Bootstrap:
@@ -20,8 +22,9 @@ class Bootstrap:
         # DAY 2
         voice.speak(LetThereBeSpace())
 
-        print("\n--- STATE AFTER DAY 2 ---")
-        print("Light:", universe.light)
-        print("Space:", universe.space)
-        print("Chaos:", universe.chaos)
-        print("Order:", universe.order)
+        # DAY 3
+        voice.speak(LetThereBeDeep())
+
+        # OBSERVE SYSTEM
+        ChronicleViewer(chronicle).dump()
+        UniverseProbe(universe).snapshot()
