@@ -2,6 +2,7 @@ from core.interaction.rules.light import LightRule
 from core.interaction.rules.space import SpaceRule
 from core.interaction.rules.deep import DeepRule
 from core.interaction.conflict import ConflictEngine
+from core.entity.factory import EntityFactory
 
 
 class RuleEngine:
@@ -9,6 +10,7 @@ class RuleEngine:
     def __init__(self):
         self._rules = []
         self._conflict = ConflictEngine()
+        self._factory = EntityFactory()
         self._load()
 
     def _load(self):
@@ -39,6 +41,9 @@ class RuleEngine:
             print(
             f"- {c['key']} changed from {c['old']} → {c['new']}"
         )
+
+        if "state" in result:
+            result = result["state"]
 
         for k, v in result.items():
             setattr(universe, k, v)

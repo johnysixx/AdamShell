@@ -99,3 +99,12 @@ class Universe:
 
             if key == "deep" and self.conflict_pressure > 1:
                 self.create_entity("AbyssSeed", streght=1)
+
+    def tick(self):
+
+        for entity in self.entities:
+            entity.tick()
+
+    def add_entity(self, entity):
+        self.entities.append(entity)
+        print(f"New entity added: {entity.name}")
