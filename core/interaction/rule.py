@@ -8,4 +8,4 @@ class Rule:
     active: bool = True
 
     def apply(self, universe, word):
-        pass
+        return None

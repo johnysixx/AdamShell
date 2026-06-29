@@ -2,6 +2,8 @@ class Universe:
 
     def __init__(self, universe_id=None):
         self.id = universe_id or "root"
+        self.conflict_history = []
+        self.conflict_pressure = 0
 
         self.light = False
         self.space = False
@@ -36,3 +38,15 @@ class Universe:
         elif word.name == "RewriteRule":
             self.rules_modified = True
             print("Reality rules are evolving...")
+
+    def register_conflicts(self, conflicts):
+
+        if not conflicts:
+         return
+
+        self.conflict_history.extend(conflicts)
+
+    # ⚖️ slabý tlak místo okamžité změny
+        self.conflict_pressure += len(conflicts)
+
+        print(f"⚠ Conflict pressure increased: {self.conflict_pressure}")

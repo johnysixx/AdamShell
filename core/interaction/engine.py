@@ -1,4 +1,4 @@
-from core.interaction.rules import RuleEngine
+from core.interaction.rule_engine import RuleEngine
 
 
 class InteractionEngine:
@@ -7,6 +7,4 @@ class InteractionEngine:
         self._rules = RuleEngine()
 
     def apply(self, universe, word):
-
-        # delegace na RULE SYSTEM
-        self._rules.apply(universe, word)
+        return self._rules.apply(universe, word)
