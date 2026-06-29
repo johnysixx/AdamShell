@@ -1,5 +1,6 @@
 from core.word.voice import Voice
 from core.word.words import LetThereBeLight
+from core.word.word_day2 import LetThereBeSpace
 from core.word.chronicle import Chronicle
 from universe.universe import Universe
 from core.reality.divergence import DivergenceInjector
@@ -9,28 +10,18 @@ class Bootstrap:
 
     def run(self):
 
-        # ORIGINAL REALITY
         universe = Universe()
         chronicle = Chronicle()
         voice = Voice(universe, chronicle)
 
+        # DAY 1
         voice.speak(LetThereBeLight())
 
-        print("\n--- INJECTING DIVERGENCE ---\n")
+        # DAY 2
+        voice.speak(LetThereBeSpace())
 
-        injector = DivergenceInjector()
-
-        # divergence: místo "LetThereBeLight" přidáme jinou realitu
-        class LetThereBeDarkness:
-            name = "LetThereBeDarkness"
-
-        new_universe, new_chronicle = injector.inject(
-            base_chronicle=chronicle,
-            universe=universe,
-            divergence_point=0,
-            new_word=LetThereBeDarkness()
-        )
-
-        print("Original universe light:", universe.light)
-        print("New universe light:", new_universe.light)
-        chronicle.validate()
+        print("\n--- STATE AFTER DAY 2 ---")
+        print("Light:", universe.light)
+        print("Space:", universe.space)
+        print("Chaos:", universe.chaos)
+        print("Order:", universe.order)
