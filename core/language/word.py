@@ -1,16 +1,10 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from uuid import uuid4
 
 
 @dataclass(frozen=True)
 class Word:
-    id: str
-    spoken_at: datetime
-
-    @classmethod
-    def spoken(cls):
-        return cls(
-            id=str(uuid4()),
-            spoken_at=datetime.utcnow()
-        )
+    name: str
+    id: str = field(default_factory=lambda: str(uuid4()))
+    spoken_at: datetime = field(default_factory=datetime.utcnow)

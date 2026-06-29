@@ -14,8 +14,14 @@ class Universe:
         print(f"Universe created: {self.id}")
         print("The universe exists.")
 
-    def hear(self, word: Word):
+    def hear(self, word):
+
+        if not hasattr(word, "name"):
+            raise ValueError("Invalid Word received")
 
         if word.name == "LetThereBeLight":
             self.light = True
-            print("Light is created.")
+
+        else:
+            # default safe behavior
+            pass
