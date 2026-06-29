@@ -4,6 +4,7 @@ class Universe:
         self.id = universe_id or "root"
         self.conflict_history = []
         self.conflict_pressure = 0
+        self.threshold = 3
 
         self.light = False
         self.space = False
@@ -48,5 +49,19 @@ class Universe:
 
     # ⚖️ slabý tlak místo okamžité změny
         self.conflict_pressure += len(conflicts)
+        self.check_threshold()
 
         print(f"⚠ Conflict pressure increased: {self.conflict_pressure}")
+
+    def check_threshold(self):
+
+        if self.conflict_pressure >= self.threshold:
+            print("Threshold reached reality shift triggered")
+            self.trigger_reality_shift()
+
+    def trigger_reality_shift(self):
+        self.conflict_pressure = 0
+        self.chaos = True
+        self.entities.append("ThresholdEvent")
+
+        print("new entity emerged: ThresholdEvent")

@@ -4,21 +4,9 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b4dd05e2-e3fb-417f-af90-8f67d2ea5ec0" name="Changes" comment="eparation of rerality">
-      <change afterPath="$PROJECT_DIR$/core/genesis/day1.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/genesis/day2.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/genesis/day3.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/interaction/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/interaction/engine.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/interaction/rule.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/interaction/rules.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/observe/chronicle_viewer.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/observe/universe_probe.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/word/evolution.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/word/voice.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/word/voice.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/word/word_day2.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/system_rulez.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/system_rulez.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/universe/bootstrap.py" beforeDir="false" afterPath="$PROJECT_DIR$/universe/bootstrap.py" afterDir="false" />
+    <list default="true" id="b4dd05e2-e3fb-417f-af90-8f67d2ea5ec0" name="Changes" comment="conflicts">
+      <change beforePath="$PROJECT_DIR$/.idea/adam-shell.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/adam-shell.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/universe/universe.py" beforeDir="false" afterPath="$PROJECT_DIR$/universe/universe.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -51,60 +39,60 @@
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
       <entry key="MS100" value="1.0" />
-      <entry key="MS500" value="1.0000000000216804" />
-      <entry key="S2" value="1.003628933810565" />
-      <entry key="S5" value="1.1601506804940096" />
-      <entry key="S10" value="1.565951550460849" />
-      <entry key="S30" value="2.3130609600830256" />
-      <entry key="S60" value="2.62502854489726" />
-      <entry key="M2" value="2.887755610433545" />
-      <entry key="M5" value="3.669667515086003" />
-      <entry key="M10" value="6.127043183611714" />
-      <entry key="M15" value="9.883656998891093" />
-      <entry key="M30" value="25.409320533860907" />
-      <entry key="H1" value="55.847864354674385" />
-      <entry key="H2" value="90.97680609373758" />
-      <entry key="H4" value="118.71065486688673" />
-      <entry key="D1" value="149.71965165316462" />
-      <entry key="W1" value="155.93537476545447" />
+      <entry key="MS500" value="1.0" />
+      <entry key="S2" value="1.0000001310506463" />
+      <entry key="S5" value="1.004296624767529" />
+      <entry key="S10" value="1.158050417576277" />
+      <entry key="S30" value="3.669691272685807" />
+      <entry key="S60" value="8.508685125066933" />
+      <entry key="M2" value="16.353101328956427" />
+      <entry key="M5" value="28.500077156436905" />
+      <entry key="M10" value="36.95954017423312" />
+      <entry key="M15" value="41.776255140086086" />
+      <entry key="M30" value="53.8722653343301" />
+      <entry key="H1" value="80.2327185333194" />
+      <entry key="H2" value="118.95652938436552" />
+      <entry key="H4" value="154.86685358674478" />
+      <entry key="D1" value="199.7883851455265" />
+      <entry key="W1" value="209.34544715316574" />
     </decayedCancelled>
     <decayedSelected>
-      <entry key="MS100" value="3.436049753823312E-73" />
-      <entry key="MS500" value="3.2152288400869528E-15" />
-      <entry key="S2" value="2.3812389197452186E-4" />
-      <entry key="S5" value="0.03554030813910052" />
-      <entry key="S10" value="0.18852137316269466" />
-      <entry key="S30" value="0.5734446170242231" />
-      <entry key="S60" value="0.7643067416297458" />
-      <entry key="M2" value="0.9546173780751188" />
-      <entry key="M5" value="1.3944429438230224" />
-      <entry key="M10" value="2.1037597872355076" />
-      <entry key="M15" value="2.7092164493159547" />
-      <entry key="M30" value="3.8241316353503136" />
-      <entry key="H1" value="4.72514396091593" />
-      <entry key="H2" value="5.306379758342374" />
-      <entry key="H4" value="5.637732477806174" />
-      <entry key="D1" value="5.93734314894997" />
-      <entry key="W1" value="5.990991397277107" />
+      <entry key="MS100" value="6.530328973381351E-123" />
+      <entry key="MS500" value="3.6558385829886682E-25" />
+      <entry key="S2" value="7.775829930330807E-7" />
+      <entry key="S5" value="0.003600768086185166" />
+      <entry key="S10" value="0.06091060866698606" />
+      <entry key="S30" value="0.5553085551495487" />
+      <entry key="S60" value="1.529692785893855" />
+      <entry key="M2" value="3.213211562490458" />
+      <entry key="M5" value="5.744960029122906" />
+      <entry key="M10" value="7.648402809122845" />
+      <entry key="M15" value="8.830320997509853" />
+      <entry key="M30" value="11.11333665723307" />
+      <entry key="H1" value="13.463218091410576" />
+      <entry key="H2" value="15.332929399416209" />
+      <entry key="H4" value="16.5441913457791" />
+      <entry key="D1" value="17.738008264092745" />
+      <entry key="W1" value="17.962063915169036" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.006087223278597652" />
-      <entry key="MS500" value="0.3604822178758543" />
-      <entry key="S2" value="0.7771765637411859" />
-      <entry key="S5" value="1.0525825144379488" />
-      <entry key="S10" value="1.6028617140970094" />
-      <entry key="S30" value="2.7766999358319406" />
-      <entry key="S60" value="3.3207134026273186" />
-      <entry key="M2" value="3.802572237229635" />
-      <entry key="M5" value="5.044591709700751" />
-      <entry key="M10" value="8.21872045621405" />
-      <entry key="M15" value="12.583367165566637" />
-      <entry key="M30" value="29.226565883026346" />
-      <entry key="H1" value="60.567860485199546" />
-      <entry key="H2" value="96.27972185806753" />
-      <entry key="H4" value="124.34632181258448" />
-      <entry key="D1" value="155.65659044035183" />
-      <entry key="W1" value="161.9263067054091" />
+      <entry key="MS100" value="0.9012504626108302" />
+      <entry key="MS500" value="0.9794202975869268" />
+      <entry key="S2" value="0.9948151909630302" />
+      <entry key="S5" value="1.0038534485329302" />
+      <entry key="S10" value="1.1953423948365571" />
+      <entry key="S30" value="4.148888248549962" />
+      <entry key="S60" value="9.941562391010228" />
+      <entry key="M2" value="19.462090309628458" />
+      <entry key="M5" value="34.159690733703094" />
+      <entry key="M10" value="44.54696524891073" />
+      <entry key="M15" value="50.55895678564174" />
+      <entry key="M30" value="64.95591685779704" />
+      <entry key="H1" value="93.67796079789389" />
+      <entry key="H2" value="134.2789323776137" />
+      <entry key="H4" value="171.40518303282377" />
+      <entry key="D1" value="217.5253031000067" />
+      <entry key="W1" value="227.30735201851203" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo"><![CDATA[{
@@ -121,7 +109,9 @@
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "Python.__init__.executor": "Run",
     "Python.bootstrap.executor": "Run",
+    "Python.engine.executor": "Run",
     "Python.main.executor": "Run",
+    "Python.rules.executor": "Run",
     "Python.universe.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
@@ -158,7 +148,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1782747593722</updated>
-      <workItem from="1782747598398" duration="9342000" />
+      <workItem from="1782747598398" duration="12303000" />
     </task>
     <task id="LOCAL-00001" summary="architecture">
       <option name="closed" value="true" />
@@ -232,7 +222,31 @@
       <option name="project" value="LOCAL" />
       <updated>1782754615563</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="uuuuuuuuuuuuuuuuuuuuulez">
+      <option name="closed" value="true" />
+      <created>1782756959077</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1782756959077</updated>
+    </task>
+    <task id="LOCAL-00011" summary="uuuuuuuuuuuuuuuuuuuuulez">
+      <option name="closed" value="true" />
+      <created>1782756967034</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1782756967034</updated>
+    </task>
+    <task id="LOCAL-00012" summary="conflicts">
+      <option name="closed" value="true" />
+      <created>1782759455048</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1782759455048</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -255,11 +269,15 @@
     <MESSAGE value="eality comparson model" />
     <MESSAGE value="ystem stabilization layer" />
     <MESSAGE value="eparation of rerality" />
-    <option name="LAST_COMMIT_MESSAGE" value="eparation of rerality" />
+    <MESSAGE value="uuuuuuuuuuuuuuuuuuuuulez" />
+    <MESSAGE value="conflicts" />
+    <option name="LAST_COMMIT_MESSAGE" value="conflicts" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/adam_shell$main.coverage" NAME="main Coverage Results" MODIFIED="1782756869823" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/adam_shell$engine.coverage" NAME="engine Coverage Results" MODIFIED="1782757892624" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/core/interaction" />
+    <SUITE FILE_PATH="coverage/adam_shell$main.coverage" NAME="main Coverage Results" MODIFIED="1782759885423" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/adam_shell$__init__.coverage" NAME="__init__ Coverage Results" MODIFIED="1782751886466" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/core/creation" />
+    <SUITE FILE_PATH="coverage/adam_shell$rules.coverage" NAME="rules Coverage Results" MODIFIED="1782757254454" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/core/interaction" />
     <SUITE FILE_PATH="coverage/adam_shell$universe.coverage" NAME="universe Coverage Results" MODIFIED="1782756798755" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/universe" />
     <SUITE FILE_PATH="coverage/adam_shell$bootstrap.coverage" NAME="bootstrap Coverage Results" MODIFIED="1782753515243" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/universe" />
   </component>
