@@ -13,5 +13,9 @@ class Chronicle:
     def all(self) -> List[Word]:
         return list(self._words)
 
-    def last(self) -> Word | None:
-        return self._words[-1] if self._words else None
+    def replay(self, universe):
+        """
+        Rebuild universe state from scratch
+        """
+        for word in self._words:
+            universe.hear(word)
