@@ -1,0 +1,1 @@
+1) ve vesmíru neexistují změny. Existují pouze události.
