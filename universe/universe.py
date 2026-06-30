@@ -1,3 +1,5 @@
+from typing import Self
+
 from core.entity.factory import EntityFactory
 
 class Universe:
@@ -13,6 +15,14 @@ class Universe:
         self.threshold = 3
         self.entities = []
         self.entity_memory = {}
+
+        self.physics= {
+            "light" : False,
+            "space" : False,
+            "time" : False,
+            "gravity" : False,
+        }
+        self.world = {}
 
         self.factory = EntityFactory()
 
@@ -121,3 +131,8 @@ class Universe:
         self.energy_pool += len(self.entities) * 0.02
 
         self.energy_pool += 0.05
+
+    def enable_physics(self, law):
+
+            self.physics[law] = True
+            print(f"Physics enabled: {law}" )
