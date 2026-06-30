@@ -1,12 +1,20 @@
+from core.entity.factory import EntityFactory
+
 class Universe:
 
     def __init__(self, universe_id=None):
         self.id = universe_id or "root"
+        self.entrophy = 0
+        self.pressure = 0
+        self.energy_pool = 100
+        self.max_entities = 50
         self.conflict_history = []
         self.conflict_pressure = 0
         self.threshold = 3
         self.entities = []
         self.entity_memory = {}
+
+        self.factory = EntityFactory()
 
         # universe is now state-less (entity driven)
 
@@ -65,14 +73,17 @@ class Universe:
 
     def create_entity(self, name, streght=1):
 
-        entity =  {
-            "name": name,
-            "streght": streght,
-            "age:": 0
-        }
-        self.entities.append(entity)
+        entity = self.factory.create(name, self,)
+
+        self.add_entity(entity)
+
         print("new entity created: ",  {name})
+
         return entity
+
+    print("ENTITY RETURNED")
+
+
 
     def spawn_entities_from_conflicts(self, conflicts):
 
@@ -100,3 +111,13 @@ class Universe:
     def add_entity(self, entity):
         self.entities.append(entity)
         print(f"New entity added: {entity.name}")
+
+    def update_physics(self):
+
+        self.entrophy += len(self.entities) * 0.01
+
+        self.pressure = self.entrophy / (len(self.entities) + 1)
+
+        self.energy_pool += len(self.entities) * 0.02
+
+        self.energy_pool += 0.05

@@ -7,4 +7,6 @@ class EntityFactory:
 
         entity = Entity(name)
         entity.word = universe
+        entity.birth_allowed = False
+
         return entity

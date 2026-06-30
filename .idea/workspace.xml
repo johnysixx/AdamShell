@@ -4,12 +4,14 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b4dd05e2-e3fb-417f-af90-8f67d2ea5ec0" name="Changes" comment="conflicts again and again">
-      <change afterPath="$PROJECT_DIR$/core/entity/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/entity/entity.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/entity/factory.py" afterDir="false" />
+    <list default="true" id="b4dd05e2-e3fb-417f-af90-8f67d2ea5ec0" name="Changes" comment="evolution">
+      <change afterPath="$PROJECT_DIR$/eden/eden.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/meeting_place/meeting_place.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/universe/layerRegistry.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/interaction/rule_engine.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/interaction/rule_engine.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/entity/entity.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/entity/entity.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/entity/factory.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/entity/factory.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eden/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/eden/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/universe/bootstrap.py" beforeDir="false" afterPath="$PROJECT_DIR$/universe/bootstrap.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/universe/universe.py" beforeDir="false" afterPath="$PROJECT_DIR$/universe/universe.py" afterDir="false" />
     </list>
@@ -42,61 +44,61 @@
 }]]></component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="2.0038985731830583E-100" />
-      <entry key="MS500" value="1.1576732811180067E-20" />
-      <entry key="S2" value="1.6033556370416796E-5" />
-      <entry key="S5" value="0.026352025781004738" />
-      <entry key="S10" value="0.34839600408014076" />
-      <entry key="S30" value="2.0530022334374296" />
-      <entry key="S60" value="3.4021905714036405" />
-      <entry key="M2" value="4.865561974281073" />
-      <entry key="M5" value="8.692092685890822" />
-      <entry key="M10" value="18.43518953387478" />
-      <entry key="M15" value="28.97010039849852" />
-      <entry key="M30" value="52.58599858549661" />
-      <entry key="H1" value="82.69608186590082" />
-      <entry key="H2" value="129.40162001359778" />
-      <entry key="H4" value="188.22312234929623" />
-      <entry key="D1" value="287.494276823104" />
-      <entry key="W1" value="312.52410077011837" />
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.000000000000097" />
+      <entry key="S2" value="1.0007190309527931" />
+      <entry key="S5" value="1.1177967917169873" />
+      <entry key="S10" value="1.8266602221676882" />
+      <entry key="S30" value="4.378051972697085" />
+      <entry key="S60" value="6.068109056979964" />
+      <entry key="M2" value="7.862080406795206" />
+      <entry key="M5" value="10.995953165355818" />
+      <entry key="M10" value="15.313932982721886" />
+      <entry key="M15" value="20.9026927109208" />
+      <entry key="M30" value="40.13670131729313" />
+      <entry key="H1" value="69.56567206051369" />
+      <entry key="H2" value="108.90666848061103" />
+      <entry key="H4" value="189.03086409780857" />
+      <entry key="D1" value="530.901013583045" />
+      <entry key="W1" value="679.984048412322" />
     </decayedCancelled>
     <decayedSelected>
-      <entry key="MS100" value="1.0" />
-      <entry key="MS500" value="1.0000705008413424" />
-      <entry key="S2" value="1.0916322973243255" />
-      <entry key="S5" value="1.384431910544413" />
-      <entry key="S10" value="1.620025974678239" />
-      <entry key="S30" value="1.8669856121182271" />
-      <entry key="S60" value="2.159631447203811" />
-      <entry key="M2" value="2.9414342920854337" />
-      <entry key="M5" value="4.863700180016201" />
-      <entry key="M10" value="7.93892959979649" />
-      <entry key="M15" value="10.555492155924044" />
-      <entry key="M30" value="15.577087207150159" />
-      <entry key="H1" value="21.05260380132003" />
-      <entry key="H2" value="27.366706937358963" />
-      <entry key="H4" value="33.24921705646374" />
-      <entry key="D1" value="40.99307306966582" />
-      <entry key="W1" value="42.70195459486131" />
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="5.191023857466213E-111" />
+      <entry key="S2" value="2.75194546565175E-28" />
+      <entry key="S5" value="1.151508012114082E-11" />
+      <entry key="S10" value="4.526476859008254E-6" />
+      <entry key="S30" value="0.025878943608224868" />
+      <entry key="S60" value="0.22707814976161003" />
+      <entry key="M2" value="0.6738439934974124" />
+      <entry key="M5" value="1.4148383970413567" />
+      <entry key="M10" value="3.1918039051866858" />
+      <entry key="M15" value="6.443572397137297" />
+      <entry key="M30" value="19.127539219571197" />
+      <entry key="H1" value="38.84919765465433" />
+      <entry key="H2" value="61.882867146217585" />
+      <entry key="H4" value="95.48649206497734" />
+      <entry key="D1" value="195.50350570987047" />
+      <entry key="W1" value="231.94844616060428" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.001575472185980715" />
-      <entry key="MS500" value="0.2750948645521259" />
-      <entry key="S2" value="0.7456948177160964" />
-      <entry key="S5" value="1.1182803903223906" />
-      <entry key="S10" value="1.7379749666481275" />
-      <entry key="S30" value="3.7983571011837505" />
-      <entry key="S60" value="5.479620280828626" />
-      <entry key="M2" value="7.742876875856137" />
-      <entry key="M5" value="13.50415456974725" />
-      <entry key="M10" value="26.324929975608622" />
-      <entry key="M15" value="39.47832562921209" />
-      <entry key="M30" value="68.12445077071466" />
-      <entry key="H1" value="103.72101481714262" />
-      <entry key="H2" value="156.74976314688968" />
-      <entry key="H4" value="221.46081509613117" />
-      <entry key="D1" value="328.4849167713393" />
-      <entry key="W1" value="355.22569112592714" />
+      <entry key="MS100" value="1.1197193210545403E-12" />
+      <entry key="MS500" value="0.004072131878300777" />
+      <entry key="S2" value="0.25302355130426485" />
+      <entry key="S5" value="0.6700930750662041" />
+      <entry key="S10" value="1.5020718300636648" />
+      <entry key="S30" value="4.206092649329461" />
+      <entry key="S60" value="6.165328133758245" />
+      <entry key="M2" value="8.454110129246411" />
+      <entry key="M5" value="12.367301609377266" />
+      <entry key="M10" value="18.475046849008372" />
+      <entry key="M15" value="27.31622265543292" />
+      <entry key="M30" value="59.23078863161587" />
+      <entry key="H1" value="108.38361509283438" />
+      <entry key="H2" value="170.76455826590458" />
+      <entry key="H4" value="284.4966504078608" />
+      <entry key="D1" value="726.3964554184887" />
+      <entry key="W1" value="911.9310915295731" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo"><![CDATA[{
@@ -114,6 +116,7 @@
     "Python.__init__.executor": "Run",
     "Python.bootstrap.executor": "Run",
     "Python.engine.executor": "Run",
+    "Python.entity.executor": "Run",
     "Python.main.executor": "Run",
     "Python.rules.executor": "Run",
     "Python.universe.executor": "Run",
@@ -152,7 +155,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1782747593722</updated>
-      <workItem from="1782747598398" duration="17209000" />
+      <workItem from="1782747598398" duration="41758000" />
     </task>
     <task id="LOCAL-00001" summary="architecture">
       <option name="closed" value="true" />
@@ -266,7 +269,23 @@
       <option name="project" value="LOCAL" />
       <updated>1782768756890</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="letbe the light">
+      <option name="closed" value="true" />
+      <created>1782770699996</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1782770699996</updated>
+    </task>
+    <task id="LOCAL-00016" summary="evolution">
+      <option name="closed" value="true" />
+      <created>1782806963375</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1782806963375</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -293,12 +312,15 @@
     <MESSAGE value="conflicts" />
     <MESSAGE value="conflicts again" />
     <MESSAGE value="conflicts again and again" />
-    <option name="LAST_COMMIT_MESSAGE" value="conflicts again and again" />
+    <MESSAGE value="letbe the light" />
+    <MESSAGE value="evolution" />
+    <option name="LAST_COMMIT_MESSAGE" value="evolution" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/adam_shell$engine.coverage" NAME="engine Coverage Results" MODIFIED="1782757892624" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/core/interaction" />
-    <SUITE FILE_PATH="coverage/adam_shell$main.coverage" NAME="main Coverage Results" MODIFIED="1782770654385" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/adam_shell$main.coverage" NAME="main Coverage Results" MODIFIED="1782814075105" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/adam_shell$__init__.coverage" NAME="__init__ Coverage Results" MODIFIED="1782751886466" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/core/creation" />
+    <SUITE FILE_PATH="coverage/adam_shell$entity.coverage" NAME="entity Coverage Results" MODIFIED="1782810125017" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/core/entity" />
     <SUITE FILE_PATH="coverage/adam_shell$rules.coverage" NAME="rules Coverage Results" MODIFIED="1782757254454" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/core/interaction" />
     <SUITE FILE_PATH="coverage/adam_shell$universe.coverage" NAME="universe Coverage Results" MODIFIED="1782756798755" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/universe" />
     <SUITE FILE_PATH="coverage/adam_shell$bootstrap.coverage" NAME="bootstrap Coverage Results" MODIFIED="1782753515243" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/universe" />

@@ -11,8 +11,8 @@ class Entity:
         self.state = "new"
         self.evolution_threshold = 5
         self.evolved = False
-        self.birth_allowed = False
         self.depth = 0
+        self.birth_allowed = False
 
 
     def tick(self, universe):
@@ -35,9 +35,15 @@ class Entity:
 
         if hasattr(universe, "light") and universe.light:
             self.energy += 1
+            self.energy -= universe.pressure * 0.1
+
+        if universe.energy_pool > 0:
+            transfer = 0.05
+            self.energy += transfer
+            universe.energy_pool -= transfer
             print(f"{self.name} -> energy {self.energy}")
 
-    def evolve(self, universe):
+    def evolve(self, universe, parent=None):
 
         if self.energy < 5:
             return
@@ -45,7 +51,10 @@ class Entity:
         if self.depth >= 5:
             return
 
-        if not hasattr(self, "birth_allowed") or not self.birth_allowed:
+        if not (self, "birth_allowed") or not self.birth_allowed:
+            return
+
+        if universe.energy_pool  < 10:
             return
 
         self.evolved = True
@@ -56,7 +65,9 @@ class Entity:
 
         child_name = f"{self.name}_child_{self.age}"
         child = Entity(child_name)
-        child.energy = self.energy // 2
+
+        child.energy = self.energy  // 2
+        child.depth = self.depth + 1
 
         universe.add_entity(child)
 
