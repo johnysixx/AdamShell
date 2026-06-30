@@ -1,3 +1,4 @@
+from core.entity import factory
 from core.word.voice import Voice
 from core.word.words import LetThereBeLight
 from core.genesis.day2 import LetThereBeSpace
@@ -6,7 +7,7 @@ from core.word.chronicle import Chronicle
 from universe.universe import Universe
 from core.observe.chronicle_viewer import ChronicleViewer
 from core.observe.universe_probe import UniverseProbe
-from core.entity.entity import Entity
+from core.entity.factory import EntityFactory
 
 
 class Bootstrap:
@@ -16,18 +17,22 @@ class Bootstrap:
         universe = Universe("root")
         chronicle = Chronicle()
         voice = Voice(universe, chronicle)
-        universe.add_entity(Entity("test_entity"))
+        factory = EntityFactory()
+        universe.add_entity(factory.create("test_entity", universe))
 
-        # DAY 1
-        voice.speak(LetThereBeLight())
+        for _ in range(3):
+            voice.speak(LetThereBeLight())
+            universe.tick()
 
-        # DAY 2
-        voice.speak(LetThereBeSpace())
+        for _ in range(3):
+            voice.speak(LetThereBeSpace())
+            universe.tick()
 
-        # DAY 3
-        voice.speak(LetThereBeDeep())
+        for _ in range(3):
+            voice.speak(LetThereBeDeep())
+            universe.tick()
 
-        universe.tick()
+
         print("\n--- CHRONICLE ---")
 
         # OBSERVE SYSTEM

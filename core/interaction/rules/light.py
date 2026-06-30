@@ -8,5 +8,11 @@ class LightRule(Rule):
 
     def apply(self, universe, word):
         if word.name == "LetThereBeLight":
-            return {"light": True}
+            return {
+                "state": {
+                    "light": True
+                },
+                "manifest": "Light",
+                "birth_allowed": True
+            }
         return None

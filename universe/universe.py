@@ -8,15 +8,7 @@ class Universe:
         self.entities = []
         self.entity_memory = {}
 
-        self.light = False
-        self.space = False
-        self.rules_modified = False
-
-        self.chaos = True
-        self.order = False
-
-        # DAY 3
-        self.deep = False
+        # universe is now state-less (entity driven)
 
         print(f"Universe created: {self.id}")
         print("The universe exists.")
@@ -103,7 +95,7 @@ class Universe:
     def tick(self):
 
         for entity in self.entities:
-            entity.tick()
+            entity.tick(self)
 
     def add_entity(self, entity):
         self.entities.append(entity)

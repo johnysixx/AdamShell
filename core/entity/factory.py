@@ -3,6 +3,8 @@ from core.entity.entity import Entity
 
 class EntityFactory:
 
-    def create(self, name):
+    def create(self, name, universe=None):
 
-        return Entity(name)
+        entity = Entity(name)
+        entity.word = universe
+        return entity
