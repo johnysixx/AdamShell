@@ -91,7 +91,9 @@ class Universe:
 
         return entity
 
-    print("ENTITY RETURNED")
+
+
+
 
 
 
@@ -146,6 +148,17 @@ class Universe:
 
             self.physics[law] = True
             print(f"Physics enabled: {law}" )
+    def boot_physics(self):
+
+            self.enable_physics("light")
+            self.enable_physics("time")
+            self.enable_physics("gravity")
+            self.enable_physics("space")
+            self.enable_physics("energy")
+
+            self.bind_spacetime()
+
+            print("Physics booted")
 
     def tick_time(self):
 
@@ -157,7 +170,46 @@ class Universe:
             t["tick"] += 1
             t["pressure"] += 0.1 * t["flow"]
 
-            self.energy_pool -= t["pressure"] * 0.01
+            self.energy_pool -= t["pressure"] * 0.1
+
+            print(
+                f"TIME={t['tick']}  PRESSURE={t['pressure']:.2f}  ENERGY={self.energy_pool:.2f}"
+            )
 
     def get_time(self):
         return self.physics["time"]["tick"]
+
+    def get_energy(self):
+        return self.energy_pool
+
+    def bind_spacetime(self):
+        self.world["spacetime"] = {
+            "linked": True,
+            "curvature": 0.0,
+
+            "time_axis": {
+                "tick": 0,
+                "flow": 1.0,
+                "state": "global"
+            },
+
+            "space_axis": {
+                "dimensions": 3,
+                "state": "global",
+                "expanded": True
+            }
+        }
+        print("time and space are bound into spacetime")
+
+    def tick_spacetime(self):
+        spacetime = self.world["spacetime"]
+
+        spacetime["time_axis"]["time_axis"] += 1
+
+        if self.physics["gravity"]:
+            spacetime["curvature"] += 0.01
+
+            print(
+                f"SPACETIME TICK={spacetime['time_axis']['tick']} "
+                f"CURVATURE={spacetime['curvature']:.2f}"
+            )

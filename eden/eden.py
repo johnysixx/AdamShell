@@ -1,3 +1,5 @@
+from typing import Self
+
 from universe.universe import Universe
 
 
@@ -28,9 +30,13 @@ class Eden:
         self.day += 1
 
         self.universe.tick_time()
-        print(f"EDEN DAY {self.day} | TIME {self.universe.get_time()}")
+
+        print(
+            f"EDEN DAY {self.day} | TIME {self.universe.get_time()} | ENERGY {self.universe.get_energy():.2f}"
+        )
 
     def day_0(self):
+        print("day 0: start")
         print("DAY 0: PHYSICS")
 
         self.universe.enable_physics("light")
@@ -52,9 +58,47 @@ class Eden:
             "state": "linear"
         }
 
-        self.universe.physics["time_dilataion"] = True
+        self.universe.physics["time_dilation"] = True
 
         print(self.universe.world)
+
+        print("God separated the light from the darkness")
+        self.universe.world["light"]["name"] = "day"
+
+        self.universe.physics["darkness"] = {
+            "name": "night",
+            "state": "primordial"
+        }
+
+        print("God called the darkness NIGHT")
+
+        self.universe.world["light"]["good"] = True
+        print("God saw that the light was good")
+
+        self.universe.world["evening"] =  {
+            "day": 0,
+            "state": "evening"
+        }
+        print("And there was evening")
+        self.universe.world["morning"] = {
+            "day": 0,
+            "state": "morning"
+        }
+
+        print("And there was morning")
+        self.universe.world["creation_day"] = {
+            "day": 0,
+            "name":"first day of the creation",
+            "complete": True
+        }
+        print("and the first day on the Earth begins")
+
+
+        print(self.universe.physics["light"])
+        print("DARKNESS= ", self.universe.physics["darkness"])
+
+
+
 
 
     def day_1(self):

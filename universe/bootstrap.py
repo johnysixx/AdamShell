@@ -19,6 +19,8 @@ class Bootstrap:
     def run(self):
 
         self.universe = Universe()
+        self.universe.boot_physics()
+
         self.layers = LayerRegistry()
         self.layers.register("eden", Eden(self.universe))
         self.layers.register("meeting", MeetingPlace(self.universe))
