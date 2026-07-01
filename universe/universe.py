@@ -9,7 +9,7 @@ class Universe:
         self.entrophy = 0
         self.pressure = 0
         self.universe_tick =0
-
+        self.universe_history = []
         self.energy_pool = 100
         self.last_pressure_cost =0.0
         self.last_energy_gain =0.0
@@ -21,6 +21,23 @@ class Universe:
         self.threshold = 3
         self.entities = []
         self.entity_memory = {}
+
+
+        self.physics_model = "symbolic_classical"
+
+        self.physics_layers ={
+            "classical": True,
+            "quantum": False,
+        }
+
+        self.quantum_state = {
+            "enabled": False,
+            "superposition": False,
+            "observer": None,
+            "collapsed": False,
+            "uncertainty": 0.0,
+            "fluctuation": 0.0,
+        }
 
         self.physics= {
             "light" : False,
@@ -173,6 +190,15 @@ class Universe:
 
             self.physics[law] = True
             print(f"Physics enabled: {law}" )
+
+    def enable_quantum_layer(self):
+
+        self.physics_layers["quantum"] = True
+        self.quantum_state["enabled"] = True
+        self.physics_model = "symbolic_quantum"
+
+        print("Quantum layers enabled")
+
     def boot_physics(self):
 
             self.enable_physics("light")
@@ -184,6 +210,20 @@ class Universe:
             self.bind_spacetime()
 
             print("Physics booted")
+            print(f"Physics model: {self.physics_model}")
+
+            print(
+                f"Physics layers: "
+                f"classical={self.physics_layers['classical']} "
+                f"quantum={self.physics_layers['quantum']} "
+            )
+            print(
+                f"Quantum state: "
+                f"enabled={self.quantum_state['enabled']} "
+                f"superposition={self.quantum_state['superposition']} "
+                f"collapsed={self.quantum_state['collapsed']}"
+            )
+
 
     def tick_time(self):
 
@@ -250,17 +290,52 @@ class Universe:
                  f"CURVATURE={spacetime['curvature']:.2f}"
                  )
 
+    def record_universe_state(self):
+
+        curvature = 0.0
+
+        if "spacetime" in self.world:
+            curvature = self.world["spacetime"]["curvature"]
+
+        snapshot = {
+            "tick": self.universe_tick,
+            "energy": self.energy_pool,
+            "gain": self.last_energy_gain,
+            "cost": self.last_pressure_cost,
+            "delta": self.last_energy_delta,
+            "entropy": self.entrophy,
+            "pressure": self.pressure,
+            "curvature": curvature,
+            "physics_model": self.physics_model,
+            "quantum_enabled": self.quantum_state["enabled"],
+        }
+
+        self.universe_history.append(snapshot)
+
+
+
+
+
     def tick_universe(self):
+        self.universe_tick += 1
+
         self.tick_spacetime()
         self.update_physics()
+        self.record_universe_state()
+        last_snapshot = self.universe_history[-1]
 
         print(
-            f"UNIVERSE ENERGY={self.energy_pool:.4f} "
+            f"UNIVERSE TICK={self.universe_tick} "
+            f"HISTORY={len(self.universe_history)} "
+            f"MODEL={last_snapshot.get('physics_model', 'unknown')} "
+            f"QUANTUM={last_snapshot.get('quantum_enabled', False)} "
+            f"ENERGY={self.energy_pool:.4f} "
             f"GAIN={self.last_energy_gain:.4f} "
             f"COST={self.last_pressure_cost:.4f} "
             f"DELTA={self.last_energy_delta:.4f} "
             f"ENTROPY={self.entrophy:.2f} "
-            f"PRESSURE={self.pressure:.2f}"
+            f"PRESSURE={self.pressure:.2f} "
+            f"CURVATURE={last_snapshot['curvature']:.2f}"
         )
 
 

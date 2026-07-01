@@ -19,7 +19,14 @@ class Bootstrap:
     def run(self):
 
         self.universe = Universe()
+        self.universe.enable_quantum_layer()
         self.universe.boot_physics()
+
+
+        for _ in range(3):
+            self.universe.tick_universe()
+
+        self.universe.tick_universe()
         self.universe.tick_universe()
 
         self.layers = LayerRegistry()
