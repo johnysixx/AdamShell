@@ -20,6 +20,7 @@ class Bootstrap:
 
         self.universe = Universe()
         self.universe.boot_physics()
+        self.universe.tick_universe()
 
         self.layers = LayerRegistry()
         self.layers.register("eden", Eden(self.universe))

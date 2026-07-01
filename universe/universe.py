@@ -145,6 +145,14 @@ class Universe:
                 }
                 print("Physics enabled: time")
                 return
+            if law == "gravity":
+                self.physics["gravity"] =  {
+                    "enabled": True,
+                    "strength": 1.0,
+                    "curvature_effect": 0.01
+                }
+                print("Physics enabled: gravity")
+                return
 
             self.physics[law] = True
             print(f"Physics enabled: {law}" )
@@ -202,9 +210,15 @@ class Universe:
         print("time and space are bound into spacetime")
 
     def tick_spacetime(self):
+
+        if "spacetime" not in self.world:
+            print("No spacetime bound yet")
+            return
+
+            spacetime = self.physics["spacetime"]
         spacetime = self.world["spacetime"]
 
-        spacetime["time_axis"]["time_axis"] += 1
+        spacetime["time_axis"]["tick"] += 1
 
         if self.physics["gravity"]:
             spacetime["curvature"] += 0.01
@@ -213,3 +227,14 @@ class Universe:
                 f"SPACETIME TICK={spacetime['time_axis']['tick']} "
                 f"CURVATURE={spacetime['curvature']:.2f}"
             )
+
+    def tick_universe(self):
+        self.tick_spacetime()
+        self.update_physics()
+
+        print(
+            f"COSMOS ENERGY={self.energy_pool:.2f} "
+            f"ENTROPHY={self.entrophy:.2f} "
+            f"PRESSURE={self.pressure:.2f} "
+        )
+        print("universe tick complete")

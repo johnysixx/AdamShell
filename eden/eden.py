@@ -70,7 +70,7 @@ class Eden:
             "state": "primordial"
         }
 
-        print("God called the darkness NIGHT")
+        print("God called the darkness night")
 
         self.universe.world["light"]["good"] = True
         print("God saw that the light was good")
@@ -109,7 +109,7 @@ class Eden:
         print("DAY 2: ANIMALS")
 
     def day_3(self):
-        print("DAY 3: TREE OF KNOWLEGGE")
+        print("DAY 3: TREE OF KNOWLEDGE")
 
     def day_4(self):
         print("DAY 4: ADAM")
