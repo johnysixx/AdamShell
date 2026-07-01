@@ -5,20 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b4dd05e2-e3fb-417f-af90-8f67d2ea5ec0" name="Changes" comment="evolution">
-      <change afterPath="$PROJECT_DIR$/eden/eden.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/meeting_place/meeting_place.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/universe/layerRegistry.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/entity/entity.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/entity/entity.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/entity/factory.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/entity/factory.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/eden/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/eden/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/universe/bootstrap.py" beforeDir="false" afterPath="$PROJECT_DIR$/universe/bootstrap.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eden/eden.py" beforeDir="false" afterPath="$PROJECT_DIR$/eden/eden.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/universe/universe.py" beforeDir="false" afterPath="$PROJECT_DIR$/universe/universe.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="EmbeddingIndexingInfo">
+    <option name="cachedIndexableFilesCount" value="69" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -30,81 +27,85 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "johnysixx"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;johnysixx&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/johnysixx/AdamShell.git",
-    "accountId": "dacf9426-6d60-4ce2-ae9f-6f291be6f253"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/johnysixx/AdamShell.git&quot;,
+    &quot;accountId&quot;: &quot;dacf9426-6d60-4ce2-ae9f-6f291be6f253&quot;
   }
-}]]></component>
+}</component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
+  </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
       <entry key="MS100" value="1.0" />
-      <entry key="MS500" value="1.000000000000097" />
-      <entry key="S2" value="1.0007190309527931" />
-      <entry key="S5" value="1.1177967917169873" />
-      <entry key="S10" value="1.8266602221676882" />
-      <entry key="S30" value="4.378051972697085" />
-      <entry key="S60" value="6.068109056979964" />
-      <entry key="M2" value="7.862080406795206" />
-      <entry key="M5" value="10.995953165355818" />
-      <entry key="M10" value="15.313932982721886" />
-      <entry key="M15" value="20.9026927109208" />
-      <entry key="M30" value="40.13670131729313" />
-      <entry key="H1" value="69.56567206051369" />
-      <entry key="H2" value="108.90666848061103" />
-      <entry key="H4" value="189.03086409780857" />
-      <entry key="D1" value="530.901013583045" />
-      <entry key="W1" value="679.984048412322" />
+      <entry key="MS500" value="1.0000034189861282" />
+      <entry key="S2" value="1.0430005821008181" />
+      <entry key="S5" value="1.2840466907250017" />
+      <entry key="S10" value="1.532965532330743" />
+      <entry key="S30" value="1.8346574155201214" />
+      <entry key="S60" value="2.2120320465066445" />
+      <entry key="M2" value="3.957336550901099" />
+      <entry key="M5" value="11.002516672518457" />
+      <entry key="M10" value="19.756856383901066" />
+      <entry key="M15" value="26.10720998385926" />
+      <entry key="M30" value="42.66740649821315" />
+      <entry key="H1" value="75.92839977764872" />
+      <entry key="H2" value="135.73534586057224" />
+      <entry key="H4" value="235.6895923288417" />
+      <entry key="D1" value="658.1591741146276" />
+      <entry key="W1" value="866.4471360833122" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
-      <entry key="MS500" value="5.191023857466213E-111" />
-      <entry key="S2" value="2.75194546565175E-28" />
-      <entry key="S5" value="1.151508012114082E-11" />
-      <entry key="S10" value="4.526476859008254E-6" />
-      <entry key="S30" value="0.025878943608224868" />
-      <entry key="S60" value="0.22707814976161003" />
-      <entry key="M2" value="0.6738439934974124" />
-      <entry key="M5" value="1.4148383970413567" />
-      <entry key="M10" value="3.1918039051866858" />
-      <entry key="M15" value="6.443572397137297" />
-      <entry key="M30" value="19.127539219571197" />
-      <entry key="H1" value="38.84919765465433" />
-      <entry key="H2" value="61.882867146217585" />
-      <entry key="H4" value="95.48649206497734" />
-      <entry key="D1" value="195.50350570987047" />
-      <entry key="W1" value="231.94844616060428" />
+      <entry key="MS500" value="3.661870037261486E-131" />
+      <entry key="S2" value="2.520717128677526E-33" />
+      <entry key="S5" value="1.207392362948072E-13" />
+      <entry key="S10" value="5.456341517310005E-7" />
+      <entry key="S30" value="0.016626371845260318" />
+      <entry key="S60" value="0.2263234220915025" />
+      <entry key="M2" value="0.9099923079828043" />
+      <entry key="M5" value="2.6466939939693357" />
+      <entry key="M10" value="4.641772527209939" />
+      <entry key="M15" value="6.247172071813031" />
+      <entry key="M30" value="11.396760755610265" />
+      <entry key="H1" value="23.8998288895889" />
+      <entry key="H2" value="49.61989617404146" />
+      <entry key="H4" value="92.83976904646156" />
+      <entry key="D1" value="234.27472450756596" />
+      <entry key="W1" value="292.3720606992356" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.1197193210545403E-12" />
-      <entry key="MS500" value="0.004072131878300777" />
-      <entry key="S2" value="0.25302355130426485" />
-      <entry key="S5" value="0.6700930750662041" />
-      <entry key="S10" value="1.5020718300636648" />
-      <entry key="S30" value="4.206092649329461" />
-      <entry key="S60" value="6.165328133758245" />
-      <entry key="M2" value="8.454110129246411" />
-      <entry key="M5" value="12.367301609377266" />
-      <entry key="M10" value="18.475046849008372" />
-      <entry key="M15" value="27.31622265543292" />
-      <entry key="M30" value="59.23078863161587" />
-      <entry key="H1" value="108.38361509283438" />
-      <entry key="H2" value="170.76455826590458" />
-      <entry key="H4" value="284.4966504078608" />
-      <entry key="D1" value="726.3964554184887" />
-      <entry key="W1" value="911.9310915295731" />
+      <entry key="MS100" value="0.002455104247112946" />
+      <entry key="MS500" value="0.3006206515774561" />
+      <entry key="S2" value="0.7832112077823208" />
+      <entry key="S5" value="1.170128477601587" />
+      <entry key="S10" value="1.4740125425820252" />
+      <entry key="S30" value="1.8297207568094715" />
+      <entry key="S60" value="2.4165141478974936" />
+      <entry key="M2" value="4.829123267881111" />
+      <entry key="M5" value="13.599804702901729" />
+      <entry key="M10" value="24.357265667719304" />
+      <entry key="M15" value="32.31950016775792" />
+      <entry key="M30" value="54.03716388399484" />
+      <entry key="H1" value="99.80444888244669" />
+      <entry key="H2" value="185.3328830081028" />
+      <entry key="H4" value="328.50868240827276" />
+      <entry key="D1" value="892.4244611838116" />
+      <entry key="W1" value="1158.8174725154513" />
     </decayedShown>
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 2,
-  "fromUser": false
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 2,
+  &quot;fromUser&quot;: false
+}</component>
   <component name="ProjectId" id="3FohzS2b9LFOBHnoXSuQWoQ4doj" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -120,13 +121,17 @@
     "Python.main.executor": "Run",
     "Python.rules.executor": "Run",
     "Python.universe.executor": "Run",
+    "RunOnceActivity.MCP Project settings loaded": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "codeWithMe.voiceChat.enabledByDefault": "false",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
     "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
     "junie.onboarding.icon.badge.shown": "true",
+    "last_opened_file_path": "C:/Users/johny/.ipython/adam-shell",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -155,7 +160,8 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1782747593722</updated>
-      <workItem from="1782747598398" duration="41758000" />
+      <workItem from="1782747598398" duration="54648000" />
+      <workItem from="1782889482624" duration="558000" />
     </task>
     <task id="LOCAL-00001" summary="architecture">
       <option name="closed" value="true" />
@@ -285,7 +291,15 @@
       <option name="project" value="LOCAL" />
       <updated>1782806963375</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="evolution">
+      <option name="closed" value="true" />
+      <created>1782814147559</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1782814147559</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -318,7 +332,7 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/adam_shell$engine.coverage" NAME="engine Coverage Results" MODIFIED="1782757892624" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/core/interaction" />
-    <SUITE FILE_PATH="coverage/adam_shell$main.coverage" NAME="main Coverage Results" MODIFIED="1782814075105" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/adam_shell$main.coverage" NAME="main Coverage Results" MODIFIED="1782829513128" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/adam_shell$__init__.coverage" NAME="__init__ Coverage Results" MODIFIED="1782751886466" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/core/creation" />
     <SUITE FILE_PATH="coverage/adam_shell$entity.coverage" NAME="entity Coverage Results" MODIFIED="1782810125017" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/core/entity" />
     <SUITE FILE_PATH="coverage/adam_shell$rules.coverage" NAME="rules Coverage Results" MODIFIED="1782757254454" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/core/interaction" />

@@ -27,8 +27,8 @@ class Eden:
 
         self.day += 1
 
-        self.universe.tick()
-        print(f"EDEN tick {self.tick_count}")
+        self.universe.tick_time()
+        print(f"EDEN DAY {self.day} | TIME {self.universe.get_time()}")
 
     def day_0(self):
         print("DAY 0: PHYSICS")
@@ -43,7 +43,7 @@ class Eden:
         "intensity": 1.0,
         "state": "primordial",
         "speed": 299792458,
-        "constatnt": True
+        "constant": True
         }
 
         self.universe.world["time"] = {
@@ -78,6 +78,9 @@ class Eden:
 
     def day_7(self):
         print("sedmeho dne buh odpocival")
+
+    def get_time(self):
+        return self.universe.physics["time"]["tick"]
 
 
 

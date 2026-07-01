@@ -115,8 +115,8 @@ class Universe:
 
     def tick(self):
 
-        for entity in self.entities:
-            entity.tick(self)
+        if hasattr(self, "layers"):
+            self.layers.tick()
 
     def add_entity(self, entity):
         self.entities.append(entity)
@@ -134,5 +134,30 @@ class Universe:
 
     def enable_physics(self, law):
 
+            if law == "time":
+                self.physics["time"] = {
+                    "tick": 0,
+                    "flow": 1.0,
+                    "state": "linear",
+                    "pressure": 0.0
+                }
+                print("Physics enabled: time")
+                return
+
             self.physics[law] = True
             print(f"Physics enabled: {law}" )
+
+    def tick_time(self):
+
+        print(("DEBUG time: ", self.physics["time"]))
+
+        if "time" in self.physics:
+            t = self.physics["time"]
+
+            t["tick"] += 1
+            t["pressure"] += 0.1 * t["flow"]
+
+            self.energy_pool -= t["pressure"] * 0.01
+
+    def get_time(self):
+        return self.physics["time"]["tick"]
