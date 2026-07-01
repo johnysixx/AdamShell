@@ -8,8 +8,14 @@ class Universe:
         self.id = universe_id or "root"
         self.entrophy = 0
         self.pressure = 0
+        self.universe_tick =0
+
         self.energy_pool = 100
+        self.last_pressure_cost =0.0
+        self.last_energy_gain =0.0
+        self.last_energy_delta = 0.0
         self.max_entities = 50
+
         self.conflict_history = []
         self.conflict_pressure = 0
         self.threshold = 3
@@ -130,9 +136,20 @@ class Universe:
 
         self.pressure = self.entrophy / (len(self.entities) + 1)
 
+        if "spacetime" in self.world:
+            self.pressure += self.world["spacetime"]["curvature"]
+
+
         self.energy_pool += len(self.entities) * 0.02
 
-        self.energy_pool += 0.05
+        self.last_energy_gain = 0.05
+        self.energy_pool += self.last_energy_gain
+
+
+        self.last_pressure_cost = self.pressure * 0.1
+        self.energy_pool -= self.last_pressure_cost
+
+        self.last_energy_delta = self.last_energy_gain - self.last_pressure_cost
 
     def enable_physics(self, law):
 
@@ -215,26 +232,36 @@ class Universe:
             print("No spacetime bound yet")
             return
 
-            spacetime = self.physics["spacetime"]
+
         spacetime = self.world["spacetime"]
 
         spacetime["time_axis"]["tick"] += 1
 
-        if self.physics["gravity"]:
-            spacetime["curvature"] += 0.01
+        gravity = self.physics["gravity"]
+        curvature_delta = 0.0
 
-            print(
-                f"SPACETIME TICK={spacetime['time_axis']['tick']} "
-                f"CURVATURE={spacetime['curvature']:.2f}"
-            )
+        if gravity and gravity["enabled"]:
+                curvature_delta = gravity["curvature_effect"] * gravity["strength"]
+                spacetime["curvature"] += curvature_delta
+
+                print(
+                 f"SPACETIME TICK={spacetime['time_axis']['tick']} "
+                 f"DELTA={curvature_delta:.2f} "
+                 f"CURVATURE={spacetime['curvature']:.2f}"
+                 )
 
     def tick_universe(self):
         self.tick_spacetime()
         self.update_physics()
 
         print(
-            f"COSMOS ENERGY={self.energy_pool:.2f} "
-            f"ENTROPHY={self.entrophy:.2f} "
-            f"PRESSURE={self.pressure:.2f} "
+            f"UNIVERSE ENERGY={self.energy_pool:.4f} "
+            f"GAIN={self.last_energy_gain:.4f} "
+            f"COST={self.last_pressure_cost:.4f} "
+            f"DELTA={self.last_energy_delta:.4f} "
+            f"ENTROPY={self.entrophy:.2f} "
+            f"PRESSURE={self.pressure:.2f}"
         )
+
+
         print("universe tick complete")
