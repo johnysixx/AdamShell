@@ -37,6 +37,8 @@ class Universe:
             "collapsed": False,
             "uncertainty": 0.0,
             "fluctuation": 0.0,
+            "entropy_delta": 0.0,
+            "entropy_total": 0.0,
         }
 
         self.physics= {
@@ -150,6 +152,10 @@ class Universe:
     def update_physics(self):
 
         self.entrophy += len(self.entities) * 0.01
+
+        if self.quantum_state["enabled"]:
+            self.entrophy += self.quantum_state["entropy_delta"]
+
 
         self.pressure = self.entrophy / (len(self.entities) + 1)
 
@@ -290,6 +296,23 @@ class Universe:
                  f"CURVATURE={spacetime['curvature']:.2f}"
                  )
 
+    def tick_quantum(self):
+
+        if not self.quantum_state["enabled"]:
+            return
+
+        self.quantum_state["fluctuation"] += 0.01
+        self.quantum_state["uncertainty"] = self.quantum_state["fluctuation"] * 0.5
+        self.quantum_state["entropy_delta"] = self.quantum_state["uncertainty"] * 0.1
+        self.quantum_state["entropy_total"] += self.quantum_state["entropy_delta"]
+
+        print(
+            f"QUANTUM TICK "
+            f"FLUCTUATION={self.quantum_state['fluctuation']:.2f} "
+            f"UNCERTAINTY={self.quantum_state['uncertainty']:.3f} "
+            f"QENTROPY={self.quantum_state['entropy_delta']:.4f} "
+        )
+
     def record_universe_state(self):
 
         curvature = 0.0
@@ -308,6 +331,10 @@ class Universe:
             "curvature": curvature,
             "physics_model": self.physics_model,
             "quantum_enabled": self.quantum_state["enabled"],
+            "quantum_fluctuation": self.quantum_state["fluctuation"],
+            "quantum_uncertainty": self.quantum_state["uncertainty"],
+            "quantum_entropy_delta": self.quantum_state["entropy_delta"],
+            "quantum_entropy_total": self.quantum_state["entropy_total"],
         }
 
         self.universe_history.append(snapshot)
@@ -320,8 +347,10 @@ class Universe:
         self.universe_tick += 1
 
         self.tick_spacetime()
+        self.tick_quantum()
         self.update_physics()
         self.record_universe_state()
+
         last_snapshot = self.universe_history[-1]
 
         print(
@@ -329,12 +358,16 @@ class Universe:
             f"HISTORY={len(self.universe_history)} "
             f"MODEL={last_snapshot.get('physics_model', 'unknown')} "
             f"QUANTUM={last_snapshot.get('quantum_enabled', False)} "
+            f"QFLUCT={last_snapshot.get('quantum_fluctuation', 0.0):.2f} "
+            f"QUNCERT={last_snapshot.get('quantum_uncertainty', 0.0):.3f} "
+            f"QENTROPY={last_snapshot.get('quantum_entropy_delta', 0.0):.4f} "
+            f"QTOTAL={last_snapshot.get('quantum_entropy_total', 0.0):.4f} "
             f"ENERGY={self.energy_pool:.4f} "
             f"GAIN={self.last_energy_gain:.4f} "
             f"COST={self.last_pressure_cost:.4f} "
             f"DELTA={self.last_energy_delta:.4f} "
-            f"ENTROPY={self.entrophy:.2f} "
-            f"PRESSURE={self.pressure:.2f} "
+            f"ENTROPY={self.entrophy:.4f} "
+            f"PRESSURE={self.pressure:.4f} "
             f"CURVATURE={last_snapshot['curvature']:.2f}"
         )
 
