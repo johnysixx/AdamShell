@@ -7,7 +7,16 @@ class Eden:
 
     def __init__(self, universe):
         self.universe = universe
+
         self.entities = []
+
+        self.plants = []
+        self.trees = []
+        self.animals = []
+        self.rules = []
+        self.observer = None
+        self.relations = []
+
         self.day = 0
         self.max_day =7
         self.tick_count = 0
@@ -103,10 +112,94 @@ class Eden:
 
     def day_1(self):
         print("DAY 1: PLANTS")
+
+        grass =  {
+            "name": "grass",
+            "type": "plant",
+            "state": "alive",
+            "edible": True,
+            "forbidden": False,
+        }
+
+        herb ={
+            "name": "herb",
+            "type": "plant",
+            "state": "alive",
+            "edible": True,
+            "forbidden": False,
+        }
+
+        fruit_tree = {
+            "name": "fruit_tree",
+            "type": "tree",
+            "state": "alive",
+            "fruit": True,
+            "forbidden": False,
+        }
+
+        self.plants.append(grass)
+        self.plants.append(herb)
+        self.trees.append(fruit_tree)
+
+        self.entities.append(grass)
+        self.entities.append(herb)
+        self.entities.append(fruit_tree)
+
+        self.universe.world["eden_plants"] = self.plants
+        self.universe.world["eden_trees"] = self.trees
+        self.universe.world["eden_entities"] = self.entities
+
+        print("plants created: grass")
+        print("plants created: herb")
+        print("plants created: fruit_tree")
+
+
         self.universe.enable_physics("space")
 
     def day_2(self):
         print("DAY 2: ANIMALS")
+
+        bird = {
+            "name": "bird",
+            "type": "animal",
+            "kind": "air",
+            "state": "alive",
+            "forbidden": False
+        }
+
+        fish = {
+            "name": "fish",
+            "type": "animal",
+            "kind": "water",
+            "state": "alive",
+            "forbidden": False
+        }
+
+        beast = {
+            "name": "beast",
+            "type": "animal",
+            "kind": "land",
+            "state": "alive",
+            "forbidden": False
+        }
+        self.animals.append(bird)
+        self.animals.append(fish)
+        self.animals.append(beast)
+
+        self.entities.append(bird)
+        self.entities.append(fish)
+        self.entities.append(beast)
+
+        self.universe.world["eden_animals"] = self.animals
+        self.universe.world["eden_entities"] = self.entities
+
+        print("Animals created: bird")
+        print("Animals created: fish")
+        print("Animals created: beast")
+
+
+
+
 
     def day_3(self):
         print("DAY 3: TREE OF KNOWLEDGE")

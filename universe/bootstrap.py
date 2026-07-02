@@ -36,6 +36,8 @@ class Bootstrap:
         self.layers.register("eden", Eden(self.universe))
         self.layers.register("meeting", MeetingPlace(self.universe))
         self.layers.get("eden").tick()
+        self.layers.get("eden").tick()
+        self.layers.get("eden").tick()
         self.layers.get("meeting").tick()
 
         universe = Universe("root")
