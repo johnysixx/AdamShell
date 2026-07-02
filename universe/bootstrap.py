@@ -22,6 +22,37 @@ class Bootstrap:
         self.universe.enable_quantum_layer()
         self.universe.boot_physics()
 
+        self.god = {
+            "name": "god",
+            "type": "creator_entity",
+            "state": "present",
+            "active": True,
+            "forbidden": False,
+
+            "role": {
+                "creator_of": ["eden"],
+                "authority": "creator"
+            },
+
+            "access": {
+                "eden": True,
+                "universe": "via_eden",
+                "quantum_layer": "via_eden",
+                "meeting_place": True
+            },
+
+            "meeting_place_access": {
+                "quantum_layer": True,
+                "eden": False,
+                "universe": False
+            }
+        }
+
+        self.universe.create_entity("god")
+        self.universe.world["god"] = self.god
+
+        print("God entity created")
+
         self.universe.create_entity("classical_probe_debug_entity")
         print("Pazuzu created")
 
