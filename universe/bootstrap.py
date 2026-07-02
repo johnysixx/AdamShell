@@ -25,6 +25,33 @@ class Bootstrap:
         self.universe.create_entity("classical_probe_debug_entity")
         print("Pazuzu created")
 
+        self.serpent = {
+            "name": "serpent",
+            "type": "primordial_entity",
+            "state": "created",
+            "active": False,
+            "forbidden": False,
+
+            "access": {
+                "eden": True,
+                "meeting_place": True,
+                "quantum_layer": "via_meeting_place"
+            },
+
+            "serpent_process": {
+                "ready": False,
+                "active": False,
+                "knowledge_payload": None,
+                "target": None
+            }
+        }
+
+        self.universe.create_entity("serpent")
+        self.universe.world["serpent"] = self.serpent
+
+        print("Serpent created")
+
+
 
         for _ in range(3):
             self.universe.tick_universe()
@@ -60,7 +87,6 @@ class Bootstrap:
             voice.speak(LetThereBeDeep())
             universe.tick()
             universe.update_physics()
-
 
         print("\n--- CHRONICLE ---")
 
