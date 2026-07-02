@@ -99,6 +99,15 @@ class Bootstrap:
         self.layers.register("library", Library(self.universe))
 
         self.layers.get("eden").tick()
+        self.layers.get("root_universe").apply_eden_influence(
+            "god",
+            {
+                "source": "eden",
+                "day": 0,
+                "event": "physics_established",
+                "effect": "root_universe_receives_initial_physics_imprint"
+            }
+        )
         self.layers.get("eden").tick()
         self.layers.get("eden").tick()
         self.layers.get("meeting").tick()
