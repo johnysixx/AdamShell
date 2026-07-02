@@ -119,6 +119,15 @@ class Bootstrap:
         )
 
         self.layers.get("eden").tick()
+        self.layers.get("root_universe").apply_eden_influence(
+            "god",
+            {
+                "source": "eden",
+                "day": 2,
+                "event": "animals_created",
+                "effect": "root_universe_receives_movement_instinct_and_living_creatures_imprint"
+            }
+        )
         self.layers.get("meeting").tick()
 
         universe = Universe("root")
