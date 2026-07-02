@@ -13,6 +13,7 @@ from eden import Eden
 from meeting_place.meeting_place import MeetingPlace
 from universe.layerRegistry import LayerRegistry
 from library import Library
+from root_universe import RootUniverse
 
 
 class Bootstrap:
@@ -92,6 +93,7 @@ class Bootstrap:
         self.universe.tick_universe()
 
         self.layers = LayerRegistry()
+        self.layers.register("root_universe", RootUniverse(self.universe))
         self.layers.register("eden", Eden(self.universe))
         self.layers.register("meeting", MeetingPlace(self.universe))
         self.layers.register("library", Library(self.universe))
