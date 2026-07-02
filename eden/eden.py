@@ -7,6 +7,24 @@ class Eden:
 
     def __init__(self, universe):
         self.universe = universe
+        self.state = {
+            "name": "eden",
+            "type": "sandbox",
+            "state": "initialized",
+            "creator": "god",
+            "created_by": "god",
+            "administrator": "god",
+
+            "permissions": {
+                "can_administer": ["god"],
+                "can_modify": ["god"]
+            }
+        }
+
+        self.universe.world["eden"] = self.state
+
+        print("EDEN CREATED BY: god")
+        print("EDEN ADMINISTRATOR: god")
 
         self.entities = []
 

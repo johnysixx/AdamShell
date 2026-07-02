@@ -128,6 +128,8 @@ class Bootstrap:
                 "effect": "root_universe_receives_movement_instinct_and_living_creatures_imprint"
             }
         )
+        self.layers.get("eden").tick()
+
         self.layers.get("meeting").tick()
 
         universe = Universe("root")
