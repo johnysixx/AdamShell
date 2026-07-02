@@ -22,6 +22,9 @@ class Bootstrap:
         self.universe.enable_quantum_layer()
         self.universe.boot_physics()
 
+        self.universe.create_entity("classical_probe_debug_entity")
+        print("Pazuzu created")
+
 
         for _ in range(3):
             self.universe.tick_universe()

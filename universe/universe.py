@@ -6,7 +6,7 @@ class Universe:
 
     def __init__(self, universe_id=None):
         self.id = universe_id or "root"
-        self.entrophy = 0
+        self.entropy = 0
         self.pressure = 0
         self.universe_tick =0
         self.universe_history = []
@@ -14,6 +14,8 @@ class Universe:
         self.last_pressure_cost =0.0
         self.last_energy_gain =0.0
         self.last_energy_delta = 0.0
+        self.last_classical_entropy_delta = 0.0
+        self.classical_entropy_total = 0.0
         self.max_entities = 50
 
         self.conflict_history = []
@@ -151,13 +153,15 @@ class Universe:
 
     def update_physics(self):
 
-        self.entrophy += len(self.entities) * 0.01
+        self.last_classical_entropy_delta= len(self.entities) * 0.01
+        self.classical_entropy_total += self.last_classical_entropy_delta
+        self.entropy += self.last_classical_entropy_delta
 
         if self.quantum_state["enabled"]:
-            self.entrophy += self.quantum_state["entropy_delta"]
+            self.entropy += self.quantum_state["entropy_delta"]
 
 
-        self.pressure = self.entrophy / (len(self.entities) + 1)
+        self.pressure = self.entropy / (len(self.entities) + 1)
 
         if "spacetime" in self.world:
             self.pressure += self.world["spacetime"]["curvature"]
@@ -326,7 +330,9 @@ class Universe:
             "gain": self.last_energy_gain,
             "cost": self.last_pressure_cost,
             "delta": self.last_energy_delta,
-            "entropy": self.entrophy,
+            "classical_entropy_delta": self.last_classical_entropy_delta,
+            "classical_entropy_total": self.classical_entropy_total,
+            "entropy": self.entropy,
             "pressure": self.pressure,
             "curvature": curvature,
             "physics_model": self.physics_model,
@@ -362,11 +368,13 @@ class Universe:
             f"QUNCERT={last_snapshot.get('quantum_uncertainty', 0.0):.3f} "
             f"QENTROPY={last_snapshot.get('quantum_entropy_delta', 0.0):.4f} "
             f"QTOTAL={last_snapshot.get('quantum_entropy_total', 0.0):.4f} "
+            f"CENTROPY={last_snapshot.get('classical_entropy_delta', 0.0):.4f} "
+            f"CTOTAL={last_snapshot.get('classical_entropy_total', 0.0):.4f} "
             f"ENERGY={self.energy_pool:.4f} "
             f"GAIN={self.last_energy_gain:.4f} "
             f"COST={self.last_pressure_cost:.4f} "
             f"DELTA={self.last_energy_delta:.4f} "
-            f"ENTROPY={self.entrophy:.4f} "
+            f"ENTROPY={self.entropy:.4f} "
             f"PRESSURE={self.pressure:.4f} "
             f"CURVATURE={last_snapshot['curvature']:.2f}"
         )
