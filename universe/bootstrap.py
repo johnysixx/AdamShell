@@ -12,6 +12,7 @@ from core.entity.factory import EntityFactory
 from eden import Eden
 from meeting_place.meeting_place import MeetingPlace
 from universe.layerRegistry import LayerRegistry
+from library import Library
 
 
 class Bootstrap:
@@ -93,6 +94,8 @@ class Bootstrap:
         self.layers = LayerRegistry()
         self.layers.register("eden", Eden(self.universe))
         self.layers.register("meeting", MeetingPlace(self.universe))
+        self.layers.register("library", Library(self.universe))
+
         self.layers.get("eden").tick()
         self.layers.get("eden").tick()
         self.layers.get("eden").tick()
