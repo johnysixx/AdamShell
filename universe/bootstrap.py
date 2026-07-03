@@ -15,6 +15,7 @@ from universe.layerRegistry import LayerRegistry
 from library import Library
 from root_universe import RootUniverse
 from cats import Cats
+from gods import Gods
 
 
 
@@ -26,36 +27,41 @@ class Bootstrap:
         self.universe.enable_quantum_layer()
         self.universe.boot_physics()
 
-        self.god = {
-            "name": "god",
-            "type": "creator_entity",
-            "state": "present",
-            "active": True,
-            "forbidden": False,
+        self.gods = Gods(self.universe)
+        self.god = self.gods.create_god(
+            name="god",
+            role="creator_entity"
+        )
 
-            "role": {
-                "creator_of": ["eden"],
-                "authority": "creator"
-            },
-
-            "access": {
-                "eden": True,
-                "universe": "via_eden",
-                "quantum_layer": "via_eden",
-                "meeting_place": True
-            },
-
-            "meeting_place_access": {
-                "quantum_layer": True,
-                "eden": False,
-                "universe": False
-            }
+        self.god["role"] = {
+            "creator_of": ["eden"],
+            "authority": "creator"
         }
+
+        self.god["access"] = {
+            "eden": True,
+            "universe": "via_eden",
+            "quantum_layer": "via_eden",
+            "meeting_place": True,
+            "library": "write"
+        }
+
+        self.god["meeting_place_access"] = {
+            "quantum_layer": True,
+            "eden": False,
+            "universe": False
+        }
+
+        self.god["administers"] = [
+            "eden",
+            "library",
+            "root_universe"
+        ]
 
         self.universe.create_entity("god")
         self.universe.world["god"] = self.god
 
-        print("God entity created")
+        print("God entity created from Gods layer")
 
         self.cats = Cats(self.universe)
 
