@@ -22,6 +22,16 @@ class Library:
             "classical_probe_debug_entity": "read"
         }
 
+        self.state = {
+            "type": "knowledge_layer",
+            "state": "initialized",
+            "librarian": self.librarian,
+            "access": self.access,
+            "permissions": self.permissions,
+            "books": self.books
+        }
+
+        self.universe.world["library"] = self.state
         print("LIBRARY INITIALIZED")
 
     def can_read(self, entity_name):
