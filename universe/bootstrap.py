@@ -59,8 +59,21 @@ class Bootstrap:
 
         self.cats = Cats(self.universe)
 
-        self.universe.create_entity("classical_probe_debug_entity")
-        print("Pazuzu created")
+        self.pazuzu = self.cats.create_cat(
+            name="pazuzu",
+            color="black",
+            fur_length="short",
+            pattern="solid",
+            eye_color="green"
+        )
+
+        self.pazuzu["alias"] = "classical_probe_debug_entity"
+
+        self.universe.create_entity("pazuzu")
+        self.universe.world["pazuzu"] = self.pazuzu
+        self.universe.world["classical_probe_debug_entity"] = self.pazuzu
+
+        print("Pazuzu created as black cat")
 
         self.serpent = {
             "name": "serpent",
