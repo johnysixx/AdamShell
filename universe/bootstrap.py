@@ -14,6 +14,8 @@ from meeting_place.meeting_place import MeetingPlace
 from universe.layerRegistry import LayerRegistry
 from library import Library
 from root_universe import RootUniverse
+from cats import Cats
+
 
 
 class Bootstrap:
@@ -54,6 +56,8 @@ class Bootstrap:
         self.universe.world["god"] = self.god
 
         print("God entity created")
+
+        self.cats = Cats(self.universe)
 
         self.universe.create_entity("classical_probe_debug_entity")
         print("Pazuzu created")
