@@ -16,6 +16,7 @@ from library import Library
 from root_universe import RootUniverse
 from cats import Cats
 from gods import Gods
+from idea_entities import IdeaEntities
 
 
 
@@ -89,9 +90,12 @@ class Bootstrap:
 
         print("Pazuzu created as black cat")
 
+        self.idea_entities = IdeaEntities(self.universe)
+
         self.serpent = {
             "name": "serpent",
-            "type": "primordial_entity",
+            "type": "idea_entity",
+            "role": "primordial_idea_entity",
             "state": "created",
             "active": False,
             "forbidden": False,
@@ -109,11 +113,14 @@ class Bootstrap:
                 "target": None
             }
         }
+        self.idea_entities.idea_entities.append(self.serpent)
+        self.universe.world["idea_entities"]["idea_entities"] = self.idea_entities.idea_entities
 
         self.universe.create_entity("serpent")
         self.universe.world["serpent"] = self.serpent
 
-        print("Serpent created")
+        print("Serpent created as idea entity")
+
 
         for _ in range(3):
             self.universe.tick_universe()
