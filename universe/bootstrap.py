@@ -72,6 +72,14 @@ class Bootstrap:
         self.universe.create_entity("pazuzu")
         self.universe.world["pazuzu"] = self.pazuzu
         self.universe.world["classical_probe_debug_entity"] = self.pazuzu
+        self.pazuzu["access"] = {
+            "cat_access": self.cats.access_rules,
+            "eden": True,
+            "meeting_place": True,
+            "library": "read",
+            "quantum_layer": "via_meeting_place"
+        }
+
 
         print("Pazuzu created as black cat")
 

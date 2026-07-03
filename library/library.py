@@ -18,6 +18,7 @@ class Library:
         self.permissions = {
             "god": "write",
             "serpent": "read",
+            "pazuzu": "read",
             "classical_probe_debug_entity": "read"
         }
 
