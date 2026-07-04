@@ -19,7 +19,8 @@ class Library:
             "god": "write",
             "serpent": "read",
             "pazuzu": "read",
-            "classical_probe_debug_entity": "read"
+            "classical_probe_debug_entity": "read",
+            "meeting_place": "read"
         }
 
         self.state = {

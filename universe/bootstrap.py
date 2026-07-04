@@ -130,14 +130,19 @@ class Bootstrap:
 
         self.layers = LayerRegistry()
         self.layers.register("root_universe", RootUniverse(self.universe))
-        self.layers.register("eden", Eden(self.universe))
-        self.layers.register("meeting", MeetingPlace(self.universe))
         self.layers.register("library", Library(self.universe))
+        self.layers.register("meeting", MeetingPlace(self.universe))
+
         self.layers.get("meeting").add_entity(self.god)
         self.layers.get("meeting").add_entity(self.serpent)
         self.layers.get("meeting").add_entity(self.pazuzu)
 
+        self.layers.get("meeting").emit_event("eden idea was born in the bar")
+
+        self.layers.register("eden", Eden(self.universe))
+
         self.layers.get("eden").tick()
+
         self.layers.get("root_universe").apply_eden_influence(
             "god",
             {

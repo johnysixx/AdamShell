@@ -1,4 +1,5 @@
 from .bartender import Bartender
+from .terminals import BarTerminals
 
 class MeetingPlace:
 
@@ -8,6 +9,7 @@ class MeetingPlace:
         self.events = []
         self.tick_count = 0
         self.bartender = Bartender()
+        self.terminals = BarTerminals()
 
         self.access = {
             "from": [
@@ -35,7 +37,8 @@ class MeetingPlace:
             "access": self.access,
             "permissions": self.permissions,
             "entities": self.entities,
-            "bartender": self.bartender.name
+            "bartender": self.bartender.name,
+            "terminals": self.terminals.terminals
         }
 
         self.universe.world["meeting_place"] = self.state
@@ -68,6 +71,16 @@ class MeetingPlace:
         print(f"MEETING PLACE TICK {self.tick_count}")
         self.bartender.idle_work()
         self._clear_events()
+
+    def show_library_book_count(self, library):
+        return self.terminals.show_book_count(library)
+
+    def show_book_search_terminal(self):
+        return self.terminals.show_book_search_placeholder()
+
+    def show_random_library_excerpt(self, library):
+        return self.terminals.show_random_excerpt(library)
+
 
     def _clear_events(self):
         self.events = []
