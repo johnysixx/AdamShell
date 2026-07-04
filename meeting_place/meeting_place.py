@@ -1,3 +1,5 @@
+from .bartender import Bartender
+
 class MeetingPlace:
 
     def __init__(self, universe):
@@ -5,6 +7,7 @@ class MeetingPlace:
         self.entities = []
         self.events = []
         self.tick_count = 0
+        self.bartender = Bartender()
 
         self.access = {
             "from": [
@@ -31,7 +34,8 @@ class MeetingPlace:
             "state": "initialized",
             "access": self.access,
             "permissions": self.permissions,
-            "entities": self.entities
+            "entities": self.entities,
+            "bartender": self.bartender.name
         }
 
         self.universe.world["meeting_place"] = self.state
@@ -52,14 +56,17 @@ class MeetingPlace:
         self.universe.world["meeting_place"]["entities"] = self.entities
 
         print(f"MEETING PLACE: entity joined {entity_name}")
+        self.bartender.guest_arrives(entity_name)
 
     def emit_event(self, event):
         self.events.append(event)
+        self.bartender.observe_event(event)
         print(f"MEETING PLACE EVENT: {event}")
 
     def tick(self):
         self.tick_count += 1
         print(f"MEETING PLACE TICK {self.tick_count}")
+        self.bartender.idle_work()
         self._clear_events()
 
     def _clear_events(self):
