@@ -137,6 +137,15 @@ class Bootstrap:
         self.layers.get("meeting").add_entity(self.serpent)
         self.layers.get("meeting").add_entity(self.pazuzu)
 
+        self.layers.get("meeting").show_library_book_count(
+            self.layers.get("library")
+        )
+
+        self.layers.get("meeting").show_book_search_terminal()
+        self.layers.get("meeting").show_random_library_excerpt(
+            self.layers.get("library")
+        )
+
         self.layers.get("meeting").emit_event("eden idea was born in the bar")
 
         self.layers.register("eden", Eden(self.universe))
