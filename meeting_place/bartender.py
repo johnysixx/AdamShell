@@ -1,12 +1,20 @@
 class Bartender:
 
-    def __init__(self, name="bartender"):
+    def __init__(self, story_book, name="bartender"):
         self.name = name
         self.type = "bar_observer"
         self.state = "present"
+        self.story_book = story_book
+
+        self.origin = {
+            "layer": "meeting_place",
+            "event": "bartender was born in the bar"
+        }
+
 
         self.event_memory = []
         self.regular_drinks = {}
+        self.known_histories = {}
 
         self.current_task = "wiping_glasses"
         self.glasses_clean = False
@@ -16,6 +24,7 @@ class Bartender:
 
     def observe_event(self, event):
         self.event_memory.append(event)
+        self.story_book.write_entry(event)
         print(f"BARTENDER OBSERVED EVENT: {event}")
 
     def guest_arrives(self, guest_name):

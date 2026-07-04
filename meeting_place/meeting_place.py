@@ -1,5 +1,7 @@
 from .bartender import Bartender
 from .terminals import BarTerminals
+from .bar_counter import BarCounter
+from .bouncer import Bouncer
 
 class MeetingPlace:
 
@@ -8,8 +10,12 @@ class MeetingPlace:
         self.entities = []
         self.events = []
         self.tick_count = 0
-        self.bartender = Bartender()
+        self.bar_counter = BarCounter()
         self.terminals = BarTerminals()
+        self.bouncer = Bouncer()
+        self.bartender = Bartender(
+            self.bar_counter.hidden_story_book
+        )
 
         self.access = {
             "from": [
@@ -37,8 +43,11 @@ class MeetingPlace:
             "access": self.access,
             "permissions": self.permissions,
             "entities": self.entities,
-            "bartender": self.bartender.name,
-            "terminals": self.terminals.terminals
+            "bar_counter": self.bar_counter.name,
+            "hidden_story_book": self.bar_counter.hidden_story_book.name,
+            "terminals": self.terminals.terminals,
+            "bouncer": self.bouncer.name,
+            "bartender": self.bartender.name
         }
 
         self.universe.world["meeting_place"] = self.state
@@ -51,8 +60,8 @@ class MeetingPlace:
     def add_entity(self, entity):
         entity_name = self._get_entity_name(entity)
 
-        if not self.can_enter(entity_name):
-            print(f"MEETING PLACE ENTRY DENIED: {entity_name}")
+        if not self.bouncer.can_enter(entity):
+            print(f"MEETING PLACE ENTRY DENIED BY BOUNCER: {entity_name}")
             return
 
         self.entities.append(entity)
