@@ -28,9 +28,6 @@ class Bartender:
         print(f"BARTENDER OBSERVED EVENT: {event}")
 
     def guest_arrives(self, guest_name):
-        event = f"{guest_name} arrived at the bar"
-        self.observe_event(event)
-
         if self.knows_drink(guest_name):
             drink = self.regular_drinks[guest_name]
             print(f"BARTENDER ASKS: {guest_name}, do you want your usual {drink}?")

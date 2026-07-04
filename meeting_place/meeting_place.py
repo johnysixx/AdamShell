@@ -68,11 +68,13 @@ class MeetingPlace:
         self.universe.world["meeting_place"]["entities"] = self.entities
 
         print(f"MEETING PLACE: entity joined {entity_name}")
+        self.emit_event(f"{entity_name} arrived at the bar")
         self.bartender.guest_arrives(entity_name)
 
     def emit_event(self, event):
         self.events.append(event)
         self.bartender.observe_event(event)
+        self.show_bar_story_count()
         print(f"MEETING PLACE EVENT: {event}")
 
     def tick(self):
@@ -89,6 +91,11 @@ class MeetingPlace:
 
     def show_random_library_excerpt(self, library):
         return self.terminals.show_random_excerpt(library)
+
+    def show_bar_story_count(self):
+        return self.terminals.show_bar_story_count(
+            self.bar_counter
+        )
 
 
     def _clear_events(self):

@@ -16,6 +16,11 @@ class BarTerminals:
             "random_excerpt_terminal": {
                 "type": "display",
                 "purpose": "show_random_library_excerpt"
+            },
+
+            "bar_story_count_terminal": {
+                "type": "display",
+                "purpose": "show_bar_story_count"
             }
         }
 
@@ -26,6 +31,13 @@ class BarTerminals:
         count = len(books)
 
         print(f"BOOK COUNT TERMINAL: {count}")
+        return count
+
+    def show_bar_story_count(self, bar_counter):
+        stories = bar_counter.read_bar_stories()
+        count = len(stories)
+
+        print(f"BAR STORY COUNT TERMINAL: {count}")
         return count
 
     def show_book_search_placeholder(self):
@@ -68,4 +80,4 @@ class BarTerminals:
                 continue
 
         return excerpts
-    
+
