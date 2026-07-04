@@ -51,6 +51,13 @@ class Cats:
             "long"
         ]
 
+        self.allowed_sexes = [
+            "female",
+            "male"
+        ]
+
+        self.default_idea_energy = 100
+
         self.access_rules = {
             "can_access_anywhere": True,
             "access_via": [
@@ -66,6 +73,8 @@ class Cats:
             "allowed_patterns": self.allowed_patterns,
             "allowed_eye_colors": self.allowed_eye_colors,
             "allowed_fur_lengths": self.allowed_fur_lengths,
+            "allowed_sexes": self.allowed_sexes,
+            "default_idea_energy": self.default_idea_energy,
             "access_rules": self.access_rules,
             "cats": self.cats
         }
@@ -73,7 +82,16 @@ class Cats:
         print("CATS CREATED")
         print("CATS ACCESS: anywhere via boxes and cat doors")
 
-    def create_cat(self, name, color, fur_length, pattern="solid", eye_color="green"):
+    def create_cat(
+            self,
+            name,
+            color,
+            fur_length,
+            pattern="solid",
+            eye_color="green",
+            sex="female",
+            origin="manual_creation"
+    ):
         if color not in self.allowed_colors:
             print(f"CAT CREATION DENIED: invalid color {color}")
             return None
@@ -90,6 +108,10 @@ class Cats:
             print(f"CAT CREATION DENIED: invalid eye color {eye_color}")
             return None
 
+        if sex not in self.allowed_sexes:
+            print(f"CAT CREATION DENIED: invalid sex {sex}")
+            return None
+
         cat = {
             "name": name,
             "type": "cat",
@@ -98,6 +120,9 @@ class Cats:
             "pattern": pattern,
             "eye_color": eye_color,
             "fur_length": fur_length,
+            "sex": sex,
+            "origin": origin,
+            "idea_energy": self.default_idea_energy,
             "access": self.access_rules,
             "special_traits": []
         }
@@ -119,4 +144,4 @@ class Cats:
 
     def _clear_events(self):
         self.events = []
-        
+
