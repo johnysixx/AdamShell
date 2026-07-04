@@ -121,6 +121,89 @@ class Bootstrap:
 
         print("Serpent created as idea entity")
 
+        self.lilith = {
+            "name": "lilith",
+            "type": "idea_entity",
+            "role": "archetype_principle",
+            "state": "created",
+            "active": True,
+            "forbidden": False,
+
+            "principle": {
+                "name": "feminine_principle",
+                "domain": [
+                    "woman",
+                    "creation",
+                    "feminine_archetype"
+                ],
+                "origin": "lilith"
+            },
+
+            "access": {
+                "meeting_place": True,
+                "library": "read",
+                "quantum_layer": "via_meeting_place"
+            },
+
+            "meeting_presence": False,
+            "known_by_bartender": True,
+            "history": [
+                "lilith was born as an idea entity",
+                "with lilith the feminine principle came into existence"
+            ]
+        }
+
+        self.idea_entities.idea_entities.append(self.lilith)
+        self.universe.world["idea_entities"]["idea_entities"] = self.idea_entities.idea_entities
+
+        self.universe.create_entity("lilith")
+        self.universe.world["lilith"] = self.lilith
+
+        print("Lilith created as idea entity")
+
+        self.pazuzu_masculine_principle = {
+            "name": "pazuzu",
+            "alias": "pazuzu",
+            "world_key": "pazuzu_masculine_principle",
+            "type": "idea_entity",
+            "role": "archetype_principle",
+            "state": "created",
+            "active": True,
+            "forbidden": False,
+
+            "principle": {
+                "name": "masculine_principle",
+                "domain": [
+                    "man",
+                    "creation",
+                    "masculine_archetype"
+                ],
+                "origin": "pazuzu_alias"
+            },
+
+            "access": {
+                "meeting_place": False,
+                "library": "read",
+                "quantum_layer": True
+            },
+
+            "meeting_presence": False,
+            "known_by_bartender": False,
+            "history": [
+                "pazuzu masculine principle was born in the idea world",
+                "with pazuzu the masculine principle came into existence",
+                "pazuzu masculine principle has no access to the bar"
+            ]
+        }
+
+        self.idea_entities.idea_entities.append(self.pazuzu_masculine_principle)
+        self.universe.world["idea_entities"]["idea_entities"] = self.idea_entities.idea_entities
+
+        self.universe.create_entity("pazuzu_masculine_principle")
+        self.universe.world["pazuzu_masculine_principle"] = self.pazuzu_masculine_principle
+
+        print("Pazuzu masculine principle created as idea entity")
+
 
         for _ in range(3):
             self.universe.tick_universe()
