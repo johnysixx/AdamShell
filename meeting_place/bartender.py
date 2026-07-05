@@ -35,6 +35,12 @@ class Bartender:
 
         print(f"BARTENDER ASKS: {guest_name}, what would you like to drink?")
 
+    def answer_about_dice_vial(self, guest_name):
+        print(
+            "BARTENDER ANSWERS: "
+            "It is just a kind of dice. It was here before me."
+        )
+
     def remember_first_order(self, guest_name, drink_name):
         if guest_name not in self.regular_drinks:
             self.regular_drinks[guest_name] = drink_name

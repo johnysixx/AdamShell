@@ -80,6 +80,10 @@ class MeetingPlace:
         self.show_bar_story_count()
         print(f"MEETING PLACE EVENT: {event}")
 
+    def guest_asks_about_dice_vial(self, guest_name):
+        self.emit_event(f"{guest_name} asked about the dice vial")
+        self.bartender.answer_about_dice_vial(guest_name)
+
     def tick(self):
         self.tick_count += 1
         print(f"MEETING PLACE TICK {self.tick_count}")
