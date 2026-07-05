@@ -4,6 +4,7 @@ class IdeaEntities:
         self.universe = universe
         self.idea_entities = []
         self.events = []
+        self.event_history = []
         self.tick_count = 0
 
         self.permissions = {
@@ -16,6 +17,8 @@ class IdeaEntities:
             "type": "entity_layer",
             "state": "created",
             "idea_entities": self.idea_entities,
+            "events": self.events,
+            "event_history": self.event_history,
             "permissions": self.permissions
         }
 
@@ -40,6 +43,11 @@ class IdeaEntities:
 
     def emit_event(self, event):
         self.events.append(event)
+        self.event_history.append(event)
+
+        self.universe.world["idea_entities"]["events"] = self.events
+        self.universe.world["idea_entities"]["event_history"] = self.event_history
+
         print(f"IDEA ENTITIES EVENT: {event}")
 
     def tick(self):
@@ -49,4 +57,4 @@ class IdeaEntities:
 
     def _clear_events(self):
         self.events = []
-        
+        self.universe.world["idea_entities"]["events"] = self.events
