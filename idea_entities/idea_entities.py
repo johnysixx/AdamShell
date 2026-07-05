@@ -50,6 +50,30 @@ class IdeaEntities:
 
         print(f"IDEA ENTITIES EVENT: {event}")
 
+    def record_idea_event(
+            self,
+            name,
+            participants,
+            observer=None,
+            state="unresolved",
+            meaning=None,
+    ):
+        event = {
+            "name": name,
+            "layer": "idea_entities",
+            "participants": participants,
+            "observer": observer,
+            "state": state,
+            "meaning": meaning,
+            "known_by": []
+        }
+
+        if observer is not None:
+            event["known_by"].append(observer)
+
+        self.emit_event(event)
+        return event
+
     def tick(self):
         self.tick_count += 1
         print(f"IDEA ENTITIES TICK {self.tick_count}")
