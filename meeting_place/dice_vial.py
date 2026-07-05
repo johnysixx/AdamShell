@@ -30,7 +30,8 @@ class DiceVial:
             "container": self.container,
             "medium": self.medium,
             "dice": self.dice,
-            "display_state": "displayed"
+            "display_state": "displayed",
+            "visibility_scope": "inside_bar_only"
         }
 
         self._secret_roll = None

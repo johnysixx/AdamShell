@@ -23,10 +23,18 @@ class BarCounter:
         self.type = "bar_furniture"
         self.state = "created"
 
+        print("BAR COUNTER CREATED")
+
         self.hidden_story_book = BarStoryBook()
 
-        print("BAR COUNTER CREATED")
-        print("BAR STORY BOOK HIDDEN UNDER BAR COUNTER")
+        self.bar_cloth = {
+            "name": "bar_cloth",
+            "type": "bar_tool",
+            "location": "under_bar_counter",
+            "visible_use": "wiping_bar"
+        }
+
+        print("BAR CLOTH PLACED UNDER BAR COUNTER")
 
     def write_bar_story(self, event):
         self.hidden_story_book.write_entry(event)
