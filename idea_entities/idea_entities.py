@@ -7,6 +7,15 @@ class IdeaEntities:
         self.event_history = []
         self.tick_count = 0
 
+        self.eternal_fire = {
+            "name": "eternal_fire",
+            "type": "idea_focal_point",
+            "state": "burning",
+            "requires_maintenance": True,
+            "maintainer": "pazuzu_masculine_principle",
+            "interactions": []
+        }
+
         self.permissions = {
             "can_exist_before_form": True,
             "can_influence": True,
@@ -17,6 +26,7 @@ class IdeaEntities:
             "type": "entity_layer",
             "state": "created",
             "idea_entities": self.idea_entities,
+            "eternal_fire": self.eternal_fire,
             "events": self.events,
             "event_history": self.event_history,
             "permissions": self.permissions
