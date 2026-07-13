@@ -7,6 +7,15 @@ class IdeaEntities:
         self.event_history = []
         self.tick_count = 0
 
+        self.eternal_fire = {
+            "name": "eternal_fire",
+            "type": "idea_focal_point",
+            "state": "burning",
+            "requires_maintenance": True,
+            "maintainer": "pazuzu_masculine_principle",
+            "interactions": []
+        }
+
         self.permissions = {
             "can_exist_before_form": True,
             "can_influence": True,
@@ -17,6 +26,7 @@ class IdeaEntities:
             "type": "entity_layer",
             "state": "created",
             "idea_entities": self.idea_entities,
+            "eternal_fire": self.eternal_fire,
             "events": self.events,
             "event_history": self.event_history,
             "permissions": self.permissions
@@ -49,6 +59,30 @@ class IdeaEntities:
         self.universe.world["idea_entities"]["event_history"] = self.event_history
 
         print(f"IDEA ENTITIES EVENT: {event}")
+
+    def record_idea_event(
+            self,
+            name,
+            participants,
+            observer=None,
+            state="unresolved",
+            meaning=None,
+    ):
+        event = {
+            "name": name,
+            "layer": "idea_entities",
+            "participants": participants,
+            "observer": observer,
+            "state": state,
+            "meaning": meaning,
+            "known_by": []
+        }
+
+        if observer is not None:
+            event["known_by"].append(observer)
+
+        self.emit_event(event)
+        return event
 
     def tick(self):
         self.tick_count += 1
