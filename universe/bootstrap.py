@@ -204,6 +204,16 @@ class Bootstrap:
 
         print("Pazuzu masculine principle created as idea entity")
 
+        self.idea_entities.record_fire_interaction(
+            name="first_fire_interaction",
+            participants=[
+                "lilith",
+                "pazuzu_masculine_principle"
+            ],
+            observer="serpent",
+            state="unresolved",
+            meaning=None
+        )
 
         for _ in range(3):
             self.universe.tick_universe()
