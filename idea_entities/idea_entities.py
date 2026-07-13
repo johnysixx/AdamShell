@@ -84,6 +84,34 @@ class IdeaEntities:
         self.emit_event(event)
         return event
 
+    def record_fire_interaction(
+            self,
+            name,
+            participants,
+            observer=None,
+            state="unresolved",
+            meaning=None,
+    ):
+        interaction = {
+            "name": name,
+            "layer": "idea_entities",
+            "place": "eternal_fire",
+            "participants": participants,
+            "observer": observer,
+            "state": state,
+            "meaning": meaning,
+            "known_by": []
+        }
+
+        if observer is not None:
+            interaction["known_by"].append(observer)
+
+        self.eternal_fire["interactions"].append(interaction)
+        self.universe.world["idea_entities"]["eternal_fire"] = self.eternal_fire
+
+        self.emit_event(interaction)
+        return interaction
+
     def tick(self):
         self.tick_count += 1
         print(f"IDEA ENTITIES TICK {self.tick_count}")
