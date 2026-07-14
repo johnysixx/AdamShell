@@ -3,6 +3,7 @@ from .terminals import BarTerminals
 from .bar_counter import BarCounter
 from .bouncer import Bouncer
 from .dice_vial import DiceVial
+from .fridge import BarFridge
 
 class MeetingPlace:
 
@@ -13,6 +14,7 @@ class MeetingPlace:
         self.tick_count = 0
         self.bar_counter = BarCounter()
         self.dice_vial = DiceVial()
+        self.fridge = BarFridge()
         self.terminals = BarTerminals()
         self.bouncer = Bouncer()
         self.bartender = Bartender(
@@ -47,7 +49,10 @@ class MeetingPlace:
             "entities": self.entities,
             "bar_counter": self.bar_counter.name,
             "hidden_story_book": self.bar_counter.hidden_story_book.name,
+            "bar_cloth": self.bar_counter.bar_cloth,
+            "milk_bowl": self.bar_counter.milk_bowl,
             "dice_vial": self.dice_vial.public_state,
+            "fridge": self.fridge.public_state,
             "terminals": self.terminals.terminals,
             "bouncer": self.bouncer.name,
             "bartender": self.bartender.name

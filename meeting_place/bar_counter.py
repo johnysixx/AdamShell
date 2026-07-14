@@ -36,6 +36,16 @@ class BarCounter:
 
         print("BAR CLOTH PLACED UNDER BAR COUNTER")
 
+        self.milk_bowl = {
+            "name": "milk_bowl",
+            "type": "bar_serving_object",
+            "state": "empty",
+            "location": "under_bar_counter_next_to_bar_cloth",
+            "intended_use": "serving_milk_to_cats"
+        }
+
+        print("MILK BOWL PLACED UNDER BAR COUNTER NEXT TO BAR CLOTH")
+
     def write_bar_story(self, event):
         self.hidden_story_book.write_entry(event)
 
