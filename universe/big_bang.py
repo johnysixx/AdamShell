@@ -13,7 +13,7 @@
         self.cosmic_state = {
             "spacetime_expanded": False,
             "primordial_plasma_formed": False,
-            "light_elements_formed": False,
+            "light_nuclei_conditions_prepared": False,
             "light_separated_from_darkness": False,
             "darkness_present": True
         }
@@ -85,7 +85,7 @@
         print("PRIMORDIAL PLASMA FORMED")
 
     def form_light_elements(self):
-        self.cosmic_state["light_elements_formed"] = True
+        self.cosmic_state["light_nuclei_conditions_prepared"] = True
 
         self.primordial_elements["hydrogen"] = {
             "name": "hydrogen",
@@ -109,11 +109,11 @@
         }
 
         self.record_phase(
-            name="light_elements_formed",
-            description="The first light elements form: hydrogen, helium, and traces of lithium."
+            name="light_nuclei_conditions_prepared",
+            description="Conditions for light nuclei formation are prepared in the early universe."
         )
 
-        print("LIGHT ELEMENTS FORMED: hydrogen, helium, trace_lithium")
+        print("LIGHT NUCLEI CONDITIONS PREPARED")
 
     def separate_light_from_darkness(self):
         self.cosmic_state["light_separated_from_darkness"] = True
