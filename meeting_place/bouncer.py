@@ -28,12 +28,11 @@ class Bouncer:
             "serpent",
             "pazuzu",
             "classical_probe_debug_entity",
-            "lilith"
-        ]
-
-        self.denied_guests = [
+            "lilith",
             "pazuzu_masculine_principle"
         ]
+
+        self.denied_guests = []
 
         self.cat_policy = {
             "cats_are_always_allowed": True,
@@ -76,4 +75,3 @@ class Bouncer:
             return entity.get("type") == "cat"
 
         return getattr(entity, "type", None) == "cat"
-    
