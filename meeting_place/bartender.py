@@ -60,6 +60,32 @@ class Bartender:
 
         print(f"BARTENDER MIXES DRINK: {drink_name} for {guest_name}")
 
+    def pour_drink(self, guest_name, drink, serving_object):
+        drink_name = self.get_drink_name(drink)
+        serving_object_name = self.get_drink_name(serving_object)
+
+        self.remember_first_order(guest_name, drink_name)
+
+        if isinstance(serving_object, dict):
+            serving_object["state"] = "filled"
+            serving_object["contains"] = drink_name
+
+        event = f"{guest_name} was served {drink_name} in {serving_object_name}"
+        self.observe_event(event)
+
+        print(
+            f"BARTENDER POURS DRINK: "
+            f"{drink_name} into {serving_object_name} for {guest_name}"
+        )
+
+        return serving_object
+
+    def get_drink_name(self, drink):
+        if isinstance(drink, dict):
+            return drink.get("name")
+
+        return getattr(drink, "name", drink)
+
     def idle_work(self):
         if not self.glasses_clean:
             self.current_task = "wiping_glasses"

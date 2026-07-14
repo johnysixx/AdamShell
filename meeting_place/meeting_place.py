@@ -79,6 +79,9 @@ class MeetingPlace:
         self.emit_event(f"{entity_name} arrived at the bar")
         self.bartender.guest_arrives(entity_name)
 
+        if self._is_cat(entity):
+            self.handle_cat_after_entry(entity)
+
     def emit_event(self, event):
         self.events.append(event)
         self.bartender.observe_event(event)
@@ -88,6 +91,22 @@ class MeetingPlace:
     def guest_asks_about_dice_vial(self, guest_name):
         self.emit_event(f"{guest_name} asked about the dice vial")
         self.bartender.answer_about_dice_vial(guest_name)
+
+    def handle_cat_after_entry(self, cat):
+        self.serve_cat_milk(cat)
+
+    def serve_cat_milk(self, cat):
+        cat_name = self._get_entity_name(cat)
+
+        milk = self.fridge.get_item("milk")
+        milk_bowl = self.bar_counter.milk_bowl
+
+        if milk is None:
+            self.emit_event(f"{cat_name} could not be served milk because milk was missing")
+            return
+
+        self.bartender.pour_drink(cat_name, milk, milk_bowl)
+        self.emit_event(f"{cat_name} drinks milk at the bar")
 
     def tick(self):
         self.tick_count += 1
@@ -118,6 +137,12 @@ class MeetingPlace:
             return entity.get("name")
 
         return getattr(entity, "name", None)
+
+    def _is_cat(self, entity):
+        if isinstance(entity, dict):
+            return entity.get("type", None) == "cat"
+
+        return getattr(entity, "type", None) == "cat"
 
     def process_interactions(self):
         if len(self.entities) < 2:
