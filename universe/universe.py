@@ -1,6 +1,7 @@
 from typing import Self
 
 from core.entity.factory import EntityFactory
+from universe.big_bang import BigBang
 
 class Universe:
 
@@ -50,6 +51,9 @@ class Universe:
             "gravity" : False,
         }
         self.world = {}
+
+        self.big_bang = BigBang(self)
+        self.big_bang.explode()
 
         self.factory = EntityFactory()
 
