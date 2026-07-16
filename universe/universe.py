@@ -52,15 +52,36 @@ class Universe:
         }
         self.world = {}
 
-        self.big_bang = BigBang(self)
-        self.big_bang.explode()
+        self.big_bang = None
+        self.big_bang_started = False
+        self.physical_universe_started = False
+        self.universe_exists = False
+        self.state = "pre_universe"
 
         self.factory = EntityFactory()
 
         # universe is now state-less (entity driven)
 
-        print(f"Universe created: {self.id}")
-        print("The universe exists.")
+        print(f"Root reality prepared: {self.id}")
+        print("Physical universe has not started yet.")
+
+    def start_big_bang(self):
+        if self.big_bang_started:
+            print("BIG BANG ALREADY STARTED")
+            return self.world.get("big_bang")
+
+        self.big_bang = BigBang(self)
+        self.big_bang.explode()
+
+        self.big_bang_started = True
+        self.physical_universe_started = True
+        self.universe_exists = True
+        self.state = "physical_universe"
+
+        print("PHYSICAL UNIVERSE STARTED")
+        print("THE UNIVERSE EXISTS")
+
+        return self.world.get("big_bang")
 
     def hear(self, word):
 
