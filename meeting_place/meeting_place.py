@@ -124,11 +124,48 @@ class MeetingPlace:
             self.entropy_reservoir.public_state
         )
 
+    def add_bar_energy(self, source, amount_j):
+        event = self.energy_reservoir.add_energy(source, amount_j)
+        self.sync_reservoirs_to_world()
+        self.emit_event(f"bar energy increased from {source}")
+        return event
+
     def add_bar_entropy(self, source, amount_units):
         event = self.entropy_reservoir.add_entropy(source, amount_units)
         self.sync_reservoirs_to_world()
         self.emit_event(f"bar entropy increased from {source}")
         return event
+
+    def serve_energy(self, entity):
+        from universe.pre_cosmic_rules import ENERGY_SERVING_J
+
+        entity_name = self._get_entity_name(entity)
+        entity_type = self._get_entity_type(entity)
+
+        if entity_type not in ["god", "idea_entity"]:
+            self.emit_event(f"{entity_name} could not be served energy")
+            return None
+
+        try:
+            reservoir_event = self.energy_reservoir.spend_energy(
+                f"energy_serving_for_{entity_name}",
+                ENERGY_SERVING_J
+            )
+        except ValueError:
+            self.sync_reservoirs_to_world()
+            self.emit_event(f"{entity_name} could not be served energy because bar energy was missing")
+            return None
+
+        service_effect = self.service_rules.apply_energy_drink(entity)
+
+        self.sync_reservoirs_to_world()
+        self.emit_event(f"{entity_name} drinks energy at the bar")
+        self.emit_event(f"{entity_name} energy drink effect applied")
+
+        return {
+            "reservoir_event": reservoir_event,
+            "service_effect": service_effect
+        }
 
     def quantum_entropy_tick(self, rng=None):
         event = self.entropy_reservoir.quantum_tick(rng)
@@ -191,6 +228,12 @@ class MeetingPlace:
             return entity.get("name")
 
         return getattr(entity, "name", None)
+
+    def _get_entity_type(self, entity):
+        if isinstance(entity, dict):
+            return entity.get("type")
+
+        return getattr(entity, "type", None)
 
     def _is_cat(self, entity):
         if isinstance(entity, dict):
