@@ -4,6 +4,7 @@ from .bar_counter import BarCounter
 from .bouncer import Bouncer
 from .dice_vial import DiceVial
 from .fridge import BarFridge
+from .reservoirs import BarEnergyReservoir, BarEntropyReservoir
 
 class MeetingPlace:
 
@@ -15,6 +16,8 @@ class MeetingPlace:
         self.bar_counter = BarCounter()
         self.dice_vial = DiceVial()
         self.fridge = BarFridge()
+        self.energy_reservoir = BarEnergyReservoir()
+        self.entropy_reservoir = BarEntropyReservoir()
         self.terminals = BarTerminals()
         self.bouncer = Bouncer()
         self.bartender = Bartender(
@@ -53,6 +56,8 @@ class MeetingPlace:
             "milk_bowl": self.bar_counter.milk_bowl,
             "dice_vial": self.dice_vial.public_state,
             "fridge": self.fridge.public_state,
+            "energy_reservoir": self.energy_reservoir.public_state,
+            "entropy_reservoir": self.entropy_reservoir.public_state,
             "terminals": self.terminals.terminals,
             "bouncer": self.bouncer.name,
             "bartender": self.bartender.name
