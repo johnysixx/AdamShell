@@ -20,8 +20,18 @@ EXPECTED_QUANTUM_TICKS_PER_ENTROPY_SERVING = (
 
 ENTROPY_UNIT_ENERGY_VALUE_J = ENERGY_SERVING_J / IDEA_DIMENSIONS
 SERPENT_ENTROPY_DRINK_UNITS = ENTROPY_UNIT
-SERPENT_ENTROPY_DRINK_ENERGY_GAIN_J = (
+SERPENT_ENTROPY_DRINK_TOTAL_ENERGY_GAIN_J = (
     SERPENT_ENTROPY_DRINK_UNITS * ENTROPY_UNIT_ENERGY_VALUE_J
+)
+SERPENT_ENTROPY_DRINK_BAR_SHARE_RATIO = 0.8
+SERPENT_ENTROPY_DRINK_SERPENT_SHARE_RATIO = 0.2
+SERPENT_ENTROPY_DRINK_BAR_ENERGY_GAIN_J = (
+    SERPENT_ENTROPY_DRINK_TOTAL_ENERGY_GAIN_J
+    * SERPENT_ENTROPY_DRINK_BAR_SHARE_RATIO
+)
+SERPENT_ENTROPY_DRINK_SERPENT_ENERGY_GAIN_J = (
+    SERPENT_ENTROPY_DRINK_TOTAL_ENERGY_GAIN_J
+    * SERPENT_ENTROPY_DRINK_SERPENT_SHARE_RATIO
 )
 SERPENT_ENTROPY_PAYMENT_RATIO = 0.0
 SERPENT_ENTROPY_INCREASE_RATIO = 0.0
@@ -39,7 +49,7 @@ def captured_by_bar(generated_energy_j):
 
 
 def describe_pre_cosmic_energy_budget():
-    serpent_entropy_energy_gain = SERPENT_ENTROPY_DRINK_ENERGY_GAIN_J
+    serpent_entropy_energy_gain = SERPENT_ENTROPY_DRINK_BAR_ENERGY_GAIN_J
 
     idea_universe_capture = captured_by_bar(IDEA_UNIVERSE_BIRTH_ENERGY_J)
     lilith_capture = captured_by_bar(PRINCIPLE_BIRTH_ENERGY_J)
@@ -74,7 +84,11 @@ def describe_pre_cosmic_energy_budget():
         "entropy_unit_energy_value_j": ENTROPY_UNIT_ENERGY_VALUE_J,
 
         "serpent_entropy_drink_units": SERPENT_ENTROPY_DRINK_UNITS,
-        "serpent_entropy_drink_energy_gain_j": serpent_entropy_energy_gain,
+        "serpent_entropy_drink_total_energy_gain_j": SERPENT_ENTROPY_DRINK_TOTAL_ENERGY_GAIN_J,
+        "serpent_entropy_drink_bar_share_ratio": SERPENT_ENTROPY_DRINK_BAR_SHARE_RATIO,
+        "serpent_entropy_drink_serpent_share_ratio": SERPENT_ENTROPY_DRINK_SERPENT_SHARE_RATIO,
+        "serpent_entropy_drink_bar_energy_gain_j": SERPENT_ENTROPY_DRINK_BAR_ENERGY_GAIN_J,
+        "serpent_entropy_drink_serpent_energy_gain_j": SERPENT_ENTROPY_DRINK_SERPENT_ENERGY_GAIN_J,
         "serpent_entropy_payment_ratio": SERPENT_ENTROPY_PAYMENT_RATIO,
         "serpent_entropy_increase_ratio": SERPENT_ENTROPY_INCREASE_RATIO,
 
