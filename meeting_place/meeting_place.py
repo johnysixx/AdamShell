@@ -140,8 +140,7 @@ class MeetingPlace:
         serpent_name = self._get_entity_name(serpent)
 
         event = self.entropy_reservoir.serve_entropy_to_serpent(
-            self.energy_reservoir,
-            serpent
+            self.energy_reservoir
         )
 
         self.sync_reservoirs_to_world()
@@ -150,8 +149,18 @@ class MeetingPlace:
             self.emit_event(f"{serpent_name} could not be served entropy")
             return None
 
+        effect = self.service_rules.apply_entropy_drink(
+            serpent,
+            event.get("serpent_energy_gain_j", 0.0)
+        )
+
         self.emit_event(f"{serpent_name} drinks entropy at the bar")
-        return event
+        self.emit_event(f"{serpent_name} entropy drink effect applied")
+
+        return {
+            "reservoir_event": event,
+            "service_effect": effect
+        }
 
     def tick(self):
         self.tick_count += 1
