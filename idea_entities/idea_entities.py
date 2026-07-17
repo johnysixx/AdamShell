@@ -1,3 +1,8 @@
+from universe.pre_cosmic_rules import (
+    IDEA_ENTITY_INITIAL_ENERGY_J,
+    IDEA_ENTITY_ARCHETYPE_EXISTENCE_THRESHOLD_PCT,
+)
+
 class IdeaEntities:
 
     def __init__(self, universe):
@@ -34,6 +39,27 @@ class IdeaEntities:
 
         print("IDEA ENTITIES LAYER CREATED")
 
+    def update_archetype_manifestation_state(self, entity):
+        existence_pct = entity.get("existence_pct", 0.0)
+        threshold_pct = entity.get(
+            "archetype_manifestation_threshold_pct",
+            IDEA_ENTITY_ARCHETYPE_EXISTENCE_THRESHOLD_PCT
+        )
+
+        possible = existence_pct >= threshold_pct
+        entity["archetype_manifestation_possible"] = possible
+
+        if possible:
+            entity["archetype_manifestation_state"] = (
+                "root_archetype_possible"
+            )
+        else:
+            entity["archetype_manifestation_state"] = (
+                "not_enough_existence"
+            )
+
+        return possible
+
     def create_idea_entity(self, name, role="primordial_idea_entity", active=False):
         idea_entity = {
             "name": name,
@@ -43,10 +69,13 @@ class IdeaEntities:
             "active": active,
             "forbidden": False,
 
-            "existence_pct": 100.0,
+            "existence_pct": 0.0,
             "will": 0.0,
-            "energy_j": 0.0,
+            "energy_j": IDEA_ENTITY_INITIAL_ENERGY_J,
             "idea_capacity": 0.0,
+            "archetype_manifestation_possible": False,
+            "archetype_manifestation_state": "not_enough_existence",
+            "archetype_manifestation_threshold_pct": IDEA_ENTITY_ARCHETYPE_EXISTENCE_THRESHOLD_PCT,
 
             "pre_physical_attributes": {
                 "can_exist_before_form": True,

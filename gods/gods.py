@@ -1,3 +1,5 @@
+from universe.pre_cosmic_rules import GOD_INITIAL_ENERGY_J
+
 class Gods:
 
     def __init__(self, universe):
@@ -32,7 +34,7 @@ class Gods:
 
             "existence_pct": 100.0,
             "creative_will": 0.0,
-            "energy_j": 0.0,
+            "energy_j": GOD_INITIAL_ENERGY_J,
             "creation_capacity": 0.0,
 
             "divine_attributes": {
