@@ -19,7 +19,7 @@ class DiceVial:
         }
 
         self.dice = {
-            "type": "d12",
+            "type": "d20",
             "state": "floating"
         }
 
@@ -37,10 +37,10 @@ class DiceVial:
         self._secret_roll = None
 
         print("DICE VIAL CREATED")
-        print("D12 FLOATS IN GLOWING OILY LIQUID")
+        print("D20 FLOATS IN GLOWING OILY LIQUID")
 
     def roll_secretly(self):
-        self._secret_roll = random.randint(1, 12)
+        self._secret_roll = random.randint(1, 20)
 
     def clear_secret(self):
         self._secret_roll = None
