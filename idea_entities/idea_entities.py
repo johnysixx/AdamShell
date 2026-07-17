@@ -42,6 +42,20 @@ class IdeaEntities:
             "state": "created",
             "active": active,
             "forbidden": False,
+
+            "existence_pct": 100.0,
+            "will": 0.0,
+            "energy_j": 0.0,
+            "idea_capacity": 0.0,
+
+            "pre_physical_attributes": {
+                "can_exist_before_form": True,
+                "can_influence": True,
+                "can_become_process": True,
+                "can_hold_symbolic_energy": True,
+                "can_hold_will": True
+            },
+
             "permissions": self.permissions
         }
 
