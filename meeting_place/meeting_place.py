@@ -113,6 +113,43 @@ class MeetingPlace:
         self.bartender.pour_drink(cat_name, milk, milk_bowl)
         self.emit_event(f"{cat_name} drinks milk at the bar")
 
+    def sync_reservoirs_to_world(self):
+        self.universe.world["meeting_place"]["energy_reservoir"] = (
+            self.energy_reservoir.public_state
+        )
+        self.universe.world["meeting_place"]["entropy_reservoir"] = (
+            self.entropy_reservoir.public_state
+        )
+
+    def add_bar_entropy(self, source, amount_units):
+        event = self.entropy_reservoir.add_entropy(source, amount_units)
+        self.sync_reservoirs_to_world()
+        self.emit_event(f"bar entropy increased from {source}")
+        return event
+
+    def quantum_entropy_tick(self, rng=None):
+        event = self.entropy_reservoir.quantum_tick(rng)
+        self.sync_reservoirs_to_world()
+        self.emit_event("quantum entropy tick was stored in the bar")
+        return event
+
+    def serve_entropy_to_serpent(self, serpent):
+        serpent_name = self._get_entity_name(serpent)
+
+        event = self.entropy_reservoir.serve_entropy_to_serpent(
+            self.energy_reservoir,
+            serpent
+        )
+
+        self.sync_reservoirs_to_world()
+
+        if event is None:
+            self.emit_event(f"{serpent_name} could not be served entropy")
+            return None
+
+        self.emit_event(f"{serpent_name} drinks entropy at the bar")
+        return event
+
     def tick(self):
         self.tick_count += 1
         print(f"MEETING PLACE TICK {self.tick_count}")
