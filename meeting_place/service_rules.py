@@ -54,8 +54,12 @@ class BarServiceRules:
 
     def apply_entropy_drink(self, entity, entity_energy_gain_j=0.0):
         entity_type = self._get(entity, "type")
+        entity_name = self._get(entity, "name")
 
         if entity_type == "god":
+            energy_j = self._get(entity, "energy_j", 0.0)
+            self._set(entity, "energy_j", energy_j + entity_energy_gain_j)
+
             existence_pct = self._get(entity, "existence_pct", 100.0)
 
             new_existence = min(
@@ -68,8 +72,9 @@ class BarServiceRules:
 
             return {
                 "name": "god_entropy_drink_effect",
-                "entity": self._get(entity, "name"),
+                "entity": entity_name,
                 "existence_gain_pct": GOD_ENTROPY_EXISTENCE_GAIN_PERCENT,
+                "entity_energy_gain_j": entity_energy_gain_j,
                 "payment_pct": 0.0
             }
 
@@ -80,14 +85,14 @@ class BarServiceRules:
 
             return {
                 "name": "idea_entity_entropy_drink_effect",
-                "entity": self._get(entity, "name"),
+                "entity": entity_name,
                 "entity_energy_gain_j": entity_energy_gain_j,
                 "payment_pct": 0.0
             }
 
         return {
             "name": "entropy_drink_not_available",
-            "entity": self._get(entity, "name"),
+            "entity": entity_name,
             "entity_type": entity_type
         }
 

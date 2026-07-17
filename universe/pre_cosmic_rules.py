@@ -19,22 +19,22 @@ EXPECTED_QUANTUM_TICKS_PER_ENTROPY_SERVING = (
 )
 
 ENTROPY_UNIT_ENERGY_VALUE_J = ENERGY_SERVING_J / IDEA_DIMENSIONS
-SERPENT_ENTROPY_DRINK_UNITS = ENTROPY_UNIT
-SERPENT_ENTROPY_DRINK_TOTAL_ENERGY_GAIN_J = (
-    SERPENT_ENTROPY_DRINK_UNITS * ENTROPY_UNIT_ENERGY_VALUE_J
+ENTROPY_DRINK_UNITS = ENTROPY_UNIT
+ENTROPY_DRINK_TOTAL_ENERGY_GAIN_J = (
+    ENTROPY_DRINK_UNITS * ENTROPY_UNIT_ENERGY_VALUE_J
 )
-SERPENT_ENTROPY_DRINK_BAR_SHARE_RATIO = 0.8
-SERPENT_ENTROPY_DRINK_SERPENT_SHARE_RATIO = 0.2
-SERPENT_ENTROPY_DRINK_BAR_ENERGY_GAIN_J = (
-    SERPENT_ENTROPY_DRINK_TOTAL_ENERGY_GAIN_J
-    * SERPENT_ENTROPY_DRINK_BAR_SHARE_RATIO
+ENTROPY_DRINK_BAR_SHARE_RATIO = 0.8
+ENTROPY_DRINK_ENTITY_SHARE_RATIO = 0.2
+ENTROPY_DRINK_BAR_ENERGY_GAIN_J = (
+    ENTROPY_DRINK_TOTAL_ENERGY_GAIN_J
+    * ENTROPY_DRINK_BAR_SHARE_RATIO
 )
-SERPENT_ENTROPY_DRINK_SERPENT_ENERGY_GAIN_J = (
-    SERPENT_ENTROPY_DRINK_TOTAL_ENERGY_GAIN_J
-    * SERPENT_ENTROPY_DRINK_SERPENT_SHARE_RATIO
+ENTROPY_DRINK_ENTITY_ENERGY_GAIN_J = (
+    ENTROPY_DRINK_TOTAL_ENERGY_GAIN_J
+    * ENTROPY_DRINK_ENTITY_SHARE_RATIO
 )
-SERPENT_ENTROPY_PAYMENT_RATIO = 0.0
-SERPENT_ENTROPY_INCREASE_RATIO = 0.0
+ENTROPY_DRINK_PAYMENT_RATIO = 0.0
+ENTROPY_DRINK_ENTROPY_INCREASE_RATIO = 0.0
 
 IDEA_UNIVERSE_BIRTH_ENERGY_J = PLANCK_ENERGY_THRESHOLD_J * 1.0
 PRINCIPLE_BIRTH_ENERGY_J = PLANCK_ENERGY_THRESHOLD_J * 0.5
@@ -49,7 +49,7 @@ def captured_by_bar(generated_energy_j):
 
 
 def describe_pre_cosmic_energy_budget():
-    serpent_entropy_energy_gain = SERPENT_ENTROPY_DRINK_BAR_ENERGY_GAIN_J
+    entropy_drink_bar_energy_gain = ENTROPY_DRINK_BAR_ENERGY_GAIN_J
 
     idea_universe_capture = captured_by_bar(IDEA_UNIVERSE_BIRTH_ENERGY_J)
     lilith_capture = captured_by_bar(PRINCIPLE_BIRTH_ENERGY_J)
@@ -57,7 +57,7 @@ def describe_pre_cosmic_energy_budget():
     god_capture = captured_by_bar(GOD_EMERGENCE_ENERGY_J)
 
     reservoir_before_serving = (
-        serpent_entropy_energy_gain
+        entropy_drink_bar_energy_gain
         + idea_universe_capture
         + lilith_capture
         + pazuzu_male_principle_capture
@@ -83,14 +83,14 @@ def describe_pre_cosmic_energy_budget():
         "expected_quantum_ticks_per_entropy_serving": EXPECTED_QUANTUM_TICKS_PER_ENTROPY_SERVING,
         "entropy_unit_energy_value_j": ENTROPY_UNIT_ENERGY_VALUE_J,
 
-        "serpent_entropy_drink_units": SERPENT_ENTROPY_DRINK_UNITS,
-        "serpent_entropy_drink_total_energy_gain_j": SERPENT_ENTROPY_DRINK_TOTAL_ENERGY_GAIN_J,
-        "serpent_entropy_drink_bar_share_ratio": SERPENT_ENTROPY_DRINK_BAR_SHARE_RATIO,
-        "serpent_entropy_drink_serpent_share_ratio": SERPENT_ENTROPY_DRINK_SERPENT_SHARE_RATIO,
-        "serpent_entropy_drink_bar_energy_gain_j": SERPENT_ENTROPY_DRINK_BAR_ENERGY_GAIN_J,
-        "serpent_entropy_drink_serpent_energy_gain_j": SERPENT_ENTROPY_DRINK_SERPENT_ENERGY_GAIN_J,
-        "serpent_entropy_payment_ratio": SERPENT_ENTROPY_PAYMENT_RATIO,
-        "serpent_entropy_increase_ratio": SERPENT_ENTROPY_INCREASE_RATIO,
+        "entropy_drink_units": ENTROPY_DRINK_UNITS,
+        "entropy_drink_total_energy_gain_j": ENTROPY_DRINK_TOTAL_ENERGY_GAIN_J,
+        "entropy_drink_bar_share_ratio": ENTROPY_DRINK_BAR_SHARE_RATIO,
+        "entropy_drink_entity_share_ratio": ENTROPY_DRINK_ENTITY_SHARE_RATIO,
+        "entropy_drink_bar_energy_gain_j": ENTROPY_DRINK_BAR_ENERGY_GAIN_J,
+        "entropy_drink_entity_energy_gain_j": ENTROPY_DRINK_ENTITY_ENERGY_GAIN_J,
+        "entropy_drink_payment_ratio": ENTROPY_DRINK_PAYMENT_RATIO,
+        "entropy_drink_entropy_increase_ratio": ENTROPY_DRINK_ENTROPY_INCREASE_RATIO,
 
         "reservoir_before_serving_j": reservoir_before_serving,
         "reservoir_before_serving_ratio": reservoir_before_serving / PLANCK_ENERGY_THRESHOLD_J,

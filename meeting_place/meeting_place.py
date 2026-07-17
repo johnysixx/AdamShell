@@ -3,6 +3,7 @@ from .terminals import BarTerminals
 from .bar_counter import BarCounter
 from .bouncer import Bouncer
 from .dice_vial import DiceVial
+from .dice_box import DiceBox
 from .fridge import BarFridge
 from .reservoirs import BarEnergyReservoir, BarEntropyReservoir
 from .service_rules import BarServiceRules
@@ -16,12 +17,22 @@ class MeetingPlace:
         self.tick_count = 0
         self.bar_counter = BarCounter()
         self.dice_vial = DiceVial()
+        self.dice_box = DiceBox()
         self.fridge = BarFridge()
         self.energy_reservoir = BarEnergyReservoir()
         self.entropy_reservoir = BarEntropyReservoir()
         self.terminals = BarTerminals()
         self.bouncer = Bouncer()
         self.service_rules = BarServiceRules()
+
+        self.total_entropy_served_today = 0
+        self.total_entropy_served_ever = 0
+        self.entropy_terminal = {
+            "name": "entropy_terminal",
+            "type": "bar_terminal",
+            "total_entropy_served_today": self.total_entropy_served_today,
+            "total_entropy_served_ever": self.total_entropy_served_ever
+        }
         self.bartender = Bartender(
             self.bar_counter.hidden_story_book
         )
@@ -57,12 +68,14 @@ class MeetingPlace:
             "bar_cloth": self.bar_counter.bar_cloth,
             "milk_bowl": self.bar_counter.milk_bowl,
             "dice_vial": self.dice_vial.public_state,
+            "dice_box": self.dice_box.public_state,
             "fridge": self.fridge.public_state,
             "energy_reservoir": self.energy_reservoir.public_state,
             "entropy_reservoir": self.entropy_reservoir.public_state,
             "terminals": self.terminals.terminals,
             "bouncer": self.bouncer.name,
             "service_rules": "bar_service_rules",
+            "entropy_terminal": self.entropy_terminal,
             "bartender": self.bartender.name
         }
 
@@ -115,6 +128,18 @@ class MeetingPlace:
 
         self.bartender.pour_drink(cat_name, milk, milk_bowl)
         self.emit_event(f"{cat_name} drinks milk at the bar")
+
+    def sync_entropy_terminal_to_world(self):
+        self.entropy_terminal["total_entropy_served_today"] = (
+            self.total_entropy_served_today
+        )
+        self.entropy_terminal["total_entropy_served_ever"] = (
+            self.total_entropy_served_ever
+        )
+
+        self.universe.world["meeting_place"]["entropy_terminal"] = (
+            self.entropy_terminal
+        )
 
     def sync_reservoirs_to_world(self):
         self.universe.world["meeting_place"]["energy_reservoir"] = (
@@ -173,26 +198,39 @@ class MeetingPlace:
         self.emit_event("quantum entropy tick was stored in the bar")
         return event
 
-    def serve_entropy_to_serpent(self, serpent):
-        serpent_name = self._get_entity_name(serpent)
+    def serve_entropy(self, entity):
+        entity_name = self._get_entity_name(entity)
+        entity_type = self._get_entity_type(entity)
 
-        event = self.entropy_reservoir.serve_entropy_to_serpent(
-            self.energy_reservoir
+        if entity_type not in ["god", "idea_entity"]:
+            self.emit_event(f"{entity_name} could not be served entropy")
+            return None
+
+        event = self.entropy_reservoir.serve_entropy(
+            self.energy_reservoir,
+            entity_name
         )
 
         self.sync_reservoirs_to_world()
 
         if event is None:
-            self.emit_event(f"{serpent_name} could not be served entropy")
+            self.emit_event(f"{entity_name} could not be served entropy")
             return None
 
+        self.total_entropy_served_today += 1
+        self.total_entropy_served_ever += 1
+        self.sync_entropy_terminal_to_world()
+
+        if self.total_entropy_served_ever % 10 == 0:
+            self.dice_vial.roll_secretly()
+
         effect = self.service_rules.apply_entropy_drink(
-            serpent,
-            event.get("serpent_energy_gain_j", 0.0)
+            entity,
+            event.get("entity_energy_gain_j", 0.0)
         )
 
-        self.emit_event(f"{serpent_name} drinks entropy at the bar")
-        self.emit_event(f"{serpent_name} entropy drink effect applied")
+        self.emit_event(f"{entity_name} drinks entropy at the bar")
+        self.emit_event(f"{entity_name} entropy drink effect applied")
 
         return {
             "reservoir_event": event,
@@ -222,6 +260,12 @@ class MeetingPlace:
 
     def _clear_events(self):
         self.events = []
+
+    def ask_bartender_about_dice_box(self, entity=None):
+        return self.dice_box.answer_about_contents()
+
+    def ask_bartender_about_d20(self, entity=None):
+        return self.dice_box.answer_about_d20()
 
     def _get_entity_name(self, entity):
         if isinstance(entity, dict):

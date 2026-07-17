@@ -1,10 +1,10 @@
-﻿import random
+import random
 
 from universe.pre_cosmic_rules import (
     QUANTUM_ENTROPY_TICK_MAX_UNITS,
-    SERPENT_ENTROPY_DRINK_BAR_ENERGY_GAIN_J,
-    SERPENT_ENTROPY_DRINK_SERPENT_ENERGY_GAIN_J,
-    SERPENT_ENTROPY_DRINK_UNITS,
+    ENTROPY_DRINK_BAR_ENERGY_GAIN_J,
+    ENTROPY_DRINK_ENTITY_ENERGY_GAIN_J,
+    ENTROPY_DRINK_UNITS,
 )
 
 
@@ -125,36 +125,34 @@ class BarEntropyReservoir:
 
         return event
 
-    def serve_entropy_to_serpent(self, energy_reservoir, serpent=None):
-        if self.entropy_units < SERPENT_ENTROPY_DRINK_UNITS:
-            print("NOT ENOUGH BAR ENTROPY FOR SERPENT")
+    def serve_entropy(self, energy_reservoir, drinker_name="entity"):
+        if self.entropy_units < ENTROPY_DRINK_UNITS:
+            print(f"NOT ENOUGH BAR ENTROPY FOR {drinker_name}")
             return None
 
-        self.entropy_units -= SERPENT_ENTROPY_DRINK_UNITS
+        self.entropy_units -= ENTROPY_DRINK_UNITS
 
-        bar_energy_gain_j = SERPENT_ENTROPY_DRINK_BAR_ENERGY_GAIN_J
-        serpent_energy_gain_j = SERPENT_ENTROPY_DRINK_SERPENT_ENERGY_GAIN_J
+        bar_energy_gain_j = ENTROPY_DRINK_BAR_ENERGY_GAIN_J
+        entity_energy_gain_j = ENTROPY_DRINK_ENTITY_ENERGY_GAIN_J
 
-        energy_reservoir.add_energy("serpent_entropy_drink", bar_energy_gain_j)
-
-        if serpent is not None:
-            if isinstance(serpent, dict):
-                serpent["energy_j"] = serpent.get("energy_j", 0.0) + serpent_energy_gain_j
-            else:
-                serpent.energy_j = getattr(serpent, "energy_j", 0.0) + serpent_energy_gain_j
+        energy_reservoir.add_energy(
+            f"{drinker_name}_entropy_drink",
+            bar_energy_gain_j
+        )
 
         event = {
-            "name": "serpent_entropy_served",
-            "entropy_units_spent": SERPENT_ENTROPY_DRINK_UNITS,
+            "name": "entropy_served",
+            "drinker": drinker_name,
+            "entropy_units_spent": ENTROPY_DRINK_UNITS,
             "bar_energy_gain_j": bar_energy_gain_j,
-            "serpent_energy_gain_j": serpent_energy_gain_j,
+            "entity_energy_gain_j": entity_energy_gain_j,
             "total_entropy_units": self.entropy_units
         }
 
         self.events.append(event)
 
-        print("SERPENT WAS SERVED ENTROPY")
-        print(f"SERPENT ENERGY GAIN: {serpent_energy_gain_j:.3f} J")
+        print(f"{drinker_name} WAS SERVED ENTROPY")
+        print(f"ENTITY ENERGY GAIN: {entity_energy_gain_j:.3f} J")
         print(f"BAR ENTROPY TOTAL: {self.entropy_units:.6f} units")
 
         return event
