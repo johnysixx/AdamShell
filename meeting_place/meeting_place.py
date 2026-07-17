@@ -5,6 +5,7 @@ from .bouncer import Bouncer
 from .dice_vial import DiceVial
 from .fridge import BarFridge
 from .reservoirs import BarEnergyReservoir, BarEntropyReservoir
+from .service_rules import BarServiceRules
 
 class MeetingPlace:
 
@@ -20,6 +21,7 @@ class MeetingPlace:
         self.entropy_reservoir = BarEntropyReservoir()
         self.terminals = BarTerminals()
         self.bouncer = Bouncer()
+        self.service_rules = BarServiceRules()
         self.bartender = Bartender(
             self.bar_counter.hidden_story_book
         )
@@ -60,6 +62,7 @@ class MeetingPlace:
             "entropy_reservoir": self.entropy_reservoir.public_state,
             "terminals": self.terminals.terminals,
             "bouncer": self.bouncer.name,
+            "service_rules": "bar_service_rules",
             "bartender": self.bartender.name
         }
 
