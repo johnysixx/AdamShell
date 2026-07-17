@@ -29,6 +29,34 @@ class Gods:
             "state": "present",
             "active": True,
             "forbidden": False,
+
+            "existence_pct": 100.0,
+            "creative_will": 0.0,
+            "energy_j": 0.0,
+            "creation_capacity": 0.0,
+
+            "divine_attributes": {
+                "aseity": True,
+                "eternity": True,
+                "transcendence": True,
+                "immanence": True,
+                "creative_authority": True,
+                "sovereignty": "potential",
+                "providence": "potential",
+                "omniscience": "potential",
+                "omnipotence": "potential",
+                "omnipresence": "potential",
+                "immutability": "limited_by_story_state",
+                "simplicity": "symbolic",
+                "perfect_goodness": "not_assumed"
+            },
+
+            "creation_limits": {
+                "limited_by_existence_pct": True,
+                "limited_by_creative_will": True,
+                "limited_by_current_reality_rules": True
+            },
+
             "permissions": self.permissions,
             "created_entities": [],
             "administers": []
