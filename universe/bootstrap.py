@@ -121,40 +121,34 @@ class Bootstrap:
 
         print("Serpent created as idea entity")
 
-        self.lilith = {
-            "name": "lilith",
-            "type": "idea_entity",
-            "role": "archetype_principle",
-            "state": "created",
-            "active": True,
-            "forbidden": False,
+        self.lilith = self.idea_entities.create_idea_entity(
+            name="lilith",
+            role="archetype_principle",
+            active=True
+        )
 
-            "principle": {
-                "name": "feminine_principle",
-                "domain": [
-                    "woman",
-                    "creation",
-                    "feminine_archetype"
-                ],
-                "origin": "lilith"
-            },
-
-            "access": {
-                "meeting_place": True,
-                "library": "read",
-                "quantum_layer": "via_meeting_place"
-            },
-
-            "meeting_presence": False,
-            "known_by_bartender": True,
-            "history": [
-                "lilith was born as an idea entity",
-                "with lilith the feminine principle came into existence"
-            ]
+        self.lilith["principle"] = {
+            "name": "feminine_principle",
+            "domain": [
+                "woman",
+                "creation",
+                "feminine_archetype"
+            ],
+            "origin": "lilith"
         }
 
-        self.idea_entities.idea_entities.append(self.lilith)
-        self.universe.world["idea_entities"]["idea_entities"] = self.idea_entities.idea_entities
+        self.lilith["access"] = {
+            "meeting_place": True,
+            "library": "read",
+            "quantum_layer": "via_meeting_place"
+        }
+
+        self.lilith["meeting_presence"] = False
+        self.lilith["known_by_bartender"] = True
+        self.lilith["history"] = [
+            "lilith was born as an idea entity",
+            "with lilith the feminine principle came into existence"
+        ]
 
         self.universe.create_entity("lilith")
         self.universe.world["lilith"] = self.lilith
