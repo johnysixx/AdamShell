@@ -33,6 +33,19 @@ class Gods:
             "forbidden": False,
 
             "existence_pct": 100.0,
+
+            "native_world": "eden",
+
+            "existence_by_world": {
+                "idea_universe": 0.0,
+                "root_universe": 0.0,
+                "eden": 100.0
+            },
+
+            "departure_intent": {
+                "wants_to_leave": False
+            },
+
             "creative_will": 0.0,
             "energy_j": GOD_INITIAL_ENERGY_J,
             "creation_capacity": 0.0,

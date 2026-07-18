@@ -5,6 +5,22 @@ class RootUniverse:
         self.events = []
         self.tick_count = 0
 
+        registry = getattr(
+            self.universe,
+            "universe_registry",
+            None
+        )
+
+        if registry is None:
+            raise RuntimeError(
+                "Root Universe requires UniverseRegistry"
+            )
+
+        self.universe_id = registry.register_universe(
+            name="root_universe",
+            universe_type="independent_root_reality"
+        )
+
         self.state = {
             "name": "root_universe",
             "type": "independent_root_reality",

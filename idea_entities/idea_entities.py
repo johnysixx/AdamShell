@@ -60,7 +60,22 @@ class IdeaEntities:
 
         return possible
 
-    def create_idea_entity(self, name, role="primordial_idea_entity", active=False):
+    def create_idea_entity(
+            self,
+            name,
+            role="primordial_idea_entity",
+            active=False,
+            existence_pct=0.0,
+            native_world="idea_universe",
+            existence_by_world=None
+    ):
+        if existence_by_world is None:
+            existence_by_world = {
+                "idea_universe": existence_pct,
+                "root_universe": 0.0,
+                "eden": 0.0
+            }
+
         idea_entity = {
             "name": name,
             "type": "idea_entity",
@@ -69,7 +84,16 @@ class IdeaEntities:
             "active": active,
             "forbidden": False,
 
-            "existence_pct": 0.0,
+            "existence_pct": existence_pct,
+
+            "native_world": native_world,
+
+            "existence_by_world": existence_by_world,
+
+            "departure_intent": {
+                "wants_to_leave": False
+            },
+
             "will": 0.0,
             "energy_j": IDEA_ENTITY_INITIAL_ENERGY_J,
             "idea_capacity": 0.0,

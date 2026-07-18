@@ -1,6 +1,7 @@
 from typing import Self
 
 from core.entity.factory import EntityFactory
+from core.entity.profile_resolver import EntityProfileResolver
 from universe.big_bang import BigBang
 
 class Universe:
@@ -38,6 +39,9 @@ class Universe:
             "superposition": False,
             "observer": None,
             "collapsed": False,
+            "tick_count": 0,
+            "collapse_count": 0,
+            "last_collapse_tick": None,
             "uncertainty": 0.0,
             "fluctuation": 0.0,
             "entropy_delta": 0.0,
@@ -133,9 +137,25 @@ class Universe:
 
         print("Reality Shifted new layer formed")
 
-    def create_entity(self, name, streght=1):
+    def create_entity(
+            self,
+            name,
+            streght=1,
+            profile=None
+    ):
 
-        entity = self.factory.create(name, self,)
+        entity = self.factory.create(
+            name,
+            self
+        )
+
+        if profile is None:
+            profile = EntityProfileResolver.find_profile(
+                world=self.world,
+                technical_name=name
+            )
+
+        entity.profile = profile
 
         self.add_entity(entity)
 
@@ -174,7 +194,40 @@ class Universe:
 
     def add_entity(self, entity):
         self.entities.append(entity)
-        print(f"New entity added: {entity.name}")
+
+        print(
+            f"New entity added: {entity.name}"
+        )
+
+        meeting_place = getattr(
+            self,
+            "meeting_place",
+            None
+        )
+
+        if meeting_place is None:
+            return
+
+        profile = getattr(
+            entity,
+            "profile",
+            None
+        )
+
+        decision = (
+            meeting_place
+            .bar_entity_policy
+            .resolve(
+                profile=profile,
+                technical_name=entity.name
+            )
+        )
+
+        entity.bar_policy = decision
+
+        meeting_place.glass_shelf.register_policy_decision(
+            decision
+        )
 
     def update_physics(self):
 
@@ -330,10 +383,23 @@ class Universe:
         if not self.quantum_state["enabled"]:
             return
 
+        self.quantum_state["tick_count"] += 1
+
+        self.quantum_state["collapsed"] = False
+        self.quantum_state["superposition"] = True
+        self.quantum_state["observer"] = "quantum_tick"
+
         self.quantum_state["fluctuation"] += 0.01
         self.quantum_state["uncertainty"] = self.quantum_state["fluctuation"] * 0.5
         self.quantum_state["entropy_delta"] = self.quantum_state["uncertainty"] * 0.1
         self.quantum_state["entropy_total"] += self.quantum_state["entropy_delta"]
+
+        self.quantum_state["superposition"] = False
+        self.quantum_state["collapsed"] = True
+        self.quantum_state["collapse_count"] += 1
+        self.quantum_state["last_collapse_tick"] = (
+            self.quantum_state["tick_count"]
+        )
 
         print(
             f"QUANTUM TICK "

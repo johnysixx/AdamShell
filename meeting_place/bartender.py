@@ -5,6 +5,7 @@ class Bartender:
         self.type = "bar_observer"
         self.state = "present"
         self.story_book = story_book
+        self.current_location = "meeting_place"
 
         self.origin = {
             "layer": "meeting_place",
@@ -101,3 +102,80 @@ class Bartender:
 
         self.current_task = "observing_bar"
         print("BARTENDER OBSERVES THE BAR")
+
+    def read_universe_manual(self, universe_manual):
+        return universe_manual.read(self)
+
+    def enter_back_room(self, back_room):
+        access_route = back_room.access.get(
+            self.name
+        )
+
+        if access_route != "main_door":
+            return False
+
+        self.current_location = back_room.name
+
+        print("BARTENDER ENTERS BACK ROOM")
+
+        return True
+
+    def sleep_in_back_room(
+            self,
+            back_room,
+            bar_has_guests
+    ):
+        if bar_has_guests:
+            return False
+
+        if self.current_location != back_room.name:
+            entered = self.enter_back_room(
+                back_room
+            )
+
+            if not entered:
+                return False
+
+        self.current_task = "sleeping"
+
+        print("BARTENDER SLEEPS IN BACK ROOM")
+
+        return True
+
+    def prepare_for_guest(self):
+        self.current_location = "meeting_place"
+        self.current_task = "wiping_glasses"
+        self.glasses_clean = False
+
+        print("BARTENDER APPEARS BEHIND THE BAR")
+        print("BARTENDER POLISHES A GLASS")
+
+    def serve_without_order(
+            self,
+            guest_name,
+            drink,
+            serving_object
+    ):
+        drink_name = self.get_drink_name(drink)
+        serving_object_name = self.get_drink_name(
+            serving_object
+        )
+
+        if isinstance(serving_object, dict):
+            serving_object["state"] = "filled"
+            serving_object["contains"] = drink_name
+
+        event = (
+            f"{guest_name} was served "
+            f"{drink_name} in {serving_object_name}"
+        )
+
+        self.observe_event(event)
+
+        print(
+            f"BARTENDER SERVES WITHOUT ORDER: "
+            f"{drink_name} into {serving_object_name} "
+            f"for {guest_name}"
+        )
+
+        return serving_object

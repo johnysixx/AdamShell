@@ -133,6 +133,17 @@ class Cats:
         print(f"CAT CREATED: {name}")
         return cat
 
+    def can_travel(self, cat, via):
+            if cat.get("type") != "cat":
+                return False
+
+            if not self.access_rules.get("can_access_anywhere", False):
+                return False
+
+            allowed_routes = self.access_rules.get("access_via", [])
+
+            return via in allowed_routes
+
     def emit_event(self, event):
         self.events.append(event)
         print(f"CATS EVENT: {event}")

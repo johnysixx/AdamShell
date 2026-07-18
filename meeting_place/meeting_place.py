@@ -7,15 +7,23 @@ from .dice_box import DiceBox
 from .fridge import BarFridge
 from .reservoirs import BarEnergyReservoir, BarEntropyReservoir
 from .service_rules import BarServiceRules
+from .back_room import BackRoom
+from .glass_shelf import GlassShelf
+from .bar_entity_policy import BarEntityPolicy
 
 class MeetingPlace:
 
     def __init__(self, universe):
         self.universe = universe
+        self.universe.meeting_place = self
+
         self.entities = []
         self.events = []
         self.tick_count = 0
         self.bar_counter = BarCounter()
+        self.glass_shelf = GlassShelf()
+        self.bar_entity_policy = BarEntityPolicy()
+
         self.dice_vial = DiceVial()
         self.dice_box = DiceBox()
         self.fridge = BarFridge()
@@ -24,6 +32,9 @@ class MeetingPlace:
         self.terminals = BarTerminals()
         self.bouncer = Bouncer()
         self.service_rules = BarServiceRules()
+        self.back_room = BackRoom(
+            self.universe.universe_registry
+        )
 
         self.total_entropy_served_today = 0
         self.total_entropy_served_ever = 0
@@ -93,7 +104,10 @@ class MeetingPlace:
             print(f"MEETING PLACE ENTRY DENIED BY BOUNCER: {entity_name}")
             return
 
+        self.bartender.prepare_for_guest()
+
         self.entities.append(entity)
+        entity["current_layer"] = "meeting_place"
         self.universe.world["meeting_place"]["entities"] = self.entities
 
         print(f"MEETING PLACE: entity joined {entity_name}")
@@ -126,7 +140,11 @@ class MeetingPlace:
             self.emit_event(f"{cat_name} could not be served milk because milk was missing")
             return
 
-        self.bartender.pour_drink(cat_name, milk, milk_bowl)
+        self.bartender.serve_without_order(
+            cat_name,
+            milk,
+            milk_bowl
+        )
         self.emit_event(f"{cat_name} drinks milk at the bar")
 
     def sync_entropy_terminal_to_world(self):

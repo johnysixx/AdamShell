@@ -1,4 +1,4 @@
-from core.entity import factory
+﻿from core.entity import factory
 from core.word.voice import Voice
 from core.word.words import LetThereBeLight
 from core.genesis.day2 import LetThereBeSpace
@@ -17,16 +17,31 @@ from root_universe import RootUniverse
 from cats import Cats
 from gods import Gods
 from idea_entities import IdeaEntities
-
+from core.transitions.root_transition import RootTransition
+from idea_universe import IdeaUniverse
+from multiverse import UniverseRegistry
 
 
 class Bootstrap:
 
     def run(self):
 
+        self.universe_registry = UniverseRegistry()
+
         self.universe = Universe()
+        self.universe.universe_registry = self.universe_registry
+
         self.universe.enable_quantum_layer()
         self.universe.boot_physics()
+        self.root_transition = RootTransition()
+
+        self.layers = LayerRegistry()
+        self.layers.register("meeting", MeetingPlace(self.universe))
+        self.layers.register("library", Library(self.universe))
+
+        self.idea_universe = IdeaUniverse(self.universe)
+
+        self.layers.register("root_universe", RootUniverse(self.universe))
 
         self.gods = Gods(self.universe)
         self.god = self.gods.create_god(
@@ -59,10 +74,11 @@ class Bootstrap:
             "root_universe"
         ]
 
-        self.universe.create_entity("god")
         self.universe.world["god"] = self.god
+        self.universe.create_entity("god")
 
         print("God entity created from Gods layer")
+
 
         self.cats = Cats(self.universe)
 
@@ -76,9 +92,6 @@ class Bootstrap:
 
         self.pazuzu["alias"] = "classical_probe_debug_entity"
 
-        self.universe.create_entity("pazuzu")
-        self.universe.world["pazuzu"] = self.pazuzu
-        self.universe.world["classical_probe_debug_entity"] = self.pazuzu
         self.pazuzu["access"] = {
             "cat_access": self.cats.access_rules,
             "eden": True,
@@ -87,39 +100,58 @@ class Bootstrap:
             "quantum_layer": "via_meeting_place"
         }
 
+        self.universe.world["pazuzu"] = self.pazuzu
+        self.universe.create_entity("pazuzu")
+
+        self.universe.world["classical_probe_debug_entity"] = self.pazuzu
+
 
         print("Pazuzu created as black cat")
 
         self.idea_entities = IdeaEntities(self.universe)
 
-        self.serpent = {
-            "name": "serpent",
-            "type": "idea_entity",
-            "role": "primordial_idea_entity",
-            "state": "created",
-            "active": False,
-            "forbidden": False,
-
-            "access": {
-                "eden": True,
-                "meeting_place": True,
-                "quantum_layer": "via_meeting_place"
-            },
-
-            "serpent_process": {
-                "ready": False,
-                "active": False,
-                "knowledge_payload": None,
-                "target": None
+        self.serpent = self.idea_entities.create_idea_entity(
+            name="serpent",
+            role="primordial_idea_entity",
+            active=False,
+            existence_pct=100.0,
+            native_world="idea_universe",
+            existence_by_world={
+                "idea_universe": 100.0,
+                "root_universe": 0.0,
+                "eden": 0.0
             }
-        }
-        self.idea_entities.idea_entities.append(self.serpent)
-        self.universe.world["idea_entities"]["idea_entities"] = self.idea_entities.idea_entities
+        )
 
-        self.universe.create_entity("serpent")
+        self.serpent["energy_j"] = 0.0
+
+        self.serpent["access"] = {
+            "eden": True,
+            "meeting_place": True,
+            "quantum_layer": "via_meeting_place"
+        }
+
+        self.serpent["serpent_process"] = {
+            "ready": False,
+            "active": False,
+            "knowledge_payload": None,
+            "target": None
+        }
+
         self.universe.world["serpent"] = self.serpent
+        self.universe.create_entity("serpent")
+        self.idea_universe.add_entity(self.serpent)
 
         print("Serpent created as idea entity")
+
+        serpent_can_create_transition = (
+            self.root_transition.can_create(self.serpent)
+        )
+
+        print(
+        "SERPENT CAN CREATE ROOT TRANSITION:",
+        serpent_can_create_transition
+        )
 
         self.lilith = self.idea_entities.create_idea_entity(
             name="lilith",
@@ -150,51 +182,50 @@ class Bootstrap:
             "with lilith the feminine principle came into existence"
         ]
 
-        self.universe.create_entity("lilith")
         self.universe.world["lilith"] = self.lilith
+        self.universe.create_entity("lilith")
 
         print("Lilith created as idea entity")
 
-        self.pazuzu_masculine_principle = {
-            "name": "pazuzu",
-            "alias": "pazuzu",
-            "world_key": "pazuzu_masculine_principle",
-            "type": "idea_entity",
-            "role": "archetype_principle",
-            "state": "created",
-            "active": True,
-            "forbidden": False,
+        self.pazuzu_masculine_principle = self.idea_entities.create_idea_entity(
+            name="pazuzu",
+            role="archetype_principle",
+            active=True
+        )
 
-            "principle": {
-                "name": "masculine_principle",
-                "domain": [
-                    "man",
-                    "creation",
-                    "masculine_archetype"
-                ],
-                "origin": "pazuzu_alias"
-            },
+        self.pazuzu_masculine_principle["alias"] = "pazuzu"
+        self.pazuzu_masculine_principle["world_key"] = (
+            "pazuzu_masculine_principle"
+        )
 
-            "access": {
-                "meeting_place": False,
-                "library": "read",
-                "quantum_layer": True
-            },
-
-            "meeting_presence": False,
-            "known_by_bartender": False,
-            "history": [
-                "pazuzu masculine principle was born in the idea world",
-                "with pazuzu the masculine principle came into existence",
-                "pazuzu masculine principle has no access to the bar"
-            ]
+        self.pazuzu_masculine_principle["principle"] = {
+            "name": "masculine_principle",
+            "domain": [
+                "man",
+                "creation",
+                "masculine_archetype"
+            ],
+            "origin": "pazuzu_alias"
         }
 
-        self.idea_entities.idea_entities.append(self.pazuzu_masculine_principle)
-        self.universe.world["idea_entities"]["idea_entities"] = self.idea_entities.idea_entities
+        self.pazuzu_masculine_principle["access"] = {
+            "meeting_place": False,
+            "library": "read",
+            "quantum_layer": True
+        }
+
+        self.pazuzu_masculine_principle["meeting_presence"] = False
+        self.pazuzu_masculine_principle["known_by_bartender"] = False
+        self.pazuzu_masculine_principle["history"] = [
+            "pazuzu masculine principle was born in the idea world",
+            "with pazuzu the masculine principle came into existence",
+            "pazuzu masculine principle has no access to the bar"
+        ]
 
         self.universe.create_entity("pazuzu_masculine_principle")
-        self.universe.world["pazuzu_masculine_principle"] = self.pazuzu_masculine_principle
+        self.universe.world["pazuzu_masculine_principle"] = (
+            self.pazuzu_masculine_principle
+        )
 
         print("Pazuzu masculine principle created as idea entity")
 
@@ -214,11 +245,6 @@ class Bootstrap:
 
         self.universe.tick_universe()
         self.universe.tick_universe()
-
-        self.layers = LayerRegistry()
-        self.layers.register("root_universe", RootUniverse(self.universe))
-        self.layers.register("library", Library(self.universe))
-        self.layers.register("meeting", MeetingPlace(self.universe))
 
         self.layers.get("meeting").add_entity(self.god)
         self.layers.get("meeting").add_entity(self.serpent)
