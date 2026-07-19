@@ -3,8 +3,11 @@ from typing import Self
 from core.entity.factory import EntityFactory
 from core.entity.profile_resolver import EntityProfileResolver
 from core.entity.quantum_die import QuantumDie
+from core.entity.quantum_die_box import QuantumDieBox
+from universe.quantum_universe_space import QuantumUniverseSpace
 from universe.big_bang import BigBang
 from core.entity.quantum_box import QuantumBox
+from universe.universe_statistics import UniverseStatistics
 
 class Universe:
 
@@ -38,6 +41,8 @@ class Universe:
 
         self.quantum_die = QuantumDie()
         self.quantum_boxes = []
+        self.quantum_events = []
+        self.statistics = UniverseStatistics()
 
         self.quantum_state = {
             "enabled": False,
@@ -73,6 +78,27 @@ class Universe:
 
         print(f"Root reality prepared: {self.id}")
         print("Physical universe has not started yet.")
+
+    @property
+    def snapshot(self):
+        geometry_state = None
+
+        if hasattr(self, "quantum_space"):
+            geometry_state = (
+                self.quantum_space
+                .geometry_engine
+                .public_state
+            )
+
+        return {
+            "universe_id": self.id,
+            "tick": self.universe_tick,
+            "energy": self.energy_pool,
+            "pressure": self.pressure,
+            "entropy": self.entropy,
+            "statistics": self.statistics.public_state,
+            "geometry": geometry_state
+        }
 
     def start_big_bang(self):
         if self.big_bang_started:
@@ -290,6 +316,16 @@ class Universe:
         self.quantum_state["enabled"] = True
         self.physics_model = "symbolic_quantum"
 
+        if not hasattr(self, "quantum_die_box"):
+            self.quantum_die_box = QuantumDieBox(
+                self.quantum_die
+            )
+
+        if not hasattr(self, "quantum_space"):
+            self.quantum_space = QuantumUniverseSpace(
+                self.quantum_die_box
+            )
+
         print("Quantum layers enabled")
 
     def boot_physics(self):
@@ -383,9 +419,77 @@ class Universe:
                  f"CURVATURE={spacetime['curvature']:.2f}"
                  )
 
+    def open_quantum_box(
+            self,
+            box_id,
+            observer=None,
+            rng=None
+    ):
+        box = next(
+            (
+                quantum_box
+                for quantum_box in self.quantum_boxes
+                if quantum_box.id == box_id
+            ),
+            None
+        )
+
+        if box is None:
+            print(f"QUANTUM BOX NOT FOUND: {box_id}")
+            return None
+
+        result = box.collapse_state(
+            cause="opened",
+            observer=observer,
+            tick=self.quantum_state["tick_count"],
+            rng=rng
+        )
+
+        self.statistics.record_quantum_collapse()
+
+
+        if result == "cat":
+            event = {
+                "name": "cat_manifestation_requested",
+                "source": "cat_distribution_system",
+                "collapse_cause": "opened",
+                "box_id": box.id,
+                "position": box.position.copy(),
+                "observer": observer,
+                "tick": self.quantum_state["tick_count"]
+            }
+
+            self.statistics.record_cat_created()
+
+            self.quantum_events.append(event)
+
+            print(
+                f"CAT JUMPS OUT OF QUANTUM BOX: {box.id}"
+            )
+
+        else:
+            event = {
+                "name": "empty_quantum_box_opened",
+                "collapse_cause": "opened",
+                "box_id": box.id,
+                "position": box.position.copy(),
+                "observer": observer,
+                "tick": self.quantum_state["tick_count"]
+            }
+
+            print(f"QUANTUM BOX WAS EMPTY: {box.id}")
+
+        self.quantum_boxes.remove(box)
+        self.statistics.record_quantum_box_disappeared()
+
+        print(f"QUANTUM BOX DISAPPEARED: {box.id}")
+
+        return event
+
     def create_quantum_box(self, rng=None):
         box = QuantumBox(rng=rng)
         self.quantum_boxes.append(box)
+        self.statistics.record_quantum_box_created()
 
         print(
             f"QUANTUM BOX CREATED: {box.id} "
@@ -395,6 +499,21 @@ class Universe:
         )
 
         return box
+
+    def should_collapse_quantum_box(self, box, rng=None):
+        import random
+
+        rng = rng or random
+
+        base_chance = 0.01
+        age_factor = box.age_ticks * 0.001
+
+        collapse_chance = min(
+            base_chance + age_factor,
+            0.25
+        )
+
+        return rng.random() < collapse_chance
 
     def tick_quantum(self):
 
@@ -418,6 +537,53 @@ class Universe:
         self.quantum_state["last_collapse_tick"] = (
             self.quantum_state["tick_count"]
         )
+
+        for box in list(self.quantum_boxes):
+            box.age_ticks += 1
+
+            if not self.should_collapse_quantum_box(box):
+                continue
+
+            result = box.collapse_state(
+                cause="spontaneous",
+                observer=None,
+                tick=self.quantum_state["tick_count"]
+            )
+
+            self.statistics.record_quantum_collapse()
+
+
+            if result == "cat":
+                event = {
+                    "name": "cat_manifestation_requested",
+                    "source": "cat_distribution_system",
+                    "collapse_cause": "spontaneous",
+                    "box_id": box.id,
+                    "position": box.position.copy(),
+                    "observer": None,
+                    "tick": self.quantum_state["tick_count"]
+                }
+
+                self.statistics.record_cat_created()
+
+                self.quantum_events.append(event)
+
+                print(
+                    f"CAT MANIFESTS FROM SPONTANEOUS "
+                    f"QUANTUM COLLAPSE: {box.id}"
+                )
+            else:
+                print(
+                    f"SPONTANEOUSLY COLLAPSED BOX WAS EMPTY: "
+                    f"{box.id}"
+                )
+
+            self.quantum_boxes.remove(box)
+            self.statistics.record_quantum_box_disappeared()
+
+            print(
+                f"QUANTUM BOX DISAPPEARED: {box.id}"
+            )
 
         print(
             f"QUANTUM TICK "
