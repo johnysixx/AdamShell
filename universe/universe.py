@@ -2,7 +2,9 @@ from typing import Self
 
 from core.entity.factory import EntityFactory
 from core.entity.profile_resolver import EntityProfileResolver
+from core.entity.quantum_die import QuantumDie
 from universe.big_bang import BigBang
+from core.entity.quantum_box import QuantumBox
 
 class Universe:
 
@@ -33,6 +35,9 @@ class Universe:
             "classical": True,
             "quantum": False,
         }
+
+        self.quantum_die = QuantumDie()
+        self.quantum_boxes = []
 
         self.quantum_state = {
             "enabled": False,
@@ -377,6 +382,19 @@ class Universe:
                  f"DELTA={curvature_delta:.2f} "
                  f"CURVATURE={spacetime['curvature']:.2f}"
                  )
+
+    def create_quantum_box(self, rng=None):
+        box = QuantumBox(rng=rng)
+        self.quantum_boxes.append(box)
+
+        print(
+            f"QUANTUM BOX CREATED: {box.id} "
+            f"AT x={box.position['x']:.3f} "
+            f"y={box.position['y']:.3f} "
+            f"z={box.position['z']:.3f}"
+        )
+
+        return box
 
     def tick_quantum(self):
 

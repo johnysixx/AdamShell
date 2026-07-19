@@ -31,3 +31,18 @@ class DiceBox:
 
     def answer_about_d20(self):
         return "I do not know"
+
+    def remove_next_die(self):
+        if not self.contents:
+            return None
+
+        die = self.contents.pop()
+
+        if die not in self.public_state["missing"]:
+            self.public_state["missing"].append(die)
+
+        print(
+            f"DIE MISSING FROM BOX: {die}"
+        )
+
+        return die

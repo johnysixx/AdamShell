@@ -240,7 +240,15 @@ class MeetingPlace:
         self.sync_entropy_terminal_to_world()
 
         if self.total_entropy_served_ever % 10 == 0:
-            self.dice_vial.roll_secretly()
+            secret_event = self.dice_vial.roll_secretly()
+
+            if secret_event["quantum_tick_requested"]:
+                self.quantum_entropy_tick()
+
+            if secret_event["box_created"]:
+                self.universe.create_quantum_box()
+
+
 
         effect = self.service_rules.apply_entropy_drink(
             entity,
