@@ -23,6 +23,22 @@ class Bartender:
 
         print("BARTENDER CREATED")
 
+    def respond_to_red_button_alarm(
+        self,
+        red_button,
+        available=True
+    ):
+        if not red_button.alarm_active:
+            print("BARTENDER HEARS NO RED BUTTON ALARM")
+            return False
+
+        if not available:
+            print("BARTENDER DOES NOT RESPOND TO RED BUTTON ALARM")
+            return False
+
+        print("BARTENDER RESPONDS TO RED BUTTON ALARM")
+        return red_button.press()
+
     def observe_event(self, event):
         self.event_memory.append(event)
         self.story_book.write_entry(event)

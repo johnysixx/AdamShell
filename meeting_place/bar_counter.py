@@ -16,6 +16,9 @@ class BarStoryBook:
         return self.entries
 
 
+from .red_button import RedButton
+
+
 class BarCounter:
 
     def __init__(self):
@@ -35,6 +38,8 @@ class BarCounter:
         }
 
         print("BAR CLOTH PLACED UNDER BAR COUNTER")
+
+        self.red_button = RedButton()
 
         self.milk_bowl = {
             "name": "milk_bowl",

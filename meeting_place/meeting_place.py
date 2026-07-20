@@ -10,6 +10,8 @@ from .service_rules import BarServiceRules
 from .back_room import BackRoom
 from .glass_shelf import GlassShelf
 from .bar_entity_policy import BarEntityPolicy
+from .bar_geometry_terminal import BarGeometryTerminal
+from .back_room_black_box import BackRoomBlackBox
 
 class MeetingPlace:
 
@@ -30,10 +32,15 @@ class MeetingPlace:
         self.energy_reservoir = BarEnergyReservoir()
         self.entropy_reservoir = BarEntropyReservoir()
         self.terminals = BarTerminals()
+        self.geometry_terminal = BarGeometryTerminal()
         self.bouncer = Bouncer()
         self.service_rules = BarServiceRules()
         self.back_room = BackRoom(
             self.universe.universe_registry
+        )
+
+        self.back_room_black_box = (
+            BackRoomBlackBox()
         )
 
         self.total_entropy_served_today = 0
@@ -100,6 +107,9 @@ class MeetingPlace:
     def add_entity(self, entity):
         entity_name = self._get_entity_name(entity)
 
+        if self._is_cat(entity):
+            self.bar_counter.red_button.clear_alarm()
+
         if not self.bouncer.can_enter(entity):
             print(f"MEETING PLACE ENTRY DENIED BY BOUNCER: {entity_name}")
             return
@@ -115,17 +125,31 @@ class MeetingPlace:
         self.bartender.guest_arrives(entity_name)
 
         if self._is_cat(entity):
+            self.universe.statistics.record_cat_arrived()
+            self.geometry_terminal.cat_arrived(entity_name)
             self.handle_cat_after_entry(entity)
 
     def emit_event(self, event):
         self.events.append(event)
+
+        self.back_room_black_box.record(
+            event=event,
+            source="meeting_place",
+            tick=self.tick_count
+        )
+
         self.bartender.observe_event(event)
         self.show_bar_story_count()
+
         print(f"MEETING PLACE EVENT: {event}")
 
     def guest_asks_about_dice_vial(self, guest_name):
         self.emit_event(f"{guest_name} asked about the dice vial")
         self.bartender.answer_about_dice_vial(guest_name)
+
+    def handle_cat_created(self, cat_id):
+        self.geometry_terminal.cat_detected(cat_id)
+        self.bar_counter.red_button.activate_alarm()
 
     def handle_cat_after_entry(self, cat):
         self.serve_cat_milk(cat)
