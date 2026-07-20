@@ -16,6 +16,7 @@ class QuantumBox:
         }
 
         self.state = "superposition"
+        self.age_ticks = 0
 
         self.content = {
             "possibilities": [
@@ -31,6 +32,38 @@ class QuantumBox:
             "observer": None,
             "tick": None
         }
+
+    def collapse_state(
+            self,
+            cause,
+            observer=None,
+            tick=None,
+            rng=None
+    ):
+        if self.collapse["collapsed"]:
+            return self.content["resolved"]
+
+        rng = rng or random
+
+        self.content["resolved"] = rng.choice([
+            "empty",
+            "cat"
+        ])
+
+        self.state = "collapsed"
+
+        self.collapse["collapsed"] = True
+        self.collapse["cause"] = cause
+        self.collapse["observer"] = observer
+        self.collapse["tick"] = tick
+
+        print(
+            f"QUANTUM BOX COLLAPSED: {self.id} "
+            f"CAUSE={cause} "
+            f"RESULT={self.content['resolved']}"
+        )
+
+        return self.content["resolved"]
 
     @property
     def public_state(self):
