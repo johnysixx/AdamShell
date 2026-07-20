@@ -90,6 +90,11 @@ class MeetingPlace:
             "fridge": self.fridge.public_state,
             "energy_reservoir": self.energy_reservoir.public_state,
             "entropy_reservoir": self.entropy_reservoir.public_state,
+            "geometry_terminal": self.geometry_terminal.public_state,
+            "back_room": self.back_room.public_state,
+            "back_room_black_box": (
+                self.back_room_black_box.public_state
+            ),
             "terminals": self.terminals.terminals,
             "bouncer": self.bouncer.name,
             "service_rules": "bar_service_rules",

@@ -21,3 +21,14 @@ class UniverseManual:
             for universe_id, universe_data
             in self._universe_registry.universes.items()
         }
+
+    @property
+    def public_state(self):
+        return {
+            "name": self.name,
+            "location": self.location,
+            "allowed_reader": self.allowed_reader,
+            "registered_universe_count": len(
+                self._universe_registry.universes
+            )
+        }
