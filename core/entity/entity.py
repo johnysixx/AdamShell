@@ -1,4 +1,4 @@
-
+from core.entities.ability_set import AbilitySet
 
 
 class Entity:
@@ -13,6 +13,10 @@ class Entity:
         self.evolved = False
         self.depth = 0
         self.birth_allowed = False
+
+        self.abilities = AbilitySet(
+            owner=self
+        )
 
 
     def tick(self, universe):
