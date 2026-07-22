@@ -60,6 +60,41 @@ class DarkSector:
 
         return event
 
+    def _condense_dark_matter(self):
+        if not self.threshold_reached:
+            return None
+
+        consumed_energy_j = (
+            self.quantum_threshold_j
+        )
+
+        produced_dark_matter_kg = (
+            self.energy_mass_equivalent_kg(
+                consumed_energy_j
+            )
+        )
+
+        self.dark_energy_j -= consumed_energy_j
+        self.dark_matter_kg += produced_dark_matter_kg
+
+        event = {
+            "name": "dark_matter_naturally_condensed",
+            "consumed_energy_j": consumed_energy_j,
+            "produced_dark_matter_kg": (
+                produced_dark_matter_kg
+            ),
+            "dark_energy_remaining_j": (
+                self.dark_energy_j
+            ),
+            "dark_matter_total_kg": (
+                self.dark_matter_kg
+            )
+        }
+
+        self.events.append(event)
+
+        return event
+
     @staticmethod
     def energy_mass_equivalent_kg(energy_j):
         if energy_j < 0:
