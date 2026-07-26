@@ -11,6 +11,23 @@ class EntityBootstrap:
         self.root_transition = root_transition
 
     def run(self):
+        self._create_god()
+        self._create_pazuzu()
+        self._create_serpent()
+        self._create_lilith()
+        self._create_pazuzu_masculine_principle()
+        self._record_first_fire_interaction()
+
+        return (
+            self.god,
+            self.pazuzu,
+            self.serpent,
+            self.lilith,
+            self.pazuzu_masculine_principle
+        )
+
+
+    def _create_god(self):
         self.gods = Gods(self.universe)
         self.god = self.gods.create_god(
             name="god",
@@ -47,6 +64,8 @@ class EntityBootstrap:
 
         print("God entity created from Gods layer")
 
+
+    def _create_pazuzu(self):
         self.cats = Cats(self.universe)
 
         self.pazuzu = self.cats.create_cat(
@@ -73,6 +92,8 @@ class EntityBootstrap:
 
         print("Pazuzu created as black cat")
 
+
+    def _create_serpent(self):
         self.idea_entities = IdeaEntities(self.universe)
 
         self.serpent = self.idea_entities.create_idea_entity(
@@ -118,6 +139,8 @@ class EntityBootstrap:
             serpent_can_create_transition
         )
 
+
+    def _create_lilith(self):
         self.lilith = self.idea_entities.create_idea_entity(
             name="lilith",
             role="archetype_principle",
@@ -152,6 +175,8 @@ class EntityBootstrap:
 
         print("Lilith created as idea entity")
 
+
+    def _create_pazuzu_masculine_principle(self):
         self.pazuzu_masculine_principle = (
             self.idea_entities.create_idea_entity(
                 name="pazuzu",
@@ -196,6 +221,8 @@ class EntityBootstrap:
 
         print("Pazuzu masculine principle created as idea entity")
 
+
+    def _record_first_fire_interaction(self):
         self.idea_entities.record_fire_interaction(
             name="first_fire_interaction",
             participants=[
@@ -206,17 +233,4 @@ class EntityBootstrap:
             state="unresolved",
             meaning=None
         )
-
-        return (
-            self.god,
-            self.pazuzu,
-            self.serpent,
-            self.lilith,
-            self.pazuzu_masculine_principle
-        )
-
-
-
-
-
 
