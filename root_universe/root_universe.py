@@ -1,3 +1,5 @@
+﻿from universe.logger import UniverseLogger
+
 class RootUniverse:
 
     def __init__(self, universe):
@@ -65,7 +67,7 @@ class RootUniverse:
         self.universe.physics["root_universe"] = self.state
         self.universe.world["root_universe"] = self.state
 
-        print("ROOT UNIVERSE INITIALIZED")
+        UniverseLogger.boot("ROOT UNIVERSE INITIALIZED")
 
     def can_read(self, entity_name):
         return entity_name in self.state["permissions"]["can_read"]
@@ -75,28 +77,28 @@ class RootUniverse:
 
     def apply_eden_influence(self, entity_name, influence):
         if not self.can_modify(entity_name):
-            print(f"ROOT UNIVERSE MODIFY DENIED: {entity_name}")
+            UniverseLogger.event(f"ROOT UNIVERSE MODIFY DENIED: {entity_name}")
             return
 
         self.state["eden_influence"].append(influence)
-        print(f"ROOT UNIVERSE EDEN INFLUENCE: {influence}")
+        UniverseLogger.event(f"ROOT UNIVERSE EDEN INFLUENCE: {influence}")
 
     def start_history(self, entity_name):
         if not self.can_modify(entity_name):
-            print(f"ROOT UNIVERSE HISTORY START DENIED: {entity_name}")
+            UniverseLogger.event(f"ROOT UNIVERSE HISTORY START DENIED: {entity_name}")
             return
 
         self.state["history_started"] = True
         self.state["awaiting_adam_and_eve"] = False
-        print("ROOT UNIVERSE HISTORY STARTED")
+        UniverseLogger.event("ROOT UNIVERSE HISTORY STARTED")
 
     def emit_event(self, event):
         self.events.append(event)
-        print(f"ROOT UNIVERSE EVENT: {event}")
+        UniverseLogger.event(f"ROOT UNIVERSE EVENT: {event}")
 
     def tick(self):
         self.tick_count += 1
-        print(f"ROOT UNIVERSE TICK {self.tick_count}")
+        UniverseLogger.event(f"ROOT UNIVERSE TICK {self.tick_count}")
         self._clear_events()
 
     def _clear_events(self):

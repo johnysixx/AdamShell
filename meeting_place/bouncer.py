@@ -1,3 +1,5 @@
+from universe.logger import UniverseLogger
+
 class Bouncer:
 
     def __init__(self):
@@ -39,30 +41,30 @@ class Bouncer:
             "pet_cats_on_entry": True
         }
 
-        print("BOUNCER CREATED")
-        print("BOUNCER STANDS OUTSIDE THE BAR")
+        UniverseLogger.boot("BOUNCER CREATED")
+        UniverseLogger.boot("BOUNCER STANDS OUTSIDE THE BAR")
 
     def can_enter(self, entity):
         entity_name = self._get_entity_name(entity)
 
         if self._is_cat(entity):
             self.pet_cat(entity_name)
-            print(f"BOUNCER ALLOWS CAT: {entity_name}")
+            UniverseLogger.event(f"BOUNCER ALLOWS CAT: {entity_name}")
             return True
 
         if entity_name in self.denied_guests:
-            print(f"BOUNCER DENIES ENTRY: {entity_name}")
+            UniverseLogger.event(f"BOUNCER DENIES ENTRY: {entity_name}")
             return False
 
         if entity_name in self.allowed_guests:
-            print(f"BOUNCER ALLOWS ENTRY: {entity_name}")
+            UniverseLogger.event(f"BOUNCER ALLOWS ENTRY: {entity_name}")
             return True
 
-        print(f"BOUNCER DENIES ENTRY: {entity_name}")
+        UniverseLogger.event(f"BOUNCER DENIES ENTRY: {entity_name}")
         return False
 
     def pet_cat(self, cat_name):
-        print(f"BOUNCER PETS CAT: {cat_name}")
+        UniverseLogger.event(f"BOUNCER PETS CAT: {cat_name}")
 
     def _get_entity_name(self, entity):
         if isinstance(entity, dict):

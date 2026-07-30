@@ -1,4 +1,5 @@
-from universe.pre_cosmic_rules import GOD_INITIAL_ENERGY_J
+﻿from universe.pre_cosmic_rules import GOD_INITIAL_ENERGY_J
+from universe.logger import UniverseLogger
 
 class Gods:
 
@@ -21,7 +22,7 @@ class Gods:
             "permissions": self.permissions
         }
 
-        print("GODS LAYER CREATED")
+        UniverseLogger.boot("GODS LAYER CREATED")
 
     def create_god(self, name, role="creator_entity"):
         god = {
@@ -80,16 +81,16 @@ class Gods:
         self.gods.append(god)
         self.universe.world["gods"]["gods"] = self.gods
 
-        print(f"GOD CREATED: {name}")
+        UniverseLogger.event(f"GOD CREATED: {name}")
         return god
 
     def emit_event(self, event):
         self.events.append(event)
-        print(f"GODS EVENT: {event}")
+        UniverseLogger.event(f"GODS EVENT: {event}")
 
     def tick(self):
         self.tick_count += 1
-        print(f"GODS TICK {self.tick_count}")
+        UniverseLogger.event(f"GODS TICK {self.tick_count}")
         self._clear_events()
 
     def _clear_events(self):

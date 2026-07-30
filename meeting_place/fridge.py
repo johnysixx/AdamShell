@@ -1,3 +1,5 @@
+from universe.logger import UniverseLogger
+
 class BarFridge:
 
     def __init__(self):
@@ -29,8 +31,8 @@ class BarFridge:
             "items": self.items
         }
 
-        print("BAR FRIDGE CREATED")
-        print("MILK STORED IN BAR FRIDGE")
+        UniverseLogger.boot("BAR FRIDGE CREATED")
+        UniverseLogger.boot("MILK STORED IN BAR FRIDGE")
 
     def get_item(self, item_name):
         return self.items.get(item_name)

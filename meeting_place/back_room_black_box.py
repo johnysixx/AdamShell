@@ -1,3 +1,5 @@
+﻿from universe.logger import UniverseLogger
+
 class BackRoomBlackBox:
 
     def __init__(self):
@@ -7,7 +9,7 @@ class BackRoomBlackBox:
         self.access = "bar_internal_only"
         self.entries = []
 
-        print("BACK ROOM BLACK BOX CREATED")
+        UniverseLogger.boot("BACK ROOM BLACK BOX CREATED")
 
     def record(
         self,
@@ -25,10 +27,7 @@ class BackRoomBlackBox:
 
         self.entries.append(entry)
 
-        print(
-            "BACK ROOM BLACK BOX ENTRY: "
-            f"[{source}] {event}"
-        )
+        UniverseLogger.event("BACK ROOM BLACK BOX ENTRY: " f"[{source}] {event}")
 
         return entry
 
@@ -45,3 +44,4 @@ class BackRoomBlackBox:
             "access": self.access,
             "entry_count": self.entry_count
         }
+

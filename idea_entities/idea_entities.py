@@ -1,7 +1,8 @@
-from universe.pre_cosmic_rules import (
+﻿from universe.pre_cosmic_rules import (
     IDEA_ENTITY_INITIAL_ENERGY_J,
     IDEA_ENTITY_ARCHETYPE_EXISTENCE_THRESHOLD_PCT,
 )
+from universe.logger import UniverseLogger
 
 class IdeaEntities:
 
@@ -37,7 +38,7 @@ class IdeaEntities:
             "permissions": self.permissions
         }
 
-        print("IDEA ENTITIES LAYER CREATED")
+        UniverseLogger.boot("IDEA ENTITIES LAYER CREATED")
 
     def update_archetype_manifestation_state(self, entity):
         existence_pct = entity.get("existence_pct", 0.0)
@@ -115,7 +116,7 @@ class IdeaEntities:
         self.idea_entities.append(idea_entity)
         self.universe.world["idea_entities"]["idea_entities"] = self.idea_entities
 
-        print(f"IDEA ENTITY CREATED: {name}")
+        UniverseLogger.event(f"IDEA ENTITY CREATED: {name}")
         return idea_entity
 
     def emit_event(self, event):
@@ -125,7 +126,7 @@ class IdeaEntities:
         self.universe.world["idea_entities"]["events"] = self.events
         self.universe.world["idea_entities"]["event_history"] = self.event_history
 
-        print(f"IDEA ENTITIES EVENT: {event}")
+        UniverseLogger.event(f"IDEA ENTITIES EVENT: {event}")
 
     def record_idea_event(
             self,
@@ -181,9 +182,10 @@ class IdeaEntities:
 
     def tick(self):
         self.tick_count += 1
-        print(f"IDEA ENTITIES TICK {self.tick_count}")
+        UniverseLogger.event(f"IDEA ENTITIES TICK {self.tick_count}")
         self._clear_events()
 
     def _clear_events(self):
         self.events = []
         self.universe.world["idea_entities"]["events"] = self.events
+

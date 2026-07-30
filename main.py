@@ -1,9 +1,7 @@
-from universe.bootstrap import Bootstrap
-
+﻿from multiverse.kernel import MultiverseKernel
 
 def main():
-    Bootstrap().run()
-
+    MultiverseKernel().boot()
 
 if __name__ == "__main__":
     main()

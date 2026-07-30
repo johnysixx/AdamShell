@@ -1,13 +1,15 @@
+from universe.logger import UniverseLogger
+
 class LayerRegistry:
 
     def __init__(self):
         self.layers = {}
 
-        print(LayerRegistry)
+        UniverseLogger.boot("LayerRegistry initialized")
 
     def register(self, name, layer):
         self.layers[name] = layer
-        print(f"🧩 Layer registered: {name}")
+        UniverseLogger.boot(f"Layer registered: {name}")
 
 
     def get(self, name):

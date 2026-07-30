@@ -8,6 +8,7 @@ from universe.quantum_universe_space import QuantumUniverseSpace
 from universe.big_bang import BigBang
 from core.entity.quantum_box import QuantumBox
 from universe.universe_statistics import UniverseStatistics
+from universe.logger import UniverseLogger
 
 class Universe:
 
@@ -76,8 +77,8 @@ class Universe:
 
         # universe is now state-less (entity driven)
 
-        print(f"Root reality prepared: {self.id}")
-        print("Physical universe has not started yet.")
+        UniverseLogger.boot(f"Root reality prepared: {self.id}")
+        UniverseLogger.boot("Physical universe has not started yet.")
 
     @property
     def snapshot(self):
@@ -102,7 +103,7 @@ class Universe:
 
     def start_big_bang(self):
         if self.big_bang_started:
-            print("BIG BANG ALREADY STARTED")
+            UniverseLogger.event("BIG BANG ALREADY STARTED")
             return self.world.get("big_bang")
 
         self.big_bang = BigBang(self)
@@ -113,8 +114,8 @@ class Universe:
         self.universe_exists = True
         self.state = "physical_universe"
 
-        print("PHYSICAL UNIVERSE STARTED")
-        print("THE UNIVERSE EXISTS")
+        UniverseLogger.boot("PHYSICAL UNIVERSE STARTED")
+        UniverseLogger.boot("THE UNIVERSE EXISTS")
 
         return self.world.get("big_bang")
 
@@ -122,22 +123,22 @@ class Universe:
 
         if word.name == "LetThereBeLight":
             self.light = True
-            print("Light is created.")
+            UniverseLogger.event("Light is created.")
 
         elif word.name == "LetThereBeSpace":
             self.space = True
             self.chaos = False
             self.order = True
-            print("Space is separated from chaos.")
+            UniverseLogger.event("Space is separated from chaos.")
 
         # DAY 3 emergence
         elif word.name == "LetThereBeDeep":
             self.deep = True
-            print("The Deep emerges from void.")
+            UniverseLogger.event("The Deep emerges from void.")
 
         elif word.name == "RewriteRule":
             self.rules_modified = True
-            print("Reality rules are evolving...")
+            UniverseLogger.event("Reality rules are evolving...")
 
     def register_conflicts(self, conflicts):
 
@@ -151,12 +152,12 @@ class Universe:
         self.check_threshold()
         self.spawn_entities_from_conflicts(conflicts)
 
-        print(f"⚠ Conflict pressure increased: {self.conflict_pressure}")
+        UniverseLogger.event(f"⚠ Conflict pressure increased: {self.conflict_pressure}")
 
     def check_threshold(self):
 
         if self.conflict_pressure >= self.threshold:
-            print("Threshold reached reality shift triggered")
+            UniverseLogger.event("Threshold reached reality shift triggered")
             self.trigger_reality_shift()
 
     def trigger_reality_shift(self):
@@ -166,7 +167,7 @@ class Universe:
         self.create_entity("TheresholdEvent", streght=3)
 
 
-        print("Reality Shifted new layer formed")
+        UniverseLogger.event("Reality Shifted new layer formed")
 
     def create_entity(
             self,
@@ -190,7 +191,7 @@ class Universe:
 
         self.add_entity(entity)
 
-        print("new entity created: ",  {name})
+        UniverseLogger.event(f"new entity created: {name}")
 
         return entity
 
@@ -226,7 +227,7 @@ class Universe:
     def add_entity(self, entity):
         self.entities.append(entity)
 
-        print(
+        UniverseLogger.event(
             f"New entity added: {entity.name}"
         )
 
@@ -296,7 +297,7 @@ class Universe:
                     "state": "linear",
                     "pressure": 0.0
                 }
-                print("Physics enabled: time")
+                UniverseLogger.event("Physics enabled: time")
                 return
             if law == "gravity":
                 self.physics["gravity"] =  {
@@ -304,11 +305,11 @@ class Universe:
                     "strength": 1.0,
                     "curvature_effect": 0.01
                 }
-                print("Physics enabled: gravity")
+                UniverseLogger.event("Physics enabled: gravity")
                 return
 
             self.physics[law] = True
-            print(f"Physics enabled: {law}" )
+            UniverseLogger.event(f"Physics enabled: {law}" )
 
     def enable_quantum_layer(self):
 
@@ -326,7 +327,7 @@ class Universe:
                 self.quantum_die_box
             )
 
-        print("Quantum layers enabled")
+        UniverseLogger.event("Quantum layers enabled")
 
     def boot_physics(self):
 
@@ -338,15 +339,15 @@ class Universe:
 
             self.bind_spacetime()
 
-            print("Physics booted")
-            print(f"Physics model: {self.physics_model}")
+            UniverseLogger.event("Physics booted")
+            UniverseLogger.event(f"Physics model: {self.physics_model}")
 
-            print(
+            UniverseLogger.event(
                 f"Physics layers: "
                 f"classical={self.physics_layers['classical']} "
                 f"quantum={self.physics_layers['quantum']} "
             )
-            print(
+            UniverseLogger.event(
                 f"Quantum state: "
                 f"enabled={self.quantum_state['enabled']} "
                 f"superposition={self.quantum_state['superposition']} "
@@ -356,7 +357,6 @@ class Universe:
 
     def tick_time(self):
 
-        print(("DEBUG time: ", self.physics["time"]))
 
         if "time" in self.physics:
             t = self.physics["time"]
@@ -366,7 +366,7 @@ class Universe:
 
             self.energy_pool -= t["pressure"] * 0.1
 
-            print(
+            UniverseLogger.event(
                 f"TIME={t['tick']}  PRESSURE={t['pressure']:.2f}  ENERGY={self.energy_pool:.2f}"
             )
 
@@ -393,12 +393,12 @@ class Universe:
                 "expanded": True
             }
         }
-        print("time and space are bound into spacetime")
+        UniverseLogger.event("time and space are bound into spacetime")
 
     def tick_spacetime(self):
 
         if "spacetime" not in self.world:
-            print("No spacetime bound yet")
+            UniverseLogger.event("No spacetime bound yet")
             return
 
 
@@ -413,7 +413,7 @@ class Universe:
                 curvature_delta = gravity["curvature_effect"] * gravity["strength"]
                 spacetime["curvature"] += curvature_delta
 
-                print(
+                UniverseLogger.event(
                  f"SPACETIME TICK={spacetime['time_axis']['tick']} "
                  f"DELTA={curvature_delta:.2f} "
                  f"CURVATURE={spacetime['curvature']:.2f}"
@@ -435,7 +435,7 @@ class Universe:
         )
 
         if box is None:
-            print(f"QUANTUM BOX NOT FOUND: {box_id}")
+            UniverseLogger.event(f"QUANTUM BOX NOT FOUND: {box_id}")
             return None
 
         result = box.collapse_state(
@@ -463,7 +463,7 @@ class Universe:
 
             self.quantum_events.append(event)
 
-            print(
+            UniverseLogger.event(
                 f"CAT JUMPS OUT OF QUANTUM BOX: {box.id}"
             )
 
@@ -477,12 +477,12 @@ class Universe:
                 "tick": self.quantum_state["tick_count"]
             }
 
-            print(f"QUANTUM BOX WAS EMPTY: {box.id}")
+            UniverseLogger.event(f"QUANTUM BOX WAS EMPTY: {box.id}")
 
         self.quantum_boxes.remove(box)
         self.statistics.record_quantum_box_disappeared()
 
-        print(f"QUANTUM BOX DISAPPEARED: {box.id}")
+        UniverseLogger.event(f"QUANTUM BOX DISAPPEARED: {box.id}")
 
         return event
 
@@ -491,7 +491,7 @@ class Universe:
         self.quantum_boxes.append(box)
         self.statistics.record_quantum_box_created()
 
-        print(
+        UniverseLogger.event(
             f"QUANTUM BOX CREATED: {box.id} "
             f"AT x={box.position['x']:.3f} "
             f"y={box.position['y']:.3f} "
@@ -568,12 +568,12 @@ class Universe:
 
                 self.quantum_events.append(event)
 
-                print(
+                UniverseLogger.event(
                     f"CAT MANIFESTS FROM SPONTANEOUS "
                     f"QUANTUM COLLAPSE: {box.id}"
                 )
             else:
-                print(
+                UniverseLogger.event(
                     f"SPONTANEOUSLY COLLAPSED BOX WAS EMPTY: "
                     f"{box.id}"
                 )
@@ -581,11 +581,11 @@ class Universe:
             self.quantum_boxes.remove(box)
             self.statistics.record_quantum_box_disappeared()
 
-            print(
+            UniverseLogger.event(
                 f"QUANTUM BOX DISAPPEARED: {box.id}"
             )
 
-        print(
+        UniverseLogger.event(
             f"QUANTUM TICK "
             f"FLUCTUATION={self.quantum_state['fluctuation']:.2f} "
             f"UNCERTAINTY={self.quantum_state['uncertainty']:.3f} "
@@ -634,7 +634,7 @@ class Universe:
 
         last_snapshot = self.universe_history[-1]
 
-        print(
+        UniverseLogger.event(
             f"UNIVERSE TICK={self.universe_tick} "
             f"HISTORY={len(self.universe_history)} "
             f"MODEL={last_snapshot.get('physics_model', 'unknown')} "
@@ -655,4 +655,7 @@ class Universe:
         )
 
 
-        print("universe tick complete")
+        UniverseLogger.event("universe tick complete")
+
+
+

@@ -1,36 +1,33 @@
-﻿from universe.universe import Universe
-from universe.layerRegistry import LayerRegistry
+﻿from universe.layerRegistry import LayerRegistry
 from meeting_place.meeting_place import MeetingPlace
 from library import Library
 from root_universe import RootUniverse
 from idea_universe import IdeaUniverse
-from multiverse import UniverseRegistry
 from core.transitions.root_transition import RootTransition
 
 
 class UniverseBootstrap:
 
+    def __init__(self, universe_registry, universe):
+        self.universe_registry = universe_registry
+        self.universe = universe
+
     def run(self):
-        universe_registry = UniverseRegistry()
+        self.universe.universe_registry = self.universe_registry
 
-        universe = Universe()
-        universe.universe_registry = universe_registry
-
-        universe.enable_quantum_layer()
-        universe.boot_physics()
+        self.universe.enable_quantum_layer()
+        self.universe.boot_physics()
 
         root_transition = RootTransition()
 
         layers = LayerRegistry()
-        layers.register("meeting", MeetingPlace(universe))
-        layers.register("library", Library(universe))
+        layers.register("meeting", MeetingPlace(self.universe))
+        layers.register("library", Library(self.universe))
 
-        idea_universe = IdeaUniverse(universe)
-        layers.register("root_universe", RootUniverse(universe))
+        idea_universe = IdeaUniverse(self.universe)
+        layers.register("root_universe", RootUniverse(self.universe))
 
         return (
-            universe_registry,
-            universe,
             root_transition,
             layers,
             idea_universe

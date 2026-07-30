@@ -1,3 +1,4 @@
+﻿from universe.logger import UniverseLogger
 import random
 
 
@@ -24,24 +25,24 @@ class BarTerminals:
             }
         }
 
-        print("BAR TERMINALS CREATED")
+        UniverseLogger.event("BAR TERMINALS CREATED")
 
     def show_book_count(self, library):
         books = library.read_books("meeting_place")
         count = len(books)
 
-        print(f"BOOK COUNT TERMINAL: {count}")
+        UniverseLogger.event(f"BOOK COUNT TERMINAL: {count}")
         return count
 
     def show_bar_story_count(self, bar_counter):
         stories = bar_counter.read_bar_stories()
         count = len(stories)
 
-        print(f"BAR STORY COUNT TERMINAL: {count}")
+        UniverseLogger.event(f"BAR STORY COUNT TERMINAL: {count}")
         return count
 
     def show_book_search_placeholder(self):
-        print("BOOK SEARCH TERMINAL: reservation system pending")
+        UniverseLogger.event("BOOK SEARCH TERMINAL: reservation system pending")
         return None
 
     def show_random_excerpt(self, library):
@@ -49,11 +50,11 @@ class BarTerminals:
         excerpts = self._collect_excerpts(books)
 
         if not excerpts:
-            print("RANDOM EXCERPT TERMINAL: no excerpts available")
+            UniverseLogger.event("RANDOM EXCERPT TERMINAL: no excerpts available")
             return None
 
         excerpt = random.choice(excerpts)
-        print(f"RANDOM EXCERPT TERMINAL: {excerpt}")
+        UniverseLogger.event(f"RANDOM EXCERPT TERMINAL: {excerpt}")
         return excerpt
 
     def _collect_excerpts(self, books):
@@ -80,4 +81,5 @@ class BarTerminals:
                 continue
 
         return excerpts
+
 

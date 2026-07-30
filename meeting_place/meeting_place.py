@@ -1,3 +1,5 @@
+from universe.logger import UniverseLogger
+
 from .bartender import Bartender
 from .terminals import BarTerminals
 from .bar_counter import BarCounter
@@ -104,7 +106,7 @@ class MeetingPlace:
 
         self.universe.world["meeting_place"] = self.state
 
-        print("MEETING PLACE INITIALIZED")
+        UniverseLogger.boot("MEETING PLACE INITIALIZED")
 
     def can_enter(self, entity_name):
         return self.permissions.get(entity_name) == "enter"
@@ -116,7 +118,7 @@ class MeetingPlace:
             self.bar_counter.red_button.clear_alarm()
 
         if not self.bouncer.can_enter(entity):
-            print(f"MEETING PLACE ENTRY DENIED BY BOUNCER: {entity_name}")
+            UniverseLogger.event(f"MEETING PLACE ENTRY DENIED BY BOUNCER: {entity_name}")
             return
 
         self.bartender.prepare_for_guest()
@@ -125,14 +127,19 @@ class MeetingPlace:
         entity["current_layer"] = "meeting_place"
         self.universe.world["meeting_place"]["entities"] = self.entities
 
-        print(f"MEETING PLACE: entity joined {entity_name}")
+        UniverseLogger.event(f"MEETING PLACE: entity joined {entity_name}")
         self.emit_event(f"{entity_name} arrived at the bar")
-        self.bartender.guest_arrives(entity_name)
-
         if self._is_cat(entity):
             self.universe.statistics.record_cat_arrived()
             self.geometry_terminal.cat_arrived(entity_name)
-            self.handle_cat_after_entry(entity)
+
+            if self.bartender.knows_guest(entity_name):
+                self.bartender.guest_arrives(entity_name)
+            else:
+                self.handle_cat_after_entry(entity)
+                self.bartender.remember_guest(entity_name)
+        else:
+            self.bartender.guest_arrives(entity_name)
 
     def emit_event(self, event):
         self.events.append(event)
@@ -146,7 +153,7 @@ class MeetingPlace:
         self.bartender.observe_event(event)
         self.show_bar_story_count()
 
-        print(f"MEETING PLACE EVENT: {event}")
+        UniverseLogger.event(f"MEETING PLACE EVENT: {event}")
 
     def guest_asks_about_dice_vial(self, guest_name):
         self.emit_event(f"{guest_name} asked about the dice vial")
@@ -294,7 +301,7 @@ class MeetingPlace:
 
     def tick(self):
         self.tick_count += 1
-        print(f"MEETING PLACE TICK {self.tick_count}")
+        UniverseLogger.event(f"MEETING PLACE TICK {self.tick_count}")
         self.bartender.idle_work()
         self._clear_events()
 
@@ -367,3 +374,5 @@ class MeetingPlace:
         b.energy += transfer
 
         self.emit_event(f"{a.name} -> {b.name} energy transfer {transfer}")
+
+

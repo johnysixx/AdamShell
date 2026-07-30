@@ -1,4 +1,5 @@
-﻿from cats import Cats
+﻿from universe.logger import UniverseLogger
+from cats import Cats
 from gods import Gods
 from idea_entities import IdeaEntities
 
@@ -62,7 +63,7 @@ class EntityBootstrap:
         self.universe.world["god"] = self.god
         self.universe.create_entity("god")
 
-        print("God entity created from Gods layer")
+        UniverseLogger.boot("God entity created from Gods layer")
 
 
     def _create_pazuzu(self):
@@ -90,7 +91,7 @@ class EntityBootstrap:
         self.universe.create_entity("pazuzu")
         self.universe.world["classical_probe_debug_entity"] = self.pazuzu
 
-        print("Pazuzu created as black cat")
+        UniverseLogger.boot("Pazuzu created as black cat")
 
 
     def _create_serpent(self):
@@ -128,16 +129,13 @@ class EntityBootstrap:
         self.universe.create_entity("serpent")
         self.idea_universe.add_entity(self.serpent)
 
-        print("Serpent created as idea entity")
+        UniverseLogger.boot("Serpent created as idea entity")
 
         serpent_can_create_transition = self.root_transition.can_create(
             self.serpent
         )
 
-        print(
-            "SERPENT CAN CREATE ROOT TRANSITION:",
-            serpent_can_create_transition
-        )
+        UniverseLogger.boot(f"SERPENT CAN CREATE ROOT TRANSITION: {serpent_can_create_transition}")
 
 
     def _create_lilith(self):
@@ -173,7 +171,7 @@ class EntityBootstrap:
         self.universe.world["lilith"] = self.lilith
         self.universe.create_entity("lilith")
 
-        print("Lilith created as idea entity")
+        UniverseLogger.boot("Lilith created as idea entity")
 
 
     def _create_pazuzu_masculine_principle(self):
@@ -219,7 +217,7 @@ class EntityBootstrap:
             self.pazuzu_masculine_principle
         )
 
-        print("Pazuzu masculine principle created as idea entity")
+        UniverseLogger.boot("Pazuzu masculine principle created as idea entity")
 
 
     def _record_first_fire_interaction(self):
@@ -233,4 +231,7 @@ class EntityBootstrap:
             state="unresolved",
             meaning=None
         )
+
+
+
 

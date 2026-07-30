@@ -1,3 +1,5 @@
+from universe.logger import UniverseLogger
+
 class BarStoryBook:
 
     def __init__(self):
@@ -6,7 +8,7 @@ class BarStoryBook:
         self.location = "under_bar_counter"
         self.entries = []
 
-        print("BAR STORY BOOK CREATED")
+        UniverseLogger.boot("BAR STORY BOOK CREATED")
 
     def write_entry(self, event):
         self.entries.append(event)
@@ -26,7 +28,7 @@ class BarCounter:
         self.type = "bar_furniture"
         self.state = "created"
 
-        print("BAR COUNTER CREATED")
+        UniverseLogger.boot("BAR COUNTER CREATED")
 
         self.hidden_story_book = BarStoryBook()
 
@@ -37,7 +39,7 @@ class BarCounter:
             "visible_use": "wiping_bar"
         }
 
-        print("BAR CLOTH PLACED UNDER BAR COUNTER")
+        UniverseLogger.boot("BAR CLOTH PLACED UNDER BAR COUNTER")
 
         self.red_button = RedButton()
 
@@ -49,7 +51,7 @@ class BarCounter:
             "intended_use": "serving_milk_to_cats"
         }
 
-        print("MILK BOWL PLACED UNDER BAR COUNTER NEXT TO BAR CLOTH")
+        UniverseLogger.boot("MILK BOWL PLACED UNDER BAR COUNTER NEXT TO BAR CLOTH")
 
     def write_bar_story(self, event):
         self.hidden_story_book.write_entry(event)

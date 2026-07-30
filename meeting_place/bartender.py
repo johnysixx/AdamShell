@@ -1,3 +1,5 @@
+from universe.logger import UniverseLogger
+
 class Bartender:
 
     def __init__(self, story_book, name="bartender"):
@@ -16,12 +18,13 @@ class Bartender:
         self.event_memory = []
         self.regular_drinks = {}
         self.known_histories = {}
+        self.known_guests = set()
 
         self.current_task = "wiping_glasses"
         self.glasses_clean = False
         self.bar_counter_clean = False
 
-        print("BARTENDER CREATED")
+        UniverseLogger.boot("BARTENDER CREATED")
 
     def respond_to_red_button_alarm(
         self,
@@ -29,31 +32,37 @@ class Bartender:
         available=True
     ):
         if not red_button.alarm_active:
-            print("BARTENDER HEARS NO RED BUTTON ALARM")
+            UniverseLogger.event("BARTENDER HEARS NO RED BUTTON ALARM")
             return False
 
         if not available:
-            print("BARTENDER DOES NOT RESPOND TO RED BUTTON ALARM")
+            UniverseLogger.event("BARTENDER DOES NOT RESPOND TO RED BUTTON ALARM")
             return False
 
-        print("BARTENDER RESPONDS TO RED BUTTON ALARM")
+        UniverseLogger.event("BARTENDER RESPONDS TO RED BUTTON ALARM")
         return red_button.press()
 
     def observe_event(self, event):
         self.event_memory.append(event)
         self.story_book.write_entry(event)
-        print(f"BARTENDER OBSERVED EVENT: {event}")
+        UniverseLogger.event(f"BARTENDER OBSERVED EVENT: {event}")
+
+    def knows_guest(self, guest_name):
+        return guest_name in self.known_guests
+
+    def remember_guest(self, guest_name):
+        self.known_guests.add(guest_name)
 
     def guest_arrives(self, guest_name):
         if self.knows_drink(guest_name):
             drink = self.regular_drinks[guest_name]
-            print(f"BARTENDER ASKS: {guest_name}, do you want your usual {drink}?")
+            UniverseLogger.event(f"BARTENDER ASKS: {guest_name}, do you want your usual {drink}?")
             return
 
-        print(f"BARTENDER ASKS: {guest_name}, what would you like to drink?")
+        UniverseLogger.event(f"BARTENDER ASKS: {guest_name}, what would you like to drink?")
 
     def answer_about_dice_vial(self, guest_name):
-        print(
+        UniverseLogger.event(
             "BARTENDER ANSWERS: "
             "It is just a kind of dice. It was here before me."
         )
@@ -61,10 +70,10 @@ class Bartender:
     def remember_first_order(self, guest_name, drink_name):
         if guest_name not in self.regular_drinks:
             self.regular_drinks[guest_name] = drink_name
-            print(f"BARTENDER REMEMBERED FIRST ORDER: {guest_name} drinks {drink_name}")
+            UniverseLogger.event(f"BARTENDER REMEMBERED FIRST ORDER: {guest_name} drinks {drink_name}")
             return
 
-        print(f"BARTENDER ALREADY KNOWS: {guest_name} drinks {self.regular_drinks[guest_name]}")
+        UniverseLogger.event(f"BARTENDER ALREADY KNOWS: {guest_name} drinks {self.regular_drinks[guest_name]}")
 
     def knows_drink(self, guest_name):
         return guest_name in self.regular_drinks
@@ -75,7 +84,7 @@ class Bartender:
         event = f"{guest_name} ordered {drink_name}"
         self.observe_event(event)
 
-        print(f"BARTENDER MIXES DRINK: {drink_name} for {guest_name}")
+        UniverseLogger.event(f"BARTENDER MIXES DRINK: {drink_name} for {guest_name}")
 
     def pour_drink(self, guest_name, drink, serving_object):
         drink_name = self.get_drink_name(drink)
@@ -90,7 +99,7 @@ class Bartender:
         event = f"{guest_name} was served {drink_name} in {serving_object_name}"
         self.observe_event(event)
 
-        print(
+        UniverseLogger.event(
             f"BARTENDER POURS DRINK: "
             f"{drink_name} into {serving_object_name} for {guest_name}"
         )
@@ -107,17 +116,17 @@ class Bartender:
         if not self.glasses_clean:
             self.current_task = "wiping_glasses"
             self.glasses_clean = True
-            print("BARTENDER WIPES ALL GLASSES")
+            UniverseLogger.event("BARTENDER WIPES ALL GLASSES")
             return
 
         if not self.bar_counter_clean:
             self.current_task = "wiping_bar_counter"
             self.bar_counter_clean = True
-            print("BARTENDER WIPES BAR COUNTER")
+            UniverseLogger.event("BARTENDER WIPES BAR COUNTER")
             return
 
         self.current_task = "observing_bar"
-        print("BARTENDER OBSERVES THE BAR")
+        UniverseLogger.event("BARTENDER OBSERVES THE BAR")
 
     def read_universe_manual(self, universe_manual):
         return universe_manual.read(self)
@@ -132,7 +141,7 @@ class Bartender:
 
         self.current_location = back_room.name
 
-        print("BARTENDER ENTERS BACK ROOM")
+        UniverseLogger.event("BARTENDER ENTERS BACK ROOM")
 
         return True
 
@@ -154,7 +163,7 @@ class Bartender:
 
         self.current_task = "sleeping"
 
-        print("BARTENDER SLEEPS IN BACK ROOM")
+        UniverseLogger.event("BARTENDER SLEEPS IN BACK ROOM")
 
         return True
 
@@ -163,8 +172,8 @@ class Bartender:
         self.current_task = "wiping_glasses"
         self.glasses_clean = False
 
-        print("BARTENDER APPEARS BEHIND THE BAR")
-        print("BARTENDER POLISHES A GLASS")
+        UniverseLogger.event("BARTENDER APPEARS BEHIND THE BAR")
+        UniverseLogger.event("BARTENDER POLISHES A GLASS")
 
     def serve_without_order(
             self,
@@ -188,10 +197,11 @@ class Bartender:
 
         self.observe_event(event)
 
-        print(
+        UniverseLogger.event(
             f"BARTENDER SERVES WITHOUT ORDER: "
             f"{drink_name} into {serving_object_name} "
             f"for {guest_name}"
         )
 
         return serving_object
+

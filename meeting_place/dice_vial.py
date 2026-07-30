@@ -1,3 +1,4 @@
+from universe.logger import UniverseLogger
 import random
 
 
@@ -37,8 +38,8 @@ class DiceVial:
         self._secret_roll = None
         self._secret_event = None
 
-        print("DICE VIAL CREATED")
-        print("D20 FLOATS IN GLOWING OILY LIQUID")
+        UniverseLogger.boot("DICE VIAL CREATED")
+        UniverseLogger.boot("D20 FLOATS IN GLOWING OILY LIQUID")
 
     def roll_secretly(self, rng=None):
         rng = rng or random

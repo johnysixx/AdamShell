@@ -1,4 +1,6 @@
-﻿class RedButton:
+from universe.logger import UniverseLogger
+
+class RedButton:
 
     def __init__(self):
         self.name = "red_button"
@@ -7,21 +9,21 @@
         self.alarm_active = False
         self.red_light_on = False
         self.horn_active = False
-        print("RED BUTTON INSTALLED ON BAR COUNTER")
+        UniverseLogger.boot("RED BUTTON INSTALLED ON BAR COUNTER")
 
     def activate_alarm(self):
         self.alarm_active = True
         self.red_light_on = True
         self.horn_active = True
 
-        print("RED BUTTON ALARM ACTIVATED")
+        UniverseLogger.event("RED BUTTON ALARM ACTIVATED")
 
     def press(self):
         if not self.alarm_active:
-            print("RED BUTTON PRESS IGNORED: NO ACTIVE ALARM")
+            UniverseLogger.event("RED BUTTON PRESS IGNORED: NO ACTIVE ALARM")
             return False
 
-        print("RED BUTTON PRESSED")
+        UniverseLogger.event("RED BUTTON PRESSED")
         self.clear_alarm()
         return True
 
@@ -30,7 +32,7 @@
         self.red_light_on = False
         self.horn_active = False
 
-        print("RED BUTTON ALARM CLEARED")
+        UniverseLogger.event("RED BUTTON ALARM CLEARED")
 
     @property
     def public_state(self):

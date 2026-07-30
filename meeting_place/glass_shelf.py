@@ -1,3 +1,5 @@
+from universe.logger import UniverseLogger
+
 class GlassShelf:
 
     def __init__(self):
@@ -8,7 +10,7 @@ class GlassShelf:
         self.reserved_glasses = []
         self.shared_glasses = []
 
-        print("GLASS SHELF CREATED BEHIND BAR")
+        UniverseLogger.boot("GLASS SHELF CREATED BEHIND BAR")
 
     def register_policy_decision(self, decision):
         glass_mode = decision.get("glass_mode")
@@ -49,7 +51,7 @@ class GlassShelf:
 
         self.personal_glasses[entity_id] = glass
 
-        print(
+        UniverseLogger.boot(
             f"PERSONAL GLASS CREATED: "
             f"{glass['name']}"
         )
@@ -78,7 +80,7 @@ class GlassShelf:
 
         self.reserved_glasses.append(glass)
 
-        print(
+        UniverseLogger.boot(
             f"UNNAMED RESERVED GLASS CREATED: "
             f"reservation_{reservation_number}"
         )
@@ -100,7 +102,7 @@ class GlassShelf:
 
         self.shared_glasses.append(glass)
 
-        print(
+        UniverseLogger.boot(
             f"SHARED GLASS CREATED: "
             f"{glass['name']}"
         )

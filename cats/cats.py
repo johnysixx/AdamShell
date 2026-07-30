@@ -1,3 +1,5 @@
+﻿from universe.logger import UniverseLogger
+
 class Cats:
 
     def __init__(self, universe):
@@ -79,8 +81,8 @@ class Cats:
             "cats": self.cats
         }
 
-        print("CATS CREATED")
-        print("CATS ACCESS: anywhere via boxes and cat doors")
+        UniverseLogger.boot("CATS CREATED")
+        UniverseLogger.boot("CATS ACCESS: anywhere via boxes and cat doors")
 
     def create_cat(
             self,
@@ -93,23 +95,23 @@ class Cats:
             origin="manual_creation"
     ):
         if color not in self.allowed_colors:
-            print(f"CAT CREATION DENIED: invalid color {color}")
+            UniverseLogger.event(f"CAT CREATION DENIED: invalid color {color}")
             return None
 
         if fur_length not in self.allowed_fur_lengths:
-            print(f"CAT CREATION DENIED: invalid fur length {fur_length}")
+            UniverseLogger.event(f"CAT CREATION DENIED: invalid fur length {fur_length}")
             return None
 
         if pattern not in self.allowed_patterns:
-            print(f"CAT CREATION DENIED: invalid pattern {pattern}")
+            UniverseLogger.event(f"CAT CREATION DENIED: invalid pattern {pattern}")
             return None
 
         if eye_color not in self.allowed_eye_colors:
-            print(f"CAT CREATION DENIED: invalid eye color {eye_color}")
+            UniverseLogger.event(f"CAT CREATION DENIED: invalid eye color {eye_color}")
             return None
 
         if sex not in self.allowed_sexes:
-            print(f"CAT CREATION DENIED: invalid sex {sex}")
+            UniverseLogger.event(f"CAT CREATION DENIED: invalid sex {sex}")
             return None
 
         cat = {
@@ -130,7 +132,7 @@ class Cats:
         self.cats.append(cat)
         self.universe.world["cats"]["cats"] = self.cats
 
-        print(f"CAT CREATED: {name}")
+        UniverseLogger.event(f"CAT CREATED: {name}")
         return cat
 
     def can_travel(self, cat, via):
@@ -146,13 +148,14 @@ class Cats:
 
     def emit_event(self, event):
         self.events.append(event)
-        print(f"CATS EVENT: {event}")
+        UniverseLogger.event(f"CATS EVENT: {event}")
 
     def tick(self):
         self.tick_count += 1
-        print(f"CATS TICK {self.tick_count}")
+        UniverseLogger.event(f"CATS TICK {self.tick_count}")
         self._clear_events()
 
     def _clear_events(self):
         self.events = []
+
 

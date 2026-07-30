@@ -1,3 +1,5 @@
+from universe.logger import UniverseLogger
+
 class DiceBox:
 
     def __init__(self):
@@ -24,7 +26,7 @@ class DiceBox:
             "visibility_scope": "inside_bar_only"
         }
 
-        print("DICE BOX PLACED ON BAR COUNTER")
+        UniverseLogger.boot("DICE BOX PLACED ON BAR COUNTER")
 
     def answer_about_contents(self):
         return "dice"
@@ -41,7 +43,7 @@ class DiceBox:
         if die not in self.public_state["missing"]:
             self.public_state["missing"].append(die)
 
-        print(
+        UniverseLogger.event(
             f"DIE MISSING FROM BOX: {die}"
         )
 

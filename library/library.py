@@ -1,3 +1,5 @@
+﻿from universe.logger import UniverseLogger
+
 class Library:
 
     def __init__(self, universe):
@@ -33,7 +35,7 @@ class Library:
         }
 
         self.universe.world["library"] = self.state
-        print("LIBRARY INITIALIZED")
+        UniverseLogger.boot("LIBRARY INITIALIZED")
 
     def can_read(self, entity_name):
         return self.permissions.get(entity_name) in ["read", "write"]
@@ -43,29 +45,30 @@ class Library:
 
     def add_book(self, entity_name, book):
         if not self.can_write(entity_name):
-            print(f"LIBRARY WRITE DENIED: {entity_name}")
+            UniverseLogger.event(f"LIBRARY WRITE DENIED: {entity_name}")
             return
 
         self.books.append(book)
-        print(f"BOOK ADDED: {book['title']}")
+        UniverseLogger.event(f"BOOK ADDED: {book['title']}")
 
     def read_books(self, entity_name):
         if not self.can_read(entity_name):
-            print(f"LIBRARY READ DENIED: {entity_name}")
+            UniverseLogger.event(f"LIBRARY READ DENIED: {entity_name}")
             return []
 
-        print(f"LIBRARY READ GRANTED: {entity_name}")
+        UniverseLogger.event(f"LIBRARY READ GRANTED: {entity_name}")
         return self.books
 
     def emit_event(self, event):
         self.events.append(event)
-        print(f"LIBRARY EVENT: {event}")
+        UniverseLogger.event(f"LIBRARY EVENT: {event}")
 
     def tick(self):
         self.tick_count += 1
-        print(f"LIBRARY TICK {self.tick_count}")
+        UniverseLogger.event(f"LIBRARY TICK {self.tick_count}")
         self._clear_events()
 
     def _clear_events(self):
         self.events = []
+
 
