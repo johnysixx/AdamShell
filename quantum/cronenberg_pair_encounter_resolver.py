@@ -99,6 +99,12 @@ class CronenbergPairEncounterResolver:
                 "result": deepcopy(result)
             })
 
+            if effect in {
+                "quantum_merge",
+                "quantum_pair_consumption"
+            }:
+                break
+
         resolution = {
             "name": (
                 "cronenberg_quantum_pair_encounter_resolved"
