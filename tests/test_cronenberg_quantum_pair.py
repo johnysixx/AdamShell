@@ -125,6 +125,80 @@ class CronenbergQuantumPairTests(unittest.TestCase):
             original.quantum_state["pair_id"]
         )
 
+    def test_tick_entities_detects_and_resolves_encounter(self):
+        universe, original, counterpart = (
+            self.create_pair()
+        )
+
+        original.location = "stable_kernel"
+        counterpart.location = "stable_kernel"
+
+        calls = []
+
+        original.tick = lambda current_universe: None
+        counterpart.tick = lambda current_universe: None
+
+        def fake_resolve(**kwargs):
+            calls.append(
+                kwargs["encounter_event"]["pair_id"]
+            )
+
+            return {
+                "name": "tick_resolution",
+                "effect": "both_survive"
+            }
+
+        universe.cronenberg_pair_encounter_resolver.resolve = (
+            fake_resolve
+        )
+
+        universe.tick_entities()
+
+        self.assertEqual(
+            len(calls),
+            1
+        )
+
+        self.assertEqual(
+            universe.cronenberg_pair_encounter
+            .public_state[
+                "encounter_count"
+            ],
+            1
+        )
+
+        encounter_event = (
+            universe.quantum_events[-1]
+        )
+
+        self.assertEqual(
+            encounter_event["location"],
+            "stable_kernel"
+        )
+
+        self.assertEqual(
+            encounter_event["resolution"],
+            {
+                "name": "tick_resolution",
+                "effect": "both_survive"
+            }
+        )
+
+        universe.tick_entities()
+
+        self.assertEqual(
+            len(calls),
+            1
+        )
+
+        self.assertEqual(
+            universe.cronenberg_pair_encounter
+            .public_state[
+                "encounter_count"
+            ],
+            1
+        )
+
     def test_automatic_encounter_resolution_runs_once(self):
         universe, original, counterpart = (
             self.create_pair()
