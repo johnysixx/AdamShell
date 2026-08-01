@@ -10,6 +10,7 @@ from universe.quantum_universe_space import QuantumUniverseSpace
 from universe.big_bang import BigBang
 from core.entity.quantum_box import QuantumBox
 from universe.universe_statistics import UniverseStatistics
+from universe.cronenberg_population_statistics import CronenbergPopulationStatistics
 from universe.logger import UniverseLogger
 from core.entity.cronenberg import Cronenberg
 from quantum.error_boundary import QuantumErrorBoundary
@@ -94,6 +95,10 @@ class Universe:
         )
 
         self.statistics = UniverseStatistics()
+
+        self.cronenberg_population_statistics = (
+            CronenbergPopulationStatistics(self)
+        )
 
         self.quantum_state = {
             "enabled": False,
@@ -1553,6 +1558,9 @@ class Universe:
         self.tick_quantum_unprotected()
         self.update_physics()
         self.tick_entities()
+
+        self.cronenberg_population_statistics.record_snapshot()
+
         self.record_universe_state()
 
         last_snapshot = self.universe_history[-1]
