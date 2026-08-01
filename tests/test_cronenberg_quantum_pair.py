@@ -520,6 +520,13 @@ class CronenbergQuantumPairTests(unittest.TestCase):
             ]
         )
 
+        self.assertEqual(
+            result["skipped_effects"],
+            [
+                "quantum_pair_consumption"
+            ]
+        )
+
         self.assertFalse(original.active)
         self.assertFalse(counterpart.active)
 

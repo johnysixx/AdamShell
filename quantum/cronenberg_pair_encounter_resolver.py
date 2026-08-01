@@ -45,8 +45,11 @@ class CronenbergPairEncounterResolver:
         )
 
         resolved_effects = []
+        skipped_effects = []
 
-        for effect in selected_effects:
+        for effect_index, effect in enumerate(
+            selected_effects
+        ):
             if effect == "both_survive":
                 result = self._both_survive(
                     first,
@@ -103,6 +106,11 @@ class CronenbergPairEncounterResolver:
                 "quantum_merge",
                 "quantum_pair_consumption"
             }:
+                skipped_effects.extend(
+                    selected_effects[
+                        effect_index + 1:
+                    ]
+                )
                 break
 
         resolution = {
@@ -116,6 +124,7 @@ class CronenbergPairEncounterResolver:
             "location": encounter_event["location"],
             "selected_effects": selected_effects,
             "resolved_effects": resolved_effects,
+            "skipped_effects": skipped_effects,
             "universe_tick": encounter_event.get(
                 "universe_tick"
             )
