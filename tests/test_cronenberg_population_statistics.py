@@ -7,6 +7,84 @@ class CronenbergPopulationStatisticsTests(
     unittest.TestCase
 ):
 
+    def test_population_pressure_and_delta(self):
+        universe = Universe()
+
+        statistics = (
+            universe
+            .cronenberg_population_statistics
+        )
+
+        first_record = (
+            statistics.record_snapshot()
+        )
+
+        self.assertEqual(
+            first_record["snapshot"][
+                "population_pressure"
+            ],
+            0
+        )
+
+        self.assertEqual(
+            first_record["delta"][
+                "population_pressure_delta"
+            ],
+            0
+        )
+
+        original = (
+            universe
+            .create_cronenberg_from_quantum_error(
+                RuntimeError("test"),
+                "test",
+                "population_pressure"
+            )
+        )
+
+        universe.create_cronenberg_quantum_counterpart(
+            original
+        )
+
+        second_record = (
+            statistics.record_snapshot()
+        )
+
+        self.assertEqual(
+            second_record["snapshot"][
+                "active_count"
+            ],
+            2
+        )
+
+        self.assertEqual(
+            second_record["snapshot"][
+                "active_quantum_pair_count"
+            ],
+            1
+        )
+
+        self.assertAlmostEqual(
+            second_record["snapshot"][
+                "total_active_energy"
+            ],
+            2.0
+        )
+
+        self.assertAlmostEqual(
+            second_record["snapshot"][
+                "population_pressure"
+            ],
+            5.0
+        )
+
+        self.assertAlmostEqual(
+            second_record["delta"][
+                "population_pressure_delta"
+            ],
+            5.0
+        )
+
     def test_universe_tick_records_population_delta(self):
         universe = Universe()
 

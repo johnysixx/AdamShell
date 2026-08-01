@@ -63,6 +63,22 @@ class CronenbergPopulationStatistics:
             == "born_from_quantum_pair_consumption"
         ]
 
+        total_active_size = sum(
+            float(cronenberg.size)
+            for cronenberg in active
+        )
+
+        total_active_energy = sum(
+            float(cronenberg.energy)
+            for cronenberg in active
+        )
+
+        population_pressure = (
+            len(active)
+            + len(active_pair_ids)
+            + total_active_energy
+        )
+
         return {
             "name": self.name,
             "type": self.type,
@@ -87,13 +103,14 @@ class CronenbergPopulationStatistics:
             "recombined_count": len(
                 recombined
             ),
-            "total_active_size": sum(
-                float(cronenberg.size)
-                for cronenberg in active
+            "total_active_size": (
+                total_active_size
             ),
-            "total_active_energy": sum(
-                float(cronenberg.energy)
-                for cronenberg in active
+            "total_active_energy": (
+                total_active_energy
+            ),
+            "population_pressure": (
+                population_pressure
             )
         }
 
@@ -114,7 +131,8 @@ class CronenbergPopulationStatistics:
             "merged_count",
             "recombined_count",
             "total_active_size",
-            "total_active_energy"
+            "total_active_energy",
+            "population_pressure"
         )
 
         delta = {}
