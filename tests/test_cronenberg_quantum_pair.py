@@ -227,6 +227,110 @@ class CronenbergQuantumPairTests(unittest.TestCase):
             2
         )
 
+    def test_tick_entities_does_not_redetect_destroyed_pair(self):
+        universe, original, counterpart = (
+            self.create_pair()
+        )
+
+        original.location = "shared_kernel"
+        counterpart.location = "shared_kernel"
+
+        original.tick = lambda current_universe: None
+        counterpart.tick = lambda current_universe: None
+
+        calls = []
+
+        original_resolve = (
+            universe
+            .cronenberg_pair_encounter_resolver
+            .resolve
+        )
+
+        def merge_only_resolve(**kwargs):
+            calls.append(
+                kwargs["encounter_event"]["pair_id"]
+            )
+
+            class MergeOnlyRng:
+
+                def random(self):
+                    return 0.1
+
+                def sample(
+                    self,
+                    population,
+                    count
+                ):
+                    return [
+                        "quantum_merge"
+                    ]
+
+            return original_resolve(
+                first=kwargs["first"],
+                second=kwargs["second"],
+                encounter_event=(
+                    kwargs["encounter_event"]
+                ),
+                rng=MergeOnlyRng()
+            )
+
+        universe.cronenberg_pair_encounter_resolver.resolve = (
+            merge_only_resolve
+        )
+
+        universe.tick_entities()
+
+        self.assertEqual(
+            len(calls),
+            1
+        )
+
+        self.assertFalse(original.active)
+        self.assertFalse(counterpart.active)
+
+        self.assertEqual(
+            original.state,
+            "quantum_merged"
+        )
+
+        self.assertEqual(
+            counterpart.state,
+            "quantum_merged"
+        )
+
+        self.assertEqual(
+            len(universe.cronenbergs),
+            3
+        )
+
+        merged = universe.cronenbergs[-1]
+
+        self.assertTrue(merged.active)
+
+        self.assertEqual(
+            merged.state,
+            "born_from_quantum_merge"
+        )
+
+        universe.tick_entities()
+
+        self.assertEqual(
+            len(calls),
+            1
+        )
+
+        encounter_events = [
+            event
+            for event in universe.quantum_events
+            if event.get("name")
+            == "cronenberg_quantum_pair_encountered"
+        ]
+
+        self.assertEqual(
+            len(encounter_events),
+            1
+        )
+
     def test_tick_entities_detects_and_resolves_encounter(self):
         universe, original, counterpart = (
             self.create_pair()
