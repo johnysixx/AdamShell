@@ -1,4 +1,4 @@
-﻿from universe.logger import UniverseLogger
+from universe.logger import UniverseLogger
 from .memory import CatMemory
 
 class Cats:
@@ -140,6 +140,72 @@ class Cats:
 
         UniverseLogger.event(f"CAT CREATED: {name}")
         return cat
+
+    def activate_for_cronenberg_overpopulation(
+            self,
+            cat,
+            hunt_quota=10
+    ):
+        if not isinstance(cat, dict):
+            return {
+                "result": "invalid_cat",
+                "activated": False
+            }
+
+        if cat.get("type") != "cat":
+            return {
+                "result": "not_a_cat",
+                "activated": False
+            }
+
+        if not self.can_travel(
+            cat,
+            via="boxes"
+        ):
+            return {
+                "result": "box_travel_unavailable",
+                "activated": False,
+                "cat": cat.get("name")
+            }
+
+        eaten = int(
+            cat.get(
+                "cronenbergs_eaten",
+                0
+            )
+        )
+
+        hunt_quota = int(hunt_quota)
+
+        if eaten < hunt_quota:
+            intent = "hunt_nearest_cronenberg"
+        else:
+            intent = "return_to_bar"
+
+        cat["state"] = (
+            "aware_of_cronenberg_overpopulation"
+        )
+
+        cat["suggested_intent"] = intent
+        cat["hunt_quota"] = hunt_quota
+        cat["overpopulation_response_available"] = True
+
+        event = {
+            "name": (
+                "cat_activated_for_"
+                "cronenberg_overpopulation"
+            ),
+            "cat": cat.get("name"),
+            "suggested_intent": intent,
+            "cat_access_unchanged": True,
+            "cronenbergs_eaten": eaten,
+            "hunt_quota": hunt_quota,
+            "activated": True
+        }
+
+        self.emit_event(event)
+
+        return event
 
     def can_travel(self, cat, via):
             if cat.get("type") != "cat":

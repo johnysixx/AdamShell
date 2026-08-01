@@ -6,6 +6,7 @@ class CronenbergPopulationStatistics:
         self.universe = universe
         self.history = []
         self.pressure_transition_history = []
+        self.critical_pressure_streak = 0
 
     def snapshot(self):
         cronenbergs = list(
@@ -180,11 +181,23 @@ class CronenbergPopulationStatistics:
                     - previous_snapshot[field]
                 )
 
+        current_level = current[
+            "population_pressure_level"
+        ]
+
+        if current_level == "critical":
+            self.critical_pressure_streak += 1
+        else:
+            self.critical_pressure_streak = 0
+
         record = {
             "tick": getattr(
                 self.universe,
                 "universe_tick",
                 0
+            ),
+            "critical_pressure_streak": (
+                self.critical_pressure_streak
             ),
             "snapshot": current,
             "delta": delta
@@ -193,6 +206,40 @@ class CronenbergPopulationStatistics:
         self.history.append(
             record
         )
+
+        cats_layer = getattr(
+            self.universe,
+            "cats_layer",
+            None
+        )
+
+        existing_cat_count = (
+            len(cats_layer.cats)
+            if cats_layer is not None
+            else 0
+        )
+
+        record["critical_response"] = {
+            "active": (
+                current_level == "critical"
+            ),
+            "critical_pressure_streak": (
+                self.critical_pressure_streak
+            ),
+            "existing_cat_count": (
+                existing_cat_count
+            ),
+            "activate_existing_cats_first": (
+                current_level == "critical"
+                and existing_cat_count > 0
+            ),
+            "overpopulation_reinforcement_allowed": (
+                current_level == "critical"
+                and self.critical_pressure_streak >= 3
+                and existing_cat_count == 0
+            ),
+            "reinforcement_is_last_resort": True
+        }
 
         if previous_snapshot is not None:
             previous_level = previous_snapshot[
@@ -231,10 +278,92 @@ class CronenbergPopulationStatistics:
                 record["pressure_transition"] = (
                     transition_event
                 )
+
+                if current_level in {
+                    "high",
+                    "critical"
+                }:
+                    activated_cats = []
+
+                    if current_level == "critical":
+                        cats_layer = getattr(
+                            self.universe,
+                            "cats_layer",
+                            None
+                        )
+
+                        if cats_layer is not None:
+                            for cat in list(
+                                cats_layer.cats
+                            ):
+                                activation = (
+                                    cats_layer
+                                    .activate_for_cronenberg_overpopulation(
+                                        cat,
+                                        hunt_quota=10
+                                    )
+                                )
+
+                                if activation.get(
+                                    "activated",
+                                    False
+                                ):
+                                    activated_cats.append(
+                                        activation["cat"]
+                                    )
+
+                    warning_event = {
+                        "name": (
+                            "cronenberg_population_"
+                            "pressure_warning"
+                        ),
+                        "tick": record["tick"],
+                        "pressure": current[
+                            "population_pressure"
+                        ],
+                        "pressure_level": (
+                            current_level
+                        ),
+                        "active_count": current[
+                            "active_count"
+                        ],
+                        "active_quantum_pair_count": (
+                            current[
+                                "active_quantum_pair_count"
+                            ]
+                        ),
+                        "bar_assistance_requested": True,
+                        "existing_cats_activated": (
+                            len(activated_cats)
+                        ),
+                        "activated_cat_names": list(
+                            activated_cats
+                        ),
+                        "cat_reinforcements_suggested": (
+                            current_level == "critical"
+                            and not activated_cats
+                        ),
+                        "cat_reinforcement_allowed": (
+                            current_level == "critical"
+                            and self.critical_pressure_streak >= 3
+                        )
+                    }
+
+                    self.universe.quantum_events.append(
+                        warning_event
+                    )
+
+                    record["pressure_warning"] = (
+                        warning_event
+                    )
+                else:
+                    record["pressure_warning"] = None
             else:
                 record["pressure_transition"] = None
+                record["pressure_warning"] = None
         else:
             record["pressure_transition"] = None
+            record["pressure_warning"] = None
 
         return record
 
