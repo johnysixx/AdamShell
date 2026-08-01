@@ -227,6 +227,159 @@ class CronenbergQuantumPairTests(unittest.TestCase):
             2
         )
 
+    def test_tick_entities_does_not_redetect_consumed_pair(self):
+        universe, original, counterpart = (
+            self.create_pair()
+        )
+
+        original.location = "shared_kernel"
+        counterpart.location = "shared_kernel"
+
+        original.size = 1.2
+        original.energy = 0.8
+
+        counterpart.size = 1.5
+        counterpart.energy = 1.2
+
+        original.tick = lambda current_universe: None
+        counterpart.tick = lambda current_universe: None
+
+        calls = []
+
+        original_resolve = (
+            universe
+            .cronenberg_pair_encounter_resolver
+            .resolve
+        )
+
+        def consumption_only_resolve(**kwargs):
+            calls.append(
+                kwargs["encounter_event"]["pair_id"]
+            )
+
+            class ConsumptionOnlyRng:
+
+                def random(self):
+                    return 0.1
+
+                def sample(
+                    self,
+                    population,
+                    count
+                ):
+                    return [
+                        "quantum_pair_consumption"
+                    ]
+
+            return original_resolve(
+                first=kwargs["first"],
+                second=kwargs["second"],
+                encounter_event=(
+                    kwargs["encounter_event"]
+                ),
+                rng=ConsumptionOnlyRng()
+            )
+
+        universe.cronenberg_pair_encounter_resolver.resolve = (
+            consumption_only_resolve
+        )
+
+        energy_pool_before = universe.energy_pool
+
+        dark_energy_before = getattr(
+            universe,
+            "dark_energy",
+            0.0
+        )
+
+        universe.tick_entities()
+
+        self.assertEqual(
+            len(calls),
+            1
+        )
+
+        self.assertFalse(original.active)
+        self.assertFalse(counterpart.active)
+
+        self.assertEqual(
+            original.state,
+            (
+                "destroyed_by_"
+                "quantum_pair_consumption"
+            )
+        )
+
+        self.assertEqual(
+            counterpart.state,
+            (
+                "destroyed_by_"
+                "quantum_pair_consumption"
+            )
+        )
+
+        self.assertEqual(
+            len(universe.cronenbergs),
+            3
+        )
+
+        recombined = universe.cronenbergs[-1]
+
+        self.assertTrue(recombined.active)
+
+        self.assertEqual(
+            recombined.state,
+            (
+                "born_from_"
+                "quantum_pair_consumption"
+            )
+        )
+
+        self.assertAlmostEqual(
+            recombined.size,
+            1.35
+        )
+
+        self.assertAlmostEqual(
+            recombined.energy,
+            0.8
+        )
+
+        self.assertAlmostEqual(
+            universe.energy_pool
+            - energy_pool_before,
+            0.7
+        )
+
+        self.assertAlmostEqual(
+            getattr(
+                universe,
+                "dark_energy",
+                0.0
+            )
+            - dark_energy_before,
+            0.5
+        )
+
+        universe.tick_entities()
+
+        self.assertEqual(
+            len(calls),
+            1
+        )
+
+        encounter_events = [
+            event
+            for event in universe.quantum_events
+            if event.get("name")
+            == "cronenberg_quantum_pair_encountered"
+        ]
+
+        self.assertEqual(
+            len(encounter_events),
+            1
+        )
+
     def test_tick_entities_does_not_redetect_destroyed_pair(self):
         universe, original, counterpart = (
             self.create_pair()
