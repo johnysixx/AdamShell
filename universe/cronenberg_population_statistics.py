@@ -5,6 +5,7 @@ class CronenbergPopulationStatistics:
         self.type = "population_statistics"
         self.universe = universe
         self.history = []
+        self.pressure_transition_history = []
 
     def snapshot(self):
         cronenbergs = list(
@@ -193,7 +194,56 @@ class CronenbergPopulationStatistics:
             record
         )
 
+        if previous_snapshot is not None:
+            previous_level = previous_snapshot[
+                "population_pressure_level"
+            ]
+
+            current_level = current[
+                "population_pressure_level"
+            ]
+
+            if previous_level != current_level:
+                transition_event = {
+                    "name": (
+                        "cronenberg_population_"
+                        "pressure_level_changed"
+                    ),
+                    "tick": record["tick"],
+                    "previous_level": previous_level,
+                    "current_level": current_level,
+                    "previous_pressure": (
+                        previous_snapshot[
+                            "population_pressure"
+                        ]
+                    ),
+                    "current_pressure": (
+                        current[
+                            "population_pressure"
+                        ]
+                    )
+                }
+
+                self.pressure_transition_history.append(
+                    transition_event
+                )
+
+                record["pressure_transition"] = (
+                    transition_event
+                )
+            else:
+                record["pressure_transition"] = None
+        else:
+            record["pressure_transition"] = None
+
         return record
+
+    @property
+    def last_pressure_transition(self):
+        if not self.pressure_transition_history:
+            return None
+
+        return self.pressure_transition_history[-1]
 
     @property
     def last_record(self):

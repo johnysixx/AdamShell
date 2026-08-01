@@ -7,6 +7,112 @@ class CronenbergPopulationStatisticsTests(
     unittest.TestCase
 ):
 
+    def test_pressure_transition_history(self):
+        universe = Universe()
+
+        statistics = (
+            universe
+            .cronenberg_population_statistics
+        )
+
+        first_record = (
+            statistics.record_snapshot()
+        )
+
+        self.assertIsNone(
+            first_record["pressure_transition"]
+        )
+
+        self.assertEqual(
+            len(
+                statistics
+                .pressure_transition_history
+            ),
+            0
+        )
+
+        second_record = (
+            statistics.record_snapshot()
+        )
+
+        self.assertIsNone(
+            second_record["pressure_transition"]
+        )
+
+        self.assertEqual(
+            len(
+                statistics
+                .pressure_transition_history
+            ),
+            0
+        )
+
+        original = (
+            universe
+            .create_cronenberg_from_quantum_error(
+                RuntimeError("test"),
+                "test",
+                "pressure_transition"
+            )
+        )
+
+        universe.create_cronenberg_quantum_counterpart(
+            original
+        )
+
+        third_record = (
+            statistics.record_snapshot()
+        )
+
+        transition = third_record[
+            "pressure_transition"
+        ]
+
+        self.assertIsNotNone(
+            transition
+        )
+
+        self.assertEqual(
+            transition["name"],
+            (
+                "cronenberg_population_"
+                "pressure_level_changed"
+            )
+        )
+
+        self.assertEqual(
+            transition["previous_level"],
+            "low"
+        )
+
+        self.assertEqual(
+            transition["current_level"],
+            "elevated"
+        )
+
+        self.assertAlmostEqual(
+            transition["previous_pressure"],
+            0.0
+        )
+
+        self.assertAlmostEqual(
+            transition["current_pressure"],
+            5.0
+        )
+
+        self.assertEqual(
+            len(
+                statistics
+                .pressure_transition_history
+            ),
+            1
+        )
+
+        self.assertEqual(
+            statistics.last_pressure_transition,
+            transition
+        )
+
     def test_population_pressure_levels(self):
         universe = Universe()
 
