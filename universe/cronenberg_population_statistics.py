@@ -111,8 +111,35 @@ class CronenbergPopulationStatistics:
             ),
             "population_pressure": (
                 population_pressure
+            ),
+            "population_pressure_level": (
+                self.classify_pressure(
+                    population_pressure
+                )
             )
         }
+
+    def classify_pressure(
+        self,
+        pressure=None
+    ):
+        if pressure is None:
+            pressure = self.snapshot()[
+                "population_pressure"
+            ]
+
+        pressure = float(pressure)
+
+        if pressure < 5.0:
+            return "low"
+
+        if pressure < 10.0:
+            return "elevated"
+
+        if pressure < 20.0:
+            return "high"
+
+        return "critical"
 
     def record_snapshot(self):
         current = self.snapshot()

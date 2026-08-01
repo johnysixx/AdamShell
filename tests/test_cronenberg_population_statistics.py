@@ -7,6 +7,87 @@ class CronenbergPopulationStatisticsTests(
     unittest.TestCase
 ):
 
+    def test_population_pressure_levels(self):
+        universe = Universe()
+
+        statistics = (
+            universe
+            .cronenberg_population_statistics
+        )
+
+        self.assertEqual(
+            statistics.classify_pressure(0),
+            "low"
+        )
+
+        self.assertEqual(
+            statistics.classify_pressure(4.99),
+            "low"
+        )
+
+        self.assertEqual(
+            statistics.classify_pressure(5.0),
+            "elevated"
+        )
+
+        self.assertEqual(
+            statistics.classify_pressure(9.99),
+            "elevated"
+        )
+
+        self.assertEqual(
+            statistics.classify_pressure(10.0),
+            "high"
+        )
+
+        self.assertEqual(
+            statistics.classify_pressure(19.99),
+            "high"
+        )
+
+        self.assertEqual(
+            statistics.classify_pressure(20.0),
+            "critical"
+        )
+
+        empty_snapshot = statistics.snapshot()
+
+        self.assertEqual(
+            empty_snapshot[
+                "population_pressure_level"
+            ],
+            "low"
+        )
+
+        original = (
+            universe
+            .create_cronenberg_from_quantum_error(
+                RuntimeError("test"),
+                "test",
+                "pressure_level"
+            )
+        )
+
+        universe.create_cronenberg_quantum_counterpart(
+            original
+        )
+
+        pair_snapshot = statistics.snapshot()
+
+        self.assertAlmostEqual(
+            pair_snapshot[
+                "population_pressure"
+            ],
+            5.0
+        )
+
+        self.assertEqual(
+            pair_snapshot[
+                "population_pressure_level"
+            ],
+            "elevated"
+        )
+
     def test_population_pressure_and_delta(self):
         universe = Universe()
 
