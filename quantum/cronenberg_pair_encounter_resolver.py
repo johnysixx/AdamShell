@@ -12,7 +12,9 @@ class CronenbergPairEncounterResolver:
         "spin_exchange",
         "geometry_shift",
         "property_sum",
-        "property_equalization"
+        "property_equalization",
+        "quantum_merge",
+        "quantum_pair_consumption"
     )
 
     def __init__(self, universe):
@@ -72,6 +74,20 @@ class CronenbergPairEncounterResolver:
             elif effect == "property_equalization":
                 result = self._property_equalization(
                     first,
+                    second
+                )
+
+            elif effect == "quantum_merge":
+                result = (
+                    self.universe
+                    .merge_cronenberg_quantum_pair(
+                        first,
+                        second
+                    )
+                )
+
+            elif effect == "quantum_pair_consumption":
+                result = first.consume(
                     second
                 )
 

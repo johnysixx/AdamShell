@@ -465,6 +465,203 @@ class CronenbergQuantumPairTests(unittest.TestCase):
             1.9
         )
 
+    def test_quantum_merge_effect(self):
+        universe, original, counterpart = (
+            self.create_pair()
+        )
+
+        original.location = "shared_kernel"
+        counterpart.location = "shared_kernel"
+
+        original.size = 1.2
+        original.energy = 0.8
+
+        counterpart.size = 1.5
+        counterpart.energy = 1.1
+
+        encounter = CronenbergPairEncounter().detect(
+            original,
+            counterpart,
+            universe_tick=1
+        )
+
+        resolver = (
+            CronenbergPairEncounterResolver(
+                universe
+            )
+        )
+
+        result = resolver.resolve(
+            original,
+            counterpart,
+            encounter,
+            rng=FixedEffectsRng(
+                ["quantum_merge"]
+            )
+        )
+
+        effect_result = (
+            result["resolved_effects"][0][
+                "result"
+            ]
+        )
+
+        merged = effect_result["merged"]
+
+        self.assertFalse(original.active)
+        self.assertFalse(counterpart.active)
+
+        self.assertEqual(
+            original.state,
+            "quantum_merged"
+        )
+
+        self.assertEqual(
+            counterpart.state,
+            "quantum_merged"
+        )
+
+        self.assertTrue(merged.active)
+
+        self.assertEqual(
+            merged.state,
+            "born_from_quantum_merge"
+        )
+
+        self.assertAlmostEqual(
+            merged.size,
+            2.7
+        )
+
+        self.assertAlmostEqual(
+            merged.energy,
+            1.9
+        )
+
+        self.assertEqual(
+            merged.quantum_state["spin"],
+            0.0
+        )
+
+        self.assertFalse(
+            merged.quantum_state["entangled"]
+        )
+
+    def test_quantum_pair_consumption_effect(self):
+        universe, original, counterpart = (
+            self.create_pair()
+        )
+
+        original.location = "shared_kernel"
+        counterpart.location = "shared_kernel"
+
+        original.size = 1.2
+        original.energy = 0.8
+
+        counterpart.size = 1.5
+        counterpart.energy = 1.2
+
+        energy_pool_before = universe.energy_pool
+
+        dark_energy_before = getattr(
+            universe,
+            "dark_energy",
+            0.0
+        )
+
+        encounter = CronenbergPairEncounter().detect(
+            original,
+            counterpart,
+            universe_tick=1
+        )
+
+        resolver = (
+            CronenbergPairEncounterResolver(
+                universe
+            )
+        )
+
+        result = resolver.resolve(
+            original,
+            counterpart,
+            encounter,
+            rng=FixedEffectsRng(
+                ["quantum_pair_consumption"]
+            )
+        )
+
+        effect_result = (
+            result["resolved_effects"][0][
+                "result"
+            ]
+        )
+
+        recombined = effect_result["recombined"]
+
+        self.assertFalse(original.active)
+        self.assertFalse(counterpart.active)
+
+        self.assertEqual(
+            original.state,
+            (
+                "destroyed_by_"
+                "quantum_pair_consumption"
+            )
+        )
+
+        self.assertEqual(
+            counterpart.state,
+            (
+                "destroyed_by_"
+                "quantum_pair_consumption"
+            )
+        )
+
+        self.assertTrue(recombined.active)
+
+        self.assertEqual(
+            recombined.state,
+            (
+                "born_from_"
+                "quantum_pair_consumption"
+            )
+        )
+
+        self.assertAlmostEqual(
+            recombined.size,
+            1.35
+        )
+
+        self.assertAlmostEqual(
+            recombined.energy,
+            0.8
+        )
+
+        self.assertEqual(
+            recombined.quantum_state["spin"],
+            0.0
+        )
+
+        self.assertFalse(
+            recombined.quantum_state["entangled"]
+        )
+
+        self.assertAlmostEqual(
+            universe.energy_pool
+            - energy_pool_before,
+            0.7
+        )
+
+        self.assertAlmostEqual(
+            getattr(
+                universe,
+                "dark_energy",
+                0.0
+            )
+            - dark_energy_before,
+            0.5
+        )
+
     def test_property_equalization(self):
         universe, original, counterpart = (
             self.create_pair()
