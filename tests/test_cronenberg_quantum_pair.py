@@ -465,6 +465,80 @@ class CronenbergQuantumPairTests(unittest.TestCase):
             1.9
         )
 
+    def test_destructive_effect_first_skips_all_remaining_effects(self):
+        universe, original, counterpart = (
+            self.create_pair()
+        )
+
+        original.location = "shared_kernel"
+        counterpart.location = "shared_kernel"
+
+        encounter = CronenbergPairEncounter().detect(
+            original,
+            counterpart,
+            universe_tick=1
+        )
+
+        resolver = (
+            CronenbergPairEncounterResolver(
+                universe
+            )
+        )
+
+        result = resolver.resolve(
+            original,
+            counterpart,
+            encounter,
+            rng=FixedEffectsRng(
+                [
+                    "quantum_merge",
+                    "spin_exchange",
+                    "property_sum"
+                ]
+            )
+        )
+
+        self.assertEqual(
+            result["selected_effects"],
+            [
+                "spin_exchange",
+                "property_sum",
+                "quantum_merge"
+            ]
+        )
+
+        self.assertEqual(
+            [
+                item["effect"]
+                for item in result[
+                    "resolved_effects"
+                ]
+            ],
+            [
+                "spin_exchange",
+                "property_sum",
+                "quantum_merge"
+            ]
+        )
+
+        self.assertEqual(
+            result["skipped_effects"],
+            []
+        )
+
+        self.assertFalse(original.active)
+        self.assertFalse(counterpart.active)
+
+        self.assertEqual(
+            original.state,
+            "quantum_merged"
+        )
+
+        self.assertEqual(
+            counterpart.state,
+            "quantum_merged"
+        )
+
     def test_destructive_effect_stops_further_resolution(self):
         universe, original, counterpart = (
             self.create_pair()
