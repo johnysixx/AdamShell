@@ -1,4 +1,4 @@
-﻿from universe.logger import UniverseLogger
+from universe.logger import UniverseLogger
 
 from .bartender import Bartender
 from .terminals import BarTerminals
@@ -346,7 +346,7 @@ class MeetingPlace:
         if event is None:
             return None
 
-        self.dice_vial.roll_secretly()
+        self.dice_vial.roll()
 
         self.lemonade_signs.sync_with_reservoir(
             self.lemonade_reservoir
@@ -421,7 +421,7 @@ class MeetingPlace:
         self.sync_entropy_terminal_to_world()
 
         if self.total_entropy_served_ever % 10 == 0:
-            secret_event = self.dice_vial.roll_secretly()
+            secret_event = self.dice_vial.roll()
 
             if secret_event["quantum_tick_requested"]:
                 self.quantum_entropy_tick()

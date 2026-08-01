@@ -125,6 +125,76 @@ class CronenbergQuantumPairTests(unittest.TestCase):
             original.quantum_state["pair_id"]
         )
 
+    def test_automatic_encounter_resolution_runs_once(self):
+        universe, original, counterpart = (
+            self.create_pair()
+        )
+
+        original.location = "same_kernel"
+        counterpart.location = "same_kernel"
+
+        calls = []
+
+        def fake_resolve(**kwargs):
+            pair_id = kwargs[
+                "encounter_event"
+            ][
+                "pair_id"
+            ]
+
+            calls.append(pair_id)
+
+            return {
+                "name": "test_resolution",
+                "effect": "both_survive"
+            }
+
+        universe.cronenberg_pair_encounter_resolver.resolve = (
+            fake_resolve
+        )
+
+        first_result = (
+            universe
+            .detect_cronenberg_pair_encounters()
+        )
+
+        second_result = (
+            universe
+            .detect_cronenberg_pair_encounters()
+        )
+
+        self.assertEqual(
+            len(first_result),
+            1
+        )
+
+        self.assertEqual(
+            second_result,
+            []
+        )
+
+        self.assertEqual(
+            len(calls),
+            1
+        )
+
+        self.assertEqual(
+            first_result[0]["resolution"],
+            {
+                "name": "test_resolution",
+                "effect": "both_survive"
+            }
+        )
+
+        self.assertEqual(
+            universe.quantum_events[-1][
+                "resolution"
+            ][
+                "name"
+            ],
+            "test_resolution"
+        )
+
     def test_spin_exchange(self):
         universe, original, counterpart = (
             self.create_pair()

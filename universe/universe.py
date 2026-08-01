@@ -16,6 +16,8 @@ from quantum.error_boundary import QuantumErrorBoundary
 from quantum.event_bus import QuantumEventBus
 from quantum.d20_registry import D20Registry
 from quantum.quantum_die_resolver import QuantumDieResolver
+from quantum.cronenberg_pair_encounter import CronenbergPairEncounter
+from quantum.cronenberg_pair_encounter_resolver import CronenbergPairEncounterResolver
 from universe.law_registry import LawRegistry
 from quantum.death_ripple import QuantumDeathRipple
 from cats.cronenberg_encounter import CatCronenbergEncounter
@@ -54,6 +56,16 @@ class Universe:
         self.quantum_die_resolver = (
             QuantumDieResolver(self)
         )
+
+        self.cronenberg_pair_encounter = (
+            CronenbergPairEncounter()
+        )
+
+        self.cronenberg_pair_encounter_resolver = (
+            CronenbergPairEncounterResolver(self)
+        )
+
+        self.active_cronenberg_pair_encounters = set()
 
         self.quantum_die = QuantumDie(
             resolver=self.quantum_die_resolver
@@ -1408,6 +1420,119 @@ class Universe:
             source_operation="test_failure"
         )
 
+    def detect_cronenberg_pair_encounters(self):
+        active_cronenbergs = [
+            cronenberg
+            for cronenberg in self.cronenbergs
+            if getattr(
+                cronenberg,
+                "active",
+                True
+            )
+            and cronenberg.is_alive
+            and cronenberg.quantum_state.get(
+                "pair_id"
+            ) is not None
+        ]
+
+        current_encounters = set()
+        detected_events = []
+        processed_pair_ids = set()
+
+        cronenbergs_by_id = {
+            cronenberg.id: cronenberg
+            for cronenberg in active_cronenbergs
+        }
+
+        for first in active_cronenbergs:
+            counterpart_id = (
+                first.quantum_state.get(
+                    "counterpart_id"
+                )
+            )
+
+            second = cronenbergs_by_id.get(
+                counterpart_id
+            )
+
+            if second is None:
+                continue
+
+            pair_id = first.quantum_state.get(
+                "pair_id"
+            )
+
+            if pair_id in processed_pair_ids:
+                continue
+
+            processed_pair_ids.add(
+                pair_id
+            )
+
+            encounter_key = (
+                pair_id,
+                first.location
+            )
+
+            if first.location != second.location:
+                continue
+
+            current_encounters.add(
+                encounter_key
+            )
+
+            if (
+                encounter_key
+                in self.active_cronenberg_pair_encounters
+            ):
+                continue
+
+            event = (
+                self.cronenberg_pair_encounter
+                .detect(
+                    first,
+                    second,
+                    universe_tick=self.universe_tick
+                )
+            )
+
+            if not event.get(
+                "encountered",
+                False
+            ):
+                continue
+
+            resolution = (
+                self.cronenberg_pair_encounter_resolver
+                .resolve(
+                    first=first,
+                    second=second,
+                    encounter_event=event
+                )
+            )
+
+            event["resolution"] = resolution
+
+            self.quantum_events.append(
+                event
+            )
+
+            detected_events.append(
+                event
+            )
+
+            UniverseLogger.event(
+                "CRONENBERG QUANTUM PAIR "
+                f"ENCOUNTERED: {pair_id} "
+                f"AT={first.location}"
+            )
+
+        self.active_cronenberg_pair_encounters = (
+            current_encounters
+        )
+
+        return detected_events
+
     def tick_entities(self):
         for entity in list(self.entities):
             if not getattr(entity, "active", True):
@@ -1417,6 +1542,8 @@ class Universe:
 
             if callable(tick):
                 tick(self)
+
+        self.detect_cronenberg_pair_encounters()
 
 
     def tick_universe(self):

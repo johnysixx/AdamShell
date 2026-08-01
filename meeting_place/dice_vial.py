@@ -1,5 +1,6 @@
-from universe.logger import UniverseLogger
 import random
+
+from universe.logger import UniverseLogger
 
 
 class DiceVial:
@@ -39,28 +40,41 @@ class DiceVial:
         self._secret_event = None
 
         UniverseLogger.boot("DICE VIAL CREATED")
-        UniverseLogger.boot("D20 FLOATS IN GLOWING OILY LIQUID")
+        UniverseLogger.boot(
+            "D20 FLOATS IN GLOWING OILY LIQUID"
+        )
 
-    def roll_secretly(self, rng=None):
+    def roll(self, rng=None):
         rng = rng or random
 
-        self._secret_roll = rng.randint(1, 20)
+        self._secret_roll = rng.randint(
+            1,
+            20
+        )
 
-        box_created = rng.choice([True, False])
+        box_created = rng.choice(
+            [True, False]
+        )
 
-        quantum_tick_requested = rng.choice([True, False])
+        quantum_tick_requested = rng.choice(
+            [True, False]
+        )
 
         self._secret_event = {
             "name": "dice_vial_secret_rotation",
             "roll": self._secret_roll,
             "box_created": box_created,
-            "quantum_tick_requested": quantum_tick_requested
+            "quantum_tick_requested": (
+                quantum_tick_requested
+            )
         }
 
         return self._secret_event.copy()
 
     def resolve_missing_universe(self, rng=None):
-        event = self.roll_secretly(rng)
+        event = self.roll(
+            rng=rng
+        )
 
         if event["roll"] <= 10:
             return {
