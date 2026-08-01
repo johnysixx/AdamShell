@@ -125,6 +125,108 @@ class CronenbergQuantumPairTests(unittest.TestCase):
             original.quantum_state["pair_id"]
         )
 
+    def test_tick_entities_resolves_reencounter_after_separation(self):
+        universe, original, counterpart = (
+            self.create_pair()
+        )
+
+        original.tick = lambda current_universe: None
+        counterpart.tick = lambda current_universe: None
+
+        calls = []
+
+        def fake_resolve(**kwargs):
+            calls.append(
+                kwargs["encounter_event"]["pair_id"]
+            )
+
+            return {
+                "name": "reencounter_resolution",
+                "resolution_number": len(calls)
+            }
+
+        universe.cronenberg_pair_encounter_resolver.resolve = (
+            fake_resolve
+        )
+
+        original.location = "shared_kernel"
+        counterpart.location = "shared_kernel"
+
+        universe.tick_entities()
+
+        self.assertEqual(
+            len(calls),
+            1
+        )
+
+        universe.tick_entities()
+
+        self.assertEqual(
+            len(calls),
+            1
+        )
+
+        counterpart.location = "other_kernel"
+
+        universe.tick_entities()
+
+        self.assertEqual(
+            len(calls),
+            1
+        )
+
+        self.assertEqual(
+            universe.active_cronenberg_pair_encounters,
+            set()
+        )
+
+        counterpart.location = "shared_kernel"
+
+        universe.tick_entities()
+
+        self.assertEqual(
+            len(calls),
+            2
+        )
+
+        self.assertEqual(
+            universe.cronenberg_pair_encounter
+            .public_state[
+                "encounter_count"
+            ],
+            2
+        )
+
+        encounter_events = [
+            event
+            for event in universe.quantum_events
+            if event.get("name")
+            == "cronenberg_quantum_pair_encountered"
+        ]
+
+        self.assertEqual(
+            len(encounter_events),
+            2
+        )
+
+        self.assertEqual(
+            encounter_events[0][
+                "resolution"
+            ][
+                "resolution_number"
+            ],
+            1
+        )
+
+        self.assertEqual(
+            encounter_events[1][
+                "resolution"
+            ][
+                "resolution_number"
+            ],
+            2
+        )
+
     def test_tick_entities_detects_and_resolves_encounter(self):
         universe, original, counterpart = (
             self.create_pair()
