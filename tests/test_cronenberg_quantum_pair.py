@@ -876,6 +876,143 @@ class CronenbergQuantumPairTests(unittest.TestCase):
             3
         )
 
+    def test_transformed_cronenbergs_do_not_keep_old_pair_links(self):
+        merge_universe, merge_first, merge_second = (
+            self.create_pair()
+        )
+
+        merge_first.location = "shared_kernel"
+        merge_second.location = "shared_kernel"
+
+        merge_pair_id = (
+            merge_first
+            .quantum_state["pair_id"]
+        )
+
+        merge_encounter = (
+            CronenbergPairEncounter()
+            .detect(
+                merge_first,
+                merge_second,
+                universe_tick=1
+            )
+        )
+
+        merge_result = (
+            CronenbergPairEncounterResolver(
+                merge_universe
+            )
+            .resolve(
+                merge_first,
+                merge_second,
+                merge_encounter,
+                rng=FixedEffectsRng(
+                    ["quantum_merge"]
+                )
+            )
+        )
+
+        merged = (
+            merge_result[
+                "resolved_effects"
+            ][0][
+                "result"
+            ][
+                "merged"
+            ]
+        )
+
+        self.assertIsNone(
+            merged.quantum_state["pair_id"]
+        )
+
+        self.assertIsNone(
+            merged.quantum_state[
+                "counterpart_id"
+            ]
+        )
+
+        self.assertFalse(
+            merged.quantum_state["entangled"]
+        )
+
+        self.assertNotEqual(
+            merged.quantum_state["pair_id"],
+            merge_pair_id
+        )
+
+        consumption_universe, consume_first, consume_second = (
+            self.create_pair()
+        )
+
+        consume_first.location = "shared_kernel"
+        consume_second.location = "shared_kernel"
+
+        consume_pair_id = (
+            consume_first
+            .quantum_state["pair_id"]
+        )
+
+        consumption_encounter = (
+            CronenbergPairEncounter()
+            .detect(
+                consume_first,
+                consume_second,
+                universe_tick=1
+            )
+        )
+
+        consumption_result = (
+            CronenbergPairEncounterResolver(
+                consumption_universe
+            )
+            .resolve(
+                consume_first,
+                consume_second,
+                consumption_encounter,
+                rng=FixedEffectsRng(
+                    [
+                        "quantum_pair_consumption"
+                    ]
+                )
+            )
+        )
+
+        recombined = (
+            consumption_result[
+                "resolved_effects"
+            ][0][
+                "result"
+            ][
+                "recombined"
+            ]
+        )
+
+        self.assertIsNone(
+            recombined.quantum_state[
+                "pair_id"
+            ]
+        )
+
+        self.assertIsNone(
+            recombined.quantum_state[
+                "counterpart_id"
+            ]
+        )
+
+        self.assertFalse(
+            recombined.quantum_state[
+                "entangled"
+            ]
+        )
+
+        self.assertNotEqual(
+            recombined.quantum_state[
+                "pair_id"
+            ],
+            consume_pair_id
+        )
+
     def test_quantum_merge_effect(self):
         universe, original, counterpart = (
             self.create_pair()
