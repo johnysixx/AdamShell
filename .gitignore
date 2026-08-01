@@ -2,3 +2,15 @@ __pycache__/
 *.pyc
 .idea/workspace.xml
 .venv/
+# Local audit archives and runtime output
+*audit*.zip
+run_output.txt
+
+# Python runtime files
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Local environments and IDE files
+.venv/
+.idea/

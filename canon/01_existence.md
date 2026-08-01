@@ -6,13 +6,13 @@ Existence is the canonical domain that defines whether anything may be.
 
 Existence does not determine form, behavior, location, or outcome.
 
-Existence determines whether a concept, entity, event, world, or structure may possess ontological presence within Universe.
+Existence determines whether a concept, entity, event, world, or structure may possess ontological presence within Multiverse.
 
 ## Axioms
 
 ### E.1
 
-Existence is contained within Universe.
+Existence is contained within Multiverse.
 
 ### E.2
 

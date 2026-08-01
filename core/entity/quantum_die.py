@@ -1,4 +1,4 @@
-import random
+﻿import random
 
 
 class QuantumDie:
@@ -7,6 +7,9 @@ class QuantumDie:
         self.sides = sides
         self.name = f"quantum_d{sides}"
         self.last_roll = None
+
+    def roll_secretly(self, rng=None):
+        return self.roll(rng=rng)
 
     def roll(self, rng=None):
         if rng is None:

@@ -1,4 +1,4 @@
-class MeetingBootstrap:
+﻿class MeetingBootstrap:
 
     def __init__(self, layers, god, serpent, pazuzu):
         self.layers = layers
@@ -18,6 +18,12 @@ class MeetingBootstrap:
         meeting.show_library_book_count(library)
         meeting.show_book_search_terminal()
         meeting.show_random_library_excerpt(library)
+        meeting.show_cronenberg_pen_terminal()
+
+        meeting.serve_lemonade(
+            self.god,
+            location="inside_bar"
+        )
 
         meeting.emit_event("eden idea was born in the bar")
 

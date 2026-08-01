@@ -1,4 +1,4 @@
-from typing import Self
+﻿from typing import Self
 
 from core.entity.factory import EntityFactory
 from core.entity.profile_resolver import EntityProfileResolver
@@ -9,6 +9,13 @@ from universe.big_bang import BigBang
 from core.entity.quantum_box import QuantumBox
 from universe.universe_statistics import UniverseStatistics
 from universe.logger import UniverseLogger
+from core.entity.cronenberg import Cronenberg
+from quantum.error_boundary import QuantumErrorBoundary
+from quantum.event_bus import QuantumEventBus
+from quantum.d20_registry import D20Registry
+from quantum.death_ripple import QuantumDeathRipple
+from cats.cronenberg_encounter import CatCronenbergEncounter
+
 
 class Universe:
 
@@ -43,6 +50,28 @@ class Universe:
         self.quantum_die = QuantumDie()
         self.quantum_boxes = []
         self.quantum_events = []
+        self.cronenbergs = []
+        self.cronenberg_count = 0
+
+        self.quantum_event_bus = QuantumEventBus()
+        self.d20_registry = D20Registry()
+        self.d20_registry.register(
+            self.quantum_die
+        )
+        self.d20_registry.register(
+            self.quantum_die
+        )
+        self.quantum_death_ripple = QuantumDeathRipple(
+            self.d20_registry
+        )
+
+        self.cat_cronenberg_encounter = CatCronenbergEncounter()
+
+        self.quantum_event_bus.subscribe(
+            "cronenberg_hunted",
+            self.quantum_death_ripple.on_cronenberg_hunted
+        )
+
         self.statistics = UniverseStatistics()
 
         self.quantum_state = {
@@ -74,6 +103,14 @@ class Universe:
         self.state = "pre_universe"
 
         self.factory = EntityFactory()
+
+        self.quantum_error_boundary = (
+            QuantumErrorBoundary(
+                cronenberg_factory=(
+                    self.create_cronenberg_from_quantum_error
+                )
+            )
+        )
 
         # universe is now state-less (entity driven)
 
@@ -231,6 +268,18 @@ class Universe:
             f"New entity added: {entity.name}"
         )
 
+        entity_type = getattr(entity, "type", None)
+
+        world_entity = self.world.get(
+            entity.name
+        )
+
+        if (
+            entity_type is None
+            and isinstance(world_entity, dict)
+        ):
+            entity_type = world_entity.get("type")
+
         meeting_place = getattr(
             self,
             "meeting_place",
@@ -239,6 +288,16 @@ class Universe:
 
         if meeting_place is None:
             return
+
+        if entity_type == "cat":
+            meeting_place.glass_shelf.appear_shared_glass(
+                kind="beer_mug"
+            )
+
+        elif entity_type == "cronenberg":
+            meeting_place.glass_shelf.appear_shared_glass(
+                kind="shot_glass"
+            )
 
         profile = getattr(
             entity,
@@ -418,8 +477,25 @@ class Universe:
                  f"DELTA={curvature_delta:.2f} "
                  f"CURVATURE={spacetime['curvature']:.2f}"
                  )
+        def open_quantum_box(
+                self,
+                box_id,
+                observer=None,
+                rng=None
+        ):
+            return self.quantum_error_boundary.execute(
+                operation=lambda: (
+                    self._open_quantum_box_unprotected(
+                        box_id=box_id,
+                        observer=observer,
+                        rng=rng
+                    )
+                ),
+                source_component="quantum_box",
+                source_operation="open_quantum_box"
+            )
 
-    def open_quantum_box(
+    def open_quantum_box_uprotected(
             self,
             box_id,
             observer=None,
@@ -515,7 +591,61 @@ class Universe:
 
         return rng.random() < collapse_chance
 
-    def tick_quantum(self):
+    def create_cronenberg_from_quantum_error(
+                self,
+                error,
+                source_component,
+                source_operation
+        ):
+        cronenberg = Cronenberg(
+                error=error,
+                source_component=source_component,
+                source_operation=source_operation,
+                quantum_tick=(
+                    self.quantum_state[
+                        "tick_count"
+                    ]
+                )
+            )
+
+        self.cronenbergs.append(
+            cronenberg
+        )
+
+        self.cronenberg_count += 1
+
+        self.add_entity(
+            cronenberg
+        )
+
+        event = {
+            "name": "cronenberg_manifested",
+            "type": "quantum_error_manifestation",
+            "cronenberg_id": cronenberg.id,
+            "source_component": source_component,
+            "source_operation": source_operation,
+            "error_type": type(error).__name__,
+            "error_message": str(error),
+            "quantum_tick": self.quantum_state[
+                "tick_count"
+            ]
+        }
+
+        self.quantum_events.append(
+            event
+        )
+
+        UniverseLogger.event(
+            "CRONENBERG MANIFESTED: "
+            f"{cronenberg.id} "
+            f"FROM={source_component}."
+            f"{source_operation} "
+            f"ERROR={type(error).__name__}"
+        )
+
+        return cronenberg
+
+    def tick_quantum_unprotected(self):
 
         if not self.quantum_state["enabled"]:
             return
@@ -590,7 +720,18 @@ class Universe:
             f"FLUCTUATION={self.quantum_state['fluctuation']:.2f} "
             f"UNCERTAINTY={self.quantum_state['uncertainty']:.3f} "
             f"QENTROPY={self.quantum_state['entropy_delta']:.4f} "
+         )
+
+    def tick_quantum(self):
+        if not self.quantum_state["enabled"]:
+            return None
+
+        return self.quantum_error_boundary.execute(
+            operation=self._tick_quantum_unprotected,
+            source_component="universe",
+            source_operation="tick_quantum"
         )
+
 
     def record_universe_state(self):
 
@@ -620,16 +761,39 @@ class Universe:
 
         self.universe_history.append(snapshot)
 
+    def trigger_test_quantum_error(self):
+        def broken_quantum_operation():
+            raise RuntimeError(
+                "Test quantum geometry failure."
+            )
+
+        return self.quantum_error_boundary.execute(
+            operation=broken_quantum_operation,
+            source_component="quantum_geometry_engine",
+            source_operation="test_failure"
+        )
 
 
+
+
+
+
+
+    def tick_entities(self):
+        for entity in list(self.entities):
+            tick = getattr(entity, "tick", None)
+
+            if callable(tick):
+                tick(self)
 
 
     def tick_universe(self):
         self.universe_tick += 1
 
         self.tick_spacetime()
-        self.tick_quantum()
+        self.tick_quantum_unprotected()
         self.update_physics()
+        self.tick_entities()
         self.record_universe_state()
 
         last_snapshot = self.universe_history[-1]
@@ -656,6 +820,3 @@ class Universe:
 
 
         UniverseLogger.event("universe tick complete")
-
-
-

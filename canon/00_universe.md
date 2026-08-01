@@ -2,68 +2,88 @@
 
 ## Definition
 
-Universe is the complete architectural system in which all canonical domains exist.
+Universe is a system existing within Multiverse.
 
-Universe is not Existence.
+Universe is not Multiverse.
 
-Universe is not Reality.
+Universe is not Meeting Place.
 
-Universe enables Existence to be expressed, Reality to operate, Worlds to exist, Layers to be entered, Entities to act, Events to occur, and History to be preserved.
+Universe is not Library.
+
+Meeting Place and Library exist as permanent infrastructure of Multiverse independently of Universe and its internal layers.
+
+Universe may contain pre-physical and physical structures, worlds, realities, layers, entities, events, and histories.
 
 ## Axioms
 
 ### U.1
 
-Nothing exists outside Universe.
+Universe exists within Multiverse.
 
 ### U.2
 
-Universe precedes every internal canonical domain.
+Universe does not contain Multiverse.
 
 ### U.3
 
-Universe contains Existence but is not identical to Existence.
+Meeting Place and Library are not internal layers of Universe.
 
 ### U.4
 
-Universe enables Reality but does not participate in Reality as one of its internal objects.
+Meeting Place and Library exist from the creation of Multiverse.
 
 ### U.5
 
-Universe may contain multiple Realities, Worlds, Layers, Entities, Events, Histories, and Branches.
+Meeting Place and Library exist before the quantum layer.
 
 ### U.6
 
-Universe does not determine outcomes.
-
-It provides the conditions under which outcomes may become possible, actualized, observed, and preserved.
+Universe may develop through multiple stages of existence.
 
 ### U.7
 
-Every canonical concept belongs to one defined architectural domain.
+Pre-physical existence does not automatically imply physical existence.
 
 ### U.8
 
-An implementation module may support multiple canonical domains.
+Idea Universe is a pre-physical idea reality.
 
-The canonical definition of a domain must not change according to its implementation.
+### U.9
+
+Physical Universe begins only when the required conditions for physical existence are fulfilled.
+
+### U.10
+
+Root Universe is not Physical Universe itself.
+
+Root Universe is the root reality within Physical Universe.
+
+### U.11
+
+A layer, world, reality, universe, and multiverse are distinct architectural concepts.
+
+### U.12
+
+The author's intended architecture has authority over documentation and implementation.
 
 ## Corollaries
 
+### U.3.1
+
+Meeting Place and Library must not depend on the activation of quantum or physical layers.
+
 ### U.7.1
 
-Reality must not be used as a synonym for Universe.
+The presence of pre-physical structures must not automatically start Physical Universe.
 
-### U.7.2
+### U.9.1
 
-World must not be used as a synonym for Universe.
+Physics must not be activated merely because Universe has been initialized.
 
-### U.7.3
+### U.10.1
 
-Layer must not be used as a synonym for World.
+Creating Root Universe must not be treated as creating Physical Universe.
 
-### U.8.1
+### U.12.1
 
-Code is evaluated against the Canon.
-
-The Canon is not derived from the current code.
+If the Canon or implementation conflicts with the author's intended architecture, the Canon or implementation must be corrected.

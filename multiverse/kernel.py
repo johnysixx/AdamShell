@@ -33,6 +33,21 @@ class MultiverseKernel:
         self._initialize_multiverse()
         self._initialize_entities()
         self._advance_universe()
+
+        print("`n--- FIRST CRONENBERG TEST ---")
+        for test_number in range(1, 6):
+            print(f"--- QUANTUM ERROR {test_number} / 5 ---")
+            result = self.universe.trigger_test_quantum_error()
+            print(result)
+
+            self.universe.tick_universe()
+            self.universe.tick_universe()
+
+        print(
+            "CRONENBERG COUNT:",
+            self.universe.cronenberg_count
+        )
+
         self._prepare_meeting_place()
         self._run_eden()
 

@@ -1,4 +1,4 @@
-class BarEntityPolicy:
+﻿class BarEntityPolicy:
 
     AUTOMATIC_ACCESS = "automatic"
     POTENTIAL_ACCESS = "potential"
@@ -41,6 +41,15 @@ class BarEntityPolicy:
                 profile,
                 entity_type
             )
+
+        if entity_type == "cat":
+            return {
+                "entity_id": entity_id,
+                "entity_class": entity_class,
+                "access_mode": self.AUTOMATIC_ACCESS,
+                "glass_mode": self.NO_GLASS,
+                "service_mode": self.CAT_SERVICE,
+            }
 
         if entity_class == "god":
             return {

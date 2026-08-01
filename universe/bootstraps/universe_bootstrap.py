@@ -15,16 +15,20 @@ class UniverseBootstrap:
     def run(self):
         self.universe.universe_registry = self.universe_registry
 
+        layers = LayerRegistry()
+
+        # Permanent Multiverse infrastructure exists before quantum physics.
+        layers.register("meeting", MeetingPlace(self.universe))
+        layers.register("library", Library(self.universe))
+
+        # Idea Universe is pre-physical.
+        idea_universe = IdeaUniverse(self.universe)
+
+        # Quantum and physical structures are initialized afterwards.
         self.universe.enable_quantum_layer()
         self.universe.boot_physics()
 
         root_transition = RootTransition()
-
-        layers = LayerRegistry()
-        layers.register("meeting", MeetingPlace(self.universe))
-        layers.register("library", Library(self.universe))
-
-        idea_universe = IdeaUniverse(self.universe)
         layers.register("root_universe", RootUniverse(self.universe))
 
         return (

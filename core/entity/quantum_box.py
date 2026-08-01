@@ -1,6 +1,9 @@
 import random
 import uuid
 
+from core.actualization.possibility import Possibility
+from core.actualization.potential import Potential
+
 
 class QuantumBox:
 
@@ -33,6 +36,80 @@ class QuantumBox:
             "tick": None
         }
 
+    @property
+    def possibilities(self):
+        return tuple(self.content["possibilities"])
+
+    def generate_potentials(self, cycle_id):
+        if self.collapse["collapsed"]:
+            return []
+
+        probability = 1.0 / len(self.possibilities)
+
+        return [
+            Potential(
+                possibility=Possibility(
+                    name=possibility_name,
+                    probability=probability,
+                    action=lambda result=possibility_name: (
+                        self.resolve_state(
+                            result=result,
+                            cause="actualization",
+                            observer="reality",
+                            tick=cycle_id
+                        )
+                    )
+                ),
+                cycle_id=cycle_id,
+                source=self.id,
+                context={
+                    "type": "quantum_box_collapse",
+                    "quantum_box_id": self.id,
+                    "result": possibility_name,
+                    "exclusive_group": self.id
+                }
+            )
+            for possibility_name in self.possibilities
+        ]
+
+    def resolve_state(
+            self,
+            result,
+            cause,
+            observer=None,
+            tick=None
+    ):
+        if self.collapse["collapsed"]:
+            return self.content["resolved"]
+
+        if result not in self.possibilities:
+            raise ValueError(
+                f"Unknown quantum box result: {result}"
+            )
+
+        self.content["resolved"] = result
+        self.state = "collapsed"
+
+        self.collapse["collapsed"] = True
+        self.collapse["cause"] = cause
+        self.collapse["observer"] = observer
+        self.collapse["tick"] = tick
+
+        print(
+            f"QUANTUM BOX COLLAPSED: {self.id} "
+            f"CAUSE={cause} "
+            f"RESULT={result}"
+        )
+
+        return {
+            "type": "quantum_box_collapsed",
+            "quantum_box_id": self.id,
+            "result": result,
+            "cause": cause,
+            "observer": observer,
+            "tick": tick
+        }
+
     def collapse_state(
             self,
             cause,
@@ -45,25 +122,18 @@ class QuantumBox:
 
         rng = rng or random
 
-        self.content["resolved"] = rng.choice([
-            "empty",
-            "cat"
-        ])
-
-        self.state = "collapsed"
-
-        self.collapse["collapsed"] = True
-        self.collapse["cause"] = cause
-        self.collapse["observer"] = observer
-        self.collapse["tick"] = tick
-
-        print(
-            f"QUANTUM BOX COLLAPSED: {self.id} "
-            f"CAUSE={cause} "
-            f"RESULT={self.content['resolved']}"
+        result = rng.choice(
+            self.possibilities
         )
 
-        return self.content["resolved"]
+        event = self.resolve_state(
+            result=result,
+            cause=cause,
+            observer=observer,
+            tick=tick
+        )
+
+        return event["result"]
 
     @property
     def public_state(self):

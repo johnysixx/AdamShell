@@ -1,4 +1,5 @@
-from .universe_manual import UniverseManual
+﻿from .universe_manual import UniverseManual
+from .cronenberg_pen_terminal import CronenbergPenTerminal
 
 
 class BackRoom:
@@ -10,6 +11,8 @@ class BackRoom:
         self.universe_manual = UniverseManual(
             universe_registry
         )
+
+        self.cronenberg_pen_terminal = CronenbergPenTerminal()
 
         self.access = {
             "bartender": "main_door",

@@ -1,4 +1,5 @@
 ﻿from universe.logger import UniverseLogger
+from .memory import CatMemory
 
 class Cats:
 
@@ -125,6 +126,11 @@ class Cats:
             "sex": sex,
             "origin": origin,
             "idea_energy": self.default_idea_energy,
+            "size": 1.0,
+            "strength": 1.0,
+            "cronenbergs_eaten": 0,
+            "cronenberg_mass_eaten": 0.0,
+            "memory": CatMemory(name),
             "access": self.access_rules,
             "special_traits": []
         }

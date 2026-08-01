@@ -1,4 +1,4 @@
-from universe.logger import UniverseLogger
+﻿from universe.logger import UniverseLogger
 
 class Bartender:
 
@@ -25,6 +25,18 @@ class Bartender:
         self.bar_counter_clean = False
 
         UniverseLogger.boot("BARTENDER CREATED")
+
+    def answer_about_lemonade_origin(self):
+        answer = (
+            "When life gives you lemons, "
+            "make lemonade."
+        )
+
+        UniverseLogger.event(
+            f"BARTENDER ANSWERS ABOUT LEMONADE: {answer}"
+        )
+
+        return answer
 
     def respond_to_red_button_alarm(
         self,

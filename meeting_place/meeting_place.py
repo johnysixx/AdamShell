@@ -1,4 +1,4 @@
-from universe.logger import UniverseLogger
+﻿from universe.logger import UniverseLogger
 
 from .bartender import Bartender
 from .terminals import BarTerminals
@@ -14,6 +14,8 @@ from .glass_shelf import GlassShelf
 from .bar_entity_policy import BarEntityPolicy
 from .bar_geometry_terminal import BarGeometryTerminal
 from .back_room_black_box import BackRoomBlackBox
+from .lemonade_reservoir import LemonadeReservoir
+from .lemonade_signs import LemonadeSigns
 
 class MeetingPlace:
 
@@ -23,16 +25,34 @@ class MeetingPlace:
 
         self.entities = []
         self.events = []
+
+        self.cronenberg_area = {
+            "state": "lemon_courtyard",
+            "location": "behind_bar",
+            "tree": True,
+            "tree_type": "lemon_tree",
+            "lemons_visible": True,
+            "bench": True
+        }
+
+        self.cronenberg_lemonade_total = 0.0
+        self.cronenberg_processing_count = 0
+        self.cronenberg_processing_history = []
         self.tick_count = 0
         self.bar_counter = BarCounter()
         self.glass_shelf = GlassShelf()
         self.bar_entity_policy = BarEntityPolicy()
 
         self.dice_vial = DiceVial()
+        self.universe.d20_registry.register(
+            self.dice_vial
+        )
         self.dice_box = DiceBox()
         self.fridge = BarFridge()
         self.energy_reservoir = BarEnergyReservoir()
         self.entropy_reservoir = BarEntropyReservoir()
+        self.lemonade_reservoir = LemonadeReservoir()
+        self.lemonade_signs = LemonadeSigns()
         self.terminals = BarTerminals()
         self.geometry_terminal = BarGeometryTerminal()
         self.bouncer = Bouncer()
@@ -111,6 +131,71 @@ class MeetingPlace:
     def can_enter(self, entity_name):
         return self.permissions.get(entity_name) == "enter"
 
+    def observe_lemon_courtyard(self, observer_role):
+        staff_roles = {
+            "bartender",
+            "bouncer",
+            "bar_staff"
+        }
+
+        pen = getattr(self, "cronenberg_pen", None)
+
+        public_view = {
+            "name": "lemon_courtyard",
+            "location": "behind_bar",
+            "tree": True,
+            "tree_type": "lemon_tree",
+            "lemons_visible": True,
+            "bench": True,
+            "assumed_lemonade_source": "lemons_from_tree",
+            "cronenberg_pen_visible": False
+        }
+
+        if observer_role not in staff_roles:
+            return public_view
+
+        staff_view = dict(public_view)
+        staff_view["cronenberg_pen_visible"] = pen is not None
+        staff_view["cronenberg_pen"] = (
+            pen.get_status()
+            if pen is not None
+            else None
+        )
+        staff_view["actual_lemonade_source"] = (
+            "cronenberg_processing"
+        )
+
+        return staff_view
+
+    def create_cronenberg_pen_area(self):
+        self.cronenberg_area = {
+            "state": "lemon_courtyard_with_hidden_pen",
+            "location": "behind_bar",
+            "tree": True,
+            "bench": True
+        }
+
+        UniverseLogger.event(
+            "A HIDDEN CRONENBERG PEN IS CREATED BEHIND THE LEMON COURTYARD"
+        )
+
+    def restore_cronenberg_clearing(self):
+        if hasattr(self, "cronenberg_pen"):
+            del self.cronenberg_pen
+
+        self.cronenberg_area = {
+            "state": "lemon_courtyard",
+            "location": "behind_bar",
+            "tree": True,
+            "tree_type": "lemon_tree",
+            "lemons_visible": True,
+            "bench": True
+        }
+
+        UniverseLogger.event(
+            "HIDDEN CRONENBERG PEN DISAPPEARS; LEMON COURTYARD REMAINS UNCHANGED"
+        )
+
     def add_entity(self, entity):
         entity_name = self._get_entity_name(entity)
 
@@ -119,12 +204,40 @@ class MeetingPlace:
 
         if not self.bouncer.can_enter(entity):
             UniverseLogger.event(f"MEETING PLACE ENTRY DENIED BY BOUNCER: {entity_name}")
+
+            entity_type = (
+                entity.get("type")
+                if isinstance(entity, dict)
+                else getattr(entity, "type", None)
+            )
+
+            if entity_type == "cronenberg":
+                if not hasattr(self, "cronenberg_pen"):
+                    from .cronenberg_pen import CronenbergPen
+                    self.cronenberg_pen = CronenbergPen(self.universe)
+                    self.create_cronenberg_pen_area()
+
+                self.cronenberg_pen.add_cronenberg(entity)
+                return
+
+            react = getattr(entity, "react", None)
+            if callable(react):
+                react(
+                    universe=self.universe,
+                    event="entry_denied",
+                    source="bouncer"
+                )
+
             return
 
         self.bartender.prepare_for_guest()
 
         self.entities.append(entity)
-        entity["current_layer"] = "meeting_place"
+        if isinstance(entity, dict):
+            entity["current_layer"] = "meeting_place"
+        else:
+            entity.current_layer = "meeting_place"
+            entity.location = "meeting_place"
         self.universe.world["meeting_place"]["entities"] = self.entities
 
         UniverseLogger.event(f"MEETING PLACE: entity joined {entity_name}")
@@ -215,6 +328,38 @@ class MeetingPlace:
         self.emit_event(f"bar entropy increased from {source}")
         return event
 
+    def serve_lemonade(self, entity, location=None):
+        entity_name = self._get_entity_name(entity)
+
+        if location is None:
+            location = getattr(
+                entity,
+                "location",
+                "outside_bar"
+            )
+
+        event = self.lemonade_reservoir.serve(
+            drinker_name=entity_name,
+            location=location
+        )
+
+        if event is None:
+            return None
+
+        self.dice_vial.roll_secretly()
+
+        self.lemonade_signs.sync_with_reservoir(
+            self.lemonade_reservoir
+        )
+
+        self.emit_event(
+            f"{entity_name} drinks free lemonade at {location}"
+        )
+
+        return {
+            "lemonade_event": event
+        }
+
     def serve_energy(self, entity):
         from universe.pre_cosmic_rules import ENERGY_SERVING_J
 
@@ -303,6 +448,10 @@ class MeetingPlace:
         self.tick_count += 1
         UniverseLogger.event(f"MEETING PLACE TICK {self.tick_count}")
         self.bartender.idle_work()
+
+        cronenberg_pen = getattr(self, "cronenberg_pen", None)
+        if cronenberg_pen is not None:
+            cronenberg_pen.tick()
         self._clear_events()
 
     def show_library_book_count(self, library):
@@ -319,6 +468,9 @@ class MeetingPlace:
             self.bar_counter
         )
 
+
+    def show_cronenberg_pen_terminal(self):
+        return self.back_room.cronenberg_pen_terminal.display(self)
 
     def _clear_events(self):
         self.events = []
@@ -374,5 +526,3 @@ class MeetingPlace:
         b.energy += transfer
 
         self.emit_event(f"{a.name} -> {b.name} energy transfer {transfer}")
-
-

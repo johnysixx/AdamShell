@@ -1,4 +1,4 @@
-from universe.logger import UniverseLogger
+﻿from universe.logger import UniverseLogger
 
 class GlassShelf:
 
@@ -12,6 +12,48 @@ class GlassShelf:
 
         UniverseLogger.boot("GLASS SHELF CREATED BEHIND BAR")
 
+    def appear_shared_glass(self, kind):
+        allowed_kinds = {
+            "generic",
+            "beer_mug",
+            "shot_glass"
+        }
+
+        if kind not in allowed_kinds:
+            raise ValueError(
+                f"Unknown shared glass kind: {kind}"
+            )
+
+        kind_number = (
+            sum(
+                1
+                for glass in self.shared_glasses
+                if glass.get("kind") == kind
+            )
+            + 1
+        )
+
+        glass = {
+            "name": f"shared_{kind}_{kind_number}",
+            "type": "shared_bar_glass",
+            "kind": kind,
+            "owner": None,
+            "state": "clean",
+            "dirt": 0.0,
+            "location": self.name
+        }
+
+        if kind == "beer_mug":
+            glass["capacity_litres"] = 0.5
+
+        self.shared_glasses.append(glass)
+
+        UniverseLogger.boot(
+            f"SHARED {kind.upper()} APPEARS: "
+            f"{glass['name']}"
+        )
+
+        return glass
     def register_policy_decision(self, decision):
         glass_mode = decision.get("glass_mode")
         entity_id = decision.get("entity_id")
