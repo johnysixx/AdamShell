@@ -1,4 +1,4 @@
-﻿import random
+import random
 
 from universe.logger import UniverseLogger
 
@@ -21,7 +21,7 @@ class D20Registry:
         if not self._can_rotate(artifact):
             raise TypeError(
                 "Registered d20 artifact must provide "
-                "roll_secretly() or rotate_secretly()."
+                "roll()."
             )
 
         self.artifacts.append(artifact)
@@ -50,7 +50,8 @@ class D20Registry:
         )
 
         result = self._rotate(
-            artifact
+            artifact,
+            rng=rng
         )
 
         event = {
@@ -66,7 +67,7 @@ class D20Registry:
 
         return event
 
-    def rotate_all(self):
+    def rotate_all(self, rng=None):
         results = []
         artifact_names = []
 
@@ -76,7 +77,10 @@ class D20Registry:
             )
 
             results.append(
-                self._rotate(artifact)
+                self._rotate(
+                    artifact,
+                    rng=rng
+                )
             )
 
         event = {
@@ -129,44 +133,26 @@ class D20Registry:
 
         return event
 
-    def _rotate(self, artifact):
-        rotate = getattr(
-            artifact,
-            "rotate_secretly",
-            None
-        )
-
-        if callable(rotate):
-            return rotate()
-
+    def _rotate(self, artifact, rng=None):
         roll = getattr(
             artifact,
-            "roll_secretly",
+            "roll",
             None
         )
 
         if callable(roll):
-            return roll()
+            return roll(rng=rng)
 
         raise TypeError(
-            "Artifact lost its d20 rotation method."
+            "Artifact lost its d20 roll method."
         )
 
     def _can_rotate(self, artifact):
-        return (
-            callable(
-                getattr(
-                    artifact,
-                    "rotate_secretly",
-                    None
-                )
-            )
-            or callable(
-                getattr(
-                    artifact,
-                    "roll_secretly",
-                    None
-                )
+        return callable(
+            getattr(
+                artifact,
+                "roll",
+                None
             )
         )
 

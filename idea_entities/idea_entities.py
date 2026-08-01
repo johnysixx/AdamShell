@@ -3,6 +3,8 @@
     IDEA_ENTITY_ARCHETYPE_EXISTENCE_THRESHOLD_PCT,
 )
 from universe.logger import UniverseLogger
+from core.entity.serpent_d20 import SerpentD20
+from idea_entities.prefysical_fire_origin import PrefysicalFireOrigin
 
 class IdeaEntities:
 
@@ -16,11 +18,18 @@ class IdeaEntities:
         self.eternal_fire = {
             "name": "eternal_fire",
             "type": "idea_focal_point",
-            "state": "burning",
+            "state": "unignited",
             "requires_maintenance": True,
             "maintainer": "pazuzu_masculine_principle",
             "interactions": []
         }
+
+        self.serpent_d20 = SerpentD20()
+
+        self.prefysical_fire_origin = PrefysicalFireOrigin(
+            eternal_fire=self.eternal_fire,
+            serpent_d20=self.serpent_d20
+        )
 
         self.permissions = {
             "can_exist_before_form": True,
@@ -33,6 +42,10 @@ class IdeaEntities:
             "state": "created",
             "idea_entities": self.idea_entities,
             "eternal_fire": self.eternal_fire,
+            "serpent_d20": self.serpent_d20.public_state,
+            "prefysical_fire_origin": (
+                self.prefysical_fire_origin.public_state
+            ),
             "events": self.events,
             "event_history": self.event_history,
             "permissions": self.permissions

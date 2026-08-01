@@ -9,6 +9,7 @@ class Entity:
         self.age = 0
         self.energy = 1
         self.state = "new"
+        self.active = True
         self.evolution_threshold = 5
         self.evolved = False
         self.depth = 0

@@ -1,4 +1,4 @@
-﻿import uuid
+import uuid
 
 from core.entity.entity import Entity
 from core.entity.cronenberg_system.metabolism import (
@@ -70,6 +70,15 @@ class Cronenberg(Entity):
         self.quantum_link_system = CronenbergQuantumLinks(
             owner_id=self.id
         )
+
+        self.quantum_state = {
+            "spin": 0.5,
+            "entangled": False,
+            "pair_id": None,
+            "counterpart_id": None,
+            "counterpart_potential": True,
+            "counterpart_manifested": False
+        }
 
         self.profile = None
         self.bar_policy = None
@@ -274,10 +283,57 @@ class Cronenberg(Entity):
             .collect_dark_energy()
         )
 
+    def _is_quantum_counterpart_of(self, other):
+        if getattr(other, "type", None) != "cronenberg":
+            return False
+
+        own_state = getattr(
+            self,
+            "quantum_state",
+            {}
+        )
+
+        other_state = getattr(
+            other,
+            "quantum_state",
+            {}
+        )
+
+        pair_id = own_state.get(
+            "pair_id"
+        )
+
+        return (
+            pair_id is not None
+            and pair_id == other_state.get("pair_id")
+            and own_state.get("counterpart_id")
+            == other.id
+            and other_state.get("counterpart_id")
+            == self.id
+        )
+
     def consume(self, other):
         if other is self:
             raise ValueError(
                 "Cronenberg cannot consume itself."
+            )
+
+        if self._is_quantum_counterpart_of(other):
+            universe = getattr(
+                self,
+                "universe",
+                None
+            )
+
+            if universe is None:
+                raise RuntimeError(
+                    "Quantum pair consumption requires "
+                    "a registered Universe."
+                )
+
+            return universe.resolve_quantum_pair_consumption(
+                first=self,
+                second=other
             )
 
         consumed_mass = float(
@@ -469,8 +525,10 @@ class Cronenberg(Entity):
             "name": self.name,
             "type": self.type,
             "state": self.state,
+            "active": self.active,
             "location": self.location,
             "origin": dict(self.origin),
+            "quantum_state": dict(self.quantum_state),
             "alive": self.is_alive,
             "age": self.age,
             "energy": self.energy,

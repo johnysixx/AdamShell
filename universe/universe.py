@@ -1,6 +1,8 @@
-﻿from typing import Self
+import uuid
+from typing import Self
 
 from core.entity.factory import EntityFactory
+from cats import Cats
 from core.entity.profile_resolver import EntityProfileResolver
 from core.entity.quantum_die import QuantumDie
 from core.entity.quantum_die_box import QuantumDieBox
@@ -13,6 +15,8 @@ from core.entity.cronenberg import Cronenberg
 from quantum.error_boundary import QuantumErrorBoundary
 from quantum.event_bus import QuantumEventBus
 from quantum.d20_registry import D20Registry
+from quantum.quantum_die_resolver import QuantumDieResolver
+from universe.law_registry import LawRegistry
 from quantum.death_ripple import QuantumDeathRipple
 from cats.cronenberg_encounter import CatCronenbergEncounter
 
@@ -47,7 +51,14 @@ class Universe:
             "quantum": False,
         }
 
-        self.quantum_die = QuantumDie()
+        self.quantum_die_resolver = (
+            QuantumDieResolver(self)
+        )
+
+        self.quantum_die = QuantumDie(
+            resolver=self.quantum_die_resolver
+        )
+
         self.quantum_boxes = []
         self.quantum_events = []
         self.cronenbergs = []
@@ -55,9 +66,7 @@ class Universe:
 
         self.quantum_event_bus = QuantumEventBus()
         self.d20_registry = D20Registry()
-        self.d20_registry.register(
-            self.quantum_die
-        )
+        self.law_registry = LawRegistry()
         self.d20_registry.register(
             self.quantum_die
         )
@@ -184,12 +193,12 @@ class Universe:
 
         self.conflict_history.extend(conflicts)
 
-    # ⚖️ slabý tlak místo okamžité změny
+    # âš–ď¸Ź slabĂ˝ tlak mĂ­sto okamĹľitĂ© zmÄ›ny
         self.conflict_pressure += len(conflicts)
         self.check_threshold()
         self.spawn_entities_from_conflicts(conflicts)
 
-        UniverseLogger.event(f"⚠ Conflict pressure increased: {self.conflict_pressure}")
+        UniverseLogger.event(f"âš  Conflict pressure increased: {self.conflict_pressure}")
 
     def check_threshold(self):
 
@@ -262,6 +271,8 @@ class Universe:
             self.layers.tick()
 
     def add_entity(self, entity):
+        entity.universe = self
+
         self.entities.append(entity)
 
         UniverseLogger.event(
@@ -477,29 +488,29 @@ class Universe:
                  f"DELTA={curvature_delta:.2f} "
                  f"CURVATURE={spacetime['curvature']:.2f}"
                  )
-        def open_quantum_box(
-                self,
-                box_id,
-                observer=None,
-                rng=None
-        ):
-            return self.quantum_error_boundary.execute(
-                operation=lambda: (
-                    self._open_quantum_box_unprotected(
-                        box_id=box_id,
-                        observer=observer,
-                        rng=rng
-                    )
-                ),
-                source_component="quantum_box",
-                source_operation="open_quantum_box"
-            )
+    def open_quantum_box(
+        self,
+        box_id,
+        observer=None,
+        rng=None
+    ):
+        return self.quantum_error_boundary.execute(
+            operation=lambda: (
+                self._open_quantum_box_unprotected(
+                    box_id=box_id,
+                    observer=observer,
+                    rng=rng
+                )
+            ),
+            source_component="quantum_box",
+            source_operation="open_quantum_box"
+        )
 
-    def open_quantum_box_uprotected(
-            self,
-            box_id,
-            observer=None,
-            rng=None
+    def _open_quantum_box_unprotected(
+        self,
+        box_id,
+        observer=None,
+        rng=None
     ):
         box = next(
             (
@@ -511,7 +522,9 @@ class Universe:
         )
 
         if box is None:
-            UniverseLogger.event(f"QUANTUM BOX NOT FOUND: {box_id}")
+            UniverseLogger.event(
+                f"QUANTUM BOX NOT FOUND: {box_id}"
+            )
             return None
 
         result = box.collapse_state(
@@ -523,21 +536,17 @@ class Universe:
 
         self.statistics.record_quantum_collapse()
 
-
         if result == "cat":
-            event = {
-                "name": "cat_manifestation_requested",
-                "source": "cat_distribution_system",
-                "collapse_cause": "opened",
-                "box_id": box.id,
-                "position": box.position.copy(),
-                "observer": observer,
-                "tick": self.quantum_state["tick_count"]
-            }
+            manifestation = self.manifest_cat(
+                name=f"cat_from_{box.id}",
+                source="quantum_box_opened",
+                position=box.position
+            )
 
-            self.statistics.record_cat_created()
-
-            self.quantum_events.append(event)
+            event = manifestation["event"]
+            event["collapse_cause"] = "opened"
+            event["box_id"] = box.id
+            event["observer"] = observer
 
             UniverseLogger.event(
                 f"CAT JUMPS OUT OF QUANTUM BOX: {box.id}"
@@ -553,14 +562,83 @@ class Universe:
                 "tick": self.quantum_state["tick_count"]
             }
 
-            UniverseLogger.event(f"QUANTUM BOX WAS EMPTY: {box.id}")
+            UniverseLogger.event(
+                f"QUANTUM BOX WAS EMPTY: {box.id}"
+            )
 
         self.quantum_boxes.remove(box)
         self.statistics.record_quantum_box_disappeared()
 
-        UniverseLogger.event(f"QUANTUM BOX DISAPPEARED: {box.id}")
+        UniverseLogger.event(
+            f"QUANTUM BOX DISAPPEARED: {box.id}"
+        )
 
         return event
+
+    def manifest_cat(
+        self,
+        name,
+        source,
+        position=None,
+        color="black",
+        fur_length="short",
+        pattern="solid",
+        eye_color="green",
+        sex="female"
+    ):
+        cats = getattr(self, "cats_layer", None)
+
+        if cats is None:
+            cats = Cats(self)
+            self.cats_layer = cats
+
+        cat = cats.create_cat(
+            name=name,
+            color=color,
+            fur_length=fur_length,
+            pattern=pattern,
+            eye_color=eye_color,
+            sex=sex,
+            origin=source
+        )
+
+        if cat is None:
+            return None
+
+        if position is not None:
+            cat["position"] = dict(position)
+
+        entity = self.create_entity(
+            name=name,
+            profile=cat
+        )
+
+        entity.cat_data = cat
+
+        event = {
+            "name": "cat_manifested",
+            "cat": name,
+            "source": source,
+            "position": (
+                dict(position)
+                if position is not None
+                else None
+            ),
+            "tick": self.quantum_state["tick_count"]
+        }
+
+        self.quantum_events.append(event)
+        self.statistics.record_cat_created()
+
+        UniverseLogger.event(
+            f"CAT MANIFESTED: {name} FROM={source}"
+        )
+
+        return {
+            "cat": cat,
+            "entity": entity,
+            "event": event
+        }
 
     def create_quantum_box(self, rng=None):
         box = QuantumBox(rng=rng)
@@ -684,19 +762,16 @@ class Universe:
 
 
             if result == "cat":
-                event = {
-                    "name": "cat_manifestation_requested",
-                    "source": "cat_distribution_system",
-                    "collapse_cause": "spontaneous",
-                    "box_id": box.id,
-                    "position": box.position.copy(),
-                    "observer": None,
-                    "tick": self.quantum_state["tick_count"]
-                }
+                manifestation = self.manifest_cat(
+                    name=f"cat_from_{box.id}",
+                    source="quantum_box_spontaneous_collapse",
+                    position=box.position
+                )
 
-                self.statistics.record_cat_created()
-
-                self.quantum_events.append(event)
+                event = manifestation["event"]
+                event["collapse_cause"] = "spontaneous"
+                event["box_id"] = box.id
+                event["observer"] = None
 
                 UniverseLogger.event(
                     f"CAT MANIFESTS FROM SPONTANEOUS "
@@ -727,7 +802,7 @@ class Universe:
             return None
 
         return self.quantum_error_boundary.execute(
-            operation=self._tick_quantum_unprotected,
+            operation=self.tick_quantum_unprotected,
             source_component="universe",
             source_operation="tick_quantum"
         )
@@ -761,26 +836,583 @@ class Universe:
 
         self.universe_history.append(snapshot)
 
-    def trigger_test_quantum_error(self):
-        def broken_quantum_operation():
-            raise RuntimeError(
-                "Test quantum geometry failure."
+    def resolve_quantum_pair_consumption(
+        self,
+        first,
+        second
+    ):
+        if not first._is_quantum_counterpart_of(
+            second
+        ):
+            raise ValueError(
+                "Cronenbergs are not quantum counterparts."
             )
+
+        if not first.active or not second.active:
+            raise ValueError(
+                "Quantum pair consumption requires "
+                "two active Cronenbergs."
+            )
+
+        pair_id = first.quantum_state.get(
+            "pair_id"
+        )
+
+        combined_size = (
+            float(first.size)
+            + float(second.size)
+        )
+
+        combined_energy = (
+            max(0.0, float(first.energy))
+            + max(0.0, float(second.energy))
+        )
+
+        retained_energy = (
+            combined_energy * 0.40
+        )
+
+        released_energy = (
+            combined_energy * 0.35
+        )
+
+        dark_energy = (
+            combined_energy * 0.25
+        )
+
+        recombined_size = (
+            combined_size * 0.50
+        )
+
+        recombined = Cronenberg(
+            error=RuntimeError(
+                "Quantum counterpart consumption "
+                "caused recombination."
+            ),
+            source_component=(
+                "cronenberg_quantum_pair_consumption"
+            ),
+            source_operation="consume",
+            quantum_tick=self.quantum_state[
+                "tick_count"
+            ]
+        )
+
+        recombined.state = (
+            "born_from_quantum_pair_consumption"
+        )
+
+        recombined.location = first.location
+
+        recombined.current_layer = getattr(
+            first,
+            "current_layer",
+            None
+        )
+
+        recombined.size = recombined_size
+        recombined.juice_value = recombined_size
+        recombined.energy = retained_energy
+
+        recombined.age = max(
+            first.age,
+            second.age
+        )
+
+        recombined.quantum_state = {
+            "spin": 0.0,
+            "entangled": False,
+            "pair_id": None,
+            "counterpart_id": None,
+            "counterpart_potential": True,
+            "counterpart_manifested": False
+        }
+
+        recombined.recombined_from = [
+            first.id,
+            second.id
+        ]
+
+        recombined.origin.update({
+            "recombined_from": list(
+                recombined.recombined_from
+            ),
+            "former_pair_id": pair_id,
+            "consumption_location": first.location,
+            "released_energy": released_energy,
+            "dark_energy_created": dark_energy
+        })
+
+        first.active = False
+        second.active = False
+
+        first.state = (
+            "destroyed_by_quantum_pair_consumption"
+        )
+
+        second.state = (
+            "destroyed_by_quantum_pair_consumption"
+        )
+
+        first.location = (
+            "quantum_consumption_history"
+        )
+
+        second.location = (
+            "quantum_consumption_history"
+        )
+
+        first.recombined_into = recombined.id
+        second.recombined_into = recombined.id
+
+        first.quantum_state.update({
+            "entangled": False
+        })
+
+        second.quantum_state.update({
+            "entangled": False
+        })
+
+        self.energy_pool += released_energy
+
+        if not hasattr(self, "dark_energy"):
+            self.dark_energy = 0.0
+
+        self.dark_energy += dark_energy
+
+        self.cronenbergs.append(
+            recombined
+        )
+
+        self.cronenberg_count += 1
+
+        self.add_entity(
+            recombined
+        )
+
+        event = {
+            "name": (
+                "cronenberg_quantum_pair_consumed"
+            ),
+            "pair_id": pair_id,
+            "participants": [
+                first.id,
+                second.id
+            ],
+            "recombined_id": recombined.id,
+            "combined_size": combined_size,
+            "recombined_size": recombined_size,
+            "combined_energy": combined_energy,
+            "retained_energy": retained_energy,
+            "released_energy": released_energy,
+            "dark_energy_created": dark_energy,
+            "tick": self.quantum_state[
+                "tick_count"
+            ]
+        }
+
+        self.quantum_events.append(
+            event
+        )
+
+        UniverseLogger.event(
+            "CRONENBERG QUANTUM PAIR CONSUMED: "
+            f"{first.id} <-> {second.id} "
+            f"-> {recombined.id}"
+        )
+
+        return {
+            "result": (
+                "quantum_pair_consumption_recombined"
+            ),
+            "first": first,
+            "second": second,
+            "recombined": recombined,
+            "event": event
+        }
+
+    def merge_cronenberg_quantum_pair(
+        self,
+        first,
+        second,
+        source="cronenberg_quantum_pair_encounter"
+    ):
+        if first is second:
+            raise ValueError(
+                "Quantum merge requires two different Cronenbergs."
+            )
+
+        if first not in self.cronenbergs:
+            raise ValueError(
+                "First Cronenberg is not registered."
+            )
+
+        if second not in self.cronenbergs:
+            raise ValueError(
+                "Second Cronenberg is not registered."
+            )
+
+        first_pair_id = first.quantum_state.get(
+            "pair_id"
+        )
+
+        second_pair_id = second.quantum_state.get(
+            "pair_id"
+        )
+
+        if (
+            first_pair_id is None
+            or first_pair_id != second_pair_id
+        ):
+            raise ValueError(
+                "Cronenbergs do not belong to the same quantum pair."
+            )
+
+        if (
+            first.quantum_state.get("counterpart_id")
+            != second.id
+            or second.quantum_state.get("counterpart_id")
+            != first.id
+        ):
+            raise ValueError(
+                "Cronenbergs are not mutual quantum counterparts."
+            )
+
+        if not first.active or not second.active:
+            raise ValueError(
+                "Only active Cronenbergs can merge."
+            )
+
+        merged = Cronenberg(
+            error=RuntimeError(
+                "Cronenberg quantum pair merged."
+            ),
+            source_component=(
+                "cronenberg_quantum_pair_merge"
+            ),
+            source_operation=source,
+            quantum_tick=self.quantum_state[
+                "tick_count"
+            ]
+        )
+
+        merged.state = "born_from_quantum_merge"
+        merged.location = first.location
+        merged.current_layer = getattr(
+            first,
+            "current_layer",
+            None
+        )
+
+        merged.size = (
+            float(first.size)
+            + float(second.size)
+        )
+
+        merged.energy = (
+            float(first.energy)
+            + float(second.energy)
+        )
+
+        merged.juice_value = merged.size
+        merged.age = max(
+            first.age,
+            second.age
+        )
+
+        merged.quantum_state = {
+            "spin": 0.0,
+            "entangled": False,
+            "pair_id": None,
+            "counterpart_id": None
+        }
+
+        merged.merged_from = [
+            first.id,
+            second.id
+        ]
+
+        merged.origin.update({
+            "merged_from": list(
+                merged.merged_from
+            ),
+            "former_pair_id": first_pair_id,
+            "merge_location": first.location
+        })
+
+        first.active = False
+        second.active = False
+
+        first.state = "quantum_merged"
+        second.state = "quantum_merged"
+
+        first.merged_into = merged.id
+        second.merged_into = merged.id
+
+        first.location = "merged_history"
+        second.location = "merged_history"
+
+        first.quantum_state.update({
+            "entangled": False
+        })
+
+        second.quantum_state.update({
+            "entangled": False
+        })
+
+        self.cronenbergs.append(
+            merged
+        )
+
+        self.cronenberg_count += 1
+
+        self.add_entity(
+            merged
+        )
+
+        event = {
+            "name": "cronenberg_quantum_pair_merged",
+            "pair_id": first_pair_id,
+            "parents": [
+                first.id,
+                second.id
+            ],
+            "merged_id": merged.id,
+            "merged_size": merged.size,
+            "merged_energy": merged.energy,
+            "merged_spin": (
+                merged.quantum_state["spin"]
+            ),
+            "source": source,
+            "tick": self.quantum_state[
+                "tick_count"
+            ]
+        }
+
+        self.quantum_events.append(
+            event
+        )
+
+        UniverseLogger.event(
+            "CRONENBERG QUANTUM PAIR MERGED: "
+            f"{first.id} + {second.id} "
+            f"-> {merged.id}"
+        )
+
+        return {
+            "result": "quantum_pair_merged",
+            "first": first,
+            "second": second,
+            "merged": merged,
+            "event": event
+        }
+
+    def create_cronenberg_quantum_counterpart(
+        self,
+        original,
+        source="serpent_d20_hidden_roll"
+    ):
+        if original not in self.cronenbergs:
+            raise ValueError(
+                "Original Cronenberg is not registered "
+                "in this universe."
+            )
+
+        if not getattr(original, "is_alive", False):
+            raise ValueError(
+                "Quantum counterpart requires "
+                "a living Cronenberg."
+            )
+
+        existing_counterpart_id = (
+            original.quantum_state.get(
+                "counterpart_id"
+            )
+        )
+
+        if existing_counterpart_id is not None:
+            existing = next(
+                (
+                    cronenberg
+                    for cronenberg in self.cronenbergs
+                    if cronenberg.id
+                    == existing_counterpart_id
+                ),
+                None
+            )
+
+            if existing is not None:
+                return {
+                    "result": "counterpart_already_exists",
+                    "original": original,
+                    "counterpart": existing,
+                    "pair_id": original.quantum_state[
+                        "pair_id"
+                    ]
+                }
+
+        pair_id = (
+            f"cronenberg_pair_"
+            f"{uuid.uuid4().hex[:8]}"
+        )
+
+        counterpart = Cronenberg(
+            error=RuntimeError(
+                "Cronenberg quantum counterpart "
+                "manifestation."
+            ),
+            source_component=(
+                "cronenberg_quantum_counterpart"
+            ),
+            source_operation=source,
+            quantum_tick=self.quantum_state[
+                "tick_count"
+            ]
+        )
+
+        counterpart.size = original.size
+        counterpart.juice_value = original.juice_value
+        counterpart.energy = original.energy
+        counterpart.age = original.age
+        counterpart.state = "born_as_quantum_counterpart"
+        counterpart.location = "quantum_layer"
+
+        counterpart.quantum_state = {
+            "spin": -float(
+                original.quantum_state.get(
+                    "spin",
+                    0.5
+                )
+            ),
+            "entangled": True,
+            "pair_id": pair_id,
+            "counterpart_id": original.id,
+            "counterpart_potential": True,
+            "counterpart_manifested": True
+        }
+
+        original.quantum_state.update({
+            "entangled": True,
+            "pair_id": pair_id,
+            "counterpart_id": counterpart.id,
+            "counterpart_potential": True,
+            "counterpart_manifested": True
+        })
+
+        metadata = {
+            "pair_id": pair_id,
+            "created_by": source,
+            "spin_relation": "opposite"
+        }
+
+        original.quantum_link_system.add_link(
+            target_id=counterpart.id,
+            link_type="quantum_counterpart",
+            strength=1.0,
+            created_tick=self.quantum_state[
+                "tick_count"
+            ],
+            metadata=metadata
+        )
+
+        counterpart.quantum_link_system.add_link(
+            target_id=original.id,
+            link_type="quantum_counterpart",
+            strength=1.0,
+            created_tick=self.quantum_state[
+                "tick_count"
+            ],
+            metadata=metadata
+        )
+
+        counterpart.origin.update({
+            "counterpart_of": original.id,
+            "pair_id": pair_id,
+            "spin_relation": "opposite",
+            "manifested_in": "quantum_layer"
+        })
+
+        self.cronenbergs.append(
+            counterpart
+        )
+
+        self.cronenberg_count += 1
+
+        self.add_entity(
+            counterpart
+        )
+
+        event = {
+            "name": (
+                "cronenberg_quantum_counterpart_created"
+            ),
+            "original_id": original.id,
+            "counterpart_id": counterpart.id,
+            "pair_id": pair_id,
+            "original_spin": (
+                original.quantum_state["spin"]
+            ),
+            "counterpart_spin": (
+                counterpart.quantum_state["spin"]
+            ),
+            "source": source,
+            "tick": self.quantum_state[
+                "tick_count"
+            ]
+        }
+
+        self.quantum_events.append(
+            event
+        )
+
+        UniverseLogger.event(
+            "CRONENBERG QUANTUM COUNTERPART "
+            f"CREATED: {original.id} "
+            f"<-> {counterpart.id}"
+        )
+
+        return {
+            "result": "counterpart_created",
+            "original": original,
+            "counterpart": counterpart,
+            "pair_id": pair_id,
+            "event": event
+        }
+
+    def trigger_quantum_error(
+        self,
+        error,
+        source_component,
+        source_operation
+    ):
+        if not isinstance(error, Exception):
+            raise TypeError(
+                "Quantum error must be an Exception."
+            )
+
+        def broken_quantum_operation():
+            raise error
 
         return self.quantum_error_boundary.execute(
             operation=broken_quantum_operation,
+            source_component=source_component,
+            source_operation=source_operation
+        )
+
+    def trigger_test_quantum_error(self):
+        return self.trigger_quantum_error(
+            error=RuntimeError(
+                "Test quantum geometry failure."
+            ),
             source_component="quantum_geometry_engine",
             source_operation="test_failure"
         )
 
-
-
-
-
-
-
     def tick_entities(self):
         for entity in list(self.entities):
+            if not getattr(entity, "active", True):
+                continue
+
             tick = getattr(entity, "tick", None)
 
             if callable(tick):
@@ -820,3 +1452,6 @@ class Universe:
 
 
         UniverseLogger.event("universe tick complete")
+
+
+

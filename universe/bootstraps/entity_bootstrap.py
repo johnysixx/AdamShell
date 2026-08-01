@@ -17,7 +17,6 @@ class EntityBootstrap:
         self._create_serpent()
         self._create_lilith()
         self._create_pazuzu_masculine_principle()
-        self._record_first_fire_interaction()
 
         return (
             self.god,

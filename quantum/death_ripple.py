@@ -1,4 +1,4 @@
-﻿import random
+import random
 
 
 class QuantumDeathRipple:
@@ -54,7 +54,9 @@ class QuantumDeathRipple:
         else:
             result = (
                 self.d20_registry
-                .rotate_all()
+                .rotate_all(
+                    rng=rng
+                )
             )
 
         record = {
