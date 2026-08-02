@@ -1,3 +1,5 @@
+from lifecycle import LifeCycleSystem
+from cats.cat_lifecycle import CatLifeCycleHandler
 import uuid
 from typing import Self
 
@@ -139,6 +141,22 @@ class Universe:
         )
 
         # universe is now state-less (entity driven)
+
+        self.life_cycle_system = (
+            LifeCycleSystem(
+                self
+            )
+        )
+
+        self.cat_life_cycle_handler = (
+            CatLifeCycleHandler(
+                self
+            )
+        )
+
+        self.life_cycle_system.register(
+            self.cat_life_cycle_handler
+        )
 
         UniverseLogger.boot(f"Root reality prepared: {self.id}")
         UniverseLogger.boot("Physical universe has not started yet.")
@@ -1557,6 +1575,9 @@ class Universe:
         self.tick_spacetime()
         self.tick_quantum_unprotected()
         self.update_physics()
+
+        self.life_cycle_system.tick_day()
+
         self.tick_entities()
 
         self.cronenberg_population_statistics.record_snapshot()
