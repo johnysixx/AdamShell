@@ -14,8 +14,8 @@ class DiceBox:
             "d6",
             "d8",
             "d10",
-            "d12",
-            "d100"
+            "d10_percentile",
+            "d12"
         ]
 
         self.public_state = {
@@ -49,14 +49,31 @@ class DiceBox:
             list(self.contents)
         )
 
-        sides = int(
-            die_name[1:]
+        is_percentile = (
+            die_name == "d10_percentile"
         )
 
-        value = int(
+        sides = (
+            10
+            if is_percentile
+            else int(die_name[1:])
+        )
+
+        raw_value = int(
             rng.randint(
                 1,
                 sides
+            )
+        )
+
+        value = (
+            0
+            if is_percentile
+            and raw_value == 10
+            else (
+                raw_value * 10
+                if is_percentile
+                else raw_value
             )
         )
 
@@ -67,6 +84,8 @@ class DiceBox:
             "die": die_name,
             "sides": sides,
             "value": value,
+            "raw_value": raw_value,
+            "is_percentile": is_percentile,
             "location": self.location,
             "removed_from_box": False,
             "visibility": (
