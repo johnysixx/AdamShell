@@ -30,6 +30,9 @@ class CatBirthResolver:
 
         self.canonical_profile_occurrences = 0
 
+        self.woodoo_birth_count = 0
+        self.woodoo_rebirth_chance = 0.001
+
     def resolve_profile(
         self,
         rng=None
@@ -174,7 +177,8 @@ class CatBirthResolver:
 
         canonical_result = (
             self._resolve_canonical_profile(
-                profile
+                profile,
+                rng=rng
             )
         )
 
@@ -667,7 +671,8 @@ class CatBirthResolver:
 
     def _resolve_canonical_profile(
         self,
-        profile
+        profile,
+        rng=None
     ):
         is_canonical = (
             profile == self.canonical_profile
@@ -679,7 +684,8 @@ class CatBirthResolver:
                 "occurrence": 0,
                 "identity": None,
                 "profile": dict(profile),
-                "special_birth_event": None
+                "special_birth_event": None,
+                "woodoo_rebirth": False
             }
 
         self.canonical_profile_occurrences += 1
@@ -716,17 +722,114 @@ class CatBirthResolver:
                 "woodoo_birth_chaos"
             )
 
-        else:
-            identity = None
-            special_birth_event = None
+            self.woodoo_birth_count += 1
 
-        return {
+        else:
+            rebirth = self._resolve_woodoo_rebirth(
+                profile=profile,
+                rng=rng
+            )
+
+            identity = rebirth[
+                "identity"
+            ]
+
+            resolved_profile = dict(
+                rebirth["profile"]
+            )
+
+            special_birth_event = (
+                rebirth[
+                    "special_birth_event"
+                ]
+            )
+
+        result = {
             "matched": True,
             "occurrence": occurrence,
             "identity": identity,
             "profile": resolved_profile,
             "special_birth_event": (
                 special_birth_event
+            ),
+            "woodoo_rebirth": (
+                identity == "woodoo"
+                and occurrence > 3
+            )
+        }
+
+        if (
+            identity == "woodoo"
+            and occurrence > 3
+        ):
+            result[
+                "woodoo_birth_number"
+            ] = self.woodoo_birth_count
+
+            result[
+                "rebirth_probability"
+            ] = self.woodoo_rebirth_chance
+
+        return result
+
+    def _resolve_woodoo_rebirth(
+        self,
+        profile,
+        rng=None
+    ):
+        if self.woodoo_birth_count < 1:
+            return {
+                "matched": False,
+                "occurrence": 0,
+                "identity": None,
+                "profile": dict(profile),
+                "special_birth_event": None,
+                "woodoo_rebirth": False
+            }
+
+        if rng is None:
+            import random
+            rng = random
+
+        reborn = (
+            rng.random()
+            < self.woodoo_rebirth_chance
+        )
+
+        if not reborn:
+            return {
+                "matched": False,
+                "occurrence": 0,
+                "identity": None,
+                "profile": dict(profile),
+                "special_birth_event": None,
+                "woodoo_rebirth": False
+            }
+
+        self.woodoo_birth_count += 1
+
+        woodoo_profile = {
+            "color": "black",
+            "fur_length": "short",
+            "pattern": "solid",
+            "eye_color": "gold",
+            "sex": "female"
+        }
+
+        return {
+            "matched": False,
+            "occurrence": 0,
+            "identity": "woodoo",
+            "profile": woodoo_profile,
+            "special_birth_event": (
+                "woodoo_rebirth_chaos"
+            ),
+            "woodoo_rebirth": True,
+            "woodoo_birth_number": (
+                self.woodoo_birth_count
+            ),
+            "rebirth_probability": (
+                self.woodoo_rebirth_chance
             )
         }
 
