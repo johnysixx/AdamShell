@@ -354,6 +354,23 @@ class CatBirthResolver:
                     trait_name
                 )
 
+            if identity not in cat[
+                "special_traits"
+            ]:
+                cat["special_traits"].append(
+                    identity
+                )
+
+        special_birth_result = None
+
+        if identity == "pazuzu":
+            special_birth_result = (
+                self.meeting_place
+                .trigger_pazuzu_birth_dice_resonance(
+                    rng=rng
+                )
+            )
+
         event = {
             "name": "cat_born_from_dice",
             "cat": cat_name,
@@ -374,6 +391,9 @@ class CatBirthResolver:
                 canonical.get(
                     "special_birth_event"
                 )
+            ),
+            "special_birth_result": (
+                special_birth_result
             ),
             "birth": birth,
             "created": True
