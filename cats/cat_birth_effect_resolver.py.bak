@@ -102,9 +102,34 @@ class CatBirthEffectResolver:
             )
 
         elif identity == "garfield":
-            result = self._execute_garfield_effects(
-                cat_name=cat_name,
-                rng=rng
+            effects = [
+                self._emit_non_dice_effect(
+                    effect_name=effect_name,
+                    cat_name=cat_name,
+                    identity="garfield"
+                )
+                for effect_name
+                in self.NON_DICE_EFFECTS
+            ]
+
+            result = {
+                "name": (
+                    "garfield_birth_all_"
+                    "non_dice_effects"
+                ),
+                "cat": cat_name,
+                "identity": "garfield",
+                "effects": effects,
+                "effect_names": list(
+                    self.NON_DICE_EFFECTS
+                ),
+                "dice_rotated": False,
+                "triggered": True
+            }
+
+            self._record(
+                result,
+                emit_to_meeting_place=True
             )
 
         elif (
@@ -212,114 +237,6 @@ class CatBirthEffectResolver:
 
         self.history.append(
             result
-        )
-
-        return result
-
-    def _execute_garfield_effects(
-        self,
-        cat_name,
-        rng=None
-    ):
-        rng = rng or random
-
-        # 1–7 představuje všech sedm neprázdných
-        # kombinací tří možných efektů.
-        effect_mask = rng.randint(
-            1,
-            7
-        )
-
-        force_next_woodoo = bool(
-            effect_mask & 1
-        )
-
-        rotate_cat_d20 = bool(
-            effect_mask & 2
-        )
-
-        rotate_quantum_d20 = bool(
-            effect_mask & 4
-        )
-
-        effects = []
-
-        if force_next_woodoo:
-            self.universe.force_next_woodoo_birth = True
-
-            effects.append({
-                "name": (
-                    "garfield_forces_next_"
-                    "woodoo_birth"
-                ),
-                "effect": "force_next_woodoo",
-                "pending": True,
-                "triggered": True
-            })
-
-        if rotate_cat_d20:
-            cat_d20_result = (
-                self.meeting_place
-                .turn_cat_d20_in_box(
-                    rng=rng
-                )
-            )
-
-            effects.append({
-                "name": (
-                    "garfield_rotates_cat_d20"
-                ),
-                "effect": "rotate_cat_d20",
-                "result": cat_d20_result,
-                "triggered": True
-            })
-
-        if rotate_quantum_d20:
-            quantum_d20_result = (
-                self.universe
-                .quantum_die
-                .roll(
-                    rng=rng
-                )
-            )
-
-            effects.append({
-                "name": (
-                    "garfield_rotates_quantum_d20"
-                ),
-                "effect": "rotate_quantum_d20",
-                "result": quantum_d20_result,
-                "triggered": True
-            })
-
-        result = {
-            "name": (
-                "garfield_birth_effect_combination"
-            ),
-            "cat": cat_name,
-            "identity": "garfield",
-            "effect_mask": effect_mask,
-            "effect_names": [
-                effect["effect"]
-                for effect in effects
-            ],
-            "effects": effects,
-            "force_next_woodoo": (
-                force_next_woodoo
-            ),
-            "cat_d20_rotated": (
-                rotate_cat_d20
-            ),
-            "quantum_d20_rotated": (
-                rotate_quantum_d20
-            ),
-            "effect_count": len(effects),
-            "triggered": True
-        }
-
-        self._record(
-            result,
-            emit_to_meeting_place=True
         )
 
         return result

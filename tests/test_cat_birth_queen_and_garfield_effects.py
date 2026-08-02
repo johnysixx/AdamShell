@@ -104,68 +104,60 @@ class CatBirthQueenAndGarfieldEffectsTests(
             "non_dice"
         )
 
-    def test_garfield_runs_all_non_dice_effects(self):
-        dice_history_before = len(
-            self.bar
-            .dice_box
-            .rotation_history
-        ) if hasattr(
-            self.bar.dice_box,
-            "rotation_history"
-        ) else 0
-
+    def test_garfield_selects_one_valid_effect_combination(
+        self
+    ):
         result = self.effects.execute(
             identity="garfield",
             cat_name="garfield",
             rng=FirstChoiceRng(),
             special_birth_event=(
-                "garfield_birth_all_"
-                "non_dice_effects"
+                "garfield_birth_effect_"
+                "combination"
             )
         )
 
-        dice_history_after = len(
-            self.bar
-            .dice_box
-            .rotation_history
-        ) if hasattr(
-            self.bar.dice_box,
-            "rotation_history"
-        ) else 0
-
         self.assertEqual(
             result["name"],
-            "garfield_birth_all_non_dice_effects"
-        )
-
-        self.assertFalse(
-            result["dice_rotated"]
+            "garfield_birth_effect_combination"
         )
 
         self.assertEqual(
-            dice_history_before,
-            dice_history_after
+            result["effect_mask"],
+            1
         )
 
         self.assertEqual(
             result["effect_names"],
             [
-                "woodoo_birth_chaos",
-                "woodoo_rebirth_chaos"
+                "force_next_woodoo"
             ]
         )
 
         self.assertEqual(
-            len(result["effects"]),
-            2
+            result["effect_count"],
+            1
         )
 
         self.assertTrue(
-            all(
-                effect["triggered"]
-                for effect
-                in result["effects"]
-            )
+            result["force_next_woodoo"]
+        )
+
+        self.assertFalse(
+            result["cat_d20_rotated"]
+        )
+
+        self.assertFalse(
+            result["quantum_d20_rotated"]
+        )
+
+        self.assertTrue(
+            self.universe
+            .force_next_woodoo_birth
+        )
+
+        self.assertTrue(
+            result["triggered"]
         )
 
 

@@ -219,51 +219,12 @@ class CatBirthResolver:
 
             self.universe.next_cat_birth_white = False
 
-        force_next_woodoo = bool(
-            getattr(
-                self.universe,
-                "force_next_woodoo_birth",
-                False
+        canonical_result = (
+            self._resolve_canonical_profile(
+                profile,
+                rng=rng
             )
         )
-
-        if force_next_woodoo:
-            self.universe.force_next_woodoo_birth = False
-
-            self.canonical_profile_occurrences += 1
-            self.woodoo_birth_count += 1
-
-            woodoo_profile = dict(
-                self.canonical_profile
-            )
-
-            woodoo_profile["eye_color"] = "gold"
-
-            canonical_result = {
-                "matched": True,
-                "occurrence": (
-                    self.canonical_profile_occurrences
-                ),
-                "identity": "woodoo",
-                "profile": woodoo_profile,
-                "special_birth_event": (
-                    "woodoo_rebirth_chaos"
-                ),
-                "woodoo_rebirth": True,
-                "woodoo_birth_number": (
-                    self.woodoo_birth_count
-                ),
-                "forced_birth": True,
-                "forced_by": "garfield"
-            }
-
-        else:
-            canonical_result = (
-                self._resolve_canonical_profile(
-                    profile,
-                    rng=rng
-                )
-            )
 
         resolved_profile = dict(
             canonical_result["profile"]
@@ -773,8 +734,8 @@ class CatBirthResolver:
                 ),
                 "profile": dict(profile),
                 "special_birth_event": (
-                    "garfield_birth_effect_"
-                    "combination"
+                    "garfield_birth_all_"
+                    "non_dice_effects"
                     if occurrence == 1
                     else None
                 ),
