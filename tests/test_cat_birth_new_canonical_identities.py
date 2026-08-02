@@ -54,8 +54,9 @@ class CatBirthNewCanonicalIdentitiesTests(
             "queen_elisabeth"
         )
 
-        self.assertIsNone(
-            result["special_birth_event"]
+        self.assertEqual(
+            result["special_birth_event"],
+            "queen_elisabeth_birth_effects"
         )
 
     def test_second_queen_profile_is_mia(self):
@@ -145,8 +146,9 @@ class CatBirthNewCanonicalIdentitiesTests(
             "garfield"
         )
 
-        self.assertIsNone(
-            result["special_birth_event"]
+        self.assertEqual(
+            result["special_birth_event"],
+            "garfield_birth_all_non_dice_effects"
         )
 
     def test_later_garfield_profile_is_ordinary_cat(self):

@@ -1,3 +1,7 @@
+from cats.cat_birth_effect_resolver import (
+    CatBirthEffectResolver
+)
+
 from .cat_trait_dice_mapping import CatTraitDiceMapping
 from .cat_genetics_validator import CatGeneticsValidator
 
@@ -10,6 +14,13 @@ class CatBirthResolver:
     ):
         self.universe = universe
         self.meeting_place = meeting_place
+
+        self.birth_effect_resolver = (
+            CatBirthEffectResolver(
+                universe,
+                meeting_place
+            )
+        )
         self.history = []
 
         self.genetics_validator = (
@@ -385,106 +396,19 @@ class CatBirthResolver:
                     identity
                 )
 
-        special_birth_result = None
-
-        if identity == "pazuzu":
-            special_birth_result = (
-                self.meeting_place
-                .trigger_pazuzu_birth_dice_resonance(
-                    rng=rng
+        special_birth_result = (
+            self.birth_effect_resolver
+            .execute(
+                identity=identity,
+                cat_name=cat_name,
+                rng=rng,
+                special_birth_event=(
+                    canonical.get(
+                        "special_birth_event"
+                    )
                 )
             )
-
-        elif identity == "gib":
-            d20_rotation = (
-                self.universe
-                .d20_registry
-                .rotate_all(
-                    rng=rng
-                )
-            )
-
-            dice_box_rotation = (
-                self.meeting_place
-                .dice_box
-                .rotate_all_dice(
-                    rng=rng
-                )
-            )
-
-            special_birth_result = {
-                "name": (
-                    "gib_birth_global_resonance"
-                ),
-                "cat": cat_name,
-                "d20_rotation": d20_rotation,
-                "dice_box_rotation": (
-                    dice_box_rotation
-                ),
-                "registered_d20_count": (
-                    d20_rotation[
-                        "rotated_count"
-                    ]
-                ),
-                "bar_dice_count": (
-                    dice_box_rotation[
-                        "rotated_count"
-                    ]
-                ),
-                "triggered": True
-            }
-
-            self.universe.quantum_events.append(
-                special_birth_result
-            )
-
-        elif identity == "mia":
-            d20_rotation = (
-                self.universe
-                .d20_registry
-                .rotate_all(
-                    rng=rng
-                )
-            )
-
-            dice_box_rotation = (
-                self.meeting_place
-                .dice_box
-                .rotate_all_dice(
-                    rng=rng
-                )
-            )
-
-            special_birth_result = {
-                "name": (
-                    "mia_birth_global_rotation"
-                ),
-                "cat": cat_name,
-                "identity": "mia",
-                "d20_rotation": d20_rotation,
-                "dice_box_rotation": (
-                    dice_box_rotation
-                ),
-                "registered_d20_count": (
-                    d20_rotation[
-                        "rotated_count"
-                    ]
-                ),
-                "bar_dice_count": (
-                    dice_box_rotation[
-                        "rotated_count"
-                    ]
-                ),
-                "triggered": True
-            }
-
-            self.universe.quantum_events.append(
-                special_birth_result
-            )
-
-            self.meeting_place.emit_event(
-                special_birth_result
-            )
+        )
 
         event = {
             "name": "cat_born_from_dice",
@@ -767,7 +691,12 @@ class CatBirthResolver:
                 "special_birth_event": (
                     "mia_birth_global_rotation"
                     if identity == "mia"
-                    else None
+                    else (
+                        "queen_elisabeth_birth_effects"
+                        if identity
+                        == "queen_elisabeth"
+                        else None
+                    )
                 ),
                 "woodoo_rebirth": False
             }
@@ -788,7 +717,12 @@ class CatBirthResolver:
                     else None
                 ),
                 "profile": dict(profile),
-                "special_birth_event": None,
+                "special_birth_event": (
+                    "garfield_birth_all_"
+                    "non_dice_effects"
+                    if occurrence == 1
+                    else None
+                ),
                 "woodoo_rebirth": False
             }
 
