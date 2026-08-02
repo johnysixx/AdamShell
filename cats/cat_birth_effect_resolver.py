@@ -135,12 +135,101 @@ class CatBirthEffectResolver:
         elif (
             identity == "woodoo"
             and special_birth_event
-            in self.NON_DICE_EFFECTS
+            == "woodoo_birth_chaos"
         ):
-            result = self._emit_non_dice_effect(
-                effect_name=special_birth_event,
-                cat_name=cat_name,
-                identity="woodoo"
+            d20_rotation = (
+                self.universe
+                .d20_registry
+                .rotate_all(
+                    rng=rng
+                )
+            )
+
+            result = {
+                "name": (
+                    "woodoo_birth_d20_rotation"
+                ),
+                "cat": cat_name,
+                "identity": "woodoo",
+                "d20_rotation": d20_rotation,
+                "registered_d20_count": (
+                    d20_rotation[
+                        "rotated_count"
+                    ]
+                ),
+                "bar_dice_rotated": False,
+                "triggered": True
+            }
+
+            self._record(
+                result,
+                emit_to_meeting_place=True
+            )
+
+        elif (
+            identity == "woodoo"
+            and special_birth_event
+            == "woodoo_rebirth_chaos"
+        ):
+            quantum_space = (
+                self.universe
+                .quantum_space
+            )
+
+            previous_configuration = (
+                quantum_space.configuration_id
+            )
+
+            previous_reconfiguration_count = (
+                quantum_space
+                .reconfiguration_count
+            )
+
+            compatible_rng = (
+                rng
+                if (
+                    rng is not None
+                    and hasattr(rng, "randint")
+                    and hasattr(rng, "uniform")
+                    and hasattr(rng, "choice")
+                )
+                else None
+            )
+
+            quantum_space.reconfigure(
+                cause="woodoo_rebirth",
+                rng=compatible_rng
+            )
+
+            self.universe.next_cat_birth_white = True
+
+            result = {
+                "name": (
+                    "woodoo_rebirth_quantum_"
+                    "reconfiguration"
+                ),
+                "cat": cat_name,
+                "identity": "woodoo",
+                "previous_configuration": (
+                    previous_configuration
+                ),
+                "new_configuration": (
+                    quantum_space.configuration_id
+                ),
+                "previous_reconfiguration_count": (
+                    previous_reconfiguration_count
+                ),
+                "reconfiguration_count": (
+                    quantum_space
+                    .reconfiguration_count
+                ),
+                "next_cat_birth_white": True,
+                "triggered": True
+            }
+
+            self._record(
+                result,
+                emit_to_meeting_place=True
             )
 
         else:

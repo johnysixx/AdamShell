@@ -206,6 +206,19 @@ class CatBirthResolver:
             genetics_result["profile"]
         )
 
+        woodoo_white_trace_applied = bool(
+            getattr(
+                self.universe,
+                "next_cat_birth_white",
+                False
+            )
+        )
+
+        if woodoo_white_trace_applied:
+            profile["color"] = "white"
+
+            self.universe.next_cat_birth_white = False
+
         canonical_result = (
             self._resolve_canonical_profile(
                 profile,
@@ -238,6 +251,9 @@ class CatBirthResolver:
             ),
             "cronenberg_count": len(
                 cronenbergs_created
+            ),
+            "woodoo_white_trace_applied": (
+                woodoo_white_trace_applied
             ),
             "resolved": True,
             "visibility": (
