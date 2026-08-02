@@ -1,3 +1,8 @@
+from cats.development_resolver import (
+    CatDevelopmentResolver
+)
+
+
 class KittenBirthResolver:
 
     def __init__(
@@ -6,6 +11,12 @@ class KittenBirthResolver:
     ):
         self.universe = universe
         self.history = []
+
+        self.development_resolver = (
+            CatDevelopmentResolver(
+                universe
+            )
+        )
 
     def give_birth(
         self,
@@ -115,6 +126,12 @@ class KittenBirthResolver:
             kitten = manifestation["cat"]
 
             kitten["state"] = "newborn"
+
+            self.development_resolver.initialize_newborn(
+                kitten,
+                birth_day=current_day
+            )
+
             kitten["genotype"] = embryo[
                 "genotype"
             ]
@@ -155,22 +172,6 @@ class KittenBirthResolver:
                     ].append(
                         trait
                     )
-
-            kitten[
-                "reproduction"
-            ]["fertile"] = False
-
-            kitten[
-                "reproduction"
-            ]["developmental_stage"] = (
-                "newborn"
-            )
-
-            kitten[
-                "reproduction"
-            ]["reproductive_maturity"] = (
-                False
-            )
 
             kittens.append(
                 kitten

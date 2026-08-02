@@ -233,6 +233,53 @@ class KittenBirthResolverTests(
             )
         )
 
+    def test_newborn_kittens_enter_development_system(self):
+        self._start_pregnancy(
+            embryo_count=1
+        )
+
+        self.mating.advance_pregnancy(
+            self.mother,
+            days=65
+        )
+
+        result = self.birth.give_birth(
+            self.mother,
+            current_day=75
+        )
+
+        kitten = result["kittens"][0]
+        reproduction = kitten[
+            "reproduction"
+        ]
+
+        self.assertEqual(
+            kitten["age_days"],
+            0
+        )
+
+        self.assertEqual(
+            kitten["birth_day"],
+            75
+        )
+
+        self.assertEqual(
+            kitten[
+                "developmental_stage"
+            ],
+            "newborn"
+        )
+
+        self.assertFalse(
+            reproduction["fertile"]
+        )
+
+        self.assertFalse(
+            reproduction[
+                "reproductive_maturity"
+            ]
+        )
+
     def test_multiple_fathers_are_preserved(self):
         self._start_pregnancy(
             embryo_count=4
