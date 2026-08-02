@@ -17,6 +17,12 @@ class CatReproductionStateTests(
             self.universe
         )
 
+    def test_cats_layer_registers_on_universe(self):
+        self.assertIs(
+            self.universe.cats_layer,
+            self.cats
+        )
+
     def test_female_cat_can_become_pregnant(self):
         cat = self.cats.create_cat(
             name="female_cat",

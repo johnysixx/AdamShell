@@ -40,6 +40,8 @@ class CatReproduction:
             "father_name": None,
             "mating_contact": None,
             "embryos": [],
+            "litters": [],
+            "last_litter": None,
             "litters_born": 0
         }
 

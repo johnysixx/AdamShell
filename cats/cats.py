@@ -9,6 +9,9 @@ class Cats:
 
     def __init__(self, universe):
         self.universe = universe
+
+        self.universe.cats_layer = self
+
         self.cats = []
         self.events = []
         self.tick_count = 0
