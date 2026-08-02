@@ -71,6 +71,152 @@ class CatOverpopulationActivationTests(
             )
         )
 
+    def test_cat_can_accept_navigation_offer(self):
+        universe = Universe()
+
+        created = universe.manifest_cat(
+            name="accepting_cat",
+            source="test",
+            position={
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            }
+        )
+
+        cat = created["cat"]
+
+        universe.cats_layer.activate_for_cronenberg_overpopulation(
+            cat
+        )
+
+        target = (
+            universe
+            .create_cronenberg_from_quantum_error(
+                RuntimeError("target"),
+                "test",
+                "accept_navigation"
+            )
+        )
+
+        target.position = {
+            "x": 3.0,
+            "y": 0.0,
+            "z": 0.0
+        }
+
+        universe.cats_layer.offer_navigation_for_suggested_intent(
+            cat
+        )
+
+        result = (
+            universe
+            .cats_layer
+            .accept_navigation_offer(
+                cat
+            )
+        )
+
+        self.assertTrue(
+            result["accepted"]
+        )
+
+        self.assertEqual(
+            cat["intent"],
+            "hunt_nearest_cronenberg"
+        )
+
+        self.assertEqual(
+            cat["active_route_id"],
+            result["route"].route_id
+        )
+
+        self.assertEqual(
+            result["route"].state,
+            "ready"
+        )
+
+        self.assertTrue(
+            cat["navigation_offer"][
+                "accepted"
+            ]
+        )
+
+    def test_cat_can_decline_navigation_offer(self):
+        universe = Universe()
+
+        created = universe.manifest_cat(
+            name="declining_cat",
+            source="test",
+            position={
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            }
+        )
+
+        cat = created["cat"]
+
+        universe.cats_layer.activate_for_cronenberg_overpopulation(
+            cat
+        )
+
+        target = (
+            universe
+            .create_cronenberg_from_quantum_error(
+                RuntimeError("target"),
+                "test",
+                "decline_navigation"
+            )
+        )
+
+        target.position = {
+            "x": 3.0,
+            "y": 0.0,
+            "z": 0.0
+        }
+
+        universe.cats_layer.offer_navigation_for_suggested_intent(
+            cat
+        )
+
+        result = (
+            universe
+            .cats_layer
+            .decline_navigation_offer(
+                cat
+            )
+        )
+
+        self.assertTrue(
+            result["declined"]
+        )
+
+        self.assertNotIn(
+            "intent",
+            cat
+        )
+
+        self.assertNotIn(
+            "active_route_id",
+            cat
+        )
+
+        self.assertFalse(
+            result["route"].observation_active
+        )
+
+        self.assertEqual(
+            result["route"].state,
+            "released"
+        )
+
+        self.assertTrue(
+            cat["navigation_offer"][
+                "declined"
+            ]
+        )
+
     def test_veteran_cat_returns_to_bar_at_quota(self):
         universe = Universe()
 

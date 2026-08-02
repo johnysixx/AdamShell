@@ -1,4 +1,5 @@
 from core.entities.ability_set import AbilitySet
+from core.entity.components import SpatialComponent
 
 
 class Entity:
@@ -19,6 +20,34 @@ class Entity:
             owner=self
         )
 
+        self.spatial = SpatialComponent()
+
+
+    @property
+    def position(self):
+        return self.spatial.position
+
+    @position.setter
+    def position(self, value):
+        if value is None:
+            self.spatial.clear_position()
+            return
+
+        self.spatial.set_position(
+            value
+        )
+
+    def move_to(
+        self,
+        position,
+        layer=None,
+        zone=None
+    ):
+        return self.spatial.move_to(
+            position=position,
+            layer=layer,
+            zone=zone
+        )
 
     def tick(self, universe):
 

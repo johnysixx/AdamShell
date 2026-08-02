@@ -1,4 +1,4 @@
-﻿from universe.logger import UniverseLogger
+from universe.logger import UniverseLogger
 from cats import Cats
 from gods import Gods
 from idea_entities import IdeaEntities
@@ -6,10 +6,29 @@ from idea_entities import IdeaEntities
 
 class EntityBootstrap:
 
-    def __init__(self, universe, idea_universe, root_transition):
+    def __init__(
+        self,
+        universe,
+        idea_universe,
+        root_transition,
+        pazuzu_profile=None
+    ):
         self.universe = universe
         self.idea_universe = idea_universe
         self.root_transition = root_transition
+
+        self.pazuzu_profile = {
+            "color": "black",
+            "fur_length": "short",
+            "pattern": "solid",
+            "eye_color": "green",
+            "sex": "female"
+        }
+
+        if pazuzu_profile is not None:
+            self.pazuzu_profile.update(
+                dict(pazuzu_profile)
+            )
 
     def run(self):
         self._create_god()
@@ -66,14 +85,38 @@ class EntityBootstrap:
 
 
     def _create_pazuzu(self):
-        self.cats = Cats(self.universe)
+        self.cats = getattr(
+            self.universe,
+            "cats_layer",
+            None
+        )
+
+        if self.cats is None:
+            self.cats = Cats(
+                self.universe
+            )
+
+            self.universe.cats_layer = (
+                self.cats
+            )
 
         self.pazuzu = self.cats.create_cat(
             name="pazuzu",
-            color="black",
-            fur_length="short",
-            pattern="solid",
-            eye_color="green"
+            color=self.pazuzu_profile[
+                "color"
+            ],
+            fur_length=self.pazuzu_profile[
+                "fur_length"
+            ],
+            pattern=self.pazuzu_profile[
+                "pattern"
+            ],
+            eye_color=self.pazuzu_profile[
+                "eye_color"
+            ],
+            sex=self.pazuzu_profile[
+                "sex"
+            ]
         )
 
         self.pazuzu["alias"] = "classical_probe_debug_entity"

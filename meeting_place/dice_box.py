@@ -1,3 +1,5 @@
+import random
+
 from universe.logger import UniverseLogger
 
 class DiceBox:
@@ -27,6 +29,75 @@ class DiceBox:
         }
 
         UniverseLogger.boot("DICE BOX PLACED ON BAR COUNTER")
+
+    def rotate_random_die(
+        self,
+        rng=None
+    ):
+        if not self.contents:
+            return {
+                "name": (
+                    "dice_box_random_rotation_failed"
+                ),
+                "result": "dice_box_empty",
+                "rotated": False
+            }
+
+        rng = rng or random
+
+        die_name = rng.choice(
+            list(self.contents)
+        )
+
+        sides = int(
+            die_name[1:]
+        )
+
+        value = int(
+            rng.randint(
+                1,
+                sides
+            )
+        )
+
+        event = {
+            "name": (
+                "dice_box_die_secretly_rotated"
+            ),
+            "die": die_name,
+            "sides": sides,
+            "value": value,
+            "location": self.location,
+            "removed_from_box": False,
+            "visibility": (
+                "secret_bar_dice_event"
+            ),
+            "rotated": True
+        }
+
+        if not hasattr(
+            self,
+            "rotation_history"
+        ):
+            self.rotation_history = []
+
+        self.rotation_history.append(
+            dict(event)
+        )
+
+        self.public_state[
+            "last_secret_rotation"
+        ] = {
+            "die": die_name,
+            "value": value
+        }
+
+        UniverseLogger.event(
+            "A DIE SECRETLY ROTATES "
+            "INSIDE THE BAR DICE BOX"
+        )
+
+        return event
 
     def answer_about_contents(self):
         return "dice"

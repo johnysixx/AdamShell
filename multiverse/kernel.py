@@ -1,4 +1,4 @@
-﻿from multiverse import UniverseRegistry
+from multiverse import UniverseRegistry
 from universe.universe import Universe
 from universe.bootstraps.entity_bootstrap import EntityBootstrap
 from universe.bootstraps.meeting_bootstrap import MeetingBootstrap
@@ -19,7 +19,9 @@ class MultiverseKernel:
         self.idea_universe = None
 
         self.god = None
+        self.cat_d20 = None
         self.pazuzu = None
+        self.pazuzu_birth_dice_resonance = None
         self.serpent = None
         self.lilith = None
         self.pazuzu_masculine_principle = None
@@ -65,6 +67,32 @@ class MultiverseKernel:
         ).run()
 
     def _initialize_entities(self):
+        meeting = self.layers.get(
+            "meeting"
+        )
+
+        cat_d20_arrival = (
+            meeting.welcome_cat_d20()
+        )
+
+        self.cat_d20 = (
+            cat_d20_arrival["cat"]
+        )
+
+        pazuzu_preparation = (
+            meeting
+            .cat_d20_prepare_pazuzu_profile()
+        )
+
+        if not pazuzu_preparation.get(
+            "prepared",
+            False
+        ):
+            raise RuntimeError(
+                "CatD20 failed to prepare "
+                "the canonical Pazuzu profile."
+            )
+
         (
             self.god,
             self.pazuzu,
@@ -74,8 +102,16 @@ class MultiverseKernel:
         ) = EntityBootstrap(
             self.universe,
             self.idea_universe,
-            self.root_transition
+            self.root_transition,
+            pazuzu_profile=(
+                pazuzu_preparation["profile"]
+            )
         ).run()
+
+        self.pazuzu_birth_dice_resonance = (
+            meeting
+            .trigger_pazuzu_birth_dice_resonance()
+        )
 
     def _advance_universe(self):
         TimelineBootstrap(self.universe).run()

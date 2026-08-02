@@ -3,6 +3,7 @@ import uuid
 
 from core.entity.quantum_cat_route import QuantumCatRoute
 from quantum.geometry_engine import QuantumGeometryEngine
+from navigation import NavigationEngine
 
 
 class QuantumUniverseSpace:
@@ -13,6 +14,7 @@ class QuantumUniverseSpace:
 
         self.quantum_die_box = quantum_die_box
         self.geometry_engine = QuantumGeometryEngine()
+        self.navigation_engine = NavigationEngine()
 
         self.configuration_id = None
         self.configuration_seed = None
@@ -229,6 +231,178 @@ class QuantumUniverseSpace:
             ),
             participants=[],
             details=route_details
+        )
+
+    def plan_direct_cat_route(
+        self,
+        cat_id,
+        start_position,
+        destination_position,
+        destination,
+        step_size=None
+    ):
+        plan = self.navigation_engine.direct_route(
+            start_position=start_position,
+            destination_position=(
+                destination_position
+            ),
+            step_size=step_size
+        )
+
+        route = self.create_cat_route(
+            cat_id=cat_id,
+            route_steps=plan["route_steps"],
+            start_position=start_position,
+            destination=destination
+        )
+
+        return {
+            "name": "cat_direct_route_planned",
+            "cat_id": cat_id,
+            "destination": destination,
+            "plan": plan,
+            "route": route
+        }
+
+    def plan_cat_route_to_nearest_huntable_cronenberg(
+        self,
+        cat,
+        cronenbergs,
+        start_position=None,
+        step_size=None,
+        max_size_ratio=1.20
+    ):
+        cat_id = (
+            cat.get("name")
+            if isinstance(cat, dict)
+            else getattr(
+                cat,
+                "name",
+                None
+            )
+        )
+
+        cat_size = float(
+            cat.get(
+                "size",
+                1.0
+            )
+            if isinstance(cat, dict)
+            else getattr(
+                cat,
+                "size",
+                1.0
+            )
+        )
+
+        if start_position is None:
+            start_position = (
+                cat.get("position")
+                if isinstance(cat, dict)
+                else getattr(
+                    cat,
+                    "position",
+                    None
+                )
+            )
+
+        if start_position is None:
+            return {
+                "name": (
+                    "cat_hunt_route_not_planned"
+                ),
+                "result": (
+                    "cat_has_no_position"
+                ),
+                "cat_id": cat_id
+            }
+
+        huntable = [
+            cronenberg
+            for cronenberg in cronenbergs
+            if getattr(
+                cronenberg,
+                "active",
+                True
+            )
+            and getattr(
+                cronenberg,
+                "is_alive",
+                False
+            )
+            and getattr(
+                cronenberg,
+                "position",
+                None
+            ) is not None
+            and (
+                float(
+                    cronenberg.size
+                )
+                / cat_size
+            ) <= float(
+                max_size_ratio
+            )
+        ]
+
+        nearest = (
+            self.navigation_engine
+            .nearest_target(
+                start_position,
+                huntable
+            )
+        )
+
+        if nearest is None:
+            return {
+                "name": (
+                    "cat_hunt_route_not_planned"
+                ),
+                "result": (
+                    "no_huntable_cronenberg"
+                ),
+                "cat_id": cat_id
+            }
+
+        target = nearest["target"]
+
+        planned = self.plan_direct_cat_route(
+            cat_id=cat_id,
+            start_position=start_position,
+            destination_position=(
+                nearest["position"]
+            ),
+            destination=target.id,
+            step_size=step_size
+        )
+
+        planned["name"] = (
+            "cat_route_to_nearest_"
+            "huntable_cronenberg_planned"
+        )
+
+        planned["target"] = target
+        planned["target_id"] = target.id
+        planned["target_distance"] = (
+            nearest["distance"]
+        )
+
+        return planned
+
+    def plan_cat_route_to_bar(
+        self,
+        cat_id,
+        start_position,
+        step_size=None
+    ):
+        return self.plan_direct_cat_route(
+            cat_id=cat_id,
+            start_position=start_position,
+            destination_position=(
+                self.bar_front_door["position"]
+            ),
+            destination="bar_front_door",
+            step_size=step_size
         )
 
     def create_cat_route(

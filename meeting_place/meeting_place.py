@@ -1,3 +1,5 @@
+import random
+
 from universe.logger import UniverseLogger
 
 from .bartender import Bartender
@@ -295,6 +297,880 @@ class MeetingPlace:
             milk_bowl
         )
         self.emit_event(f"{cat_name} drinks milk at the bar")
+
+    def welcome_cat_d20(
+        self,
+        name="cat_d20"
+    ):
+        existing = next(
+            (
+                cat
+                for cat in getattr(
+                    getattr(
+                        self.universe,
+                        "cats_layer",
+                        None
+                    ),
+                    "cats",
+                    []
+                )
+                if cat.get("name") == name
+            ),
+            None
+        )
+
+        if existing is not None:
+            return {
+                "name": "cat_d20_already_present",
+                "cat": existing,
+                "box": getattr(
+                    self,
+                    "cat_d20_box",
+                    None
+                ),
+                "created": False
+            }
+
+        manifestation = (
+            self.universe.manifest_cat(
+                name=name,
+                source="cat_d20_arrival",
+                position={
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                color="black",
+                fur_length="short",
+                pattern="solid",
+                eye_color="gold",
+                sex="female"
+            )
+        )
+
+        cat = manifestation["cat"]
+
+        if not hasattr(
+            self,
+            "cat_d20_secret_history"
+        ):
+            self.cat_d20_secret_history = []
+
+        cat["special_traits"].extend([
+            "d20_cat",
+            "born_as_cat_d20",
+            "secret_probability_sense"
+        ])
+
+        cat["state"] = "arrived_at_bar"
+        cat["current_layer"] = (
+            "meeting_place"
+        )
+
+        cat["cat_d20"] = {
+            "is_cat": True,
+            "is_die": False,
+            "sides": 20,
+            "roll_method": (
+                "turns_herself_in_box"
+            ),
+            "can_be_thrown": False,
+            "visibility": (
+                "appears_to_be_a_small_cat"
+            )
+        }
+
+        self.add_entity(
+            cat
+        )
+
+        cat_box = (
+            self.place_cat_d20_box(
+                cat
+            )
+        )
+
+        event = {
+            "name": "cat_d20_welcomed_at_bar",
+            "cat": cat["name"],
+            "milk_served": (
+                self.bar_counter
+                .milk_bowl
+                .get("contains")
+                == "milk"
+            ),
+            "box": cat_box["name"],
+            "box_location": (
+                cat_box["location"]
+            ),
+            "cat_entered_box": True,
+            "tick": getattr(
+                self.universe,
+                "universe_tick",
+                0
+            )
+        }
+
+        self.emit_event(
+            event
+        )
+
+        UniverseLogger.event(
+            "CAT D20 ARRIVED AS A CAT, "
+            "DRANK MILK, AND ENTERED "
+            "HER OWN BOX ON THE BAR"
+        )
+
+        return {
+            "name": (
+                "cat_d20_arrival_completed"
+            ),
+            "cat": cat,
+            "entity": manifestation[
+                "entity"
+            ],
+            "box": cat_box,
+            "event": event,
+            "created": True
+        }
+
+    def turn_cat_d20_in_box(
+        self,
+        rng=None
+    ):
+        cats_layer = getattr(
+            self.universe,
+            "cats_layer",
+            None
+        )
+
+        if cats_layer is None:
+            return {
+                "name": "cat_d20_turn_failed",
+                "result": "cats_layer_missing",
+                "turned": False
+            }
+
+        cat = next(
+            (
+                candidate
+                for candidate in cats_layer.cats
+                if "d20_cat" in candidate.get(
+                    "special_traits",
+                    []
+                )
+            ),
+            None
+        )
+
+        if cat is None:
+            return {
+                "name": "cat_d20_turn_failed",
+                "result": "cat_d20_missing",
+                "turned": False
+            }
+
+        box = getattr(
+            self,
+            "cat_d20_box",
+            None
+        )
+
+        if box is None:
+            return {
+                "name": "cat_d20_turn_failed",
+                "result": "cat_d20_box_missing",
+                "cat": cat["name"],
+                "turned": False
+            }
+
+        if box.get(
+            "occupied_by"
+        ) != cat["name"]:
+            return {
+                "name": "cat_d20_turn_failed",
+                "result": "cat_d20_not_in_box",
+                "cat": cat["name"],
+                "turned": False
+            }
+
+        rng = rng or random
+
+        value = int(
+            rng.randint(
+                1,
+                20
+            )
+        )
+
+        cat_d20_state = cat[
+            "cat_d20"
+        ]
+
+        previous_value = (
+            cat_d20_state.get(
+                "current_value"
+            )
+        )
+
+        turn_count = int(
+            cat_d20_state.get(
+                "turn_count",
+                0
+            )
+        ) + 1
+
+        turn_event = {
+            "name": "cat_d20_turned_in_box",
+            "cat": cat["name"],
+            "box": box["name"],
+            "previous_value": (
+                previous_value
+            ),
+            "value": value,
+            "turn_number": turn_count,
+            "turned_by": "herself",
+            "was_thrown": False,
+            "visibility": "secret_cat_event",
+            "tick": getattr(
+                self.universe,
+                "universe_tick",
+                0
+            ),
+            "turned": True
+        }
+
+        cat_d20_state[
+            "current_value"
+        ] = value
+
+        cat_d20_state[
+            "turn_count"
+        ] = turn_count
+
+        cat_d20_state.setdefault(
+            "turn_history",
+            []
+        ).append(
+            dict(turn_event)
+        )
+
+        cat[
+            "state"
+        ] = "turned_in_cat_d20_box"
+
+        box[
+            "last_cat_d20_value"
+        ] = value
+
+        box[
+            "turn_count"
+        ] = turn_count
+
+        if not hasattr(
+            self,
+            "cat_d20_secret_history"
+        ):
+            self.cat_d20_secret_history = []
+
+        self.cat_d20_secret_history.append(
+            dict(turn_event)
+        )
+
+        self.universe.quantum_events.append(
+            dict(turn_event)
+        )
+
+        UniverseLogger.event(
+            "CAT D20 SECRET ROTATION RECORDED"
+        )
+
+        interpretation = (
+            self.interpret_cat_d20_value(
+                value
+            )
+        )
+
+        turn_event["interpretation"] = (
+            interpretation
+        )
+
+        return turn_event
+
+    def cat_d20_prepare_pazuzu_profile(
+        self
+    ):
+        cats_layer = getattr(
+            self.universe,
+            "cats_layer",
+            None
+        )
+
+        if cats_layer is None:
+            return {
+                "name": (
+                    "cat_d20_pazuzu_profile_failed"
+                ),
+                "result": "cats_layer_missing",
+                "prepared": False
+            }
+
+        cat_d20 = next(
+            (
+                cat
+                for cat in cats_layer.cats
+                if "d20_cat" in cat.get(
+                    "special_traits",
+                    []
+                )
+            ),
+            None
+        )
+
+        if cat_d20 is None:
+            return {
+                "name": (
+                    "cat_d20_pazuzu_profile_failed"
+                ),
+                "result": "cat_d20_missing",
+                "prepared": False
+            }
+
+        base_profile = {
+            "color": "black",
+            "fur_length": "short",
+            "pattern": "solid",
+            "eye_color": "green",
+            "sex": "female"
+        }
+
+        if not hasattr(
+            self,
+            "cat_d20_canonical_profile_counts"
+        ):
+            self.cat_d20_canonical_profile_counts = {}
+
+        profile_key = (
+            base_profile["color"],
+            base_profile["fur_length"],
+            base_profile["pattern"],
+            base_profile["eye_color"],
+            base_profile["sex"]
+        )
+
+        occurrence = (
+            self.cat_d20_canonical_profile_counts.get(
+                profile_key,
+                0
+            )
+            + 1
+        )
+
+        self.cat_d20_canonical_profile_counts[
+            profile_key
+        ] = occurrence
+
+        if occurrence == 1:
+            target_name = "pazuzu"
+            profile = dict(
+                base_profile
+            )
+            all_dice_rotation_requested = False
+
+        elif occurrence == 2:
+            target_name = "gib"
+            profile = dict(
+                base_profile
+            )
+            profile[
+                "fur_length"
+            ] = "long"
+            all_dice_rotation_requested = True
+
+        else:
+            target_name = None
+            profile = dict(
+                base_profile
+            )
+            all_dice_rotation_requested = False
+
+        event = {
+            "name": (
+                "cat_d20_prepared_"
+                "canonical_pazuzu_profile"
+            ),
+            "cat": cat_d20["name"],
+            "profile": dict(
+                profile
+            ),
+            "base_profile": dict(
+                base_profile
+            ),
+            "profile_occurrence": occurrence,
+            "target_name": target_name,
+            "all_dice_rotation_requested": (
+                all_dice_rotation_requested
+            ),
+            "mode": "canonical_turn",
+            "random": False,
+            "prepared": (
+                target_name is not None
+            ),
+            "visibility": "secret_cat_event",
+            "tick": getattr(
+                self.universe,
+                "universe_tick",
+                0
+            )
+        }
+
+        cat_d20["cat_d20"][
+            "canonical_target"
+        ] = target_name
+
+        cat_d20["cat_d20"][
+            "canonical_profile"
+        ] = dict(
+            profile
+        )
+
+        if not hasattr(
+            self,
+            "cat_d20_secret_history"
+        ):
+            self.cat_d20_secret_history = []
+
+        self.cat_d20_secret_history.append(
+            dict(event)
+        )
+
+        self.universe.quantum_events.append(
+            dict(event)
+        )
+
+        UniverseLogger.event(
+            "CAT D20 CANONICAL ROTATION "
+            "FOR PAZUZU RECORDED"
+        )
+
+        return event
+
+    def manifest_gib_from_cat_d20(
+        self,
+        prepared_event
+    ):
+        if not isinstance(
+            prepared_event,
+            dict
+        ):
+            return {
+                "name": "gib_manifestation_failed",
+                "result": "invalid_prepared_event",
+                "created": False
+            }
+
+        if prepared_event.get(
+            "target_name"
+        ) != "gib":
+            return {
+                "name": "gib_manifestation_failed",
+                "result": "prepared_target_is_not_gib",
+                "created": False
+            }
+
+        if prepared_event.get(
+            "profile_occurrence"
+        ) != 2:
+            return {
+                "name": "gib_manifestation_failed",
+                "result": "invalid_profile_occurrence",
+                "created": False
+            }
+
+        profile = dict(
+            prepared_event.get(
+                "profile",
+                {}
+            )
+        )
+
+        required_fields = {
+            "color",
+            "fur_length",
+            "pattern",
+            "eye_color",
+            "sex"
+        }
+
+        if not required_fields.issubset(
+            profile
+        ):
+            return {
+                "name": "gib_manifestation_failed",
+                "result": "incomplete_gib_profile",
+                "created": False
+            }
+
+        cats_layer = getattr(
+            self.universe,
+            "cats_layer",
+            None
+        )
+
+        existing = next(
+            (
+                cat
+                for cat in (
+                    cats_layer.cats
+                    if cats_layer is not None
+                    else []
+                )
+                if cat.get("name") == "gib"
+            ),
+            None
+        )
+
+        if existing is not None:
+            return {
+                "name": "gib_already_exists",
+                "cat": existing,
+                "created": False
+            }
+
+        manifestation = (
+            self.universe.manifest_cat(
+                name="gib",
+                source=(
+                    "cat_d20_second_"
+                    "canonical_profile"
+                ),
+                color=profile["color"],
+                fur_length=profile[
+                    "fur_length"
+                ],
+                pattern=profile["pattern"],
+                eye_color=profile[
+                    "eye_color"
+                ],
+                sex=profile["sex"]
+            )
+        )
+
+        if manifestation is None:
+            return {
+                "name": "gib_manifestation_failed",
+                "result": "manifest_cat_failed",
+                "created": False
+            }
+
+        gib = manifestation["cat"]
+
+        gib["special_traits"].extend([
+            "gib",
+            "pazuzu_profile_echo",
+            "second_canonical_cat"
+        ])
+
+        gib["canonical_origin"] = {
+            "base_profile": dict(
+                prepared_event[
+                    "base_profile"
+                ]
+            ),
+            "mutation": {
+                "fur_length": {
+                    "from": "short",
+                    "to": "long"
+                }
+            },
+            "profile_occurrence": 2,
+            "created_by": "cat_d20"
+        }
+
+        event = {
+            "name": "gib_manifested",
+            "cat": gib["name"],
+            "profile": dict(
+                profile
+            ),
+            "profile_occurrence": 2,
+            "all_dice_rotation_requested": (
+                prepared_event.get(
+                    "all_dice_rotation_requested",
+                    False
+                )
+            ),
+            "created": True,
+            "visibility": "secret_cat_event",
+            "tick": getattr(
+                self.universe,
+                "universe_tick",
+                0
+            )
+        }
+
+        if not hasattr(
+            self,
+            "cat_d20_secret_history"
+        ):
+            self.cat_d20_secret_history = []
+
+        self.cat_d20_secret_history.append(
+            dict(event)
+        )
+
+        self.universe.quantum_events.append(
+            dict(event)
+        )
+
+        UniverseLogger.event(
+            "GIB MANIFESTED FROM THE SECOND "
+            "CANONICAL CAT D20 PROFILE"
+        )
+
+        return {
+            **event,
+            "cat": gib,
+            "entity": manifestation[
+                "entity"
+            ]
+        }
+
+    def trigger_pazuzu_birth_dice_resonance(
+        self,
+        rng=None
+    ):
+        existing_event = getattr(
+            self,
+            "pazuzu_birth_dice_resonance_event",
+            None
+        )
+
+        if existing_event is not None:
+            return {
+                **existing_event,
+                "already_triggered": True
+            }
+
+        cats_layer = getattr(
+            self.universe,
+            "cats_layer",
+            None
+        )
+
+        cat_d20 = next(
+            (
+                cat
+                for cat in (
+                    cats_layer.cats
+                    if cats_layer is not None
+                    else []
+                )
+                if "d20_cat" in cat.get(
+                    "special_traits",
+                    []
+                )
+            ),
+            None
+        )
+
+        if cat_d20 is None:
+            return {
+                "name": (
+                    "pazuzu_birth_dice_"
+                    "resonance_failed"
+                ),
+                "result": "cat_d20_missing",
+                "triggered": False
+            }
+
+        quantum_d20_result = (
+            self.universe
+            .quantum_die
+            .roll(
+                rng=rng
+            )
+        )
+
+        cat_d20_result = (
+            self.turn_cat_d20_in_box(
+                rng=rng
+            )
+        )
+
+        dice_vial_result = (
+            self.dice_vial.roll(
+                rng=rng
+            )
+        )
+
+        dice_box_result = (
+            self.dice_box
+            .rotate_random_die(
+                rng=rng
+            )
+        )
+
+        event = {
+            "name": (
+                "pazuzu_birth_dice_resonance"
+            ),
+            "quantum_d20": (
+                quantum_d20_result
+            ),
+            "cat_d20": (
+                cat_d20_result
+            ),
+            "dice_vial": (
+                dice_vial_result
+            ),
+            "dice_box": (
+                dice_box_result
+            ),
+            "triggered": True,
+            "visibility": (
+                "secret_multiverse_event"
+            ),
+            "tick": getattr(
+                self.universe,
+                "universe_tick",
+                0
+            )
+        }
+
+        if not hasattr(
+            self,
+            "cat_d20_secret_history"
+        ):
+            self.cat_d20_secret_history = []
+
+        self.cat_d20_secret_history.append(
+            dict(event)
+        )
+
+        self.universe.quantum_events.append(
+            dict(event)
+        )
+
+        self.pazuzu_birth_dice_resonance_event = (
+            dict(event)
+        )
+
+        UniverseLogger.event(
+            "PAZUZU BIRTH DICE RESONANCE "
+            "RECORDED"
+        )
+
+        return event
+
+    def interpret_cat_d20_value(
+        self,
+        value
+    ):
+        value = int(value)
+
+        if value < 1 or value > 20:
+            raise ValueError(
+                "CatD20 value must be between 1 and 20."
+            )
+
+        if value <= 14:
+            meaning = "accept_navigation_offer"
+        elif value <= 18:
+            meaning = "decline_navigation_offer"
+        elif value == 19:
+            meaning = "cat_does_something_else"
+        else:
+            meaning = "cat_d20_surge"
+
+        return {
+            "name": "cat_d20_value_interpreted",
+            "value": value,
+            "meaning": meaning
+        }
+
+    def place_cat_d20_box(
+        self,
+        cat
+    ):
+        if not isinstance(cat, dict):
+            raise TypeError(
+                "Cat D20 box requires a cat."
+            )
+
+        if "d20_cat" not in cat.get(
+            "special_traits",
+            []
+        ):
+            raise ValueError(
+                "This box is reserved for Cat D20."
+            )
+
+        existing_box = getattr(
+            self,
+            "cat_d20_box",
+            None
+        )
+
+        if existing_box is not None:
+            existing_box[
+                "occupied_by"
+            ] = cat["name"]
+
+            cat["cat_d20_box"] = (
+                existing_box
+            )
+
+            return existing_box
+
+        self.cat_d20_box = {
+            "name": "cat_d20_box",
+            "type": "cat_box",
+            "location": "on_bar_counter",
+            "state": "occupied",
+            "material": "wood",
+            "size": "kitten_sized",
+            "purpose": (
+                "safe_place_for_cat_d20_"
+                "to_sleep_and_turn"
+            ),
+            "occupied_by": cat["name"],
+            "access": {
+                "cats": True,
+                "bartender": (
+                    "may_place_and_clean"
+                ),
+                "guests": (
+                    "look_but_do_not_touch"
+                )
+            },
+            "throwable": False
+        }
+
+        cat["cat_d20_box"] = (
+            self.cat_d20_box
+        )
+
+        cat["state"] = (
+            "resting_in_cat_d20_box"
+        )
+
+        self.universe.world[
+            "meeting_place"
+        ]["cat_d20_box"] = (
+            self.cat_d20_box
+        )
+
+        UniverseLogger.event(
+            "BARTENDER PLACES A SMALL WOODEN "
+            "BOX ON THE BAR FOR CAT D20"
+        )
+
+        UniverseLogger.event(
+            "CAT D20 ENTERS HER BOX"
+        )
+
+        return self.cat_d20_box
 
     def sync_entropy_terminal_to_world(self):
         self.entropy_terminal["total_entropy_served_today"] = (
