@@ -2,6 +2,7 @@ import random
 
 from universe.logger import UniverseLogger
 from .memory import CatMemory
+from .reproduction import CatReproduction
 
 class Cats:
 
@@ -126,6 +127,12 @@ class Cats:
             "eye_color": eye_color,
             "fur_length": fur_length,
             "sex": sex,
+            "reproduction": (
+                CatReproduction.create_state(
+                    sex=sex,
+                    neutered=False
+                )
+            ),
             "origin": origin,
             "idea_energy": self.default_idea_energy,
             "size": 1.0,
