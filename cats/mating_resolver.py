@@ -1,5 +1,8 @@
 import random
 
+from cats.physical_biology_gate import (
+    PhysicalBiologyGate
+)
 from cats.reproduction import CatReproduction
 from cats.kitten_embryo_resolver import (
     KittenEmbryoResolver
@@ -18,6 +21,12 @@ class CatMatingResolver:
         self.universe = universe
         self.history = []
 
+        self.biology_gate = (
+            PhysicalBiologyGate(
+                universe
+            )
+        )
+
         self.embryo_resolver = (
             KittenEmbryoResolver(
                 universe
@@ -34,6 +43,17 @@ class CatMatingResolver:
         male,
         current_day=0
     ):
+        biology = (
+            self.biology_gate
+            .require_physical_world(
+                operation="cat_mating",
+                cat=female
+            )
+        )
+
+        if not biology["allowed"]:
+            return biology
+
         self._validate_pair(
             female,
             male
@@ -141,6 +161,19 @@ class CatMatingResolver:
         embryo_count=None,
         rng=None
     ):
+        biology = (
+            self.biology_gate
+            .require_physical_world(
+                operation=(
+                    "close_cat_mating_window"
+                ),
+                cat=female
+            )
+        )
+
+        if not biology["allowed"]:
+            return biology
+
         reproduction = female.get(
             "reproduction",
             {}
@@ -364,6 +397,19 @@ class CatMatingResolver:
         female,
         days=1
     ):
+        biology = (
+            self.biology_gate
+            .require_physical_world(
+                operation=(
+                    "advance_cat_pregnancy"
+                ),
+                cat=female
+            )
+        )
+
+        if not biology["allowed"]:
+            return biology
+
         reproduction = female.get(
             "reproduction",
             {}

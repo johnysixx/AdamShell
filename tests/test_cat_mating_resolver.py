@@ -48,6 +48,7 @@ class CatMatingResolverTests(
 
     def setUp(self):
         self.universe = Universe()
+        self.universe.start_big_bang()
         self.cats = Cats(
             self.universe
         )

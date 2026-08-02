@@ -1,3 +1,8 @@
+from cats.physical_biology_gate import (
+    PhysicalBiologyGate
+)
+
+
 class CatDevelopmentResolver:
 
     SEXUAL_MATURITY_DAY = 180
@@ -18,6 +23,12 @@ class CatDevelopmentResolver:
     ):
         self.universe = universe
         self.history = []
+
+        self.biology_gate = (
+            PhysicalBiologyGate(
+                universe
+            )
+        )
 
     def initialize_newborn(
         self,
@@ -66,6 +77,17 @@ class CatDevelopmentResolver:
         cat,
         days=1
     ):
+        biology = (
+            self.biology_gate
+            .require_physical_world(
+                operation="advance_cat_age",
+                cat=cat
+            )
+        )
+
+        if not biology["allowed"]:
+            return biology
+
         days = int(days)
 
         if days < 1:

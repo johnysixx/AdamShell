@@ -1,3 +1,8 @@
+from cats.physical_biology_gate import (
+    PhysicalBiologyGate
+)
+
+
 from cats.development_resolver import (
     CatDevelopmentResolver
 )
@@ -12,6 +17,12 @@ class KittenBirthResolver:
         self.universe = universe
         self.history = []
 
+        self.biology_gate = (
+            PhysicalBiologyGate(
+                universe
+            )
+        )
+
         self.development_resolver = (
             CatDevelopmentResolver(
                 universe
@@ -23,6 +34,17 @@ class KittenBirthResolver:
         mother,
         current_day=None
     ):
+        biology = (
+            self.biology_gate
+            .require_physical_world(
+                operation="kitten_birth",
+                cat=mother
+            )
+        )
+
+        if not biology["allowed"]:
+            return biology
+
         reproduction = mother.get(
             "reproduction",
             {}
