@@ -30,6 +30,26 @@ class CatBirthResolver:
 
         self.canonical_profile_occurrences = 0
 
+        self.queen_elisabeth_profile = {
+            "color": "white",
+            "fur_length": "long",
+            "pattern": "tabby",
+            "eye_color": "green",
+            "sex": "female"
+        }
+
+        self.queen_elisabeth_profile_occurrences = 0
+
+        self.garfield_profile = {
+            "color": "orange",
+            "fur_length": "short",
+            "pattern": "tabby",
+            "eye_color": "yellow",
+            "sex": "male"
+        }
+
+        self.garfield_profile_occurrences = 0
+
         self.woodoo_birth_count = 0
         self.woodoo_rebirth_chance = 0.001
 
@@ -674,6 +694,52 @@ class CatBirthResolver:
         profile,
         rng=None
     ):
+        if profile == self.queen_elisabeth_profile:
+            self.queen_elisabeth_profile_occurrences += 1
+
+            occurrence = (
+                self.queen_elisabeth_profile_occurrences
+            )
+
+            identity = (
+                "queen_elisabeth"
+                if occurrence == 1
+                else (
+                    "mia"
+                    if occurrence == 2
+                    else None
+                )
+            )
+
+            return {
+                "matched": True,
+                "occurrence": occurrence,
+                "identity": identity,
+                "profile": dict(profile),
+                "special_birth_event": None,
+                "woodoo_rebirth": False
+            }
+
+        if profile == self.garfield_profile:
+            self.garfield_profile_occurrences += 1
+
+            occurrence = (
+                self.garfield_profile_occurrences
+            )
+
+            return {
+                "matched": True,
+                "occurrence": occurrence,
+                "identity": (
+                    "garfield"
+                    if occurrence == 1
+                    else None
+                ),
+                "profile": dict(profile),
+                "special_birth_event": None,
+                "woodoo_rebirth": False
+            }
+
         is_canonical = (
             profile == self.canonical_profile
         )
