@@ -1,7 +1,12 @@
 import random
 
-from cats.kitten_embryo_resolver import KittenEmbryoResolver
 from cats.reproduction import CatReproduction
+from cats.kitten_embryo_resolver import (
+    KittenEmbryoResolver
+)
+from cats.paternity_resolver import (
+    MultipleSirePaternityResolver
+)
 
 
 class CatMatingResolver:
@@ -19,14 +24,15 @@ class CatMatingResolver:
             )
         )
 
+        self.paternity_resolver = (
+            MultipleSirePaternityResolver()
+        )
+
     def mate(
         self,
         female,
         male,
-        current_day=0,
-        gestation_days=None,
-        embryo_count=None,
-        rng=None
+        current_day=0
     ):
         self._validate_pair(
             female,
@@ -37,24 +43,137 @@ class CatMatingResolver:
             "reproduction"
         ]
 
-        rng = rng or random
-
-        embryo_count = (
-            int(
-                rng.randint(
-                    1,
-                    6
-                )
-            )
-            if embryo_count is None
-            else int(embryo_count)
+        current_day = int(
+            current_day
         )
 
-        if embryo_count < 1:
+        if reproduction.get(
+            "pregnant",
+            False
+        ):
             raise ValueError(
-                "Embryo count must be "
-                "at least one."
+                "A pregnant cat cannot add "
+                "another potential father."
             )
+
+        if not reproduction.get(
+            "mating_window_open",
+            False
+        ):
+            reproduction.update({
+                "estrus_active": True,
+                "mating_window_open": True,
+                "mating_window_started_day": (
+                    current_day
+                ),
+                "mating_contacts": [],
+                "potential_fathers": []
+            })
+
+        contact_number = (
+            len(
+                reproduction[
+                    "mating_contacts"
+                ]
+            )
+            + 1
+        )
+
+        contact = {
+            "name": "cat_mating_contact",
+            "contact_number": contact_number,
+            "female": female["name"],
+            "male": male["name"],
+            "male_name": male["name"],
+            "successful": True,
+            "day": current_day,
+
+            # Interní reference pro genetiku embryí.
+            "_male_ref": male
+        }
+
+        reproduction[
+            "mating_contacts"
+        ].append(
+            contact
+        )
+
+        if (
+            male["name"]
+            not in reproduction[
+                "potential_fathers"
+            ]
+        ):
+            reproduction[
+                "potential_fathers"
+            ].append(
+                male["name"]
+            )
+
+        event = {
+            "name": (
+                "cat_mating_contact_recorded"
+            ),
+            "female": female["name"],
+            "male": male["name"],
+            "day": current_day,
+            "contact_number": contact_number,
+            "mating_window_open": True,
+            "potential_fathers": list(
+                reproduction[
+                    "potential_fathers"
+                ]
+            ),
+            "pregnancy_started": False
+        }
+
+        self.history.append(
+            event
+        )
+
+        return event
+
+    def close_mating_window(
+        self,
+        female,
+        current_day=0,
+        gestation_days=None,
+        embryo_count=None,
+        rng=None
+    ):
+        reproduction = female.get(
+            "reproduction",
+            {}
+        )
+
+        if reproduction.get(
+            "pregnant",
+            False
+        ):
+            raise ValueError(
+                "Cat is already pregnant."
+            )
+
+        if not reproduction.get(
+            "mating_window_open",
+            False
+        ):
+            raise ValueError(
+                "Cat has no open mating window."
+            )
+
+        contacts = reproduction.get(
+            "mating_contacts",
+            []
+        )
+
+        if not contacts:
+            raise ValueError(
+                "Ovulation requires at least "
+                "one successful mating contact."
+            )
+
+        rng = rng or random
 
         gestation_days = (
             CatReproduction
@@ -75,21 +194,73 @@ class CatMatingResolver:
                 f"{CatReproduction.GESTATION_DAYS_MAX}."
             )
 
-        current_day = int(
-            current_day
+        embryo_count = (
+            int(
+                rng.randint(
+                    1,
+                    6
+                )
+            )
+            if embryo_count is None
+            else int(embryo_count)
         )
 
-        embryo_results = [
-            self.embryo_resolver
-            .create_embryo(
-                mother=female,
-                father=male,
-                rng=rng
+        if embryo_count < 1:
+            raise ValueError(
+                "Embryo count must be "
+                "at least one."
             )
-            for _ in range(
-                embryo_count
+
+        embryo_results = []
+        paternity_results = []
+
+        for _ in range(
+            embryo_count
+        ):
+            paternity = (
+                self.paternity_resolver
+                .select_father(
+                    mating_contacts=contacts,
+                    rng=rng
+                )
             )
-        ]
+
+            father = paternity[
+                "father"
+            ]
+
+            embryo_result = (
+                self.embryo_resolver
+                .create_embryo(
+                    mother=female,
+                    father=father,
+                    rng=rng
+                )
+            )
+
+            embryo_results.append(
+                embryo_result
+            )
+
+            paternity_results.append({
+                "embryo_id": (
+                    embryo_result[
+                        "embryo"
+                    ]["id"]
+                    if embryo_result[
+                        "embryo"
+                    ] is not None
+                    else embryo_result[
+                        "event"
+                    ][
+                        "embryo_id"
+                    ]
+                ),
+                "father": father["name"],
+                "selection": paternity[
+                    "event"
+                ]
+            })
 
         viable_embryos = [
             result["embryo"]
@@ -103,15 +274,25 @@ class CatMatingResolver:
             if not result["viable"]
         ]
 
-        contact = {
-            "name": "cat_mating_contact",
-            "female": female["name"],
-            "male": male["name"],
-            "successful": True,
-            "day": current_day
-        }
+        current_day = int(
+            current_day
+        )
+
+        father_names = []
+
+        for result in paternity_results:
+            father_name = result[
+                "father"
+            ]
+
+            if father_name not in father_names:
+                father_names.append(
+                    father_name
+                )
 
         reproduction.update({
+            "estrus_active": False,
+            "mating_window_open": False,
             "pregnant": True,
             "pregnancy_day": 0,
             "gestation_days": gestation_days,
@@ -119,21 +300,29 @@ class CatMatingResolver:
                 current_day
                 + gestation_days
             ),
-            "mother_name": female[
-                "name"
-            ],
-            "father_name": male[
-                "name"
-            ],
-            "mating_contact": contact,
+            "mother_name": female["name"],
+            "father_name": (
+                father_names[0]
+                if len(father_names) == 1
+                else None
+            ),
+            "father_names": father_names,
             "embryos": viable_embryos
         })
 
         event = {
             "name": "cat_pregnancy_started",
             "mother": female["name"],
-            "father": male["name"],
-            "contact": contact,
+            "father_names": father_names,
+            "multiple_sires": (
+                len(father_names) > 1
+            ),
+            "mating_contact_count": len(
+                contacts
+            ),
+            "paternity_results": (
+                paternity_results
+            ),
             "gestation_days": gestation_days,
             "pregnancy_day": 0,
             "started_on_day": current_day,
