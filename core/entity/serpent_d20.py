@@ -1,4 +1,4 @@
-﻿import random
+import random
 import uuid
 from copy import deepcopy
 
@@ -23,6 +23,16 @@ class SerpentD20:
 
         # Tento seznam není součástí public_state.
         self._hidden_history = []
+
+    def roll(
+        self,
+        rng=None,
+        universe_tick=None
+    ):
+        return self.roll_publicly(
+            rng=rng,
+            universe_tick=universe_tick
+        )
 
     def roll_publicly(
         self,

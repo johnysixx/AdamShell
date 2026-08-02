@@ -139,6 +139,14 @@ class EntityBootstrap:
     def _create_serpent(self):
         self.idea_entities = IdeaEntities(self.universe)
 
+        self.universe.idea_entities = (
+            self.idea_entities
+        )
+
+        self.universe.d20_registry.register(
+            self.idea_entities.serpent_d20
+        )
+
         self.serpent = self.idea_entities.create_idea_entity(
             name="serpent",
             role="primordial_idea_entity",

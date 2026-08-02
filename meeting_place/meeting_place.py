@@ -8,6 +8,7 @@ from .bar_counter import BarCounter
 from .bouncer import Bouncer
 from .dice_vial import DiceVial
 from .dice_box import DiceBox
+from .cat_d20_adapter import CatD20Adapter
 from .fridge import BarFridge
 from .reservoirs import BarEnergyReservoir, BarEntropyReservoir
 from .service_rules import BarServiceRules
@@ -379,6 +380,16 @@ class MeetingPlace:
                 "appears_to_be_a_small_cat"
             )
         }
+
+        self.cat_d20_adapter = (
+            CatD20Adapter(
+                self
+            )
+        )
+
+        self.universe.d20_registry.register(
+            self.cat_d20_adapter
+        )
 
         self.add_entity(
             cat
