@@ -79,6 +79,13 @@ class CatMatingResolverTests(
                 self.universe
             )
         )
+        self.female[
+            "reproduction"
+        ]["estrus_active"] = True
+
+        self.female[
+        "reproduction"
+        ]["estrous_phase"] = "estrus"
 
     def test_first_contact_opens_window_without_pregnancy(self):
         event = self.resolver.mate(

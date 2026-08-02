@@ -103,6 +103,14 @@ class KittenBirthResolverTests(
     ):
         rng = AlternatingFatherRng()
 
+        self.mother[
+            "reproduction"
+        ]["estrus_active"] = True
+
+        self.mother[
+            "reproduction"
+        ]["estrous_phase"] = "estrus"
+
         self.mating.mate(
             self.mother,
             self.father_one

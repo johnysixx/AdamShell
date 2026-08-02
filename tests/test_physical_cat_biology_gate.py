@@ -78,6 +78,14 @@ class PhysicalCatBiologyGateTests(
     def test_mating_after_physical_world_is_allowed(self):
         self.universe.start_big_bang()
 
+        self.female[
+            "reproduction"
+        ]["estrus_active"] = True
+
+        self.female[
+            "reproduction"
+        ]["estrous_phase"] = "estrus"
+
         result = self.resolver.mate(
             self.female,
             self.male

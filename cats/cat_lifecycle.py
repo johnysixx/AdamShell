@@ -1,3 +1,6 @@
+from cats.estrous_cycle_resolver import (
+    CatEstrousCycleResolver
+)
 from cats.development_resolver import (
     CatDevelopmentResolver
 )
@@ -22,6 +25,12 @@ class CatLifeCycleHandler:
 
         self.development_resolver = (
             CatDevelopmentResolver(
+                universe
+            )
+        )
+
+        self.estrous_cycle_resolver = (
+            CatEstrousCycleResolver(
                 universe
             )
         )
@@ -67,6 +76,7 @@ class CatLifeCycleHandler:
             return event
 
         age_advances = []
+        estrous_cycle_results = []
         pregnancy_advances = []
         births = []
 
@@ -96,6 +106,18 @@ class CatLifeCycleHandler:
             reproduction = cat.get(
                 "reproduction",
                 {}
+            )
+
+            estrous_result = (
+                self.estrous_cycle_resolver
+                .tick_day(
+                    cat,
+                    day=day
+                )
+            )
+
+            estrous_cycle_results.append(
+                estrous_result
             )
 
             if not reproduction.get(
@@ -141,6 +163,9 @@ class CatLifeCycleHandler:
             "day": day,
             "cats_processed": len(cats),
             "age_advances": age_advances,
+            "estrous_cycle_results": (
+                estrous_cycle_results
+            ),
             "pregnancy_advances": (
                 pregnancy_advances
             ),

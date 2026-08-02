@@ -158,6 +158,14 @@ class LifeCycleSystemTests(
             self.universe
         )
 
+        mother[
+            "reproduction"
+        ]["estrus_active"] = True
+
+        mother[
+            "reproduction"
+        ]["estrous_phase"] = "estrus"
+
         mating.mate(
             mother,
             father
@@ -200,6 +208,14 @@ class LifeCycleSystemTests(
         mating = CatMatingResolver(
             self.universe
         )
+
+        mother[
+            "reproduction"
+        ]["estrus_active"] = True
+
+        mother[
+            "reproduction"
+        ]["estrous_phase"] = "estrus"
 
         mating.mate(
             mother,

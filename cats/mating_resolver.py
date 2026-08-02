@@ -3,6 +3,9 @@ import random
 from cats.physical_biology_gate import (
     PhysicalBiologyGate
 )
+from cats.estrous_cycle_resolver import (
+    CatEstrousCycleResolver
+)
 from cats.reproduction import CatReproduction
 from cats.kitten_embryo_resolver import (
     KittenEmbryoResolver
@@ -37,6 +40,12 @@ class CatMatingResolver:
             MultipleSirePaternityResolver()
         )
 
+        self.estrous_cycle_resolver = (
+            CatEstrousCycleResolver(
+                universe
+            )
+        )
+
     def mate(
         self,
         female,
@@ -58,6 +67,29 @@ class CatMatingResolver:
             female,
             male
         )
+
+        reproduction = female.get(
+            "reproduction",
+            {}
+        )
+
+        if not reproduction.get(
+            "estrus_active",
+            False
+        ):
+            return {
+                "name": "cat_mating_denied",
+                "female": female.get(
+                    "name"
+                ),
+                "male": male.get(
+                    "name"
+                ),
+                "reason": (
+                    "female_not_in_estrus"
+                ),
+                "mating_recorded": False
+            }
 
         reproduction = female[
             "reproduction"
@@ -325,6 +357,8 @@ class CatMatingResolver:
 
         reproduction.update({
             "estrus_active": False,
+            "estrous_phase": "diestrus",
+            "estrous_cycle_day": 0,
             "mating_window_open": False,
             "pregnant": True,
             "pregnancy_day": 0,
