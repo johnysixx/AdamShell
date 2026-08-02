@@ -40,12 +40,17 @@ class CatGenotype:
         cls,
         sex,
         autosomal_loci=None,
-        orange_locus=None
+        orange_locus=None,
+        sex_chromosomes=None,
+        lethal_mutations=None
     ):
         if sex == "female":
-            sex_chromosomes = (
-                "X",
-                "X"
+            resolved_chromosomes = tuple(
+                sex_chromosomes
+                or (
+                    "X",
+                    "X"
+                )
             )
 
             default_orange = (
@@ -54,13 +59,23 @@ class CatGenotype:
             )
 
         elif sex == "male":
-            sex_chromosomes = (
-                "X",
-                "Y"
+            resolved_chromosomes = tuple(
+                sex_chromosomes
+                or (
+                    "X",
+                    "Y"
+                )
             )
 
             default_orange = (
-                "o",
+                ("o", "o")
+                if resolved_chromosomes
+                == (
+                    "X",
+                    "X",
+                    "Y"
+                )
+                else ("o",)
             )
 
         else:
@@ -99,7 +114,7 @@ class CatGenotype:
         genotype = {
             "sex": sex,
             "sex_chromosomes": (
-                sex_chromosomes
+                resolved_chromosomes
             ),
             "orange_locus": tuple(
                 orange_locus
@@ -113,6 +128,9 @@ class CatGenotype:
                     or default_autosomal
                 ).items()
             },
+            "lethal_mutations": list(
+                lethal_mutations or []
+            ),
             "origin": "founder"
         }
 
@@ -236,6 +254,7 @@ class CatGenotype:
             "autosomal_loci": (
                 inherited_loci
             ),
+            "lethal_mutations": [],
             "origin": "parental_inheritance",
             "inheritance_record": {
                 "sex_chromosomes": {
@@ -309,19 +328,39 @@ class CatGenotype:
                 )
 
         elif sex == "male":
-            if chromosomes != (
-                "X",
-                "Y"
-            ):
+            if chromosomes not in {
+                (
+                    "X",
+                    "Y"
+                ),
+                (
+                    "X",
+                    "X",
+                    "Y"
+                )
+            }:
                 raise ValueError(
-                    "Standard male genotype "
-                    "must use XY."
+                    "Supported male genotype "
+                    "must use XY or XXY."
                 )
 
-            if len(orange) != 1:
+            expected_orange_count = (
+                2
+                if chromosomes
+                == (
+                    "X",
+                    "X",
+                    "Y"
+                )
+                else 1
+            )
+
+            if len(orange) != (
+                expected_orange_count
+            ):
                 raise ValueError(
-                    "Male orange locus must "
-                    "contain one X-linked allele."
+                    "Male orange locus does not "
+                    "match the number of X chromosomes."
                 )
 
         else:

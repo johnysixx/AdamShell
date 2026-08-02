@@ -153,7 +153,20 @@ class CatPhenotypeResolver:
                 return "tortoiseshell"
 
         elif sex == "male":
-            if orange_alleles == (
+            orange_count = (
+                orange_alleles.count("O")
+            )
+
+            if len(
+                orange_alleles
+            ) == 2:
+                if orange_count == 2:
+                    return "orange"
+
+                if orange_count == 1:
+                    return "tortoiseshell"
+
+            elif orange_alleles == (
                 "O",
             ):
                 return "orange"
