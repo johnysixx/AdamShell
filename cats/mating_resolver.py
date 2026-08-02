@@ -1,3 +1,6 @@
+import random
+
+from cats.kitten_embryo_resolver import KittenEmbryoResolver
 from cats.reproduction import CatReproduction
 
 
@@ -10,12 +13,20 @@ class CatMatingResolver:
         self.universe = universe
         self.history = []
 
+        self.embryo_resolver = (
+            KittenEmbryoResolver(
+                universe
+            )
+        )
+
     def mate(
         self,
         female,
         male,
         current_day=0,
-        gestation_days=None
+        gestation_days=None,
+        embryo_count=None,
+        rng=None
     ):
         self._validate_pair(
             female,
@@ -25,6 +36,25 @@ class CatMatingResolver:
         reproduction = female[
             "reproduction"
         ]
+
+        rng = rng or random
+
+        embryo_count = (
+            int(
+                rng.randint(
+                    1,
+                    6
+                )
+            )
+            if embryo_count is None
+            else int(embryo_count)
+        )
+
+        if embryo_count < 1:
+            raise ValueError(
+                "Embryo count must be "
+                "at least one."
+            )
 
         gestation_days = (
             CatReproduction
@@ -49,6 +79,30 @@ class CatMatingResolver:
             current_day
         )
 
+        embryo_results = [
+            self.embryo_resolver
+            .create_embryo(
+                mother=female,
+                father=male,
+                rng=rng
+            )
+            for _ in range(
+                embryo_count
+            )
+        ]
+
+        viable_embryos = [
+            result["embryo"]
+            for result in embryo_results
+            if result["viable"]
+        ]
+
+        nonviable_results = [
+            result
+            for result in embryo_results
+            if not result["viable"]
+        ]
+
         contact = {
             "name": "cat_mating_contact",
             "female": female["name"],
@@ -72,7 +126,7 @@ class CatMatingResolver:
                 "name"
             ],
             "mating_contact": contact,
-            "embryos": []
+            "embryos": viable_embryos
         })
 
         event = {
@@ -86,6 +140,18 @@ class CatMatingResolver:
             "expected_birth_day": (
                 current_day
                 + gestation_days
+            ),
+            "embryos_attempted": (
+                embryo_count
+            ),
+            "viable_embryo_count": len(
+                viable_embryos
+            ),
+            "nonviable_embryo_count": len(
+                nonviable_results
+            ),
+            "embryo_results": (
+                embryo_results
             ),
             "started": True
         }

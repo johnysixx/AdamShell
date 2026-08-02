@@ -3,6 +3,7 @@ import random
 from universe.logger import UniverseLogger
 from .memory import CatMemory
 from .reproduction import CatReproduction
+from .genotype import CatGenotype
 
 class Cats:
 
@@ -127,6 +128,11 @@ class Cats:
             "eye_color": eye_color,
             "fur_length": fur_length,
             "sex": sex,
+            "genotype": (
+                CatGenotype.create_founder(
+                    sex=sex
+                )
+            ),
             "reproduction": (
                 CatReproduction.create_state(
                     sex=sex,

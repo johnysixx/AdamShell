@@ -181,6 +181,45 @@ class CatMatingResolverTests(
                 self.male
             )
 
+    def test_mating_creates_requested_embryos(self):
+        event = self.resolver.mate(
+            self.female,
+            self.male,
+            embryo_count=4
+        )
+
+        embryos = self.female[
+            "reproduction"
+        ]["embryos"]
+
+        self.assertEqual(
+            event["embryos_attempted"],
+            4
+        )
+
+        self.assertEqual(
+            event["viable_embryo_count"],
+            4
+        )
+
+        self.assertEqual(
+            event["nonviable_embryo_count"],
+            0
+        )
+
+        self.assertEqual(
+            len(embryos),
+            4
+        )
+
+        self.assertTrue(
+            all(
+                embryo["state"]
+                == "gestating"
+                for embryo in embryos
+            )
+        )
+
     def test_custom_gestation_must_stay_in_range(self):
         with self.assertRaises(
             ValueError
