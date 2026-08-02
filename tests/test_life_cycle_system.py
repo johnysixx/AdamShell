@@ -160,6 +160,10 @@ class LifeCycleSystemTests(
 
         mother[
             "reproduction"
+        ]["ovulation_threshold"] = 1
+
+        mother[
+            "reproduction"
         ]["estrus_active"] = True
 
         mother[
@@ -208,6 +212,10 @@ class LifeCycleSystemTests(
         mating = CatMatingResolver(
             self.universe
         )
+
+        mother[
+            "reproduction"
+        ]["ovulation_threshold"] = 1
 
         mother[
             "reproduction"

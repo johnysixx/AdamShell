@@ -74,6 +74,10 @@ class CatMatingResolverTests(
             sex="male"
         )
 
+        self.female[
+            "reproduction"
+        ]["ovulation_threshold"] = 1
+
         self.resolver = (
             CatMatingResolver(
                 self.universe

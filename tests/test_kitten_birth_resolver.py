@@ -85,6 +85,10 @@ class KittenBirthResolverTests(
             )
         )
 
+        self.mother[
+            "reproduction"
+        ]["ovulation_threshold"] = 1
+
         self.mating = (
             CatMatingResolver(
                 self.universe

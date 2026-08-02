@@ -6,6 +6,9 @@ from cats.physical_biology_gate import (
 from cats.estrous_cycle_resolver import (
     CatEstrousCycleResolver
 )
+from cats.ovulation_resolver import (
+    CatOvulationResolver
+)
 from cats.reproduction import CatReproduction
 from cats.kitten_embryo_resolver import (
     KittenEmbryoResolver
@@ -42,6 +45,12 @@ class CatMatingResolver:
 
         self.estrous_cycle_resolver = (
             CatEstrousCycleResolver(
+                universe
+            )
+        )
+
+        self.ovulation_resolver = (
+            CatOvulationResolver(
                 universe
             )
         )
@@ -150,6 +159,16 @@ class CatMatingResolver:
             contact
         )
 
+        stimulation = (
+            self.ovulation_resolver
+            .record_stimulation(
+                female=female,
+                male=male,
+                amount=1,
+                day=current_day
+            )
+        )
+
         if (
             male["name"]
             not in reproduction[
@@ -176,7 +195,18 @@ class CatMatingResolver:
                     "potential_fathers"
                 ]
             ),
-            "pregnancy_started": False
+            "pregnancy_started": False,
+            "ovulation_stimulation": (
+                stimulation["stimulation"]
+            ),
+            "ovulation_threshold": (
+                stimulation["threshold"]
+            ),
+            "ovulation_threshold_reached": (
+                stimulation[
+                    "threshold_reached"
+                ]
+            )
         }
 
         self.history.append(
@@ -237,6 +267,55 @@ class CatMatingResolver:
                 "Ovulation requires at least "
                 "one successful mating contact."
             )
+
+        ovulation = (
+            self.ovulation_resolver
+            .resolve(
+                female,
+                day=current_day
+            )
+        )
+
+        if not ovulation[
+            "ovulation_induced"
+        ]:
+            reproduction.update({
+                "estrus_active": False,
+                "estrous_phase": (
+                    "interestrus"
+                ),
+                "estrous_cycle_day": 0,
+                "mating_window_open": False,
+                "mating_window_started_day": None,
+                "mating_contacts": [],
+                "potential_fathers": [],
+                "pregnant": False,
+                "embryos": []
+            })
+
+            event = {
+                "name": (
+                    "cat_mating_window_closed_"
+                    "without_ovulation"
+                ),
+                "mother": female["name"],
+                "mating_contact_count": len(
+                    contacts
+                ),
+                "ovulation": ovulation,
+                "ovulation_induced": False,
+                "pregnancy_started": False,
+                "embryos_attempted": 0,
+                "viable_embryo_count": 0,
+                "nonviable_embryo_count": 0,
+                "started": False
+            }
+
+            self.history.append(
+                event
+            )
+
+            return event
 
         rng = rng or random
 
@@ -384,6 +463,8 @@ class CatMatingResolver:
             "multiple_sires": (
                 len(father_names) > 1
             ),
+            "ovulation": ovulation,
+            "ovulation_induced": True,
             "mating_contact_count": len(
                 contacts
             ),
