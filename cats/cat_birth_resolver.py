@@ -371,6 +371,49 @@ class CatBirthResolver:
                 )
             )
 
+        elif identity == "gib":
+            d20_rotation = (
+                self.universe
+                .d20_registry
+                .rotate_all(
+                    rng=rng
+                )
+            )
+
+            dice_box_rotation = (
+                self.meeting_place
+                .dice_box
+                .rotate_all_dice(
+                    rng=rng
+                )
+            )
+
+            special_birth_result = {
+                "name": (
+                    "gib_birth_global_resonance"
+                ),
+                "cat": cat_name,
+                "d20_rotation": d20_rotation,
+                "dice_box_rotation": (
+                    dice_box_rotation
+                ),
+                "registered_d20_count": (
+                    d20_rotation[
+                        "rotated_count"
+                    ]
+                ),
+                "bar_dice_count": (
+                    dice_box_rotation[
+                        "rotated_count"
+                    ]
+                ),
+                "triggered": True
+            }
+
+            self.universe.quantum_events.append(
+                special_birth_result
+            )
+
         event = {
             "name": "cat_born_from_dice",
             "cat": cat_name,
