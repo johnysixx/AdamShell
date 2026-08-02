@@ -90,8 +90,9 @@ class CatBirthNewCanonicalIdentitiesTests(
             "mia"
         )
 
-        self.assertIsNone(
-            second["special_birth_event"]
+        self.assertEqual(
+            second["special_birth_event"],
+            "mia_birth_global_rotation"
         )
 
     def test_later_queen_profile_is_ordinary_cat(self):
