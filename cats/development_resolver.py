@@ -1,6 +1,9 @@
 from cats.physical_biology_gate import (
     PhysicalBiologyGate
 )
+from cats.cat_learning import (
+    CatLearning
+)
 
 
 class CatDevelopmentResolver:
@@ -43,6 +46,14 @@ class CatDevelopmentResolver:
         cat["birth_day"] = birth_day
         cat["developmental_stage"] = (
             "newborn"
+        )
+
+        cat["learning"] = (
+            CatLearning.create_newborn_state(
+                mother_name=cat.get(
+                    "mother_name"
+                )
+            )
         )
 
         reproduction[

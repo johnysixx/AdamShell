@@ -4,6 +4,7 @@ from universe.logger import UniverseLogger
 from .memory import CatMemory
 from .reproduction import CatReproduction
 from .genotype import CatGenotype
+from .cat_learning import CatLearning
 
 class Cats:
 
@@ -150,6 +151,9 @@ class Cats:
             "cronenberg_mass_eaten": 0.0,
             "memory": CatMemory(name),
             "access": self.access_rules,
+            "learning": (
+                CatLearning.create_complete_state()
+            ),
             "special_traits": []
         }
 

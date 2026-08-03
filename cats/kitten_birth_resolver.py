@@ -172,6 +172,10 @@ class KittenBirthResolver:
                     "father_name"
                 ]
             }
+
+            kitten["learning"][
+                "teacher_mother"
+            ] = mother["name"]
             kitten["embryo_id"] = embryo[
                 "id"
             ]
