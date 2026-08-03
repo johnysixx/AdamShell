@@ -175,12 +175,26 @@ class MeowKnowledgeResolver:
             kitten=kitten
         )
 
-        transmission_source = (
-            "maternal_transmission"
-            if teacher_role["role"]
+        if (
+            teacher_role["role"]
             == "biological_mother"
-            else "dice_cat_transmission"
-        )
+        ):
+            transmission_source = (
+                "maternal_transmission"
+            )
+
+        elif (
+            teacher_role["role"]
+            == "dice_cat_teacher"
+        ):
+            transmission_source = (
+                "qualified_dice_cat_transmission"
+            )
+
+        else:
+            transmission_source = (
+                "qualified_cat_transmission"
+            )
 
         meow.update({
             "learned": True,
@@ -321,37 +335,46 @@ class MeowKnowledgeResolver:
                 "role": "biological_mother"
             }
 
-        teacher_origin = teacher.get(
-            "origin"
+        teacher_wisdom = (
+            FelineWisdom.ensure_state(
+                teacher
+            )
         )
 
-        if teacher_origin == (
-            "dice_manifestation"
-        ):
-            teacher_wisdom = (
-                FelineWisdom.ensure_state(
-                    teacher,
-                    can_transmit_meow=True
-                )
+        teaching_ability = (
+            teacher_wisdom[
+                "abilities"
+            ].get(
+                "teach_other_cats"
             )
+        )
 
-            if teacher_wisdom.get(
-                "can_transmit_meow",
+        can_teach_other_cats = bool(
+            teaching_ability
+            and teaching_ability.get(
+                "learned",
                 False
-            ):
-                return {
-                    "allowed": True,
-                    "reason": (
-                        "dice_cat_wisdom_teacher"
-                    ),
-                    "role": "dice_cat_teacher"
-                }
+            )
+        )
+
+        if can_teach_other_cats:
+            return {
+                "allowed": True,
+                "reason": (
+                    "qualified_feline_teacher"
+                ),
+                "role": (
+                    "dice_cat_teacher"
+                    if teacher.get("origin")
+                    == "dice_manifestation"
+                    else "qualified_cat_teacher"
+                )
+            }
 
         return {
             "allowed": False,
             "reason": (
-                "teacher_is_neither_mother_"
-                "nor_dice_cat"
+                "teacher_has_not_learned_to_teach"
             ),
             "role": None
         }

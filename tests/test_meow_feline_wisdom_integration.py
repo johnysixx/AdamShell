@@ -11,6 +11,9 @@ from cats.feline_wisdom import (
 from cats.meow_knowledge_resolver import (
     MeowKnowledgeResolver
 )
+from cats.feline_ability_resolver import (
+    FelineAbilityResolver
+)
 
 
 class MeowFelineWisdomIntegrationTests(
@@ -33,6 +36,19 @@ class MeowFelineWisdomIntegrationTests(
             MeowKnowledgeResolver(
                 self.universe
             )
+        )
+
+        self.abilities = (
+            FelineAbilityResolver(
+                self.universe
+            )
+        )
+
+        self.garfield = self.cats.create_cat(
+            name="garfield",
+            color="orange",
+            fur_length="short",
+            origin="canonical_birth"
         )
 
         self.mother = self.cats.create_cat(
@@ -73,6 +89,10 @@ class MeowFelineWisdomIntegrationTests(
         self.development.initialize_newborn(
             self.kitten,
             birth_day=0
+        )
+
+        self.abilities.register_garfield_teaching_abilities(
+            self.garfield
         )
 
         self.complete_required_experiences()
@@ -182,10 +202,7 @@ class MeowFelineWisdomIntegrationTests(
 
         self.assertEqual(
             result["reason"],
-            (
-                "teacher_is_neither_mother_"
-                "nor_dice_cat"
-            )
+            "teacher_has_not_learned_to_teach"
         )
 
     def test_dice_cat_can_teach_orphaned_kitten(self):
@@ -199,9 +216,19 @@ class MeowFelineWisdomIntegrationTests(
             "teacher_mother"
         ] = None
 
-        FelineWisdom.ensure_state(
-            self.dice_cat,
-            can_transmit_meow=True
+        teaching_lesson = (
+            self.abilities.teach_method(
+                teacher=self.garfield,
+                student=self.dice_cat,
+                ability_name="teach_other_cats",
+                method_name=(
+                    "garfield_teaching_method"
+                )
+            )
+        )
+
+        self.assertTrue(
+            teaching_lesson["learned"]
         )
 
         FelineWisdom.add_awareness(
@@ -233,7 +260,7 @@ class MeowFelineWisdomIntegrationTests(
 
         self.assertEqual(
             result["transmission_source"],
-            "dice_cat_transmission"
+            "qualified_dice_cat_transmission"
         )
 
         self.assertIn(
@@ -278,6 +305,46 @@ class MeowFelineWisdomIntegrationTests(
                 "feline_wisdom"
             ][
                 "awareness"
+            ]
+        )
+
+
+
+    def test_untrained_dice_cat_cannot_teach_orphan(
+        self
+    ):
+        self.kitten["parents"][
+            "mother"
+        ] = None
+
+        self.kitten[
+            "learning"
+        ][
+            "teacher_mother"
+        ] = None
+
+        result = self.resolver.transmit(
+            mother=self.dice_cat,
+            kitten=self.kitten,
+            current_day=90
+        )
+
+        self.assertFalse(
+            result["transmitted"]
+        )
+
+        self.assertEqual(
+            result["reason"],
+            "teacher_has_not_learned_to_teach"
+        )
+
+        self.assertFalse(
+            self.kitten[
+                "learning"
+            ][
+                "meow_knowledge"
+            ][
+                "learned"
             ]
         )
 
