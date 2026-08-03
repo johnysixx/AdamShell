@@ -6,6 +6,7 @@ from cats.meow_knowledge_resolver import (
 )
 from cats.cat_learning import CatLearning
 from cats.feline_wisdom import FelineWisdom
+from cats.kitten_growth import KittenGrowth
 
 
 class KittenUpbringingResolver:
@@ -39,6 +40,10 @@ class KittenUpbringingResolver:
             MeowKnowledgeResolver(
                 universe
             )
+        )
+
+        self.growth = KittenGrowth(
+            universe
         )
 
     def tick_day(
@@ -258,6 +263,16 @@ class KittenUpbringingResolver:
 
         events = []
 
+        if mother is not None:
+            events.append(
+                self.growth.feed_cat_milk(
+                    kitten=kitten,
+                    day=current_day,
+                    amount=1.0,
+                    source=mother["name"]
+                )
+            )
+
         for care_name in care_names:
             events.append({
                 "name": care_name,
@@ -324,6 +339,13 @@ class KittenUpbringingResolver:
                 "day": current_day,
                 "first_time": True
             })
+
+            events.append(
+                self.growth.feed_dead_delivery(
+                    kitten=kitten,
+                    day=current_day
+                )
+            )
 
             events.append({
                 "name": (
@@ -669,6 +691,13 @@ class KittenUpbringingResolver:
             0.85
         )
 
+        growth_event = (
+            self.growth.feed_first_kill(
+                kitten=kitten,
+                day=current_day
+            )
+        )
+
         event = {
             "name": (
                 "kitten_completed_first_"
@@ -689,7 +718,8 @@ class KittenUpbringingResolver:
             ],
             "hunting_progress": hunting[
                 "progress"
-            ]
+            ],
+            "growth": growth_event
         }
 
         kitten[
@@ -797,6 +827,13 @@ class KittenUpbringingResolver:
                 "learned_on_day"
             ] = current_day
 
+        growth_event = (
+            self.growth.feed_family_hunt(
+                kitten=kitten,
+                day=current_day
+            )
+        )
+
         event = {
             "name": (
                 "kitten_joined_family_"
@@ -822,6 +859,7 @@ class KittenUpbringingResolver:
             ),
             "hunting_progress": progress,
             "hunting_learned": learned,
+            "growth": growth_event,
             "successful": True
         }
 
@@ -1272,6 +1310,13 @@ class KittenUpbringingResolver:
         if age_days == 0 or age_days % 5 != 0:
             return None
 
+        growth_event = (
+            self.growth.feed_father_delivery(
+                kitten=kitten,
+                day=current_day
+            )
+        )
+
         event = {
             "name": (
                 "father_brought_dead_cronenberg"
@@ -1281,7 +1326,8 @@ class KittenUpbringingResolver:
             "age_days": age_days,
             "day": current_day,
             "prey_alive": False,
-            "purpose": "family_food"
+            "purpose": "family_food",
+            "growth": growth_event
         }
 
         kitten[
