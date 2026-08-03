@@ -1,3 +1,8 @@
+from cats.feline_wisdom import (
+    FelineWisdom
+)
+
+
 class MeowKnowledgeResolver:
 
     REQUIRED_EXPERIENCES = (
@@ -53,6 +58,14 @@ class MeowKnowledgeResolver:
                 "allowed": False,
                 "reason": "teacher_is_not_cat"
             }
+
+        teacher_role = self._resolve_teacher_role(
+            teacher=mother,
+            kitten=kitten
+        )
+
+        if not teacher_role["allowed"]:
+            return teacher_role
 
         if kitten_meow.get(
             "learned",
@@ -157,17 +170,42 @@ class MeowKnowledgeResolver:
             "meow_knowledge"
         ]
 
+        teacher_role = self._resolve_teacher_role(
+            teacher=mother,
+            kitten=kitten
+        )
+
+        transmission_source = (
+            "maternal_transmission"
+            if teacher_role["role"]
+            == "biological_mother"
+            else "dice_cat_transmission"
+        )
+
         meow.update({
             "learned": True,
             "understood": True,
             "can_speak": True,
             "teacher": mother["name"],
-            "source": "maternal_transmission",
+            "source": transmission_source,
             "learned_on_day": current_day
         })
 
+        wisdom_result = (
+            self._transmit_feline_awareness(
+                teacher=mother,
+                kitten=kitten,
+                current_day=current_day
+            )
+        )
+
         learning["lessons"].append({
-            "name": "mother_spoke_meow",
+            "name": (
+                "mother_spoke_meow"
+                if teacher_role["role"]
+                == "biological_mother"
+                else "dice_cat_spoke_meow"
+            ),
             "teacher": mother["name"],
             "student": kitten["name"],
             "day": current_day,
@@ -213,6 +251,18 @@ class MeowKnowledgeResolver:
             "learning_complete": (
                 learning["complete"]
             ),
+            "teacher_role": (
+                teacher_role["role"]
+            ),
+            "transmission_source": (
+                transmission_source
+            ),
+            "awareness_transferred": (
+                wisdom_result[
+                    "transferred_count"
+                ]
+            ),
+            "ability_methods_transferred": 0,
             "transmitted": True
         }
 
@@ -230,6 +280,176 @@ class MeowKnowledgeResolver:
             quantum_events.append(
                 event
             )
+
+        return event
+
+    def _resolve_teacher_role(
+        self,
+        teacher,
+        kitten
+    ):
+        teacher_name = teacher.get(
+            "name"
+        )
+
+        parents = kitten.get(
+            "parents",
+            {}
+        )
+
+        mother_name = parents.get(
+            "mother"
+        )
+
+        if mother_name is None:
+            mother_name = kitten.get(
+                "learning",
+                {}
+            ).get(
+                "teacher_mother"
+            )
+
+        if (
+            mother_name is not None
+            and teacher_name == mother_name
+        ):
+            return {
+                "allowed": True,
+                "reason": (
+                    "biological_mother_available"
+                ),
+                "role": "biological_mother"
+            }
+
+        teacher_origin = teacher.get(
+            "origin"
+        )
+
+        if teacher_origin == (
+            "dice_manifestation"
+        ):
+            teacher_wisdom = (
+                FelineWisdom.ensure_state(
+                    teacher,
+                    can_transmit_meow=True
+                )
+            )
+
+            if teacher_wisdom.get(
+                "can_transmit_meow",
+                False
+            ):
+                return {
+                    "allowed": True,
+                    "reason": (
+                        "dice_cat_wisdom_teacher"
+                    ),
+                    "role": "dice_cat_teacher"
+                }
+
+        return {
+            "allowed": False,
+            "reason": (
+                "teacher_is_neither_mother_"
+                "nor_dice_cat"
+            ),
+            "role": None
+        }
+
+    def _transmit_feline_awareness(
+        self,
+        teacher,
+        kitten,
+        current_day
+    ):
+        teacher_wisdom = (
+            FelineWisdom.ensure_state(
+                teacher
+            )
+        )
+
+        kitten_wisdom = (
+            FelineWisdom.ensure_state(
+                kitten
+            )
+        )
+
+        transferred = []
+
+        for knowledge_name, knowledge in (
+            teacher_wisdom[
+                "awareness"
+            ].items()
+        ):
+            domain = knowledge.get(
+                "domain"
+            )
+
+            if domain not in (
+                FelineWisdom
+                .MEOW_ALLOWED_DOMAINS
+            ):
+                continue
+
+            copied = {
+                "name": knowledge_name,
+                "domain": domain,
+                "known_to_exist": True,
+                "description": knowledge.get(
+                    "description"
+                ),
+                "known_teachers": list(
+                    knowledge.get(
+                        "known_teachers",
+                        []
+                    )
+                ),
+                "transfer_mode": (
+                    "awareness_only"
+                ),
+                "received_from": (
+                    teacher["name"]
+                ),
+                "received_on_day": (
+                    current_day
+                )
+            }
+
+            kitten_wisdom[
+                "awareness"
+            ][
+                knowledge_name
+            ] = copied
+
+            transferred.append(
+                copied
+            )
+
+        event = {
+            "name": (
+                "meow_feline_awareness_transmitted"
+            ),
+            "teacher": teacher["name"],
+            "kitten": kitten["name"],
+            "day": current_day,
+            "transferred": transferred,
+            "transferred_count": len(
+                transferred
+            ),
+            "ability_methods_transferred": 0
+        }
+
+        teacher_wisdom[
+            "transmission_history"
+        ].append(
+            event
+        )
+
+        kitten_wisdom[
+            "transmission_history"
+        ].append(
+            event
+        )
 
         return event
 
