@@ -1,3 +1,13 @@
+from cats.adult_vocalization_resolver import (
+    AdultVocalizationResolver
+)
+from cats.meow_knowledge_resolver import (
+    MeowKnowledgeResolver
+)
+from cats.cat_learning import CatLearning
+from cats.feline_wisdom import FelineWisdom
+
+
 class KittenUpbringingResolver:
 
     CARE_ONLY_LAST_DAY = 13
@@ -18,6 +28,18 @@ class KittenUpbringingResolver:
     ):
         self.universe = universe
         self.history = []
+
+        self.vocalization_resolver = (
+            AdultVocalizationResolver(
+                universe
+            )
+        )
+
+        self.meow_resolver = (
+            MeowKnowledgeResolver(
+                universe
+            )
+        )
 
     def tick_day(
         self,
@@ -141,6 +163,16 @@ class KittenUpbringingResolver:
                     kitten=kitten,
                     mother=mother,
                     father=father,
+                    age_days=age_days,
+                    current_day=current_day
+                )
+            )
+
+            events.extend(
+                self._run_late_education(
+                    kitten=kitten,
+                    mother=mother,
+                    cats=cats,
                     age_days=age_days,
                     current_day=current_day
                 )
@@ -802,6 +834,298 @@ class KittenUpbringingResolver:
         )
 
         return event
+
+    def _run_late_education(
+        self,
+        kitten,
+        mother,
+        cats,
+        age_days,
+        current_day
+    ):
+        events = []
+
+        teacher = self._find_late_teacher(
+            kitten=kitten,
+            mother=mother,
+            cats=cats
+        )
+
+        # Osm běžných dospělých hlasů:
+        # jeden každý den od 60. do 67. dne.
+        vocalization_index = age_days - 60
+
+        if (
+            0 <= vocalization_index
+            < len(
+                CatLearning.ADULT_VOCALIZATIONS
+            )
+        ):
+            if teacher is None:
+                events.append({
+                    "name": (
+                        "adult_vocalization_teacher_"
+                        "unavailable"
+                    ),
+                    "kitten": kitten["name"],
+                    "age_days": age_days,
+                    "day": current_day,
+                    "learned": False
+                })
+
+            else:
+                vocalization = (
+                    CatLearning
+                    .ADULT_VOCALIZATIONS[
+                        vocalization_index
+                    ]
+                )
+
+                events.append(
+                    self.vocalization_resolver.teach(
+                        teacher=teacher,
+                        kitten=kitten,
+                        vocalization=vocalization,
+                        current_day=current_day
+                    )
+                )
+
+        # Praktické používání naučených zvuků
+        # vůči lidem je samostatná dovednost.
+        if age_days == 75:
+            events.append(
+                self._teach_human_communication(
+                    kitten=kitten,
+                    teacher=teacher,
+                    age_days=age_days,
+                    current_day=current_day
+                )
+            )
+
+        # MEOW je závěrečná lekce.
+        if age_days == 90:
+            if teacher is None:
+                events.append({
+                    "name": (
+                        "meow_teacher_unavailable"
+                    ),
+                    "kitten": kitten["name"],
+                    "age_days": age_days,
+                    "day": current_day,
+                    "transmitted": False
+                })
+
+            else:
+                events.append(
+                    self.meow_resolver.transmit(
+                        mother=teacher,
+                        kitten=kitten,
+                        current_day=current_day
+                    )
+                )
+
+        return events
+
+    def _teach_human_communication(
+        self,
+        kitten,
+        teacher,
+        age_days,
+        current_day
+    ):
+        learning = kitten[
+            "learning"
+        ]
+
+        adult_meowing = learning[
+            "skills"
+        ][
+            "adult_meowing"
+        ]
+
+        if not adult_meowing.get(
+            "learned",
+            False
+        ):
+            return {
+                "name": (
+                    "human_communication_lesson_denied"
+                ),
+                "kitten": kitten["name"],
+                "teacher": (
+                    teacher.get("name")
+                    if teacher is not None
+                    else None
+                ),
+                "age_days": age_days,
+                "day": current_day,
+                "reason": (
+                    "adult_vocalization_repertoire_"
+                    "incomplete"
+                ),
+                "learned": False
+            }
+
+        if teacher is None:
+            return {
+                "name": (
+                    "human_communication_lesson_denied"
+                ),
+                "kitten": kitten["name"],
+                "teacher": None,
+                "age_days": age_days,
+                "day": current_day,
+                "reason": "teacher_unavailable",
+                "learned": False
+            }
+
+        skill = learning[
+            "skills"
+        ][
+            "human_communication"
+        ]
+
+        skill.update({
+            "learned": True,
+            "progress": 1.0,
+            "teacher": teacher["name"],
+            "learned_on_day": current_day
+        })
+
+        learning[
+            "human_communication_learned"
+        ] = True
+
+        lesson = {
+            "name": (
+                "human_feline_communication_learned"
+            ),
+            "kitten": kitten["name"],
+            "teacher": teacher["name"],
+            "age_days": age_days,
+            "day": current_day,
+            "uses": list(
+                CatLearning.ADULT_VOCALIZATIONS
+            ),
+            "learned": True
+        }
+
+        learning[
+            "lessons"
+        ].append(
+            lesson
+        )
+
+        return lesson
+
+    def _find_late_teacher(
+        self,
+        kitten,
+        mother,
+        cats
+    ):
+        # Biologická matka má vždy přednost.
+        if self._is_qualified_late_teacher(
+            mother,
+            parental_exception=True
+        ):
+            return mother
+
+        # Potom určená náhradní kočka.
+        substitute_name = kitten.get(
+            "learning",
+            {}
+        ).get(
+            "teacher_mother"
+        )
+
+        if substitute_name:
+            substitute = next(
+                (
+                    candidate
+                    for candidate in cats
+                    if candidate.get("name")
+                    == substitute_name
+                ),
+                None
+            )
+
+            if self._is_qualified_late_teacher(
+                substitute
+            ):
+                return substitute
+
+        # Nakonec jiná kvalifikovaná kočka.
+        for candidate in cats:
+            if candidate is kitten:
+                continue
+
+            if candidate is mother:
+                continue
+
+            if self._is_qualified_late_teacher(
+                candidate
+            ):
+                return candidate
+
+        return None
+
+    def _is_qualified_late_teacher(
+        self,
+        candidate,
+        parental_exception=False
+    ):
+        if candidate is None:
+            return False
+
+        if not self._knows_meow(
+            candidate
+        ):
+            return False
+
+        if parental_exception:
+            return True
+
+        wisdom = FelineWisdom.ensure_state(
+            candidate
+        )
+
+        teaching = wisdom[
+            "abilities"
+        ].get(
+            "teach_other_cats"
+        )
+
+        return bool(
+            teaching
+            and teaching.get(
+                "learned",
+                False
+            )
+        )
+
+    def _knows_meow(
+        self,
+        cat
+    ):
+        meow = cat.get(
+            "learning",
+            {}
+        ).get(
+            "meow_knowledge",
+            {}
+        )
+
+        return bool(
+            meow.get(
+                "learned",
+                False
+            )
+            and meow.get(
+                "can_speak",
+                False
+            )
+        )
 
     def _advance_skill(
         self,

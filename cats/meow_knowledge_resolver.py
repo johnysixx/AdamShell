@@ -307,15 +307,24 @@ class MeowKnowledgeResolver:
         )
 
         parents = kitten.get(
-            "parents",
-            {}
+            "parents"
         )
 
-        mother_name = parents.get(
-            "mother"
-        )
+        if parents is not None:
+            # Pokud je rodičovská struktura přítomná,
+            # jedině parents["mother"] označuje
+            # biologickou matku.
+            #
+            # Hodnota None znamená osiřelé kotě.
+            # learning["teacher_mother"] pak může být
+            # náhradní učitel, nikoli biologický rodič.
+            mother_name = parents.get(
+                "mother"
+            )
 
-        if mother_name is None:
+        else:
+            # Kompatibilita se staršími kočkami,
+            # které ještě nemají strukturu parents.
             mother_name = kitten.get(
                 "learning",
                 {}
