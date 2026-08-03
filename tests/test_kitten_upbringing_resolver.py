@@ -260,5 +260,227 @@ class KittenUpbringingResolverTests(
         )
 
 
+
+    def test_day_twenty_one_introduces_live_prey(self):
+        result = self.run_at_age(21)
+
+        self.assertEqual(
+            result["phase"],
+            "live_prey_training"
+        )
+
+        event_names = {
+            event["name"]
+            for event in result["events"]
+        }
+
+        self.assertIn(
+            "mother_brought_small_live_cronenberg",
+            event_names
+        )
+
+        experience = self.kitten[
+            "upbringing"
+        ][
+            "cronenberg_experience"
+        ]
+
+        self.assertEqual(
+            experience["live_deliveries"],
+            1
+        )
+
+    def test_early_live_prey_days_practice_chasing(self):
+        result = self.run_at_age(24)
+
+        hunting_events = [
+            event
+            for event in result["events"]
+            if event["name"]
+            == "kitten_hunting_step_practiced"
+        ]
+
+        self.assertEqual(
+            len(hunting_events),
+            1
+        )
+
+        self.assertEqual(
+            hunting_events[0]["step"],
+            "tracking_and_chasing"
+        )
+
+        hunting = self.kitten[
+            "learning"
+        ][
+            "skills"
+        ][
+            "hunting"
+        ]
+
+        self.assertGreater(
+            hunting["progress"],
+            0.0
+        )
+
+        self.assertFalse(
+            hunting["learned"]
+        )
+
+    def test_later_training_practices_killing_bite(self):
+        result = self.run_at_age(30)
+
+        hunting_event = next(
+            event
+            for event in result["events"]
+            if event["name"]
+            == "kitten_hunting_step_practiced"
+        )
+
+        self.assertEqual(
+            hunting_event["step"],
+            "capture_and_killing_bite"
+        )
+
+    def test_day_thirty_five_records_first_kill(self):
+        result = self.run_at_age(35)
+
+        self.assertEqual(
+            result["phase"],
+            "first_training_kill"
+        )
+
+        event_names = {
+            event["name"]
+            for event in result["events"]
+        }
+
+        self.assertIn(
+            "kitten_completed_first_training_kill",
+            event_names
+        )
+
+        experience = self.kitten[
+            "upbringing"
+        ][
+            "cronenberg_experience"
+        ]
+
+        self.assertEqual(
+            experience["successful_kills"],
+            1
+        )
+
+        hunting = self.kitten[
+            "learning"
+        ][
+            "skills"
+        ][
+            "hunting"
+        ]
+
+        self.assertGreaterEqual(
+            hunting["progress"],
+            0.85
+        )
+
+    def test_family_hunts_start_after_training_kill(self):
+        self.run_at_age(35)
+
+        result = self.run_at_age(36)
+
+        self.assertEqual(
+            result["phase"],
+            "family_hunting"
+        )
+
+        event = next(
+            event
+            for event in result["events"]
+            if event["name"]
+            == "kitten_joined_family_cronenberg_hunt"
+        )
+
+        self.assertEqual(
+            event["family_hunt_number"],
+            1
+        )
+
+        self.assertFalse(
+            event["father_joined"]
+        )
+
+    def test_father_joins_every_second_family_hunt(self):
+        self.run_at_age(35)
+        self.run_at_age(36)
+
+        result = self.run_at_age(37)
+
+        event = next(
+            event
+            for event in result["events"]
+            if event["name"]
+            == "kitten_joined_family_cronenberg_hunt"
+        )
+
+        self.assertEqual(
+            event["family_hunt_number"],
+            2
+        )
+
+        self.assertTrue(
+            event["father_joined"]
+        )
+
+        self.assertEqual(
+            self.kitten[
+                "learning"
+            ][
+                "hunting_teacher_father"
+            ],
+            "father"
+        )
+
+    def test_hunting_finishes_after_family_experience(self):
+        for age in range(21, 36):
+            self.run_at_age(age)
+
+        for age in range(36, 40):
+            self.run_at_age(age)
+
+        hunting = self.kitten[
+            "learning"
+        ][
+            "skills"
+        ][
+            "hunting"
+        ]
+
+        experience = self.kitten[
+            "upbringing"
+        ][
+            "cronenberg_experience"
+        ]
+
+        self.assertGreaterEqual(
+            experience["successful_kills"],
+            1
+        )
+
+        self.assertGreaterEqual(
+            experience["family_hunts"],
+            3
+        )
+
+        self.assertTrue(
+            hunting["learned"]
+        )
+
+        self.assertEqual(
+            hunting["progress"],
+            1.0
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

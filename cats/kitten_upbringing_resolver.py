@@ -4,6 +4,14 @@ class KittenUpbringingResolver:
     EARLY_LEARNING_FIRST_DAY = 14
     EARLY_LEARNING_LAST_DAY = 20
 
+    LIVE_PREY_FIRST_DAY = 21
+    LIVE_PREY_PRACTICE_LAST_DAY = 34
+    FIRST_TRAINING_KILL_DAY = 35
+    FAMILY_HUNT_FIRST_DAY = 36
+    UPBRINGING_LAST_DAY = 90
+
+    REQUIRED_FAMILY_HUNTS = 3
+
     def __init__(
         self,
         universe
@@ -49,7 +57,7 @@ class KittenUpbringingResolver:
         )
 
         if age_days > (
-            self.EARLY_LEARNING_LAST_DAY
+            self.UPBRINGING_LAST_DAY
         ):
             return self._skip(
                 kitten=kitten,
@@ -104,7 +112,9 @@ class KittenUpbringingResolver:
 
             phase = "complete_maternal_care"
 
-        else:
+        elif age_days <= (
+            self.EARLY_LEARNING_LAST_DAY
+        ):
             events.extend(
                 self._provide_reduced_care(
                     kitten=kitten,
@@ -124,6 +134,30 @@ class KittenUpbringingResolver:
             )
 
             phase = "early_socialization"
+
+        else:
+            events.extend(
+                self._run_hunting_upbringing(
+                    kitten=kitten,
+                    mother=mother,
+                    father=father,
+                    age_days=age_days,
+                    current_day=current_day
+                )
+            )
+
+            if age_days <= (
+                self.LIVE_PREY_PRACTICE_LAST_DAY
+            ):
+                phase = "live_prey_training"
+
+            elif age_days == (
+                self.FIRST_TRAINING_KILL_DAY
+            ):
+                phase = "first_training_kill"
+
+            else:
+                phase = "family_hunting"
 
         upbringing["phase"] = phase
         upbringing["last_processed_age"] = (
@@ -368,6 +402,406 @@ class KittenUpbringingResolver:
             )
 
         return events
+
+    def _run_hunting_upbringing(
+        self,
+        kitten,
+        mother,
+        father,
+        age_days,
+        current_day
+    ):
+        events = []
+
+        if age_days == (
+            self.LIVE_PREY_FIRST_DAY
+        ):
+            events.append(
+                self._bring_live_cronenberg(
+                    kitten=kitten,
+                    mother=mother,
+                    age_days=age_days,
+                    current_day=current_day
+                )
+            )
+
+        if (
+            self.LIVE_PREY_FIRST_DAY
+            <= age_days
+            <= 27
+        ):
+            events.append(
+                self._practice_hunting_step(
+                    kitten=kitten,
+                    teacher=mother,
+                    skill_step="tracking_and_chasing",
+                    progress_amount=0.04,
+                    age_days=age_days,
+                    current_day=current_day
+                )
+            )
+
+        elif 28 <= age_days <= (
+            self.LIVE_PREY_PRACTICE_LAST_DAY
+        ):
+            events.append(
+                self._practice_hunting_step(
+                    kitten=kitten,
+                    teacher=mother,
+                    skill_step=(
+                        "capture_and_killing_bite"
+                    ),
+                    progress_amount=0.05,
+                    age_days=age_days,
+                    current_day=current_day
+                )
+            )
+
+        elif age_days == (
+            self.FIRST_TRAINING_KILL_DAY
+        ):
+            events.append(
+                self._first_training_kill(
+                    kitten=kitten,
+                    mother=mother,
+                    age_days=age_days,
+                    current_day=current_day
+                )
+            )
+
+        elif age_days >= (
+            self.FAMILY_HUNT_FIRST_DAY
+        ):
+            events.append(
+                self._family_hunt(
+                    kitten=kitten,
+                    mother=mother,
+                    father=father,
+                    age_days=age_days,
+                    current_day=current_day
+                )
+            )
+
+        return events
+
+    def _bring_live_cronenberg(
+        self,
+        kitten,
+        mother,
+        age_days,
+        current_day
+    ):
+        experience = kitten[
+            "upbringing"
+        ][
+            "cronenberg_experience"
+        ]
+
+        experience[
+            "live_deliveries"
+        ] += 1
+
+        event = {
+            "name": (
+                "mother_brought_small_"
+                "live_cronenberg"
+            ),
+            "kitten": kitten["name"],
+            "mother": (
+                mother.get("name")
+                if mother is not None
+                else None
+            ),
+            "age_days": age_days,
+            "day": current_day,
+            "prey_alive": True,
+            "prey_controlled_by_mother": True,
+            "purpose": "live_prey_training"
+        }
+
+        kitten[
+            "learning"
+        ][
+            "lessons"
+        ].append(
+            event
+        )
+
+        return event
+
+    def _practice_hunting_step(
+        self,
+        kitten,
+        teacher,
+        skill_step,
+        progress_amount,
+        age_days,
+        current_day
+    ):
+        hunting = kitten[
+            "learning"
+        ][
+            "skills"
+        ][
+            "hunting"
+        ]
+
+        previous_progress = float(
+            hunting.get(
+                "progress",
+                0.0
+            )
+        )
+
+        progress = min(
+            0.8,
+            previous_progress
+            + progress_amount
+        )
+
+        teacher_name = (
+            teacher.get("name")
+            if teacher is not None
+            else kitten[
+                "learning"
+            ].get(
+                "teacher_mother"
+            )
+        )
+
+        hunting.update({
+            "progress": progress,
+            "teacher": teacher_name
+        })
+
+        event = {
+            "name": (
+                "kitten_hunting_step_practiced"
+            ),
+            "kitten": kitten["name"],
+            "teacher": teacher_name,
+            "step": skill_step,
+            "age_days": age_days,
+            "day": current_day,
+            "previous_progress": (
+                previous_progress
+            ),
+            "progress": progress,
+            "learned": False
+        }
+
+        kitten[
+            "learning"
+        ][
+            "lessons"
+        ].append(
+            event
+        )
+
+        return event
+
+    def _first_training_kill(
+        self,
+        kitten,
+        mother,
+        age_days,
+        current_day
+    ):
+        experience = kitten[
+            "upbringing"
+        ][
+            "cronenberg_experience"
+        ]
+
+        experience[
+            "successful_kills"
+        ] += 1
+
+        hunting = kitten[
+            "learning"
+        ][
+            "skills"
+        ][
+            "hunting"
+        ]
+
+        previous_progress = float(
+            hunting.get(
+                "progress",
+                0.0
+            )
+        )
+
+        hunting["progress"] = max(
+            previous_progress,
+            0.85
+        )
+
+        event = {
+            "name": (
+                "kitten_completed_first_"
+                "training_kill"
+            ),
+            "kitten": kitten["name"],
+            "mother": (
+                mother.get("name")
+                if mother is not None
+                else None
+            ),
+            "age_days": age_days,
+            "day": current_day,
+            "prey": "small_live_cronenberg",
+            "successful": True,
+            "successful_kills": experience[
+                "successful_kills"
+            ],
+            "hunting_progress": hunting[
+                "progress"
+            ]
+        }
+
+        kitten[
+            "learning"
+        ][
+            "lessons"
+        ].append(
+            event
+        )
+
+        return event
+
+    def _family_hunt(
+        self,
+        kitten,
+        mother,
+        father,
+        age_days,
+        current_day
+    ):
+        experience = kitten[
+            "upbringing"
+        ][
+            "cronenberg_experience"
+        ]
+
+        experience[
+            "family_hunts"
+        ] += 1
+
+        family_hunt_number = experience[
+            "family_hunts"
+        ]
+
+        # Otec se přidá občas:
+        # při každé druhé rodinné výpravě.
+        father_joined = (
+            father is not None
+            and family_hunt_number % 2 == 0
+        )
+
+        hunting = kitten[
+            "learning"
+        ][
+            "skills"
+        ][
+            "hunting"
+        ]
+
+        previous_progress = float(
+            hunting.get(
+                "progress",
+                0.0
+            )
+        )
+
+        progress = min(
+            1.0,
+            previous_progress + 0.05
+        )
+
+        enough_experience = (
+            experience[
+                "successful_kills"
+            ] >= 1
+            and family_hunt_number
+            >= self.REQUIRED_FAMILY_HUNTS
+        )
+
+        learned = (
+            enough_experience
+            and progress >= 0.999999
+        )
+
+        teacher_names = []
+
+        if mother is not None:
+            teacher_names.append(
+                mother["name"]
+            )
+
+        if father_joined:
+            teacher_names.append(
+                father["name"]
+            )
+
+            kitten[
+                "learning"
+            ][
+                "hunting_teacher_father"
+            ] = father["name"]
+
+        hunting.update({
+            "progress": progress,
+            "learned": learned,
+            "teacher": (
+                teacher_names[0]
+                if teacher_names
+                else None
+            )
+        })
+
+        if learned:
+            hunting[
+                "learned_on_day"
+            ] = current_day
+
+        event = {
+            "name": (
+                "kitten_joined_family_"
+                "cronenberg_hunt"
+            ),
+            "kitten": kitten["name"],
+            "mother": (
+                mother.get("name")
+                if mother is not None
+                else None
+            ),
+            "father": (
+                father.get("name")
+                if father is not None
+                else None
+            ),
+            "father_joined": father_joined,
+            "teachers": teacher_names,
+            "age_days": age_days,
+            "day": current_day,
+            "family_hunt_number": (
+                family_hunt_number
+            ),
+            "hunting_progress": progress,
+            "hunting_learned": learned,
+            "successful": True
+        }
+
+        kitten[
+            "learning"
+        ][
+            "lessons"
+        ].append(
+            event
+        )
+
+        return event
 
     def _advance_skill(
         self,
