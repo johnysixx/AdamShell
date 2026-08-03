@@ -288,5 +288,33 @@ class FelineAbilityLearningTests(
         )
 
 
+
+    def test_queen_cannot_open_locked_door(self):
+        self.resolver.teach_method(
+            teacher=self.queen,
+            student=self.kitten,
+            ability_name="open_human_door",
+            method_name="pull_with_paw"
+        )
+
+        result = (
+            self.resolver
+            .can_open_human_door(
+                cat=self.kitten,
+                locked=True,
+                opens_toward_cat=True
+            )
+        )
+
+        self.assertFalse(
+            result["allowed"]
+        )
+
+        self.assertEqual(
+            result["reason"],
+            "door_is_locked"
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
