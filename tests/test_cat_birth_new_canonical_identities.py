@@ -148,7 +148,7 @@ class CatBirthNewCanonicalIdentitiesTests(
 
         self.assertEqual(
             result["special_birth_event"],
-            "garfield_birth_all_non_dice_effects"
+            "garfield_birth_effect_combination"
         )
 
     def test_later_garfield_profile_is_ordinary_cat(self):
