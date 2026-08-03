@@ -10,6 +10,9 @@ from cats.mating_resolver import (
 from cats.kitten_birth_resolver import (
     KittenBirthResolver
 )
+from cats.kitten_upbringing_resolver import (
+    KittenUpbringingResolver
+)
 
 
 class CatLifeCycleHandler:
@@ -47,6 +50,12 @@ class CatLifeCycleHandler:
             )
         )
 
+        self.upbringing_resolver = (
+            KittenUpbringingResolver(
+                universe
+            )
+        )
+
     def tick_day(
         self,
         day
@@ -79,6 +88,7 @@ class CatLifeCycleHandler:
         estrous_cycle_results = []
         pregnancy_advances = []
         births = []
+        upbringing_results = []
 
         # Kopie seznamu je důležitá:
         # porod může během iterace přidat nová koťata.
@@ -101,6 +111,19 @@ class CatLifeCycleHandler:
 
                 age_advances.append(
                     age_result
+                )
+
+                upbringing_result = (
+                    self.upbringing_resolver
+                    .tick_day(
+                        kitten=cat,
+                        cats=cats,
+                        current_day=day
+                    )
+                )
+
+                upbringing_results.append(
+                    upbringing_result
                 )
 
             reproduction = cat.get(
@@ -169,7 +192,10 @@ class CatLifeCycleHandler:
             "pregnancy_advances": (
                 pregnancy_advances
             ),
-            "births": births
+            "births": births,
+            "upbringing_results": (
+                upbringing_results
+            )
         }
 
         self.history.append(
