@@ -5,6 +5,22 @@ from cats.feline_wisdom import (
 
 class FelineAbilityResolver:
 
+    TEACH_OTHER_CATS = (
+        "teach_other_cats"
+    )
+
+    TEACH_TEACHING = (
+        "teach_teaching"
+    )
+
+    GARFIELD_TEACHING_METHOD = (
+        "garfield_teaching_method"
+    )
+
+    GARFIELD_META_TEACHING_METHOD = (
+        "garfield_meta_teaching_method"
+    )
+
     OPEN_HUMAN_DOOR = (
         "open_human_door"
     )
@@ -236,6 +252,39 @@ class FelineAbilityResolver:
         ability_name,
         method_name
     ):
+        FelineWisdom.ensure_state(
+            teacher
+        )
+
+        FelineWisdom.ensure_state(
+            student
+        )
+
+        permission = self._check_teaching_permission(
+            teacher=teacher,
+            student=student,
+            ability_name=ability_name
+        )
+
+        if not permission["allowed"]:
+            if permission.get(
+                "creates_cronenberg",
+                False
+            ):
+                return self._create_teaching_cronenberg(
+                    teacher=teacher,
+                    student=student,
+                    ability_name=ability_name,
+                    reason=permission["reason"]
+                )
+
+            return self._deny(
+                name="feline_ability_lesson_denied",
+                teacher=teacher,
+                student=student,
+                reason=permission["reason"]
+            )
+
         teacher_wisdom = (
             FelineWisdom.ensure_state(
                 teacher
@@ -419,6 +468,271 @@ class FelineAbilityResolver:
                 "close_human_doors"
             )
         }
+
+    def register_garfield_teaching_abilities(
+        self,
+        garfield
+    ):
+        teach_method = (
+            FelineWisdom.learn_ability_method(
+                cat=garfield,
+                ability_name=self.TEACH_OTHER_CATS,
+                method_name=(
+                    self.GARFIELD_TEACHING_METHOD
+                ),
+                teacher_name=None,
+                constraints={
+                    "can_teach_meow": True,
+                    "can_teach_owned_abilities": True,
+                    "can_teach_to_own_kittens": True,
+                    "can_create_foreign_teachers": True
+                }
+            )
+        )
+
+        meta_method = (
+            FelineWisdom.learn_ability_method(
+                cat=garfield,
+                ability_name=self.TEACH_TEACHING,
+                method_name=(
+                    self.GARFIELD_META_TEACHING_METHOD
+                ),
+                teacher_name=None,
+                constraints={
+                    "can_teach_teach_other_cats": True,
+                    "can_teach_teach_teaching": True
+                }
+            )
+        )
+
+        FelineWisdom.add_awareness(
+            cat=garfield,
+            knowledge_name=self.TEACH_OTHER_CATS,
+            domain="feline",
+            description=(
+                "Cats can learn to teach MEOW "
+                "and their own abilities."
+            ),
+            known_teachers=[
+                garfield["name"]
+            ]
+        )
+
+        FelineWisdom.add_awareness(
+            cat=garfield,
+            knowledge_name=self.TEACH_TEACHING,
+            domain="feline",
+            description=(
+                "A higher teaching ability allows "
+                "a cat to create teachers outside "
+                "its own offspring."
+            ),
+            known_teachers=[
+                garfield["name"]
+            ]
+        )
+
+        event = {
+            "name": (
+                "garfield_teaching_abilities_registered"
+            ),
+            "cat": garfield["name"],
+            "teach_other_cats": teach_method,
+            "teach_teaching": meta_method,
+            "registered": True
+        }
+
+        self._record(
+            event
+        )
+
+        return event
+
+    def _check_teaching_permission(
+        self,
+        teacher,
+        student,
+        ability_name
+    ):
+        if self._is_parent_of(
+            teacher=teacher,
+            student=student
+        ):
+            return {
+                "allowed": True,
+                "reason": "parent_teaching_own_kitten"
+            }
+
+        teacher_wisdom = (
+            FelineWisdom.ensure_state(
+                teacher
+            )
+        )
+
+        knows_teaching = self._knows_ability(
+            teacher_wisdom,
+            self.TEACH_OTHER_CATS
+        )
+
+        knows_meta_teaching = self._knows_ability(
+            teacher_wisdom,
+            self.TEACH_TEACHING
+        )
+
+        is_garfield = (
+            teacher.get("name") == "garfield"
+        )
+
+        if ability_name == self.TEACH_OTHER_CATS:
+            if is_garfield:
+                return {
+                    "allowed": True,
+                    "reason": "garfield_teaches_teaching"
+                }
+
+            if knows_meta_teaching:
+                return {
+                    "allowed": True,
+                    "reason": (
+                        "meta_teacher_creates_teacher"
+                    )
+                }
+
+            if knows_teaching:
+                return {
+                    "allowed": False,
+                    "reason": (
+                        "teacher_cannot_create_"
+                        "non_offspring_teacher"
+                    ),
+                    "creates_cronenberg": True
+                }
+
+            return {
+                "allowed": False,
+                "reason": (
+                    "teacher_has_not_learned_to_teach"
+                )
+            }
+
+        if ability_name == self.TEACH_TEACHING:
+            if is_garfield or knows_meta_teaching:
+                return {
+                    "allowed": True,
+                    "reason": (
+                        "meta_teaching_authorized"
+                    )
+                }
+
+            return {
+                "allowed": False,
+                "reason": (
+                    "teacher_does_not_know_"
+                    "teach_teaching"
+                )
+            }
+
+        if knows_teaching:
+            return {
+                "allowed": True,
+                "reason": (
+                    "teacher_may_teach_owned_ability"
+                )
+            }
+
+        return {
+            "allowed": False,
+            "reason": (
+                "teacher_has_not_learned_to_teach"
+            )
+        }
+
+    def _is_parent_of(
+        self,
+        teacher,
+        student
+    ):
+        teacher_name = teacher.get(
+            "name"
+        )
+
+        parents = student.get(
+            "parents",
+            {}
+        )
+
+        return teacher_name in {
+            parents.get("mother"),
+            parents.get("father")
+        }
+
+    def _knows_ability(
+        self,
+        wisdom,
+        ability_name
+    ):
+        ability = wisdom[
+            "abilities"
+        ].get(
+            ability_name
+        )
+
+        return bool(
+            ability
+            and ability.get(
+                "learned",
+                False
+            )
+        )
+
+    def _create_teaching_cronenberg(
+        self,
+        teacher,
+        student,
+        ability_name,
+        reason
+    ):
+        error = RuntimeError(
+            "Forbidden feline teaching paradox: "
+            f"{teacher.get('name')} attempted to "
+            f"teach {ability_name} to "
+            f"{student.get('name')} without "
+            "teach_teaching."
+        )
+
+        cronenberg = (
+            self.universe
+            .create_cronenberg_from_quantum_error(
+                error=error,
+                source_component=(
+                    "feline_ability_resolver"
+                ),
+                source_operation=(
+                    "forbidden_teaching_attempt"
+                )
+            )
+        )
+
+        event = {
+            "name": (
+                "forbidden_teaching_created_"
+                "cronenberg"
+            ),
+            "teacher": teacher.get("name"),
+            "student": student.get("name"),
+            "attempted_ability": ability_name,
+            "reason": reason,
+            "cronenberg_id": cronenberg.id,
+            "cronenberg_created": True,
+            "learned": False,
+            "transmitted": False
+        }
+
+        self._record(
+            event
+        )
+
+        return event
 
     def _deny(
         self,

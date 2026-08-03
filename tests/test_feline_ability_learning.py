@@ -52,6 +52,13 @@ class FelineAbilityLearningTests(
             )
         )
 
+        self.garfield = self.cats.create_cat(
+            name="garfield",
+            color="orange",
+            fur_length="short",
+            origin="canonical_birth"
+        )
+
         self.kitten = self.cats.create_cat(
             name="kitten",
             color="white",
@@ -70,6 +77,24 @@ class FelineAbilityLearningTests(
 
         self.resolver.register_queen_elisabeth_door_method(
             self.queen
+        )
+
+        self.resolver.register_garfield_teaching_abilities(
+            self.garfield
+        )
+
+        self.resolver.teach_method(
+            teacher=self.garfield,
+            student=self.pazuzu,
+            ability_name="teach_other_cats",
+            method_name="garfield_teaching_method"
+        )
+
+        self.resolver.teach_method(
+            teacher=self.garfield,
+            student=self.queen,
+            ability_name="teach_other_cats",
+            method_name="garfield_teaching_method"
         )
 
     def test_meow_transfers_awareness_not_method(self):
