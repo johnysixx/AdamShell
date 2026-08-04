@@ -149,23 +149,26 @@ class DiceBox:
             else int(die_name[1:])
         )
 
-        raw_value = int(
+        face_value = int(
             rng.randint(
                 1,
                 sides
             )
         )
 
-        value = (
-            0
-            if is_percentile
-            and raw_value == 10
-            else (
-                raw_value * 10
-                if is_percentile
-                else raw_value
+        percentile_tens = None
+
+        if is_percentile:
+            percentile_tens = (
+                0
+                if face_value == 10
+                else face_value * 10
             )
-        )
+
+            value = percentile_tens
+
+        else:
+            value = face_value
 
         return {
             "name": (
@@ -173,8 +176,17 @@ class DiceBox:
             ),
             "die": die_name,
             "sides": sides,
+
+            # Jednozna?n? nov? pole.
+            "face_value": face_value,
+            "percentile_tens": (
+                percentile_tens
+            ),
+
+            # Kompatibilita se st?vaj?c?m k?dem.
+            "raw_value": face_value,
             "value": value,
-            "raw_value": raw_value,
+
             "is_percentile": is_percentile,
             "location": self.location,
             "removed_from_box": False,
@@ -224,43 +236,83 @@ class DiceBox:
             list(self.contents)
         )
 
-        is_percentile = (
-            die_name == "d10_percentile"
+        event = self._roll_die(
+            die_name,
+            rng
         )
 
-        sides = (
-            10
-            if is_percentile
-            else int(die_name[1:])
+        self._record_rotation(
+            event
         )
 
-        raw_value = int(
-            rng.randint(
-                1,
-                sides
-            )
+        UniverseLogger.event(
+            "A DIE SECRETLY ROTATES "
+            "INSIDE THE BAR DICE BOX"
         )
 
-        value = (
+        return event
+
+    def rotate_percentile_pair(
+        self,
+        rng=None
+    ):
+        """
+        Provede skute?n? hod d100 pomoc?:
+        - d10_percentile jako des?tek,
+        - oby?ejn? d10 jako jednotek.
+
+        00 znamen? 100.
+        """
+        rng = rng or random
+
+        tens = self._roll_die(
+            "d10_percentile",
+            rng
+        )
+
+        units_die = self._roll_die(
+            "d10",
+            rng
+        )
+
+        units = (
             0
-            if is_percentile
-            and raw_value == 10
-            else (
-                raw_value * 10
-                if is_percentile
-                else raw_value
-            )
+            if units_die["face_value"] == 10
+            else units_die["face_value"]
+        )
+
+        percentile_value = (
+            tens["percentile_tens"]
+            + units
+        )
+
+        if percentile_value == 0:
+            percentile_value = 100
+
+        self._record_rotation(
+            tens
+        )
+
+        self._record_rotation(
+            units_die
         )
 
         event = {
             "name": (
-                "dice_box_die_secretly_rotated"
+                "dice_box_percentile_pair_rotated"
             ),
-            "die": die_name,
-            "sides": sides,
-            "value": value,
-            "raw_value": raw_value,
-            "is_percentile": is_percentile,
+            "dice": [
+                "d10_percentile",
+                "d10"
+            ],
+            "tens": dict(tens),
+            "units": {
+                **dict(units_die),
+                "percentile_units": units
+            },
+            "value": percentile_value,
+            "minimum": 1,
+            "maximum": 100,
             "location": self.location,
             "removed_from_box": False,
             "visibility": (
@@ -271,23 +323,20 @@ class DiceBox:
 
         if not hasattr(
             self,
-            "rotation_history"
+            "percentile_history"
         ):
-            self.rotation_history = []
+            self.percentile_history = []
 
-        self.rotation_history.append(
+        self.percentile_history.append(
             dict(event)
         )
 
         self.public_state[
-            "last_secret_rotation"
-        ] = {
-            "die": die_name,
-            "value": value
-        }
+            "last_percentile_rotation"
+        ] = percentile_value
 
         UniverseLogger.event(
-            "A DIE SECRETLY ROTATES "
+            "PERCENTILE DICE SECRETLY ROTATE "
             "INSIDE THE BAR DICE BOX"
         )
 
@@ -306,10 +355,13 @@ class DiceBox:
         die = self.contents.pop()
 
         if die not in self.public_state["missing"]:
-            self.public_state["missing"].append(die)
+            self.public_state["missing"].append(
+                die
+            )
 
         UniverseLogger.event(
             f"DIE MISSING FROM BOX: {die}"
         )
 
         return die
+
