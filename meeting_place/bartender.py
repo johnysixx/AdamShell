@@ -1,4 +1,4 @@
-﻿from universe.logger import UniverseLogger
+from universe.logger import UniverseLogger
 
 class Bartender:
 
@@ -19,6 +19,7 @@ class Bartender:
         self.regular_drinks = {}
         self.known_histories = {}
         self.known_guests = set()
+        self.cat_meow_history = []
 
         self.current_task = "wiping_glasses"
         self.glasses_clean = False
@@ -186,6 +187,83 @@ class Bartender:
 
         UniverseLogger.event("BARTENDER APPEARS BEHIND THE BAR")
         UniverseLogger.event("BARTENDER POLISHES A GLASS")
+
+    def exchange_meow_with_cat(
+        self,
+        cat
+    ):
+        if isinstance(
+            cat,
+            dict
+        ):
+            cat_name = (
+                cat.get("world_key")
+                or cat.get("name")
+            )
+
+            meow = cat.get(
+                "learning",
+                {}
+            ).get(
+                "meow_knowledge",
+                {}
+            )
+
+            cat_knows_meow = bool(
+                meow.get(
+                    "learned",
+                    False
+                )
+                and meow.get(
+                    "can_speak",
+                    False
+                )
+            )
+
+        else:
+            cat_name = getattr(
+                cat,
+                "name",
+                None
+            )
+
+            cat_knows_meow = False
+
+        cat_event = {
+            "name": "cat_meowed_at_bartender",
+            "cat": cat_name,
+            "sound": "MEOW",
+            "understood": cat_knows_meow
+        }
+
+        self.cat_meow_history.append(
+            cat_event
+        )
+
+        UniverseLogger.event(
+            f"CAT MEOWS AT BARTENDER: {cat_name}"
+        )
+
+        reply_event = {
+            "name": "bartender_replied_meow",
+            "bartender": self.name,
+            "cat": cat_name,
+            "sound": "MEOW",
+            "reply": True
+        }
+
+        self.cat_meow_history.append(
+            reply_event
+        )
+
+        UniverseLogger.event(
+            f"BARTENDER REPLIES MEOW TO: {cat_name}"
+        )
+
+        return {
+            "cat_meow": cat_event,
+            "bartender_meow": reply_event
+        }
 
     def serve_without_order(
             self,

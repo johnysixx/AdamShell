@@ -19,6 +19,7 @@ from .bar_geometry_terminal import BarGeometryTerminal
 from .back_room_black_box import BackRoomBlackBox
 from .lemonade_reservoir import LemonadeReservoir
 from .lemonade_signs import LemonadeSigns
+from cats.kitten_growth import KittenGrowth
 
 class MeetingPlace:
 
@@ -78,6 +79,10 @@ class MeetingPlace:
         }
         self.bartender = Bartender(
             self.bar_counter.hidden_story_book
+        )
+
+        self.kitten_growth = KittenGrowth(
+            universe
         )
 
         self.access = {
@@ -280,24 +285,101 @@ class MeetingPlace:
         self.bar_counter.red_button.activate_alarm()
 
     def handle_cat_after_entry(self, cat):
-        self.serve_cat_milk(cat)
+        meow_exchange = (
+            self.bartender
+            .exchange_meow_with_cat(
+                cat
+            )
+        )
+
+        self.emit_event({
+            "name": "cat_bartender_meow_exchange",
+            "cat": self._get_entity_name(
+                cat
+            ),
+            "cat_meow": meow_exchange[
+                "cat_meow"
+            ],
+            "bartender_meow": meow_exchange[
+                "bartender_meow"
+            ],
+            "tick": self.tick_count
+        })
+
+        return self.serve_cat_milk(
+            cat
+        )
 
     def serve_cat_milk(self, cat):
-        cat_name = self._get_entity_name(cat)
+        cat_name = self._get_entity_name(
+            cat
+        )
 
-        milk = self.fridge.get_item("milk")
-        milk_bowl = self.bar_counter.milk_bowl
+        milk = self.fridge.get_item(
+            "milk"
+        )
+
+        milk_bowl = (
+            self.bar_counter.milk_bowl
+        )
 
         if milk is None:
-            self.emit_event(f"{cat_name} could not be served milk because milk was missing")
-            return
+            event = {
+                "name": "cat_milk_service_failed",
+                "cat": cat_name,
+                "reason": "milk_missing",
+                "served": False
+            }
+
+            self.emit_event(
+                event
+            )
+
+            return event
 
         self.bartender.serve_without_order(
             cat_name,
             milk,
             milk_bowl
         )
-        self.emit_event(f"{cat_name} drinks milk at the bar")
+
+        growth_event = None
+
+        if (
+            isinstance(cat, dict)
+            and "age_days" in cat
+            and cat.get(
+                "developmental_stage"
+            ) != "adult"
+        ):
+            growth_event = (
+                self.kitten_growth
+                .feed_cat_milk(
+                    kitten=cat,
+                    day=self.tick_count,
+                    amount=1.0,
+                    source="bartender"
+                )
+            )
+
+        event = {
+            "name": "cat_drank_milk_at_bar",
+            "cat": cat_name,
+            "milk": "milk",
+            "bowl": milk_bowl.get(
+                "name",
+                "milk_bowl"
+            ),
+            "growth": growth_event,
+            "served": True,
+            "tick": self.tick_count
+        }
+
+        self.emit_event(
+            event
+        )
+
+        return event
 
     def welcome_cat_d20(
         self,
