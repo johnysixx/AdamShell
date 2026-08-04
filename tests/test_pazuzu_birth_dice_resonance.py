@@ -262,15 +262,34 @@ class PazuzuBirthDiceResonanceTests(
             result["dice_box"]["rotated"]
         )
 
+        dice_box_result = result[
+            "dice_box"
+        ]
+
         self.assertGreaterEqual(
-            result["dice_box"]["value"],
+            dice_box_result["raw_value"],
             1
         )
 
         self.assertLessEqual(
-            result["dice_box"]["value"],
-            result["dice_box"]["sides"]
+            dice_box_result["raw_value"],
+            dice_box_result["sides"]
         )
+
+        if dice_box_result.get(
+            "is_percentile",
+            False
+        ):
+            self.assertIn(
+                dice_box_result["value"],
+                range(0, 100, 10)
+            )
+
+        else:
+            self.assertEqual(
+                dice_box_result["value"],
+                dice_box_result["raw_value"]
+            )
 
 
 if __name__ == "__main__":

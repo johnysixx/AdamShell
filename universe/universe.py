@@ -643,6 +643,15 @@ class Universe:
         if position is not None:
             cat["position"] = dict(position)
 
+        if source in {
+            "quantum_box_opened",
+            "quantum_box_spontaneous_collapse"
+        }:
+            self._prepare_quantum_box_cat(
+                cat=cat,
+                source=source
+            )
+
         entity = self.create_entity(
             name=name,
             profile=cat
@@ -674,6 +683,107 @@ class Universe:
             "entity": entity,
             "event": event
         }
+
+    def _prepare_quantum_box_cat(
+        self,
+        cat,
+        source
+    ):
+        learning = cat[
+            "learning"
+        ]
+
+        cat["age_days"] = 98
+        cat[
+            "developmental_stage"
+        ] = "juvenile"
+
+        cat["quantum_box_origin"] = {
+            "manifested_from_box": True,
+            "source": source,
+            "born_in_quantum_layer": True
+        }
+
+        traits = cat.setdefault(
+            "special_traits",
+            []
+        )
+
+        for trait in (
+            "quantum_box_cat",
+            "juvenile_quantum_cat",
+            "sees_direct_path_to_bar"
+        ):
+            if trait not in traits:
+                traits.append(
+                    trait
+                )
+
+        meow = learning[
+            "meow_knowledge"
+        ]
+
+        meow.update({
+            "learned": True,
+            "understood": True,
+            "can_speak": True,
+            "teacher": None,
+            "source": "quantum_box_cat_wisdom",
+            "learned_on_day": 0
+        })
+
+        learning[
+            "adult_meowing_learned"
+        ] = True
+
+        learning[
+            "human_communication_learned"
+        ] = True
+
+        for skill in learning[
+            "skills"
+        ].values():
+            skill.update({
+                "learned": True,
+                "progress": 1.0,
+                "teacher": None,
+                "learned_on_day": 0
+            })
+
+        learning["complete"] = True
+        learning[
+            "teaching_required"
+        ] = False
+
+        # Ko?ka v?, ale zat?m neum? u?it.
+        feline_wisdom = cat.setdefault(
+            "feline_wisdom",
+            {
+                "awareness": {},
+                "abilities": {},
+                "history": []
+            }
+        )
+
+        feline_wisdom[
+            "abilities"
+        ].pop(
+            "teach_other_cats",
+            None
+        )
+
+        feline_wisdom[
+            "abilities"
+        ].pop(
+            "teach_teaching",
+            None
+        )
+
+        cat["state"] = (
+            "juvenile_cat_from_quantum_box"
+        )
+
+        return cat
 
     def create_quantum_box(self, rng=None):
         box = QuantumBox(rng=rng)
