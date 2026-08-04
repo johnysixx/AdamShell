@@ -1,3 +1,8 @@
+from cats.duplicate_consumption_energy import (
+    DuplicateConsumptionEnergy
+)
+
+
 class KittenGrowth:
 
     MILK_SIZE_GAIN = 0.006
@@ -17,6 +22,12 @@ class KittenGrowth:
     ):
         self.universe = universe
         self.history = []
+
+        self.duplicate_energy = (
+            DuplicateConsumptionEnergy(
+                universe
+            )
+        )
 
     def ensure_state(
         self,
@@ -100,7 +111,8 @@ class KittenGrowth:
             return self._duplicate_event(
                 kitten=kitten,
                 source="cat_milk",
-                day=day
+                day=day,
+                amount=amount
             )
 
         amount = max(
@@ -169,7 +181,8 @@ class KittenGrowth:
             return self._duplicate_event(
                 kitten=kitten,
                 source=source,
-                day=day
+                day=day,
+                amount=mass
             )
 
         mass = max(
@@ -369,8 +382,18 @@ class KittenGrowth:
         self,
         kitten,
         source,
-        day
+        day,
+        amount=1.0
     ):
+        stored_energy = (
+            self.duplicate_energy.store(
+                cat=kitten,
+                source=source,
+                day=day,
+                amount=amount
+            )
+        )
+
         event = {
             "name": (
                 "kitten_growth_already_processed"
@@ -378,6 +401,11 @@ class KittenGrowth:
             "kitten": kitten["name"],
             "source": source,
             "day": day,
+            "amount_not_absorbed": float(
+                amount
+            ),
+            "stored_energy": stored_energy,
+            "energy_conserved": True,
             "grew": False
         }
 

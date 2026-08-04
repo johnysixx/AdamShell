@@ -19,6 +19,9 @@ from .bar_geometry_terminal import BarGeometryTerminal
 from .back_room_black_box import BackRoomBlackBox
 from .lemonade_reservoir import LemonadeReservoir
 from .lemonade_signs import LemonadeSigns
+from cats.duplicate_consumption_energy import (
+    DuplicateConsumptionEnergy
+)
 from cats.kitten_growth import KittenGrowth
 
 class MeetingPlace:
@@ -79,6 +82,12 @@ class MeetingPlace:
         }
         self.bartender = Bartender(
             self.bar_counter.hidden_story_book
+        )
+
+        self.duplicate_consumption_energy = (
+            DuplicateConsumptionEnergy(
+                universe
+            )
         )
 
         self.kitten_growth = KittenGrowth(
@@ -687,6 +696,17 @@ class MeetingPlace:
         turn_event["interpretation"] = (
             interpretation
         )
+
+        energy_resolution = (
+            self.duplicate_consumption_energy
+            .resolve_next(
+                cat_d20_value=value
+            )
+        )
+
+        turn_event[
+            "duplicate_consumption_energy"
+        ] = energy_resolution
 
         return turn_event
 
