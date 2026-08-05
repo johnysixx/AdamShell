@@ -6,6 +6,8 @@ from .reproduction import CatReproduction
 from .genotype import CatGenotype
 from .cat_learning import CatLearning
 from .cat_personality import CatPersonality
+from .cat_mind import CatMind
+from .cat_intellect import CatIntellect
 
 class Cats:
 
@@ -157,6 +159,12 @@ class Cats:
             ),
             "personality": (
                 CatPersonality.create_state()
+            ),
+            "mind": (
+                CatMind.create_state()
+            ),
+            "intellect": (
+                CatIntellect.create_state()
             ),
             "special_traits": []
         }
