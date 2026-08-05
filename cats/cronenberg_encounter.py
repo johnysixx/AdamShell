@@ -1,6 +1,7 @@
-﻿import random
+import random
 
 from universe.logger import UniverseLogger
+from cats.cat_personality import CatPersonality
 
 
 class CatCronenbergEncounter:
@@ -96,6 +97,21 @@ class CatCronenbergEncounter:
                 }
             )
 
+            event["personality"] = (
+                self._apply_personality_experience(
+                    cat=cat,
+                    source="avoided_large_cronenberg",
+                    changes={
+                        "patience": 0.03,
+                        "courage": 0.01
+                    },
+                    metadata={
+                        "cronenberg": cronenberg.name,
+                        "size_ratio": size_ratio,
+                        "decision": "minimal_detour"
+                    }
+                )
+            )
             return event
 
         escape_chance = (
@@ -150,6 +166,21 @@ class CatCronenbergEncounter:
                 }
             )
 
+            event["personality"] = (
+                self._apply_personality_experience(
+                    cat=cat,
+                    source="cronenberg_escaped",
+                    changes={
+                        "patience": 0.02,
+                        "curiosity": 0.01
+                    },
+                    metadata={
+                        "cronenberg": cronenberg.name,
+                        "size_ratio": size_ratio,
+                        "escape_chance": escape_chance
+                    }
+                )
+            )
             return event
 
         encounter_layer = getattr(
@@ -286,7 +317,52 @@ class CatCronenbergEncounter:
             f"{cronenberg.name}"
         )
 
+        event["personality"] = (
+            self._apply_personality_experience(
+                cat=cat,
+                source="successful_cronenberg_hunt",
+                changes={
+                    "courage": 0.04,
+                    "aggression": 0.025,
+                    "curiosity": 0.01
+                },
+                metadata={
+                    "cronenberg": cronenberg.name,
+                    "size_ratio": size_ratio
+                }
+            )
+        )
+
         return event
+
+    def _apply_personality_experience(
+        self,
+        cat,
+        source,
+        changes,
+        metadata=None
+    ):
+        if not isinstance(
+            cat,
+            dict
+        ):
+            return {
+                "name": (
+                    "cat_personality_experience_skipped"
+                ),
+                "reason": (
+                    "unsupported_cat_representation"
+                ),
+                "source": source,
+                "applied": False
+            }
+
+        return CatPersonality.apply_experience(
+            cat=cat,
+            source=source,
+            changes=changes,
+            metadata=metadata
+        )
 
     def _remember_encounter(
         self,

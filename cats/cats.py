@@ -5,6 +5,7 @@ from .memory import CatMemory
 from .reproduction import CatReproduction
 from .genotype import CatGenotype
 from .cat_learning import CatLearning
+from .cat_personality import CatPersonality
 
 class Cats:
 
@@ -153,6 +154,9 @@ class Cats:
             "access": self.access_rules,
             "learning": (
                 CatLearning.create_complete_state()
+            ),
+            "personality": (
+                CatPersonality.create_state()
             ),
             "special_traits": []
         }
