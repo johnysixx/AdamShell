@@ -8,6 +8,9 @@ from .cat_learning import CatLearning
 from .cat_personality import CatPersonality
 from .cat_mind import CatMind
 from .cat_intellect import CatIntellect
+from .cat_intention_executor import (
+    CatIntentionExecutor
+)
 
 class Cats:
 
@@ -19,6 +22,12 @@ class Cats:
         self.cats = []
         self.events = []
         self.tick_count = 0
+
+        self.intention_executor = (
+            CatIntentionExecutor(
+                self
+            )
+        )
 
         self.allowed_colors = [
             "white",
@@ -652,6 +661,21 @@ class Cats:
                 "route"
             )
         }
+
+    def execute_cat_intention(
+            self,
+            cat,
+            cronenbergs=None,
+            step_size=None
+    ):
+        return (
+            self.intention_executor
+            .execute_current_intention(
+                cat=cat,
+                cronenbergs=cronenbergs,
+                step_size=step_size
+            )
+        )
 
     def can_travel(self, cat, via):
             if cat.get("type") != "cat":
