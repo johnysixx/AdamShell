@@ -1,6 +1,9 @@
 from cats.feline_wisdom import (
     FelineWisdom
 )
+from cats.cat_personality import (
+    CatPersonality
+)
 
 
 class FelineAbilityResolver:
@@ -346,6 +349,41 @@ class FelineAbilityResolver:
             )
         )
 
+        teacher_personality = (
+            CatPersonality.apply_experience(
+                cat=teacher,
+                source=(
+                    "successfully_taught_other_cat"
+                ),
+                changes={
+                    "empathy": 0.02,
+                    "patience": 0.015
+                },
+                metadata={
+                    "student": student["name"],
+                    "ability": ability_name,
+                    "method": method_name
+                }
+            )
+        )
+
+        student_personality = (
+            CatPersonality.apply_experience(
+                cat=student,
+                source=(
+                    "learned_from_other_cat"
+                ),
+                changes={
+                    "curiosity": 0.01
+                },
+                metadata={
+                    "teacher": teacher["name"],
+                    "ability": ability_name,
+                    "method": method_name
+                }
+            )
+        )
+
         event = {
             "name": (
                 "feline_ability_method_learned"
@@ -358,6 +396,12 @@ class FelineAbilityResolver:
                 learned_method[
                     "constraints"
                 ]
+            ),
+            "teacher_personality": (
+                teacher_personality
+            ),
+            "student_personality": (
+                student_personality
             ),
             "learned": True
         }

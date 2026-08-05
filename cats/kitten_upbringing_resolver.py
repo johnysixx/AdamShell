@@ -6,6 +6,7 @@ from cats.meow_knowledge_resolver import (
 )
 from cats.cat_learning import CatLearning
 from cats.feline_wisdom import FelineWisdom
+from cats.cat_personality import CatPersonality
 from cats.kitten_growth import KittenGrowth
 
 
@@ -386,7 +387,7 @@ class KittenUpbringingResolver:
         events = []
 
         if age_days >= 14:
-            events.append(
+            socialization_lesson = (
                 self._advance_skill(
                     kitten=kitten,
                     skill_name="socialization",
@@ -398,6 +399,39 @@ class KittenUpbringingResolver:
                         "kitten_socialization_lesson"
                     )
                 )
+            )
+
+            socialization_lesson[
+                "personality"
+            ] = (
+                CatPersonality.apply_experience(
+                    cat=kitten,
+                    source=(
+                        "maternal_socialization"
+                    ),
+                    changes={
+                        "empathy": 0.01,
+                        "patience": 0.005
+                    },
+                    day=current_day,
+                    metadata={
+                        "teacher": (
+                            mother.get("name")
+                            if mother is not None
+                            else None
+                        ),
+                        "age_days": age_days,
+                        "skill_progress": (
+                            socialization_lesson.get(
+                                "progress"
+                            )
+                        )
+                    }
+                )
+            )
+
+            events.append(
+                socialization_lesson
             )
 
         if age_days == 16:
