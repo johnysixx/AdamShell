@@ -11,6 +11,9 @@ from .cat_intellect import CatIntellect
 from .cat_intention_executor import (
     CatIntentionExecutor
 )
+from .cat_perception import (
+    CatPerception
+)
 
 class Cats:
 
@@ -27,6 +30,10 @@ class Cats:
             CatIntentionExecutor(
                 self
             )
+        )
+
+        self.perception = CatPerception(
+            self
         )
 
         self.allowed_colors = [
@@ -661,6 +668,91 @@ class Cats:
                 "route"
             )
         }
+
+    def observe_cat(
+            self,
+            cat,
+            vision_radius=None
+    ):
+        return self.perception.observe(
+            cat=cat,
+            vision_radius=vision_radius
+        )
+
+    def think_and_act(
+            self,
+            cat,
+            quantum_roll=None,
+            vision_radius=None,
+            cronenbergs=None,
+            step_size=None
+    ):
+        from .cat_mind import CatMind
+
+        observations = self.observe_cat(
+            cat=cat,
+            vision_radius=vision_radius
+        )
+
+        if not observations.get(
+            "observed",
+            False
+        ):
+            return {
+                "name": (
+                    "cat_thought_cycle_failed"
+                ),
+                "cat": (
+                    cat.get("name")
+                    if isinstance(cat, dict)
+                    else None
+                ),
+                "observation": observations,
+                "completed": False
+            }
+
+        decision = CatMind.decide(
+            cat=cat,
+            observations=observations,
+            quantum_roll=quantum_roll
+        )
+
+        if not decision.get(
+            "selected",
+            False
+        ):
+            return {
+                "name": (
+                    "cat_thought_cycle_failed"
+                ),
+                "cat": cat.get("name"),
+                "observations": observations,
+                "decision": decision,
+                "completed": False
+            }
+
+        execution = (
+            self.execute_cat_intention(
+                cat=cat,
+                cronenbergs=cronenbergs,
+                step_size=step_size
+            )
+        )
+
+        event = {
+            "name": "cat_thought_cycle_completed",
+            "cat": cat.get("name"),
+            "observations": observations,
+            "decision": decision,
+            "execution": execution,
+            "completed": True
+        }
+
+        self.emit_event(
+            event
+        )
+
+        return event
 
     def execute_cat_intention(
             self,
