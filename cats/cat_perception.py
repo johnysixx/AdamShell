@@ -85,6 +85,7 @@ class CatPerception:
 
         visible_boxes = (
             self._observe_quantum_boxes(
+                cat=cat,
                 position=position,
                 radius=radius
             )
@@ -93,9 +94,24 @@ class CatPerception:
         unexplored_boxes = [
             item
             for item in visible_boxes
-            if not self._box_was_explored(
-                cat=cat,
-                box_id=item["id"]
+            if (
+                not item.get(
+                    "occupied",
+                    False
+                )
+                and not self._box_was_explored(
+                    cat=cat,
+                    box_id=item["id"]
+                )
+            )
+        ]
+
+        occupied_transfer_boxes = [
+            item
+            for item in visible_boxes
+            if item.get(
+                "occupied",
+                False
             )
         ]
 
@@ -164,6 +180,15 @@ class CatPerception:
                 item["id"]
                 for item in unexplored_boxes
             ],
+
+            "occupied_transfer_boxes": [
+                item["id"]
+                for item
+                in occupied_transfer_boxes
+            ],
+            "occupied_transfer_box_details": (
+                occupied_transfer_boxes
+            ),
 
             "interesting_unknown": bool(
                 unexplored_boxes
@@ -349,6 +374,7 @@ class CatPerception:
 
     def _observe_quantum_boxes(
         self,
+        cat,
         position,
         radius
     ):
@@ -359,6 +385,18 @@ class CatPerception:
             "quantum_boxes",
             []
         ):
+            visible_to = getattr(
+                box,
+                "is_visible_to",
+                None
+            )
+
+            if (
+                callable(visible_to)
+                and not visible_to(cat)
+            ):
+                continue
+
             box_position = getattr(
                 box,
                 "position",
@@ -376,6 +414,27 @@ class CatPerception:
             if distance > radius:
                 continue
 
+            cat_observation = getattr(
+                box,
+                "cat_observation_state",
+                None
+            )
+
+            occupancy = (
+                cat_observation(cat)
+                if callable(cat_observation)
+                else {
+                    "visible": True,
+                    "occupied": False,
+                    "occupancy_state": (
+                        "unknown"
+                    ),
+                    "occupant_identity_visible": (
+                        False
+                    )
+                }
+            )
+
             observed.append({
                 "id": box.id,
                 "state": getattr(
@@ -390,6 +449,22 @@ class CatPerception:
                         {}
                     ).get(
                         "collapsed",
+                        False
+                    )
+                ),
+                "occupied": occupancy.get(
+                    "occupied",
+                    False
+                ),
+                "occupancy_state": (
+                    occupancy.get(
+                        "occupancy_state",
+                        "unknown"
+                    )
+                ),
+                "occupant_identity_visible": (
+                    occupancy.get(
+                        "occupant_identity_visible",
                         False
                     )
                 ),
