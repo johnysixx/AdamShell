@@ -8,6 +8,7 @@ class CatMind:
         "visit_bar",
         "hunt_cronenberg",
         "explore_box",
+        "create_exploration_pair",
         "approach_cat",
         "observe",
         "rest"
@@ -218,6 +219,46 @@ class CatMind:
                         "curiosity"
                     ],
                     target=boxes[0]
+                )
+            )
+
+        if (
+            not boxes
+            and observations.get(
+                "can_create_exploration_pair",
+                False
+            )
+        ):
+            pair_score = (
+                0.20
+                + curiosity * 0.55
+                + courage * 0.10
+                + patience * 0.05
+            )
+
+            candidates.append(
+                cls._candidate(
+                    intention_type=(
+                        "create_exploration_pair"
+                    ),
+                    score=pair_score,
+                    reasons=[
+                        "no_usable_box_visible",
+                        "sufficient_energy",
+                        "curiosity",
+                        "quantum_pair_creation_possible"
+                    ],
+                    target={
+                        "layer": observations.get(
+                            "exploration_destination_layer"
+                        ),
+                        "position": observations.get(
+                            "exploration_destination_position"
+                        ),
+                        "energy_cost": observations.get(
+                            "exploration_pair_energy_cost"
+                        )
+                    }
                 )
             )
 

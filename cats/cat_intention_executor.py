@@ -97,6 +97,17 @@ class CatIntentionExecutor:
                 intention=intention
             )
 
+        if (
+            intention_type
+            == "create_exploration_pair"
+        ):
+            return (
+                self._execute_exploration_pair_creation(
+                    cat=cat,
+                    intention=intention
+                )
+            )
+
         if intention_type in (
             self.DEFERRED_INTENTS
         ):
@@ -241,6 +252,160 @@ class CatIntentionExecutor:
             "mind",
             {}
         )
+
+        mind[
+            "active_body_execution"
+        ] = deepcopy(
+            event
+        )
+
+        return self._record(
+            event
+        )
+
+    def _execute_exploration_pair_creation(
+        self,
+        cat,
+        intention
+    ):
+        target = intention.get(
+            "target",
+            {}
+        )
+
+        destination_layer = target.get(
+            "layer"
+        )
+
+        destination_position = target.get(
+            "position"
+        )
+
+        if (
+            destination_layer is None
+            or destination_position is None
+        ):
+            return self._record({
+                "name": (
+                    "cat_exploration_pair_"
+                    "creation_failed"
+                ),
+                "cat": cat.get("name"),
+                "intention": (
+                    "create_exploration_pair"
+                ),
+                "reason": (
+                    "missing_exploration_destination"
+                ),
+                "executed": False
+            })
+
+        transfer_system = getattr(
+            self.universe,
+            "cat_box_transfer",
+            None
+        )
+
+        if transfer_system is None:
+            return self._record({
+                "name": (
+                    "cat_exploration_pair_"
+                    "creation_failed"
+                ),
+                "cat": cat.get("name"),
+                "intention": (
+                    "create_exploration_pair"
+                ),
+                "reason": (
+                    "cat_box_transfer_unavailable"
+                ),
+                "executed": False
+            })
+
+        result = (
+            transfer_system
+            .create_exploration_pair(
+                cat=cat,
+                destination_layer=(
+                    destination_layer
+                ),
+                destination_position=(
+                    destination_position
+                )
+            )
+        )
+
+        if not result.get(
+            "created",
+            False
+        ):
+            return self._record({
+                "name": (
+                    "cat_exploration_pair_"
+                    "creation_failed"
+                ),
+                "cat": cat.get("name"),
+                "intention": (
+                    "create_exploration_pair"
+                ),
+                "reason": result.get(
+                    "reason",
+                    "pair_creation_failed"
+                ),
+                "creation_result": result,
+                "executed": False
+            })
+
+        cat["state"] = (
+            "stable_exploration_pair_created"
+        )
+
+        mind = cat.setdefault(
+            "mind",
+            {}
+        )
+
+        mind["previous_intention"] = deepcopy(
+            intention
+        )
+
+        mind["current_intention"] = None
+
+        event = {
+            "name": (
+                "cat_created_exploration_pair_"
+                "by_own_intention"
+            ),
+            "cat": cat.get("name"),
+            "intention": (
+                "create_exploration_pair"
+            ),
+            "pair_id": result[
+                "pair_id"
+            ],
+            "source_box_id": result[
+                "source_box_id"
+            ],
+            "target_box_id": result[
+                "target_box_id"
+            ],
+            "source_layer": result[
+                "source_layer"
+            ],
+            "target_layer": result[
+                "target_layer"
+            ],
+            "energy_cost_j": result[
+                "energy_cost_j"
+            ],
+            "remaining_cat_energy": (
+                result[
+                    "remaining_cat_energy"
+                ]
+            ),
+            "decision_source": "cat_mind",
+            "executed": True
+        }
 
         mind[
             "active_body_execution"

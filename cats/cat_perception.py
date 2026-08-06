@@ -1,6 +1,10 @@
 import math
 from copy import deepcopy
 
+from universe.dark_sector import (
+    QUANTUM_BOX_ENERGY_COST_J
+)
+
 
 class CatPerception:
 
@@ -130,6 +134,57 @@ class CatPerception:
             )
         )
 
+        current_layer = cat.get(
+            "current_layer",
+            "quantum_layer"
+        )
+
+        exploration_goal = cat.get(
+            "exploration_goal",
+            {}
+        )
+
+        default_destination_layer = (
+            "quantum_layer"
+            if current_layer
+            != "quantum_layer"
+            else "meeting_place"
+        )
+
+        exploration_destination_layer = (
+            exploration_goal.get(
+                "layer",
+                default_destination_layer
+            )
+        )
+
+        exploration_destination_position = dict(
+            exploration_goal.get(
+                "position",
+                position
+            )
+        )
+
+        exploration_pair_energy_cost = (
+            QUANTUM_BOX_ENERGY_COST_J
+            * 2.0
+        )
+
+        available_cat_energy = float(
+            cat.get(
+                "idea_energy",
+                0.0
+            )
+        )
+
+        can_create_exploration_pair = bool(
+            not unexplored_boxes
+            and available_cat_energy
+            >= exploration_pair_energy_cost
+            and exploration_destination_layer
+            != current_layer
+        )
+
         observations = {
             "cat": cat.get("name"),
             "position": deepcopy(
@@ -192,6 +247,23 @@ class CatPerception:
 
             "interesting_unknown": bool(
                 unexplored_boxes
+            ),
+
+            "current_layer": current_layer,
+            "available_cat_energy": (
+                available_cat_energy
+            ),
+            "can_create_exploration_pair": (
+                can_create_exploration_pair
+            ),
+            "exploration_pair_energy_cost": (
+                exploration_pair_energy_cost
+            ),
+            "exploration_destination_layer": (
+                exploration_destination_layer
+            ),
+            "exploration_destination_position": (
+                exploration_destination_position
             ),
 
             "observed": True
