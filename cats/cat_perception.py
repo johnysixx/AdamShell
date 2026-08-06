@@ -4,6 +4,9 @@ from copy import deepcopy
 from universe.dark_sector import (
     QUANTUM_BOX_ENERGY_COST_J
 )
+from .cat_exploration_planner import (
+    CatExplorationPlanner
+)
 
 
 class CatPerception:
@@ -139,29 +142,23 @@ class CatPerception:
             "quantum_layer"
         )
 
-        exploration_goal = cat.get(
-            "exploration_goal",
-            {}
-        )
-
-        default_destination_layer = (
-            "quantum_layer"
-            if current_layer
-            != "quantum_layer"
-            else "meeting_place"
-        )
-
-        exploration_destination_layer = (
-            exploration_goal.get(
-                "layer",
-                default_destination_layer
+        exploration_plan = (
+            CatExplorationPlanner
+            .choose_destination(
+                cat=cat,
+                universe=self.universe
             )
         )
 
-        exploration_destination_position = dict(
-            exploration_goal.get(
-                "position",
-                position
+        exploration_destination_layer = (
+            exploration_plan.get(
+                "layer"
+            )
+        )
+
+        exploration_destination_position = (
+            exploration_plan.get(
+                "position"
             )
         )
 
@@ -181,6 +178,10 @@ class CatPerception:
             not unexplored_boxes
             and available_cat_energy
             >= exploration_pair_energy_cost
+            and exploration_plan.get(
+                "selected",
+                False
+            )
             and exploration_destination_layer
             != current_layer
         )
@@ -264,6 +265,9 @@ class CatPerception:
             ),
             "exploration_destination_position": (
                 exploration_destination_position
+            ),
+            "exploration_plan": deepcopy(
+                exploration_plan
             ),
 
             "observed": True
