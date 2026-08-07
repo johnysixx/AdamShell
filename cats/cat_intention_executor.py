@@ -268,6 +268,14 @@ class CatIntentionExecutor:
         cat,
         intention
     ):
+        """
+        Ko?ka vytvo?? stabiln? pr?zkumn? p?r
+        a ihned jej pou?ije.
+
+        Rozhodnut? u? prob?hlo v CatMind.
+        Executor pouze vytvo?? t?lesnou cestu
+        a zah?j? p?enos.
+        """
         target = intention.get(
             "target",
             {}
@@ -322,7 +330,7 @@ class CatIntentionExecutor:
                 "executed": False
             })
 
-        result = (
+        creation = (
             transfer_system
             .create_exploration_pair(
                 cat=cat,
@@ -335,7 +343,7 @@ class CatIntentionExecutor:
             )
         )
 
-        if not result.get(
+        if not creation.get(
             "created",
             False
         ):
@@ -348,17 +356,90 @@ class CatIntentionExecutor:
                 "intention": (
                     "create_exploration_pair"
                 ),
-                "reason": result.get(
+                "reason": creation.get(
                     "reason",
                     "pair_creation_failed"
                 ),
-                "creation_result": result,
+                "creation_result": creation,
                 "executed": False
             })
 
-        cat["state"] = (
-            "stable_exploration_pair_created"
+        source_box = creation.get(
+            "source_box"
         )
+
+        target_box = creation.get(
+            "target_box"
+        )
+
+        if (
+            source_box is None
+            or target_box is None
+        ):
+            return self._record({
+                "name": (
+                    "cat_exploration_pair_"
+                    "transfer_failed"
+                ),
+                "cat": cat.get("name"),
+                "intention": (
+                    "create_exploration_pair"
+                ),
+                "pair_id": creation.get(
+                    "pair_id"
+                ),
+                "reason": (
+                    "created_pair_boxes_missing"
+                ),
+                "creation_result": creation,
+                "executed": False
+            })
+
+        transfer = (
+            transfer_system
+            .transfer_cat(
+                cat=cat,
+                source_box_id=source_box.id,
+                target_box_id=target_box.id
+            )
+        )
+
+        if not transfer.get(
+            "transferred",
+            False
+        ):
+            cat["state"] = (
+                "exploration_pair_created_"
+                "but_transfer_failed"
+            )
+
+            return self._record({
+                "name": (
+                    "cat_exploration_pair_"
+                    "transfer_failed"
+                ),
+                "cat": cat.get("name"),
+                "intention": (
+                    "create_exploration_pair"
+                ),
+                "pair_id": creation[
+                    "pair_id"
+                ],
+                "source_box_id": (
+                    source_box.id
+                ),
+                "target_box_id": (
+                    target_box.id
+                ),
+                "reason": transfer.get(
+                    "reason",
+                    "stable_pair_transfer_failed"
+                ),
+                "creation_result": creation,
+                "transfer_result": transfer,
+                "pair_preserved": True,
+                "executed": False
+            })
 
         mind = cat.setdefault(
             "mind",
@@ -373,36 +454,71 @@ class CatIntentionExecutor:
 
         event = {
             "name": (
-                "cat_created_exploration_pair_"
-                "by_own_intention"
+                "cat_started_autonomous_"
+                "exploration_through_new_pair"
             ),
             "cat": cat.get("name"),
             "intention": (
                 "create_exploration_pair"
             ),
-            "pair_id": result[
+            "pair_id": creation[
                 "pair_id"
             ],
-            "source_box_id": result[
-                "source_box_id"
-            ],
-            "target_box_id": result[
-                "target_box_id"
-            ],
-            "source_layer": result[
+            "source_box_id": (
+                source_box.id
+            ),
+            "target_box_id": (
+                target_box.id
+            ),
+            "source_layer": creation[
                 "source_layer"
             ],
-            "target_layer": result[
+            "target_layer": creation[
                 "target_layer"
             ],
-            "energy_cost_j": result[
+            "energy_cost_j": creation[
                 "energy_cost_j"
             ],
             "remaining_cat_energy": (
-                result[
+                creation[
                     "remaining_cat_energy"
                 ]
             ),
+            "creation": {
+                "created": True,
+                "stable": creation.get(
+                    "stable",
+                    True
+                ),
+                "available_to_other_cats": (
+                    creation.get(
+                        "available_to_other_cats",
+                        True
+                    )
+                )
+            },
+            "transfer": {
+                "transferred": True,
+                "pair_remains_stable": (
+                    transfer.get(
+                        "pair_remains_stable",
+                        False
+                    )
+                ),
+                "target_box_consumed": (
+                    transfer.get(
+                        "target_box_consumed"
+                    )
+                ),
+                "destination_layer": (
+                    transfer.get(
+                        "target_layer"
+                    )
+                ),
+                "trail": transfer.get(
+                    "trail"
+                )
+            },
             "decision_source": "cat_mind",
             "executed": True
         }

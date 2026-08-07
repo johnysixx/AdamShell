@@ -98,7 +98,7 @@ class CatAutonomousExplorationPairTests(
             "create_exploration_pair"
         )
 
-    def test_think_and_act_creates_stable_pair(
+    def test_think_and_act_creates_and_uses_stable_pair(
         self
     ):
         before_boxes = len(
@@ -126,12 +126,20 @@ class CatAutonomousExplorationPairTests(
             "create_exploration_pair"
         )
 
+        execution = result[
+            "execution"
+        ]
+
         self.assertTrue(
-            result[
-                "execution"
-            ][
-                "executed"
-            ]
+            execution["executed"]
+        )
+
+        self.assertEqual(
+            execution["name"],
+            (
+                "cat_started_autonomous_"
+                "exploration_through_new_pair"
+            )
         )
 
         self.assertEqual(
@@ -152,6 +160,43 @@ class CatAutonomousExplorationPairTests(
         self.assertLess(
             self.cat["idea_energy"],
             before_energy
+        )
+
+        self.assertEqual(
+            self.cat["current_layer"],
+            "quantum_layer"
+        )
+
+        self.assertEqual(
+            self.cat["state"],
+            (
+                "materialized_through_"
+                "stable_exploration_pair"
+            )
+        )
+
+        self.assertTrue(
+            execution[
+                "transfer"
+            ][
+                "transferred"
+            ]
+        )
+
+        self.assertTrue(
+            execution[
+                "transfer"
+            ][
+                "pair_remains_stable"
+            ]
+        )
+
+        self.assertFalse(
+            execution[
+                "transfer"
+            ][
+                "target_box_consumed"
+            ]
         )
 
         self.assertIsNone(
