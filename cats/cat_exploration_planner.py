@@ -103,6 +103,166 @@ class CatExplorationPlanner:
         }
 
     @classmethod
+    def choose_after_arrival(
+        cls,
+        cat,
+        pair=None,
+        quantum_roll=None
+    ):
+        """
+        Ko?ka po dosa?en? pr?zkumn?ho c?le
+        sama rozhodne, co d?l.
+
+        Cat D20 pouze rozli?? mezi nejlep??mi
+        rozumn?mi mo?nostmi.
+        """
+        traits = cat.get(
+            "personality",
+            {}
+        ).get(
+            "traits",
+            {}
+        )
+
+        curiosity = float(
+            traits.get(
+                "curiosity",
+                0.5
+            )
+        )
+
+        courage = float(
+            traits.get(
+                "courage",
+                0.5
+            )
+        )
+
+        patience = float(
+            traits.get(
+                "patience",
+                0.5
+            )
+        )
+
+        intellect = float(
+            cat.get(
+                "intellect",
+                {}
+            ).get(
+                "normalized",
+                0.5
+            )
+        )
+
+        continue_score = (
+            0.15
+            + curiosity * 0.50
+            + courage * 0.20
+            + intellect * 0.10
+        )
+
+        rest_score = (
+            0.20
+            + patience * 0.45
+            + (1.0 - courage) * 0.10
+        )
+
+        return_score = (
+            0.15
+            + (1.0 - curiosity) * 0.35
+            + patience * 0.20
+            + (1.0 - courage) * 0.20
+        )
+
+        if pair is None:
+            return_score = 0.0
+
+        candidates = [
+            {
+                "action": "continue_exploration",
+                "score": min(
+                    1.0,
+                    continue_score
+                ),
+                "reasons": [
+                    "curiosity",
+                    "courage",
+                    "intellect"
+                ]
+            },
+            {
+                "action": "rest_at_destination",
+                "score": min(
+                    1.0,
+                    rest_score
+                ),
+                "reasons": [
+                    "patience",
+                    "destination_reached"
+                ]
+            },
+            {
+                "action": (
+                    "return_via_exploration_pair"
+                ),
+                "score": min(
+                    1.0,
+                    return_score
+                ),
+                "reasons": [
+                    "known_return_path",
+                    "patience",
+                    "risk_evaluation"
+                ]
+            }
+        ]
+
+        candidates.sort(
+            key=lambda item: item["score"],
+            reverse=True
+        )
+
+        finalists = candidates[:2]
+
+        if quantum_roll is None:
+            selected = finalists[0]
+
+        else:
+            roll = int(
+                quantum_roll
+            )
+
+            if not 1 <= roll <= 20:
+                raise ValueError(
+                    "Cat quantum decision roll "
+                    "must be between 1 and 20."
+                )
+
+            selected = (
+                finalists[0]
+                if roll <= 14
+                else finalists[1]
+            )
+
+        return {
+            "selected": True,
+            "action": selected[
+                "action"
+            ],
+            "score": selected[
+                "score"
+            ],
+            "reasons": list(
+                selected["reasons"]
+            ),
+            "finalists": deepcopy(
+                finalists
+            ),
+            "quantum_roll": quantum_roll
+        }
+
+    @classmethod
     def collect_candidates(
         cls,
         cat,

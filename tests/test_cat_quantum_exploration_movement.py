@@ -184,12 +184,26 @@ class CatQuantumExplorationMovementTests(
             }
         )
 
-        self.assertEqual(
-            self.cat["state"],
-            (
-                "quantum_exploration_"
-                "goal_reached"
+        self.assertTrue(
+            self.cat[
+                "quantum_exploration"
+            ][
+                "arrived"
+            ]
+        )
+
+        self.assertIsNotNone(
+            result.get(
+                "arrival_resolution"
             )
+        )
+
+        self.assertTrue(
+            result[
+                "arrival_resolution"
+            ][
+                "resolved"
+            ]
         )
 
 

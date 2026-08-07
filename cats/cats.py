@@ -786,6 +786,38 @@ class Cats:
             )
         )
 
+    def advance_cat_quantum_return(
+            self,
+            cat,
+            rng=None
+    ):
+        transfer_system = getattr(
+            self.universe,
+            "cat_box_transfer",
+            None
+        )
+
+        if transfer_system is None:
+            return {
+                "name": (
+                    "cat_quantum_return_"
+                    "not_advanced"
+                ),
+                "cat": cat.get("name"),
+                "reason": (
+                    "cat_box_transfer_unavailable"
+                ),
+                "advanced": False
+            }
+
+        return (
+            transfer_system
+            .advance_quantum_return(
+                cat=cat,
+                rng=rng
+            )
+        )
+
     def execute_cat_intention(
             self,
             cat,

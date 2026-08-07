@@ -1,4 +1,8 @@
 from copy import deepcopy
+
+from cats.cat_exploration_planner import (
+    CatExplorationPlanner
+)
 import math
 
 from universe.dark_sector import (
@@ -1253,6 +1257,8 @@ class CatQuantumBoxTransfer:
                 position
             )
 
+        arrival_resolution = None
+
         if result.get(
             "arrived",
             False
@@ -1262,6 +1268,12 @@ class CatQuantumBoxTransfer:
 
             cat["state"] = (
                 "quantum_exploration_goal_reached"
+            )
+
+            arrival_resolution = (
+                self.finish_quantum_exploration(
+                    cat=cat
+                )
             )
 
         event = {
@@ -1287,10 +1299,409 @@ class CatQuantumBoxTransfer:
                 "arrived",
                 False
             ),
+            "arrival_resolution": (
+                arrival_resolution
+            ),
             "advanced": (
                 result.get("result")
                 != "no_active_route"
             )
+        }
+
+        self._record(
+            event
+        )
+
+        return event
+
+    def _find_stable_pair_by_id(
+        self,
+        pair_id
+    ):
+        return next(
+            (
+                pair
+                for pair
+                in self.universe
+                .stable_cat_box_pairs
+                if pair.get(
+                    "pair_id"
+                ) == pair_id
+                and pair.get(
+                    "active",
+                    False
+                )
+            ),
+            None
+        )
+
+    def finish_quantum_exploration(
+        self,
+        cat,
+        quantum_roll=None
+    ):
+        exploration = cat.get(
+            "quantum_exploration",
+            {}
+        )
+
+        if not exploration.get(
+            "arrived",
+            False
+        ):
+            return {
+                "name": (
+                    "cat_quantum_exploration_"
+                    "arrival_not_resolved"
+                ),
+                "cat": cat.get("name"),
+                "reason": "destination_not_reached",
+                "resolved": False
+            }
+
+        pair = (
+            self._find_stable_pair_by_id(
+                exploration.get(
+                    "pair_id"
+                )
+            )
+        )
+
+        memory = cat.get(
+            "memory"
+        )
+
+        remembered = None
+
+        if memory is not None:
+            remembered = memory.remember(
+                event_type=(
+                    "successful_exploration"
+                ),
+                universe_tick=(
+                    self.universe
+                    .universe_tick
+                ),
+                location=dict(
+                    cat["position"]
+                ),
+                details={
+                    "target_layer": (
+                        cat.get(
+                            "current_layer"
+                        )
+                    ),
+                    "position": dict(
+                        cat["position"]
+                    ),
+                    "pair_id": exploration.get(
+                        "pair_id"
+                    )
+                }
+            )
+
+        decision = (
+            CatExplorationPlanner
+            .choose_after_arrival(
+                cat=cat,
+                pair=pair,
+                quantum_roll=quantum_roll
+            )
+        )
+
+        action = decision[
+            "action"
+        ]
+
+        if action == "rest_at_destination":
+            cat["state"] = (
+                "resting_at_quantum_"
+                "exploration_goal"
+            )
+
+        elif action == "continue_exploration":
+            cat["state"] = (
+                "ready_to_continue_"
+                "quantum_exploration"
+            )
+
+            cat.pop(
+                "exploration_goal",
+                None
+            )
+
+        elif (
+            action
+            == "return_via_exploration_pair"
+        ):
+            return_plan = (
+                self.start_quantum_return_route(
+                    cat=cat,
+                    pair_id=pair[
+                        "pair_id"
+                    ]
+                )
+            )
+
+            cat["state"] = (
+                "returning_to_"
+                "exploration_pair"
+            )
+
+        else:
+            return_plan = None
+
+        if (
+            action
+            != "return_via_exploration_pair"
+        ):
+            return_plan = None
+
+        event = {
+            "name": (
+                "cat_quantum_exploration_"
+                "arrival_resolved"
+            ),
+            "cat": cat.get("name"),
+            "pair_id": exploration.get(
+                "pair_id"
+            ),
+            "position": dict(
+                cat["position"]
+            ),
+            "memory": remembered,
+            "decision": decision,
+            "action": action,
+            "return_plan": return_plan,
+            "resolved": True
+        }
+
+        self._record(
+            event
+        )
+
+        return event
+
+    def start_quantum_return_route(
+        self,
+        cat,
+        pair_id
+    ):
+        pair = self._find_stable_pair_by_id(
+            pair_id
+        )
+
+        if pair is None:
+            return {
+                "name": (
+                    "cat_quantum_return_"
+                    "route_not_started"
+                ),
+                "cat": cat.get("name"),
+                "reason": (
+                    "stable_pair_not_found"
+                ),
+                "started": False
+            }
+
+        remote_box = self._find_box(
+            pair["remote_box_id"]
+        )
+
+        if remote_box is None:
+            return {
+                "name": (
+                    "cat_quantum_return_"
+                    "route_not_started"
+                ),
+                "cat": cat.get("name"),
+                "reason": (
+                    "remote_box_not_found"
+                ),
+                "started": False
+            }
+
+        quantum_space = getattr(
+            self.universe,
+            "quantum_space",
+            None
+        )
+
+        if quantum_space is None:
+            return {
+                "name": (
+                    "cat_quantum_return_"
+                    "route_not_started"
+                ),
+                "cat": cat.get("name"),
+                "reason": (
+                    "quantum_space_unavailable"
+                ),
+                "started": False
+            }
+
+        destination = dict(
+            remote_box.position
+        )
+
+        stabilized = self.stabilize_direct_trail(
+            cat=cat,
+            destination=destination
+        )
+
+        planned = (
+            quantum_space
+            .plan_direct_cat_route(
+                cat_id=cat.get("name"),
+                start_position=dict(
+                    cat["position"]
+                ),
+                destination_position=(
+                    destination
+                ),
+                destination=(
+                    f"return_to_pair:"
+                    f"{pair_id}"
+                )
+            )
+        )
+
+        route = planned["route"]
+        route.state = "ready"
+
+        cat["active_route_id"] = (
+            route.route_id
+        )
+
+        cat["quantum_return"] = {
+            "active": True,
+            "arrived_at_box": False,
+            "pair_id": pair_id,
+            "route_id": route.route_id,
+            "remote_box_id": (
+                pair["remote_box_id"]
+            ),
+            "anchor_box_id": (
+                pair["anchor_box_id"]
+            ),
+            "destination": destination,
+            "stabilized_path": stabilized
+        }
+
+        return {
+            "name": (
+                "cat_quantum_return_route_started"
+            ),
+            "cat": cat.get("name"),
+            "pair_id": pair_id,
+            "route_id": route.route_id,
+            "destination": destination,
+            "started": True
+        }
+
+    def advance_quantum_return(
+        self,
+        cat,
+        rng=None
+    ):
+        returning = cat.get(
+            "quantum_return"
+        )
+
+        if not returning or not returning.get(
+            "active",
+            False
+        ):
+            return {
+                "name": (
+                    "cat_quantum_return_"
+                    "not_advanced"
+                ),
+                "cat": cat.get("name"),
+                "reason": (
+                    "no_active_quantum_return"
+                ),
+                "advanced": False
+            }
+
+        quantum_space = self.universe.quantum_space
+
+        result = quantum_space.advance_cat_route(
+            cat=cat,
+            cronenbergs=getattr(
+                self.universe,
+                "cronenbergs",
+                []
+            ),
+            encounter_system=(
+                self.universe
+                .cat_cronenberg_encounter
+            ),
+            universe=self.universe,
+            rng=rng
+        )
+
+        position = result.get(
+            "position"
+        )
+
+        if position is not None:
+            cat["position"] = dict(
+                position
+            )
+
+        transfer_result = None
+
+        if result.get(
+            "arrived",
+            False
+        ):
+            returning[
+                "arrived_at_box"
+            ] = True
+
+            returning["active"] = False
+
+            transfer_result = self.transfer_cat(
+                cat=cat,
+                source_box_id=returning[
+                    "remote_box_id"
+                ],
+                target_box_id=returning[
+                    "anchor_box_id"
+                ]
+            )
+
+            if transfer_result.get(
+                "transferred",
+                False
+            ):
+                cat["state"] = (
+                    "returned_from_"
+                    "quantum_exploration"
+                )
+
+        event = {
+            "name": (
+                "cat_quantum_return_advanced"
+            ),
+            "cat": cat.get("name"),
+            "pair_id": returning[
+                "pair_id"
+            ],
+            "position": (
+                dict(position)
+                if position is not None
+                else None
+            ),
+            "arrived_at_box": result.get(
+                "arrived",
+                False
+            ),
+            "transfer_result": (
+                transfer_result
+            ),
+            "advanced": True
         }
 
         self._record(

@@ -229,12 +229,48 @@ class CatMind:
                 False
             )
         ):
+            exploration_plan = (
+                observations.get(
+                    "exploration_plan",
+                    {}
+                )
+            )
+
+            exploration_reasons = set(
+                exploration_plan.get(
+                    "reasons",
+                    []
+                )
+            )
+
+            explicit_goal_bonus = (
+                0.50
+                if (
+                    "explicit_exploration_goal"
+                    in exploration_reasons
+                )
+                else 0.0
+            )
+
             pair_score = (
                 0.20
                 + curiosity * 0.55
                 + courage * 0.10
                 + patience * 0.05
+                + explicit_goal_bonus
             )
+
+            reasons = [
+                "no_usable_box_visible",
+                "sufficient_energy",
+                "curiosity",
+                "quantum_pair_creation_possible"
+            ]
+
+            if explicit_goal_bonus > 0.0:
+                reasons.append(
+                    "explicit_exploration_goal"
+                )
 
             candidates.append(
                 cls._candidate(
@@ -242,12 +278,7 @@ class CatMind:
                         "create_exploration_pair"
                     ),
                     score=pair_score,
-                    reasons=[
-                        "no_usable_box_visible",
-                        "sufficient_energy",
-                        "curiosity",
-                        "quantum_pair_creation_possible"
-                    ],
+                    reasons=reasons,
                     target={
                         "layer": observations.get(
                             "exploration_destination_layer"
