@@ -441,6 +441,22 @@ class CatIntentionExecutor:
                 "executed": False
             })
 
+        exploration_route = None
+
+        if (
+            cat.get("current_layer")
+            == "quantum_layer"
+        ):
+            exploration_route = (
+                transfer_system
+                .start_quantum_exploration_route(
+                    cat=cat,
+                    pair_id=creation[
+                        "pair_id"
+                    ]
+                )
+            )
+
         mind = cat.setdefault(
             "mind",
             {}
@@ -519,6 +535,9 @@ class CatIntentionExecutor:
                     "trail"
                 )
             },
+            "exploration_route": (
+                exploration_route
+            ),
             "decision_source": "cat_mind",
             "executed": True
         }

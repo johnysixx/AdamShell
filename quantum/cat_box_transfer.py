@@ -150,9 +150,21 @@ class CatQuantumBoxTransfer:
             )
         )
 
-        target_box.position = dict(
+        exploration_destination_position = dict(
             destination_position
         )
+
+        # P?i vstupu do Quantum Layer nen?
+        # vzd?len? krabice samotn?m c?lem.
+        # Je pouze vstupn?m bodem.
+        if destination_layer == "quantum_layer":
+            target_box.position = dict(
+                source_box.position
+            )
+        else:
+            target_box.position = dict(
+                exploration_destination_position
+            )
 
         self.pair_boxes(
             source_box,
@@ -186,6 +198,9 @@ class CatQuantumBoxTransfer:
             "remote_box_id": target_box.id,
             "anchor_layer": source_layer,
             "remote_layer": destination_layer,
+            "exploration_destination_position": dict(
+                exploration_destination_position
+            ),
             "creation_energy_j": energy_cost,
             "remaining_energy_j": energy_cost,
             "currently_in_use": False,
@@ -1033,6 +1048,256 @@ class CatQuantumBoxTransfer:
             **event,
             "counterpart": counterpart
         }
+
+    def start_quantum_exploration_route(
+        self,
+        cat,
+        pair_id,
+        step_size=None
+    ):
+        pair = next(
+            (
+                item
+                for item in self.universe.stable_cat_box_pairs
+                if item.get("pair_id") == pair_id
+                and item.get("active", False)
+            ),
+            None
+        )
+
+        if pair is None:
+            return {
+                "name": (
+                    "cat_quantum_exploration_"
+                    "route_not_started"
+                ),
+                "cat": cat.get("name"),
+                "reason": "stable_pair_not_found",
+                "started": False
+            }
+
+        if cat.get(
+            "current_layer"
+        ) != "quantum_layer":
+            return {
+                "name": (
+                    "cat_quantum_exploration_"
+                    "route_not_started"
+                ),
+                "cat": cat.get("name"),
+                "reason": "cat_not_in_quantum_layer",
+                "started": False
+            }
+
+        destination = dict(
+            pair[
+                "exploration_destination_position"
+            ]
+        )
+
+        stabilized = self.stabilize_direct_trail(
+            cat=cat,
+            destination=destination
+        )
+
+        quantum_space = getattr(
+            self.universe,
+            "quantum_space",
+            None
+        )
+
+        if quantum_space is None:
+            return {
+                "name": (
+                    "cat_quantum_exploration_"
+                    "route_not_started"
+                ),
+                "cat": cat.get("name"),
+                "reason": "quantum_space_unavailable",
+                "started": False
+            }
+
+        planned = (
+            quantum_space
+            .plan_direct_cat_route(
+                cat_id=cat.get("name"),
+                start_position=dict(
+                    cat["position"]
+                ),
+                destination_position=destination,
+                destination=(
+                    f"exploration_goal:"
+                    f"{pair_id}"
+                ),
+                step_size=step_size
+            )
+        )
+
+        route = planned["route"]
+        route.state = "ready"
+
+        cat["active_route_id"] = (
+            route.route_id
+        )
+
+        cat["quantum_exploration"] = {
+            "active": True,
+            "pair_id": pair_id,
+            "route_id": route.route_id,
+            "destination": destination,
+            "stabilized_path": stabilized,
+            "arrived": False
+        }
+
+        event = {
+            "name": (
+                "cat_quantum_exploration_"
+                "route_started"
+            ),
+            "cat": cat.get("name"),
+            "pair_id": pair_id,
+            "route_id": route.route_id,
+            "start_position": dict(
+                cat["position"]
+            ),
+            "destination": destination,
+            "step_count": len(
+                route.route_steps
+            ),
+            "most_direct_possible": True,
+            "started": True
+        }
+
+        self._record(
+            event
+        )
+
+        return {
+            **event,
+            "route": route,
+            "plan": planned["plan"]
+        }
+
+    def advance_quantum_exploration(
+        self,
+        cat,
+        rng=None
+    ):
+        exploration = cat.get(
+            "quantum_exploration"
+        )
+
+        if not exploration:
+            return {
+                "name": (
+                    "cat_quantum_exploration_"
+                    "not_advanced"
+                ),
+                "cat": cat.get("name"),
+                "reason": "no_quantum_exploration",
+                "advanced": False
+            }
+
+        if not exploration.get(
+            "active",
+            False
+        ):
+            return {
+                "name": (
+                    "cat_quantum_exploration_"
+                    "not_advanced"
+                ),
+                "cat": cat.get("name"),
+                "reason": "exploration_not_active",
+                "advanced": False
+            }
+
+        quantum_space = getattr(
+            self.universe,
+            "quantum_space",
+            None
+        )
+
+        if quantum_space is None:
+            return {
+                "name": (
+                    "cat_quantum_exploration_"
+                    "not_advanced"
+                ),
+                "cat": cat.get("name"),
+                "reason": "quantum_space_unavailable",
+                "advanced": False
+            }
+
+        result = quantum_space.advance_cat_route(
+            cat=cat,
+            cronenbergs=getattr(
+                self.universe,
+                "cronenbergs",
+                []
+            ),
+            encounter_system=(
+                self.universe
+                .cat_cronenberg_encounter
+            ),
+            universe=self.universe,
+            rng=rng
+        )
+
+        position = result.get(
+            "position"
+        )
+
+        if position is not None:
+            cat["position"] = dict(
+                position
+            )
+
+        if result.get(
+            "arrived",
+            False
+        ):
+            exploration["active"] = False
+            exploration["arrived"] = True
+
+            cat["state"] = (
+                "quantum_exploration_goal_reached"
+            )
+
+        event = {
+            "name": (
+                "cat_quantum_exploration_advanced"
+            ),
+            "cat": cat.get("name"),
+            "pair_id": exploration[
+                "pair_id"
+            ],
+            "route_id": exploration[
+                "route_id"
+            ],
+            "position": (
+                dict(position)
+                if position is not None
+                else None
+            ),
+            "result": result.get(
+                "result"
+            ),
+            "arrived": result.get(
+                "arrived",
+                False
+            ),
+            "advanced": (
+                result.get("result")
+                != "no_active_route"
+            )
+        }
+
+        self._record(
+            event
+        )
+
+        return event
 
     def stabilize_direct_trail(
         self,
