@@ -24,6 +24,9 @@ from quantum.cronenberg_pair_encounter_resolver import CronenbergPairEncounterRe
 from universe.law_registry import LawRegistry
 from quantum.death_ripple import QuantumDeathRipple
 from cats.cronenberg_encounter import CatCronenbergEncounter
+from quantum.cat_box_transfer import (
+    CatQuantumBoxTransfer
+)
 
 
 class Universe:
@@ -90,6 +93,12 @@ class Universe:
         )
 
         self.cat_cronenberg_encounter = CatCronenbergEncounter()
+
+        self.cat_box_transfer = (
+            CatQuantumBoxTransfer(
+                self
+            )
+        )
 
         self.quantum_event_bus.subscribe(
             "cronenberg_hunted",
@@ -785,8 +794,13 @@ class Universe:
 
         return cat
 
-    def create_quantum_box(self, rng=None):
+    def create_quantum_box(
+        self,
+        rng=None,
+        layer="quantum_layer"
+    ):
         box = QuantumBox(rng=rng)
+        box.current_layer = layer
         self.quantum_boxes.append(box)
         self.statistics.record_quantum_box_created()
 
