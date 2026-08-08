@@ -14,6 +14,9 @@ from .cat_intention_executor import (
 from .cat_perception import (
     CatPerception
 )
+from universe.aroma_profile import (
+    AromaProfile
+)
 
 class Cats:
 
@@ -182,7 +185,16 @@ class Cats:
             "intellect": (
                 CatIntellect.create_state()
             ),
-            "special_traits": []
+            "special_traits": [],
+            "aroma": AromaProfile.create(
+                identity=f"cat:{name}",
+                components={
+                    "cat": 1.0,
+                    "fur": 0.80,
+                    "individual_cat": 1.0
+                },
+                intensity=1.0
+            )
         }
 
         self.cats.append(cat)
@@ -190,6 +202,40 @@ class Cats:
 
         UniverseLogger.event(f"CAT CREATED: {name}")
         return cat
+
+    def add_surface_aroma(
+            self,
+            cat,
+            source,
+            components,
+            intensity=1.0,
+            decay_rate=0.03
+    ):
+        return AromaProfile.add_surface(
+            profile=cat["aroma"],
+            source=source,
+            components=components,
+            intensity=intensity,
+            decay_rate=decay_rate
+        )
+
+    def current_aroma(
+            self,
+            cat
+    ):
+        return AromaProfile.current(
+            cat["aroma"]
+        )
+
+    def decay_cat_aroma(
+            self,
+            cat,
+            ticks=1
+    ):
+        return AromaProfile.decay(
+            cat["aroma"],
+            ticks=ticks
+        )
 
     def activate_for_cronenberg_overpopulation(
             self,

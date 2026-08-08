@@ -15,6 +15,7 @@ from core.entity.cronenberg_system.growth import (
 )
 from core.entity.cronenberg_system.traits import CronenbergTraits
 from core.entity.cronenberg_system.quantum_links import CronenbergQuantumLinks
+from universe.aroma_profile import AromaProfile
 
 
 class Cronenberg(Entity):
@@ -41,6 +42,22 @@ class Cronenberg(Entity):
 
         self.size = 1.0
         self.juice_value = self.size
+
+        self.aroma = AromaProfile.create(
+            identity="cronenberg",
+            components={
+                "ozone": 1.0,
+                "ionized_air": 0.85,
+                "electrical": 0.75,
+                "metallic": 0.20
+            },
+            intensity=1.0
+        )
+
+        self.aroma_chemical_marker = {
+            "molecule": "ozone",
+            "formula": "O3"
+        }
 
         self.metabolism = (
             CronenbergMetabolism()

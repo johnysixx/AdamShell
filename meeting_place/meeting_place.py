@@ -23,6 +23,9 @@ from cats.duplicate_consumption_energy import (
     DuplicateConsumptionEnergy
 )
 from cats.kitten_growth import KittenGrowth
+from universe.aroma_foundations import (
+    AromaFoundations
+)
 
 class MeetingPlace:
 
@@ -55,6 +58,36 @@ class MeetingPlace:
             self.dice_vial
         )
         self.dice_box = DiceBox()
+        self.aroma_foundations = (
+            AromaFoundations(
+                self.universe
+            )
+        )
+
+        self.raspberry_rum = (
+            self.aroma_foundations
+            .get_mixture(
+                "raspberry_rum"
+            )
+        )
+
+        self.drink_menu = {
+            "raspberry_rum": (
+                self.raspberry_rum
+            )
+        }
+
+        self.ambient_aroma = {
+            "dominant_source": (
+                "raspberry_rum"
+            ),
+            "profile": dict(
+                self.raspberry_rum[
+                    "aroma_profile"
+                ]
+            )
+        }
+
         self.fridge = BarFridge()
         self.energy_reservoir = BarEnergyReservoir()
         self.entropy_reservoir = BarEntropyReservoir()
@@ -127,6 +160,8 @@ class MeetingPlace:
             "dice_vial": self.dice_vial.public_state,
             "dice_box": self.dice_box.public_state,
             "fridge": self.fridge.public_state,
+            "drink_menu": self.drink_menu,
+            "ambient_aroma": self.ambient_aroma,
             "energy_reservoir": self.energy_reservoir.public_state,
             "entropy_reservoir": self.entropy_reservoir.public_state,
             "geometry_terminal": self.geometry_terminal.public_state,
