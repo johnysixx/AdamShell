@@ -278,6 +278,384 @@ class CatKnowledge:
         )
 
     @classmethod
+    def hear_legend(
+        cls,
+        listener,
+        storyteller,
+        legend
+    ):
+        """
+        Poslucha? si ciz? legendu neulo??
+        jako fakt, ale jako sly?en? tvrzen?.
+        """
+        knowledge = cls.ensure_cat_knowledge(
+            listener
+        )
+
+        storyteller_name = (
+            storyteller.get("name")
+            if isinstance(storyteller, dict)
+            else str(storyteller)
+        )
+
+        trust = cls._trust_in_cat(
+            listener,
+            storyteller_name
+        )
+
+        intellect = float(
+            listener.get(
+                "intellect",
+                {}
+            ).get(
+                "normalized",
+                0.5
+            )
+        )
+
+        source_confidence = float(
+            legend.get(
+                "confidence",
+                0.5
+            )
+        )
+
+        credibility = (
+            source_confidence * 0.45
+            + trust * 0.40
+            + intellect * 0.15
+        )
+
+        heard = next(
+            (
+                item
+                for item in knowledge[
+                    "heard_legends"
+                ]
+                if item.get(
+                    "legend_id"
+                ) == legend.get(
+                    "legend_id"
+                )
+                and item.get(
+                    "storyteller"
+                ) == storyteller_name
+            ),
+            None
+        )
+
+        if heard is None:
+            heard = {
+                "legend_id": legend.get(
+                    "legend_id"
+                ),
+                "claim_type": legend.get(
+                    "claim_type"
+                ),
+                "place_id": legend.get(
+                    "place_id"
+                ),
+                "layer": legend.get(
+                    "layer"
+                ),
+                "position": deepcopy(
+                    legend.get(
+                        "position"
+                    )
+                ),
+                "storyteller": storyteller_name,
+                "trust_in_storyteller": trust,
+                "source_confidence": (
+                    source_confidence
+                ),
+                "credibility": credibility,
+                "heard_count": 1,
+                "verified": False,
+                "contradicted": False
+            }
+
+            knowledge[
+                "heard_legends"
+            ].append(
+                heard
+            )
+
+        else:
+            heard["heard_count"] += 1
+
+            heard[
+                "trust_in_storyteller"
+            ] = trust
+
+            heard[
+                "source_confidence"
+            ] = source_confidence
+
+            heard["credibility"] = min(
+                1.0,
+                (
+                    heard["credibility"]
+                    + credibility
+                ) / 2.0
+                + 0.03
+            )
+
+        return deepcopy(
+            heard
+        )
+
+    @classmethod
+    def verify_heard_legend(
+        cls,
+        cat,
+        place
+    ):
+        knowledge = cls.ensure_cat_knowledge(
+            cat
+        )
+
+        verified = []
+
+        for heard in knowledge[
+            "heard_legends"
+        ]:
+            if (
+                heard.get("place_id")
+                != place.get("place_id")
+            ):
+                continue
+
+            if heard.get(
+                "verified",
+                False
+            ):
+                continue
+
+            heard["verified"] = True
+            heard["contradicted"] = False
+
+            trust_change = (
+                cls.adjust_storyteller_trust(
+                    listener=cat,
+                    storyteller_name=heard[
+                        "storyteller"
+                    ],
+                    delta=0.10,
+                    reason=(
+                        "legend_confirmed_by_"
+                        "personal_observation"
+                    ),
+                    legend_id=heard[
+                        "legend_id"
+                    ]
+                )
+            )
+
+            heard[
+                "trust_after_verification"
+            ] = trust_change[
+                "current"
+            ]
+
+            record = {
+                "legend_id": heard[
+                    "legend_id"
+                ],
+                "place_id": heard[
+                    "place_id"
+                ],
+                "storyteller": heard[
+                    "storyteller"
+                ],
+                "verified_by": cat.get(
+                    "name"
+                ),
+                "credibility_before": (
+                    heard["credibility"]
+                ),
+                "trust_change": (
+                    trust_change
+                )
+            }
+
+            knowledge[
+                "verified_legends"
+            ].append(
+                record
+            )
+
+            verified.append(
+                deepcopy(record)
+            )
+
+        return verified
+
+    @classmethod
+    def adjust_storyteller_trust(
+        cls,
+        listener,
+        storyteller_name,
+        delta,
+        reason,
+        legend_id=None
+    ):
+        relationships = listener.setdefault(
+            "relationships",
+            {}
+        )
+
+        relation = relationships.setdefault(
+            storyteller_name,
+            {}
+        )
+
+        previous = float(
+            relation.get(
+                "trust",
+                0.5
+            )
+        )
+
+        current = max(
+            0.0,
+            min(
+                1.0,
+                previous + float(delta)
+            )
+        )
+
+        relation["trust"] = current
+
+        history = relation.setdefault(
+            "trust_history",
+            []
+        )
+
+        event = {
+            "previous": previous,
+            "current": current,
+            "delta": current - previous,
+            "reason": reason,
+            "legend_id": legend_id
+        }
+
+        history.append(
+            deepcopy(event)
+        )
+
+        return deepcopy(
+            event
+        )
+
+    @classmethod
+    def contradict_heard_legend(
+        cls,
+        cat,
+        legend_id,
+        reason="personal_observation_contradicted"
+    ):
+        knowledge = cls.ensure_cat_knowledge(
+            cat
+        )
+
+        heard = next(
+            (
+                item
+                for item in knowledge[
+                    "heard_legends"
+                ]
+                if item.get(
+                    "legend_id"
+                ) == legend_id
+            ),
+            None
+        )
+
+        if heard is None:
+            return {
+                "contradicted": False,
+                "reason": "legend_not_heard",
+                "legend_id": legend_id
+            }
+
+        if heard.get(
+            "verified",
+            False
+        ):
+            return {
+                "contradicted": False,
+                "reason": "legend_already_verified",
+                "legend_id": legend_id
+            }
+
+        heard["contradicted"] = True
+        heard["verified"] = False
+
+        storyteller = heard.get(
+            "storyteller"
+        )
+
+        trust_change = (
+            cls.adjust_storyteller_trust(
+                listener=cat,
+                storyteller_name=storyteller,
+                delta=-0.15,
+                reason=reason,
+                legend_id=legend_id
+            )
+        )
+
+        heard[
+            "trust_after_contradiction"
+        ] = trust_change[
+            "current"
+        ]
+
+        return {
+            "contradicted": True,
+            "legend_id": legend_id,
+            "storyteller": storyteller,
+            "trust_change": trust_change
+        }
+
+    @staticmethod
+    def _trust_in_cat(
+        listener,
+        storyteller_name
+    ):
+        relationships = listener.get(
+            "relationships",
+            {}
+        )
+
+        if isinstance(
+            relationships,
+            dict
+        ):
+            relation = relationships.get(
+                storyteller_name
+            )
+
+            if isinstance(
+                relation,
+                dict
+            ):
+                return max(
+                    0.0,
+                    min(
+                        1.0,
+                        float(
+                            relation.get(
+                                "trust",
+                                0.5
+                            )
+                        )
+                    )
+                )
+
+        return 0.5
+
+    @classmethod
     def _find_place(
         cls,
         places,

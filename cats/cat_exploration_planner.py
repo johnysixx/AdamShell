@@ -263,6 +263,227 @@ class CatExplorationPlanner:
         }
 
     @classmethod
+    def choose_continuation_destination(
+        cls,
+        cat,
+        universe
+    ):
+        """
+        Vybere dal?? bod pr?zkumu ve stejn?
+        Quantum Layer.
+
+        Nezakl?d? nov? mezivrstvov? p?r.
+        """
+        current = dict(
+            cat.get(
+                "position",
+                {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            )
+        )
+
+        traits = cat.get(
+            "personality",
+            {}
+        ).get(
+            "traits",
+            {}
+        )
+
+        curiosity = float(
+            traits.get(
+                "curiosity",
+                0.5
+            )
+        )
+
+        courage = float(
+            traits.get(
+                "courage",
+                0.5
+            )
+        )
+
+        intellect = float(
+            cat.get(
+                "intellect",
+                {}
+            ).get(
+                "normalized",
+                0.5
+            )
+        )
+
+        memory = cat.get(
+            "memory"
+        )
+
+        visited_positions = []
+
+        for event in getattr(
+            memory,
+            "events",
+            []
+        ):
+            if event.get(
+                "event_type"
+            ) != "successful_exploration":
+                continue
+
+            details = event.get(
+                "details",
+                {}
+            )
+
+            if details.get(
+                "target_layer"
+            ) != "quantum_layer":
+                continue
+
+            position = details.get(
+                "position"
+            )
+
+            if isinstance(
+                position,
+                dict
+            ):
+                visited_positions.append(
+                    cls._position(
+                        position
+                    )
+                )
+
+        # Vzd?lenost dal?? etapy je vlastnost
+        # ko?ky, ne pevn? teleport.
+        distance = (
+            2.0
+            + curiosity * 5.0
+            + courage * 2.0
+            + intellect * 1.0
+        )
+
+        directions = [
+            (1.0, 0.0, 0.0),
+            (-1.0, 0.0, 0.0),
+            (0.0, 1.0, 0.0),
+            (0.0, -1.0, 0.0),
+            (0.0, 0.0, 1.0),
+            (0.0, 0.0, -1.0)
+        ]
+
+        candidates = []
+
+        for index, direction in enumerate(
+            directions
+        ):
+            position = {
+                "x": (
+                    float(
+                        current.get(
+                            "x",
+                            0.0
+                        )
+                    )
+                    + direction[0]
+                    * distance
+                ),
+                "y": (
+                    float(
+                        current.get(
+                            "y",
+                            0.0
+                        )
+                    )
+                    + direction[1]
+                    * distance
+                ),
+                "z": (
+                    float(
+                        current.get(
+                            "z",
+                            0.0
+                        )
+                    )
+                    + direction[2]
+                    * distance
+                )
+            }
+
+            revisit_penalty = 0.0
+
+            for visited in visited_positions:
+                difference = (
+                    abs(
+                        position["x"]
+                        - visited["x"]
+                    )
+                    + abs(
+                        position["y"]
+                        - visited["y"]
+                    )
+                    + abs(
+                        position["z"]
+                        - visited["z"]
+                    )
+                )
+
+                if difference < 1.0:
+                    revisit_penalty += 0.40
+
+            score = (
+                0.30
+                + curiosity * 0.40
+                + courage * 0.15
+                + intellect * 0.10
+                - revisit_penalty
+            )
+
+            candidates.append({
+                "layer": "quantum_layer",
+                "position": position,
+                "score": max(
+                    0.0,
+                    min(
+                        1.0,
+                        score
+                    )
+                ),
+                "direction_index": index,
+                "revisit_penalty": (
+                    revisit_penalty
+                )
+            })
+
+        candidates.sort(
+            key=lambda item: (
+                item["score"],
+                -item["direction_index"]
+            ),
+            reverse=True
+        )
+
+        winner = candidates[0]
+
+        return {
+            "selected": True,
+            "layer": "quantum_layer",
+            "position": deepcopy(
+                winner["position"]
+            ),
+            "score": winner["score"],
+            "reason": (
+                "continue_quantum_exploration"
+            ),
+            "candidates": deepcopy(
+                candidates
+            )
+        }
+
+    @classmethod
     def collect_candidates(
         cls,
         cat,
@@ -426,6 +647,74 @@ class CatExplorationPlanner:
                     )
                 })
 
+        knowledge = cat.get(
+            "knowledge",
+            {}
+        )
+
+        for heard in knowledge.get(
+            "heard_legends",
+            []
+        ):
+            if heard.get(
+                "verified",
+                False
+            ):
+                continue
+
+            if heard.get(
+                "contradicted",
+                False
+            ):
+                continue
+
+            credibility = float(
+                heard.get(
+                    "credibility",
+                    0.0
+                )
+            )
+
+            if credibility < 0.35:
+                continue
+
+            layer = heard.get(
+                "layer"
+            )
+
+            position = heard.get(
+                "position"
+            )
+
+            if (
+                layer is None
+                or not isinstance(
+                    position,
+                    dict
+                )
+            ):
+                continue
+
+            candidates.append({
+                "layer": str(layer),
+                "position": cls._position(
+                    position
+                ),
+                "source": "heard_legend",
+                "legend_id": heard.get(
+                    "legend_id"
+                ),
+                "storyteller": heard.get(
+                    "storyteller"
+                ),
+                "legend_credibility": (
+                    credibility
+                ),
+                "known_visits": 0,
+                "positive_memories": 0,
+                "negative_memories": 0
+            })
+
         return cls._merge_candidates(
             candidates
         )
@@ -537,6 +826,29 @@ class CatExplorationPlanner:
         if negative:
             reasons.append(
                 "dangerous_memory"
+            )
+
+        if (
+            candidate.get("source")
+            == "heard_legend"
+        ):
+            credibility = float(
+                candidate.get(
+                    "legend_credibility",
+                    0.0
+                )
+            )
+
+            score += (
+                credibility * 0.20
+            )
+
+            reasons.append(
+                "heard_cat_legend"
+            )
+
+            reasons.append(
+                "legend_credibility"
             )
 
         if (
