@@ -3,6 +3,9 @@ from copy import deepcopy
 from cats.cat_exploration_planner import (
     CatExplorationPlanner
 )
+from cats.cat_knowledge import (
+    CatKnowledge
+)
 import math
 
 from universe.dark_sector import (
@@ -1266,6 +1269,17 @@ class CatQuantumBoxTransfer:
             exploration["active"] = False
             exploration["arrived"] = True
 
+            exploration_history = cat.setdefault(
+                "quantum_exploration_history",
+                []
+            )
+
+            exploration_history.append(
+                deepcopy(
+                    exploration
+                )
+            )
+
             cat["state"] = (
                 "quantum_exploration_goal_reached"
             )
@@ -1400,6 +1414,48 @@ class CatQuantumBoxTransfer:
                 }
             )
 
+        known_place = (
+            CatKnowledge.remember_place(
+                cat=cat,
+                layer=cat.get(
+                    "current_layer",
+                    "quantum_layer"
+                ),
+                position=dict(
+                    cat["position"]
+                ),
+                source=(
+                    "direct_quantum_exploration"
+                ),
+                safe=True,
+                universe_tick=(
+                    self.universe.universe_tick
+                ),
+                details={
+                    "pair_id": exploration.get(
+                        "pair_id"
+                    ),
+                    "exploration_stage": (
+                        exploration.get(
+                            "stage",
+                            1
+                        )
+                    )
+                }
+            )
+        )
+
+        legend = (
+            CatKnowledge.publish_legend(
+                universe=self.universe,
+                cat=cat,
+                place=known_place,
+                claim_type=(
+                    "place_discovered"
+                )
+            )
+        )
+
         decision = (
             CatExplorationPlanner
             .choose_after_arrival(
@@ -1413,6 +1469,9 @@ class CatQuantumBoxTransfer:
             "action"
         ]
 
+        return_plan = None
+        continuation_plan = None
+
         if action == "rest_at_destination":
             cat["state"] = (
                 "resting_at_quantum_"
@@ -1420,15 +1479,29 @@ class CatQuantumBoxTransfer:
             )
 
         elif action == "continue_exploration":
-            cat["state"] = (
-                "ready_to_continue_"
-                "quantum_exploration"
-            )
-
             cat.pop(
                 "exploration_goal",
                 None
             )
+
+            continuation_plan = (
+                self.continue_quantum_exploration(
+                    cat=cat
+                )
+            )
+
+            if continuation_plan.get(
+                "continued",
+                False
+            ):
+                cat["state"] = (
+                    "continuing_quantum_exploration"
+                )
+            else:
+                cat["state"] = (
+                    "ready_to_continue_"
+                    "quantum_exploration"
+                )
 
         elif (
             action
@@ -1457,6 +1530,9 @@ class CatQuantumBoxTransfer:
         ):
             return_plan = None
 
+        if action != "continue_exploration":
+            continuation_plan = None
+
         event = {
             "name": (
                 "cat_quantum_exploration_"
@@ -1470,10 +1546,166 @@ class CatQuantumBoxTransfer:
                 cat["position"]
             ),
             "memory": remembered,
+            "known_place": known_place,
+            "legend": legend,
             "decision": decision,
             "action": action,
             "return_plan": return_plan,
+            "continuation_plan": (
+                continuation_plan
+            ),
             "resolved": True
+        }
+
+        self._record(
+            event
+        )
+
+        return event
+
+    def continue_quantum_exploration(
+        self,
+        cat
+    ):
+        exploration = cat.get(
+            "quantum_exploration",
+            {}
+        )
+
+        pair_id = exploration.get(
+            "pair_id"
+        )
+
+        pair = self._find_stable_pair_by_id(
+            pair_id
+        )
+
+        if pair is None:
+            return {
+                "name": (
+                    "cat_quantum_exploration_"
+                    "continuation_failed"
+                ),
+                "cat": cat.get("name"),
+                "reason": (
+                    "return_pair_not_found"
+                ),
+                "continued": False
+            }
+
+        if cat.get(
+            "current_layer"
+        ) != "quantum_layer":
+            return {
+                "name": (
+                    "cat_quantum_exploration_"
+                    "continuation_failed"
+                ),
+                "cat": cat.get("name"),
+                "reason": (
+                    "cat_not_in_quantum_layer"
+                ),
+                "continued": False
+            }
+
+        plan = (
+            CatExplorationPlanner
+            .choose_continuation_destination(
+                cat=cat,
+                universe=self.universe
+            )
+        )
+
+        if not plan.get(
+            "selected",
+            False
+        ):
+            return {
+                "name": (
+                    "cat_quantum_exploration_"
+                    "continuation_failed"
+                ),
+                "cat": cat.get("name"),
+                "reason": (
+                    "no_continuation_destination"
+                ),
+                "continued": False
+            }
+
+        destination = dict(
+            plan["position"]
+        )
+
+        stabilized = self.stabilize_direct_trail(
+            cat=cat,
+            destination=destination
+        )
+
+        quantum_space = (
+            self.universe.quantum_space
+        )
+
+        planned = (
+            quantum_space
+            .plan_direct_cat_route(
+                cat_id=cat.get("name"),
+                start_position=dict(
+                    cat["position"]
+                ),
+                destination_position=(
+                    destination
+                ),
+                destination=(
+                    f"continued_exploration:"
+                    f"{pair_id}"
+                )
+            )
+        )
+
+        route = planned["route"]
+        route.state = "ready"
+
+        cat["active_route_id"] = (
+            route.route_id
+        )
+
+        stage = int(
+            exploration.get(
+                "stage",
+                1
+            )
+        ) + 1
+
+        cat["quantum_exploration"] = {
+            "active": True,
+            "arrived": False,
+            "pair_id": pair_id,
+            "route_id": route.route_id,
+            "destination": destination,
+            "stabilized_path": stabilized,
+            "stage": stage,
+            "continuation": True
+        }
+
+        cat["state"] = (
+            "continuing_quantum_exploration"
+        )
+
+        event = {
+            "name": (
+                "cat_continued_quantum_exploration"
+            ),
+            "cat": cat.get("name"),
+            "pair_id": pair_id,
+            "stage": stage,
+            "route_id": route.route_id,
+            "start_position": dict(
+                cat["position"]
+            ),
+            "destination": destination,
+            "return_pair_preserved": True,
+            "created_new_pair": False,
+            "continued": True
         }
 
         self._record(
