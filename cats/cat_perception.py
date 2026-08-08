@@ -186,6 +186,23 @@ class CatPerception:
             != current_layer
         )
 
+        active_cat_legends = [
+            legend
+            for legend in getattr(
+                self.universe,
+                "cat_legends",
+                []
+            )
+            if legend.get(
+                "active",
+                True
+            )
+        ]
+
+        shareable_legend_count = len(
+            active_cat_legends
+        )
+
         observations = {
             "cat": cat.get("name"),
             "position": deepcopy(
@@ -268,6 +285,10 @@ class CatPerception:
             ),
             "exploration_plan": deepcopy(
                 exploration_plan
+            ),
+
+            "shareable_legend_count": (
+                shareable_legend_count
             ),
 
             "observed": True

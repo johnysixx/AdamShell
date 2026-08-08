@@ -491,6 +491,313 @@ class CatKnowledge:
         return verified
 
     @classmethod
+    def choose_legend_to_share(
+        cls,
+        storyteller,
+        listener,
+        universe
+    ):
+        """
+        Vybere legendu, kterou m? smysl
+        sd?lit konkr?tn?mu poslucha?i.
+        """
+        legends = cls.ensure_universe_legends(
+            universe
+        )
+
+        storyteller_name = storyteller.get(
+            "name"
+        )
+
+        listener_name = listener.get(
+            "name"
+        )
+
+        knowledge = cls.ensure_cat_knowledge(
+            listener
+        )
+
+        already_heard = {
+            (
+                item.get("legend_id"),
+                item.get("storyteller")
+            )
+            for item
+            in knowledge["heard_legends"]
+        }
+
+        candidates = []
+
+        for legend in legends:
+            if not legend.get(
+                "active",
+                True
+            ):
+                continue
+
+            if storyteller_name not in legend.get(
+                "reported_by",
+                []
+            ):
+                continue
+
+            if (
+                legend.get("legend_id"),
+                storyteller_name
+            ) in already_heard:
+                continue
+
+            candidates.append(
+                deepcopy(legend)
+            )
+
+        if not candidates:
+            return {
+                "selected": False,
+                "reason": "no_shareable_legend",
+                "storyteller": storyteller_name,
+                "listener": listener_name
+            }
+
+        candidates.sort(
+            key=lambda item: (
+                float(
+                    item.get(
+                        "confidence",
+                        0.0
+                    )
+                ),
+                int(
+                    item.get(
+                        "verification_count",
+                        0
+                    )
+                )
+            ),
+            reverse=True
+        )
+
+        return {
+            "selected": True,
+            "legend": candidates[0],
+            "candidate_count": len(
+                candidates
+            ),
+            "storyteller": storyteller_name,
+            "listener": listener_name
+        }
+
+    @classmethod
+    def evaluate_legend_sharing(
+        cls,
+        storyteller,
+        listener,
+        legend
+    ):
+        """
+        Rozhodne, zda konkr?tn? ko?ka
+        konkr?tn? legendu konkr?tn?mu
+        poslucha?i v?bec ?ekne.
+        """
+        listener_name = listener.get(
+            "name"
+        )
+
+        traits = storyteller.get(
+            "personality",
+            {}
+        ).get(
+            "traits",
+            {}
+        )
+
+        curiosity = float(
+            traits.get(
+                "curiosity",
+                0.5
+            )
+        )
+
+        patience = float(
+            traits.get(
+                "patience",
+                0.5
+            )
+        )
+
+        intellect = float(
+            storyteller.get(
+                "intellect",
+                {}
+            ).get(
+                "normalized",
+                0.5
+            )
+        )
+
+        trust = cls._trust_in_cat(
+            storyteller,
+            listener_name
+        )
+
+        confidence = float(
+            legend.get(
+                "confidence",
+                0.5
+            )
+        )
+
+        verification_count = int(
+            legend.get(
+                "verification_count",
+                1
+            )
+        )
+
+        information_value = min(
+            1.0,
+            confidence * 0.70
+            + min(
+                verification_count,
+                5
+            ) * 0.06
+        )
+
+        share_score = (
+            0.10
+            + trust * 0.30
+            + curiosity * 0.20
+            + patience * 0.10
+            + intellect * 0.10
+            + information_value * 0.20
+        )
+
+        share_score = max(
+            0.0,
+            min(
+                1.0,
+                share_score
+            )
+        )
+
+        return {
+            "share": (
+                share_score >= 0.55
+            ),
+            "score": share_score,
+            "trust_in_listener": trust,
+            "information_value": (
+                information_value
+            ),
+            "reasons": [
+                "relationship_to_listener",
+                "information_value",
+                "curiosity",
+                "patience",
+                "intellect"
+            ]
+        }
+
+    @classmethod
+    def share_legend(
+        cls,
+        storyteller,
+        listener,
+        universe
+    ):
+        """
+        Kompletn? soci?ln? akt:
+        vybere legendu, rozhodne o sd?len?
+        a p??padn? ji p?ed? poslucha?i.
+        """
+        selection = cls.choose_legend_to_share(
+            storyteller=storyteller,
+            listener=listener,
+            universe=universe
+        )
+
+        if not selection.get(
+            "selected",
+            False
+        ):
+            return {
+                "name": "cat_legend_not_shared",
+                "storyteller": storyteller.get(
+                    "name"
+                ),
+                "listener": listener.get(
+                    "name"
+                ),
+                "reason": selection.get(
+                    "reason"
+                ),
+                "shared": False
+            }
+
+        legend = selection[
+            "legend"
+        ]
+
+        evaluation = (
+            cls.evaluate_legend_sharing(
+                storyteller=storyteller,
+                listener=listener,
+                legend=legend
+            )
+        )
+
+        if not evaluation[
+            "share"
+        ]:
+            return {
+                "name": "cat_legend_not_shared",
+                "storyteller": storyteller.get(
+                    "name"
+                ),
+                "listener": listener.get(
+                    "name"
+                ),
+                "legend_id": legend.get(
+                    "legend_id"
+                ),
+                "evaluation": evaluation,
+                "reason": (
+                    "sharing_not_worthwhile"
+                ),
+                "shared": False
+            }
+
+        heard = cls.hear_legend(
+            listener=listener,
+            storyteller=storyteller,
+            legend=legend
+        )
+
+        return {
+            "name": "cat_shared_legend",
+            "storyteller": storyteller.get(
+                "name"
+            ),
+            "listener": listener.get(
+                "name"
+            ),
+            "legend_id": legend.get(
+                "legend_id"
+            ),
+            "layer": legend.get(
+                "layer"
+            ),
+            "position": deepcopy(
+                legend.get(
+                    "position"
+                )
+            ),
+            "evaluation": evaluation,
+            "heard_legend": heard,
+            "shared": True
+        }
+
+    @classmethod
     def adjust_storyteller_trust(
         cls,
         listener,

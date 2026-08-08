@@ -10,6 +10,7 @@ class CatMind:
         "explore_box",
         "create_exploration_pair",
         "approach_cat",
+        "share_legend",
         "observe",
         "rest"
     )
@@ -297,6 +298,33 @@ class CatMind:
             "nearby_cats",
             []
         )
+
+        if nearby_cats:
+            legend_count = int(
+                observations.get(
+                    "shareable_legend_count",
+                    0
+                )
+            )
+
+            if legend_count > 0:
+                candidates.append(
+                    cls._candidate(
+                        intention_type=(
+                            "share_legend"
+                        ),
+                        score=(
+                            0.25
+                            + patience * 0.15
+                            + curiosity * 0.15
+                        ),
+                        reasons=[
+                            "another_cat_nearby",
+                            "shareable_knowledge_exists"
+                        ],
+                        target=nearby_cats[0]
+                    )
+                )
 
         if nearby_cats:
             social_score = (

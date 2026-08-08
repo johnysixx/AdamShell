@@ -1,5 +1,9 @@
 from copy import deepcopy
 
+from cats.cat_knowledge import (
+    CatKnowledge
+)
+
 
 class CatIntentionExecutor:
 
@@ -93,6 +97,12 @@ class CatIntentionExecutor:
 
         if intention_type == "rest":
             return self._execute_rest(
+                cat=cat,
+                intention=intention
+            )
+
+        if intention_type == "share_legend":
+            return self._execute_share_legend(
                 cat=cat,
                 intention=intention
             )
@@ -252,6 +262,89 @@ class CatIntentionExecutor:
             "mind",
             {}
         )
+
+        mind[
+            "active_body_execution"
+        ] = deepcopy(
+            event
+        )
+
+        return self._record(
+            event
+        )
+
+    def _execute_share_legend(
+        self,
+        cat,
+        intention
+    ):
+        target = intention.get(
+            "target"
+        )
+
+        listener = None
+
+        if isinstance(
+            target,
+            dict
+        ):
+            target_name = (
+                target.get("name")
+                or target.get("id")
+            )
+        else:
+            target_name = target
+
+        for candidate in getattr(
+            self.universe,
+            "entities",
+            []
+        ):
+            if not isinstance(
+                candidate,
+                dict
+            ):
+                continue
+
+            if candidate.get(
+                "name"
+            ) == target_name:
+                listener = candidate
+                break
+
+        if listener is None:
+            return self._record({
+                "name": "cat_legend_not_shared",
+                "cat": cat.get("name"),
+                "listener": target_name,
+                "reason": "listener_not_found",
+                "executed": False
+            })
+
+        result = CatKnowledge.share_legend(
+            storyteller=cat,
+            listener=listener,
+            universe=self.universe
+        )
+
+        mind = cat.setdefault(
+            "mind",
+            {}
+        )
+
+        mind["previous_intention"] = deepcopy(
+            intention
+        )
+
+        mind["current_intention"] = None
+
+        event = {
+            **result,
+            "cat": cat.get("name"),
+            "intention": "share_legend",
+            "decision_source": "cat_mind",
+            "executed": True
+        }
 
         mind[
             "active_body_execution"
