@@ -103,6 +103,146 @@ class CatExplorationPlanner:
         }
 
     @classmethod
+    def choose_scent_destination(
+        cls,
+        cat,
+        preferred_identity=None,
+        avoid_identity=None
+    ):
+        knowledge = cat.get(
+            "knowledge",
+            {}
+        )
+
+        scent_places = list(
+            knowledge.get(
+                "known_scent_places",
+                []
+            )
+        )
+
+        if not scent_places:
+            return {
+                "selected": False,
+                "reason": "no_known_scent_places"
+            }
+
+        current_layer = cat.get(
+            "current_layer"
+        )
+
+        candidates = []
+
+        for place in scent_places:
+            identity = place.get(
+                "identity"
+            )
+
+            if (
+                preferred_identity is not None
+                and identity
+                != preferred_identity
+            ):
+                continue
+
+            score = (
+                float(
+                    place.get(
+                        "confidence",
+                        0.0
+                    )
+                ) * 0.45
+                + min(
+                    1.0,
+                    float(
+                        place.get(
+                            "last_intensity",
+                            0.0
+                        )
+                    )
+                ) * 0.35
+            )
+
+            if (
+                place.get("layer")
+                == current_layer
+            ):
+                score += 0.20
+
+            if (
+                avoid_identity is not None
+                and identity
+                == avoid_identity
+            ):
+                score *= -1.0
+
+            candidates.append({
+                "identity": identity,
+                "layer": place.get(
+                    "layer"
+                ),
+                "position": cls._position(
+                    place.get(
+                        "position",
+                        {}
+                    )
+                ),
+                "source_id": place.get(
+                    "source_id"
+                ),
+                "confidence": place.get(
+                    "confidence",
+                    0.0
+                ),
+                "last_intensity": (
+                    place.get(
+                        "last_intensity",
+                        0.0
+                    )
+                ),
+                "score": score
+            })
+
+        if not candidates:
+            return {
+                "selected": False,
+                "reason": (
+                    "no_matching_scent_place"
+                )
+            }
+
+        candidates.sort(
+            key=lambda item: item[
+                "score"
+            ],
+            reverse=True
+        )
+
+        winner = candidates[0]
+
+        return {
+            "selected": True,
+            "identity": winner[
+                "identity"
+            ],
+            "layer": winner[
+                "layer"
+            ],
+            "position": deepcopy(
+                winner["position"]
+            ),
+            "source_id": winner[
+                "source_id"
+            ],
+            "score": winner[
+                "score"
+            ],
+            "candidates": deepcopy(
+                candidates
+            )
+        }
+
+    @classmethod
     def choose_after_arrival(
         cls,
         cat,

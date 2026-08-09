@@ -28,6 +28,16 @@ class CatKnowledge:
             []
         )
 
+        knowledge.setdefault(
+            "known_aromas",
+            []
+        )
+
+        knowledge.setdefault(
+            "known_scent_places",
+            []
+        )
+
         return knowledge
 
     @classmethod
@@ -489,6 +499,481 @@ class CatKnowledge:
             )
 
         return verified
+
+    @classmethod
+    def learn_aroma(
+        cls,
+        cat,
+        identity,
+        components,
+        source="direct_experience"
+    ):
+        knowledge = cls.ensure_cat_knowledge(
+            cat
+        )
+
+        normalized = {
+            str(key): float(value)
+            for key, value
+            in dict(components).items()
+            if float(value) > 0.0
+        }
+
+        known = next(
+            (
+                item
+                for item in knowledge[
+                    "known_aromas"
+                ]
+                if item.get(
+                    "identity"
+                ) == identity
+            ),
+            None
+        )
+
+        if known is None:
+            known = {
+                "identity": identity,
+                "components": normalized,
+                "source": source,
+                "encounters": 1,
+                "confidence": 0.55
+            }
+
+            knowledge[
+                "known_aromas"
+            ].append(
+                known
+            )
+
+        else:
+            known["encounters"] += 1
+            known["source"] = source
+
+            previous = known.setdefault(
+                "components",
+                {}
+            )
+
+            all_keys = set(previous) | set(
+                normalized
+            )
+
+            for key in all_keys:
+                previous[key] = (
+                    float(
+                        previous.get(
+                            key,
+                            0.0
+                        )
+                    )
+                    + float(
+                        normalized.get(
+                            key,
+                            0.0
+                        )
+                    )
+                ) / 2.0
+
+            known["confidence"] = min(
+                1.0,
+                float(
+                    known.get(
+                        "confidence",
+                        0.55
+                    )
+                )
+                + 0.10
+            )
+
+        return deepcopy(
+            known
+        )
+
+    @classmethod
+    def recognize_aroma(
+        cls,
+        cat,
+        components,
+        minimum_similarity=0.55
+    ):
+        knowledge = cls.ensure_cat_knowledge(
+            cat
+        )
+
+        observed = {
+            str(key): float(value)
+            for key, value
+            in dict(components).items()
+            if float(value) > 0.0
+        }
+
+        matches = []
+
+        for known in knowledge[
+            "known_aromas"
+        ]:
+            similarity = cls._aroma_similarity(
+                observed,
+                known.get(
+                    "components",
+                    {}
+                )
+            )
+
+            if similarity < minimum_similarity:
+                continue
+
+            matches.append({
+                "identity": known[
+                    "identity"
+                ],
+                "similarity": similarity,
+                "confidence": known.get(
+                    "confidence",
+                    0.5
+                ),
+                "encounters": known.get(
+                    "encounters",
+                    1
+                )
+            })
+
+        matches.sort(
+            key=lambda item: (
+                item["similarity"],
+                item["confidence"]
+            ),
+            reverse=True
+        )
+
+        if not matches:
+            return {
+                "recognized": False,
+                "identity": None,
+                "similarity": 0.0,
+                "matches": []
+            }
+
+        winner = matches[0]
+
+        return {
+            "recognized": True,
+            "identity": winner[
+                "identity"
+            ],
+            "similarity": winner[
+                "similarity"
+            ],
+            "matches": matches
+        }
+
+    @staticmethod
+    def _aroma_similarity(
+        first,
+        second
+    ):
+        keys = set(first) | set(second)
+
+        if not keys:
+            return 0.0
+
+        dot = sum(
+            float(first.get(key, 0.0))
+            * float(second.get(key, 0.0))
+            for key in keys
+        )
+
+        first_length = sum(
+            float(first.get(key, 0.0)) ** 2
+            for key in keys
+        ) ** 0.5
+
+        second_length = sum(
+            float(second.get(key, 0.0)) ** 2
+            for key in keys
+        ) ** 0.5
+
+        if (
+            first_length == 0.0
+            or second_length == 0.0
+        ):
+            return 0.0
+
+        return max(
+            0.0,
+            min(
+                1.0,
+                dot
+                / (
+                    first_length
+                    * second_length
+                )
+            )
+        )
+
+    @classmethod
+    def remember_scent_place(
+        cls,
+        cat,
+        layer,
+        position,
+        source_id,
+        recognized_identity=None,
+        components=None,
+        perceived_intensity=0.0,
+        universe_tick=None
+    ):
+        knowledge = cls.ensure_cat_knowledge(
+            cat
+        )
+
+        position = cls._position(
+            position
+        )
+
+        place_id = cls._place_id(
+            layer,
+            position
+        )
+
+        identity = (
+            recognized_identity
+            or "unknown_aroma"
+        )
+
+        memory = next(
+            (
+                item
+                for item
+                in knowledge[
+                    "known_scent_places"
+                ]
+                if (
+                    item.get(
+                        "place_id"
+                    ) == place_id
+                    and item.get(
+                        "identity"
+                    ) == identity
+                    and item.get(
+                        "source_id"
+                    ) == source_id
+                )
+            ),
+            None
+        )
+
+        if memory is None:
+            memory = {
+                "place_id": place_id,
+                "layer": layer,
+                "position": deepcopy(
+                    position
+                ),
+                "source_id": source_id,
+                "identity": identity,
+                "observations": 1,
+                "confidence": (
+                    0.60
+                    if recognized_identity
+                    else 0.30
+                ),
+                "last_intensity": float(
+                    perceived_intensity
+                ),
+                "strongest_intensity": float(
+                    perceived_intensity
+                ),
+                "components": deepcopy(
+                    components or {}
+                ),
+                "first_seen_tick": (
+                    universe_tick
+                ),
+                "last_seen_tick": (
+                    universe_tick
+                )
+            }
+
+            knowledge[
+                "known_scent_places"
+            ].append(
+                memory
+            )
+
+        else:
+            memory[
+                "observations"
+            ] += 1
+
+            memory[
+                "last_intensity"
+            ] = float(
+                perceived_intensity
+            )
+
+            memory[
+                "strongest_intensity"
+            ] = max(
+                float(
+                    memory.get(
+                        "strongest_intensity",
+                        0.0
+                    )
+                ),
+                float(
+                    perceived_intensity
+                )
+            )
+
+            memory[
+                "last_seen_tick"
+            ] = universe_tick
+
+            memory[
+                "confidence"
+            ] = min(
+                1.0,
+                float(
+                    memory.get(
+                        "confidence",
+                        0.3
+                    )
+                )
+                + (
+                    0.10
+                    if recognized_identity
+                    else 0.03
+                )
+            )
+
+            if components:
+                memory[
+                    "components"
+                ] = deepcopy(
+                    components
+                )
+
+        return deepcopy(
+            memory
+        )
+
+    @classmethod
+    def remember_olfaction(
+        cls,
+        cat,
+        olfaction,
+        current_layer,
+        universe_tick=None
+    ):
+        remembered = []
+
+        for item in olfaction.get(
+            "detected_aromas",
+            []
+        ):
+            recognition = item.get(
+                "recognition",
+                {}
+            )
+
+            identity = (
+                recognition.get(
+                    "identity"
+                )
+                if recognition.get(
+                    "recognized",
+                    False
+                )
+                else None
+            )
+
+            position = item.get(
+                "position"
+            )
+
+            if not isinstance(
+                position,
+                dict
+            ):
+                continue
+
+            remembered.append(
+                cls.remember_scent_place(
+                    cat=cat,
+                    layer=current_layer,
+                    position=position,
+                    source_id=item.get(
+                        "entity_id"
+                    ),
+                    recognized_identity=identity,
+                    components=item.get(
+                        "raw_components",
+                        {}
+                    ),
+                    perceived_intensity=item.get(
+                        "perceived_intensity",
+                        0.0
+                    ),
+                    universe_tick=universe_tick
+                )
+            )
+
+        ambient = olfaction.get(
+            "ambient_aroma"
+        )
+
+        if isinstance(
+            ambient,
+            dict
+        ):
+            recognition = ambient.get(
+                "recognition",
+                {}
+            )
+
+            identity = (
+                recognition.get(
+                    "identity"
+                )
+                if recognition.get(
+                    "recognized",
+                    False
+                )
+                else ambient.get(
+                    "source"
+                )
+            )
+
+            remembered.append(
+                cls.remember_scent_place(
+                    cat=cat,
+                    layer=current_layer,
+                    position=cat.get(
+                        "position",
+                        {}
+                    ),
+                    source_id="ambient",
+                    recognized_identity=identity,
+                    components=ambient.get(
+                        "components",
+                        {}
+                    ),
+                    perceived_intensity=sum(
+                        float(value)
+                        for value
+                        in ambient.get(
+                            "components",
+                            {}
+                        ).values()
+                    ),
+                    universe_tick=universe_tick
+                )
+            )
+
+        return remembered
 
     @classmethod
     def choose_legend_to_share(

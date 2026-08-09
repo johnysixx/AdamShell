@@ -8,6 +8,7 @@ class CatMind:
         "visit_bar",
         "hunt_cronenberg",
         "track_cronenberg_scent",
+        "follow_known_scent",
         "avoid_cronenberg_scent",
         "explore_box",
         "create_exploration_pair",
@@ -258,6 +259,86 @@ class CatMind:
                             "patience",
                             "known_safe_bar"
                         ]
+                    )
+                )
+
+        scent_places = (
+            cat.get(
+                "knowledge",
+                {}
+            ).get(
+                "known_scent_places",
+                []
+            )
+        )
+
+        if scent_places:
+            strongest = max(
+                scent_places,
+                key=lambda item: (
+                    float(
+                        item.get(
+                            "confidence",
+                            0.0
+                        )
+                    )
+                    + min(
+                        1.0,
+                        float(
+                            item.get(
+                                "last_intensity",
+                                0.0
+                            )
+                        )
+                    )
+                )
+            )
+
+            identity = strongest.get(
+                "identity"
+            )
+
+            if (
+                identity
+                not in (
+                    None,
+                    "unknown_aroma",
+                    "cronenberg"
+                )
+            ):
+                candidates.append(
+                    cls._candidate(
+                        intention_type=(
+                            "follow_known_scent"
+                        ),
+                        score=(
+                            0.15
+                            + curiosity * 0.25
+                            + courage * 0.10
+                            + float(
+                                strongest.get(
+                                    "confidence",
+                                    0.0
+                                )
+                            ) * 0.25
+                        ),
+                        reasons=[
+                            "known_scent_place",
+                            "recognized_identity",
+                            "curiosity"
+                        ],
+                        target={
+                            "identity": identity,
+                            "layer": strongest.get(
+                                "layer"
+                            ),
+                            "position": strongest.get(
+                                "position"
+                            ),
+                            "source_id": strongest.get(
+                                "source_id"
+                            )
+                        }
                     )
                 )
 

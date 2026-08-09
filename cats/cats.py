@@ -17,6 +17,9 @@ from .cat_perception import (
 from universe.aroma_profile import (
     AromaProfile
 )
+from .cat_knowledge import (
+    CatKnowledge
+)
 
 class Cats:
 
@@ -202,6 +205,88 @@ class Cats:
 
         UniverseLogger.event(f"CAT CREATED: {name}")
         return cat
+
+    def learn_raspberry_rum_aroma(
+            self,
+            cat,
+            meeting_place
+    ):
+        raspberry_rum = getattr(
+            meeting_place,
+            "raspberry_rum",
+            None
+        )
+
+        if not isinstance(
+            raspberry_rum,
+            dict
+        ):
+            return None
+
+        return CatKnowledge.learn_aroma(
+            cat=cat,
+            identity="raspberry_rum",
+            components=raspberry_rum[
+                "aroma_profile"
+            ],
+            source=(
+                "direct_raspberry_rum_experience"
+            )
+        )
+
+    def learn_cat_aroma(
+            self,
+            observer,
+            observed_cat
+    ):
+        aroma = AromaProfile.current(
+            observed_cat["aroma"]
+        )
+
+        return CatKnowledge.learn_aroma(
+            cat=observer,
+            identity=observed_cat[
+                "aroma"
+            ][
+                "identity"
+            ],
+            components=aroma,
+            source=(
+                "direct_cat_contact"
+            )
+        )
+
+    def learn_cronenberg_aroma(
+            self,
+            cat,
+            cronenberg
+    ):
+        aroma = AromaProfile.current(
+            cronenberg.aroma
+        )
+
+        return CatKnowledge.learn_aroma(
+            cat=cat,
+            identity="cronenberg",
+            components=aroma,
+            source=(
+                "direct_cronenberg_encounter"
+            )
+        )
+
+    def learn_aroma(
+            self,
+            cat,
+            identity,
+            components,
+            source="direct_experience"
+    ):
+        return CatKnowledge.learn_aroma(
+            cat=cat,
+            identity=identity,
+            components=components,
+            source=source
+        )
 
     def add_surface_aroma(
             self,

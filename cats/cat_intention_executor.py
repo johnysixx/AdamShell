@@ -107,6 +107,12 @@ class CatIntentionExecutor:
                 intention=intention
             )
 
+        if intention_type == "follow_known_scent":
+            return self._execute_follow_known_scent(
+                cat=cat,
+                intention=intention
+            )
+
         if intention_type == "share_legend":
             return self._execute_share_legend(
                 cat=cat,
@@ -278,6 +284,133 @@ class CatIntentionExecutor:
         return self._record(
             event
         )
+
+    def _execute_follow_known_scent(
+        self,
+        cat,
+        intention
+    ):
+        target = intention.get(
+            "target",
+            {}
+        )
+
+        layer = target.get(
+            "layer"
+        )
+
+        position = target.get(
+            "position"
+        )
+
+        if (
+            layer is None
+            or not isinstance(
+                position,
+                dict
+            )
+        ):
+            return self._record({
+                "name": (
+                    "cat_known_scent_follow_failed"
+                ),
+                "cat": cat.get("name"),
+                "reason": (
+                    "invalid_scent_target"
+                ),
+                "executed": False
+            })
+
+        if (
+            layer
+            == cat.get(
+                "current_layer"
+            )
+        ):
+            quantum_space = getattr(
+                self.universe,
+                "quantum_space",
+                None
+            )
+
+            if quantum_space is None:
+                return self._record({
+                    "name": (
+                        "cat_known_scent_follow_failed"
+                    ),
+                    "cat": cat.get("name"),
+                    "reason": (
+                        "quantum_space_unavailable"
+                    ),
+                    "executed": False
+                })
+
+            planned = (
+                quantum_space
+                .plan_direct_cat_route(
+                    cat_id=cat.get(
+                        "name"
+                    ),
+                    start_position=dict(
+                        cat.get(
+                            "position",
+                            {}
+                        )
+                    ),
+                    destination_position=dict(
+                        position
+                    ),
+                    destination=(
+                        "known_scent:"
+                        f"{target.get('identity')}"
+                    )
+                )
+            )
+
+            route = planned["route"]
+            route.state = "ready"
+
+            cat["active_route_id"] = (
+                route.route_id
+            )
+
+            event = {
+                "name": (
+                    "cat_following_known_scent"
+                ),
+                "cat": cat.get("name"),
+                "identity": target.get(
+                    "identity"
+                ),
+                "layer": layer,
+                "destination": dict(
+                    position
+                ),
+                "route_id": route.route_id,
+                "decision_source": (
+                    "cat_mind"
+                ),
+                "executed": True
+            }
+
+            return self._record(
+                event
+            )
+
+        return self._record({
+            "name": (
+                "cat_known_scent_follow_failed"
+            ),
+            "cat": cat.get("name"),
+            "identity": target.get(
+                "identity"
+            ),
+            "reason": (
+                "cross_layer_scent_navigation_"
+                "not_available_yet"
+            ),
+            "executed": False
+        })
 
     def _execute_share_legend(
         self,

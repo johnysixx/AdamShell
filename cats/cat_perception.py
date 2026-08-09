@@ -10,6 +10,9 @@ from .cat_exploration_planner import (
 from .cat_olfaction import (
     CatOlfaction
 )
+from .cat_knowledge import (
+    CatKnowledge
+)
 
 
 class CatPerception:
@@ -213,6 +216,22 @@ class CatPerception:
             )
         )
 
+        scent_memories = (
+            CatKnowledge.remember_olfaction(
+                cat=cat,
+                olfaction=olfaction,
+                current_layer=cat.get(
+                    "current_layer",
+                    "unknown"
+                ),
+                universe_tick=getattr(
+                    self.universe,
+                    "universe_tick",
+                    None
+                )
+            )
+        )
+
         smelled_cronenbergs = [
             item
             for item in olfaction[
@@ -329,6 +348,9 @@ class CatPerception:
 
             "olfaction": deepcopy(
                 olfaction
+            ),
+            "scent_memories": deepcopy(
+                scent_memories
             ),
             "smelled_entities": [
                 item["entity_id"]
