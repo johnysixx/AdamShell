@@ -168,11 +168,29 @@ class CatQuantumExplorationMovementTests(
                 break
 
         self.assertTrue(
-            self.cat[
-                "quantum_exploration"
-            ][
-                "arrived"
-            ]
+            result["arrived"]
+        )
+
+        history = self.cat[
+            "quantum_exploration_history"
+        ]
+
+        self.assertGreaterEqual(
+            len(history),
+            1
+        )
+
+        self.assertTrue(
+            history[-1]["arrived"]
+        )
+
+        self.assertEqual(
+            history[-1]["destination"],
+            {
+                "x": 6.0,
+                "y": 0.0,
+                "z": 0.0
+            }
         )
 
         self.assertEqual(
@@ -182,14 +200,6 @@ class CatQuantumExplorationMovementTests(
                 "y": 0.0,
                 "z": 0.0
             }
-        )
-
-        self.assertTrue(
-            self.cat[
-                "quantum_exploration"
-            ][
-                "arrived"
-            ]
         )
 
         self.assertIsNotNone(

@@ -6,6 +6,9 @@ from cats.cat_exploration_planner import (
 from cats.cat_knowledge import (
     CatKnowledge
 )
+from universe.aroma_residue import (
+    AromaResidue
+)
 import math
 
 from universe.dark_sector import (
@@ -415,6 +418,37 @@ class CatQuantumBoxTransfer:
         pair["currently_in_use"] = False
         pair["current_user"] = None
 
+        source_box_residue = None
+        target_box_residue = None
+
+        cat_aroma = cat.get(
+            "aroma"
+        )
+
+        if isinstance(
+            cat_aroma,
+            dict
+        ):
+            source_box_residue = (
+                AromaResidue.transfer(
+                    source_profile=cat_aroma,
+                    target=source_box,
+                    source_identity=cat_name,
+                    fraction=0.18,
+                    decay_rate=0.035
+                )
+            )
+
+            target_box_residue = (
+                AromaResidue.transfer(
+                    source_profile=cat_aroma,
+                    target=target_box,
+                    source_identity=cat_name,
+                    fraction=0.12,
+                    decay_rate=0.035
+                )
+            )
+
         trail = self._create_trail(
             cat=cat,
             source_box=source_box,
@@ -489,6 +523,12 @@ class CatQuantumBoxTransfer:
                 "use_count"
             ],
             "trail": trail,
+            "source_box_aroma_residue": (
+                source_box_residue
+            ),
+            "target_box_aroma_residue": (
+                target_box_residue
+            ),
             "memory": remembered,
             "transferred": True
         }
@@ -1445,6 +1485,13 @@ class CatQuantumBoxTransfer:
             )
         )
 
+        verified_legends = (
+            CatKnowledge.verify_heard_legend(
+                cat=cat,
+                place=known_place
+            )
+        )
+
         legend = (
             CatKnowledge.publish_legend(
                 universe=self.universe,
@@ -1547,6 +1594,9 @@ class CatQuantumBoxTransfer:
             ),
             "memory": remembered,
             "known_place": known_place,
+            "verified_legends": (
+                verified_legends
+            ),
             "legend": legend,
             "decision": decision,
             "action": action,
