@@ -107,6 +107,14 @@ class CatIntentionExecutor:
                 intention=intention
             )
 
+        if intention_type == "follow_scent_through_box":
+            return (
+                self._execute_follow_scent_through_box(
+                    cat=cat,
+                    intention=intention
+                )
+            )
+
         if intention_type == "follow_known_scent":
             return self._execute_follow_known_scent(
                 cat=cat,
@@ -274,6 +282,121 @@ class CatIntentionExecutor:
             "mind",
             {}
         )
+
+        mind[
+            "active_body_execution"
+        ] = deepcopy(
+            event
+        )
+
+        return self._record(
+            event
+        )
+
+    def _execute_follow_scent_through_box(
+        self,
+        cat,
+        intention
+    ):
+        target = intention.get(
+            "target",
+            {}
+        )
+
+        source_box_id = target.get(
+            "box_id"
+        )
+
+        target_box_id = target.get(
+            "counterpart_box_id"
+        )
+
+        if (
+            source_box_id is None
+            or target_box_id is None
+        ):
+            return self._record({
+                "name": (
+                    "cat_scent_box_transfer_failed"
+                ),
+                "cat": cat.get("name"),
+                "reason": (
+                    "missing_box_pair"
+                ),
+                "executed": False
+            })
+
+        transfer_system = getattr(
+            self.universe,
+            "cat_box_transfer",
+            None
+        )
+
+        if transfer_system is None:
+            return self._record({
+                "name": (
+                    "cat_scent_box_transfer_failed"
+                ),
+                "cat": cat.get("name"),
+                "reason": (
+                    "cat_box_transfer_unavailable"
+                ),
+                "executed": False
+            })
+
+        result = transfer_system.transfer_cat(
+            cat=cat,
+            source_box_id=source_box_id,
+            target_box_id=target_box_id
+        )
+
+        mind = cat.setdefault(
+            "mind",
+            {}
+        )
+
+        mind[
+            "previous_intention"
+        ] = deepcopy(
+            intention
+        )
+
+        mind[
+            "current_intention"
+        ] = None
+
+        event = {
+            "name": (
+                "cat_followed_scent_through_box"
+                if result.get(
+                    "transferred",
+                    False
+                )
+                else "cat_scent_box_transfer_failed"
+            ),
+            "cat": cat.get("name"),
+            "identity": target.get(
+                "identity"
+            ),
+            "source_box_id": (
+                source_box_id
+            ),
+            "target_box_id": (
+                target_box_id
+            ),
+            "source_layer": target.get(
+                "source_layer"
+            ),
+            "target_layer": target.get(
+                "target_layer"
+            ),
+            "transfer": result,
+            "decision_source": "cat_mind",
+            "executed": result.get(
+                "transferred",
+                False
+            )
+        }
 
         mind[
             "active_body_execution"

@@ -258,6 +258,138 @@ class CatPerception:
             smelled_cronenbergs
         )
 
+        scent_transfer_candidates = []
+
+        smelled_by_id = {
+            item.get("entity_id"): item
+            for item
+            in olfaction.get(
+                "detected_aromas",
+                []
+            )
+        }
+
+        boxes_by_id = {
+            getattr(box, "id", None): box
+            for box
+            in getattr(
+                self.universe,
+                "quantum_boxes",
+                []
+            )
+        }
+
+        for visible_box in visible_boxes:
+            if isinstance(
+                visible_box,
+                dict
+            ):
+                box_id = (
+                    visible_box.get("id")
+                    or visible_box.get(
+                        "box_id"
+                    )
+                )
+            else:
+                box_id = visible_box
+
+            if box_id is None:
+                continue
+
+            box = boxes_by_id.get(
+                box_id
+            )
+
+            smelled = smelled_by_id.get(
+                box_id
+            )
+
+            if (
+                box is None
+                or smelled is None
+            ):
+                continue
+
+            recognition = smelled.get(
+                "recognition",
+                {}
+            )
+
+            if not recognition.get(
+                "recognized",
+                False
+            ):
+                continue
+
+            counterpart = getattr(
+                box,
+                "quantum_counterpart",
+                None
+            )
+
+            if not isinstance(
+                counterpart,
+                dict
+            ):
+                continue
+
+            if not counterpart.get(
+                "paired",
+                False
+            ):
+                continue
+
+            counterpart_id = counterpart.get(
+                "box_id"
+            )
+
+            counterpart_box = boxes_by_id.get(
+                counterpart_id
+            )
+
+            if counterpart_box is None:
+                continue
+
+            scent_transfer_candidates.append({
+                "box_id": box_id,
+                "counterpart_box_id": (
+                    counterpart_id
+                ),
+                "identity": recognition.get(
+                    "identity"
+                ),
+                "similarity": recognition.get(
+                    "similarity",
+                    0.0
+                ),
+                "source_layer": getattr(
+                    box,
+                    "current_layer",
+                    cat.get(
+                        "current_layer"
+                    )
+                ),
+                "target_layer": getattr(
+                    counterpart_box,
+                    "current_layer",
+                    None
+                ),
+                "box_position": deepcopy(
+                    getattr(
+                        box,
+                        "position",
+                        {}
+                    )
+                ),
+                "counterpart_position": deepcopy(
+                    getattr(
+                        counterpart_box,
+                        "position",
+                        {}
+                    )
+                )
+            })
+
         observations = {
             "cat": cat.get("name"),
             "position": deepcopy(
@@ -351,6 +483,9 @@ class CatPerception:
             ),
             "scent_memories": deepcopy(
                 scent_memories
+            ),
+            "scent_transfer_candidates": deepcopy(
+                scent_transfer_candidates
             ),
             "smelled_entities": [
                 item["entity_id"]
