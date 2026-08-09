@@ -2,6 +2,8 @@ import random
 
 from universe.logger import UniverseLogger
 from cats.cat_personality import CatPersonality
+from cats.cat_knowledge import CatKnowledge
+from universe.aroma_profile import AromaProfile
 
 
 class CatCronenbergEncounter:
@@ -46,6 +48,13 @@ class CatCronenbergEncounter:
 
         cat_name = self._cat_name(cat)
         cat_size = self._cat_size(cat)
+
+        learned_aroma = (
+            self._learn_cronenberg_aroma(
+                cat=cat,
+                cronenberg=cronenberg
+            )
+        )
 
         cronenberg_size = float(
             cronenberg.size
@@ -334,6 +343,45 @@ class CatCronenbergEncounter:
         )
 
         return event
+
+    def _learn_cronenberg_aroma(
+        self,
+        cat,
+        cronenberg
+    ):
+        if not isinstance(
+            cat,
+            dict
+        ):
+            return None
+
+        aroma = getattr(
+            cronenberg,
+            "aroma",
+            None
+        )
+
+        if not isinstance(
+            aroma,
+            dict
+        ):
+            return None
+
+        components = AromaProfile.current(
+            aroma
+        )
+
+        if not components:
+            return None
+
+        return CatKnowledge.learn_aroma(
+            cat=cat,
+            identity="cronenberg",
+            components=components,
+            source=(
+                "direct_cronenberg_encounter"
+            )
+        )
 
     def _apply_personality_experience(
         self,

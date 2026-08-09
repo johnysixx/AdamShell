@@ -7,6 +7,8 @@ class CatMind:
     INTENTION_TYPES = (
         "visit_bar",
         "hunt_cronenberg",
+        "track_cronenberg_scent",
+        "avoid_cronenberg_scent",
         "explore_box",
         "create_exploration_pair",
         "approach_cat",
@@ -198,6 +200,66 @@ class CatMind:
                     )
                 )
             )
+
+        if (
+            observations.get(
+                "cronenberg_scent_recognized",
+                False
+            )
+            and not observations.get(
+                "visible_cronenbergs",
+                []
+            )
+        ):
+            scent_track_score = (
+                0.15
+                + courage * 0.35
+                + aggression * 0.30
+                + curiosity * 0.20
+            )
+
+            scent_avoid_score = (
+                0.15
+                + (1.0 - courage) * 0.45
+                + patience * 0.25
+                + (1.0 - aggression) * 0.15
+            )
+
+            candidates.append(
+                cls._candidate(
+                    intention_type=(
+                        "track_cronenberg_scent"
+                    ),
+                    score=scent_track_score,
+                    reasons=[
+                        "recognized_cronenberg_scent",
+                        "cronenberg_not_visible",
+                        "courage",
+                        "aggression",
+                        "curiosity"
+                    ]
+                )
+            )
+
+            if observations.get(
+                "bar_known",
+                False
+            ):
+                candidates.append(
+                    cls._candidate(
+                        intention_type=(
+                            "avoid_cronenberg_scent"
+                        ),
+                        score=scent_avoid_score,
+                        reasons=[
+                            "recognized_cronenberg_scent",
+                            "cronenberg_not_visible",
+                            "low_courage",
+                            "patience",
+                            "known_safe_bar"
+                        ]
+                    )
+                )
 
         boxes = observations.get(
             "unexplored_boxes",

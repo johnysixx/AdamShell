@@ -7,6 +7,9 @@ from universe.dark_sector import (
 from .cat_exploration_planner import (
     CatExplorationPlanner
 )
+from .cat_olfaction import (
+    CatOlfaction
+)
 
 
 class CatPerception:
@@ -203,6 +206,39 @@ class CatPerception:
             active_cat_legends
         )
 
+        olfaction = (
+            CatOlfaction.sniff(
+                cat=cat,
+                universe=self.universe
+            )
+        )
+
+        smelled_cronenbergs = [
+            item
+            for item in olfaction[
+                "detected_aromas"
+            ]
+            if (
+                item.get(
+                    "recognition",
+                    {}
+                ).get(
+                    "recognized",
+                    False
+                )
+                and item.get(
+                    "recognition",
+                    {}
+                ).get(
+                    "identity"
+                ) == "cronenberg"
+            )
+        ]
+
+        cronenberg_scent_recognized = bool(
+            smelled_cronenbergs
+        )
+
         observations = {
             "cat": cat.get("name"),
             "position": deepcopy(
@@ -289,6 +325,28 @@ class CatPerception:
 
             "shareable_legend_count": (
                 shareable_legend_count
+            ),
+
+            "olfaction": deepcopy(
+                olfaction
+            ),
+            "smelled_entities": [
+                item["entity_id"]
+                for item
+                in olfaction[
+                    "detected_aromas"
+                ]
+            ],
+            "ozone_detected": (
+                olfaction[
+                    "ozone_detected"
+                ]
+            ),
+            "cronenberg_scent_recognized": (
+                cronenberg_scent_recognized
+            ),
+            "smelled_cronenbergs": deepcopy(
+                smelled_cronenbergs
             ),
 
             "observed": True

@@ -11,6 +11,12 @@ class CatIntentionExecutor:
         "visit_bar": "return_to_bar",
         "hunt_cronenberg": (
             "hunt_nearest_cronenberg"
+        ),
+        "track_cronenberg_scent": (
+            "hunt_nearest_cronenberg"
+        ),
+        "avoid_cronenberg_scent": (
+            "return_to_bar"
         )
     }
 
