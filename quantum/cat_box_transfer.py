@@ -418,6 +418,30 @@ class CatQuantumBoxTransfer:
         pair["currently_in_use"] = False
         pair["current_user"] = None
 
+        source_box_aroma_pickup = (
+            AromaResidue.transfer_existing(
+                source=source_box,
+                target=cat,
+                source_identity=(
+                    f"quantum_box:{source_box.id}"
+                ),
+                fraction=0.08,
+                decay_rate=0.03
+            )
+        )
+
+        target_box_aroma_pickup = (
+            AromaResidue.transfer_existing(
+                source=target_box,
+                target=cat,
+                source_identity=(
+                    f"quantum_box:{target_box.id}"
+                ),
+                fraction=0.06,
+                decay_rate=0.03
+            )
+        )
+
         source_box_residue = None
         target_box_residue = None
 
@@ -523,6 +547,12 @@ class CatQuantumBoxTransfer:
                 "use_count"
             ],
             "trail": trail,
+            "source_box_aroma_pickup": (
+                source_box_aroma_pickup
+            ),
+            "target_box_aroma_pickup": (
+                target_box_aroma_pickup
+            ),
             "source_box_aroma_residue": (
                 source_box_residue
             ),
@@ -891,6 +921,53 @@ class CatQuantumBoxTransfer:
                 )
             )
 
+        source_box_aroma_pickup = (
+            AromaResidue.transfer_existing(
+                source=source_box,
+                target=cat,
+                source_identity=(
+                    f"quantum_box:{source_box.id}"
+                ),
+                fraction=0.08,
+                decay_rate=0.03
+            )
+        )
+
+        target_box_aroma_pickup = (
+            AromaResidue.transfer_existing(
+                source=target_box,
+                target=cat,
+                source_identity=(
+                    f"quantum_box:{target_box.id}"
+                ),
+                fraction=0.06,
+                decay_rate=0.03
+            )
+        )
+
+        source_box_aroma_residue = None
+
+        cat_aroma = cat.get(
+            "aroma"
+        )
+
+        if isinstance(
+            cat_aroma,
+            dict
+        ):
+            source_box_aroma_residue = (
+                AromaResidue.transfer(
+                    source_profile=cat_aroma,
+                    target=source_box,
+                    source_identity=cat.get(
+                        "name",
+                        "unknown_cat"
+                    ),
+                    fraction=0.18,
+                    decay_rate=0.035
+                )
+            )
+
         target_box.consume_for_cat_transfer()
 
         # Energie cílové krabice se spotřebovala
@@ -990,6 +1067,15 @@ class CatQuantumBoxTransfer:
             "energy_conserved": True,
             "cat_state": cat["state"],
             "trail": trail,
+            "source_box_aroma_pickup": (
+                source_box_aroma_pickup
+            ),
+            "target_box_aroma_pickup": (
+                target_box_aroma_pickup
+            ),
+            "source_box_aroma_residue": (
+                source_box_aroma_residue
+            ),
             "memory": remembered,
             "transferred": True
         }

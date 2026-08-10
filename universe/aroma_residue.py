@@ -102,6 +102,57 @@ class AromaResidue:
         }
 
     @classmethod
+    def transfer_existing(
+        cls,
+        source,
+        target,
+        source_identity,
+        fraction=0.08,
+        decay_rate=0.03
+    ):
+        if isinstance(source, dict):
+            source_profile = source.get(
+                "aroma"
+            )
+        else:
+            source_profile = getattr(
+                source,
+                "aroma",
+                None
+            )
+
+        if not isinstance(
+            source_profile,
+            dict
+        ):
+            return {
+                "transferred": False,
+                "source": source_identity,
+                "components": {},
+                "reason": "source_has_no_aroma"
+            }
+
+        current = AromaProfile.current(
+            source_profile
+        )
+
+        if not current:
+            return {
+                "transferred": False,
+                "source": source_identity,
+                "components": {},
+                "reason": "source_aroma_is_empty"
+            }
+
+        return cls.transfer(
+            source_profile=source_profile,
+            target=target,
+            source_identity=source_identity,
+            fraction=fraction,
+            decay_rate=decay_rate
+        )
+
+    @classmethod
     def decay(
         cls,
         target,
