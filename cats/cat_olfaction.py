@@ -103,11 +103,28 @@ class CatOlfaction:
                 observation
             )
 
+        cat_layer = cat.get(
+            "current_layer"
+        )
+
         for quantum_box in getattr(
             universe,
             "quantum_boxes",
             []
         ):
+            box_layer = getattr(
+                quantum_box,
+                "current_layer",
+                None
+            )
+
+            if (
+                cat_layer is not None
+                and box_layer is not None
+                and box_layer != cat_layer
+            ):
+                continue
+
             observation = (
                 cls._sniff_entity(
                     cat=cat,

@@ -194,7 +194,7 @@ class Cats:
                 components={
                     "cat": 1.0,
                     "fur": 0.80,
-                    "individual_cat": 1.0
+                    f"individual_cat:{name}": 2.0
                 },
                 intensity=1.0
             )

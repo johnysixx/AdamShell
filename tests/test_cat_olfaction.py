@@ -351,5 +351,124 @@ class CatOlfactionTests(
         )
 
 
+    def test_known_cat_is_not_confused_with_other_cat(
+        self
+    ):
+        garfield = self.cats.create_cat(
+            name="garfield",
+            color="orange",
+            fur_length="short"
+        )
+
+        garfield["position"] = {
+            "x": 3.0,
+            "y": 0.0,
+            "z": 0.0
+        }
+
+        self.universe.entities.append(
+            garfield
+        )
+
+        self.cats.learn_cat_aroma(
+            observer=self.observer,
+            observed_cat=self.other
+        )
+
+        result = CatOlfaction.sniff(
+            self.observer,
+            self.universe
+        )
+
+        pazuzu = next(
+            item
+            for item
+            in result["detected_aromas"]
+            if item["actual_identity"]
+            == "cat:pazuzu"
+        )
+
+        garfield_smell = next(
+            item
+            for item
+            in result["detected_aromas"]
+            if item["actual_identity"]
+            == "cat:garfield"
+        )
+
+        self.assertTrue(
+            pazuzu[
+                "recognition"
+            ][
+                "recognized"
+            ]
+        )
+
+        self.assertEqual(
+            pazuzu[
+                "recognition"
+            ][
+                "identity"
+            ],
+            "cat:pazuzu"
+        )
+
+        self.assertFalse(
+            garfield_smell[
+                "recognition"
+            ][
+                "recognized"
+            ]
+        )
+
+    def test_surface_aroma_preserves_individual_cat_identity(
+        self
+    ):
+        self.cats.learn_cat_aroma(
+            observer=self.observer,
+            observed_cat=self.other
+        )
+
+        self.cats.add_surface_aroma(
+            cat=self.other,
+            source="raspberry_rum",
+            components={
+                "berry": 1.0,
+                "ethanol": 0.7
+            },
+            intensity=0.3
+        )
+
+        result = CatOlfaction.sniff(
+            self.observer,
+            self.universe
+        )
+
+        pazuzu = next(
+            item
+            for item
+            in result["detected_aromas"]
+            if item["actual_identity"]
+            == "cat:pazuzu"
+        )
+
+        self.assertTrue(
+            pazuzu[
+                "recognition"
+            ][
+                "recognized"
+            ]
+        )
+
+        self.assertEqual(
+            pazuzu[
+                "recognition"
+            ][
+                "identity"
+            ],
+            "cat:pazuzu"
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

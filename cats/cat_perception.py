@@ -692,11 +692,28 @@ class CatPerception:
     ):
         observed = []
 
+        cat_layer = cat.get(
+            "current_layer"
+        )
+
         for box in getattr(
             self.universe,
             "quantum_boxes",
             []
         ):
+            box_layer = getattr(
+                box,
+                "current_layer",
+                None
+            )
+
+            if (
+                cat_layer is not None
+                and box_layer is not None
+                and box_layer != cat_layer
+            ):
+                continue
+
             visible_to = getattr(
                 box,
                 "is_visible_to",
