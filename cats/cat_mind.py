@@ -1,4 +1,5 @@
 from cats.cat_intellect import CatIntellect
+from cats.cat_knowledge import CatKnowledge
 from copy import deepcopy
 
 
@@ -9,6 +10,7 @@ class CatMind:
         "hunt_cronenberg",
         "track_cronenberg_scent",
         "follow_known_scent",
+        "search_for_scent",
         "follow_scent_through_box",
         "avoid_cronenberg_scent",
         "explore_box",
@@ -340,6 +342,51 @@ class CatMind:
                 scored_place
             )
 
+        reached_scent = cat.get(
+            "known_scent_follow",
+            {}
+        )
+
+        currently_smelt_identities = {
+            item.get(
+                "recognition",
+                {}
+            ).get(
+                "identity"
+            )
+            for item
+            in observations.get(
+                "olfaction",
+                {}
+            ).get(
+                "detected_aromas",
+                []
+            )
+            if item.get(
+                "recognition",
+                {}
+            ).get(
+                "recognized",
+                False
+            )
+        }
+
+        if (
+            isinstance(
+                reached_scent,
+                dict
+            )
+            and reached_scent.get(
+                "arrived",
+                False
+            )
+            and reached_scent.get(
+                "identity"
+            )
+            not in currently_smelt_identities
+        ):
+            local_scent_places = []
+
         if local_scent_places:
             strongest = max(
                 local_scent_places,
@@ -382,6 +429,15 @@ class CatMind:
                     "cronenberg"
                 )
             ):
+                scent_direction = (
+                    CatKnowledge
+                    .infer_scent_direction(
+                        cat=cat,
+                        identity=identity,
+                        layer=current_layer
+                    )
+                )
+
                 candidates.append(
                     cls._candidate(
                         intention_type=(
@@ -421,6 +477,9 @@ class CatMind:
                             "freshness": strongest.get(
                                 "freshness",
                                 1.0
+                            ),
+                            "trail_direction": deepcopy(
+                                scent_direction
                             )
                         }
                     )
@@ -682,6 +741,195 @@ class CatMind:
                 ]
             )
         )
+
+        reached_scent = cat.get(
+            "known_scent_follow",
+            {}
+        )
+
+        if (
+            isinstance(
+                reached_scent,
+                dict
+            )
+            and reached_scent.get(
+                "arrived",
+                False
+            )
+        ):
+            identity = reached_scent.get(
+                "identity"
+            )
+
+            direction = reached_scent.get(
+                "trail_direction",
+                {}
+            )
+
+            target_smelt_now = any(
+                item.get(
+                    "recognition",
+                    {}
+                ).get(
+                    "recognized",
+                    False
+                )
+                and item.get(
+                    "recognition",
+                    {}
+                ).get(
+                    "identity"
+                )
+                == identity
+                for item
+                in observations.get(
+                    "olfaction",
+                    {}
+                ).get(
+                    "detected_aromas",
+                    []
+                )
+            )
+
+            if (
+                identity is not None
+                and not target_smelt_now
+                and isinstance(
+                    direction,
+                    dict
+                )
+                and direction.get(
+                    "inferred",
+                    False
+                )
+            ):
+                traits = (
+                    cat.get(
+                        "personality",
+                        {}
+                    ).get(
+                        "traits",
+                        {}
+                    )
+                )
+
+                curiosity = float(
+                    traits.get(
+                        "curiosity",
+                        0.5
+                    )
+                )
+
+                courage = float(
+                    traits.get(
+                        "courage",
+                        0.5
+                    )
+                )
+
+                previous_search = cat.get(
+                    "scent_search",
+                    {}
+                )
+
+                if (
+                    isinstance(
+                        previous_search,
+                        dict
+                    )
+                    and previous_search.get(
+                        "identity"
+                    ) == identity
+                    and previous_search.get(
+                        "layer"
+                    ) == cat.get(
+                        "current_layer"
+                    )
+                ):
+                    attempts = int(
+                        previous_search.get(
+                            "attempts",
+                            0
+                        )
+                    )
+                else:
+                    attempts = 0
+
+                max_attempts = max(
+                    1,
+                    min(
+                        3,
+                        1
+                        + int(
+                            round(
+                                curiosity * 2.0
+                            )
+                        )
+                    )
+                )
+
+                if attempts < max_attempts:
+                    direction_confidence = float(
+                        direction.get(
+                            "confidence",
+                            0.0
+                        )
+                    )
+
+                    search_distance = (
+                        1.0
+                        + curiosity
+                        + courage * 0.5
+                    )
+
+                    search_score = (
+                        0.38
+                        + curiosity * 0.18
+                        + courage * 0.08
+                        + direction_confidence * 0.20
+                        - attempts * 0.08
+                    )
+
+                    candidates.append(
+                        cls._candidate(
+                            intention_type=(
+                                "search_for_scent"
+                            ),
+                            score=search_score,
+                            reasons=[
+                                "last_known_scent_reached",
+                                "target_scent_not_detected",
+                                "trail_direction_inferred",
+                                "local_search"
+                            ],
+                            target={
+                                "identity": identity,
+                                "layer": cat.get(
+                                    "current_layer"
+                                ),
+                                "from_position": dict(
+                                    cat.get(
+                                        "position",
+                                        {}
+                                    )
+                                ),
+                                "trail_direction": (
+                                    deepcopy(
+                                        direction
+                                    )
+                                ),
+                                "attempt": (
+                                    attempts + 1
+                                ),
+                                "max_attempts": (
+                                    max_attempts
+                                ),
+                                "search_distance": (
+                                    search_distance
+                                )
+                            }
+                        )
+                    )
 
         candidates.sort(
             key=lambda item: item["score"],
