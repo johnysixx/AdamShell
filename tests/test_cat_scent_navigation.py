@@ -142,5 +142,114 @@ class CatScentNavigationTests(
         )
 
 
+    def test_known_scent_navigation_prefers_current_layer(
+        self
+    ):
+        from cats.cat_knowledge import (
+            CatKnowledge
+        )
+
+        # Velmi siln?, ale star? stopa
+        # v jin? vrstv?.
+        CatKnowledge.remember_scent_place(
+            cat=self.cat,
+            layer="meeting_place",
+            position={
+                "x": 99.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            source_id="old_pazuzu_trace",
+            recognized_identity=(
+                "cat:pazuzu"
+            ),
+            components={
+                "cat": 1.0,
+                "individual_cat:pazuzu": 2.0
+            },
+            perceived_intensity=1.0,
+            universe_tick=1
+        )
+
+        old_memory = next(
+            memory
+            for memory
+            in self.cat[
+                "knowledge"
+            ][
+                "known_scent_places"
+            ]
+            if memory[
+                "source_id"
+            ] == "old_pazuzu_trace"
+        )
+
+        old_memory[
+            "confidence"
+        ] = 1.0
+
+        # Lok?ln? stopa je slab??,
+        # ale je fyzicky v aktu?ln? vrstv?.
+        CatKnowledge.remember_scent_place(
+            cat=self.cat,
+            layer="quantum_layer",
+            position={
+                "x": 7.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            source_id="local_pazuzu_trace",
+            recognized_identity=(
+                "cat:pazuzu"
+            ),
+            components={
+                "cat": 0.4,
+                "individual_cat:pazuzu": 0.8
+            },
+            perceived_intensity=0.3,
+            universe_tick=2
+        )
+
+        candidates = CatMind.consider(
+            cat=self.cat,
+            observations=self.observations()
+        )
+
+        scent = next(
+            candidate
+            for candidate in candidates
+            if candidate[
+                "type"
+            ] == "follow_known_scent"
+        )
+
+        self.assertEqual(
+            scent[
+                "target"
+            ][
+                "layer"
+            ],
+            "quantum_layer"
+        )
+
+        self.assertNotEqual(
+            scent[
+                "target"
+            ][
+                "source_id"
+            ],
+            "old_pazuzu_trace"
+        )
+
+        self.assertEqual(
+            scent[
+                "target"
+            ][
+                "layer"
+            ],
+            "quantum_layer"
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

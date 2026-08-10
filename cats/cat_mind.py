@@ -273,9 +273,21 @@ class CatMind:
             )
         )
 
-        if scent_places:
+        current_layer = cat.get(
+            "current_layer"
+        )
+
+        local_scent_places = [
+            place
+            for place in scent_places
+            if place.get(
+                "layer"
+            ) == current_layer
+        ]
+
+        if local_scent_places:
             strongest = max(
-                scent_places,
+                local_scent_places,
                 key=lambda item: (
                     float(
                         item.get(
