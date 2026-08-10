@@ -28,6 +28,7 @@ from quantum.cat_box_transfer import (
     CatQuantumBoxTransfer
 )
 
+from universe.aroma_residue import AromaResidue
 
 class Universe:
 
@@ -1693,8 +1694,45 @@ class Universe:
         self.detect_cronenberg_pair_encounters()
 
 
+    def _tick_aroma_residues(self):
+        # Pach na quantum boxech.
+        for box in getattr(
+            self,
+            "quantum_boxes",
+            []
+        ):
+            AromaResidue.decay(
+                box,
+                ticks=1
+            )
+
+        # Povrchov? pachy na ko?k?ch.
+        cats_world = self.world.get(
+            "cats",
+            {}
+        )
+
+        if isinstance(
+            cats_world,
+            dict
+        ):
+            cats = cats_world.get(
+                "cats",
+                []
+            )
+        else:
+            cats = []
+
+        for cat in cats:
+            AromaResidue.decay(
+                cat,
+                ticks=1
+            )
+
     def tick_universe(self):
         self.universe_tick += 1
+
+        self._tick_aroma_residues()
 
         self.tick_spacetime()
         self.tick_quantum_unprotected()

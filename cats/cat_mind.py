@@ -277,31 +277,94 @@ class CatMind:
             "current_layer"
         )
 
-        local_scent_places = [
-            place
-            for place in scent_places
+        knowledge = cat.get(
+            "knowledge",
+            {}
+        )
+
+        current_tick = knowledge.get(
+            "scent_clock_tick"
+        )
+
+        local_scent_places = []
+
+        for place in scent_places:
             if place.get(
                 "layer"
-            ) == current_layer
-        ]
+            ) != current_layer:
+                continue
+
+            last_seen_tick = place.get(
+                "last_seen_tick"
+            )
+
+            if (
+                current_tick is None
+                or last_seen_tick is None
+            ):
+                age_ticks = 0
+            else:
+                age_ticks = max(
+                    0,
+                    int(current_tick)
+                    - int(last_seen_tick)
+                )
+
+            freshness = (
+                0.5
+                ** (
+                    age_ticks
+                    / 50.0
+                )
+            )
+
+            # Vzpom?nka z?st?v? ulo?en?,
+            # ale extr?mn? star? stopa u?
+            # nen? naviga?n?m podn?tem.
+            if freshness < 0.05:
+                continue
+
+            scored_place = deepcopy(
+                place
+            )
+
+            scored_place[
+                "age_ticks"
+            ] = age_ticks
+
+            scored_place[
+                "freshness"
+            ] = freshness
+
+            local_scent_places.append(
+                scored_place
+            )
 
         if local_scent_places:
             strongest = max(
                 local_scent_places,
                 key=lambda item: (
-                    float(
-                        item.get(
-                            "confidence",
-                            0.0
-                        )
-                    )
-                    + min(
-                        1.0,
+                    (
                         float(
                             item.get(
-                                "last_intensity",
+                                "confidence",
                                 0.0
                             )
+                        )
+                        + min(
+                            1.0,
+                            float(
+                                item.get(
+                                    "last_intensity",
+                                    0.0
+                                )
+                            )
+                        )
+                    )
+                    * float(
+                        item.get(
+                            "freshness",
+                            1.0
                         )
                     )
                 )
@@ -350,6 +413,14 @@ class CatMind:
                             ),
                             "source_id": strongest.get(
                                 "source_id"
+                            ),
+                            "age_ticks": strongest.get(
+                                "age_ticks",
+                                0
+                            ),
+                            "freshness": strongest.get(
+                                "freshness",
+                                1.0
                             )
                         }
                     )

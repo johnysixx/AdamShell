@@ -870,6 +870,17 @@ class CatKnowledge:
     ):
         remembered = []
 
+        knowledge = (
+            cls.ensure_cat_knowledge(
+                cat
+            )
+        )
+
+        if universe_tick is not None:
+            knowledge[
+                "scent_clock_tick"
+            ] = universe_tick
+
         for item in olfaction.get(
             "detected_aromas",
             []

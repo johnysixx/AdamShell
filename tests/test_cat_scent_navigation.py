@@ -251,5 +251,171 @@ class CatScentNavigationTests(
         )
 
 
+    def test_fresh_scent_beats_old_stronger_memory(
+        self
+    ):
+        from cats.cat_knowledge import (
+            CatKnowledge
+        )
+
+        self.cat[
+            "knowledge"
+        ][
+            "known_scent_places"
+        ] = []
+
+        CatKnowledge.remember_scent_place(
+            cat=self.cat,
+            layer="quantum_layer",
+            position={
+                "x": 2.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            source_id="old_strong_trace",
+            recognized_identity=(
+                "cat:pazuzu"
+            ),
+            components={},
+            perceived_intensity=1.0,
+            universe_tick=0
+        )
+
+        CatKnowledge.remember_scent_place(
+            cat=self.cat,
+            layer="quantum_layer",
+            position={
+                "x": 8.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            source_id="fresh_trace",
+            recognized_identity=(
+                "cat:pazuzu"
+            ),
+            components={},
+            perceived_intensity=0.4,
+            universe_tick=195
+        )
+
+        self.cat[
+            "knowledge"
+        ][
+            "scent_clock_tick"
+        ] = 200
+
+        candidates = CatMind.consider(
+            cat=self.cat,
+            observations=self.observations()
+        )
+
+        scent = next(
+            candidate
+            for candidate in candidates
+            if candidate[
+                "type"
+            ] == "follow_known_scent"
+        )
+
+        self.assertEqual(
+            scent[
+                "target"
+            ][
+                "source_id"
+            ],
+            "fresh_trace"
+        )
+
+        self.assertEqual(
+            scent[
+                "target"
+            ][
+                "age_ticks"
+            ],
+            5
+        )
+
+        self.assertGreater(
+            scent[
+                "target"
+            ][
+                "freshness"
+            ],
+            0.9
+        )
+
+    def test_ancient_scent_remains_memory_but_not_navigation_target(
+        self
+    ):
+        from cats.cat_knowledge import (
+            CatKnowledge
+        )
+
+        self.cat[
+            "knowledge"
+        ][
+            "known_scent_places"
+        ] = []
+
+        CatKnowledge.remember_scent_place(
+            cat=self.cat,
+            layer="quantum_layer",
+            position={
+                "x": 5.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            source_id="ancient_trace",
+            recognized_identity=(
+                "cat:pazuzu"
+            ),
+            components={},
+            perceived_intensity=1.0,
+            universe_tick=0
+        )
+
+        self.cat[
+            "knowledge"
+        ][
+            "scent_clock_tick"
+        ] = 300
+
+        candidates = CatMind.consider(
+            cat=self.cat,
+            observations=self.observations()
+        )
+
+        scent_candidates = [
+            candidate
+            for candidate in candidates
+            if candidate[
+                "type"
+            ] == "follow_known_scent"
+        ]
+
+        self.assertEqual(
+            scent_candidates,
+            []
+        )
+
+        memories = self.cat[
+            "knowledge"
+        ][
+            "known_scent_places"
+        ]
+
+        self.assertEqual(
+            len(memories),
+            1
+        )
+
+        self.assertEqual(
+            memories[0][
+                "source_id"
+            ],
+            "ancient_trace"
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

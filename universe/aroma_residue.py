@@ -158,9 +158,23 @@ class AromaResidue:
         target,
         ticks=1
     ):
-        profile = cls.ensure(
-            target
-        )
+        if isinstance(target, dict):
+            profile = target.get(
+                "aroma"
+            )
+        else:
+            profile = getattr(
+                target,
+                "aroma",
+                None
+            )
+
+        # Objekt bez pachu z?st?v? bez pachu.
+        if not isinstance(
+            profile,
+            dict
+        ):
+            return {}
 
         return AromaProfile.decay(
             profile,
