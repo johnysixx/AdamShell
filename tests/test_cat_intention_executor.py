@@ -183,8 +183,8 @@ class CatIntentionExecutorTests(
         self
     ):
         self.set_intention(
-            "explore_box",
-            target="unknown_box"
+            "observe",
+            target="unknown_target"
         )
 
         result = (
@@ -216,7 +216,7 @@ class CatIntentionExecutorTests(
             ][
                 "type"
             ],
-            "explore_box"
+            "observe"
         )
 
     def test_executor_does_not_make_new_decision(

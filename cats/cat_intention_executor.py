@@ -25,9 +25,6 @@ class CatIntentionExecutor:
     }
 
     DEFERRED_INTENTS = {
-        "explore_box": (
-            "box_exploration_body_system"
-        ),
         "approach_cat": (
             "cat_social_body_system"
         ),
@@ -119,6 +116,14 @@ class CatIntentionExecutor:
                     cronenbergs=cronenbergs,
                     step_size=step_size
                 )
+            )
+
+        if intention_type == "explore_box":
+            return self._execute_explore_box(
+                cat=cat,
+                intention=intention,
+                cronenbergs=cronenbergs,
+                step_size=step_size
             )
 
         if intention_type == "search_for_scent":
@@ -824,6 +829,491 @@ class CatIntentionExecutor:
                 "y",
                 "z"
             )
+        )
+
+    def _execute_explore_box(
+        self,
+        cat,
+        intention,
+        cronenbergs=None,
+        step_size=None
+    ):
+        target = intention.get(
+            "target"
+        )
+
+        if isinstance(
+            target,
+            dict
+        ):
+            box_id = (
+                target.get("id")
+                or target.get("box_id")
+            )
+        else:
+            box_id = target
+
+        if box_id is None:
+            return self._record({
+                "name": (
+                    "cat_box_exploration_failed"
+                ),
+                "cat": cat.get("name"),
+                "reason": "missing_box_id",
+                "executed": False
+            })
+
+        box = next(
+            (
+                candidate
+                for candidate
+                in getattr(
+                    self.universe,
+                    "quantum_boxes",
+                    []
+                )
+                if getattr(
+                    candidate,
+                    "id",
+                    None
+                ) == box_id
+            ),
+            None
+        )
+
+        if box is None:
+            return self._record({
+                "name": (
+                    "cat_box_exploration_failed"
+                ),
+                "cat": cat.get("name"),
+                "box_id": box_id,
+                "reason": "box_not_found",
+                "executed": False
+            })
+
+        if getattr(
+            box,
+            "current_layer",
+            None
+        ) != cat.get(
+            "current_layer"
+        ):
+            return self._record({
+                "name": (
+                    "cat_box_exploration_failed"
+                ),
+                "cat": cat.get("name"),
+                "box_id": box_id,
+                "reason": (
+                    "box_not_in_cat_layer"
+                ),
+                "executed": False
+            })
+
+        exploration = cat.get(
+            "box_exploration"
+        )
+
+        if (
+            isinstance(
+                exploration,
+                dict
+            )
+            and exploration.get(
+                "active",
+                False
+            )
+            and exploration.get(
+                "box_id"
+            ) == box_id
+        ):
+            return self._advance_box_exploration(
+                cat=cat,
+                intention=intention,
+                cronenbergs=cronenbergs
+            )
+
+        cat_position = cat.get(
+            "position",
+            {}
+        )
+
+        box_position = getattr(
+            box,
+            "position",
+            None
+        )
+
+        if not isinstance(
+            box_position,
+            dict
+        ):
+            return self._record({
+                "name": (
+                    "cat_box_exploration_failed"
+                ),
+                "cat": cat.get("name"),
+                "box_id": box_id,
+                "reason": (
+                    "box_position_missing"
+                ),
+                "executed": False
+            })
+
+        if self._same_position(
+            cat_position,
+            box_position
+        ):
+            return self._finish_box_exploration(
+                cat=cat,
+                intention=intention,
+                box=box
+            )
+
+        quantum_space = getattr(
+            self.universe,
+            "quantum_space",
+            None
+        )
+
+        if quantum_space is None:
+            return self._record({
+                "name": (
+                    "cat_box_exploration_failed"
+                ),
+                "cat": cat.get("name"),
+                "box_id": box_id,
+                "reason": (
+                    "quantum_space_unavailable"
+                ),
+                "executed": False
+            })
+
+        planned = (
+            quantum_space
+            .plan_direct_cat_route(
+                cat_id=cat.get(
+                    "name"
+                ),
+                start_position=dict(
+                    cat_position
+                ),
+                destination_position=dict(
+                    box_position
+                ),
+                destination=(
+                    f"explore_box:{box_id}"
+                ),
+                step_size=step_size
+            )
+        )
+
+        route = planned["route"]
+        route.state = "ready"
+
+        cat["active_route_id"] = (
+            route.route_id
+        )
+
+        cat["box_exploration"] = {
+            "active": True,
+            "arrived": False,
+            "box_id": box_id,
+            "route_id": route.route_id,
+            "destination": dict(
+                box_position
+            )
+        }
+
+        event = {
+            "name": (
+                "cat_approaching_box_to_explore"
+            ),
+            "cat": cat.get("name"),
+            "box_id": box_id,
+            "route_id": route.route_id,
+            "destination": dict(
+                box_position
+            ),
+            "arrived": False,
+            "decision_source": (
+                "cat_mind"
+            ),
+            "executed": True
+        }
+
+        cat.setdefault(
+            "mind",
+            {}
+        )[
+            "active_body_execution"
+        ] = deepcopy(
+            event
+        )
+
+        return self._record(
+            event
+        )
+
+    def _advance_box_exploration(
+        self,
+        cat,
+        intention,
+        cronenbergs=None
+    ):
+        exploration = cat[
+            "box_exploration"
+        ]
+
+        result = (
+            self.universe
+            .quantum_space
+            .advance_cat_route(
+                cat=cat,
+                cronenbergs=(
+                    cronenbergs
+                    if cronenbergs is not None
+                    else getattr(
+                        self.universe,
+                        "cronenbergs",
+                        []
+                    )
+                ),
+                encounter_system=(
+                    self.universe
+                    .cat_cronenberg_encounter
+                ),
+                universe=self.universe
+            )
+        )
+
+        position = result.get(
+            "position"
+        )
+
+        if position is not None:
+            cat["position"] = dict(
+                position
+            )
+
+        if result.get(
+            "arrived",
+            False
+        ):
+            box = next(
+                (
+                    candidate
+                    for candidate
+                    in getattr(
+                        self.universe,
+                        "quantum_boxes",
+                        []
+                    )
+                    if getattr(
+                        candidate,
+                        "id",
+                        None
+                    ) == exploration.get(
+                        "box_id"
+                    )
+                ),
+                None
+            )
+
+            if box is None:
+                return self._record({
+                    "name": (
+                        "cat_box_exploration_failed"
+                    ),
+                    "cat": cat.get("name"),
+                    "reason": (
+                        "box_disappeared"
+                    ),
+                    "executed": False
+                })
+
+            return self._finish_box_exploration(
+                cat=cat,
+                intention=intention,
+                box=box
+            )
+
+        event = {
+            "name": (
+                "cat_approaching_box_to_explore"
+            ),
+            "cat": cat.get("name"),
+            "box_id": exploration.get(
+                "box_id"
+            ),
+            "route_id": exploration.get(
+                "route_id"
+            ),
+            "position": (
+                dict(position)
+                if position is not None
+                else None
+            ),
+            "destination": dict(
+                exploration[
+                    "destination"
+                ]
+            ),
+            "arrived": False,
+            "decision_source": (
+                "cat_mind"
+            ),
+            "executed": (
+                result.get(
+                    "result"
+                )
+                != "no_active_route"
+            )
+        }
+
+        cat.setdefault(
+            "mind",
+            {}
+        )[
+            "active_body_execution"
+        ] = deepcopy(
+            event
+        )
+
+        return self._record(
+            event
+        )
+
+    def _finish_box_exploration(
+        self,
+        cat,
+        intention,
+        box
+    ):
+        box_id = getattr(
+            box,
+            "id",
+            None
+        )
+
+        observation = (
+            box.cat_observation_state(
+                cat
+            )
+            if callable(
+                getattr(
+                    box,
+                    "cat_observation_state",
+                    None
+                )
+            )
+            else {}
+        )
+
+        memory = cat.get(
+            "memory"
+        )
+
+        remembered = None
+
+        if memory is not None:
+            remembered = memory.remember(
+                event_type=(
+                    "quantum_box_observed"
+                ),
+                universe_tick=getattr(
+                    self.universe,
+                    "universe_tick",
+                    None
+                ),
+                location=cat.get(
+                    "current_layer"
+                ),
+                participants=[
+                    box_id
+                ],
+                details={
+                    "box_id": box_id,
+                    "position": deepcopy(
+                        getattr(
+                            box,
+                            "position",
+                            {}
+                        )
+                    ),
+                    "observation": deepcopy(
+                        observation
+                    )
+                }
+            )
+
+        exploration = cat.setdefault(
+            "box_exploration",
+            {}
+        )
+
+        exploration.update({
+            "active": False,
+            "arrived": True,
+            "box_id": box_id,
+            "observed": True
+        })
+
+        cat.pop(
+            "active_route_id",
+            None
+        )
+
+        mind = cat.setdefault(
+            "mind",
+            {}
+        )
+
+        mind[
+            "previous_intention"
+        ] = deepcopy(
+            intention
+        )
+
+        mind[
+            "current_intention"
+        ] = None
+
+        event = {
+            "name": (
+                "cat_explored_quantum_box"
+            ),
+            "cat": cat.get("name"),
+            "box_id": box_id,
+            "position": deepcopy(
+                getattr(
+                    box,
+                    "position",
+                    {}
+                )
+            ),
+            "observation": deepcopy(
+                observation
+            ),
+            "memory": deepcopy(
+                remembered
+            ),
+            "arrived": True,
+            "decision_source": (
+                "cat_mind"
+            ),
+            "executed": True
+        }
+
+        mind[
+            "active_body_execution"
+        ] = deepcopy(
+            event
+        )
+
+        return self._record(
+            event
         )
 
     def _execute_search_for_scent(
