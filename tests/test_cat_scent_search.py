@@ -193,5 +193,152 @@ class CatScentSearchTests(
         )
 
 
+    def test_search_stops_when_target_scent_is_reacquired(
+        self
+    ):
+        pazuzu = self.cats.create_cat(
+            name="pazuzu",
+            color="black",
+            fur_length="short"
+        )
+
+        pazuzu[
+            "current_layer"
+        ] = "quantum_layer"
+
+        pazuzu["position"] = {
+            "x": 17.5,
+            "y": 0.0,
+            "z": 0.0
+        }
+
+        self.universe.entities.append(
+            self.cat
+        )
+
+        self.universe.entities.append(
+            pazuzu
+        )
+
+        self.cats.learn_cat_aroma(
+            observer=self.cat,
+            observed_cat=pazuzu
+        )
+
+        candidates = CatMind.consider(
+            cat=self.cat,
+            observations=self.observations()
+        )
+
+        intention = next(
+            candidate
+            for candidate in candidates
+            if candidate[
+                "type"
+            ] == "search_for_scent"
+        )
+
+        self.cat[
+            "mind"
+        ][
+            "current_intention"
+        ] = intention
+
+        started = (
+            self.cats
+            .execute_cat_intention(
+                self.cat
+            )
+        )
+
+        self.assertEqual(
+            started["name"],
+            "cat_searching_for_scent"
+        )
+
+        reacquired = (
+            self.cats
+            .execute_cat_intention(
+                self.cat
+            )
+        )
+
+        self.assertEqual(
+            reacquired["name"],
+            (
+                "cat_reacquired_scent_"
+                "during_search"
+            )
+        )
+
+        self.assertEqual(
+            reacquired["identity"],
+            "cat:pazuzu"
+        )
+
+        self.assertTrue(
+            reacquired[
+                "search_interrupted"
+            ]
+        )
+
+        self.assertFalse(
+            self.cat[
+                "scent_search"
+            ][
+                "active"
+            ]
+        )
+
+        self.assertTrue(
+            self.cat[
+                "scent_search"
+            ][
+                "reacquired"
+            ]
+        )
+
+        self.assertIsNone(
+            self.cat[
+                "mind"
+            ][
+                "current_intention"
+            ]
+        )
+
+        self.assertNotIn(
+            "active_route_id",
+            self.cat
+        )
+
+        route = (
+            self.universe
+            .quantum_space
+            .find_cat_route(
+                self.cat["name"]
+            )
+        )
+
+        self.assertIsNone(
+            route
+        )
+
+        memories = self.cat[
+            "knowledge"
+        ][
+            "known_scent_places"
+        ]
+
+        self.assertTrue(
+            any(
+                memory.get(
+                    "identity"
+                ) == "cat:pazuzu"
+                for memory
+                in memories
+            )
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

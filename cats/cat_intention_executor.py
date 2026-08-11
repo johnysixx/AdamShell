@@ -3,9 +3,13 @@ from copy import deepcopy
 from cats.cat_knowledge import (
     CatKnowledge
 )
+from cats.cat_olfaction import (
+    CatOlfaction
+)
 
 
 class CatIntentionExecutor:
+
 
     NAVIGATION_INTENTS = {
         "visit_bar": "return_to_bar",
@@ -1052,6 +1056,135 @@ class CatIntentionExecutor:
         if position is not None:
             cat["position"] = dict(
                 position
+            )
+
+        olfaction = CatOlfaction.sniff(
+            cat=cat,
+            universe=self.universe
+        )
+
+        reacquired = next(
+            (
+                item
+                for item
+                in olfaction.get(
+                    "detected_aromas",
+                    []
+                )
+                if item.get(
+                    "recognition",
+                    {}
+                ).get(
+                    "recognized",
+                    False
+                )
+                and item.get(
+                    "recognition",
+                    {}
+                ).get(
+                    "identity"
+                ) == search.get(
+                    "identity"
+                )
+            ),
+            None
+        )
+
+        if reacquired is not None:
+            CatKnowledge.remember_olfaction(
+                cat=cat,
+                olfaction=olfaction,
+                current_layer=cat.get(
+                    "current_layer",
+                    "unknown"
+                ),
+                universe_tick=getattr(
+                    self.universe,
+                    "universe_tick",
+                    None
+                )
+            )
+
+            route = (
+                self.universe
+                .quantum_space
+                .find_cat_route(
+                    cat.get("name")
+                )
+            )
+
+            if route is not None:
+                route.stop_observation()
+
+            search["active"] = False
+            search["arrived"] = False
+            search["reacquired"] = True
+            search["reacquired_at"] = dict(
+                cat.get(
+                    "position",
+                    {}
+                )
+            )
+            search[
+                "reacquired_source_id"
+            ] = reacquired.get(
+                "entity_id"
+            )
+
+            cat.pop(
+                "active_route_id",
+                None
+            )
+
+            mind = cat.setdefault(
+                "mind",
+                {}
+            )
+
+            mind[
+                "previous_intention"
+            ] = deepcopy(
+                intention
+            )
+
+            mind[
+                "current_intention"
+            ] = None
+
+            event = {
+                "name": (
+                    "cat_reacquired_scent_"
+                    "during_search"
+                ),
+                "cat": cat.get("name"),
+                "identity": search.get(
+                    "identity"
+                ),
+                "source_id": reacquired.get(
+                    "entity_id"
+                ),
+                "position": dict(
+                    cat.get(
+                        "position",
+                        {}
+                    )
+                ),
+                "olfaction": deepcopy(
+                    olfaction
+                ),
+                "search_interrupted": True,
+                "decision_source": "cat_mind",
+                "executed": True
+            }
+
+            mind[
+                "active_body_execution"
+            ] = deepcopy(
+                event
+            )
+
+            return self._record(
+                event
             )
 
         if result.get(
