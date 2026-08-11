@@ -390,5 +390,77 @@ class CatScentSearchTests(
         )
 
 
+    def test_exhausted_search_returns_cat_to_normal_decision_candidates(
+        self
+    ):
+        self.cat[
+            "scent_search"
+        ] = {
+            "active": False,
+            "identity": "cat:pazuzu",
+            "layer": "quantum_layer",
+            "attempts": 3,
+            "max_attempts": 3,
+            "arrived": True
+        }
+
+        self.cat[
+            "mind"
+        ][
+            "current_intention"
+        ] = None
+
+        candidates = CatMind.consider(
+            cat=self.cat,
+            observations=self.observations()
+        )
+
+        self.assertTrue(
+            candidates
+        )
+
+        types = {
+            candidate["type"]
+            for candidate in candidates
+        }
+
+        self.assertNotIn(
+            "search_for_scent",
+            types
+        )
+
+        self.assertIn(
+            "rest",
+            types
+        )
+
+        decision = CatMind.decide(
+            cat=self.cat,
+            observations=self.observations(),
+            quantum_roll=None
+        )
+
+        self.assertTrue(
+            decision[
+                "selected"
+            ]
+        )
+
+        self.assertNotEqual(
+            decision[
+                "intention"
+            ],
+            "search_for_scent"
+        )
+
+        self.assertIsNotNone(
+            self.cat[
+                "mind"
+            ][
+                "current_intention"
+            ]
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
