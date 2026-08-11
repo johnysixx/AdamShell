@@ -340,5 +340,55 @@ class CatScentSearchTests(
         )
 
 
+    def test_search_stops_after_max_attempts(
+        self
+    ):
+        self.cat[
+            "scent_search"
+        ] = {
+            "active": False,
+            "identity": "cat:pazuzu",
+            "layer": "quantum_layer",
+            "attempts": 3,
+            "max_attempts": 3,
+            "arrived": True
+        }
+
+        candidates = CatMind.consider(
+            cat=self.cat,
+            observations=self.observations()
+        )
+
+        search = [
+            candidate
+            for candidate in candidates
+            if candidate[
+                "type"
+            ] == "search_for_scent"
+        ]
+
+        self.assertEqual(
+            search,
+            []
+        )
+
+        self.assertTrue(
+            self.cat[
+                "known_scent_follow"
+            ][
+                "arrived"
+            ]
+        )
+
+        self.assertEqual(
+            self.cat[
+                "scent_search"
+            ][
+                "attempts"
+            ],
+            3
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
