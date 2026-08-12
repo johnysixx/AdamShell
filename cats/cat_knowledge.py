@@ -38,6 +38,16 @@ class CatKnowledge:
             []
         )
 
+        principles = knowledge.setdefault(
+            "known_principles",
+            {}
+        )
+
+        principles.setdefault(
+            "quantum_boxes_are_paired",
+            True
+        )
+
         return knowledge
 
     @classmethod
@@ -985,6 +995,233 @@ class CatKnowledge:
             )
 
         return remembered
+
+    @classmethod
+    def infer_scent_direction(
+        cls,
+        cat,
+        identity,
+        layer
+    ):
+        knowledge = cls.ensure_cat_knowledge(
+            cat
+        )
+
+        memories = [
+            memory
+            for memory
+            in knowledge.get(
+                "known_scent_places",
+                []
+            )
+            if (
+                memory.get("identity")
+                == identity
+                and memory.get("layer")
+                == layer
+                and isinstance(
+                    memory.get(
+                        "position"
+                    ),
+                    dict
+                )
+                and memory.get(
+                    "last_seen_tick"
+                ) is not None
+            )
+        ]
+
+        if len(memories) < 2:
+            return {
+                "inferred": False,
+                "reason": (
+                    "not_enough_scent_points"
+                )
+            }
+
+        memories.sort(
+            key=lambda memory: int(
+                memory[
+                    "last_seen_tick"
+                ]
+            )
+        )
+
+        newest = memories[-1]
+
+        older = next(
+            (
+                memory
+                for memory
+                in reversed(
+                    memories[:-1]
+                )
+                if memory.get(
+                    "position"
+                ) != newest.get(
+                    "position"
+                )
+            ),
+            None
+        )
+
+        if older is None:
+            return {
+                "inferred": False,
+                "reason": (
+                    "no_distinct_scent_positions"
+                )
+            }
+
+        start = older[
+            "position"
+        ]
+
+        end = newest[
+            "position"
+        ]
+
+        vector = {
+            axis: (
+                float(
+                    end.get(
+                        axis,
+                        0.0
+                    )
+                )
+                - float(
+                    start.get(
+                        axis,
+                        0.0
+                    )
+                )
+            )
+            for axis in (
+                "x",
+                "y",
+                "z"
+            )
+        }
+
+        distance = (
+            (
+                vector["x"] ** 2
+                + vector["y"] ** 2
+                + vector["z"] ** 2
+            )
+            ** 0.5
+        )
+
+        if distance <= 0.0:
+            return {
+                "inferred": False,
+                "reason": (
+                    "zero_length_scent_direction"
+                )
+            }
+
+        tick_delta = (
+            int(
+                newest[
+                    "last_seen_tick"
+                ]
+            )
+            - int(
+                older[
+                    "last_seen_tick"
+                ]
+            )
+        )
+
+        if tick_delta <= 0:
+            return {
+                "inferred": False,
+                "reason": (
+                    "scent_order_not_temporal"
+                )
+            }
+
+        unit_vector = {
+            axis: (
+                vector[axis]
+                / distance
+            )
+            for axis in (
+                "x",
+                "y",
+                "z"
+            )
+        }
+
+        current_tick = knowledge.get(
+            "scent_clock_tick"
+        )
+
+        if current_tick is None:
+            newest_age = 0
+        else:
+            newest_age = max(
+                0,
+                int(current_tick)
+                - int(
+                    newest[
+                        "last_seen_tick"
+                    ]
+                )
+            )
+
+        freshness = (
+            0.5
+            ** (
+                newest_age
+                / 50.0
+            )
+        )
+
+        confidence = min(
+            1.0,
+            (
+                float(
+                    older.get(
+                        "confidence",
+                        0.0
+                    )
+                )
+                + float(
+                    newest.get(
+                        "confidence",
+                        0.0
+                    )
+                )
+            )
+            / 2.0
+            * freshness
+        )
+
+        return {
+            "inferred": True,
+            "identity": identity,
+            "layer": layer,
+            "from_position": deepcopy(
+                start
+            ),
+            "to_position": deepcopy(
+                end
+            ),
+            "vector": vector,
+            "unit_vector": unit_vector,
+            "distance": distance,
+            "tick_delta": tick_delta,
+            "newest_age_ticks": newest_age,
+            "freshness": freshness,
+            "confidence": confidence,
+            "from_source_id": older.get(
+                "source_id"
+            ),
+            "to_source_id": newest.get(
+                "source_id"
+            )
+        }
 
     @classmethod
     def choose_legend_to_share(

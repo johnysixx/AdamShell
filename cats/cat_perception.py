@@ -795,6 +795,30 @@ class CatPerception:
             }
 
             if explored:
+                knowledge = (
+                    CatKnowledge
+                    .ensure_cat_knowledge(
+                        cat
+                    )
+                )
+
+                pairing_principle_known = bool(
+                    knowledge.get(
+                        "known_principles",
+                        {}
+                    ).get(
+                        "quantum_boxes_are_paired",
+                        False
+                    )
+                )
+
+                recognized_as_quantum_box = (
+                    occupancy.get(
+                        "recognized_as_quantum_box",
+                        True
+                    )
+                )
+
                 detail.update({
                     "state": getattr(
                         box,
@@ -812,11 +836,13 @@ class CatPerception:
                         )
                     ),
                     "recognized_as_quantum_box": (
-                        occupancy.get(
-                            "recognized_as_quantum_box",
-                            True
-                        )
-                    )
+                        recognized_as_quantum_box
+                    ),
+                    "paired": bool(
+                        recognized_as_quantum_box
+                        and pairing_principle_known
+                    ),
+                    "counterpart_known": False
                 })
 
             observed.append(
