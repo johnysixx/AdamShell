@@ -764,23 +764,14 @@ class CatPerception:
                 }
             )
 
-            observed.append({
+            explored = self._box_was_explored(
+                cat=cat,
+                box_id=box.id
+            )
+
+            detail = {
                 "id": box.id,
-                "state": getattr(
-                    box,
-                    "state",
-                    None
-                ),
-                "collapsed": bool(
-                    getattr(
-                        box,
-                        "collapse",
-                        {}
-                    ).get(
-                        "collapsed",
-                        False
-                    )
-                ),
+                "explored": explored,
                 "occupied": occupancy.get(
                     "occupied",
                     False
@@ -801,7 +792,36 @@ class CatPerception:
                 "position": deepcopy(
                     box_position
                 )
-            })
+            }
+
+            if explored:
+                detail.update({
+                    "state": getattr(
+                        box,
+                        "state",
+                        None
+                    ),
+                    "collapsed": bool(
+                        getattr(
+                            box,
+                            "collapse",
+                            {}
+                        ).get(
+                            "collapsed",
+                            False
+                        )
+                    ),
+                    "recognized_as_quantum_box": (
+                        occupancy.get(
+                            "recognized_as_quantum_box",
+                            True
+                        )
+                    )
+                })
+
+            observed.append(
+                detail
+            )
 
         observed.sort(
             key=lambda item: item[
