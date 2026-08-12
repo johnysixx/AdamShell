@@ -14,6 +14,7 @@ class CatMind:
         "follow_scent_through_box",
         "avoid_cronenberg_scent",
         "explore_box",
+        "sense_quantum_counterpart",
         "create_exploration_pair",
         "approach_cat",
         "share_legend",
@@ -558,6 +559,82 @@ class CatMind:
                                 "target_layer"
                             )
                         )
+                    }
+                )
+            )
+
+        intellect = (
+            CatIntellect
+            .ensure_state(
+                cat
+            )
+        )
+
+        intellect_normalized = float(
+            intellect.get(
+                "normalized",
+                0.5
+            )
+        )
+
+        for box_detail in observations.get(
+            "visible_box_details",
+            []
+        ):
+            if not box_detail.get(
+                "explored",
+                False
+            ):
+                continue
+
+            if not box_detail.get(
+                "recognized_as_quantum_box",
+                False
+            ):
+                continue
+
+            if not box_detail.get(
+                "paired",
+                False
+            ):
+                continue
+
+            if box_detail.get(
+                "counterpart_known",
+                False
+            ):
+                continue
+
+            if float(
+                box_detail.get(
+                    "distance",
+                    999999.0
+                )
+            ) > 1e-9:
+                continue
+
+            resonance_score = (
+                0.30
+                + curiosity * 0.35
+                + intellect_normalized * 0.30
+            )
+
+            candidates.append(
+                cls._candidate(
+                    intention_type=(
+                        "sense_quantum_counterpart"
+                    ),
+                    score=resonance_score,
+                    reasons=[
+                        "quantum_box_explored",
+                        "quantum_pair_resonance_possible",
+                        "curiosity",
+                        "intellect"
+                    ],
+                    target={
+                        "box_id": box_detail[
+                            "id"
+                        ]
                     }
                 )
             )

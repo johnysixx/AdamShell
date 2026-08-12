@@ -99,7 +99,7 @@ class CatThoughtCycleTests(
             result[
                 "execution"
             ][
-                "deferred"
+                "executed"
             ]
         )
 
@@ -107,11 +107,18 @@ class CatThoughtCycleTests(
             result[
                 "execution"
             ][
-                "required_system"
+                "name"
             ],
-            (
-                "box_exploration_body_system"
-            )
+            "cat_approaching_box_to_explore"
+        )
+
+        self.assertEqual(
+            result[
+                "execution"
+            ][
+                "box_id"
+            ],
+            box.id
         )
 
     def test_missing_position_stops_cycle(

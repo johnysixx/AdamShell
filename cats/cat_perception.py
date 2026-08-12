@@ -390,6 +390,107 @@ class CatPerception:
                 )
             })
 
+        counterpart_observation = deepcopy(
+            cat.get(
+                "current_quantum_counterpart_observation"
+            )
+        )
+
+        if isinstance(
+            counterpart_observation,
+            dict
+        ):
+            source_id = (
+                counterpart_observation.get(
+                    "source_box_id"
+                )
+            )
+
+            counterpart_id = (
+                counterpart_observation.get(
+                    "counterpart_box_id"
+                )
+            )
+
+            source_box = next(
+                (
+                    box
+                    for box
+                    in getattr(
+                        self.universe,
+                        "quantum_boxes",
+                        []
+                    )
+                    if getattr(
+                        box,
+                        "id",
+                        None
+                    ) == source_id
+                ),
+                None
+            )
+
+            counterpart_box = next(
+                (
+                    box
+                    for box
+                    in getattr(
+                        self.universe,
+                        "quantum_boxes",
+                        []
+                    )
+                    if getattr(
+                        box,
+                        "id",
+                        None
+                    ) == counterpart_id
+                ),
+                None
+            )
+
+            valid = (
+                source_box is not None
+                and counterpart_box is not None
+                and getattr(
+                    source_box,
+                    "quantum_counterpart",
+                    {}
+                ).get(
+                    "paired",
+                    False
+                )
+                and getattr(
+                    source_box,
+                    "quantum_counterpart",
+                    {}
+                ).get(
+                    "box_id"
+                ) == counterpart_id
+                and getattr(
+                    counterpart_box,
+                    "quantum_counterpart",
+                    {}
+                ).get(
+                    "paired",
+                    False
+                )
+                and getattr(
+                    counterpart_box,
+                    "quantum_counterpart",
+                    {}
+                ).get(
+                    "box_id"
+                ) == source_id
+            )
+
+            if not valid:
+                cat.pop(
+                    "current_quantum_counterpart_observation",
+                    None
+                )
+
+                counterpart_observation = None
+
         observations = {
             "cat": cat.get("name"),
             "position": deepcopy(
@@ -452,6 +553,12 @@ class CatPerception:
 
             "interesting_unknown": bool(
                 unexplored_boxes
+            ),
+
+            "quantum_counterpart_observation": (
+                deepcopy(
+                    counterpart_observation
+                )
             ),
 
             "current_layer": current_layer,

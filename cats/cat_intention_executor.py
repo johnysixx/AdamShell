@@ -118,6 +118,12 @@ class CatIntentionExecutor:
                 )
             )
 
+        if intention_type == "sense_quantum_counterpart":
+            return self._execute_sense_quantum_counterpart(
+                cat=cat,
+                intention=intention
+            )
+
         if intention_type == "explore_box":
             return self._execute_explore_box(
                 cat=cat,
@@ -831,6 +837,284 @@ class CatIntentionExecutor:
             )
         )
 
+    def _execute_sense_quantum_counterpart(
+        self,
+        cat,
+        intention
+    ):
+        target = intention.get(
+            "target",
+            {}
+        )
+
+        if isinstance(
+            target,
+            dict
+        ):
+            source_box_id = target.get(
+                "box_id"
+            )
+        else:
+            source_box_id = target
+
+        if source_box_id is None:
+            return self._record({
+                "name": (
+                    "cat_quantum_counterpart_"
+                    "sensing_failed"
+                ),
+                "cat": cat.get("name"),
+                "reason": "missing_box_id",
+                "executed": False
+            })
+
+        source_box = next(
+            (
+                box
+                for box
+                in getattr(
+                    self.universe,
+                    "quantum_boxes",
+                    []
+                )
+                if getattr(
+                    box,
+                    "id",
+                    None
+                ) == source_box_id
+            ),
+            None
+        )
+
+        if source_box is None:
+            return self._record({
+                "name": (
+                    "cat_quantum_counterpart_"
+                    "sensing_failed"
+                ),
+                "cat": cat.get("name"),
+                "source_box_id": source_box_id,
+                "reason": (
+                    "source_box_no_longer_exists"
+                ),
+                "executed": False
+            })
+
+        if getattr(
+            source_box,
+            "current_layer",
+            None
+        ) != cat.get(
+            "current_layer"
+        ):
+            return self._record({
+                "name": (
+                    "cat_quantum_counterpart_"
+                    "sensing_failed"
+                ),
+                "cat": cat.get("name"),
+                "source_box_id": source_box_id,
+                "reason": (
+                    "source_box_not_in_cat_layer"
+                ),
+                "executed": False
+            })
+
+        source_position = getattr(
+            source_box,
+            "position",
+            None
+        )
+
+        if (
+            not isinstance(
+                source_position,
+                dict
+            )
+            or not self._same_position(
+                cat.get(
+                    "position",
+                    {}
+                ),
+                source_position
+            )
+        ):
+            return self._record({
+                "name": (
+                    "cat_quantum_counterpart_"
+                    "sensing_failed"
+                ),
+                "cat": cat.get("name"),
+                "source_box_id": source_box_id,
+                "reason": (
+                    "cat_not_at_source_box"
+                ),
+                "executed": False
+            })
+
+        pairing = getattr(
+            source_box,
+            "quantum_counterpart",
+            {}
+        )
+
+        if not pairing.get(
+            "paired",
+            False
+        ):
+            return self._record({
+                "name": (
+                    "cat_quantum_counterpart_"
+                    "sensing_failed"
+                ),
+                "cat": cat.get("name"),
+                "source_box_id": source_box_id,
+                "reason": (
+                    "pair_no_longer_exists"
+                ),
+                "executed": False
+            })
+
+        counterpart_id = pairing.get(
+            "box_id"
+        )
+
+        counterpart = next(
+            (
+                box
+                for box
+                in getattr(
+                    self.universe,
+                    "quantum_boxes",
+                    []
+                )
+                if getattr(
+                    box,
+                    "id",
+                    None
+                ) == counterpart_id
+            ),
+            None
+        )
+
+        if counterpart is None:
+            return self._record({
+                "name": (
+                    "cat_quantum_counterpart_"
+                    "sensing_failed"
+                ),
+                "cat": cat.get("name"),
+                "source_box_id": source_box_id,
+                "reason": (
+                    "counterpart_no_longer_exists"
+                ),
+                "executed": False
+            })
+
+        reverse_pairing = getattr(
+            counterpart,
+            "quantum_counterpart",
+            {}
+        )
+
+        if (
+            not reverse_pairing.get(
+                "paired",
+                False
+            )
+            or reverse_pairing.get(
+                "box_id"
+            ) != source_box_id
+        ):
+            return self._record({
+                "name": (
+                    "cat_quantum_counterpart_"
+                    "sensing_failed"
+                ),
+                "cat": cat.get("name"),
+                "source_box_id": source_box_id,
+                "reason": (
+                    "pair_not_reciprocal"
+                ),
+                "executed": False
+            })
+
+        observation = {
+            "source_box_id": source_box_id,
+            "counterpart_box_id": (
+                counterpart.id
+            ),
+            "source_layer": getattr(
+                source_box,
+                "current_layer",
+                None
+            ),
+            "counterpart_layer": getattr(
+                counterpart,
+                "current_layer",
+                None
+            ),
+            "counterpart_position": deepcopy(
+                getattr(
+                    counterpart,
+                    "position",
+                    {}
+                )
+            ),
+            "observed_tick": getattr(
+                self.universe,
+                "universe_tick",
+                None
+            ),
+            "temporary": True,
+            "pair_currently_valid": True
+        }
+
+        # NEN? to knowledge ani permanentn? mapa.
+        # Je to jen pr?v? platn? pozorov?n?.
+        cat[
+            "current_quantum_counterpart_observation"
+        ] = deepcopy(
+            observation
+        )
+
+        mind = cat.setdefault(
+            "mind",
+            {}
+        )
+
+        mind[
+            "previous_intention"
+        ] = deepcopy(
+            intention
+        )
+
+        mind[
+            "current_intention"
+        ] = None
+
+        event = {
+            "name": (
+                "cat_sensed_quantum_counterpart"
+            ),
+            "cat": cat.get("name"),
+            "observation": deepcopy(
+                observation
+            ),
+            "decision_source": "cat_mind",
+            "executed": True
+        }
+
+        mind[
+            "active_body_execution"
+        ] = deepcopy(
+            event
+        )
+
+        return self._record(
+            event
+        )
+
     def _execute_explore_box(
         self,
         cat,
@@ -897,7 +1181,8 @@ class CatIntentionExecutor:
             "current_layer",
             None
         ) != cat.get(
-            "current_layer"
+            "current_layer",
+            "quantum_layer"
         ):
             return self._record({
                 "name": (

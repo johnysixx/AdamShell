@@ -417,5 +417,195 @@ class CatScentNavigationTests(
         )
 
 
+    def test_cat_infers_direction_from_scent_points(
+        self
+    ):
+        from cats.cat_knowledge import (
+            CatKnowledge
+        )
+
+        self.cat[
+            "knowledge"
+        ][
+            "known_scent_places"
+        ] = []
+
+        CatKnowledge.remember_scent_place(
+            cat=self.cat,
+            layer="quantum_layer",
+            position={
+                "x": 1.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            source_id="trace_a",
+            recognized_identity=(
+                "cat:pazuzu"
+            ),
+            components={},
+            perceived_intensity=0.4,
+            universe_tick=10
+        )
+
+        CatKnowledge.remember_scent_place(
+            cat=self.cat,
+            layer="quantum_layer",
+            position={
+                "x": 4.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            source_id="trace_b",
+            recognized_identity=(
+                "cat:pazuzu"
+            ),
+            components={},
+            perceived_intensity=0.6,
+            universe_tick=20
+        )
+
+        self.cat[
+            "knowledge"
+        ][
+            "scent_clock_tick"
+        ] = 20
+
+        result = (
+            CatKnowledge
+            .infer_scent_direction(
+                cat=self.cat,
+                identity="cat:pazuzu",
+                layer="quantum_layer"
+            )
+        )
+
+        self.assertTrue(
+            result["inferred"]
+        )
+
+        self.assertEqual(
+            result["from_source_id"],
+            "trace_a"
+        )
+
+        self.assertEqual(
+            result["to_source_id"],
+            "trace_b"
+        )
+
+        self.assertEqual(
+            result["vector"],
+            {
+                "x": 3.0,
+                "y": 0.0,
+                "z": 0.0
+            }
+        )
+
+        self.assertEqual(
+            result["unit_vector"],
+            {
+                "x": 1.0,
+                "y": 0.0,
+                "z": 0.0
+            }
+        )
+
+        self.assertEqual(
+            result["tick_delta"],
+            10
+        )
+
+    def test_follow_known_scent_contains_inferred_direction(
+        self
+    ):
+        from cats.cat_knowledge import (
+            CatKnowledge
+        )
+
+        self.cat[
+            "knowledge"
+        ][
+            "known_scent_places"
+        ] = []
+
+        CatKnowledge.remember_scent_place(
+            cat=self.cat,
+            layer="quantum_layer",
+            position={
+                "x": 1.0,
+                "y": 1.0,
+                "z": 0.0
+            },
+            source_id="trace_1",
+            recognized_identity=(
+                "cat:pazuzu"
+            ),
+            components={},
+            perceived_intensity=0.4,
+            universe_tick=10
+        )
+
+        CatKnowledge.remember_scent_place(
+            cat=self.cat,
+            layer="quantum_layer",
+            position={
+                "x": 2.0,
+                "y": 2.0,
+                "z": 0.0
+            },
+            source_id="trace_2",
+            recognized_identity=(
+                "cat:pazuzu"
+            ),
+            components={},
+            perceived_intensity=0.8,
+            universe_tick=20
+        )
+
+        self.cat[
+            "knowledge"
+        ][
+            "scent_clock_tick"
+        ] = 20
+
+        candidates = CatMind.consider(
+            cat=self.cat,
+            observations=self.observations()
+        )
+
+        scent = next(
+            candidate
+            for candidate in candidates
+            if candidate[
+                "type"
+            ] == "follow_known_scent"
+        )
+
+        direction = scent[
+            "target"
+        ][
+            "trail_direction"
+        ]
+
+        self.assertTrue(
+            direction["inferred"]
+        )
+
+        self.assertEqual(
+            direction[
+                "to_source_id"
+            ],
+            "trace_2"
+        )
+
+        self.assertGreater(
+            direction[
+                "confidence"
+            ],
+            0.0
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
