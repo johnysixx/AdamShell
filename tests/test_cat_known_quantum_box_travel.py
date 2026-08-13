@@ -260,5 +260,90 @@ class CatKnownQuantumBoxTravelTests(
         )
 
 
+    def test_successful_travel_is_remembered_as_route(
+        self
+    ):
+        self.sense_counterpart()
+
+        candidates = CatMind.consider(
+            cat=self.cat,
+            observations=self.observations()
+        )
+
+        travel = next(
+            candidate
+            for candidate in candidates
+            if candidate["type"]
+            == "travel_through_known_quantum_box"
+        )
+
+        self.cat[
+            "mind"
+        ][
+            "current_intention"
+        ] = travel
+
+        result = (
+            self.cats
+            .execute_cat_intention(
+                self.cat
+            )
+        )
+
+        self.assertTrue(
+            result["executed"]
+        )
+
+        memories = self.cat[
+            "memory"
+        ].recall(
+            event_type=(
+                "quantum_box_layer_transfer"
+            )
+        )
+
+        self.assertTrue(
+            memories
+        )
+
+        memory = memories[-1]
+
+        self.assertEqual(
+            memory[
+                "participants"
+            ],
+            [
+                self.source.id,
+                self.target.id
+            ]
+        )
+
+        self.assertEqual(
+            memory[
+                "details"
+            ][
+                "source_layer"
+            ],
+            "quantum_layer"
+        )
+
+        self.assertEqual(
+            memory[
+                "details"
+            ][
+                "target_layer"
+            ],
+            "meeting_place"
+        )
+
+        self.assertTrue(
+            memory[
+                "details"
+            ][
+                "target_box_consumed"
+            ]
+        )
+
 if __name__ == "__main__":
     unittest.main()
+
