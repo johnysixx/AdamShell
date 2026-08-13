@@ -1,4 +1,4 @@
-from copy import deepcopy
+﻿from copy import deepcopy
 
 from cats.cat_knowledge import (
     CatKnowledge
@@ -124,6 +124,18 @@ class CatIntentionExecutor:
                 intention=intention
             )
 
+        if (
+            intention_type
+            == "travel_through_known_quantum_box"
+        ):
+            return (
+                self._execute_travel_through_known_quantum_box(
+                    cat=cat,
+                    intention=intention
+                )
+            )
+
+
         if intention_type == "explore_box":
             return self._execute_explore_box(
                 cat=cat,
@@ -243,8 +255,8 @@ class CatIntentionExecutor:
                 event
             )
 
-        # Kočka už se rozhodla ve své mysli.
-        # Executor její vůli znovu nehází.
+        # KoÄŤka uĹľ se rozhodla ve svĂ© mysli.
+        # Executor jejĂ­ vĹŻli znovu nehĂˇzĂ­.
         acceptance = (
             self.cats_layer
             .accept_navigation_offer(
@@ -836,6 +848,302 @@ class CatIntentionExecutor:
                 "z"
             )
         )
+
+    def _execute_travel_through_known_quantum_box(
+            self,
+            cat,
+            intention,
+    ):
+
+        target = intention.get(
+            "target",
+            {}
+        )
+
+        if not isinstance(
+            target,
+            dict
+        ):
+            return self._record({
+                "name":(
+                    "cat_quantum_box_travel_failed"
+                        ),
+                "cat": cat.get("name"),
+                "reason": "invalid_target",
+                "executed": False
+            })
+
+        source_box_id = target.get(
+            "source_box_id"
+        )
+        counterpart_box_id = target.get(
+            "counterpart_box_id"
+        )
+
+        if (
+            source_box_id is None
+            or counterpart_box_id is None
+        ):
+            return self._record({
+                "name": (
+                    "cat_quantum_box_travel_failed"
+                ),
+                "cat": cat.get("name"),
+                "reason": "missing_box_pair",
+                "executed": False
+            })
+
+        observation = cat.get(
+            "current_quantum_counterpart_observation"
+        )
+
+        if not isinstance(
+            observation,
+            dict
+        ):
+            return self._record({
+                "name":(
+                    "cat_quantum_box_travel_failed"
+                ),
+                "cat": cat.get("name"),
+                "source_box_id": source_box_id,
+                "counterpart_box_id": (
+                    counterpart_box_id
+                ),
+                "reason": (
+                    "counterpart_observation_missing"
+                ),
+                "executed": False
+            })
+
+        if not observation.get(
+            "pair_currently_valid",
+            False
+        ):
+            return self._record({
+                "name":(
+                    "cat_quantum_box_travel_failed"
+                ),
+                "cat": cat.get("name"),
+                "source_box_id": source_box_id,
+                "counterpart_box_id": (
+                    counterpart_box_id
+                ),
+                "reason": (
+                    "counterpart_observation_invalid"
+                ),
+                "executed": False
+            })
+
+        if (
+            observation.get(
+                "source_box_id"
+            ) != source_box_id
+        ):
+            return self._record({
+                "name":(
+                    "cat_quantum_box_travel_failed"
+                ),
+                "cat": cat.get("name"),
+                "source_box_id": source_box_id,
+                "counterpart_box_id": (
+                    counterpart_box_id
+                ),
+                "reason": (
+                    "observation_pair_mismatch"
+                ),
+                "executed": False
+            })
+
+        source_box = next(
+            (
+                box for box in getattr(
+                self.universe,
+                "quantum_boxes",
+                []
+            )
+                if getattr(
+                box,
+                "id",
+                None
+            ) == source_box_id
+
+            ),
+            None
+        )
+
+        if source_box is None:
+            return self._record({
+                "name":(
+                    "cat_quantum_box_travel_failed"
+                ),
+                "cat": cat.get("name"),
+                "source_box_id": source_box_id,
+                "counterpart_box_id": (
+                    counterpart_box_id
+                ),
+                "reason": (
+                    "source_box_no_longer_exists"
+                ),
+                "executed": False
+            })
+
+        if getattr(
+            source_box,
+            "current_layer",
+            None
+        ) != cat.get(
+            "current_layer",
+        ):
+            return self._record({
+                "name":(
+                    "cat_quantum_box_travel_failed"
+                ),
+                "cat": cat.get("name"),
+                "source_box_id": source_box_id,
+                "counterpart_box_id": (
+                    counterpart_box_id
+                ),
+                "reason": (
+                    "source_box_not_in_cat_layer"
+                ),
+                "executed": False
+            })
+
+        source_position = getattr(
+            source_box,
+            "position",
+            None
+        )
+
+        cat_possition = cat.get(
+            "position"
+        )
+
+        if (
+            not isinstance(
+                source_position,
+                dict
+            )
+        ):
+            return self._record({
+                "name":(
+                    "cat_quantum_box_travel_failed"
+                ),
+                "cat": cat.get("name"),
+                "source_box_id": source_box_id,
+                "counterpart_box_id": (
+                    counterpart_box_id
+                ),
+                "reason": "missing_position",
+                "executed": False
+            })
+
+        if not self._same_position(
+            cat_possition,
+            source_position
+        ):
+            return self._record({
+                "name":(
+                    "cat_quantum_box_travel_failed"
+                ),
+                "cat": cat.get("name"),
+                "source_box_id": source_box_id,
+                "counterpart_box_id": (
+                    counterpart_box_id
+                ),
+                "reason": (
+                    "cat_not_at_source_box"
+                ),
+                "executed": False
+            })
+
+        transfer_system = getattr(
+            self.universe,
+            "cat_box_transfer",
+            None
+        )
+
+        if transfer_system is None:
+            return self._record({
+                "name":(
+                    "cat_quantum_box_travel_failed"
+                ),
+                "cat": cat.get("name"),
+                "source_box_id": source_box_id,
+                "counterpart_box_id": (
+                    counterpart_box_id
+                ),
+                "reason": (
+                    "cat_box_tranfer_unavaible"
+                ),
+                "executed": False
+            })
+
+        result =(
+            transfer_system
+            .transfer_cat(
+                cat=cat,source_box_id =source_box_id,
+                target_box_id=counterpart_box_id
+            )
+        )
+
+        transferred = result.get(
+            "transferred",
+            False
+        )
+
+        event = {
+            "name": (
+                "cat_traveled_through_known_quantum_box"
+                if transferred
+                else "cat_quantum_box_travel_failed"
+            ),
+            "cat": cat.get("name"),
+            "source_box_id": source_box_id,
+            "counterpart_box_id": (
+                counterpart_box_id
+            ),
+            "source_layer": target.get(
+                "source_layer"
+            ),
+            "transfer": deepcopy(
+                result
+            ),
+            "decision_source": "cat_mind",
+            "executed": transferred
+        }
+
+        mind = cat.setdefault(
+            "mind",
+            {}
+        )
+
+        mind[
+            "previous_intention"
+        ] = deepcopy(
+            intention
+        )
+
+        mind[
+            "current_intention"
+        ] = None
+
+        mind[
+            "active_body_execution"
+        ] = deepcopy(
+            event
+        )
+
+        if transferred:
+            cat.pop(
+                "current_quantum_counterpart_observation",
+                None
+            )
+
+            return self._record(
+                event
+            )
 
     def _execute_sense_quantum_counterpart(
         self,
@@ -3001,3 +3309,12 @@ class CatIntentionExecutor:
             )
 
         return event
+
+
+
+
+
+
+
+
+

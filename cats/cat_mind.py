@@ -1,4 +1,4 @@
-from cats.cat_intellect import CatIntellect
+﻿from cats.cat_intellect import CatIntellect
 from cats.cat_knowledge import CatKnowledge
 from copy import deepcopy
 
@@ -15,6 +15,8 @@ class CatMind:
         "avoid_cronenberg_scent",
         "explore_box",
         "sense_quantum_counterpart",
+        "travel_through_known_quantum_box",
+        "travel_trough_known_quantum_box",
         "create_exploration_pair",
         "approach_cat",
         "share_legend",
@@ -76,9 +78,9 @@ class CatMind:
         observations
     ):
         """
-        Vytvoří možné úmysly.
+        VytvoĹ™Ă­ moĹľnĂ© Ăşmysly.
 
-        Nic nevykonává a nevybírá vítěze.
+        Nic nevykonĂˇvĂˇ a nevybĂ­rĂˇ vĂ­tÄ›ze.
         """
         traits = cat.get(
             "personality",
@@ -577,6 +579,85 @@ class CatMind:
             )
         )
 
+        counterpart_observation = cat.get(
+            "current_quantum_counterpart_observation"
+        )
+
+        if (
+            isinstance(
+                counterpart_observation,
+                dict
+            )
+            and counterpart_observation.get(
+                "pair_currently_valid",
+                False
+            )
+            and counterpart_observation.get(
+                "temporary",
+                False
+            )
+        ):
+            source_box_id = (
+                counterpart_observation.get(
+                    "source_box_id"
+                )
+            )
+
+            counterpart_box_id = (
+                counterpart_observation.get(
+                    "counterpart_box_id"
+                )
+            )
+
+            if (
+                source_box_id is not None
+                and counterpart_box_id is not None
+            ):
+                travel_score = (
+                    0.30
+                    + curiosity * 0.35
+                    + courage * 0.20
+                    + intellect_normalized * 0.15
+                )
+
+                candidates.append(
+                    cls._candidate(
+                        intention_type=(
+                            "travel_through_known_quantum_box"
+                        ),
+                        score=travel_score,
+                        reasons=[
+                            "quantum_counterpart_sensed",
+                            "quantum_pair_currently_valid",
+                            "curiosity",
+                            "courage"
+                        ],
+                        target={
+                            "source_box_id": (
+                                source_box_id
+                            ),
+                            "counterpart_box_id": (
+                                counterpart_box_id
+                            ),
+                            "source_layer": (
+                                counterpart_observation.get(
+                                    "source_layer"
+                                )
+                            ),
+                            "target_layer": (
+                                counterpart_observation.get(
+                                    "counterpart_layer"
+                                )
+                            ),
+                            "target_position": deepcopy(
+                                counterpart_observation.get(
+                                    "counterpart_position",
+                                    {}
+                                )
+                            )
+                        }
+                    )
+                )
         for box_detail in observations.get(
             "visible_box_details",
             []
@@ -805,7 +886,7 @@ class CatMind:
                 )
             )
 
-        # Odpočinek je vždy možný.
+        # OdpoÄŤinek je vĹľdy moĹľnĂ˝.
         candidates.append(
             cls._candidate(
                 intention_type="rest",
@@ -1034,11 +1115,11 @@ class CatMind:
         top_count=None
     ):
         """
-        Vybere vlastní úmysl kočky.
+        Vybere vlastnĂ­ Ăşmysl koÄŤky.
 
-        Cat D20 zde neurčuje seznam možností.
-        Pouze vybere mezi nejlepšími
-        rozumnými kandidáty.
+        Cat D20 zde neurÄŤuje seznam moĹľnostĂ­.
+        Pouze vybere mezi nejlepĹˇĂ­mi
+        rozumnĂ˝mi kandidĂˇty.
         """
         candidates = cls.consider(
             cat=cat,
@@ -1268,3 +1349,4 @@ class CatMind:
             0.30,
             positive_count * 0.06
         )
+
