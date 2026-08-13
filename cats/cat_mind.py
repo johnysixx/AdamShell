@@ -704,19 +704,24 @@ class CatMind:
                 )
             )
 
-            experienced_quantum_traveler = bool(
+            quantum_travel_count = len(
                 quantum_travel_memories
+            )
+
+            experienced_quantum_traveler = (
+                quantum_travel_count > 0
+            )
+
+            quantum_experience_bonus = min(
+                0.20,
+                quantum_travel_count * 0.075
             )
 
             resonance_score = (
                 0.30
                 + curiosity * 0.35
                 + intellect_normalized * 0.30
-                + (
-                    0.10
-                    if experienced_quantum_traveler
-                    else 0.0
-                )
+                + quantum_experience_bonus
             )
 
             candidates.append(
@@ -1375,5 +1380,8 @@ class CatMind:
             0.30,
             positive_count * 0.06
         )
+
+
+
 
 

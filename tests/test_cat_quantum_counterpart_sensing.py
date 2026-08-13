@@ -336,6 +336,93 @@ class CatQuantumCounterpartSensingTests(
             experienced["reasons"]
         )
 
+    def test_quantum_travel_experience_bonus_scales_with_history(
+        self
+    ):
+        def sense_score():
+            candidates = CatMind.consider(
+                cat=self.cat,
+                observations=self.observations()
+            )
+
+            return next(
+                candidate["score"]
+                for candidate in candidates
+                if candidate["type"]
+                == "sense_quantum_counterpart"
+            )
+
+        base_score = sense_score()
+
+        self.cat[
+            "memory"
+        ].remember(
+            event_type="quantum_box_layer_transfer",
+            universe_tick=1,
+            location={"x": 1.0, "y": 1.0, "z": 0.0},
+            participants=["source_1", "target_1"],
+            details={
+                "source_layer": "quantum_layer",
+                "target_layer": "meeting_place",
+                "target_box_consumed": True
+            }
+        )
+
+
+        one_transfer_score = sense_score()
+
+        self.cat[
+            "memory"
+        ].remember(
+            event_type="quantum_box_layer_transfer",
+            universe_tick=2,
+            location={"x": 2.0, "y": 2.0, "z": 0.0},
+            participants=["source_2", "target_2"],
+            details={
+                "source_layer": "quantum_layer",
+                "target_layer": "meeting_place",
+                "target_box_consumed": True
+            }
+        )
+
+        self.cat[
+            "memory"
+        ].remember(
+            event_type="quantum_box_layer_transfer",
+            universe_tick=3,
+            location={"x": 3.0, "y": 3.0, "z": 0.0},
+            participants=["source_3", "target_3"],
+            details={
+                "source_layer": "quantum_layer",
+                "target_layer": "meeting_place",
+                "target_box_consumed": True
+            }
+        )
+
+
+        three_transfer_score = sense_score()
+
+        self.assertGreater(
+            one_transfer_score,
+            base_score
+        )
+
+        self.assertGreater(
+            three_transfer_score,
+            one_transfer_score
+        )
+
+        self.assertAlmostEqual(
+            three_transfer_score - base_score,
+            0.20,
+            places=7
+        )
+
 if __name__ == "__main__":
     unittest.main()
+
+
+
+
+
 
