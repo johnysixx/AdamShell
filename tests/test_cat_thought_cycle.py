@@ -1,4 +1,4 @@
-import unittest
+﻿import unittest
 
 from universe.universe import Universe
 from cats.cats import Cats
@@ -31,8 +31,8 @@ class CatThoughtCycleTests(
     def test_cat_can_think_and_start_bar_route(
         self
     ):
-        # Bar je blízko a nejsou přítomné
-        # jiné výrazné možnosti.
+        # Bar je blĂ­zko a nejsou pĹ™Ă­tomnĂ©
+        # jinĂ© vĂ˝raznĂ© moĹľnosti.
         result = self.cats.think_and_act(
             cat=self.cat
         )
@@ -145,6 +145,162 @@ class CatThoughtCycleTests(
             "cat_has_no_position"
         )
 
+
+    def test_cat_autonomously_senses_and_uses_quantum_box(
+        self
+    ):
+        self.cat[
+            "personality"
+        ][
+            "traits"
+        ][
+            "curiosity"
+        ] = 1.0
+
+        self.cat[
+            "personality"
+        ][
+            "traits"
+        ][
+            "courage"
+        ] = 1.0
+
+        self.cat[
+            "current_layer"
+        ] = "quantum_layer"
+
+        source = (
+            self.universe
+            .create_quantum_box()
+        )
+
+        target = (
+            self.universe
+            .create_quantum_box()
+        )
+
+        source.current_layer = (
+            "quantum_layer"
+        )
+
+        target.current_layer = (
+            "meeting_place"
+        )
+
+        source.position = {
+            "x": 1.0,
+            "y": 0.0,
+            "z": 0.0
+        }
+
+        target.position = {
+            "x": 9.0,
+            "y": 4.0,
+            "z": 0.0
+        }
+
+        source.pair_with(
+            target
+        )
+
+        self.cat["position"] = dict(
+            source.position
+        )
+
+        self.cat[
+            "memory"
+        ].remember(
+            event_type=(
+                "quantum_box_observed"
+            ),
+            universe_tick=0,
+            location="quantum_layer",
+            participants=[
+                source.id
+            ],
+            details={
+                "box_id": source.id
+            }
+        )
+
+        first_cycle = (
+            self.cats
+            .think_and_act(
+                cat=self.cat
+            )
+        )
+
+        self.assertTrue(
+            first_cycle[
+                "completed"
+            ]
+        )
+
+        self.assertEqual(
+            first_cycle[
+                "decision"
+            ][
+                "intention"
+            ],
+            "sense_quantum_counterpart"
+        )
+
+        self.assertTrue(
+            first_cycle[
+                "execution"
+            ][
+                "executed"
+            ]
+        )
+
+        self.assertIn(
+            "current_quantum_counterpart_observation",
+            self.cat
+        )
+
+        second_cycle = (
+            self.cats
+            .think_and_act(
+                cat=self.cat
+            )
+        )
+
+        self.assertTrue(
+            second_cycle[
+                "completed"
+            ]
+        )
+
+        self.assertEqual(
+            second_cycle[
+                "decision"
+            ][
+                "intention"
+            ],
+            "travel_through_known_quantum_box"
+        )
+
+        self.assertTrue(
+            second_cycle[
+                "execution"
+            ][
+                "executed"
+            ]
+        )
+
+        self.assertEqual(
+            self.cat[
+                "current_layer"
+            ],
+            target.current_layer
+        )
+
+        self.assertEqual(
+            self.cat[
+                "position"
+            ],
+            target.position
+        )
 
 if __name__ == "__main__":
     unittest.main()
