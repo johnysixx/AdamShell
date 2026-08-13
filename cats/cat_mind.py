@@ -694,10 +694,29 @@ class CatMind:
             ) > 1e-9:
                 continue
 
+            quantum_travel_memories = (
+                cat[
+                    "memory"
+                ].recall(
+                    event_type=(
+                        "quantum_box_layer_transfer"
+                    )
+                )
+            )
+
+            experienced_quantum_traveler = bool(
+                quantum_travel_memories
+            )
+
             resonance_score = (
                 0.30
                 + curiosity * 0.35
                 + intellect_normalized * 0.30
+                + (
+                    0.10
+                    if experienced_quantum_traveler
+                    else 0.0
+                )
             )
 
             candidates.append(
@@ -710,7 +729,14 @@ class CatMind:
                         "quantum_box_explored",
                         "quantum_pair_resonance_possible",
                         "curiosity",
-                        "intellect"
+                        "intellect",
+                        *(
+                            [
+                                "experienced_quantum_traveler"
+                            ]
+                            if experienced_quantum_traveler
+                            else []
+                        )
                     ],
                     target={
                         "box_id": box_detail[
@@ -1349,4 +1375,5 @@ class CatMind:
             0.30,
             positive_count * 0.06
         )
+
 

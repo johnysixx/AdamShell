@@ -1,4 +1,4 @@
-import unittest
+﻿import unittest
 
 from universe.universe import Universe
 from cats.cats import Cats
@@ -268,5 +268,74 @@ class CatQuantumCounterpartSensingTests(
         )
 
 
+    def test_previous_quantum_travel_increases_sensing_score(
+        self
+    ):
+        inexperienced_candidates = CatMind.consider(
+            cat=self.cat,
+            observations=self.observations()
+        )
+
+        inexperienced = next(
+            candidate
+            for candidate in inexperienced_candidates
+            if candidate["type"]
+            == "sense_quantum_counterpart"
+        )
+
+        self.cat[
+            "memory"
+        ].remember(
+            event_type=(
+                "quantum_box_layer_transfer"
+            ),
+            universe_tick=0,
+            location={
+                "x": 9.0,
+                "y": 4.0,
+                "z": 0.0
+            },
+            participants=[
+                "old_source_box",
+                "old_target_box"
+            ],
+            details={
+                "source_layer": (
+                    "old_quantum_layer"
+                ),
+                "target_layer": (
+                    "old_meeting_place"
+                ),
+                "target_box_consumed": True,
+                "energy_j": 1.0,
+                "trail_id": (
+                    "old_quantum_trail"
+                )
+            }
+        )
+
+        experienced_candidates = CatMind.consider(
+            cat=self.cat,
+            observations=self.observations()
+        )
+
+        experienced = next(
+            candidate
+            for candidate in experienced_candidates
+            if candidate["type"]
+            == "sense_quantum_counterpart"
+        )
+
+        self.assertGreater(
+            experienced["score"],
+            inexperienced["score"]
+        )
+
+        self.assertIn(
+            "experienced_quantum_traveler",
+            experienced["reasons"]
+        )
+
 if __name__ == "__main__":
     unittest.main()
+
