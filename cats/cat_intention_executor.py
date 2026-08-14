@@ -1129,13 +1129,13 @@ class CatIntentionExecutor:
             "current_intention"
         ] = None
 
-        mind[
-            "active_body_execution"
-        ] = deepcopy(
-            event
-        )
-
         if transferred:
+            mind[
+                "active_body_execution"
+            ] = deepcopy(
+                event
+            )
+
             cat.pop(
                 "current_quantum_counterpart_observation",
                 None
@@ -1144,6 +1144,85 @@ class CatIntentionExecutor:
             return self._record(
                 event
             )
+
+        failure_reason = result.get(
+            "reason",
+            "quantum_transfer_failed"
+        )
+
+        cronenberg = (
+            self.universe
+            .create_cronenberg_from_quantum_error(
+                error=RuntimeError(
+                    "Cat quantum box transfer failed: "
+                    f"{failure_reason}"
+                ),
+                source_component=(
+                    "cat_intention_executor"
+                ),
+                source_operation=(
+                    "quantum_box_travel_failed"
+                )
+            )
+        )
+
+        memory = cat[
+            "memory"
+        ].remember(
+            event_type=(
+                "quantum_box_layer_transfer_failed"
+            ),
+            universe_tick=(
+                self.universe
+                .quantum_state.get(
+                    "tick_count",
+                    0
+                )
+            ),
+            location=deepcopy(
+                cat.get(
+                    "position"
+                )
+            ),
+            participants=[
+                source_box_id,
+                counterpart_box_id
+            ],
+            details={
+                "source_layer": target.get(
+                    "source_layer"
+                ),
+                "target_layer": target.get(
+                    "target_layer"
+                ),
+                "reason": failure_reason,
+                "cronenberg_id": cronenberg.id
+            }
+        )
+
+        event[
+            "reason"
+        ] = failure_reason
+
+        event[
+            "cronenberg_id"
+        ] = cronenberg.id
+
+        event[
+            "memory"
+        ] = deepcopy(
+            memory
+        )
+
+        mind[
+            "active_body_execution"
+        ] = deepcopy(
+            event
+        )
+
+        return self._record(
+            event
+        )
 
     def _execute_sense_quantum_counterpart(
         self,

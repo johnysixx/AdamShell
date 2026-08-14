@@ -344,6 +344,146 @@ class CatKnownQuantumBoxTravelTests(
             ]
         )
 
+    def test_failed_quantum_transfer_creates_cronenberg_and_memory(
+        self
+    ):
+        self.sense_counterpart()
+
+        candidates = CatMind.consider(
+            cat=self.cat,
+            observations=self.observations()
+        )
+
+        travel = next(
+            candidate
+            for candidate in candidates
+            if candidate["type"]
+            == "travel_through_known_quantum_box"
+        )
+
+        self.cat[
+            "mind"
+        ][
+            "current_intention"
+        ] = travel
+
+        cronenberg_count_before = len(
+            self.universe.cronenbergs
+        )
+
+        def fail_transfer(
+            cat,
+            source_box_id,
+            target_box_id
+        ):
+            return {
+                "name": (
+                    "cat_quantum_box_transfer_failed"
+                ),
+                "cat": cat.get("name"),
+                "source_box_id": source_box_id,
+                "target_box_id": target_box_id,
+                "reason": (
+                    "simulated_quantum_transfer_error"
+                ),
+                "transferred": False
+            }
+
+        self.universe.cat_box_transfer.transfer_cat = (
+            fail_transfer
+        )
+
+        result = (
+            self.cats
+            .execute_cat_intention(
+                self.cat
+            )
+        )
+
+        self.assertFalse(
+            result["executed"]
+        )
+
+        self.assertEqual(
+            result["name"],
+            "cat_quantum_box_travel_failed"
+        )
+
+        self.assertEqual(
+            len(
+                self.universe.cronenbergs
+            ),
+            cronenberg_count_before + 1
+        )
+
+        cronenberg = (
+            self.universe.cronenbergs[-1]
+        )
+
+        manifested = next(
+            event
+            for event in reversed(
+                self.universe.quantum_events
+            )
+            if event.get("name")
+            == "cronenberg_manifested"
+        )
+
+        self.assertEqual(
+            manifested[
+                "cronenberg_id"
+            ],
+            cronenberg.id
+        )
+
+        self.assertEqual(
+            manifested[
+                "source_component"
+            ],
+            "cat_intention_executor"
+        )
+
+        self.assertEqual(
+            manifested[
+                "source_operation"
+            ],
+            "quantum_box_travel_failed"
+        )
+
+        memories = self.cat[
+            "memory"
+        ].recall(
+            event_type=(
+                "quantum_box_layer_transfer_failed"
+            )
+        )
+
+        self.assertEqual(
+            len(memories),
+            1
+        )
+
+        self.assertEqual(
+            memories[0][
+                "participants"
+            ],
+            [
+                self.source.id,
+                self.target.id
+            ]
+        )
+
+        self.assertEqual(
+            memories[0][
+                "details"
+            ][
+                "reason"
+            ],
+            "simulated_quantum_transfer_error"
+        )
+
 if __name__ == "__main__":
     unittest.main()
+
+
 
