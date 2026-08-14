@@ -144,6 +144,15 @@ class CatMind:
                     cat
                 )
             )
+            quantum_failure_bar_score = (
+                cls._quantum_failure_bar_score(
+                    cat
+                )
+            )
+
+            bar_score += (
+                quantum_failure_bar_score
+            )
 
             candidates.append(
                 cls._candidate(
@@ -164,6 +173,13 @@ class CatMind:
                             if cls._bar_memory_score(
                                 cat
                             ) > 0
+                            else []
+                        ),
+                        *(
+                            [
+                                "seeking_safety_after_quantum_failure"
+                            ]
+                            if quantum_failure_bar_score > 0
                             else []
                         )
                     ]
@@ -1368,6 +1384,29 @@ class CatMind:
         }
 
     @classmethod
+    def _quantum_failure_bar_score(
+        cls,
+        cat
+    ):
+        memory = cat.get(
+            "memory"
+        )
+
+        if memory is None:
+            return 0.0
+
+        failures = memory.recall(
+            event_type=(
+                "quantum_box_layer_transfer_failed"
+            )
+        )
+
+        return min(
+            0.30,
+            len(failures) * 0.10
+        )
+
+    @classmethod
     def _quantum_travel_memory_score(
         cls,
         cat
@@ -1442,6 +1481,9 @@ class CatMind:
             0.30,
             positive_count * 0.06
         )
+
+
+
 
 
 

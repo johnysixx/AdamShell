@@ -1,4 +1,4 @@
-from lifecycle import LifeCycleSystem
+﻿from lifecycle import LifeCycleSystem
 from cats.cat_lifecycle import CatLifeCycleHandler
 import uuid
 from typing import Self
@@ -182,6 +182,27 @@ class Universe:
                 .public_state
             )
 
+        quantum_layer_map = {
+            "tick": self.universe_tick,
+            "boxes": [
+                box.public_state
+                for box in self.quantum_boxes
+                if getattr(
+                    box,
+                    "current_layer",
+                    None
+                ) == "quantum_layer"
+            ],
+            "space": (
+                self.quantum_space.public_state
+                if hasattr(
+                    self,
+                    "quantum_space"
+                )
+                else {}
+            )
+        }
+
         return {
             "universe_id": self.id,
             "tick": self.universe_tick,
@@ -189,7 +210,10 @@ class Universe:
             "pressure": self.pressure,
             "entropy": self.entropy,
             "statistics": self.statistics.public_state,
-            "geometry": geometry_state
+            "geometry": geometry_state,
+            "quantum_layer_map": (
+                quantum_layer_map
+            )
         }
 
     def start_big_bang(self):
@@ -238,12 +262,12 @@ class Universe:
 
         self.conflict_history.extend(conflicts)
 
-    # âš–ď¸Ź slabĂ˝ tlak mĂ­sto okamĹľitĂ© zmÄ›ny
+    # Ă˘Ĺˇâ€“ÄŹÂ¸Ĺą slabÄ‚Ëť tlak mÄ‚Â­sto okamÄąÄľitÄ‚Â© zmĂ„â€şny
         self.conflict_pressure += len(conflicts)
         self.check_threshold()
         self.spawn_entities_from_conflicts(conflicts)
 
-        UniverseLogger.event(f"âš  Conflict pressure increased: {self.conflict_pressure}")
+        UniverseLogger.event(f"Ă˘ĹˇÂ  Conflict pressure increased: {self.conflict_pressure}")
 
     def check_threshold(self):
 

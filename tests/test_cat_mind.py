@@ -1,4 +1,4 @@
-import unittest
+﻿import unittest
 
 from universe.universe import Universe
 from cats.cats import Cats
@@ -253,6 +253,70 @@ class CatMindTests(
             second["score"]
         )
 
+
+    def test_failed_quantum_travel_increases_bar_score(
+        self
+    ):
+        before = CatMind.consider(
+            cat=self.cat,
+            observations={
+                "bar_known": True,
+                "bar_visible": False
+            }
+        )
+
+        before_bar = next(
+            candidate
+            for candidate in before
+            if candidate["type"]
+            == "visit_bar"
+        )
+
+        self.cat[
+            "memory"
+        ].remember(
+            event_type=(
+                "quantum_box_layer_transfer_failed"
+            ),
+            universe_tick=1,
+            location={
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            participants=[
+                "source_box",
+                "target_box"
+            ],
+            details={
+                "reason": "test_failure"
+            }
+        )
+
+        after = CatMind.consider(
+            cat=self.cat,
+            observations={
+                "bar_known": True,
+                "bar_visible": False
+            }
+        )
+
+        after_bar = next(
+            candidate
+            for candidate in after
+            if candidate["type"]
+            == "visit_bar"
+        )
+
+        self.assertGreater(
+            after_bar["score"],
+            before_bar["score"]
+        )
+
+        self.assertIn(
+            "seeking_safety_after_quantum_failure",
+            after_bar["reasons"]
+        )
 
 if __name__ == "__main__":
     unittest.main()
