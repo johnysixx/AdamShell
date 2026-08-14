@@ -613,11 +613,28 @@ class CatMind:
                 source_box_id is not None
                 and counterpart_box_id is not None
             ):
+                quantum_memory_score = (
+                    cls._quantum_travel_memory_score(
+                        cat
+                    )
+                )
+
+                negative_quantum_memories = (
+                    cat[
+                        "memory"
+                    ].recall(
+                        event_type=(
+                            "quantum_box_layer_transfer_failed"
+                        )
+                    )
+                )
+
                 travel_score = (
                     0.30
                     + curiosity * 0.35
                     + courage * 0.20
                     + intellect_normalized * 0.15
+                    + quantum_memory_score
                 )
 
                 candidates.append(
@@ -630,7 +647,14 @@ class CatMind:
                             "quantum_counterpart_sensed",
                             "quantum_pair_currently_valid",
                             "curiosity",
-                            "courage"
+                            "courage",
+                            *(
+                                [
+                                    "negative_quantum_travel_memory"
+                                ]
+                                if negative_quantum_memories
+                                else []
+                            )
                         ],
                         target={
                             "source_box_id": (
@@ -1344,6 +1368,44 @@ class CatMind:
         }
 
     @classmethod
+    def _quantum_travel_memory_score(
+        cls,
+        cat
+    ):
+        memory = cat.get(
+            "memory"
+        )
+
+        if memory is None:
+            return 0.0
+
+        successful = memory.recall(
+            event_type=(
+                "quantum_box_layer_transfer"
+            )
+        )
+
+        failed = memory.recall(
+            event_type=(
+                "quantum_box_layer_transfer_failed"
+            )
+        )
+
+        positive_bonus = min(
+            0.20,
+            len(successful) * 0.075
+        )
+
+        negative_penalty = min(
+            0.30,
+            len(failed) * 0.10
+        )
+
+        return (
+            positive_bonus
+            - negative_penalty
+        )
+    @classmethod
     def _bar_memory_score(
         cls,
         cat
@@ -1380,6 +1442,9 @@ class CatMind:
             0.30,
             positive_count * 0.06
         )
+
+
+
 
 
 

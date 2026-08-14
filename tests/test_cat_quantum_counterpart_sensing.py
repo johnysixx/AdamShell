@@ -418,8 +418,97 @@ class CatQuantumCounterpartSensingTests(
             places=7
         )
 
+    def test_failed_quantum_travel_reduces_travel_score(
+        self
+    ):
+        candidates = CatMind.consider(
+            cat=self.cat,
+            observations=self.observations()
+        )
+
+        sense = next(
+            candidate
+            for candidate in candidates
+            if candidate["type"]
+            == "sense_quantum_counterpart"
+        )
+
+        self.cat[
+            "mind"
+        ][
+            "current_intention"
+        ] = sense
+
+        result = (
+            self.cats
+            .execute_cat_intention(
+                self.cat
+            )
+        )
+
+        self.assertTrue(
+            result["executed"]
+        )
+
+        before_candidates = CatMind.consider(
+            cat=self.cat,
+            observations=self.observations()
+        )
+
+        before = next(
+            candidate
+            for candidate in before_candidates
+            if candidate["type"]
+            == "travel_through_known_quantum_box"
+        )
+
+        self.cat[
+            "memory"
+        ].remember(
+            event_type=(
+                "quantum_box_layer_transfer_failed"
+            ),
+            universe_tick=1,
+            location=dict(
+                self.cat["position"]
+            ),
+            participants=[
+                self.source.id,
+                self.target.id
+            ],
+            details={
+                "source_layer": "quantum_layer",
+                "target_layer": "meeting_place",
+                "reason": "test_quantum_failure",
+                "cronenberg_id": "test_cronenberg"
+            }
+        )
+
+        after_candidates = CatMind.consider(
+            cat=self.cat,
+            observations=self.observations()
+        )
+
+        after = next(
+            candidate
+            for candidate in after_candidates
+            if candidate["type"]
+            == "travel_through_known_quantum_box"
+        )
+
+        self.assertLess(
+            after["score"],
+            before["score"]
+        )
+
+        self.assertIn(
+            "negative_quantum_travel_memory",
+            after["reasons"]
+        )
+
 if __name__ == "__main__":
     unittest.main()
+
 
 
 
