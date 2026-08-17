@@ -1,4 +1,4 @@
-from copy import deepcopy
+﻿from copy import deepcopy
 
 
 class CatKnowledge:
@@ -46,6 +46,11 @@ class CatKnowledge:
         principles.setdefault(
             "quantum_boxes_are_paired",
             True
+        )
+
+        knowledge.setdefault(
+            "current_quantum_layer_map",
+            None
         )
 
         return knowledge
@@ -1763,8 +1768,8 @@ class CatKnowledge:
             position
         )
 
-        # Zaokrouhlení vytvoří praktickou
-        # oblast místo přesného matematického bodu.
+        # ZaokrouhlenĂ­ vytvoĹ™Ă­ praktickou
+        # oblast mĂ­sto pĹ™esnĂ©ho matematickĂ©ho bodu.
         return (
             f"{layer}:"
             f"{position['x']:.2f}:"

@@ -1,4 +1,4 @@
-import random
+﻿import random
 
 from universe.logger import UniverseLogger
 
@@ -422,6 +422,20 @@ class MeetingPlace:
         self.emit_event(
             event
         )
+
+        cat_distribution_system = getattr(
+            self,
+            "cat_distribution_system",
+            None
+        )
+
+        if cat_distribution_system is not None:
+            event["distribution"] = (
+                cat_distribution_system
+                .handle_after_milk(
+                    cat
+                )
+            )
 
         return event
 

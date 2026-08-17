@@ -1,4 +1,4 @@
-import unittest
+﻿import unittest
 
 from universe.universe import Universe
 from cats.cats import Cats
@@ -280,6 +280,173 @@ class CatIntentionExecutorTests(
             "no_current_intention"
         )
 
+
+    def test_visit_recipient_requests_follow_entity_navigation(
+        self
+    ):
+        self.set_intention(
+            "visit_recipient",
+            target={
+                "recipient": "wizard"
+            }
+        )
+
+        original_navigation = (
+            self.cats
+            .offer_navigation_for_suggested_intent
+        )
+
+        original_acceptance = (
+            self.cats
+            .accept_navigation_offer
+        )
+
+        captured = {}
+
+        def fake_navigation(
+            cat,
+            cronenbergs=None,
+            step_size=None
+        ):
+            captured[
+                "suggested_intent"
+            ] = cat.get(
+                "suggested_intent"
+            )
+
+            captured[
+                "navigation_target"
+            ] = cat.get(
+                "navigation_target"
+            )
+
+            return {
+                "name": "cat_navigation_offered",
+                "offered": True,
+                "accepted": False,
+                "route_id": "test_route",
+                "destination": "wizard",
+                "route_step_count": 1
+            }
+
+        def fake_acceptance(
+            cat
+        ):
+            return {
+                "name": "cat_navigation_offer_accepted",
+                "accepted": True,
+                "route_id": "test_route",
+                "destination": "wizard"
+            }
+
+        self.cats.offer_navigation_for_suggested_intent = (
+            fake_navigation
+        )
+
+        self.cats.accept_navigation_offer = (
+            fake_acceptance
+        )
+
+        try:
+            result = (
+                self.cats
+                .execute_cat_intention(
+                    self.cat
+                )
+            )
+        finally:
+            self.cats.offer_navigation_for_suggested_intent = (
+                original_navigation
+            )
+
+            self.cats.accept_navigation_offer = (
+                original_acceptance
+            )
+
+        self.assertTrue(
+            result["executed"]
+        )
+
+        self.assertEqual(
+            result["intention"],
+            "visit_recipient"
+        )
+
+        self.assertEqual(
+            result["body_intent"],
+            "follow_entity"
+        )
+
+        self.assertEqual(
+            captured["suggested_intent"],
+            "follow_entity"
+        )
+
+        self.assertEqual(
+            captured["navigation_target"],
+            "wizard"
+        )
+
+    def test_visit_recipient_starts_direct_route_in_same_layer(
+        self
+    ):
+        recipient = {
+            "id": "wizard",
+            "type": "idea_entity",
+            "needs_cat": False,
+            "current_layer": "idea_universe",
+            "position": {
+                "x": 4.0,
+                "y": 3.0,
+                "z": 0.0
+            }
+        }
+
+        self.universe.cat_recipient_registry.register(
+            recipient
+        )
+
+        self.cat["current_layer"] = (
+            "idea_universe"
+        )
+
+        self.set_intention(
+            "visit_recipient",
+            target={
+                "recipient": "wizard"
+            }
+        )
+
+        result = (
+            self.cats
+            .execute_cat_intention(
+                self.cat
+            )
+        )
+
+        self.assertTrue(
+            result["executed"]
+        )
+
+        self.assertEqual(
+            result["body_intent"],
+            "follow_entity"
+        )
+
+        self.assertEqual(
+            result["destination"],
+            "recipient:wizard"
+        )
+
+        self.assertEqual(
+            self.cat["navigation_target"],
+            "wizard"
+        )
+
+        self.assertIn(
+            "active_route_id",
+            self.cat
+        )
 
 if __name__ == "__main__":
     unittest.main()

@@ -28,6 +28,14 @@ from quantum.cat_box_transfer import (
     CatQuantumBoxTransfer
 )
 
+from cats.cat_door_registry import (
+    CatDoorRegistry
+)
+
+from universe.cat_recipient_registry import (
+    CatRecipientRegistry
+)
+
 from universe.aroma_residue import AromaResidue
 
 class Universe:
@@ -100,6 +108,15 @@ class Universe:
                 self
             )
         )
+
+        self.cat_door_registry = (
+            CatDoorRegistry()
+        )
+
+        self.cat_recipient_registry = (
+            CatRecipientRegistry()
+        )
+
 
         self.quantum_event_bus.subscribe(
             "cronenberg_hunted",
@@ -1794,6 +1811,3 @@ class Universe:
 
 
         UniverseLogger.event("universe tick complete")
-
-
-

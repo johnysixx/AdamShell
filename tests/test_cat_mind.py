@@ -318,5 +318,55 @@ class CatMindTests(
             after_bar["reasons"]
         )
 
-if __name__ == "__main__":
-    unittest.main()
+    def test_assigned_cat_considers_visiting_recipient(
+        self
+    ):
+        cat = {
+            "name": "thinking_cat",
+            "type": "cat",
+            "recipient": "wizard",
+            "personality": {
+                "traits": {
+                    "curiosity": 0.5,
+                    "courage": 0.5,
+                    "aggression": 0.5,
+                    "empathy": 0.8,
+                    "patience": 0.5
+                }
+            }
+        }
+
+        observations = {
+            "bar_known": False
+        }
+
+        candidates = CatMind.consider(
+            cat,
+            observations
+        )
+
+        visit_recipient = next(
+            (
+                candidate
+                for candidate in candidates
+                if candidate["type"]
+                == "visit_recipient"
+            ),
+            None
+        )
+
+        self.assertIsNotNone(
+            visit_recipient
+        )
+
+        self.assertEqual(
+            visit_recipient["target"],
+            {
+                "recipient": "wizard"
+            }
+        )
+
+        self.assertIn(
+            "assigned_recipient",
+            visit_recipient["reasons"]
+        )

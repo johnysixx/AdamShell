@@ -22,7 +22,7 @@ class BackRoom:
         self.world_door = {
             "locked": True,
             "current_world_id": None,
-            "has_cat_door": True
+            "cat_door": None
         }
 
         self.world_window = {
@@ -33,6 +33,16 @@ class BackRoom:
             "allowed_user": "bartender",
             "entered_world_id": None
         }
+
+    def attach_world_cat_door(
+        self,
+        cat_door
+    ):
+        self.world_door["cat_door"] = (
+            cat_door
+        )
+
+        return cat_door
 
     def inspect_world(self, observer_name):
         if observer_name != "bartender":
@@ -57,7 +67,27 @@ class BackRoom:
             "universe_manual": (
                 self.universe_manual.public_state
             ),
-            "world_door": self.world_door,
+            "world_door": {
+                "locked": (
+                    self.world_door[
+                        "locked"
+                    ]
+                ),
+                "current_world_id": (
+                    self.world_door[
+                        "current_world_id"
+                    ]
+                ),
+                "cat_door": (
+                    self.world_door[
+                        "cat_door"
+                    ].public_state
+                    if self.world_door[
+                        "cat_door"
+                    ] is not None
+                    else None
+                )
+            },
             "world_window": self.world_window,
             "world_keypad": self.world_keypad
         }

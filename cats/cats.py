@@ -1,4 +1,4 @@
-import random
+﻿import random
 
 from universe.logger import UniverseLogger
 from .memory import CatMemory
@@ -477,6 +477,86 @@ class Cats:
                     cat_id=cat.get("name"),
                     start_position=(
                         start_position
+                    ),
+                    step_size=step_size
+                )
+            )
+
+        elif suggested_intent == (
+            "follow_entity"
+        ):
+            target_id = cat.get(
+                "navigation_target"
+            )
+
+            recipient_registry = getattr(
+                self.universe,
+                "cat_recipient_registry",
+                None
+            )
+
+            if recipient_registry is None:
+                return {
+                    "name": "cat_navigation_not_offered",
+                    "result": "recipient_registry_missing",
+                    "cat": cat.get("name"),
+                    "suggested_intent": suggested_intent,
+                    "offered": False
+                }
+
+            recipient = recipient_registry.find(
+                target_id
+            )
+
+            if recipient is None:
+                return {
+                    "name": "cat_navigation_not_offered",
+                    "result": "recipient_not_found",
+                    "cat": cat.get("name"),
+                    "navigation_target": target_id,
+                    "offered": False
+                }
+
+            recipient_layer = recipient.get(
+                "current_layer"
+            )
+
+            if recipient_layer != cat.get(
+                "current_layer"
+            ):
+                return {
+                    "name": "cat_navigation_not_offered",
+                    "result": "recipient_in_other_layer",
+                    "cat": cat.get("name"),
+                    "navigation_target": target_id,
+                    "recipient_layer": recipient_layer,
+                    "cat_layer": cat.get("current_layer"),
+                    "offered": False
+                }
+
+            recipient_position = recipient.get(
+                "position"
+            )
+
+            if recipient_position is None:
+                return {
+                    "name": "cat_navigation_not_offered",
+                    "result": "recipient_has_no_position",
+                    "cat": cat.get("name"),
+                    "navigation_target": target_id,
+                    "offered": False
+                }
+
+            plan = (
+                quantum_space
+                .plan_direct_cat_route(
+                    cat_id=cat.get("name"),
+                    start_position=start_position,
+                    destination_position=(
+                        recipient_position
+                    ),
+                    destination=(
+                        f"recipient:{target_id}"
                     ),
                     step_size=step_size
                 )

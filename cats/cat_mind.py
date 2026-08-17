@@ -7,6 +7,7 @@ class CatMind:
 
     INTENTION_TYPES = (
         "visit_bar",
+        "visit_recipient",
         "hunt_cronenberg",
         "track_cronenberg_scent",
         "follow_known_scent",
@@ -183,6 +184,33 @@ class CatMind:
                             else []
                         )
                     ]
+                )
+            )
+
+        recipient = cat.get(
+            "recipient"
+        )
+
+        if recipient is not None:
+            recipient_score = (
+                0.25
+                + empathy * 0.30
+                + curiosity * 0.10
+                + patience * 0.05
+            )
+
+            candidates.append(
+                cls._candidate(
+                    intention_type="visit_recipient",
+                    score=recipient_score,
+                    reasons=[
+                        "assigned_recipient",
+                        "empathy",
+                        "curiosity"
+                    ],
+                    target={
+                        "recipient": recipient
+                    }
                 )
             )
 
@@ -1481,14 +1509,3 @@ class CatMind:
             0.30,
             positive_count * 0.06
         )
-
-
-
-
-
-
-
-
-
-
-

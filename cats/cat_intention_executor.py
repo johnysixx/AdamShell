@@ -13,6 +13,7 @@ class CatIntentionExecutor:
 
     NAVIGATION_INTENTS = {
         "visit_bar": "return_to_bar",
+        "visit_recipient": "follow_entity",
         "hunt_cronenberg": (
             "hunt_nearest_cronenberg"
         ),
@@ -211,6 +212,17 @@ class CatIntentionExecutor:
                 intention_type
             ]
         )
+
+        if intention_type == "visit_recipient":
+            target = intention.get(
+                "target"
+            ) or {}
+
+            cat["navigation_target"] = (
+                target.get(
+                    "recipient"
+                )
+            )
 
         previous_suggestion = cat.get(
             "suggested_intent"
@@ -3388,12 +3400,3 @@ class CatIntentionExecutor:
             )
 
         return event
-
-
-
-
-
-
-
-
-
