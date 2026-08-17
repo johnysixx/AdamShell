@@ -16,6 +16,7 @@ from .back_room import BackRoom
 from .glass_shelf import GlassShelf
 from .bar_entity_policy import BarEntityPolicy
 from .bar_geometry_terminal import BarGeometryTerminal
+from .bar_hex_geometry import BarHexGeometry
 from .back_room_black_box import BackRoomBlackBox
 from .lemonade_reservoir import LemonadeReservoir
 from .lemonade_signs import LemonadeSigns
@@ -95,6 +96,7 @@ class MeetingPlace:
         self.lemonade_signs = LemonadeSigns()
         self.terminals = BarTerminals()
         self.geometry_terminal = BarGeometryTerminal()
+        self.bar_geometry = BarHexGeometry()
         self.bouncer = Bouncer()
         self.service_rules = BarServiceRules()
         self.back_room = BackRoom(
@@ -1564,3 +1566,4 @@ class MeetingPlace:
         b.energy += transfer
 
         self.emit_event(f"{a.name} -> {b.name} energy transfer {transfer}")
+
