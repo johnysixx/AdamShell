@@ -306,8 +306,158 @@ class BarArrivalProtocolTests(
         )
 
 
+    def test_fourth_guest_expands_complete_bar_module(
+        self
+    ):
+        initial_customer = len([
+            cell
+            for cell in self.geometry.cells
+            if cell["kind"] == "customer_floor"
+        ])
+
+        initial_bar = len([
+            cell
+            for cell in self.geometry.cells
+            if cell["kind"] == "bar"
+        ])
+
+        initial_service = len([
+            cell
+            for cell in self.geometry.cells
+            if cell["kind"] == "service_floor"
+        ])
+
+        guests = [
+            {
+                "name": f"guest_{index}",
+                "state": "entering",
+                "position": None
+            }
+            for index in range(
+                1,
+                5
+            )
+        ]
+
+        for guest in guests:
+            self.assertTrue(
+                self.protocol.arrive(
+                    guest
+                )
+            )
+
+        customer = len([
+            cell
+            for cell in self.geometry.cells
+            if cell["kind"] == "customer_floor"
+        ])
+
+        bar = len([
+            cell
+            for cell in self.geometry.cells
+            if cell["kind"] == "bar"
+        ])
+
+        service = len([
+            cell
+            for cell in self.geometry.cells
+            if cell["kind"] == "service_floor"
+        ])
+
+        self.assertEqual(
+            customer,
+            initial_customer + 1
+        )
+
+        self.assertEqual(
+            bar,
+            initial_bar + 1
+        )
+
+        self.assertEqual(
+            service,
+            initial_service + 2
+        )
+
+
+    def test_fifth_guest_expands_another_complete_bar_module(
+        self
+    ):
+        initial_customer = len([
+            cell
+            for cell in self.geometry.cells
+            if cell["kind"] == "customer_floor"
+        ])
+
+        initial_bar = len([
+            cell
+            for cell in self.geometry.cells
+            if cell["kind"] == "bar"
+        ])
+
+        initial_service = len([
+            cell
+            for cell in self.geometry.cells
+            if cell["kind"] == "service_floor"
+        ])
+
+        guests = [
+            {
+                "name": f"guest_{index}",
+                "state": "entering",
+                "position": None
+            }
+            for index in range(
+                1,
+                6
+            )
+        ]
+
+        for guest in guests:
+            self.assertTrue(
+                self.protocol.arrive(
+                    guest
+                )
+            )
+
+        customer = len([
+            cell
+            for cell in self.geometry.cells
+            if cell["kind"] == "customer_floor"
+        ])
+
+        bar = len([
+            cell
+            for cell in self.geometry.cells
+            if cell["kind"] == "bar"
+        ])
+
+        service = len([
+            cell
+            for cell in self.geometry.cells
+            if cell["kind"] == "service_floor"
+        ])
+
+        self.assertEqual(
+            customer,
+            initial_customer + 2
+        )
+
+        self.assertEqual(
+            bar,
+            initial_bar + 2
+        )
+
+        self.assertEqual(
+            service,
+            initial_service + 4
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
+
+
 
 
 

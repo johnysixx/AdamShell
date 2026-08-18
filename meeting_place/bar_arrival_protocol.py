@@ -29,7 +29,7 @@
 
         if destination is None:
             destination = (
-                self.geometry.expand_customer_frontage()
+                self.geometry.expand_bar()
             )
 
         if destination is None:
@@ -68,5 +68,6 @@
         guest["state"] = "at_bar"
 
         return True
+
 
 

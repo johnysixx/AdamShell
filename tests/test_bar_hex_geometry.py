@@ -1,4 +1,4 @@
-import unittest
+﻿import unittest
 
 from meeting_place.bar_hex_geometry import (
     BarHexGeometry
@@ -519,7 +519,7 @@ class BarHexGeometryTests(
 
         self.assertEqual(
             back_room["x"],
-            5000
+            6000
         )
 
         self.assertLess(
@@ -533,7 +533,7 @@ class BarHexGeometryTests(
         )
 
 
-    def test_bar_has_three_hex_service_area(
+    def test_bar_has_six_hex_service_area(
         self
     ):
         service = [
@@ -544,13 +544,16 @@ class BarHexGeometryTests(
 
         self.assertEqual(
             len(service),
-            3
+            6
         )
 
         expected_positions = {
-            (4000, 0),
             (3500, -866.0254),
-            (3500, 866.0254)
+            (4000, 0),
+            (3500, 866.0254),
+            (4500, -866.0254),
+            (5000, 0),
+            (4500, 866.0254)
         }
 
         actual_positions = {
@@ -584,7 +587,7 @@ class BarHexGeometryTests(
             )
 
 
-    def test_bar_has_three_hex_service_area(
+    def test_bar_has_six_hex_service_area(
         self
     ):
         service = [
@@ -595,13 +598,16 @@ class BarHexGeometryTests(
 
         self.assertEqual(
             len(service),
-            3
+            6
         )
 
         expected_positions = {
-            (4000, 0),
             (3500, -866.0254),
-            (3500, 866.0254)
+            (4000, 0),
+            (3500, 866.0254),
+            (4500, -866.0254),
+            (5000, 0),
+            (4500, 866.0254)
         }
 
         actual_positions = {
@@ -1132,5 +1138,82 @@ class BarHexGeometryTests(
         )
 
 
+    def test_initial_bar_has_three_modules_and_two_deep_service_area(
+        self
+    ):
+        customer = [
+            cell
+            for cell in self.geometry.cells
+            if cell["kind"] == "customer_floor"
+        ]
+
+        bar = [
+            cell
+            for cell in self.geometry.cells
+            if cell["kind"] == "bar"
+        ]
+
+        service = [
+            cell
+            for cell in self.geometry.cells
+            if cell["kind"] == "service_floor"
+        ]
+
+        self.assertEqual(
+            len(customer),
+            3
+        )
+
+        self.assertEqual(
+            len(bar),
+            3
+        )
+
+        self.assertEqual(
+            len(service),
+            6
+        )
+
+        expected_service_positions = {
+            (3500, -866.0254),
+            (4000, 0),
+            (3500, 866.0254),
+            (4500, -866.0254),
+            (5000, 0),
+            (4500, 866.0254)
+        }
+
+        actual_service_positions = {
+            (
+                cell["x"],
+                cell["y"]
+            )
+            for cell in service
+        }
+
+        self.assertEqual(
+            actual_service_positions,
+            expected_service_positions
+        )
+
+        back_room = self.geometry.find_cell(
+            name="back_room_door"
+        )
+
+        self.assertEqual(
+            back_room["x"],
+            6000
+        )
+
+        self.assertEqual(
+            back_room["y"],
+            0
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
+
+
+
+

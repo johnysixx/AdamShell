@@ -429,8 +429,59 @@
 
         self.cells.append(
             self._cell(
-                name="back_room_door",
+                name="bar_service_floor_deep_upper",
+                x=4500,
+                y=-866.0254,
+                kind="service_floor",
+                walkable=True,
+                standing=False,
+                seating=False,
+                door=False,
+                connects_to=None,
+                immutable=False,
+                furniture_allowed=False,
+                ring=None
+            )
+        )
+
+        self.cells.append(
+            self._cell(
+                name="bar_service_floor_deep_center",
                 x=5000,
+                y=0,
+                kind="service_floor",
+                walkable=True,
+                standing=False,
+                seating=False,
+                door=False,
+                connects_to=None,
+                immutable=False,
+                furniture_allowed=False,
+                ring=None
+            )
+        )
+
+        self.cells.append(
+            self._cell(
+                name="bar_service_floor_deep_lower",
+                x=4500,
+                y=866.0254,
+                kind="service_floor",
+                walkable=True,
+                standing=False,
+                seating=False,
+                door=False,
+                connects_to=None,
+                immutable=False,
+                furniture_allowed=False,
+                ring=None
+            )
+        )
+
+        self.cells.append(
+            self._cell(
+                name="back_room_door",
+                x=6000,
                 y=0,
                 kind="back_room_door",
                 walkable=True,
@@ -589,7 +640,7 @@
 
         return None
 
-    def expand_customer_frontage(
+    def expand_bar(
         self
     ):
         bar_cells = [
@@ -598,56 +649,111 @@
             if cell["kind"] == "bar"
         ]
 
-        candidates = []
+        bar_count = len(
+            bar_cells
+        )
 
-        for bar_cell in bar_cells:
-            for candidate in self.neighbors(
-                bar_cell
-            ):
-                if not candidate["walkable"]:
-                    continue
-
-                if candidate["immutable"]:
-                    continue
-
-                if candidate["occupied_by"] is not None:
-                    continue
-
-                if candidate["kind"] not in {
-                    "open_floor",
-                    "seating_place",
-                    "standing_place"
-                }:
-                    continue
-
-                if candidate not in candidates:
-                    candidates.append(
-                        candidate
-                    )
-
-        if not candidates:
+        if bar_count < 3:
             return None
 
-        candidates.sort(
-            key=lambda cell: (
-                abs(cell["y"]),
-                cell["y"],
-                cell["x"]
+        extra_index = (
+            bar_count
+            - 3
+        )
+
+        level = (
+            2
+            + extra_index // 2
+        )
+
+        side = (
+            -1
+            if extra_index % 2 == 0
+            else 1
+        )
+
+        y = round(
+            side
+            * 866.0254
+            * level,
+            4
+        )
+
+        customer_x = (
+            2000
+            - 500 * level
+        )
+
+        bar_x = (
+            customer_x
+            + 1000
+        )
+
+        service_front_x = (
+            customer_x
+            + 2000
+        )
+
+        service_back_x = (
+            customer_x
+            + 3000
+        )
+
+        customer = self.find_cell(
+            x=customer_x,
+            y=y
+        )
+
+        bar = self.find_cell(
+            x=bar_x,
+            y=y
+        )
+
+        if (
+            customer is None
+            or bar is None
+        ):
+            return None
+
+        if (
+            customer["occupied_by"]
+            is not None
+            or bar["occupied_by"]
+            is not None
+        ):
+            return None
+
+        service_front_existing = (
+            self.find_cell(
+                x=service_front_x,
+                y=y
             )
         )
 
-        new_place = candidates[0]
+        service_back_existing = (
+            self.find_cell(
+                x=service_back_x,
+                y=y
+            )
+        )
 
-        customer_count = len([
-            cell
-            for cell in self.cells
-            if cell["kind"] == "customer_floor"
-        ])
+        if (
+            service_front_existing
+            is not None
+            or service_back_existing
+            is not None
+        ):
+            return None
 
-        new_place.update({
+        module_number = (
+            bar_count
+            + 1
+        )
+
+        customer.update({
             "name": (
                 "dynamic_customer_floor_"
-                f"{customer_count + 1:02d}"
+                f"{module_number:02d}"
             ),
             "kind": "customer_floor",
             "walkable": True,
@@ -658,8 +764,61 @@
             "furniture_allowed": False
         })
 
-        return new_place
+        bar.update({
+            "name": (
+                "dynamic_bar_"
+                f"{module_number:02d}"
+            ),
+            "kind": "bar",
+            "walkable": False,
+            "standing": False,
+            "seating": False,
+            "door": False,
+            "connects_to": None,
+            "furniture_allowed": False
+        })
 
+        self.cells.append(
+            self._cell(
+                name=(
+                    "dynamic_service_front_"
+                    f"{module_number:02d}"
+                ),
+                x=service_front_x,
+                y=y,
+                kind="service_floor",
+                walkable=True,
+                standing=False,
+                seating=False,
+                door=False,
+                connects_to=None,
+                immutable=False,
+                furniture_allowed=False,
+                ring=None
+            )
+        )
+
+        self.cells.append(
+            self._cell(
+                name=(
+                    "dynamic_service_back_"
+                    f"{module_number:02d}"
+                ),
+                x=service_back_x,
+                y=y,
+                kind="service_floor",
+                walkable=True,
+                standing=False,
+                seating=False,
+                door=False,
+                connects_to=None,
+                immutable=False,
+                furniture_allowed=False,
+                ring=None
+            )
+        )
+
+        return customer
     def occupy_cell(
         self,
         entity_id,
@@ -844,5 +1003,7 @@
                 for cell in self.cells
             ]
         }
+
+
 
 
