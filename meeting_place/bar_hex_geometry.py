@@ -1,4 +1,4 @@
-class BarHexGeometry:
+﻿class BarHexGeometry:
 
     HEX_WIDTH = 1000
     HEX_HEIGHT = 1000
@@ -589,6 +589,77 @@ class BarHexGeometry:
 
         return None
 
+    def expand_customer_frontage(
+        self
+    ):
+        bar_cells = [
+            cell
+            for cell in self.cells
+            if cell["kind"] == "bar"
+        ]
+
+        candidates = []
+
+        for bar_cell in bar_cells:
+            for candidate in self.neighbors(
+                bar_cell
+            ):
+                if not candidate["walkable"]:
+                    continue
+
+                if candidate["immutable"]:
+                    continue
+
+                if candidate["occupied_by"] is not None:
+                    continue
+
+                if candidate["kind"] not in {
+                    "open_floor",
+                    "seating_place",
+                    "standing_place"
+                }:
+                    continue
+
+                if candidate not in candidates:
+                    candidates.append(
+                        candidate
+                    )
+
+        if not candidates:
+            return None
+
+        candidates.sort(
+            key=lambda cell: (
+                abs(cell["y"]),
+                cell["y"],
+                cell["x"]
+            )
+        )
+
+        new_place = candidates[0]
+
+        customer_count = len([
+            cell
+            for cell in self.cells
+            if cell["kind"] == "customer_floor"
+        ])
+
+        new_place.update({
+            "name": (
+                "dynamic_customer_floor_"
+                f"{customer_count + 1:02d}"
+            ),
+            "kind": "customer_floor",
+            "walkable": True,
+            "standing": False,
+            "seating": False,
+            "door": False,
+            "connects_to": None,
+            "furniture_allowed": False
+        })
+
+        return new_place
+
     def occupy_cell(
         self,
         entity_id,
@@ -610,7 +681,8 @@ class BarHexGeometry:
 
         if cell["kind"] not in {
             "seating_place",
-            "standing_place"
+            "standing_place",
+            "customer_floor"
         }:
             return False
 
@@ -772,3 +844,5 @@ class BarHexGeometry:
                 for cell in self.cells
             ]
         }
+
+
