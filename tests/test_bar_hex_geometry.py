@@ -1,4 +1,4 @@
-﻿import unittest
+import unittest
 
 from meeting_place.bar_hex_geometry import (
     BarHexGeometry
@@ -941,25 +941,196 @@ class BarHexGeometryTests(
         )
 
 
+    def test_seating_and_standing_places_start_unoccupied(
+        self
+    ):
+        places = [
+            cell
+            for cell in self.geometry.cells
+            if cell["kind"] in {
+                "seating_place",
+                "standing_place"
+            }
+        ]
+
+        self.assertGreater(
+            len(places),
+            0
+        )
+
+        for cell in places:
+            self.assertIn(
+                "occupied_by",
+                cell
+            )
+
+            self.assertIsNone(
+                cell["occupied_by"]
+            )
+
+
+    def test_nearest_reachable_cell_skips_occupied_place(
+        self
+    ):
+        entrance = self.geometry.find_cell(
+            name="entrance_door"
+        )
+
+        first_seat = self.geometry.nearest_reachable_cell(
+            entrance,
+            kind="seating_place"
+        )
+
+        self.assertIsNotNone(
+            first_seat
+        )
+
+        first_seat["occupied_by"] = "entity_1"
+
+        second_seat = self.geometry.nearest_reachable_cell(
+            entrance,
+            kind="seating_place"
+        )
+
+        self.assertIsNotNone(
+            second_seat
+        )
+
+        self.assertIsNot(
+            second_seat,
+            first_seat
+        )
+
+        self.assertIsNone(
+            second_seat["occupied_by"]
+        )
+
+
+    def test_entity_can_occupy_free_seating_place(
+        self
+    ):
+        entrance = self.geometry.find_cell(
+            name="entrance_door"
+        )
+
+        seat = self.geometry.nearest_reachable_cell(
+            entrance,
+            kind="seating_place"
+        )
+
+        result = self.geometry.occupy_cell(
+            "entity_1",
+            seat
+        )
+
+        self.assertTrue(
+            result
+        )
+
+        self.assertEqual(
+            seat["occupied_by"],
+            "entity_1"
+        )
+
+
+    def test_entity_cannot_replace_other_occupant(
+        self
+    ):
+        entrance = self.geometry.find_cell(
+            name="entrance_door"
+        )
+
+        seat = self.geometry.nearest_reachable_cell(
+            entrance,
+            kind="seating_place"
+        )
+
+        first = self.geometry.occupy_cell(
+            "entity_1",
+            seat
+        )
+
+        second = self.geometry.occupy_cell(
+            "entity_2",
+            seat
+        )
+
+        self.assertTrue(
+            first
+        )
+
+        self.assertFalse(
+            second
+        )
+
+        self.assertEqual(
+            seat["occupied_by"],
+            "entity_1"
+        )
+
+
+    def test_entity_can_release_own_place(
+        self
+    ):
+        entrance = self.geometry.find_cell(
+            name="entrance_door"
+        )
+
+        seat = self.geometry.nearest_reachable_cell(
+            entrance,
+            kind="seating_place"
+        )
+
+        self.geometry.occupy_cell(
+            "entity_1",
+            seat
+        )
+
+        result = self.geometry.release_cell(
+            "entity_1",
+            seat
+        )
+
+        self.assertTrue(
+            result
+        )
+
+        self.assertIsNone(
+            seat["occupied_by"]
+        )
+
+
+    def test_entity_cannot_release_other_occupants_place(
+        self
+    ):
+        entrance = self.geometry.find_cell(
+            name="entrance_door"
+        )
+
+        seat = self.geometry.nearest_reachable_cell(
+            entrance,
+            kind="seating_place"
+        )
+
+        self.geometry.occupy_cell(
+            "entity_1",
+            seat
+        )
+
+        result = self.geometry.release_cell(
+            "entity_2",
+            seat
+        )
+
+        self.assertFalse(
+            result
+        )
+
+        self.assertEqual(
+            seat["occupied_by"],
+            "entity_1"
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

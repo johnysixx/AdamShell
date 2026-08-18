@@ -1,4 +1,4 @@
-﻿class BarHexGeometry:
+class BarHexGeometry:
 
     HEX_WIDTH = 1000
     HEX_HEIGHT = 1000
@@ -30,7 +30,8 @@
         connects_to=None,
         immutable=False,
         furniture_allowed=True,
-        ring=None
+        ring=None,
+        occupied_by=None
     ):
         return {
             "name": name,
@@ -46,7 +47,8 @@
             "furniture_allowed": (
                 furniture_allowed
             ),
-            "ring": ring
+            "ring": ring,
+            "occupied_by": occupied_by
         }
 
     def build_immutable_core(self):
@@ -587,6 +589,64 @@
 
         return None
 
+    def occupy_cell(
+        self,
+        entity_id,
+        cell
+    ):
+        if (
+            entity_id is None
+            or cell is None
+        ):
+            return False
+
+        belongs_to_geometry = any(
+            candidate is cell
+            for candidate in self.cells
+        )
+
+        if not belongs_to_geometry:
+            return False
+
+        if cell["kind"] not in {
+            "seating_place",
+            "standing_place"
+        }:
+            return False
+
+        if cell["occupied_by"] is not None:
+            return False
+
+        cell["occupied_by"] = entity_id
+
+        return True
+
+    def release_cell(
+        self,
+        entity_id,
+        cell
+    ):
+        if (
+            entity_id is None
+            or cell is None
+        ):
+            return False
+
+        belongs_to_geometry = any(
+            candidate is cell
+            for candidate in self.cells
+        )
+
+        if not belongs_to_geometry:
+            return False
+
+        if cell["occupied_by"] != entity_id:
+            return False
+
+        cell["occupied_by"] = None
+
+        return True
+
     def nearest_reachable_cell(
         self,
         start,
@@ -613,9 +673,19 @@
 
             cursor += 1
 
-            if (
+            matches_kind = (
                 kind is None
                 or current["kind"] == kind
+            )
+
+            is_available = (
+                current["occupied_by"]
+                is None
+            )
+
+            if (
+                matches_kind
+                and is_available
             ):
                 return current
 
@@ -702,14 +772,3 @@
                 for cell in self.cells
             ]
         }
-
-
-
-
-
-
-
-
-
-
-
