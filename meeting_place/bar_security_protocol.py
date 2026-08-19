@@ -1,4 +1,5 @@
 from core.entity.cronenberg import Cronenberg
+from core.entity.existence import ExistenceResolver
 
 
 class BarSecurityProtocol:
@@ -134,8 +135,36 @@ class BarSecurityProtocol:
                 "energy_j": energy_j
             }
 
+            existence_result = (
+                ExistenceResolver
+                .remove_from_strongest_world(
+                    guest
+                )
+            )
+
             guest["existence_pct"] = 0.0
+
+            guest["exists_somewhere"] = (
+                ExistenceResolver
+                .exists_anywhere(
+                    guest
+                )
+            )
+
             guest["energy_j"] = 0.0
+
+            if existence_result["world"] is not None:
+                self.last_confiscation[
+                    "existence_world"
+                ] = existence_result[
+                    "world"
+                ]
+
+                self.last_confiscation[
+                    "removed_existence_pct"
+                ] = existence_result[
+                    "removed_existence_pct"
+                ]
 
         else:
             guest_name = getattr(
@@ -166,8 +195,36 @@ class BarSecurityProtocol:
                 "energy_j": energy_j
             }
 
+            existence_result = (
+                ExistenceResolver
+                .remove_from_strongest_world(
+                    guest
+                )
+            )
+
             guest.existence_pct = 0.0
+
+            guest.exists_somewhere = (
+                ExistenceResolver
+                .exists_anywhere(
+                    guest
+                )
+            )
+
             guest.energy_j = 0.0
+
+            if existence_result["world"] is not None:
+                self.last_confiscation[
+                    "existence_world"
+                ] = existence_result[
+                    "world"
+                ]
+
+                self.last_confiscation[
+                    "removed_existence_pct"
+                ] = existence_result[
+                    "removed_existence_pct"
+                ]
 
         self.last_energy_allocation = (
             self.split_confiscated_energy(

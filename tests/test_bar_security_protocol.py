@@ -857,5 +857,101 @@ class BarSecurityProtocolTests(
         )
 
 
+    def test_ejection_removes_existence_only_from_strongest_world(
+        self
+    ):
+        guest = {
+            "name": "guest_1",
+            "type": "guest",
+            "state": "behind_bar",
+            "position": {
+                "x": 4000,
+                "y": 0
+            },
+            "existence_pct": 70.0,
+            "native_world": "idea_universe",
+            "existence_by_world": {
+                "idea_universe": 20.0,
+                "root_universe": 70.0,
+                "eden": 40.0
+            },
+            "energy_j": 100.0
+        }
+
+        service = self.geometry.find_cell(
+            name="bar_service_floor"
+        )
+
+        result = self.protocol.handle_guest_entry(
+            guest,
+            service
+        )
+
+        self.assertTrue(
+            result
+        )
+
+        self.assertEqual(
+            guest["existence_by_world"],
+            {
+                "idea_universe": 20.0,
+                "root_universe": 0.0,
+                "eden": 40.0
+            }
+        )
+
+        self.assertTrue(
+            guest["exists_somewhere"]
+        )
+
+
+    def test_ejection_marks_entity_gone_if_no_world_existence_remains(
+        self
+    ):
+        guest = {
+            "name": "guest_1",
+            "type": "guest",
+            "state": "behind_bar",
+            "position": {
+                "x": 4000,
+                "y": 0
+            },
+            "existence_pct": 70.0,
+            "native_world": "root_universe",
+            "existence_by_world": {
+                "idea_universe": 0.0,
+                "root_universe": 70.0,
+                "eden": 0.0
+            },
+            "energy_j": 100.0
+        }
+
+        service = self.geometry.find_cell(
+            name="bar_service_floor"
+        )
+
+        result = self.protocol.handle_guest_entry(
+            guest,
+            service
+        )
+
+        self.assertTrue(
+            result
+        )
+
+        self.assertEqual(
+            guest["existence_by_world"],
+            {
+                "idea_universe": 0.0,
+                "root_universe": 0.0,
+                "eden": 0.0
+            }
+        )
+
+        self.assertFalse(
+            guest["exists_somewhere"]
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
