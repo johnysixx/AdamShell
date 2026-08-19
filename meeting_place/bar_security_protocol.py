@@ -61,25 +61,17 @@ class BarSecurityProtocol:
             )
         }
 
-    def handle_guest_entry(
+    def handle_bartender_red_button_press(
         self,
-        guest,
-        target
+        reason
     ):
-        if (
-            guest is None
-            or target is None
-        ):
-            return False
-
-        if target["kind"] != "service_floor":
-            return False
-
         red_button = (
             self.bar_counter.red_button
         )
 
-        red_button.activate_alarm()
+        if reason == "cat_alarm_clear":
+            red_button.clear_alarm()
+            return True
 
         pressed = (
             self.bartender
@@ -98,6 +90,38 @@ class BarSecurityProtocol:
         self.bouncer.position = (
             "inside_bar"
         )
+
+        return True
+
+    def handle_guest_entry(
+        self,
+        guest,
+        target
+    ):
+        if (
+            guest is None
+            or target is None
+        ):
+            return False
+
+        if target["kind"] != "service_floor":
+            return False
+
+
+        red_button = (
+            self.bar_counter.red_button
+        )
+
+        red_button.activate_alarm()
+
+        pressed = (
+            self.handle_bartender_red_button_press(
+                reason="unauthorized_area"
+            )
+        )
+
+        if not pressed:
+            return False
 
         ejected = self.bouncer.eject(
             guest
@@ -442,5 +466,19 @@ class BarSecurityProtocol:
                             )
                         )
                     )
+
+        blacklist = getattr(
+            self.bouncer,
+            "blacklist",
+            None
+        )
+
+        if (
+            blacklist is not None
+            and guest_name is not None
+        ):
+            blacklist.ban(
+                guest_name
+            )
 
         return True

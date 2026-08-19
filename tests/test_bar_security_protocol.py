@@ -1015,6 +1015,105 @@ class BarSecurityProtocolTests(
             )
         )
 
+    def test_unauthorized_bar_entry_adds_identity_to_blacklist(
+            self
+    ):
+        guest = {
+            "name": "guest_1",
+            "type": "guest",
+            "state": "behind_bar",
+            "position": {
+                "x": 4000,
+                "y": 0
+            },
+            "existence_pct": 100.0,
+            "energy_j": 100.0
+        }
+
+        service = self.geometry.find_cell(
+        name="bar_service_floor"
+    )
+
+        result = self.protocol.handle_guest_entry(
+        guest,
+        service
+    )
+
+        self.assertTrue(result)
+
+        self.assertTrue(
+        self.blacklist.is_banned(
+            "guest_1"
+        )
+    )
+
+    def test_generic_bartender_red_button_press_summons_bouncer_without_blacklist(
+        self
+    ):
+        self.bar_counter.red_button.activate_alarm()
+
+        pressed = (
+            self.protocol
+            .handle_bartender_red_button_press(
+                reason="generic_security_call"
+            )
+        )
+
+        self.assertTrue(
+            pressed
+        )
+
+        self.assertEqual(
+            self.bouncer.state,
+            "responding_inside_bar"
+        )
+
+        self.assertEqual(
+            self.bouncer.position,
+            "inside_bar"
+        )
+
+        self.assertEqual(
+            self.blacklist.denied_identities,
+            []
+        )
+
+
+    def test_cat_alarm_clear_does_not_summon_bouncer(
+        self
+    ):
+        self.bar_counter.red_button.activate_alarm()
+
+        result = (
+            self.protocol
+            .handle_bartender_red_button_press(
+                reason="cat_alarm_clear"
+            )
+        )
+
+        self.assertTrue(
+            result
+        )
+
+        self.assertFalse(
+            self.bar_counter.red_button.alarm_active
+        )
+
+        self.assertEqual(
+            self.bouncer.state,
+            "standing_outside_bar"
+        )
+
+        self.assertEqual(
+            self.bouncer.position,
+            "outside_bar"
+        )
+
+        self.assertEqual(
+            self.blacklist.denied_identities,
+            []
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,4 +1,4 @@
-﻿import unittest
+import unittest
 
 from meeting_place.bar_blacklist import BarBlacklist
 
@@ -61,6 +61,40 @@ class BarBlacklistTests(unittest.TestCase):
         from meeting_place.bouncer import Bouncer
 
         blacklist = BarBlacklist()
+
+        bouncer = Bouncer(
+            blacklist=blacklist
+        )
+
+        blacklist.ban(
+            "guest_1"
+        )
+
+        second_manifestation = {
+            "name": "guest_1",
+            "type": "guest"
+        }
+
+        self.assertTrue(
+            blacklist.is_banned(
+                "guest_1"
+            )
+        )
+
+        self.assertFalse(
+            bouncer.can_enter(
+                second_manifestation
+            )
+        )
+
+
+    def test_bouncer_ejection_alone_does_not_blacklist_identity(
+        self
+    ):
+        from meeting_place.bouncer import Bouncer
+
+        blacklist = BarBlacklist()
+
         bouncer = Bouncer(
             blacklist=blacklist
         )
@@ -74,24 +108,12 @@ class BarBlacklistTests(unittest.TestCase):
             guest
         )
 
-        self.assertTrue(
+        self.assertFalse(
             blacklist.is_banned(
                 "guest_1"
-            )
-        )
-
-        second_manifestation = {
-            "name": "guest_1",
-            "type": "guest"
-        }
-
-        self.assertFalse(
-            bouncer.can_enter(
-                second_manifestation
             )
         )
 
 
 if __name__ == "__main__":
     unittest.main()
-

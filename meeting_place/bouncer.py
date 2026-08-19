@@ -102,9 +102,6 @@ class Bouncer:
         if entity_name is None:
             return False
 
-        self.blacklist.ban(
-            entity_name
-        )
 
         if isinstance(
             entity,
@@ -117,7 +114,7 @@ class Bouncer:
             entity.position = None
 
         UniverseLogger.event(
-            f"BOUNCER EJECTS AND BANS: {entity_name}"
+            f"BOUNCER EJECTS: {entity_name}"
         )
 
         return True
