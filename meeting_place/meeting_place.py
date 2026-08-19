@@ -7,6 +7,7 @@ from .terminals import BarTerminals
 from .bar_counter import BarCounter
 from .bouncer import Bouncer
 from .bar_blacklist import BarBlacklist
+from .bar_incident_book import BarIncidentBook
 from .dice_vial import DiceVial
 from .dice_box import DiceBox
 from .cat_d20_adapter import CatD20Adapter
@@ -106,6 +107,10 @@ class MeetingPlace:
             BarBlacklist()
         )
 
+        self.bar_incident_book = (
+            BarIncidentBook()
+        )
+
         self.bouncer = Bouncer(
             blacklist=self.bar_blacklist
         )
@@ -149,6 +154,14 @@ class MeetingPlace:
 
         self.bar_security_protocol.bottle_shelf = (
             self.bottle_shelf
+        )
+
+        self.bar_security_protocol.incident_book = (
+            self.bar_incident_book
+        )
+
+        self.bar_security_protocol.incident_book = (
+            self.bar_incident_book
         )
 
         self.duplicate_consumption_energy = (

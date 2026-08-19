@@ -93,6 +93,52 @@ class BarSecurityProtocol:
 
         return True
 
+    def handle_security_incident(
+        self,
+        incident,
+        resolve_immediately=True
+    ):
+        incident_book = getattr(
+            self,
+            "incident_book",
+            None
+        )
+
+        if incident_book is None:
+            return False
+
+        self.last_incident_entry = (
+            incident_book.record(
+                incident
+            )
+        )
+
+        red_button = (
+            self.bar_counter.red_button
+        )
+
+        red_button.activate_alarm()
+
+        handled = (
+            self.handle_bartender_red_button_press(
+                reason=incident.get(
+                    "reason",
+                    "generic_security_call"
+                )
+            )
+        )
+
+        if not handled:
+            return False
+
+        if resolve_immediately:
+            incident_book.resolve(
+                self.last_incident_entry,
+                resolution="bouncer_summoned"
+            )
+
+        return True
+
     def handle_guest_entry(
         self,
         guest,
@@ -108,19 +154,31 @@ class BarSecurityProtocol:
             return False
 
 
-        red_button = (
-            self.bar_counter.red_button
-        )
-
-        red_button.activate_alarm()
-
-        pressed = (
-            self.handle_bartender_red_button_press(
-                reason="unauthorized_area"
+        guest_name = (
+            guest.get("world_key")
+            or guest.get("name")
+            if isinstance(guest, dict)
+            else getattr(
+                guest,
+                "name",
+                None
             )
         )
 
-        if not pressed:
+        incident = {
+            "name": "bar_security_incident",
+            "reason": "unauthorized_area",
+            "offender": guest_name
+        }
+
+        handled = (
+            self.handle_security_incident(
+                incident,
+                resolve_immediately=False
+            )
+        )
+
+        if not handled:
             return False
 
         ejected = self.bouncer.eject(
@@ -466,6 +524,29 @@ class BarSecurityProtocol:
                             )
                         )
                     )
+
+        incident_book = getattr(
+            self,
+            "incident_book",
+            None
+        )
+
+        last_incident_entry = getattr(
+            self,
+            "last_incident_entry",
+            None
+        )
+
+        if (
+            incident_book is not None
+            and last_incident_entry is not None
+        ):
+            incident_book.resolve(
+                last_incident_entry,
+                resolution=(
+                    "ejected_and_blacklisted"
+                )
+            )
 
         blacklist = getattr(
             self.bouncer,

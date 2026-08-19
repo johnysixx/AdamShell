@@ -19,6 +19,10 @@ from meeting_place.bar_blacklist import (
     BarBlacklist
 )
 
+from meeting_place.bar_incident_book import (
+    BarIncidentBook
+)
+
 from meeting_place.bar_hex_geometry import (
     BarHexGeometry
 )
@@ -46,6 +50,7 @@ class BarSecurityProtocolTests(
         )
 
         self.blacklist = BarBlacklist()
+        self.incident_book = BarIncidentBook()
 
         self.bouncer = Bouncer(
             blacklist=self.blacklist
@@ -56,6 +61,10 @@ class BarSecurityProtocolTests(
             bar_counter=self.bar_counter,
             bartender=self.bartender,
             bouncer=self.bouncer
+        )
+
+        self.protocol.incident_book = (
+            self.incident_book
         )
 
     def test_guest_behind_bar_makes_bartender_press_red_button(
@@ -1107,6 +1116,215 @@ class BarSecurityProtocolTests(
         self.assertEqual(
             self.bouncer.position,
             "outside_bar"
+        )
+
+        self.assertEqual(
+            self.blacklist.denied_identities,
+            []
+        )
+
+
+    def test_generic_security_incident_summons_bouncer_without_blacklist(
+        self
+    ):
+        incident = {
+            "name": "bar_security_incident",
+            "reason": "unknown_disturbance",
+            "offender": None,
+            "blacklist_after": False
+        }
+
+        result = (
+            self.protocol
+            .handle_security_incident(
+                incident
+            )
+        )
+
+        self.assertTrue(
+            result
+        )
+
+        self.assertEqual(
+            self.bouncer.state,
+            "responding_inside_bar"
+        )
+
+        self.assertEqual(
+            self.bouncer.position,
+            "inside_bar"
+        )
+
+        self.assertEqual(
+            self.blacklist.denied_identities,
+            []
+        )
+
+
+    def test_security_incident_is_recorded_before_response(
+        self
+    ):
+        from meeting_place.bar_incident_book import (
+            BarIncidentBook
+        )
+
+        incident_book = BarIncidentBook()
+
+        self.protocol.incident_book = (
+            incident_book
+        )
+
+        incident = {
+            "name": "bar_security_incident",
+            "reason": "unknown_disturbance",
+            "offender": None
+        }
+
+        result = (
+            self.protocol
+            .handle_security_incident(
+                incident
+            )
+        )
+
+        self.assertTrue(
+            result
+        )
+
+        self.assertEqual(
+            len(incident_book.incidents),
+            1
+        )
+
+        self.assertEqual(
+            incident_book.incidents[0][
+                "reason"
+            ],
+            "unknown_disturbance"
+        )
+
+        self.assertEqual(
+            self.bouncer.state,
+            "responding_inside_bar"
+        )
+
+
+    def test_unauthorized_area_incident_is_recorded_with_offender(
+        self
+    ):
+        guest = {
+            "name": "guest_1",
+            "type": "guest",
+            "state": "behind_bar",
+            "position": {
+                "x": 4000,
+                "y": 0
+            },
+            "existence_pct": 100.0,
+            "energy_j": 100.0
+        }
+
+        service = self.geometry.find_cell(
+            name="bar_service_floor"
+        )
+
+        result = self.protocol.handle_guest_entry(
+            guest,
+            service
+        )
+
+        self.assertTrue(
+            result
+        )
+
+        self.assertEqual(
+            len(self.incident_book.incidents),
+            1
+        )
+
+        incident = (
+            self.incident_book.incidents[0]
+        )
+
+        self.assertEqual(
+            incident["reason"],
+            "unauthorized_area"
+        )
+
+        self.assertEqual(
+            incident["offender"],
+            "guest_1"
+        )
+
+
+    def test_unauthorized_area_incident_is_marked_resolved(
+        self
+    ):
+        guest = {
+            "name": "guest_1",
+            "type": "guest",
+            "state": "behind_bar",
+            "position": {
+                "x": 4000,
+                "y": 0
+            },
+            "existence_pct": 100.0,
+            "energy_j": 100.0
+        }
+
+        service = self.geometry.find_cell(
+            name="bar_service_floor"
+        )
+
+        result = self.protocol.handle_guest_entry(
+            guest,
+            service
+        )
+
+        self.assertTrue(
+            result
+        )
+
+        incident = (
+            self.incident_book.incidents[-1]
+        )
+
+        self.assertTrue(
+            incident["resolved"]
+        )
+
+
+    def test_generic_security_incident_is_resolved_as_bouncer_summoned(
+        self
+    ):
+        incident = {
+            "name": "bar_security_incident",
+            "reason": "unknown_disturbance",
+            "offender": None
+        }
+
+        result = (
+            self.protocol
+            .handle_security_incident(
+                incident
+            )
+        )
+
+        self.assertTrue(
+            result
+        )
+
+        entry = (
+            self.incident_book.incidents[-1]
+        )
+
+        self.assertTrue(
+            entry["resolved"]
+        )
+
+        self.assertEqual(
+            entry["resolution"],
+            "bouncer_summoned"
         )
 
         self.assertEqual(
