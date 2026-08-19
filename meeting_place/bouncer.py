@@ -2,7 +2,10 @@ from universe.logger import UniverseLogger
 
 class Bouncer:
 
-    def __init__(self):
+    def __init__(
+        self,
+        blacklist
+    ):
         self.name = "bouncer"
         self.type = "bar_guard"
         self.state = "standing_outside_bar"
@@ -34,7 +37,7 @@ class Bouncer:
             "pazuzu_masculine_principle"
         ]
 
-        self.denied_guests = []
+        self.blacklist = blacklist
 
         self.cat_policy = {
             "cats_are_always_allowed": True,
@@ -75,7 +78,9 @@ class Bouncer:
 
             return True
 
-        if entity_name in self.denied_guests:
+        if self.blacklist.is_banned(
+            entity_name
+        ):
             UniverseLogger.event(f"BOUNCER DENIES ENTRY: {entity_name}")
             return False
 
@@ -97,10 +102,9 @@ class Bouncer:
         if entity_name is None:
             return False
 
-        if entity_name not in self.denied_guests:
-            self.denied_guests.append(
-                entity_name
-            )
+        self.blacklist.ban(
+            entity_name
+        )
 
         if isinstance(
             entity,

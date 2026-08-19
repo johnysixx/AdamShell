@@ -15,6 +15,10 @@ from meeting_place.bouncer import (
     Bouncer
 )
 
+from meeting_place.bar_blacklist import (
+    BarBlacklist
+)
+
 from meeting_place.bar_hex_geometry import (
     BarHexGeometry
 )
@@ -41,7 +45,11 @@ class BarSecurityProtocolTests(
             self.bar_counter.hidden_story_book
         )
 
-        self.bouncer = Bouncer()
+        self.blacklist = BarBlacklist()
+
+        self.bouncer = Bouncer(
+            blacklist=self.blacklist
+        )
 
         self.protocol = BarSecurityProtocol(
             geometry=self.geometry,
@@ -146,9 +154,10 @@ class BarSecurityProtocolTests(
             guest["position"]
         )
 
-        self.assertIn(
-            "guest_1",
-            self.bouncer.denied_guests
+        self.assertTrue(
+            self.blacklist.is_banned(
+                "guest_1"
+            )
         )
 
         self.assertFalse(
@@ -950,6 +959,60 @@ class BarSecurityProtocolTests(
 
         self.assertFalse(
             guest["exists_somewhere"]
+        )
+
+
+    def test_ban_applies_to_new_manifestation_of_same_identity(
+        self
+    ):
+        first_manifestation = {
+            "name": "guest_1",
+            "type": "guest",
+            "state": "behind_bar",
+            "position": {
+                "x": 4000,
+                "y": 0
+            },
+            "existence_pct": 70.0,
+            "native_world": "root_universe",
+            "existence_by_world": {
+                "root_universe": 70.0,
+                "eden": 40.0
+            },
+            "energy_j": 100.0
+        }
+
+        service = self.geometry.find_cell(
+            name="bar_service_floor"
+        )
+
+        result = self.protocol.handle_guest_entry(
+            first_manifestation,
+            service
+        )
+
+        self.assertTrue(
+            result
+        )
+
+        second_manifestation = {
+            "name": "guest_1",
+            "type": "guest",
+            "state": "arriving",
+            "position": None,
+            "existence_pct": 40.0,
+            "native_world": "eden",
+            "existence_by_world": {
+                "root_universe": 0.0,
+                "eden": 40.0
+            },
+            "energy_j": 10.0
+        }
+
+        self.assertFalse(
+            self.bouncer.can_enter(
+                second_manifestation
+            )
         )
 
 

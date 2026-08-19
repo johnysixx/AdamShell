@@ -6,6 +6,7 @@ from .bartender import Bartender
 from .terminals import BarTerminals
 from .bar_counter import BarCounter
 from .bouncer import Bouncer
+from .bar_blacklist import BarBlacklist
 from .dice_vial import DiceVial
 from .dice_box import DiceBox
 from .cat_d20_adapter import CatD20Adapter
@@ -100,7 +101,14 @@ class MeetingPlace:
         self.terminals = BarTerminals()
         self.geometry_terminal = BarGeometryTerminal()
         self.bar_geometry = BarHexGeometry()
-        self.bouncer = Bouncer()
+
+        self.bar_blacklist = (
+            BarBlacklist()
+        )
+
+        self.bouncer = Bouncer(
+            blacklist=self.bar_blacklist
+        )
         self.service_rules = BarServiceRules()
         self.back_room = BackRoom(
             self.universe.universe_registry
