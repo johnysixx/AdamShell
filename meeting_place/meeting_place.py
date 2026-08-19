@@ -1,4 +1,4 @@
-﻿import random
+import random
 
 from universe.logger import UniverseLogger
 
@@ -14,6 +14,8 @@ from .reservoirs import BarEnergyReservoir, BarEntropyReservoir
 from .service_rules import BarServiceRules
 from .back_room import BackRoom
 from .glass_shelf import GlassShelf
+from .bottle_shelf import BottleShelf
+from .bar_security_protocol import BarSecurityProtocol
 from .bar_entity_policy import BarEntityPolicy
 from .bar_geometry_terminal import BarGeometryTerminal
 from .bar_hex_geometry import BarHexGeometry
@@ -52,6 +54,7 @@ class MeetingPlace:
         self.tick_count = 0
         self.bar_counter = BarCounter()
         self.glass_shelf = GlassShelf()
+        self.bottle_shelf = BottleShelf()
         self.bar_entity_policy = BarEntityPolicy()
 
         self.dice_vial = DiceVial()
@@ -117,6 +120,27 @@ class MeetingPlace:
         }
         self.bartender = Bartender(
             self.bar_counter.hidden_story_book
+        )
+
+        self.bar_security_protocol = (
+            BarSecurityProtocol(
+                geometry=self.bar_geometry,
+                bar_counter=self.bar_counter,
+                bartender=self.bartender,
+                bouncer=self.bouncer
+            )
+        )
+
+        self.bar_security_protocol.universe = (
+            self.universe
+        )
+
+        self.bar_security_protocol.bar_energy_reservoir = (
+            self.energy_reservoir
+        )
+
+        self.bar_security_protocol.bottle_shelf = (
+            self.bottle_shelf
         )
 
         self.duplicate_consumption_energy = (
@@ -1566,4 +1590,3 @@ class MeetingPlace:
         b.energy += transfer
 
         self.emit_event(f"{a.name} -> {b.name} energy transfer {transfer}")
-

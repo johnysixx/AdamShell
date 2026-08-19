@@ -1,5 +1,7 @@
-﻿import unittest
+import unittest
 from unittest.mock import Mock, patch
+
+from universe.dark_sector import DarkSector
 
 from meeting_place.bar_counter import (
     BarCounter
@@ -707,6 +709,7 @@ class BarSecurityProtocolTests(
     ):
         universe = Mock()
         universe.energy_pool = 100.0
+        universe.dark_sector = DarkSector()
 
         self.protocol.universe = universe
 
@@ -737,7 +740,12 @@ class BarSecurityProtocolTests(
 
         self.assertEqual(
             universe.energy_pool,
-            150.0
+            145.0
+        )
+
+        self.assertEqual(
+            universe.dark_sector.dark_energy_j,
+            5.0
         )
 
         self.assertEqual(
@@ -784,7 +792,7 @@ class BarSecurityProtocolTests(
 
         bar_energy_reservoir.add_energy.assert_called_once_with(
             source="bar_security_confiscation",
-            amount_j=25.0
+            amount_j=20.0
         )
 
         self.assertEqual(
@@ -794,24 +802,60 @@ class BarSecurityProtocolTests(
             25.0
         )
 
+        self.assertEqual(
+            self.protocol.last_bar_dark_energy_j,
+            5.0
+        )
+
+
+    def test_bar_share_splits_energy_and_dark_energy(
+        self
+    ):
+        bar_energy_reservoir = Mock()
+        bottle_shelf = Mock()
+
+        self.protocol.bar_energy_reservoir = (
+            bar_energy_reservoir
+        )
+
+        self.protocol.bottle_shelf = (
+            bottle_shelf
+        )
+
+        guest = {
+            "name": "guest_1",
+            "type": "guest",
+            "state": "behind_bar",
+            "position": {
+                "x": 4000,
+                "y": 0
+            },
+            "existence_pct": 100.0,
+            "energy_j": 100.0
+        }
+
+        service = self.geometry.find_cell(
+            name="bar_service_floor"
+        )
+
+        result = self.protocol.handle_guest_entry(
+            guest,
+            service
+        )
+
+        self.assertTrue(
+            result
+        )
+
+        bar_energy_reservoir.add_energy.assert_called_once_with(
+            source="bar_security_confiscation",
+            amount_j=20.0
+        )
+
+        bottle_shelf.add_dark_energy.assert_called_once_with(
+            5.0
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

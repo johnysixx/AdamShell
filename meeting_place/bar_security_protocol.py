@@ -1,4 +1,4 @@
-﻿from core.entity.cronenberg import Cronenberg
+from core.entity.cronenberg import Cronenberg
 
 
 class BarSecurityProtocol:
@@ -22,6 +22,7 @@ class BarSecurityProtocol:
         self.last_security_box = None
         self.last_energy_allocation = None
         self.last_creation_energy_j = None
+        self.last_bar_dark_energy_j = None
 
     def interpret_security_roll(
         self,
@@ -193,16 +194,70 @@ class BarSecurityProtocol:
                 None
             )
 
+            multiverse_energy_j = (
+                self.last_energy_allocation[
+                    "multiverse_energy_j"
+                ]
+            )
+
+            multiverse_dark_energy_j = (
+                multiverse_energy_j * 0.10
+            )
+
+            multiverse_ordinary_energy_j = (
+                multiverse_energy_j
+                - multiverse_dark_energy_j
+            )
+
             if isinstance(
                 energy_pool,
                 (int, float)
             ):
                 universe.energy_pool = (
                     float(energy_pool)
-                    + self.last_energy_allocation[
-                        "multiverse_energy_j"
-                    ]
+                    + multiverse_ordinary_energy_j
                 )
+
+            dark_sector = getattr(
+                universe,
+                "dark_sector",
+                None
+            )
+
+            if dark_sector is not None:
+                dark_energy_j = getattr(
+                    dark_sector,
+                    "dark_energy_j",
+                    None
+                )
+
+                if isinstance(
+                    dark_energy_j,
+                    (int, float)
+                ):
+                    dark_sector.dark_energy_j = (
+                        float(dark_energy_j)
+                        + multiverse_dark_energy_j
+                    )
+
+        bar_energy_j = (
+            self.last_energy_allocation[
+                "bar_energy_j"
+            ]
+        )
+
+        bar_dark_energy_j = (
+            bar_energy_j * 0.20
+        )
+
+        bar_ordinary_energy_j = (
+            bar_energy_j
+            - bar_dark_energy_j
+        )
+
+        self.last_bar_dark_energy_j = (
+            bar_dark_energy_j
+        )
 
         bar_energy_reservoir = getattr(
             self,
@@ -214,10 +269,19 @@ class BarSecurityProtocol:
             bar_energy_reservoir.add_energy(
                 source="bar_security_confiscation",
                 amount_j=(
-                    self.last_energy_allocation[
-                        "bar_energy_j"
-                    ]
+                    bar_ordinary_energy_j
                 )
+            )
+
+        bottle_shelf = getattr(
+            self,
+            "bottle_shelf",
+            None
+        )
+
+        if bottle_shelf is not None:
+            bottle_shelf.add_dark_energy(
+                bar_dark_energy_j
             )
 
         cat_d20 = getattr(
@@ -323,21 +387,3 @@ class BarSecurityProtocol:
                     )
 
         return True
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
