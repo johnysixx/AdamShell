@@ -86,6 +86,38 @@ class Bouncer:
         UniverseLogger.event(f"BOUNCER DENIES ENTRY: {entity_name}")
         return False
 
+    def eject(
+        self,
+        entity
+    ):
+        entity_name = self._get_entity_name(
+            entity
+        )
+
+        if entity_name is None:
+            return False
+
+        if entity_name not in self.denied_guests:
+            self.denied_guests.append(
+                entity_name
+            )
+
+        if isinstance(
+            entity,
+            dict
+        ):
+            entity["state"] = "ejected"
+            entity["position"] = None
+        else:
+            entity.state = "ejected"
+            entity.position = None
+
+        UniverseLogger.event(
+            f"BOUNCER EJECTS AND BANS: {entity_name}"
+        )
+
+        return True
+
     def receive_cat_meow(
         self,
         cat
