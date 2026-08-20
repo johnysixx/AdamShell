@@ -41,6 +41,10 @@ class MeetingPlace:
         self.entities = []
         self.events = []
 
+        self.back_room_black_box = (
+            BackRoomBlackBox()
+        )
+
         self.cronenberg_area = {
             "state": "lemon_courtyard",
             "location": "behind_bar",
@@ -108,7 +112,9 @@ class MeetingPlace:
         )
 
         self.bar_incident_book = (
-            BarIncidentBook()
+            BarIncidentBook(
+                recorder=self.back_room_black_box
+            )
         )
 
         self.bouncer = Bouncer(
@@ -119,9 +125,6 @@ class MeetingPlace:
             self.universe.universe_registry
         )
 
-        self.back_room_black_box = (
-            BackRoomBlackBox()
-        )
 
         self.total_entropy_served_today = 0
         self.total_entropy_served_ever = 0

@@ -1,3 +1,4 @@
+from meeting_place.back_room_black_box import BackRoomBlackBox
 import unittest
 from unittest.mock import Mock, patch
 
@@ -50,7 +51,13 @@ class BarSecurityProtocolTests(
         )
 
         self.blacklist = BarBlacklist()
-        self.incident_book = BarIncidentBook()
+        self.back_room_black_box = (
+            BackRoomBlackBox()
+        )
+
+        self.incident_book = BarIncidentBook(
+            recorder=self.back_room_black_box
+        )
 
         self.bouncer = Bouncer(
             blacklist=self.blacklist
@@ -1129,6 +1136,7 @@ class BarSecurityProtocolTests(
     ):
         incident = {
             "name": "bar_security_incident",
+            "category": "disturbance",
             "reason": "unknown_disturbance",
             "offender": None,
             "blacklist_after": False
@@ -1168,7 +1176,9 @@ class BarSecurityProtocolTests(
             BarIncidentBook
         )
 
-        incident_book = BarIncidentBook()
+        incident_book = BarIncidentBook(
+            recorder=BackRoomBlackBox()
+        )
 
         self.protocol.incident_book = (
             incident_book
@@ -1176,6 +1186,7 @@ class BarSecurityProtocolTests(
 
         incident = {
             "name": "bar_security_incident",
+            "category": "disturbance",
             "reason": "unknown_disturbance",
             "offender": None
         }
@@ -1299,6 +1310,7 @@ class BarSecurityProtocolTests(
     ):
         incident = {
             "name": "bar_security_incident",
+            "category": "disturbance",
             "reason": "unknown_disturbance",
             "offender": None
         }

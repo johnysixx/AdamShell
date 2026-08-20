@@ -167,6 +167,7 @@ class BarSecurityProtocol:
 
         incident = {
             "name": "bar_security_incident",
+            "category": "access_violation",
             "reason": "unauthorized_area",
             "offender": guest_name
         }
