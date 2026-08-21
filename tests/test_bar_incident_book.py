@@ -520,5 +520,55 @@ class BarIncidentBookTests(unittest.TestCase):
         )
 
 
+    def test_real_security_incident_reaches_bartender_event_memory(
+        self
+    ):
+        from universe.universe import Universe
+        from multiverse import UniverseRegistry
+        from meeting_place.meeting_place import MeetingPlace
+
+        universe = Universe()
+        universe.universe_registry = UniverseRegistry()
+
+        meeting_place = MeetingPlace(
+            universe
+        )
+
+        incident = {
+            "name": "bar_security_incident",
+            "category": "disturbance",
+            "reason": "unknown_disturbance",
+            "offender": None
+        }
+
+        result = (
+            meeting_place
+            .bar_security_protocol
+            .handle_security_incident(
+                incident
+            )
+        )
+
+        self.assertTrue(
+            result
+        )
+
+        security_events = [
+            event
+            for event
+            in meeting_place.bartender.event_memory
+            if (
+                isinstance(event, dict)
+                and event.get("name")
+                == "bar_security_incident"
+            )
+        ]
+
+        self.assertEqual(
+            len(security_events),
+            1
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

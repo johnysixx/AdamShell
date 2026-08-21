@@ -30,7 +30,8 @@ class BarIncidentBook:
 
     def __init__(
         self,
-        recorder
+        recorder,
+        event_emitter=None
     ):
         if recorder is None:
             raise ValueError(
@@ -40,6 +41,7 @@ class BarIncidentBook:
         self.name = "bar_incident_book"
         self.type = "bar_security_record"
         self.recorder = recorder
+        self.event_emitter = event_emitter
 
         UniverseLogger.boot(
             "BAR INCIDENT BOOK CREATED"
@@ -165,7 +167,11 @@ class BarIncidentBook:
         entry["resolved"] = False
 
 
-        if self.recorder is not None:
+        if self.event_emitter is not None:
+            self.event_emitter(
+                entry
+            )
+        else:
             self.recorder.record(
                 event=entry["name"],
                 data=entry,

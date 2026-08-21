@@ -113,7 +113,8 @@ class MeetingPlace:
 
         self.bar_incident_book = (
             BarIncidentBook(
-                recorder=self.back_room_black_box
+                recorder=self.back_room_black_box,
+                event_emitter=self.emit_event
             )
         )
 
@@ -359,11 +360,25 @@ class MeetingPlace:
     def emit_event(self, event):
         self.events.append(event)
 
-        self.back_room_black_box.record(
-            event=event,
-            source="meeting_place",
-            tick=self.tick_count
-        )
+        if isinstance(
+            event,
+            dict
+        ):
+            self.back_room_black_box.record(
+                event=event.get(
+                    "name",
+                    "meeting_place_event"
+                ),
+                data=event,
+                source="meeting_place",
+                tick=self.tick_count
+            )
+        else:
+            self.back_room_black_box.record(
+                event=event,
+                source="meeting_place",
+                tick=self.tick_count
+            )
 
         self.bartender.observe_event(event)
         self.show_bar_story_count()
