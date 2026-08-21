@@ -22,6 +22,8 @@ from .bar_entity_policy import BarEntityPolicy
 from .bar_geometry_terminal import BarGeometryTerminal
 from .bar_hex_geometry import BarHexGeometry
 from .back_room_black_box import BackRoomBlackBox
+from .bar_clock import BarClock
+from .bar_clock import BarClock
 from .lemonade_reservoir import LemonadeReservoir
 from .lemonade_signs import LemonadeSigns
 from cats.duplicate_consumption_energy import (
@@ -43,6 +45,10 @@ class MeetingPlace:
 
         self.back_room_black_box = (
             BackRoomBlackBox()
+        )
+
+        self.bar_clock = (
+            BarClock()
         )
 
         self.cronenberg_area = {
@@ -1549,6 +1555,10 @@ class MeetingPlace:
 
     def tick(self):
         self.tick_count += 1
+        self.bar_clock.tick()
+
+        if self.bar_clock.hour == 0:
+            self.bartender.end_shift()
         UniverseLogger.event(f"MEETING PLACE TICK {self.tick_count}")
         self.bartender.idle_work()
 

@@ -16,6 +16,7 @@ class Bartender:
 
 
         self.event_memory = []
+
         self.regular_drinks = {}
         self.known_histories = {}
         self.known_guests = set()
@@ -56,9 +57,69 @@ class Bartender:
         return red_button.press()
 
     def observe_event(self, event):
-        self.event_memory.append(event)
-        self.story_book.write_entry(event)
-        UniverseLogger.event(f"BARTENDER OBSERVED EVENT: {event}")
+        self.event_memory.append(
+            event
+        )
+
+        UniverseLogger.event(
+            f"BARTENDER OBSERVED EVENT: {event}"
+        )
+
+    def end_shift(
+        self
+    ):
+        shift_entries = []
+
+        for event in self.event_memory:
+            if not isinstance(
+                event,
+                dict
+            ):
+                continue
+
+            if (
+                event.get("name")
+                != "bar_security_incident"
+            ):
+                continue
+
+            resolution = event.get(
+                "resolution"
+            )
+
+            if (
+                resolution
+                != "ejected_and_blacklisted"
+            ):
+                continue
+
+            entry = {
+                "type": "bartender_shift_story",
+                "subject": event.get(
+                    "offender"
+                ),
+                "observed_reason": event.get(
+                    "reason"
+                ),
+                "observed_outcome": "ejected"
+            }
+
+            self.story_book.write_entry(
+                entry
+            )
+
+            shift_entries.append(
+                entry
+            )
+
+        self.event_memory = []
+
+
+        UniverseLogger.event(
+            "BARTENDER SHIFT ENDED"
+        )
+
+        return shift_entries
 
     def knows_guest(self, guest_name):
         return guest_name in self.known_guests
@@ -294,4 +355,3 @@ class Bartender:
         )
 
         return serving_object
-
