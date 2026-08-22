@@ -1,4 +1,4 @@
-﻿import unittest
+import unittest
 
 from universe.universe import Universe
 from multiverse import UniverseRegistry
@@ -82,7 +82,7 @@ class BarClockIntegrationTests(unittest.TestCase):
 
         self.assertEqual(
             entries[0]["type"],
-            "bartender_shift_story"
+            "bartender_shift_chronicle"
         )
 
         self.assertEqual(
@@ -163,26 +163,394 @@ class BarClockIntegrationTests(unittest.TestCase):
 
         self.assertEqual(
             entry["type"],
-            "bartender_shift_story"
+            "bartender_shift_chronicle"
+        )
+
+        event = (
+            entry["events"][0]
         )
 
         self.assertEqual(
-            entry["subject"],
+            event["subject"],
             "guest_1"
         )
 
         self.assertEqual(
-            entry["observed_reason"],
+            event["observed_reason"],
             "unauthorized_area"
         )
 
         self.assertEqual(
-            entry["observed_outcome"],
+            event["observed_outcome"],
             "ejected"
+        )
+
+
+
+    def test_bartender_chronicles_are_numbered_by_bar_day(
+        self
+    ):
+        universe = Universe()
+        universe.universe_registry = UniverseRegistry()
+
+        meeting_place = MeetingPlace(
+            universe
+        )
+
+        meeting_place.bartender.observe_event(
+            "first shift event"
+        )
+
+        for _ in range(24):
+            meeting_place.tick()
+
+        meeting_place.bartender.observe_event(
+            "second shift event"
+        )
+
+        for _ in range(24):
+            meeting_place.tick()
+
+        entries = (
+            meeting_place
+            .bar_counter
+            .hidden_story_book
+            .read_entries()
+        )
+
+        self.assertEqual(
+            len(entries),
+            2
+        )
+
+        self.assertEqual(
+            entries[0]["bar_day"],
+            1
+        )
+
+        self.assertEqual(
+            entries[1]["bar_day"],
+            2
+        )
+
+        self.assertEqual(
+            entries[0]["events"][0][
+                "observed_event"
+            ],
+            "first shift event"
+        )
+
+        self.assertEqual(
+            entries[1]["events"][0][
+                "observed_event"
+            ],
+            "second shift event"
+        )
+    def test_shift_chronicle_records_tick_range(
+        self
+    ):
+        universe = Universe()
+        universe.universe_registry = UniverseRegistry()
+
+        meeting_place = MeetingPlace(
+            universe
+        )
+
+        meeting_place.bartender.observe_event(
+            "shift event"
+        )
+
+        for _ in range(24):
+            meeting_place.tick()
+
+        entries = (
+            meeting_place
+            .bar_counter
+            .hidden_story_book
+            .read_entries()
+        )
+
+        self.assertEqual(
+            len(entries),
+            1
+        )
+
+        chronicle = entries[0]
+
+        self.assertEqual(
+            chronicle["shift_start_tick"],
+            0
+        )
+
+        self.assertEqual(
+            chronicle["shift_end_tick"],
+            24
+        )
+
+
+    def test_consecutive_shift_chronicles_have_continuous_tick_ranges(
+        self
+    ):
+        universe = Universe()
+        universe.universe_registry = UniverseRegistry()
+
+        meeting_place = MeetingPlace(
+            universe
+        )
+
+        meeting_place.bartender.observe_event(
+            "first shift event"
+        )
+
+        for _ in range(24):
+            meeting_place.tick()
+
+        meeting_place.bartender.observe_event(
+            "second shift event"
+        )
+
+        for _ in range(24):
+            meeting_place.tick()
+
+        entries = (
+            meeting_place
+            .bar_counter
+            .hidden_story_book
+            .read_entries()
+        )
+
+        self.assertEqual(
+            entries[0]["shift_start_tick"],
+            0
+        )
+
+        self.assertEqual(
+            entries[0]["shift_end_tick"],
+            24
+        )
+
+        self.assertEqual(
+            entries[1]["shift_start_tick"],
+            24
+        )
+
+        self.assertEqual(
+            entries[1]["shift_end_tick"],
+            48
+        )
+
+
+    def test_new_bar_drink_is_noted_by_bartender(
+        self
+    ):
+        universe = Universe()
+        universe.universe_registry = UniverseRegistry()
+
+        meeting_place = MeetingPlace(
+            universe
+        )
+
+        drink = {
+            "name": "absinthe",
+            "type": "bar_drink"
+        }
+
+        meeting_place.add_drink(
+            drink=drink,
+            source="new_bottle"
+        )
+
+        self.assertIs(
+            meeting_place.drink_menu[
+                "absinthe"
+            ],
+            drink
+        )
+
+        self.assertEqual(
+            len(
+                meeting_place
+                .bartender
+                .chronicle_memory
+            ),
+            1
+        )
+
+        note = (
+            meeting_place
+            .bartender
+            .chronicle_memory[0]
+        )
+
+        self.assertEqual(
+            note["kind"],
+            "new_drink"
+        )
+
+        self.assertEqual(
+            note["drink"],
+            "absinthe"
+        )
+
+        self.assertEqual(
+            note["source"],
+            "new_bottle"
+        )
+
+
+    def test_new_bar_drink_is_written_to_shift_chronicle(
+        self
+    ):
+        universe = Universe()
+        universe.universe_registry = UniverseRegistry()
+
+        meeting_place = MeetingPlace(
+            universe
+        )
+
+        meeting_place.add_drink(
+            drink={
+                "name": "absinthe",
+                "type": "bar_drink"
+            },
+            source="new_bottle"
+        )
+
+        self.assertEqual(
+            len(
+                meeting_place
+                .bar_counter
+                .hidden_story_book
+                .read_entries()
+            ),
+            0
+        )
+
+        for _ in range(24):
+            meeting_place.tick()
+
+        entries = (
+            meeting_place
+            .bar_counter
+            .hidden_story_book
+            .read_entries()
+        )
+
+        self.assertEqual(
+            len(entries),
+            1
+        )
+
+        chronicle = entries[0]
+
+        self.assertEqual(
+            chronicle["bar_day"],
+            1
+        )
+
+        self.assertEqual(
+            len(
+                chronicle["events"]
+            ),
+            1
+        )
+
+        event = (
+            chronicle["events"][0]
+        )
+
+        self.assertEqual(
+            event["kind"],
+            "new_drink"
+        )
+
+        self.assertEqual(
+            event["drink"],
+            "absinthe"
+        )
+
+        self.assertEqual(
+            event["source"],
+            "new_bottle"
+        )
+
+
+    def test_new_bar_drink_is_written_to_shift_chronicle(
+        self
+    ):
+        universe = Universe()
+        universe.universe_registry = UniverseRegistry()
+
+        meeting_place = MeetingPlace(
+            universe
+        )
+
+        meeting_place.add_drink(
+            drink={
+                "name": "absinthe",
+                "type": "bar_drink"
+            },
+            source="new_bottle"
+        )
+
+        self.assertEqual(
+            len(
+                meeting_place
+                .bar_counter
+                .hidden_story_book
+                .read_entries()
+            ),
+            0
+        )
+
+        for _ in range(24):
+            meeting_place.tick()
+
+        entries = (
+            meeting_place
+            .bar_counter
+            .hidden_story_book
+            .read_entries()
+        )
+
+        self.assertEqual(
+            len(entries),
+            1
+        )
+
+        chronicle = entries[0]
+
+        self.assertEqual(
+            chronicle["bar_day"],
+            1
+        )
+
+        self.assertEqual(
+            len(
+                chronicle["events"]
+            ),
+            1
+        )
+
+        event = (
+            chronicle["events"][0]
+        )
+
+        self.assertEqual(
+            event["kind"],
+            "new_drink"
+        )
+
+        self.assertEqual(
+            event["drink"],
+            "absinthe"
+        )
+
+        self.assertEqual(
+            event["source"],
+            "new_bottle"
         )
 
 
 if __name__ == "__main__":
     unittest.main()
-
-

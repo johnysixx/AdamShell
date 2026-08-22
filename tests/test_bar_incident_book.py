@@ -64,7 +64,7 @@ class BarIncidentBookTests(unittest.TestCase):
                 "name": "bar_security_incident",
                 "category": "access_violation",
                 "reason": "unauthorized_area",
-                "offender": "guest_1"
+                "offender": "dement"
             }
         )
 

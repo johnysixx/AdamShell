@@ -36,12 +36,17 @@ from universe.aroma_foundations import (
 
 class MeetingPlace:
 
+    BAR_HALF_YEAR_DAYS = 180
+
     def __init__(self, universe):
         self.universe = universe
         self.universe.meeting_place = self
 
         self.entities = []
         self.events = []
+
+        self.guest_visit_history = {}
+        self.regular_guests = set()
 
         self.back_room_black_box = (
             BackRoomBlackBox()
@@ -93,6 +98,10 @@ class MeetingPlace:
             )
         }
 
+        self.new_drinks = {}
+
+        self.new_drinks = {}
+
         self.ambient_aroma = {
             "dominant_source": (
                 "raspberry_rum"
@@ -142,7 +151,10 @@ class MeetingPlace:
             "total_entropy_served_ever": self.total_entropy_served_ever
         }
         self.bartender = Bartender(
-            self.bar_counter.hidden_story_book
+            self.bar_counter.hidden_story_book,
+            on_cocktail_approved=(
+                self.add_approved_cocktail
+            )
         )
 
         self.bar_security_protocol = (
@@ -305,6 +317,114 @@ class MeetingPlace:
             "HIDDEN CRONENBERG PEN DISAPPEARS; LEMON COURTYARD REMAINS UNCHANGED"
         )
 
+    def record_guest_visit(
+        self,
+        guest_name
+    ):
+        current_day = (
+            self.bar_clock.day
+        )
+
+        visits = self.guest_visit_history.setdefault(
+            guest_name,
+            []
+        )
+
+        visits.append(
+            current_day
+        )
+
+        cutoff_day = (
+            current_day
+            - self.BAR_HALF_YEAR_DAYS
+        )
+
+        recent_visits = [
+            visit_day
+            for visit_day in visits
+            if visit_day >= cutoff_day
+        ]
+
+        self.guest_visit_history[
+            guest_name
+        ] = recent_visits
+
+        if (
+            len(recent_visits) >= 5
+            and guest_name
+            not in self.regular_guests
+        ):
+            self.regular_guests.add(
+                guest_name
+            )
+
+            self.bartender.regular_guests.add(
+                guest_name
+            )
+
+            UniverseLogger.event(
+                "BAR REGULAR GUEST RECOGNIZED: "
+                f"{guest_name}"
+            )
+
+        return len(
+            recent_visits
+        )
+    def refresh_regular_guest_status(
+        self,
+        guest_name
+    ):
+        if guest_name not in self.regular_guests:
+            return False
+
+        current_day = (
+            self.bar_clock.day
+        )
+
+        year_cutoff = (
+            current_day - 360
+        )
+
+        visits = (
+            self.guest_visit_history.get(
+                guest_name,
+                []
+            )
+        )
+
+        yearly_visits = [
+            visit_day
+            for visit_day in visits
+            if visit_day >= year_cutoff
+        ]
+
+        if len(yearly_visits) >= 2:
+            return True
+
+        self.regular_guests.discard(
+            guest_name
+        )
+
+        self.bartender.regular_guests.discard(
+            guest_name
+        )
+
+        UniverseLogger.event(
+            "BAR REGULAR GUEST STATUS LOST: "
+            f"{guest_name}"
+        )
+
+        return False
+
+    def is_regular_guest(
+        self,
+        guest_name
+    ):
+        return (
+            guest_name
+            in self.regular_guests
+        )
+
     def add_entity(self, entity):
         entity_name = self._get_entity_name(entity)
 
@@ -359,9 +479,24 @@ class MeetingPlace:
                 self.bartender.guest_arrives(entity_name)
             else:
                 self.handle_cat_after_entry(entity)
-                self.bartender.remember_guest(entity_name)
+                self.bartender.remember_guest(
+                    entity
+                )
         else:
-            self.bartender.guest_arrives(entity_name)
+            if not self.bartender.knows_guest(
+                entity_name
+            ):
+                self.bartender.remember_guest(
+                    entity
+                )
+
+            self.record_guest_visit(
+                entity_name
+            )
+
+            self.bartender.guest_arrives(
+                entity_name
+            )
 
     def emit_event(self, event):
         self.events.append(event)
@@ -1553,65 +1688,254 @@ class MeetingPlace:
             "service_effect": effect
         }
 
+    def add_approved_cocktail(
+        self,
+        recipe
+    ):
+        if not isinstance(
+            recipe,
+            dict
+        ):
+            raise ValueError(
+                "Approved cocktail requires recipe."
+            )
+
+        if (
+            recipe.get("status")
+            != "approved"
+            or not recipe.get(
+                "approved",
+                False
+            )
+        ):
+            raise ValueError(
+                "Cocktail is not approved."
+            )
+
+        drink_name = recipe.get(
+            "name"
+        )
+
+        if not drink_name:
+            raise ValueError(
+                "Approved cocktail requires name."
+            )
+
+        self.new_drinks[
+            drink_name
+        ] = recipe
+
+        self.bartender.chronicle_memory.append(
+            {
+                "kind": "new_menu_drink",
+                "drink": drink_name
+            }
+        )
+
+        UniverseLogger.event(
+            "BAR NEW DRINK ADDED: "
+            f"{drink_name}"
+        )
+
+        return recipe
+
+    def add_drink(
+        self,
+        drink,
+        source="bar"
+    ):
+        if isinstance(
+            drink,
+            dict
+        ):
+            drink_name = drink.get(
+                "name"
+            )
+        else:
+            drink_name = getattr(
+                drink,
+                "name",
+                None
+            )
+
+        if not drink_name:
+            raise ValueError(
+                "Bar drink requires name."
+            )
+
+        self.drink_menu[
+            drink_name
+        ] = drink
+
+        self.bartender.note_new_drink(
+            drink=drink_name,
+            source=source
+        )
+
+        UniverseLogger.event(
+            "BAR DRINK ADDED: "
+            f"{drink_name}"
+        )
+
+        return drink
+
     def tick(self):
         self.tick_count += 1
         self.bar_clock.tick()
 
         if self.bar_clock.hour == 0:
-            self.bartender.end_shift()
-        UniverseLogger.event(f"MEETING PLACE TICK {self.tick_count}")
+            self.bartender.end_shift(
+                bar_day=self.bar_clock.day,
+                shift_start_tick=(
+                    self.bar_clock.tick_count
+                    - 24
+                ),
+                shift_end_tick=(
+                    self.bar_clock.tick_count
+                )
+            )
+
+        UniverseLogger.event(
+            f"MEETING PLACE TICK {self.tick_count}"
+        )
+
         self.bartender.idle_work()
 
-        cronenberg_pen = getattr(self, "cronenberg_pen", None)
+        cronenberg_pen = getattr(
+            self,
+            "cronenberg_pen",
+            None
+        )
+
         if cronenberg_pen is not None:
             cronenberg_pen.tick()
+
         self._clear_events()
 
-    def show_library_book_count(self, library):
-        return self.terminals.show_book_count(library)
+    def show_library_book_count(
+        self,
+        library
+    ):
+        return self.terminals.show_book_count(
+            library
+        )
 
-    def show_book_search_terminal(self):
-        return self.terminals.show_book_search_placeholder()
+    def show_book_search_terminal(
+        self
+    ):
+        return (
+            self.terminals
+            .show_book_search_placeholder()
+        )
 
-    def show_random_library_excerpt(self, library):
-        return self.terminals.show_random_excerpt(library)
+    def show_random_library_excerpt(
+        self,
+        library
+    ):
+        return self.terminals.show_random_excerpt(
+            library
+        )
 
-    def show_bar_story_count(self):
+    def show_bar_story_count(
+        self
+    ):
         return self.terminals.show_bar_story_count(
             self.bar_counter
         )
 
+    def show_cronenberg_pen_terminal(
+        self
+    ):
+        return (
+            self.back_room
+            .cronenberg_pen_terminal
+            .display(self)
+        )
 
-    def show_cronenberg_pen_terminal(self):
-        return self.back_room.cronenberg_pen_terminal.display(self)
-
-    def _clear_events(self):
+    def _clear_events(
+        self
+    ):
         self.events = []
 
-    def ask_bartender_about_dice_box(self, entity=None):
-        return self.dice_box.answer_about_contents()
+    def ask_bartender_about_dice_box(
+        self,
+        entity=None
+    ):
+        return (
+            self.dice_box
+            .answer_about_contents()
+        )
 
-    def ask_bartender_about_d20(self, entity=None):
-        return self.dice_box.answer_about_d20()
+    def ask_bartender_about_d20(
+        self,
+        entity=None
+    ):
+        return (
+            self.dice_box
+            .answer_about_d20()
+        )
 
-    def _get_entity_name(self, entity):
-        if isinstance(entity, dict):
-            return entity.get("name")
+    def _get_entity_name(
+        self,
+        entity
+    ):
+        if isinstance(
+            entity,
+            dict
+        ):
+            return entity.get(
+                "name"
+            )
 
-        return getattr(entity, "name", None)
+        return getattr(
+            entity,
+            "name",
+            None
+        )
 
-    def _get_entity_type(self, entity):
-        if isinstance(entity, dict):
-            return entity.get("type")
+    def _get_entity_type(
+        self,
+        entity
+    ):
+        if isinstance(
+            entity,
+            dict
+        ):
+            return entity.get(
+                "type",
+                None
+            )
 
-        return getattr(entity, "type", None)
+        return getattr(
+            entity,
+            "type",
+            None
+        )
 
-    def _is_cat(self, entity):
-        if isinstance(entity, dict):
-            return entity.get("type", None) == "cat"
+    def _is_cat(
+        self,
+        entity
+    ):
+        if isinstance(
+            entity,
+            dict
+        ):
+            return (
+                entity.get(
+                    "type",
+                    None
+                )
+                == "cat"
+            )
 
-        return getattr(entity, "type", None) == "cat"
-
+        return (
+            getattr(
+                entity,
+                "type",
+                None
+            )
+            == "cat"
+        )
     def process_interactions(self):
         if len(self.entities) < 2:
             return
