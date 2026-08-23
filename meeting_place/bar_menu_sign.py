@@ -18,14 +18,30 @@ class BarMenuSign:
         self.current_screen = None
         self.screen_history = []
 
+        self.idle_minutes = 0
+        self.INACTIVITY_TIMEOUT_MINUTES = 5
+
+        self.idle_minutes = 0
+        self.INACTIVITY_TIMEOUT_MINUTES = 5
+
+        self.idle_minutes = 0
+        self.INACTIVITY_TIMEOUT_MINUTES = 5
+
         UniverseLogger.boot(
             "BAR MENU SIGN CREATED"
         )
+
+    def _reset_idle(
+        self
+    ):
+        self.idle_minutes = 0
 
     def _show_screen(
         self,
         screen
     ):
+        self._reset_idle()
+
         if self.current_screen is not None:
             self.screen_history.append(
                 self.current_screen
@@ -38,6 +54,7 @@ class BarMenuSign:
     def open(
         self
     ):
+        self._reset_idle()
         self.screen_history = []
 
         screen = {
@@ -129,6 +146,8 @@ class BarMenuSign:
     def back(
         self
     ):
+        self._reset_idle()
+
         if not self.screen_history:
             return self.current_screen
 
@@ -137,6 +156,42 @@ class BarMenuSign:
         )
 
         return self.current_screen
+    def advance_minutes(
+        self,
+        minutes
+    ):
+        if minutes < 0:
+            raise ValueError(
+                "Minutes cannot be negative."
+            )
+
+        for _ in range(minutes):
+            self.idle_minute()
+
+        return self.current_screen
+
+    def idle_minute(
+        self
+    ):
+        if (
+            self.current_screen is None
+            or self.current_screen.get(
+                "screen"
+            ) == "home"
+        ):
+            self.idle_minutes = 0
+            return self.current_screen
+
+        self.idle_minutes += 1
+
+        if (
+            self.idle_minutes
+            >= self.INACTIVITY_TIMEOUT_MINUTES
+        ):
+            self.open()
+
+        return self.current_screen
+
     def render(
         self
     ):
@@ -285,6 +340,15 @@ class BarMenuSign:
             "drinks": self.drink_menu,
             "new_drinks": self.new_drinks
         }
+
+
+
+
+
+
+
+
+
 
 
 

@@ -62,5 +62,75 @@ class BarMenuSignIntegrationTests(unittest.TestCase):
         )
 
 
+    def test_bar_tick_advances_menu_inactivity(
+        self
+    ):
+        universe = Universe()
+        universe.universe_registry = UniverseRegistry()
+
+        meeting_place = MeetingPlace(
+            universe
+        )
+
+        meeting_place.new_drinks[
+            "singularity"
+        ] = {
+            "name": "singularity",
+            "ingredients": []
+        }
+
+        meeting_place.bar_menu_sign.open()
+        meeting_place.bar_menu_sign.open_drink(
+            "singularity"
+        )
+
+        self.assertEqual(
+            meeting_place
+            .bar_menu_sign
+            .current_screen["screen"],
+            "drink_detail"
+        )
+
+        meeting_place.tick()
+
+        self.assertEqual(
+            meeting_place
+            .bar_menu_sign
+            .current_screen["screen"],
+            "home"
+        )
+
+
+    def test_bar_tick_keeps_home_screen_idle_at_zero(
+        self
+    ):
+        universe = Universe()
+        universe.universe_registry = UniverseRegistry()
+
+        meeting_place = MeetingPlace(
+            universe
+        )
+
+        meeting_place.bar_menu_sign.open()
+
+        meeting_place.tick()
+
+        self.assertEqual(
+            meeting_place
+            .bar_menu_sign
+            .current_screen["screen"],
+            "home"
+        )
+
+        self.assertEqual(
+            meeting_place
+            .bar_menu_sign
+            .idle_minutes,
+            0
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
+
+

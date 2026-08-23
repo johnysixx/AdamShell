@@ -528,8 +528,129 @@ class BarMenuSignTests(unittest.TestCase):
         )
 
 
+    def test_drink_detail_returns_home_after_inactivity_timeout(
+        self
+    ):
+        sign = BarMenuSign(
+            drink_menu={},
+            new_drinks={
+                "singularity": {
+                    "name": "singularity",
+                    "ingredients": []
+                }
+            }
+        )
+
+        sign.open()
+        sign.open_drink(
+            "singularity"
+        )
+
+        self.assertEqual(
+            sign.current_screen["screen"],
+            "drink_detail"
+        )
+
+        for _ in range(5):
+            sign.idle_minute()
+
+        self.assertEqual(
+            sign.current_screen["screen"],
+            "home"
+        )
+
+
+    def test_interaction_resets_inactivity_timeout(
+        self
+    ):
+        sign = BarMenuSign(
+            drink_menu={},
+            new_drinks={
+                "singularity": {
+                    "name": "singularity",
+                    "ingredients": []
+                }
+            }
+        )
+
+        sign.open()
+        sign.open_drink(
+            "singularity"
+        )
+
+        for _ in range(4):
+            sign.idle_minute()
+
+        self.assertEqual(
+            sign.idle_minutes,
+            4
+        )
+
+        sign.open_drink(
+            "singularity"
+        )
+
+        self.assertEqual(
+            sign.idle_minutes,
+            0
+        )
+
+        sign.idle_minute()
+
+        self.assertEqual(
+            sign.current_screen["screen"],
+            "drink_detail"
+        )
+
+
+    def test_interaction_resets_inactivity_timeout(
+        self
+    ):
+        sign = BarMenuSign(
+            drink_menu={},
+            new_drinks={
+                "singularity": {
+                    "name": "singularity",
+                    "ingredients": []
+                }
+            }
+        )
+
+        sign.open()
+        sign.open_drink(
+            "singularity"
+        )
+
+        for _ in range(4):
+            sign.idle_minute()
+
+        self.assertEqual(
+            sign.idle_minutes,
+            4
+        )
+
+        sign.open_drink(
+            "singularity"
+        )
+
+        self.assertEqual(
+            sign.idle_minutes,
+            0
+        )
+
+        sign.idle_minute()
+
+        self.assertEqual(
+            sign.current_screen["screen"],
+            "drink_detail"
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
+
+
+
 
 
 

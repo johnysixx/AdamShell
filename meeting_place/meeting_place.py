@@ -1792,6 +1792,10 @@ class MeetingPlace:
         self.tick_count += 1
         self.bar_clock.tick()
 
+        self.bar_menu_sign.advance_minutes(
+            60
+        )
+
         if self.bar_clock.hour == 0:
             self.bartender.end_shift(
                 bar_day=self.bar_clock.day,
@@ -1972,6 +1976,7 @@ class MeetingPlace:
         b.energy += transfer
 
         self.emit_event(f"{a.name} -> {b.name} energy transfer {transfer}")
+
 
 
 
