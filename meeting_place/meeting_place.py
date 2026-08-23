@@ -1,4 +1,4 @@
-import random
+﻿import random
 
 from universe.logger import UniverseLogger
 
@@ -26,6 +26,7 @@ from .bar_clock import BarClock
 from .bar_clock import BarClock
 from .lemonade_reservoir import LemonadeReservoir
 from .lemonade_signs import LemonadeSigns
+from .bar_menu_sign import BarMenuSign
 from cats.duplicate_consumption_energy import (
     DuplicateConsumptionEnergy
 )
@@ -100,7 +101,15 @@ class MeetingPlace:
 
         self.new_drinks = {}
 
-        self.new_drinks = {}
+        self.bar_menu_sign = BarMenuSign(
+            drink_menu=self.drink_menu,
+            new_drinks=self.new_drinks
+        )
+
+        self.bar_counter.attach_menu_sign(
+            self.bar_menu_sign
+        )
+
 
         self.ambient_aroma = {
             "dominant_source": (
@@ -1963,3 +1972,7 @@ class MeetingPlace:
         b.energy += transfer
 
         self.emit_event(f"{a.name} -> {b.name} energy transfer {transfer}")
+
+
+
+

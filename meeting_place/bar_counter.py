@@ -1,4 +1,4 @@
-from universe.logger import UniverseLogger
+﻿from universe.logger import UniverseLogger
 
 class BarStoryBook:
 
@@ -58,3 +58,89 @@ class BarCounter:
 
     def read_bar_stories(self):
         return self.hidden_story_book.read_entries()
+
+
+    def attach_menu_sign(
+        self,
+        menu_sign
+    ):
+        self.menu_sign = menu_sign
+
+        UniverseLogger.boot(
+            "BAR MENU SIGN CONNECTED TO BAR COUNTER"
+        )
+
+    def tap_menu(
+        self,
+        target=None
+    ):
+        if not hasattr(
+            self,
+            "menu_sign"
+        ):
+            raise RuntimeError(
+                "Bar counter has no menu sign."
+            )
+
+        if target is None:
+            UniverseLogger.event(
+                "BAR COUNTER MENU OPEN TAP"
+            )
+
+            return self.menu_sign.open()
+
+        if target == "back":
+            return self.tap_menu_back()
+
+        try:
+            return self.tap_menu_drink(
+                target
+            )
+        except ValueError:
+            UniverseLogger.event(
+                "BAR COUNTER MENU TAP IGNORED: "
+                f"{target}"
+            )
+
+            return False
+    def tap_menu_drink(
+        self,
+        drink
+    ):
+        if not hasattr(
+            self,
+            "menu_sign"
+        ):
+            raise RuntimeError(
+                "Bar counter has no menu sign."
+            )
+
+        UniverseLogger.event(
+            "BAR COUNTER MENU TAP: "
+            f"{drink}"
+        )
+
+        return self.menu_sign.open_drink(
+            drink
+        )
+
+    def tap_menu_back(
+        self
+    ):
+        if not hasattr(
+            self,
+            "menu_sign"
+        ):
+            raise RuntimeError(
+                "Bar counter has no menu sign."
+            )
+
+        UniverseLogger.event(
+            "BAR COUNTER MENU BACK TAP"
+        )
+
+        return self.menu_sign.back()
+
+
+
+
