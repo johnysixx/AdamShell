@@ -1,4 +1,4 @@
-﻿import random
+import random
 
 from universe.logger import UniverseLogger
 
@@ -1730,6 +1730,10 @@ class MeetingPlace:
                 "Approved cocktail requires name."
             )
 
+        recipe["menu_added_day"] = (
+            self.bar_clock.day
+        )
+
         self.new_drinks[
             drink_name
         ] = recipe
@@ -1743,6 +1747,70 @@ class MeetingPlace:
 
         UniverseLogger.event(
             "BAR NEW DRINK ADDED: "
+            f"{drink_name}"
+        )
+
+        return recipe
+
+    def refresh_new_drinks(
+        self
+    ):
+        current_day = self.bar_clock.day
+
+        to_promote = []
+
+        for (
+            drink_name,
+            recipe
+        ) in self.new_drinks.items():
+
+            added_day = recipe.get(
+                "menu_added_day"
+            )
+
+            if added_day is None:
+                continue
+
+            if (
+                current_day
+                - added_day
+                >= 90
+            ):
+                to_promote.append(
+                    drink_name
+                )
+
+        for drink_name in to_promote:
+            self.promote_new_drink(
+                drink_name
+            )
+
+    def promote_new_drink(
+        self,
+        drink_name
+    ):
+        if drink_name not in self.new_drinks:
+            raise ValueError(
+                "Unknown new drink."
+            )
+
+        recipe = self.new_drinks.pop(
+            drink_name
+        )
+
+        self.drink_menu[
+            drink_name
+        ] = recipe
+
+        self.bartender.chronicle_memory.append(
+            {
+                "kind": "drink_promoted",
+                "drink": drink_name
+            }
+        )
+
+        UniverseLogger.event(
+            "BAR DRINK PROMOTED: "
             f"{drink_name}"
         )
 
@@ -1791,6 +1859,9 @@ class MeetingPlace:
     def tick(self):
         self.tick_count += 1
         self.bar_clock.tick()
+
+        if self.bar_clock.hour == 0:
+            self.refresh_new_drinks()
 
         self.bar_menu_sign.advance_minutes(
             60
@@ -1976,8 +2047,3 @@ class MeetingPlace:
         b.energy += transfer
 
         self.emit_event(f"{a.name} -> {b.name} energy transfer {transfer}")
-
-
-
-
-
