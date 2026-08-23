@@ -317,5 +317,123 @@ class BarMenuSignIntegrationTests(unittest.TestCase):
         )
 
 
+    def test_menu_sign_loses_new_label_after_quarter_year(
+        self
+    ):
+        universe = Universe()
+        universe.universe_registry = UniverseRegistry()
+
+        meeting_place = MeetingPlace(
+            universe
+        )
+
+        recipe = {
+            "name": "singularity",
+            "status": "approved",
+            "approved": True,
+            "ingredients": []
+        }
+
+        meeting_place.add_approved_cocktail(
+            recipe
+        )
+
+        meeting_place.bar_menu_sign.open()
+
+        rendered = (
+            meeting_place
+            .bar_menu_sign
+            .render()
+        )
+
+        self.assertIn(
+            "singularity [NOVINKA]",
+            rendered
+        )
+
+        for _ in range(
+            90 * 24
+        ):
+            meeting_place.tick()
+
+        meeting_place.bar_menu_sign.open()
+
+        rendered = (
+            meeting_place
+            .bar_menu_sign
+            .render()
+        )
+
+        self.assertIn(
+            "singularity",
+            rendered
+        )
+
+        self.assertNotIn(
+            "singularity [NOVINKA]",
+            rendered
+        )
+
+
+    def test_removed_drink_disappears_from_menu_sign(
+        self
+    ):
+        universe = Universe()
+        universe.universe_registry = UniverseRegistry()
+
+        meeting_place = MeetingPlace(
+            universe
+        )
+
+        drink = {
+            "name": "absinthe",
+            "type": "bar_drink"
+        }
+
+        meeting_place.add_drink(
+            drink,
+            source="new_bottle"
+        )
+
+        meeting_place.bar_menu_sign.open()
+
+        self.assertIn(
+            "absinthe",
+            meeting_place
+            .bar_menu_sign
+            .render()
+        )
+
+        meeting_place.remove_drink(
+            "absinthe"
+        )
+
+        self.assertNotIn(
+            "absinthe",
+            meeting_place
+            .bar_menu_sign
+            .render()
+        )
+
+
+    def test_removing_unknown_drink_returns_false(
+        self
+    ):
+        universe = Universe()
+        universe.universe_registry = UniverseRegistry()
+
+        meeting_place = MeetingPlace(
+            universe
+        )
+
+        result = meeting_place.remove_drink(
+            "nonexistent"
+        )
+
+        self.assertFalse(
+            result
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

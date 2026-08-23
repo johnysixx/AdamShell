@@ -1816,6 +1816,24 @@ class MeetingPlace:
 
         return recipe
 
+    def remove_drink(
+        self,
+        drink_name
+    ):
+        if drink_name not in self.drink_menu:
+            return False
+
+        self.drink_menu.pop(
+            drink_name
+        )
+
+        UniverseLogger.event(
+            "BAR DRINK REMOVED: "
+            f"{drink_name}"
+        )
+
+        return True
+
     def add_drink(
         self,
         drink,
