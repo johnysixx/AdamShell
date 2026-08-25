@@ -1,8 +1,9 @@
-import random
+﻿import random
 
 from universe.logger import UniverseLogger
 
 from .bartender import Bartender
+from .how_to_mix_drinks import HowToMixDrinks
 from .terminals import BarTerminals
 from .bar_counter import BarCounter
 from .bouncer import Bouncer
@@ -93,13 +94,10 @@ class MeetingPlace:
             )
         )
 
-        self.drink_menu = {
-            "raspberry_rum": (
-                self.raspberry_rum
-            )
-        }
+        self.drink_menu = {}
 
         self.new_drinks = {}
+
 
         self.bar_menu_sign = BarMenuSign(
             drink_menu=self.drink_menu,
@@ -159,8 +157,13 @@ class MeetingPlace:
             "total_entropy_served_today": self.total_entropy_served_today,
             "total_entropy_served_ever": self.total_entropy_served_ever
         }
+        self.how_to_mix_drinks = (
+            HowToMixDrinks()
+        )
+
         self.bartender = Bartender(
             self.bar_counter.hidden_story_book,
+            mix_book=self.how_to_mix_drinks,
             on_cocktail_approved=(
                 self.add_approved_cocktail
             )
@@ -1697,6 +1700,29 @@ class MeetingPlace:
             "service_effect": effect
         }
 
+    def refresh_bar_ingredients(
+        self
+    ):
+        if getattr(
+            self.universe,
+            "liquid_hydrocarbons",
+            False
+        ):
+            self.back_room.bar_ingredients[
+                "liquid_hydrocarbons"
+            ] = {
+                "available": True,
+                "fundamental": False,
+                "shots": 200
+            }
+
+        self.refresh_basic_drinks()
+
+        return (
+            self.back_room
+            .bar_ingredients
+        )
+
     def add_approved_cocktail(
         self,
         recipe
@@ -1751,6 +1777,113 @@ class MeetingPlace:
         )
 
         return recipe
+
+    def mix_basic_drink(
+        self,
+        drink_name
+    ):
+        recipe = (
+            self.how_to_mix_drinks
+            .recipes.get(
+                drink_name
+            )
+        )
+
+        if recipe is None:
+            raise ValueError(
+                "Unknown basic drink recipe."
+            )
+
+        ingredients = (
+            self.back_room
+            .bar_ingredients
+        )
+
+        for (
+            ingredient_name,
+            requirement
+        ) in recipe["ingredients"].items():
+
+            if ingredient_name not in ingredients:
+                raise ValueError(
+                    "Missing drink ingredient."
+                )
+
+            stock = ingredients[
+                ingredient_name
+            ]
+
+            required_shots = (
+                requirement.get(
+                    "shots",
+                    0
+                )
+            )
+
+            if (
+                requirement.get(
+                    "consumed",
+                    False
+                )
+                and stock.get(
+                    "shots",
+                    0
+                ) < required_shots
+            ):
+                return (
+                    self.universe
+                    .create_cronenberg_from_quantum_error(
+                        error=RuntimeError(
+                            "Bar ingredient depleted."
+                        ),
+                        source_component=(
+                            "meeting_place"
+                        ),
+                        source_operation=(
+                            "mix_basic_drink"
+                        )
+                    )
+                )
+
+        for (
+            ingredient_name,
+            requirement
+        ) in recipe["ingredients"].items():
+
+            if not requirement.get(
+                "consumed",
+                False
+            ):
+                continue
+
+            self.back_room.bar_ingredients[
+                ingredient_name
+            ]["shots"] -= requirement[
+                "shots"
+            ]
+
+        return {
+            "name": drink_name,
+            "type": "mixed_bar_drink"
+        }
+
+    def refresh_basic_drinks(
+        self
+    ):
+        ingredients = (
+            self.back_room
+            .bar_ingredients
+        )
+
+        if (
+            "rum" in ingredients
+            and "liquid_hydrocarbons" in ingredients
+        ):
+            self.drink_menu[
+                "raspberry_rum"
+            ] = self.raspberry_rum
+
+        return self.drink_menu
 
     def refresh_new_drinks(
         self
@@ -2065,3 +2198,14 @@ class MeetingPlace:
         b.energy += transfer
 
         self.emit_event(f"{a.name} -> {b.name} energy transfer {transfer}")
+
+
+
+
+
+
+
+
+
+
+

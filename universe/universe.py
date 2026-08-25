@@ -729,6 +729,20 @@ class Universe:
             f"CAT MANIFESTED: {name} FROM={source}"
         )
 
+        meeting_place = getattr(
+            self,
+            "meeting_place",
+            None
+        )
+
+        if (
+            meeting_place is not None
+            and cat not in meeting_place.entities
+        ):
+            meeting_place.entities.append(
+                cat
+            )
+
         return {
             "cat": cat,
             "entity": entity,
@@ -1772,6 +1786,15 @@ class Universe:
 
     def tick_universe(self):
         self.universe_tick += 1
+
+        idea_universe = getattr(
+            self,
+            "idea_universe",
+            None
+        )
+
+        if idea_universe is not None:
+            idea_universe.tick()
 
         self._tick_aroma_residues()
 

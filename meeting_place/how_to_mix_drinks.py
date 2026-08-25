@@ -6,7 +6,22 @@ class HowToMixDrinks:
     def __init__(self):
         self.name = "how_to_mix_drinks"
         self.type = "bartender_recipe_book"
-        self.recipes = {}
+        self.recipes = {
+            "raspberry_rum": {
+                "name": "raspberry_rum",
+                "origin": "basic_bar_recipe",
+                "ingredients": {
+                    "rum": {
+                        "shots": 1,
+                        "consumed": False
+                    },
+                    "liquid_hydrocarbons": {
+                        "shots": 1,
+                        "consumed": True
+                    }
+                }
+            }
+        }
 
         UniverseLogger.boot(
             "HOW TO MIX DRINKS CREATED"
@@ -100,6 +115,8 @@ class HowToMixDrinks:
         )
 
         return tasting
+
+
 
 
 

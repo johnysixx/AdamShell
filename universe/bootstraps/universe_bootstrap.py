@@ -45,6 +45,14 @@ class UniverseBootstrap:
             self.universe
         )
 
+        self.universe.meeting_place = (
+            meeting_place
+        )
+
+        self.universe.idea_universe = (
+            idea_universe
+        )
+
         meeting_place.cat_distribution_system = (
             CatDistributionSystem(
                 meeting_entities=(

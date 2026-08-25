@@ -1121,8 +1121,44 @@ class HowToMixDrinksTests(unittest.TestCase):
         )
 
 
+    def test_book_contains_basic_raspberry_rum_recipe(
+        self
+    ):
+        book = HowToMixDrinks()
+
+        self.assertIn(
+            "raspberry_rum",
+            book.recipes
+        )
+
+        recipe = book.recipes[
+            "raspberry_rum"
+        ]
+
+        self.assertEqual(
+            recipe["ingredients"],
+            {
+                "rum": {
+                    "shots": 1,
+                    "consumed": False
+                },
+                "liquid_hydrocarbons": {
+                    "shots": 1,
+                    "consumed": True
+                }
+            }
+        )
+
+        self.assertEqual(
+            recipe["origin"],
+            "basic_bar_recipe"
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
+
+
 
 
 

@@ -8,6 +8,13 @@ class BackRoom:
         self.name = "back_room"
         self.type = "bar_internal_room"
 
+        self.bar_ingredients = {
+            "rum": {
+                "available": True,
+                "fundamental": True
+            }
+        }
+
         self.universe_manual = UniverseManual(
             universe_registry
         )
@@ -91,3 +98,5 @@ class BackRoom:
             "world_window": self.world_window,
             "world_keypad": self.world_keypad
         }
+
+
