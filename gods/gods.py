@@ -1,4 +1,4 @@
-﻿from universe.pre_cosmic_rules import GOD_INITIAL_ENERGY_J
+from universe.pre_cosmic_rules import GOD_INITIAL_ENERGY_J
 from universe.logger import UniverseLogger
 
 class Gods:
@@ -35,12 +35,13 @@ class Gods:
 
             "existence_pct": 100.0,
 
-            "native_world": "eden",
+            "native_world": "gods_layer",
 
             "existence_by_world": {
-                "idea_universe": 0.0,
+                "gods_layer": 100.0,
+                "idea_universe": 100.0,
                 "root_universe": 0.0,
-                "eden": 100.0
+                "eden": 0.0
             },
 
             "departure_intent": {
@@ -75,7 +76,21 @@ class Gods:
 
             "permissions": self.permissions,
             "created_entities": [],
-            "administers": []
+            "administers": [],
+
+            "book": {
+                "type": "god_book",
+                "author": name,
+                "state": "being_written",
+                "energy_j": 0.0,
+                "location": "with_author",
+                "entries": [
+                    {
+                        "event": "god_born",
+                        "subject": name
+                    }
+                ]
+            }
         }
 
         self.gods.append(god)
@@ -95,3 +110,80 @@ class Gods:
 
     def _clear_events(self):
         self.events = []
+
+
+
+
+    def assume_mask(
+        self,
+        god,
+        mask_name,
+        role
+    ):
+        knowledge = god.setdefault(
+            "knowledge",
+            set()
+        )
+
+        research_book = god.setdefault(
+            "research_book",
+            []
+        )
+
+        masks = god.setdefault(
+            "masks",
+            {}
+        )
+
+        mask = {
+            "name": mask_name,
+            "type": "god_mask",
+            "role": role,
+            "active": True,
+            "mask_of": god,
+            "knowledge": knowledge,
+            "research_book": research_book
+        }
+
+        masks[
+            mask_name
+        ] = mask
+
+        god[
+            "active_mask"
+        ] = mask_name
+
+        return mask
+
+    def release_mask(
+        self,
+        god,
+        mask_name
+    ):
+        masks = god.get(
+            "masks",
+            {}
+        )
+
+        if mask_name not in masks:
+            raise RuntimeError(
+                f"Mask not found: {mask_name}"
+            )
+
+        mask = masks[
+            mask_name
+        ]
+
+        mask["active"] = False
+
+        if god.get("active_mask") == mask_name:
+            god["active_mask"] = None
+
+        return {
+            "released_mask": mask_name,
+            "god": god,
+            "mask": mask
+        }
+
+
+
