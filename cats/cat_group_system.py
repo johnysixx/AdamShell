@@ -61,6 +61,25 @@ class CatGroupSystem:
             "shared_scent_strength": 0.0,
             "territories": {},
             "threat_events": 0,
+
+            # Group lifecycle
+            "state": "forming",
+            "age_ticks": 0,
+            "migration_count": 0,
+            "conflict_count": 0,
+            "split_count": 0,
+            "parent_group": None,
+            "daughter_groups": [],
+            "dissolved": False,
+
+            # Current collective location
+            "current_layer": (
+                founder.current_layer
+            ),
+            "current_location": (
+                founder.location
+            ),
+
             "history": []
         }
 
