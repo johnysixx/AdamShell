@@ -111,6 +111,29 @@ class Cat:
             "last_play_day": None
         }
 
+        # Persistent sibling rivalry
+        self.sibling_rivalry = {
+            "events": 0,
+            "rivals": {},
+            "last_rival": None,
+            "last_resource": None
+        }
+
+        # Persistent parental teaching history
+        self.parental_teaching = {
+            "lessons_received": 0,
+            "teachers": {},
+            "skills": {},
+            "last_lesson": None,
+            "last_teacher": None
+        }
+
+        # Family-specific bond history
+        self.family_bonding = {
+            "events": 0,
+            "family_bonds": []
+        }
+
         self.special_traits = []
         self.aroma = aroma
 
