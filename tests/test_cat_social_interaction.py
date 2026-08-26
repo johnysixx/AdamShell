@@ -12,6 +12,9 @@ from cats.cat_territory_system import (
 from cats.cat_bonding_system import (
     CatBondingSystem
 )
+from cats.cat_family_system import (
+    CatFamilySystem
+)
 from cats.development_resolver import (
     CatDevelopmentResolver
 )
@@ -1367,6 +1370,271 @@ class CatSocialInteractionTests(
             first.bonds[
                 second.name
             ]["active"]
+        )
+
+
+    def test_mother_and_kitten_get_family_social_bonus(
+        self
+    ):
+        mother, kitten = (
+            self._social_pair()
+        )
+
+        mother.name = "mother"
+        kitten.name = "kitten"
+
+        kitten.family[
+            "parents"
+        ][
+            "mother"
+        ] = mother.name
+
+        mother.family[
+            "children"
+        ].append(
+            kitten.name
+        )
+
+        social = CatSocialSystem(
+            self.cats
+        )
+
+        assessment = social.assess(
+            kitten,
+            mother
+        )
+
+        self.assertEqual(
+            assessment[
+                "family_relation"
+            ],
+            "mother"
+        )
+
+        self.assertGreater(
+            assessment[
+                "family_bias"
+            ][
+                "friendly"
+            ],
+            0.0
+        )
+
+    def test_littermates_get_stronger_bonus_than_half_siblings(
+        self
+    ):
+        first, second = (
+            self._social_pair()
+        )
+
+        first.family[
+            "littermates"
+        ].append(
+            second.name
+        )
+
+        first.family[
+            "siblings"
+        ].append(
+            second.name
+        )
+
+        social = CatSocialSystem(
+            self.cats
+        )
+
+        full = social.assess(
+            first,
+            second
+        )
+
+        first.family[
+            "siblings"
+        ].clear()
+
+        first.family[
+            "half_siblings"
+        ].append(
+            second.name
+        )
+
+        half = social.assess(
+            first,
+            second
+        )
+
+        self.assertEqual(
+            full[
+                "family_relation"
+            ],
+            "sibling_littermate"
+        )
+
+        self.assertEqual(
+            half[
+                "family_relation"
+            ],
+            "half_sibling_littermate"
+        )
+
+        self.assertGreater(
+            full[
+                "family_bias"
+            ][
+                "friendly"
+            ],
+            half[
+                "family_bias"
+            ][
+                "friendly"
+            ]
+        )
+
+    def test_family_reduces_territorial_hostility(
+        self
+    ):
+        first, second = (
+            self._social_pair()
+        )
+
+        first.location = "nest"
+        second.location = "nest"
+
+        first.family[
+            "littermates"
+        ].append(
+            second.name
+        )
+
+        first.family[
+            "siblings"
+        ].append(
+            second.name
+        )
+
+        territory = CatTerritorySystem(
+            self.cats
+        )
+
+        territory.claim(
+            first,
+            strength=1.0
+        )
+
+        social = CatSocialSystem(
+            self.cats
+        )
+
+        assessment = social.assess(
+            first,
+            second
+        )
+
+        self.assertEqual(
+            assessment[
+                "family_relation"
+            ],
+            "sibling_littermate"
+        )
+
+        self.assertNotEqual(
+            assessment[
+                "attitude"
+            ],
+            "hostile"
+        )
+
+    def test_family_does_not_override_real_hostile_history(
+        self
+    ):
+        first, second = (
+            self._social_pair()
+        )
+
+        first.family[
+            "littermates"
+        ].append(
+            second.name
+        )
+
+        first.family[
+            "siblings"
+        ].append(
+            second.name
+        )
+
+        first.relationships[
+            second.name
+        ] = {
+            "familiarity": 0.8,
+            "trust": 0.1,
+            "affiliation": 0.0,
+            "shared_scent": 0.3,
+            "tension": 0.9
+        }
+
+        first.social_memory[
+            second.name
+        ] = {
+            "meet_count": 5,
+            "friendly_count": 0,
+            "uncertain_count": 0,
+            "hostile_count": 5,
+            "last_attitude": "hostile",
+            "last_outcome": "hiss",
+            "last_steps": [],
+            "recent_outcomes": [
+                "hiss",
+                "hiss",
+                "warning_swat"
+            ]
+        }
+
+        social = CatSocialSystem(
+            self.cats
+        )
+
+        assessment = social.assess(
+            first,
+            second
+        )
+
+        self.assertEqual(
+            assessment[
+                "attitude"
+            ],
+            "hostile"
+        )
+
+    def test_unrelated_cat_gets_no_family_bonus(
+        self
+    ):
+        first, second = (
+            self._social_pair()
+        )
+
+        social = CatSocialSystem(
+            self.cats
+        )
+
+        assessment = social.assess(
+            first,
+            second
+        )
+
+        self.assertIsNone(
+            assessment[
+                "family_relation"
+            ]
+        )
+
+        self.assertEqual(
+            assessment[
+                "family_bias"
+            ][
+                "friendly"
+            ],
+            0.0
         )
 
 

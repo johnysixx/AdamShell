@@ -7,6 +7,9 @@ from cats.cat_territory_system import (
 from cats.cat_bonding_system import (
     CatBondingSystem
 )
+from cats.cat_family_system import (
+    CatFamilySystem
+)
 
 
 class CatSocialSystem:
@@ -32,6 +35,12 @@ class CatSocialSystem:
 
         self.bonding_system = (
             CatBondingSystem(
+                cats_layer
+            )
+        )
+
+        self.family_system = (
+            CatFamilySystem(
                 cats_layer
             )
         )
@@ -281,6 +290,17 @@ class CatSocialSystem:
             )
         )
 
+        family_relation = (
+            self.family_system.relation(
+                cat,
+                other_cat
+            )
+        )
+
+        family_bias = self._family_bias(
+            family_relation
+        )
+
         territory = (
             self.territory_system.context(
                 cat,
@@ -372,7 +392,15 @@ class CatSocialSystem:
             - tension * 0.35
             - aggression * 0.15
             + memory_bias
-            - territorial_pressure * 0.35
+            + family_bias[
+                "friendly"
+            ]
+            - territorial_pressure * (
+                0.35
+                * family_bias[
+                    "territory_multiplier"
+                ]
+            )
         )
 
         if (
@@ -388,6 +416,9 @@ class CatSocialSystem:
                 and territory[
                     "claim_strength"
                 ] >= 0.80
+                and not family_bias[
+                    "protected_from_territorial_hostility"
+                ]
             )
             or (
                 aggression >= 0.80
@@ -445,6 +476,12 @@ class CatSocialSystem:
             "territorial_pressure": round(
                 territorial_pressure,
                 4
+            ),
+            "family_relation": (
+                family_relation
+            ),
+            "family_bias": dict(
+                family_bias
             )
         }
 
@@ -926,6 +963,57 @@ class CatSocialSystem:
             return "kept_distance"
 
         return attitude
+
+    def _family_bias(
+        self,
+        relation
+    ):
+        profiles = {
+            "mother": {
+                "friendly": 0.30,
+                "territory_multiplier": 0.20,
+                "protected_from_territorial_hostility": True
+            },
+            "child": {
+                "friendly": 0.30,
+                "territory_multiplier": 0.20,
+                "protected_from_territorial_hostility": True
+            },
+            "sibling_littermate": {
+                "friendly": 0.22,
+                "territory_multiplier": 0.35,
+                "protected_from_territorial_hostility": True
+            },
+            "half_sibling_littermate": {
+                "friendly": 0.15,
+                "territory_multiplier": 0.50,
+                "protected_from_territorial_hostility": True
+            },
+            "sibling": {
+                "friendly": 0.10,
+                "territory_multiplier": 0.70,
+                "protected_from_territorial_hostility": False
+            },
+            "half_sibling": {
+                "friendly": 0.05,
+                "territory_multiplier": 0.85,
+                "protected_from_territorial_hostility": False
+            },
+            "father": {
+                "friendly": 0.08,
+                "territory_multiplier": 0.80,
+                "protected_from_territorial_hostility": False
+            }
+        }
+
+        return profiles.get(
+            relation,
+            {
+                "friendly": 0.0,
+                "territory_multiplier": 1.0,
+                "protected_from_territorial_hostility": False
+            }
+        )
 
     def _memory_profile(
         self,
