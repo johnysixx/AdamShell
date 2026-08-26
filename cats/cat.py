@@ -66,6 +66,9 @@ class Cat:
         # Persistent memory of cat-to-cat encounters
         self.social_memory = {}
 
+        # Persistent territorial claims
+        self.territories = {}
+
         self.special_traits = []
         self.aroma = aroma
 

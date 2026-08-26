@@ -1,6 +1,9 @@
 from copy import deepcopy
 
 from cats.cat import Cat
+from cats.cat_territory_system import (
+    CatTerritorySystem
+)
 
 
 class CatSocialSystem:
@@ -17,6 +20,12 @@ class CatSocialSystem:
         cats_layer=None
     ):
         self.cats_layer = cats_layer
+
+        self.territory_system = (
+            CatTerritorySystem(
+                cats_layer
+            )
+        )
 
     def meet(
         self,
@@ -249,6 +258,23 @@ class CatSocialSystem:
             )
         )
 
+        territory = (
+            self.territory_system.context(
+                cat,
+                other_cat
+            )
+        )
+
+        territorial_pressure = (
+            territory[
+                "claim_strength"
+            ]
+            if territory[
+                "intrusion"
+            ]
+            else 0.0
+        )
+
         familiarity = self._number(
             relation.get(
                 "familiarity",
@@ -323,6 +349,7 @@ class CatSocialSystem:
             - tension * 0.35
             - aggression * 0.15
             + memory_bias
+            - territorial_pressure * 0.35
         )
 
         if (
@@ -332,6 +359,12 @@ class CatSocialSystem:
                 negative_memory >= 3
                 and negative_memory
                 > positive_memory + 1
+            )
+            or (
+                territory["intrusion"]
+                and territory[
+                    "claim_strength"
+                ] >= 0.80
             )
             or (
                 aggression >= 0.80
@@ -382,6 +415,13 @@ class CatSocialSystem:
                 memory.get(
                     "last_outcome"
                 )
+            ),
+            "territory": deepcopy(
+                territory
+            ),
+            "territorial_pressure": round(
+                territorial_pressure,
+                4
             )
         }
 

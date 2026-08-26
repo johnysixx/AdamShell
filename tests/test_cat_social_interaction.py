@@ -6,6 +6,9 @@ from cats.cat import Cat
 from cats.cat_social_system import (
     CatSocialSystem
 )
+from cats.cat_territory_system import (
+    CatTerritorySystem
+)
 from cats.development_resolver import (
     CatDevelopmentResolver
 )
@@ -874,6 +877,220 @@ class CatSocialInteractionTests(
                 "outcome_5",
                 "outcome_6"
             ]
+        )
+
+
+    def test_cat_can_claim_and_scent_mark_territory(
+        self
+    ):
+        first, _ = (
+            self._social_pair()
+        )
+
+        first.location = "window"
+
+        territory = CatTerritorySystem(
+            self.cats
+        )
+
+        claim = territory.claim(
+            first,
+            strength=0.6
+        )
+
+        self.assertEqual(
+            claim["owner"],
+            first.name
+        )
+
+        self.assertEqual(
+            claim["location"],
+            "window"
+        )
+
+        marked = territory.scent_mark(
+            first
+        )
+
+        self.assertEqual(
+            marked["scent_marks"],
+            2
+        )
+
+        self.assertGreater(
+            marked["strength"],
+            0.6
+        )
+
+    def test_unknown_cat_is_intruder_in_claimed_territory(
+        self
+    ):
+        first, second = (
+            self._social_pair()
+        )
+
+        first.location = "window"
+        second.location = "window"
+
+        territory = CatTerritorySystem(
+            self.cats
+        )
+
+        territory.claim(
+            first,
+            strength=0.9
+        )
+
+        context = territory.context(
+            first,
+            second
+        )
+
+        self.assertTrue(
+            context["owns_here"]
+        )
+
+        self.assertTrue(
+            context["intrusion"]
+        )
+
+        self.assertFalse(
+            context["accepted"]
+        )
+
+    def test_bonded_cat_is_accepted_in_territory(
+        self
+    ):
+        first, second = (
+            self._social_pair()
+        )
+
+        first.location = "window"
+        second.location = "window"
+
+        first.relationships[
+            second.name
+        ] = {
+            "familiarity": 0.9,
+            "trust": 0.9,
+            "affiliation": 0.8,
+            "shared_scent": 0.7,
+            "tension": 0.0
+        }
+
+        territory = CatTerritorySystem(
+            self.cats
+        )
+
+        territory.claim(
+            first,
+            strength=1.0
+        )
+
+        context = territory.context(
+            first,
+            second
+        )
+
+        self.assertTrue(
+            context["owns_here"]
+        )
+
+        self.assertTrue(
+            context["accepted"]
+        )
+
+        self.assertFalse(
+            context["intrusion"]
+        )
+
+    def test_strong_territory_can_make_stranger_hostile(
+        self
+    ):
+        first, second = (
+            self._social_pair()
+        )
+
+        first.location = "window"
+        second.location = "window"
+
+        territory = CatTerritorySystem(
+            self.cats
+        )
+
+        territory.claim(
+            first,
+            strength=0.9
+        )
+
+        social = CatSocialSystem(
+            self.cats
+        )
+
+        assessment = social.assess(
+            first,
+            second
+        )
+
+        self.assertTrue(
+            assessment[
+                "territory"
+            ]["intrusion"]
+        )
+
+        self.assertGreater(
+            assessment[
+                "territorial_pressure"
+            ],
+            0.0
+        )
+
+        self.assertEqual(
+            assessment[
+                "attitude"
+            ],
+            "hostile"
+        )
+
+    def test_weak_territory_makes_stranger_cautious_not_hostile(
+        self
+    ):
+        first, second = (
+            self._social_pair()
+        )
+
+        first.location = "chair"
+        second.location = "chair"
+
+        territory = CatTerritorySystem(
+            self.cats
+        )
+
+        territory.claim(
+            first,
+            strength=0.4
+        )
+
+        social = CatSocialSystem(
+            self.cats
+        )
+
+        assessment = social.assess(
+            first,
+            second
+        )
+
+        self.assertTrue(
+            assessment[
+                "territory"
+            ]["intrusion"]
+        )
+
+        self.assertEqual(
+            assessment[
+                "attitude"
+            ],
+            "uncertain"
         )
 
 
