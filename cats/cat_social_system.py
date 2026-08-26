@@ -4,6 +4,9 @@ from cats.cat import Cat
 from cats.cat_territory_system import (
     CatTerritorySystem
 )
+from cats.cat_bonding_system import (
+    CatBondingSystem
+)
 
 
 class CatSocialSystem:
@@ -23,6 +26,12 @@ class CatSocialSystem:
 
         self.territory_system = (
             CatTerritorySystem(
+                cats_layer
+            )
+        )
+
+        self.bonding_system = (
+            CatBondingSystem(
                 cats_layer
             )
         )
@@ -175,6 +184,17 @@ class CatSocialSystem:
             steps=steps
         )
 
+        bond_event = None
+
+        if attitude == "friendly":
+            bond_event = (
+                self.bonding_system
+                .ensure_bond(
+                    cat,
+                    other_cat
+                )
+            )
+
         event = {
             "name": "cat_social_meeting",
             "cat": cat.name,
@@ -190,6 +210,9 @@ class CatSocialSystem:
                 steps
             ),
             "outcome": outcome,
+            "bond": deepcopy(
+                bond_event
+            ),
             "socialized": True
         }
 

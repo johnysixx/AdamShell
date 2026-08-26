@@ -9,6 +9,9 @@ from cats.cat_social_system import (
 from cats.cat_territory_system import (
     CatTerritorySystem
 )
+from cats.cat_bonding_system import (
+    CatBondingSystem
+)
 from cats.development_resolver import (
     CatDevelopmentResolver
 )
@@ -1091,6 +1094,279 @@ class CatSocialInteractionTests(
                 "attitude"
             ],
             "uncertain"
+        )
+
+
+    def _prepare_bonded_pair(
+        self
+    ):
+        first, second = (
+            self._social_pair()
+        )
+
+        first.relationships[
+            second.name
+        ] = {
+            "familiarity": 0.9,
+            "trust": 0.9,
+            "affiliation": 0.85,
+            "shared_scent": 0.7,
+            "tension": 0.0
+        }
+
+        second.relationships[
+            first.name
+        ] = {
+            "familiarity": 0.9,
+            "trust": 0.9,
+            "affiliation": 0.85,
+            "shared_scent": 0.7,
+            "tension": 0.0
+        }
+
+        first.social_memory[
+            second.name
+        ] = {
+            "meet_count": 3,
+            "friendly_count": 3,
+            "uncertain_count": 0,
+            "hostile_count": 0,
+            "last_attitude": "friendly",
+            "last_outcome": "head_bunt",
+            "last_steps": [],
+            "recent_outcomes": [
+                "nose_touch",
+                "head_bunt"
+            ]
+        }
+
+        second.social_memory[
+            first.name
+        ] = {
+            "meet_count": 3,
+            "friendly_count": 3,
+            "uncertain_count": 0,
+            "hostile_count": 0,
+            "last_attitude": "friendly",
+            "last_outcome": "head_bunt",
+            "last_steps": [],
+            "recent_outcomes": [
+                "nose_touch",
+                "head_bunt"
+            ]
+        }
+
+        return (
+            first,
+            second
+        )
+
+    def test_close_cats_can_form_mutual_bond(
+        self
+    ):
+        first, second = (
+            self._prepare_bonded_pair()
+        )
+
+        bonding = CatBondingSystem(
+            self.cats
+        )
+
+        result = bonding.form_bond(
+            first,
+            second
+        )
+
+        self.assertTrue(
+            result["formed"]
+        )
+
+        self.assertIn(
+            second.name,
+            first.bonds
+        )
+
+        self.assertIn(
+            first.name,
+            second.bonds
+        )
+
+        self.assertTrue(
+            first.bonds[
+                second.name
+            ]["active"]
+        )
+
+    def test_weak_relationship_does_not_form_bond(
+        self
+    ):
+        first, second = (
+            self._social_pair()
+        )
+
+        bonding = CatBondingSystem(
+            self.cats
+        )
+
+        result = bonding.form_bond(
+            first,
+            second
+        )
+
+        self.assertFalse(
+            result["formed"]
+        )
+
+        self.assertEqual(
+            result["reason"],
+            "bond_requirements_not_met"
+        )
+
+    def test_bonded_cats_can_mutually_groom(
+        self
+    ):
+        first, second = (
+            self._prepare_bonded_pair()
+        )
+
+        bonding = CatBondingSystem(
+            self.cats
+        )
+
+        bonding.form_bond(
+            first,
+            second
+        )
+
+        before = first.bonds[
+            second.name
+        ]["strength"]
+
+        result = bonding.mutual_groom(
+            first,
+            second
+        )
+
+        self.assertEqual(
+            result["name"],
+            "cats_mutually_groomed"
+        )
+
+        self.assertGreater(
+            first.bonds[
+                second.name
+            ]["strength"],
+            before
+        )
+
+    def test_bonded_cats_can_sleep_together(
+        self
+    ):
+        first, second = (
+            self._prepare_bonded_pair()
+        )
+
+        bonding = CatBondingSystem(
+            self.cats
+        )
+
+        bonding.form_bond(
+            first,
+            second
+        )
+
+        result = bonding.sleep_together(
+            first,
+            second
+        )
+
+        self.assertTrue(
+            result["performed"]
+        )
+
+        self.assertEqual(
+            first.state,
+            "resting_with_bonded_cat"
+        )
+
+        self.assertEqual(
+            second.state,
+            "resting_with_bonded_cat"
+        )
+
+    def test_bonded_cat_can_follow_partner(
+        self
+    ):
+        first, second = (
+            self._prepare_bonded_pair()
+        )
+
+        bonding = CatBondingSystem(
+            self.cats
+        )
+
+        bonding.form_bond(
+            first,
+            second
+        )
+
+        result = bonding.follow(
+            first,
+            second
+        )
+
+        self.assertTrue(
+            result["performed"]
+        )
+
+        self.assertEqual(
+            first.navigation_target,
+            second.name
+        )
+
+        self.assertEqual(
+            first.state,
+            "following_bonded_cat"
+        )
+
+    def test_friendly_social_meeting_can_preserve_existing_bond(
+        self
+    ):
+        first, second = (
+            self._prepare_bonded_pair()
+        )
+
+        bonding = CatBondingSystem(
+            self.cats
+        )
+
+        bonding.form_bond(
+            first,
+            second
+        )
+
+        social = CatSocialSystem(
+            self.cats
+        )
+
+        result = social.meet(
+            first,
+            second
+        )
+
+        self.assertEqual(
+            result["attitude"],
+            "friendly"
+        )
+
+        self.assertIsNotNone(
+            result["bond"]
+        )
+
+        self.assertTrue(
+            first.bonds[
+                second.name
+            ]["active"]
         )
 
 

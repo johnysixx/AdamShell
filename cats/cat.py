@@ -69,6 +69,9 @@ class Cat:
         # Persistent territorial claims
         self.territories = {}
 
+        # Persistent close feline bonds
+        self.bonds = {}
+
         self.special_traits = []
         self.aroma = aroma
 
