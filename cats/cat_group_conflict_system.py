@@ -6,6 +6,9 @@ from cats.cat_group_bonding_system import (
 from cats.cat_group_hierarchy_system import (
     CatGroupHierarchySystem
 )
+from cats.cat_group_memory_system import (
+    CatGroupMemorySystem
+)
 
 
 class CatGroupConflictSystem:
@@ -24,6 +27,12 @@ class CatGroupConflictSystem:
 
         self.hierarchy = (
             CatGroupHierarchySystem(
+                group_system
+            )
+        )
+
+        self.memory = (
+            CatGroupMemorySystem(
                 group_system
             )
         )
@@ -231,6 +240,12 @@ class CatGroupConflictSystem:
                     event
                 )
             )
+
+        self.memory.remember_encounter(
+            first_group_id,
+            second_group_id,
+            event
+        )
 
         return event
 

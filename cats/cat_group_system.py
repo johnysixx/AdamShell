@@ -72,6 +72,11 @@ class CatGroupSystem:
             "daughter_groups": [],
             "dissolved": False,
 
+            # Persistent inter-group relations
+            "group_memory": {},
+            "diplomacy": {},
+            "alliances": [],
+
             # Current collective location
             "current_layer": (
                 founder.current_layer
