@@ -103,6 +103,14 @@ class Cat:
             "last_phase": None
         }
 
+        # Persistent sibling play history
+        self.sibling_play = {
+            "play_events": 0,
+            "partners": {},
+            "last_partner": None,
+            "last_play_day": None
+        }
+
         self.special_traits = []
         self.aroma = aroma
 

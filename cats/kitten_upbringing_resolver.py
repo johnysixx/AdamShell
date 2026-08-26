@@ -1,3 +1,7 @@
+from cats.cat_maternal_care_system import (
+    CatMaternalCareSystem
+)
+
 from cats.adult_vocalization_resolver import (
     AdultVocalizationResolver
 )
@@ -299,6 +303,22 @@ class KittenUpbringingResolver:
                 mother is not None
             )
         })
+
+        if mother is not None:
+            maternal_sync = (
+                CatMaternalCareSystem()
+                .record_upbringing_care(
+                    mother=mother,
+                    kitten=kitten,
+                    events=events,
+                    age_days=age_days,
+                    current_day=current_day
+                )
+            )
+
+            events.append(
+                maternal_sync
+            )
 
         return events
 
