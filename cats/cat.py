@@ -134,6 +134,16 @@ class Cat:
             "family_bonds": []
         }
 
+        # Persistent group membership
+        self.group = {
+            "group_id": None,
+            "member": False,
+            "joined_order": None,
+            "shared_scent": 0.0,
+            "accepted_members": [],
+            "group_events": 0
+        }
+
         self.special_traits = []
         self.aroma = aroma
 
