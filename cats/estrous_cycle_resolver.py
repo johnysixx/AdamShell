@@ -18,10 +18,7 @@ class CatEstrousCycleResolver:
         cat,
         day=None
     ):
-        reproduction = cat.get(
-            "reproduction",
-            {}
-        )
+        reproduction = cat.reproduction
 
         if not self._can_cycle(
             cat
@@ -96,7 +93,7 @@ class CatEstrousCycleResolver:
             "name": (
                 "cat_estrous_cycle_advanced"
             ),
-            "cat": cat["name"],
+            "cat": cat.name,
             "day": day,
             "phase": phase,
             "cycle_day": reproduction[
@@ -140,9 +137,7 @@ class CatEstrousCycleResolver:
         cat,
         day=None
     ):
-        reproduction = cat[
-            "reproduction"
-        ]
+        reproduction = cat.reproduction
 
         reproduction[
             "estrous_phase"
@@ -160,7 +155,7 @@ class CatEstrousCycleResolver:
             "name": (
                 "cat_estrus_ended_after_ovulation"
             ),
-            "cat": cat["name"],
+            "cat": cat.name,
             "day": day,
             "phase": "diestrus",
             "estrus_active": False,
@@ -178,9 +173,7 @@ class CatEstrousCycleResolver:
         cat,
         day=None
     ):
-        reproduction = cat[
-            "reproduction"
-        ]
+        reproduction = cat.reproduction
 
         reproduction[
             "estrous_phase"
@@ -196,7 +189,7 @@ class CatEstrousCycleResolver:
 
         event = {
             "name": "cat_estrus_started",
-            "cat": cat["name"],
+            "cat": cat.name,
             "day": day,
             "phase": "estrus",
             "cycle_day": 0,
@@ -209,7 +202,7 @@ class CatEstrousCycleResolver:
         )
 
         UniverseLogger.event(
-            f"CAT ESTRUS STARTED: {cat['name']}"
+            f"CAT ESTRUS STARTED: {cat.name}"
         )
 
         return event
@@ -219,9 +212,7 @@ class CatEstrousCycleResolver:
         cat,
         day=None
     ):
-        reproduction = cat[
-            "reproduction"
-        ]
+        reproduction = cat.reproduction
 
         reproduction[
             "estrous_phase"
@@ -260,7 +251,7 @@ class CatEstrousCycleResolver:
             "name": (
                 "cat_interestrus_started"
             ),
-            "cat": cat["name"],
+            "cat": cat.name,
             "day": day,
             "phase": "interestrus",
             "cycle_day": 0,
@@ -280,10 +271,7 @@ class CatEstrousCycleResolver:
         reason,
         day=None
     ):
-        reproduction = cat.get(
-            "reproduction",
-            {}
-        )
+        reproduction = cat.reproduction
 
         reproduction[
             "estrous_phase"
@@ -301,7 +289,7 @@ class CatEstrousCycleResolver:
             "name": (
                 "cat_estrous_cycle_inactive"
             ),
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "day": day,
             "phase": "inactive",
             "estrus_active": False,
@@ -319,13 +307,10 @@ class CatEstrousCycleResolver:
     def _can_cycle(
         cat
     ):
-        reproduction = cat.get(
-            "reproduction",
-            {}
-        )
+        reproduction = cat.reproduction
 
         return (
-            cat.get("sex") == "female"
+            cat.sex == "female"
             and not reproduction.get(
                 "neutered",
                 True
@@ -344,12 +329,9 @@ class CatEstrousCycleResolver:
     def _inactive_reason(
         cat
     ):
-        reproduction = cat.get(
-            "reproduction",
-            {}
-        )
+        reproduction = cat.reproduction
 
-        if cat.get("sex") != "female":
+        if cat.sex != "female":
             return "not_female"
 
         if reproduction.get(

@@ -2,6 +2,7 @@ import random
 
 from universe.logger import UniverseLogger
 from cats.cat_personality import CatPersonality
+from cats.cat import Cat
 from cats.cat_knowledge import CatKnowledge
 from universe.aroma_profile import AromaProfile
 
@@ -201,66 +202,21 @@ class CatCronenbergEncounter:
         cat_growth = cronenberg_size * 0.05
         strength_gain = cronenberg_size * 0.10
 
-        if isinstance(cat, dict):
-            cat["size"] = float(
-                cat.get(
-                    "size",
-                    self.default_cat_size
-                )
-            ) + cat_growth
+        cat.size = float(
+            cat.size
+        ) + cat_growth
 
-            cat["strength"] = float(
-                cat.get(
-                    "strength",
-                    1.0
-                )
-            ) + strength_gain
+        cat.strength = float(
+            cat.strength
+        ) + strength_gain
 
-            cat["cronenbergs_eaten"] = int(
-                cat.get(
-                    "cronenbergs_eaten",
-                    0
-                )
-            ) + 1
+        cat.cronenbergs_eaten = int(
+            cat.cronenbergs_eaten
+        ) + 1
 
-            cat["cronenberg_mass_eaten"] = float(
-                cat.get(
-                    "cronenberg_mass_eaten",
-                    0.0
-                )
-            ) + cronenberg_size
-        else:
-            cat.size = float(
-                getattr(
-                    cat,
-                    "size",
-                    self.default_cat_size
-                )
-            ) + cat_growth
-
-            cat.strength = float(
-                getattr(
-                    cat,
-                    "strength",
-                    1.0
-                )
-            ) + strength_gain
-
-            cat.cronenbergs_eaten = int(
-                getattr(
-                    cat,
-                    "cronenbergs_eaten",
-                    0
-                )
-            ) + 1
-
-            cat.cronenberg_mass_eaten = float(
-                getattr(
-                    cat,
-                    "cronenberg_mass_eaten",
-                    0.0
-                )
-            ) + cronenberg_size
+        cat.cronenberg_mass_eaten = float(
+            cat.cronenberg_mass_eaten
+        ) + cronenberg_size
 
 
         self._remember_encounter(
@@ -351,7 +307,7 @@ class CatCronenbergEncounter:
     ):
         if not isinstance(
             cat,
-            dict
+            Cat
         ):
             return None
 
@@ -392,15 +348,13 @@ class CatCronenbergEncounter:
     ):
         if not isinstance(
             cat,
-            dict
+            Cat
         ):
             return {
                 "name": (
                     "cat_personality_experience_skipped"
                 ),
-                "reason": (
-                    "unsupported_cat_representation"
-                ),
+                "reason": "invalid_cat",
                 "source": source,
                 "applied": False
             }
@@ -422,11 +376,7 @@ class CatCronenbergEncounter:
         location,
         details=None
     ):
-        memory = (
-            cat.get("memory")
-            if isinstance(cat, dict)
-            else getattr(cat, "memory", None)
-        )
+        memory = cat.memory
 
         if memory is None:
             return None
@@ -496,33 +446,25 @@ class CatCronenbergEncounter:
         return 0.50
 
     def _cat_name(self, cat):
-        if isinstance(cat, dict):
-            return cat.get(
-                "name",
-                "cat"
-            )
-
-        return getattr(
+        if not isinstance(
             cat,
-            "name",
-            "cat"
-        )
+            Cat
+        ):
+            return "cat"
+
+        return cat.name
 
     def _cat_size(self, cat):
-        if isinstance(cat, dict):
+        if not isinstance(
+            cat,
+            Cat
+        ):
             return float(
-                cat.get(
-                    "size",
-                    self.default_cat_size
-                )
+                self.default_cat_size
             )
 
         return float(
-            getattr(
-                cat,
-                "size",
-                self.default_cat_size
-            )
+            cat.size
         )
 
     def _position_of(self, cronenberg):

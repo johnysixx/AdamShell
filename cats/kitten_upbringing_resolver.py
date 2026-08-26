@@ -1180,10 +1180,7 @@ class KittenUpbringingResolver:
         self,
         cat
     ):
-        meow = cat.get(
-            "learning",
-            {}
-        ).get(
+        meow = cat.learning.get(
             "meow_knowledge",
             {}
         )
@@ -1404,7 +1401,7 @@ class KittenUpbringingResolver:
             return None
 
         for cat in cats:
-            if cat.get("name") == parent_name:
+            if cat.name == parent_name:
                 return cat
 
         return None

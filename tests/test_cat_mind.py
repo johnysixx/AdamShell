@@ -1,4 +1,4 @@
-﻿import unittest
+import unittest
 
 from universe.universe import Universe
 from cats.cats import Cats
@@ -321,20 +321,21 @@ class CatMindTests(
     def test_assigned_cat_considers_visiting_recipient(
         self
     ):
-        cat = {
-            "name": "thinking_cat",
-            "type": "cat",
-            "recipient": "wizard",
-            "personality": {
-                "traits": {
-                    "curiosity": 0.5,
-                    "courage": 0.5,
-                    "aggression": 0.5,
-                    "empathy": 0.8,
-                    "patience": 0.5
-                }
-            }
-        }
+        cat = self.cats.create_cat(
+            name="thinking_cat",
+            color="black",
+            fur_length="short"
+        )
+
+        cat.recipient = "wizard"
+
+        cat.personality["traits"].update({
+            "curiosity": 0.5,
+            "courage": 0.5,
+            "aggression": 0.5,
+            "empathy": 0.8,
+            "patience": 0.5
+        })
 
         observations = {
             "bar_known": False

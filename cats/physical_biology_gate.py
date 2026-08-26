@@ -23,10 +23,10 @@ class PhysicalBiologyGate:
                 "cronenberg": None
             }
 
-        cat_name = (
-            cat.get("name")
-            if isinstance(cat, dict)
-            else None
+        cat_name = getattr(
+            cat,
+            "name",
+            None
         )
 
         cronenberg = (

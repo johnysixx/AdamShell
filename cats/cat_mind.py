@@ -1,4 +1,4 @@
-﻿from cats.cat_intellect import CatIntellect
+from cats.cat_intellect import CatIntellect
 from cats.cat_knowledge import CatKnowledge
 from copy import deepcopy
 
@@ -40,10 +40,7 @@ class CatMind:
         cls,
         cat
     ):
-        mind = cat.setdefault(
-            "mind",
-            cls.create_state()
-        )
+        mind = cat.mind
 
         mind.setdefault(
             "current_intention",
@@ -83,10 +80,7 @@ class CatMind:
 
         Nic nevykonĂˇvĂˇ a nevybĂ­rĂˇ vĂ­tÄ›ze.
         """
-        traits = cat.get(
-            "personality",
-            {}
-        ).get(
+        traits = cat.personality.get(
             "traits",
             {}
         )
@@ -187,9 +181,7 @@ class CatMind:
                 )
             )
 
-        recipient = cat.get(
-            "recipient"
-        )
+        recipient = cat.recipient
 
         if recipient is not None:
             recipient_score = (
@@ -313,23 +305,15 @@ class CatMind:
                 )
 
         scent_places = (
-            cat.get(
-                "knowledge",
-                {}
-            ).get(
+            (cat.knowledge or {}).get(
                 "known_scent_places",
                 []
             )
         )
 
-        current_layer = cat.get(
-            "current_layer"
-        )
+        current_layer = cat.current_layer
 
-        knowledge = cat.get(
-            "knowledge",
-            {}
-        )
+        knowledge = (cat.knowledge or {})
 
         current_tick = knowledge.get(
             "scent_clock_tick"
@@ -389,10 +373,7 @@ class CatMind:
                 scored_place
             )
 
-        reached_scent = cat.get(
-            "known_scent_follow",
-            {}
-        )
+        reached_scent = (cat.known_scent_follow or {})
 
         currently_smelt_identities = {
             item.get(
@@ -623,8 +604,10 @@ class CatMind:
             )
         )
 
-        counterpart_observation = cat.get(
-            "current_quantum_counterpart_observation"
+        counterpart_observation = getattr(
+            cat,
+            "current_quantum_counterpart_observation",
+            None
         )
 
         if (
@@ -664,9 +647,7 @@ class CatMind:
                 )
 
                 negative_quantum_memories = (
-                    cat[
-                        "memory"
-                    ].recall(
+                    cat.memory.recall(
                         event_type=(
                             "quantum_box_layer_transfer_failed"
                         )
@@ -763,9 +744,7 @@ class CatMind:
                 continue
 
             quantum_travel_memories = (
-                cat[
-                    "memory"
-                ].recall(
+                cat.memory.recall(
                     event_type=(
                         "quantum_box_layer_transfer"
                     )
@@ -999,10 +978,7 @@ class CatMind:
             )
         )
 
-        reached_scent = cat.get(
-            "known_scent_follow",
-            {}
-        )
+        reached_scent = (cat.known_scent_follow or {})
 
         if (
             isinstance(
@@ -1061,10 +1037,7 @@ class CatMind:
                 )
             ):
                 traits = (
-                    cat.get(
-                        "personality",
-                        {}
-                    ).get(
+                    cat.personality.get(
                         "traits",
                         {}
                     )
@@ -1084,10 +1057,7 @@ class CatMind:
                     )
                 )
 
-                previous_search = cat.get(
-                    "scent_search",
-                    {}
-                )
+                previous_search = (cat.scent_search or {})
 
                 if (
                     isinstance(
@@ -1099,9 +1069,7 @@ class CatMind:
                     ) == identity
                     and previous_search.get(
                         "layer"
-                    ) == cat.get(
-                        "current_layer"
-                    )
+                    ) == cat.current_layer
                 ):
                     attempts = int(
                         previous_search.get(
@@ -1161,14 +1129,10 @@ class CatMind:
                             ],
                             target={
                                 "identity": identity,
-                                "layer": cat.get(
-                                    "current_layer"
-                                ),
+                                "layer": cat.current_layer,
                                 "from_position": dict(
-                                    cat.get(
-                                        "position",
-                                        {}
-                                    )
+                                    cat.position
+                                    or {}
                                 ),
                                 "trail_direction": (
                                     deepcopy(
@@ -1230,7 +1194,7 @@ class CatMind:
                 "name": (
                     "cat_intention_not_selected"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "reason": "no_candidates",
                 "selected": False
             }
@@ -1305,7 +1269,7 @@ class CatMind:
 
         event = {
             "name": "cat_intention_selected",
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "intention": winner["type"],
             "target": winner.get(
                 "target"
@@ -1368,7 +1332,7 @@ class CatMind:
 
         event = {
             "name": "cat_intention_cleared",
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "previous_intention": (
                 deepcopy(previous)
             ),
@@ -1416,9 +1380,7 @@ class CatMind:
         cls,
         cat
     ):
-        memory = cat.get(
-            "memory"
-        )
+        memory = cat.memory
 
         if memory is None:
             return 0.0
@@ -1439,9 +1401,7 @@ class CatMind:
         cls,
         cat
     ):
-        memory = cat.get(
-            "memory"
-        )
+        memory = cat.memory
 
         if memory is None:
             return 0.0
@@ -1477,9 +1437,7 @@ class CatMind:
         cls,
         cat
     ):
-        memory = cat.get(
-            "memory"
-        )
+        memory = cat.memory
 
         if memory is None:
             return 0.0

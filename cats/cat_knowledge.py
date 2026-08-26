@@ -1,4 +1,5 @@
-﻿from copy import deepcopy
+from cats.cat import Cat
+from copy import deepcopy
 
 
 class CatKnowledge:
@@ -8,10 +9,15 @@ class CatKnowledge:
         cls,
         cat
     ):
-        knowledge = cat.setdefault(
-            "knowledge",
-            {}
-        )
+        if not isinstance(
+            cat,
+            Cat
+        ):
+            raise TypeError(
+                "CatKnowledge requires Cat."
+            )
+
+        knowledge = cat.knowledge
 
         knowledge.setdefault(
             "known_places",
@@ -108,9 +114,7 @@ class CatKnowledge:
                 "position": deepcopy(
                     normalized_position
                 ),
-                "discovered_by": cat.get(
-                    "name"
-                ),
+                "discovered_by": cat.name,
                 "first_source": source,
                 "last_source": source,
                 "visit_count": 1,
@@ -211,9 +215,7 @@ class CatKnowledge:
             None
         )
 
-        cat_name = cat.get(
-            "name"
-        )
+        cat_name = cat.name
 
         if legend is None:
             legend = {
@@ -317,10 +319,24 @@ class CatKnowledge:
             listener
         )
 
+        if not isinstance(
+            storyteller,
+            Cat
+        ):
+            raise TypeError(
+                "Legend storyteller must be Cat."
+            )
+
+        if not isinstance(
+            listener,
+            Cat
+        ):
+            raise TypeError(
+                "Legend listener must be Cat."
+            )
+
         storyteller_name = (
-            storyteller.get("name")
-            if isinstance(storyteller, dict)
-            else str(storyteller)
+            storyteller.name
         )
 
         trust = cls._trust_in_cat(
@@ -329,10 +345,7 @@ class CatKnowledge:
         )
 
         intellect = float(
-            listener.get(
-                "intellect",
-                {}
-            ).get(
+            listener.intellect.get(
                 "normalized",
                 0.5
             )
@@ -492,9 +505,7 @@ class CatKnowledge:
                 "storyteller": heard[
                     "storyteller"
                 ],
-                "verified_by": cat.get(
-                    "name"
-                ),
+                "verified_by": cat.name,
                 "credibility_before": (
                     heard["credibility"]
                 ),
@@ -977,10 +988,7 @@ class CatKnowledge:
                 cls.remember_scent_place(
                     cat=cat,
                     layer=current_layer,
-                    position=cat.get(
-                        "position",
-                        {}
-                    ),
+                    position=(cat.position or {}),
                     source_id="ambient",
                     recognized_identity=identity,
                     components=ambient.get(
@@ -1243,13 +1251,9 @@ class CatKnowledge:
             universe
         )
 
-        storyteller_name = storyteller.get(
-            "name"
-        )
+        storyteller_name = storyteller.name
 
-        listener_name = listener.get(
-            "name"
-        )
+        listener_name = listener.name
 
         knowledge = cls.ensure_cat_knowledge(
             listener
@@ -1337,14 +1341,9 @@ class CatKnowledge:
         konkr?tn? legendu konkr?tn?mu
         poslucha?i v?bec ?ekne.
         """
-        listener_name = listener.get(
-            "name"
-        )
+        listener_name = listener.name
 
-        traits = storyteller.get(
-            "personality",
-            {}
-        ).get(
+        traits = storyteller.personality.get(
             "traits",
             {}
         )
@@ -1364,10 +1363,7 @@ class CatKnowledge:
         )
 
         intellect = float(
-            storyteller.get(
-                "intellect",
-                {}
-            ).get(
+            storyteller.intellect.get(
                 "normalized",
                 0.5
             )
@@ -1460,12 +1456,8 @@ class CatKnowledge:
         ):
             return {
                 "name": "cat_legend_not_shared",
-                "storyteller": storyteller.get(
-                    "name"
-                ),
-                "listener": listener.get(
-                    "name"
-                ),
+                "storyteller": storyteller.name,
+                "listener": listener.name,
                 "reason": selection.get(
                     "reason"
                 ),
@@ -1489,12 +1481,8 @@ class CatKnowledge:
         ]:
             return {
                 "name": "cat_legend_not_shared",
-                "storyteller": storyteller.get(
-                    "name"
-                ),
-                "listener": listener.get(
-                    "name"
-                ),
+                "storyteller": storyteller.name,
+                "listener": listener.name,
                 "legend_id": legend.get(
                     "legend_id"
                 ),
@@ -1513,12 +1501,8 @@ class CatKnowledge:
 
         return {
             "name": "cat_shared_legend",
-            "storyteller": storyteller.get(
-                "name"
-            ),
-            "listener": listener.get(
-                "name"
-            ),
+            "storyteller": storyteller.name,
+            "listener": listener.name,
             "legend_id": legend.get(
                 "legend_id"
             ),
@@ -1544,9 +1528,16 @@ class CatKnowledge:
         reason,
         legend_id=None
     ):
-        relationships = listener.setdefault(
-            "relationships",
-            {}
+        if not isinstance(
+            listener,
+            Cat
+        ):
+            raise TypeError(
+                "Trust listener must be Cat."
+            )
+
+        relationships = (
+            listener.relationships
         )
 
         relation = relationships.setdefault(
@@ -1668,9 +1659,16 @@ class CatKnowledge:
         listener,
         storyteller_name
     ):
-        relationships = listener.get(
-            "relationships",
-            {}
+        if not isinstance(
+            listener,
+            Cat
+        ):
+            raise TypeError(
+                "Trust listener must be Cat."
+            )
+
+        relationships = (
+            listener.relationships
         )
 
         if isinstance(

@@ -1,3 +1,5 @@
+from cats.cat import Cat
+
 class CatReproduction:
 
     GESTATION_DAYS_DEFAULT = 65
@@ -59,9 +61,16 @@ class CatReproduction:
         cls,
         cat
     ):
-        reproduction = cat.get(
-            "reproduction",
-            {}
+        if not isinstance(
+            cat,
+            Cat
+        ):
+            raise TypeError(
+                "CatReproduction requires Cat."
+            )
+
+        reproduction = (
+            cat.reproduction
         )
 
         return (
@@ -80,13 +89,20 @@ class CatReproduction:
         cls,
         cat
     ):
-        reproduction = cat.get(
-            "reproduction",
-            {}
+        if not isinstance(
+            cat,
+            Cat
+        ):
+            raise TypeError(
+                "CatReproduction requires Cat."
+            )
+
+        reproduction = (
+            cat.reproduction
         )
 
         return (
-            cat.get("sex") == "female"
+            cat.sex == "female"
             and cls.can_mate(cat)
             and not reproduction.get(
                 "pregnant",
@@ -99,7 +115,15 @@ class CatReproduction:
         cls,
         cat
     ):
+        if not isinstance(
+            cat,
+            Cat
+        ):
+            raise TypeError(
+                "CatReproduction requires Cat."
+            )
+
         return (
-            cat.get("sex") == "male"
+            cat.sex == "male"
             and cls.can_mate(cat)
         )

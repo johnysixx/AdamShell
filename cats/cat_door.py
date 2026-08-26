@@ -1,4 +1,6 @@
-﻿class CatDoor:
+from cats.cat import Cat
+
+class CatDoor:
 
     def __init__(
         self,
@@ -82,16 +84,27 @@
             return {
                 "name": "cat_door_travel_failed",
                 "door": self.name,
-                "cat": cat.get("name"),
+                "cat": getattr(
+                    cat,
+                    "name",
+                    None
+                ),
                 "reason": "door_inactive",
                 "traveled": False
             }
 
-        if cat.get("type") != "cat":
+        if not isinstance(
+            cat,
+            Cat
+        ):
             return {
                 "name": "cat_door_travel_failed",
                 "door": self.name,
-                "cat": cat.get("name"),
+                "cat": getattr(
+                    cat,
+                    "name",
+                    None
+                ),
                 "reason": "entity_is_not_cat",
                 "traveled": False
             }
@@ -101,7 +114,7 @@
                 return {
                     "name": "cat_door_travel_failed",
                     "door": self.name,
-                    "cat": cat.get("name"),
+                    "cat": cat.name,
                     "reason": "cat_target_layer_missing",
                     "traveled": False
                 }
@@ -114,13 +127,11 @@
                 self.target_layer
             )
 
-        if cat.get(
-            "current_layer"
-        ) != self.source_layer:
+        if cat.current_layer != self.source_layer:
             return {
                 "name": "cat_door_travel_failed",
                 "door": self.name,
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "reason": "cat_not_in_source_layer",
                 "source_layer": self.source_layer,
                 "target_layer": target_layer,
@@ -129,30 +140,23 @@
 
         if (
             self.source_location is not None
-            and cat.get(
-                "location"
-            ) != self.source_location
+            and cat.location != self.source_location
         ):
             return {
                 "name": "cat_door_travel_failed",
                 "door": self.name,
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "reason": "cat_not_in_source_location",
                 "source_layer": self.source_layer,
                 "target_layer": target_layer,
                 "source_location": self.source_location,
                 "target_location": self.target_location,
-                "cat_location": cat.get(
-                    "location"
-                ),
+                "cat_location": cat.location,
                 "traveled": False
             }
 
         skill = (
-            cat.get(
-                "learning",
-                {}
-            )
+            cat.learning
             .get(
                 "skills",
                 {}
@@ -170,7 +174,7 @@
             return {
                 "name": "cat_door_travel_failed",
                 "door": self.name,
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "reason": "cat_door_travel_not_learned",
                 "source_layer": self.source_layer,
                 "target_layer": target_layer,
@@ -182,7 +186,7 @@
                 return {
                     "name": "cat_door_travel_failed",
                     "door": self.name,
-                    "cat": cat.get("name"),
+                    "cat": cat.name,
                     "reason": "cat_missing_from_source_registry",
                     "source_layer": self.source_layer,
                     "target_layer": target_layer,
@@ -199,28 +203,28 @@
                     cat
                 )
 
-        cat["current_layer"] = (
+        cat.current_layer = (
             target_layer
         )
 
         if self.target_location is not None:
-            cat["location"] = (
+            cat.location = (
                 self.target_location
             )
 
         if self.target_position is not None:
-            cat["position"] = dict(
+            cat.position = dict(
                 self.target_position
             )
 
-        cat["state"] = (
+        cat.state = (
             "traveled_through_cat_door"
         )
 
         return {
             "name": "cat_traveled_through_cat_door",
             "door": self.name,
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "source_layer": self.source_layer,
             "target_layer": target_layer,
             "source_location": (

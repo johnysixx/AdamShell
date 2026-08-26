@@ -1,4 +1,6 @@
-﻿class CatDistributionSystem:
+from cats.cat import Cat
+
+class CatDistributionSystem:
 
     def __init__(
         self,
@@ -23,10 +25,18 @@
         self,
         cat
     ):
-        if cat.get("recipient") is not None:
+        if not isinstance(
+            cat,
+            Cat
+        ):
+            raise TypeError(
+                "CatDistributionSystem requires Cat."
+            )
+
+        if cat.recipient is not None:
             return {
                 "name": "cat_distribution_skipped",
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "reason": "cat_already_has_recipient",
                 "distributed": False
             }
@@ -42,11 +52,11 @@
                 or recipient.get("name")
             )
 
-            cat["recipient"] = (
+            cat.recipient = (
                 recipient_id
             )
 
-            cat["distribution"] = {
+            cat.distribution = {
                 "recipient": recipient_id,
                 "status": "assigned",
                 "suggested_layer": None
@@ -56,7 +66,7 @@
 
             return {
                 "name": "cat_assigned_to_recipient",
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "recipient": recipient_id,
                 "status": "assigned",
                 "distributed": True
@@ -64,7 +74,7 @@
 
         suggested_layer = "idea_universe"
 
-        cat["distribution"] = {
+        cat.distribution = {
             "recipient": None,
             "status": "unassigned",
             "suggested_layer": (
@@ -74,7 +84,7 @@
 
         return {
             "name": "cat_distribution_suggested",
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "status": "unassigned",
             "suggested_layer": (
                 suggested_layer

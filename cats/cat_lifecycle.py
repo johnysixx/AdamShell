@@ -100,7 +100,10 @@ class CatLifeCycleHandler:
             # Biologicky narozené kočky mají age_days.
             # Kvantově manifestované kočky bez známého
             # biologického věku zatím automaticky nestárnou.
-            if "age_days" in cat:
+            if hasattr(
+                cat,
+                "age_days"
+            ):
                 age_result = (
                     self.development_resolver
                     .advance_age(
@@ -126,10 +129,7 @@ class CatLifeCycleHandler:
                     upbringing_result
                 )
 
-            reproduction = cat.get(
-                "reproduction",
-                {}
-            )
+            reproduction = cat.reproduction
 
             estrous_result = (
                 self.estrous_cycle_resolver

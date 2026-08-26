@@ -1,10 +1,11 @@
-﻿import random
+import random
 
 from universe.logger import UniverseLogger
 from .memory import CatMemory
 from .reproduction import CatReproduction
 from .genotype import CatGenotype
 from .cat_learning import CatLearning
+from .cat import Cat
 from .cat_personality import CatPersonality
 from .cat_mind import CatMind
 from .cat_intellect import CatIntellect
@@ -148,57 +149,56 @@ class Cats:
             UniverseLogger.event(f"CAT CREATION DENIED: invalid sex {sex}")
             return None
 
-        cat = {
-            "name": name,
-            "type": "cat",
-            "state": "created",
-            "color": color,
-            "pattern": pattern,
-            "eye_color": eye_color,
-            "fur_length": fur_length,
-            "sex": sex,
-            "genotype": (
+        cat = Cat(
+            name=name,
+            color=color,
+            pattern=pattern,
+            eye_color=eye_color,
+            fur_length=fur_length,
+            sex=sex,
+            genotype=(
                 CatGenotype.create_founder(
                     sex=sex
                 )
             ),
-            "reproduction": (
+            reproduction=(
                 CatReproduction.create_state(
                     sex=sex,
                     neutered=False
                 )
             ),
-            "origin": origin,
-            "idea_energy": self.default_idea_energy,
-            "size": 1.0,
-            "strength": 1.0,
-            "cronenbergs_eaten": 0,
-            "cronenberg_mass_eaten": 0.0,
-            "memory": CatMemory(name),
-            "access": self.access_rules,
-            "learning": (
+            origin=origin,
+            idea_energy=(
+                self.default_idea_energy
+            ),
+            memory=CatMemory(
+                name
+            ),
+            access=self.access_rules,
+            learning=(
                 CatLearning.create_complete_state()
             ),
-            "personality": (
+            personality=(
                 CatPersonality.create_state()
             ),
-            "mind": (
+            mind=(
                 CatMind.create_state()
             ),
-            "intellect": (
+            intellect=(
                 CatIntellect.create_state()
             ),
-            "special_traits": [],
-            "aroma": AromaProfile.create(
-                identity=f"cat:{name}",
-                components={
-                    "cat": 1.0,
-                    "fur": 0.80,
-                    f"individual_cat:{name}": 2.0
-                },
-                intensity=1.0
+            aroma=(
+                AromaProfile.create(
+                    identity=f"cat:{name}",
+                    components={
+                        "cat": 1.0,
+                        "fur": 0.80,
+                        f"individual_cat:{name}": 2.0
+                    },
+                    intensity=1.0
+                )
             )
-        }
+        )
 
         self.cats.append(cat)
         self.universe.world["cats"]["cats"] = self.cats
@@ -240,14 +240,12 @@ class Cats:
             observed_cat
     ):
         aroma = AromaProfile.current(
-            observed_cat["aroma"]
+            observed_cat.aroma
         )
 
         return CatKnowledge.learn_aroma(
             cat=observer,
-            identity=observed_cat[
-                "aroma"
-            ][
+            identity=observed_cat.aroma[
                 "identity"
             ],
             components=aroma,
@@ -297,7 +295,7 @@ class Cats:
             decay_rate=0.03
     ):
         return AromaProfile.add_surface(
-            profile=cat["aroma"],
+            profile=cat.aroma,
             source=source,
             components=components,
             intensity=intensity,
@@ -309,7 +307,7 @@ class Cats:
             cat
     ):
         return AromaProfile.current(
-            cat["aroma"]
+            cat.aroma
         )
 
     def decay_cat_aroma(
@@ -318,7 +316,7 @@ class Cats:
             ticks=1
     ):
         return AromaProfile.decay(
-            cat["aroma"],
+            cat.aroma,
             ticks=ticks
         )
 
@@ -327,13 +325,16 @@ class Cats:
             cat,
             hunt_quota=10
     ):
-        if not isinstance(cat, dict):
+        if not isinstance(
+            cat,
+            Cat
+        ):
             return {
                 "result": "invalid_cat",
                 "activated": False
             }
 
-        if cat.get("type") != "cat":
+        if cat.type != "cat":
             return {
                 "result": "not_a_cat",
                 "activated": False
@@ -346,14 +347,11 @@ class Cats:
             return {
                 "result": "box_travel_unavailable",
                 "activated": False,
-                "cat": cat.get("name")
+                "cat": cat.name
             }
 
         eaten = int(
-            cat.get(
-                "cronenbergs_eaten",
-                0
-            )
+            cat.cronenbergs_eaten
         )
 
         hunt_quota = int(hunt_quota)
@@ -363,20 +361,20 @@ class Cats:
         else:
             intent = "return_to_bar"
 
-        cat["state"] = (
+        cat.state = (
             "aware_of_cronenberg_overpopulation"
         )
 
-        cat["suggested_intent"] = intent
-        cat["hunt_quota"] = hunt_quota
-        cat["overpopulation_response_available"] = True
+        cat.suggested_intent = intent
+        cat.hunt_quota = hunt_quota
+        cat.overpopulation_response_available = True
 
         event = {
             "name": (
                 "cat_activated_for_"
                 "cronenberg_overpopulation"
             ),
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "suggested_intent": intent,
             "cat_access_unchanged": True,
             "cronenbergs_eaten": eaten,
@@ -394,41 +392,44 @@ class Cats:
             cronenbergs=None,
             step_size=None
     ):
-        if not isinstance(cat, dict):
+        if not isinstance(
+            cat,
+            Cat
+        ):
             return {
                 "name": "cat_navigation_not_offered",
                 "result": "invalid_cat",
                 "offered": False
             }
 
-        if cat.get("type") != "cat":
+        if cat.type != "cat":
             return {
                 "name": "cat_navigation_not_offered",
                 "result": "not_a_cat",
                 "offered": False
             }
 
-        suggested_intent = cat.get(
-            "suggested_intent"
+        suggested_intent = (
+            cat.suggested_intent
         )
 
         if suggested_intent is None:
             return {
                 "name": "cat_navigation_not_offered",
                 "result": "no_suggested_intent",
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "offered": False
             }
 
-        start_position = cat.get(
-            "position"
+        start_position = (
+            cat.position
         )
 
         if start_position is None:
             return {
                 "name": "cat_navigation_not_offered",
                 "result": "cat_has_no_position",
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "suggested_intent": suggested_intent,
                 "offered": False
             }
@@ -474,7 +475,7 @@ class Cats:
             plan = (
                 quantum_space
                 .plan_cat_route_to_bar(
-                    cat_id=cat.get("name"),
+                    cat_id=cat.name,
                     start_position=(
                         start_position
                     ),
@@ -485,8 +486,8 @@ class Cats:
         elif suggested_intent == (
             "follow_entity"
         ):
-            target_id = cat.get(
-                "navigation_target"
+            target_id = (
+                cat.navigation_target
             )
 
             recipient_registry = getattr(
@@ -499,7 +500,7 @@ class Cats:
                 return {
                     "name": "cat_navigation_not_offered",
                     "result": "recipient_registry_missing",
-                    "cat": cat.get("name"),
+                    "cat": cat.name,
                     "suggested_intent": suggested_intent,
                     "offered": False
                 }
@@ -512,7 +513,7 @@ class Cats:
                 return {
                     "name": "cat_navigation_not_offered",
                     "result": "recipient_not_found",
-                    "cat": cat.get("name"),
+                    "cat": cat.name,
                     "navigation_target": target_id,
                     "offered": False
                 }
@@ -521,16 +522,14 @@ class Cats:
                 "current_layer"
             )
 
-            if recipient_layer != cat.get(
-                "current_layer"
-            ):
+            if recipient_layer != cat.current_layer:
                 return {
                     "name": "cat_navigation_not_offered",
                     "result": "recipient_in_other_layer",
-                    "cat": cat.get("name"),
+                    "cat": cat.name,
                     "navigation_target": target_id,
                     "recipient_layer": recipient_layer,
-                    "cat_layer": cat.get("current_layer"),
+                    "cat_layer": cat.current_layer,
                     "offered": False
                 }
 
@@ -542,7 +541,7 @@ class Cats:
                 return {
                     "name": "cat_navigation_not_offered",
                     "result": "recipient_has_no_position",
-                    "cat": cat.get("name"),
+                    "cat": cat.name,
                     "navigation_target": target_id,
                     "offered": False
                 }
@@ -550,7 +549,7 @@ class Cats:
             plan = (
                 quantum_space
                 .plan_direct_cat_route(
-                    cat_id=cat.get("name"),
+                    cat_id=cat.name,
                     start_position=start_position,
                     destination_position=(
                         recipient_position
@@ -566,7 +565,7 @@ class Cats:
             return {
                 "name": "cat_navigation_not_offered",
                 "result": "unsupported_suggested_intent",
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "suggested_intent": suggested_intent,
                 "offered": False
             }
@@ -582,7 +581,7 @@ class Cats:
                     "result",
                     "route_not_planned"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "suggested_intent": suggested_intent,
                 "plan": plan,
                 "offered": False
@@ -590,7 +589,7 @@ class Cats:
 
         offer = {
             "name": "cat_navigation_offered",
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "suggested_intent": (
                 suggested_intent
             ),
@@ -605,7 +604,7 @@ class Cats:
             "offered": True
         }
 
-        cat["navigation_offer"] = dict(
+        cat.navigation_offer = dict(
             offer
         )
 
@@ -623,22 +622,25 @@ class Cats:
             self,
             cat
     ):
-        if not isinstance(cat, dict):
+        if not isinstance(
+            cat,
+            Cat
+        ):
             return {
                 "name": "cat_navigation_offer_not_accepted",
                 "result": "invalid_cat",
                 "accepted": False
             }
 
-        offer = cat.get(
-            "navigation_offer"
+        offer = (
+            cat.navigation_offer
         )
 
         if offer is None:
             return {
                 "name": "cat_navigation_offer_not_accepted",
                 "result": "no_navigation_offer",
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "accepted": False
             }
 
@@ -652,30 +654,30 @@ class Cats:
             return {
                 "name": "cat_navigation_offer_not_accepted",
                 "result": "quantum_space_unavailable",
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "accepted": False
             }
 
         route = quantum_space.find_cat_route(
-            cat.get("name")
+            cat.name
         )
 
         if route is None:
             return {
                 "name": "cat_navigation_offer_not_accepted",
                 "result": "offered_route_not_found",
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "accepted": False
             }
 
         offer["accepted"] = True
 
-        cat["intent"] = offer[
+        cat.intent = offer[
             "suggested_intent"
         ]
 
-        cat["navigation_offer"] = offer
-        cat["active_route_id"] = (
+        cat.navigation_offer = offer
+        cat.active_route_id = (
             route.route_id
         )
 
@@ -683,8 +685,8 @@ class Cats:
 
         event = {
             "name": "cat_navigation_offer_accepted",
-            "cat": cat.get("name"),
-            "intent": cat["intent"],
+            "cat": cat.name,
+            "intent": cat.intent,
             "route_id": route.route_id,
             "destination": route.destination,
             "accepted": True
@@ -703,22 +705,25 @@ class Cats:
             self,
             cat
     ):
-        if not isinstance(cat, dict):
+        if not isinstance(
+            cat,
+            Cat
+        ):
             return {
                 "name": "cat_navigation_offer_not_declined",
                 "result": "invalid_cat",
                 "declined": False
             }
 
-        offer = cat.get(
-            "navigation_offer"
+        offer = (
+            cat.navigation_offer
         )
 
         if offer is None:
             return {
                 "name": "cat_navigation_offer_not_declined",
                 "result": "no_navigation_offer",
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "declined": False
             }
 
@@ -730,7 +735,7 @@ class Cats:
 
         route = (
             quantum_space.find_cat_route(
-                cat.get("name")
+                cat.name
             )
             if quantum_space is not None
             else None
@@ -742,21 +747,23 @@ class Cats:
         offer["accepted"] = False
         offer["declined"] = True
 
-        cat["navigation_offer"] = offer
+        cat.navigation_offer = offer
 
-        cat.pop(
-            "intent",
-            None
-        )
+        if hasattr(
+            cat,
+            "intent"
+        ):
+            del cat.intent
 
-        cat.pop(
-            "active_route_id",
-            None
-        )
+        if hasattr(
+            cat,
+            "active_route_id"
+        ):
+            del cat.active_route_id
 
         event = {
             "name": "cat_navigation_offer_declined",
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "route_id": offer.get(
                 "route_id"
             ),
@@ -781,7 +788,10 @@ class Cats:
             rng=None,
             acceptance_chance=0.70
     ):
-        if not isinstance(cat, dict):
+        if not isinstance(
+            cat,
+            Cat
+        ):
             return {
                 "name": (
                     "cat_navigation_decision_failed"
@@ -790,8 +800,8 @@ class Cats:
                 "decided": False
             }
 
-        offer = cat.get(
-            "navigation_offer"
+        offer = (
+            cat.navigation_offer
         )
 
         if offer is None:
@@ -800,7 +810,7 @@ class Cats:
                     "cat_navigation_decision_failed"
                 ),
                 "result": "no_navigation_offer",
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "decided": False
             }
 
@@ -829,7 +839,7 @@ class Cats:
             "name": (
                 "cat_navigation_offer_decided"
             ),
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "route_id": offer.get(
                 "route_id"
             ),
@@ -851,7 +861,7 @@ class Cats:
             "decided": True
         }
 
-        cat["last_navigation_decision"] = (
+        cat.last_navigation_decision = (
             dict(decision)
         )
 
@@ -913,10 +923,10 @@ class Cats:
                 "name": (
                     "cat_thought_cycle_failed"
                 ),
-                "cat": (
-                    cat.get("name")
-                    if isinstance(cat, dict)
-                    else None
+                "cat": getattr(
+                    cat,
+                    "name",
+                    None
                 ),
                 "observation": observations,
                 "completed": False
@@ -936,7 +946,7 @@ class Cats:
                 "name": (
                     "cat_thought_cycle_failed"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "observations": observations,
                 "decision": decision,
                 "completed": False
@@ -952,7 +962,7 @@ class Cats:
 
         event = {
             "name": "cat_thought_cycle_completed",
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "observations": observations,
             "decision": decision,
             "execution": execution,
@@ -982,7 +992,7 @@ class Cats:
                     "cat_quantum_exploration_"
                     "not_advanced"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "reason": (
                     "cat_box_transfer_unavailable"
                 ),
@@ -1014,7 +1024,7 @@ class Cats:
                     "cat_quantum_return_"
                     "not_advanced"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "reason": (
                     "cat_box_transfer_unavailable"
                 ),
@@ -1045,7 +1055,7 @@ class Cats:
         )
 
     def can_travel(self, cat, via):
-            if cat.get("type") != "cat":
+            if cat.type != "cat":
                 return False
 
             if not self.access_rules.get("can_access_anywhere", False):

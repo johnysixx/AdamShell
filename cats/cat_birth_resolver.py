@@ -360,7 +360,7 @@ class CatBirthResolver:
             (
                 cat
                 for cat in cats_layer.cats
-                if cat.get("name") == cat_name
+                if cat.name == cat_name
             ),
             None
         )
@@ -404,31 +404,31 @@ class CatBirthResolver:
             "cat"
         ]
 
-        cat["birth_profile"] = dict(
+        cat.birth_profile = dict(
             profile
         )
 
-        cat["rolled_birth_profile"] = dict(
+        cat.rolled_birth_profile = dict(
             birth["rolled_profile"]
         )
 
-        cat["birth_canonical"] = dict(
+        cat.birth_canonical = dict(
             canonical
         )
 
-        cat["birth_genetics"] = (
+        cat.birth_genetics = (
             birth["genetics"]
         )
 
-        cat["birth_trait_dice_mapping"] = (
+        cat.birth_trait_dice_mapping = (
             birth["trait_dice_mapping"]
         )
 
-        cat["birth_percentile"] = dict(
+        cat.birth_percentile = dict(
             birth["percentile"]
         )
 
-        cat["canonical_identity"] = (
+        cat.canonical_identity = (
             identity
         )
 
@@ -437,17 +437,13 @@ class CatBirthResolver:
                 f"canonical_cat_{identity}"
             )
 
-            if trait_name not in cat[
-                "special_traits"
-            ]:
-                cat["special_traits"].append(
+            if trait_name not in cat.special_traits:
+                cat.special_traits.append(
                     trait_name
                 )
 
-            if identity not in cat[
-                "special_traits"
-            ]:
-                cat["special_traits"].append(
+            if identity not in cat.special_traits:
+                cat.special_traits.append(
                     identity
                 )
 
@@ -517,7 +513,7 @@ class CatBirthResolver:
         )
 
         existing_names = {
-            cat.get("name")
+            cat.name
             for cat in (
                 cats_layer.cats
                 if cats_layer is not None

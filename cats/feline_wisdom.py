@@ -26,10 +26,15 @@ class FelineWisdom:
         cat,
         can_transmit_meow=None
     ):
-        wisdom = cat.setdefault(
+        wisdom = getattr(
+            cat,
             "feline_wisdom",
-            cls.create_state()
+            None
         )
+
+        if wisdom is None:
+            wisdom = cls.create_state()
+            cat.feline_wisdom = wisdom
 
         if can_transmit_meow is not None:
             wisdom[

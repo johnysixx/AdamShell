@@ -1,7 +1,8 @@
-﻿import unittest
+import unittest
 
 from multiverse import UniverseRegistry
 from universe.universe import Universe
+from cats.cats import Cats
 from universe.bootstraps.universe_bootstrap import (
     UniverseBootstrap
 )
@@ -32,12 +33,21 @@ class CatDistributionBarIntegrationTests(
     def test_cat_is_assigned_after_milk_but_stays_in_bar(
         self
     ):
-        cat = {
-            "name": "bar_cat",
-            "type": "cat",
-            "current_layer": "meeting_place",
-            "recipient": None
-        }
+        cats = Cats(
+            self.universe
+        )
+
+        cat = cats.create_cat(
+            name="bar_cat",
+            color="black",
+            fur_length="short"
+        )
+
+        cat.current_layer = (
+            "meeting_place"
+        )
+
+        cat.recipient = None
 
         recipient = {
             "id": "alice",
@@ -93,7 +103,7 @@ class CatDistributionBarIntegrationTests(
         )
 
         self.assertEqual(
-            cat["recipient"],
+            cat.recipient,
             "alice"
         )
 
@@ -108,7 +118,7 @@ class CatDistributionBarIntegrationTests(
         )
 
         self.assertEqual(
-            cat["current_layer"],
+            cat.current_layer,
             "meeting_place"
         )
 

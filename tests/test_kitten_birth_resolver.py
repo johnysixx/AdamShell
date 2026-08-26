@@ -30,12 +30,10 @@ class AlternatingFatherRng:
 
         if (
             values
-            and isinstance(
+            and getattr(
                 values[0],
-                dict
-            )
-            and values[0].get(
-                "type"
+                "type",
+                None
             ) == "cat"
         ):
             value = values[

@@ -56,10 +56,15 @@ class CatIntellect:
         cls,
         cat
     ):
-        intellect = cat.setdefault(
+        intellect = getattr(
+            cat,
             "intellect",
-            cls.create_state()
+            None
         )
+
+        if intellect is None:
+            intellect = cls.create_state()
+            cat.intellect = intellect
 
         score = int(
             intellect.get(

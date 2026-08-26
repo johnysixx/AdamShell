@@ -1,7 +1,8 @@
-﻿import unittest
+import unittest
 
 from multiverse import UniverseRegistry
 from universe.universe import Universe
+from cats.cats import Cats
 from universe.bootstraps.universe_bootstrap import (
     UniverseBootstrap
 )
@@ -32,20 +33,35 @@ class CatDoorIntegrationTests(
     def test_cat_travels_through_front_cat_door(
         self
     ):
-        cat = {
-            "name": "door_traveler",
-            "type": "cat",
-            "origin_layer": "quantum_layer",
-            "current_layer": "meeting_place",
-            "location": "outside_front_door",
-            "learning": {
-                "skills": {
-                    "cat_door_travel": {
-                        "learned": True
-                    }
-                }
-            }
-        }
+        cats = Cats(
+            self.universe
+        )
+
+        cat = cats.create_cat(
+            name="door_traveler",
+            color="black",
+            fur_length="short"
+        )
+
+        cat.origin_layer = (
+            "quantum_layer"
+        )
+
+        cat.current_layer = (
+            "meeting_place"
+        )
+
+        cat.location = (
+            "outside_front_door"
+        )
+
+        cat.learning[
+            "skills"
+        ][
+            "cat_door_travel"
+        ][
+            "learned"
+        ] = True
 
         door = (
             self.universe
@@ -71,17 +87,17 @@ class CatDoorIntegrationTests(
         )
 
         self.assertEqual(
-            cat["current_layer"],
+            cat.current_layer,
             "meeting_place"
         )
 
         self.assertEqual(
-            cat["location"],
+            cat.location,
             "inside_front_door"
         )
 
         self.assertEqual(
-            cat["origin_layer"],
+            cat.origin_layer,
             "quantum_layer"
         )
 

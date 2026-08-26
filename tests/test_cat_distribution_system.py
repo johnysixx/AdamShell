@@ -1,8 +1,10 @@
-﻿import unittest
+import unittest
 
 from cats.cat_distribution_system import (
     CatDistributionSystem
 )
+from cats.cats import Cats
+from universe.universe import Universe
 
 from universe.cat_recipient_registry import (
     CatRecipientRegistry
@@ -13,21 +15,36 @@ class CatDistributionSystemTests(
     unittest.TestCase
 ):
 
+    def make_cat(
+        self,
+        name,
+        recipient=None
+    ):
+        universe = Universe()
+        cats = Cats(
+            universe
+        )
+
+        cat = cats.create_cat(
+            name=name,
+            color="black",
+            fur_length="short"
+        )
+
+        cat.current_layer = (
+            "meeting_place"
+        )
+
+        cat.recipient = recipient
+
+        return cat
+
     def test_unowned_cat_gets_fallback_suggestion_without_travel(
         self
     ):
-        cat = {
-            "name": "traveler",
-            "type": "cat",
-            "current_layer": "meeting_place",
-            "learning": {
-                "skills": {
-                    "cat_door_travel": {
-                        "learned": True
-                    }
-                }
-            }
-        }
+        cat = self.make_cat(
+            name="traveler"
+        )
 
         meeting_entities = [
             cat
@@ -74,12 +91,12 @@ class CatDistributionSystemTests(
         )
 
         self.assertEqual(
-            cat["current_layer"],
+            cat.current_layer,
             "meeting_place"
         )
 
         self.assertEqual(
-            cat["distribution"][
+            cat.distribution[
                 "suggested_layer"
             ],
             "idea_universe"
@@ -89,19 +106,10 @@ class CatDistributionSystemTests(
     def test_assigned_cat_is_not_distributed(
         self
     ):
-        cat = {
-            "name": "house_cat",
-            "type": "cat",
-            "current_layer": "meeting_place",
-            "recipient": "alice",
-            "learning": {
-                "skills": {
-                    "cat_door_travel": {
-                        "learned": True
-                    }
-                }
-            }
-        }
+        cat = self.make_cat(
+            name="house_cat",
+            recipient="alice"
+        )
 
         meeting_entities = [
             cat
@@ -145,11 +153,9 @@ class CatDistributionSystemTests(
     def test_unowned_cat_is_assigned_to_waiting_recipient(
         self
     ):
-        cat = {
-            "name": "traveler",
-            "type": "cat",
-            "current_layer": "meeting_place"
-        }
+        cat = self.make_cat(
+            name="traveler"
+        )
 
         meeting_entities = [
             cat
@@ -203,19 +209,19 @@ class CatDistributionSystemTests(
         )
 
         self.assertEqual(
-            cat["recipient"],
+            cat.recipient,
             "alice"
         )
 
         self.assertEqual(
-            cat["distribution"][
+            cat.distribution[
                 "status"
             ],
             "assigned"
         )
 
         self.assertEqual(
-            cat["distribution"][
+            cat.distribution[
                 "recipient"
             ],
             "alice"
@@ -227,7 +233,7 @@ class CatDistributionSystemTests(
         )
 
         self.assertEqual(
-            cat["current_layer"],
+            cat.current_layer,
             "meeting_place"
         )
 
@@ -237,11 +243,9 @@ class CatDistributionSystemTests(
     def test_first_waiting_recipient_gets_cat(
         self
     ):
-        cat = {
-            "name": "traveler",
-            "type": "cat",
-            "current_layer": "meeting_place"
-        }
+        cat = self.make_cat(
+            name="traveler"
+        )
 
         first = {
             "id": "alice",
@@ -288,7 +292,7 @@ class CatDistributionSystemTests(
         )
 
         self.assertEqual(
-            cat["recipient"],
+            cat.recipient,
             "alice"
         )
 

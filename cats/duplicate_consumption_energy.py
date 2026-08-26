@@ -50,7 +50,7 @@ class DuplicateConsumptionEnergy:
                 f"cat_consumption_energy_"
                 f"{item_number:04d}"
             ),
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "source": source,
             "day": int(day),
             "amount": max(

@@ -4,6 +4,7 @@ from cats.physical_biology_gate import (
 from cats.cat_learning import (
     CatLearning
 )
+from cats.cat import Cat
 
 
 class CatDevelopmentResolver:
@@ -38,21 +39,27 @@ class CatDevelopmentResolver:
         cat,
         birth_day=None
     ):
-        reproduction = cat[
-            "reproduction"
-        ]
+        if not isinstance(
+            cat,
+            Cat
+        ):
+            raise TypeError(
+                "CatDevelopmentResolver requires Cat."
+            )
 
-        cat["age_days"] = 0
-        cat["birth_day"] = birth_day
-        cat["developmental_stage"] = (
+        reproduction = (
+            cat.reproduction
+        )
+
+        cat.age_days = 0
+        cat.birth_day = birth_day
+        cat.developmental_stage = (
             "newborn"
         )
 
-        cat["learning"] = (
+        cat.learning = (
             CatLearning.create_newborn_state(
-                mother_name=cat.get(
-                    "mother_name"
-                )
+                mother_name=cat.mother_name
             )
         )
 
@@ -70,7 +77,7 @@ class CatDevelopmentResolver:
             "name": (
                 "newborn_cat_development_initialized"
             ),
-            "cat": cat["name"],
+            "cat": cat.name,
             "age_days": 0,
             "stage": "newborn",
             "fertile": False,
@@ -88,6 +95,14 @@ class CatDevelopmentResolver:
         cat,
         days=1
     ):
+        if not isinstance(
+            cat,
+            Cat
+        ):
+            raise TypeError(
+                "CatDevelopmentResolver requires Cat."
+            )
+
         biology = (
             self.biology_gate
             .require_physical_world(
@@ -108,15 +123,12 @@ class CatDevelopmentResolver:
             )
 
         previous_age = int(
-            cat.get(
-                "age_days",
-                0
-            )
+            cat.age_days
         )
 
-        previous_stage = cat.get(
-            "developmental_stage",
-            self.stage_for_age(
+        previous_stage = (
+            cat.developmental_stage
+            or self.stage_for_age(
                 previous_age
             )
         )
@@ -126,14 +138,14 @@ class CatDevelopmentResolver:
             new_age
         )
 
-        cat["age_days"] = new_age
-        cat["developmental_stage"] = (
+        cat.age_days = new_age
+        cat.developmental_stage = (
             new_stage
         )
 
-        reproduction = cat[
-            "reproduction"
-        ]
+        reproduction = (
+            cat.reproduction
+        )
 
         reproduction[
             "developmental_stage"
@@ -166,7 +178,7 @@ class CatDevelopmentResolver:
 
         event = {
             "name": "cat_age_advanced",
-            "cat": cat["name"],
+            "cat": cat.name,
             "days_advanced": days,
             "previous_age_days": (
                 previous_age

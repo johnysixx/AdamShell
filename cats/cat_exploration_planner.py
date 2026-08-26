@@ -39,7 +39,8 @@ class CatExplorationPlanner:
         cat,
         universe
     ):
-        current_layer = cat.get(
+        current_layer = getattr(
+            cat,
             "current_layer",
             "quantum_layer"
         )
@@ -109,10 +110,7 @@ class CatExplorationPlanner:
         preferred_identity=None,
         avoid_identity=None
     ):
-        knowledge = cat.get(
-            "knowledge",
-            {}
-        )
+        knowledge = cat.knowledge
 
         scent_places = list(
             knowledge.get(
@@ -127,8 +125,10 @@ class CatExplorationPlanner:
                 "reason": "no_known_scent_places"
             }
 
-        current_layer = cat.get(
-            "current_layer"
+        current_layer = getattr(
+            cat,
+            "current_layer",
+            None
         )
 
         candidates = []
@@ -256,10 +256,7 @@ class CatExplorationPlanner:
         Cat D20 pouze rozli?? mezi nejlep??mi
         rozumn?mi mo?nostmi.
         """
-        traits = cat.get(
-            "personality",
-            {}
-        ).get(
+        traits = cat.personality.get(
             "traits",
             {}
         )
@@ -286,10 +283,7 @@ class CatExplorationPlanner:
         )
 
         intellect = float(
-            cat.get(
-                "intellect",
-                {}
-            ).get(
+            cat.intellect.get(
                 "normalized",
                 0.5
             )
@@ -415,7 +409,8 @@ class CatExplorationPlanner:
         Nezakl?d? nov? mezivrstvov? p?r.
         """
         current = dict(
-            cat.get(
+            getattr(
+                cat,
                 "position",
                 {
                     "x": 0.0,
@@ -425,10 +420,7 @@ class CatExplorationPlanner:
             )
         )
 
-        traits = cat.get(
-            "personality",
-            {}
-        ).get(
+        traits = cat.personality.get(
             "traits",
             {}
         )
@@ -448,18 +440,13 @@ class CatExplorationPlanner:
         )
 
         intellect = float(
-            cat.get(
-                "intellect",
-                {}
-            ).get(
+            cat.intellect.get(
                 "normalized",
                 0.5
             )
         )
 
-        memory = cat.get(
-            "memory"
-        )
+        memory = cat.memory
 
         visited_positions = []
 
@@ -631,8 +618,10 @@ class CatExplorationPlanner:
     ):
         candidates = []
 
-        explicit_goal = cat.get(
-            "exploration_goal"
+        explicit_goal = getattr(
+            cat,
+            "exploration_goal",
+            None
         )
 
         if isinstance(
@@ -707,9 +696,7 @@ class CatExplorationPlanner:
                 "negative_memories": 0
             })
 
-        memory = cat.get(
-            "memory"
-        )
+        memory = cat.memory
 
         for event in getattr(
             memory,
@@ -787,10 +774,7 @@ class CatExplorationPlanner:
                     )
                 })
 
-        knowledge = cat.get(
-            "knowledge",
-            {}
-        )
+        knowledge = cat.knowledge
 
         for heard in knowledge.get(
             "heard_legends",
@@ -865,10 +849,7 @@ class CatExplorationPlanner:
         cat,
         candidate
     ):
-        traits = cat.get(
-            "personality",
-            {}
-        ).get(
+        traits = cat.personality.get(
             "traits",
             {}
         )
@@ -895,10 +876,7 @@ class CatExplorationPlanner:
         )
 
         intellect = float(
-            cat.get(
-                "intellect",
-                {}
-            ).get(
+            cat.intellect.get(
                 "normalized",
                 0.5
             )

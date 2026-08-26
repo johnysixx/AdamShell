@@ -26,10 +26,15 @@ class CatPersonality:
         cls,
         cat
     ):
-        personality = cat.setdefault(
+        personality = getattr(
+            cat,
             "personality",
-            cls.create_state()
+            None
         )
+
+        if personality is None:
+            personality = cls.create_state()
+            cat.personality = personality
 
         traits = personality.setdefault(
             "traits",
@@ -102,7 +107,7 @@ class CatPersonality:
             "name": (
                 "cat_personality_trait_adjusted"
             ),
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "trait": trait,
             "source": source,
             "day": day,
@@ -154,7 +159,7 @@ class CatPersonality:
             "name": (
                 "cat_personality_experience_applied"
             ),
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "source": source,
             "day": day,
             "changes": dict(changes),

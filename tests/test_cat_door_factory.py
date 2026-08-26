@@ -1,14 +1,59 @@
-﻿import unittest
+import unittest
 
 from cats.cat_door import CatDoor
 from cats.cat_door_factory import (
     CatDoorFactory
 )
+from cats.cats import Cats
+from universe.universe import Universe
 
 
 class CatDoorFactoryTests(
     unittest.TestCase
 ):
+
+    def make_cat(
+        self,
+        name,
+        current_layer,
+        location=None,
+        trained=True,
+        origin_layer=None
+    ):
+        universe = Universe()
+
+        cats = Cats(
+            universe
+        )
+
+        cat = cats.create_cat(
+            name=name,
+            color="black",
+            fur_length="short"
+        )
+
+        cat.current_layer = (
+            current_layer
+        )
+
+        cat.location = location
+
+        if origin_layer is not None:
+            cat.origin_layer = (
+                origin_layer
+            )
+
+        cat.learning[
+            "skills"
+        ][
+            "cat_door_travel"
+        ][
+            "learned"
+        ] = bool(
+            trained
+        )
+
+        return cat
 
     def test_create_cat_door(
         self
@@ -102,18 +147,10 @@ class CatDoorFactoryTests(
             target_layer="layer_b"
         )
 
-        cat = {
-            "name": "traveler",
-            "type": "cat",
-            "current_layer": "layer_a",
-            "learning": {
-                "skills": {
-                    "cat_door_travel": {
-                        "learned": True
-                    }
-                }
-            }
-        }
+        cat = self.make_cat(
+            name="traveler",
+            current_layer="layer_a"
+        )
 
         result = door.travel(
             cat
@@ -124,7 +161,7 @@ class CatDoorFactoryTests(
         )
 
         self.assertEqual(
-            cat["current_layer"],
+            cat.current_layer,
             "layer_b"
         )
 
@@ -147,18 +184,10 @@ class CatDoorFactoryTests(
             target_layer="layer_b"
         )
 
-        cat = {
-            "name": "traveler",
-            "type": "cat",
-            "current_layer": "quantum_layer",
-            "learning": {
-                "skills": {
-                    "cat_door_travel": {
-                        "learned": True
-                    }
-                }
-            }
-        }
+        cat = self.make_cat(
+            name="traveler",
+            current_layer="quantum_layer"
+        )
 
         result = door.travel(
             cat
@@ -174,7 +203,7 @@ class CatDoorFactoryTests(
         )
 
         self.assertEqual(
-            cat["current_layer"],
+            cat.current_layer,
             "quantum_layer"
         )
 
@@ -187,18 +216,11 @@ class CatDoorFactoryTests(
             target_layer="layer_b"
         )
 
-        kitten = {
-            "name": "kitten",
-            "type": "cat",
-            "current_layer": "layer_a",
-            "learning": {
-                "skills": {
-                    "cat_door_travel": {
-                        "learned": False
-                    }
-                }
-            }
-        }
+        kitten = self.make_cat(
+            name="kitten",
+            current_layer="layer_a",
+            trained=False
+        )
 
         result = door.travel(
             kitten
@@ -214,7 +236,7 @@ class CatDoorFactoryTests(
         )
 
         self.assertEqual(
-            kitten["current_layer"],
+            kitten.current_layer,
             "layer_a"
         )
 
@@ -227,19 +249,11 @@ class CatDoorFactoryTests(
             target_layer="layer_b"
         )
 
-        cat = {
-            "name": "traveler",
-            "type": "cat",
-            "origin_layer": "quantum_layer",
-            "current_layer": "layer_a",
-            "learning": {
-                "skills": {
-                    "cat_door_travel": {
-                        "learned": True
-                    }
-                }
-            }
-        }
+        cat = self.make_cat(
+            name="traveler",
+            current_layer="layer_a",
+            origin_layer="quantum_layer"
+        )
 
         source_entities = [
             cat
@@ -268,12 +282,12 @@ class CatDoorFactoryTests(
         )
 
         self.assertEqual(
-            cat["current_layer"],
+            cat.current_layer,
             "layer_b"
         )
 
         self.assertEqual(
-            cat["origin_layer"],
+            cat.origin_layer,
             "quantum_layer"
         )
 
@@ -381,19 +395,11 @@ class CatDoorFactoryTests(
             target_location="inside_front_door"
         )
 
-        cat = {
-            "name": "micka",
-            "type": "cat",
-            "current_layer": "layer_a",
-            "location": "behind_bar",
-            "learning": {
-                "skills": {
-                    "cat_door_travel": {
-                        "learned": True
-                    }
-                }
-            }
-        }
+        cat = self.make_cat(
+            name="micka",
+            current_layer="layer_a",
+            location="behind_bar"
+        )
 
         result = door.travel(cat)
 
@@ -407,7 +413,7 @@ class CatDoorFactoryTests(
         )
 
         self.assertEqual(
-            cat["location"],
+            cat.location,
             "behind_bar"
         )
 
@@ -422,19 +428,11 @@ class CatDoorFactoryTests(
             target_location="inside_front_door"
         )
 
-        cat = {
-            "name": "micka",
-            "type": "cat",
-            "current_layer": "layer_a",
-            "location": "outside_front_door",
-            "learning": {
-                "skills": {
-                    "cat_door_travel": {
-                        "learned": True
-                    }
-                }
-            }
-        }
+        cat = self.make_cat(
+            name="micka",
+            current_layer="layer_a",
+            location="outside_front_door"
+        )
 
         result = door.travel(cat)
 
@@ -443,12 +441,12 @@ class CatDoorFactoryTests(
         )
 
         self.assertEqual(
-            cat["current_layer"],
+            cat.current_layer,
             "layer_a"
         )
 
         self.assertEqual(
-            cat["location"],
+            cat.location,
             "inside_front_door"
         )
 
@@ -463,19 +461,11 @@ class CatDoorFactoryTests(
             destination_mode="cat_choice"
         )
 
-        cat = {
-            "name": "micka",
-            "type": "cat",
-            "current_layer": "meeting_place",
-            "location": "back_room",
-            "learning": {
-                "skills": {
-                    "cat_door_travel": {
-                        "learned": True
-                    }
-                }
-            }
-        }
+        cat = self.make_cat(
+            name="micka",
+            current_layer="meeting_place",
+            location="back_room"
+        )
 
         result = door.travel(
             cat,
@@ -496,7 +486,7 @@ class CatDoorFactoryTests(
         )
 
         self.assertEqual(
-            cat["current_layer"],
+            cat.current_layer,
             "root_universe"
         )
 
@@ -517,19 +507,11 @@ class CatDoorFactoryTests(
             destination_mode="cat_choice"
         )
 
-        cat = {
-            "name": "micka",
-            "type": "cat",
-            "current_layer": "meeting_place",
-            "location": "back_room",
-            "learning": {
-                "skills": {
-                    "cat_door_travel": {
-                        "learned": True
-                    }
-                }
-            }
-        }
+        cat = self.make_cat(
+            name="micka",
+            current_layer="meeting_place",
+            location="back_room"
+        )
 
         result = door.travel(
             cat
@@ -545,12 +527,12 @@ class CatDoorFactoryTests(
         )
 
         self.assertEqual(
-            cat["current_layer"],
+            cat.current_layer,
             "meeting_place"
         )
 
         self.assertEqual(
-            cat["location"],
+            cat.location,
             "back_room"
         )
 

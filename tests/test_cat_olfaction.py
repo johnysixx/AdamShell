@@ -40,13 +40,13 @@ class CatOlfactionTests(
             )
         )
 
-        self.observer["position"] = {
+        self.observer.position = {
             "x": 0.0,
             "y": 0.0,
             "z": 0.0
         }
 
-        self.other["position"] = {
+        self.other.position = {
             "x": 2.0,
             "y": 0.0,
             "z": 0.0
@@ -360,7 +360,7 @@ class CatOlfactionTests(
             fur_length="short"
         )
 
-        garfield["position"] = {
+        garfield.position = {
             "x": 3.0,
             "y": 0.0,
             "z": 0.0

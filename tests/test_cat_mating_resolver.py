@@ -2,6 +2,7 @@ import unittest
 
 from universe.universe import Universe
 from cats import Cats
+from cats.cat import Cat
 from cats.mating_resolver import (
     CatMatingResolver
 )
@@ -25,11 +26,9 @@ class MultiSireRng:
             values
             and isinstance(
                 values[0],
-                dict
+                Cat
             )
-            and values[0].get(
-                "type"
-            ) == "cat"
+            and values[0].type == "cat"
         ):
             value = values[
                 self.next_father

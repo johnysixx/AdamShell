@@ -27,8 +27,10 @@ class CatOlfaction:
         )
 
         cat_position = cls._position(
-            cat.get(
-                "position"
+            getattr(
+                cat,
+                "position",
+                None
             )
         )
 
@@ -103,8 +105,10 @@ class CatOlfaction:
                 observation
             )
 
-        cat_layer = cat.get(
-            "current_layer"
+        cat_layer = getattr(
+            cat,
+            "current_layer",
+            None
         )
 
         for quantum_box in getattr(
@@ -177,7 +181,7 @@ class CatOlfaction:
         )
 
         return {
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "radius": radius,
             "detected_aromas": detected,
             "ambient_aroma": ambient,
@@ -286,8 +290,10 @@ class CatOlfaction:
         cat,
         universe
     ):
-        if cat.get(
-            "current_layer"
+        if getattr(
+            cat,
+            "current_layer",
+            None
         ) != "meeting_place":
             return None
 

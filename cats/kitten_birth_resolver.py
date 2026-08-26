@@ -327,7 +327,7 @@ class KittenBirthResolver:
             )
 
         existing_names = {
-            cat.get("name")
+            cat.name
             for cat in cats_layer.cats
         }
 

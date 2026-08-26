@@ -292,9 +292,7 @@ class FelineTeacherResolver:
         cat_name
     ):
         for cat in cats:
-            if cat.get(
-                "name"
-            ) == cat_name:
+            if cat.name == cat_name:
                 return cat
 
         return None
