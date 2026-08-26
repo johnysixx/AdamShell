@@ -77,6 +77,14 @@ class CatGroupSystem:
             "diplomacy": {},
             "alliances": [],
 
+            # Collective knowledge is not automatically
+            # believed by every individual cat.
+            "knowledge": {},
+
+            # Federation memberships stay separate
+            # from ordinary group alliances.
+            "federations": [],
+
             # Current collective location
             "current_layer": (
                 founder.current_layer
