@@ -1,4 +1,4 @@
-﻿from .universe_manual import UniverseManual
+from .universe_manual import UniverseManual
 from .cronenberg_pen_terminal import CronenbergPenTerminal
 
 
@@ -11,7 +11,51 @@ class BackRoom:
         self.bar_ingredients = {
             "rum": {
                 "available": True,
-                "fundamental": True
+                "fundamental": True,
+                "serve_directly": True,
+                "category": "basic_drink"
+            },
+            "whisky": {
+                "available": True,
+                "fundamental": True,
+                "serve_directly": True,
+                "category": "basic_drink"
+            },
+            "vodka": {
+                "available": True,
+                "fundamental": True,
+                "serve_directly": True,
+                "category": "basic_drink"
+            },
+            "gin": {
+                "available": True,
+                "fundamental": True,
+                "serve_directly": True,
+                "category": "basic_drink"
+            },
+            "beer": {
+                "available": True,
+                "fundamental": True,
+                "serve_directly": True,
+                "category": "basic_drink"
+            },
+            "wine": {
+                "available": True,
+                "fundamental": True,
+                "serve_directly": True,
+                "category": "basic_drink"
+            },
+            "mead": {
+                "available": True,
+                "fundamental": True,
+                "serve_directly": True,
+                "category": "basic_drink"
+            },
+            "apple_cider": {
+                "available": True,
+                "fundamental": True,
+                "serve_directly": True,
+                "category": "basic_drink"
             }
         }
 

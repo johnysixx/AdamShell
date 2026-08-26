@@ -1,4 +1,4 @@
-﻿from universe.logger import UniverseLogger
+from universe.logger import UniverseLogger
 
 class BarStoryBook:
 
@@ -19,6 +19,7 @@ class BarStoryBook:
 
 
 from .red_button import RedButton
+from .cash_register import CashRegister
 
 
 class BarCounter:
@@ -42,6 +43,8 @@ class BarCounter:
         UniverseLogger.boot("BAR CLOTH PLACED UNDER BAR COUNTER")
 
         self.red_button = RedButton()
+
+        self.cash_register = CashRegister()
 
         self.milk_bowl = {
             "name": "milk_bowl",
