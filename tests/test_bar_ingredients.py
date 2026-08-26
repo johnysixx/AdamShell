@@ -1,4 +1,4 @@
-﻿import unittest
+import unittest
 
 from universe.universe import Universe
 from multiverse import UniverseRegistry
@@ -6,6 +6,34 @@ from meeting_place.meeting_place import MeetingPlace
 
 
 class BarIngredientsTests(unittest.TestCase):
+
+    def _teach_raspberry_rum(
+        self,
+        meeting_place
+    ):
+        recipe = (
+            meeting_place
+            .how_to_mix_drinks
+            .reveal_hidden_recipe(
+                name="raspberry_rum",
+                teacher="god"
+            )
+        )
+
+        meeting_place.bartender.learn_cocktail(
+            drink="raspberry_rum",
+            teacher="god",
+            ingredients=list(
+                recipe[
+                    "ingredients"
+                ].keys()
+            )
+        )
+
+        meeting_place.refresh_basic_drinks()
+
+        return recipe
+
 
     def test_bar_has_basic_rum_from_start(
         self
@@ -99,7 +127,7 @@ class BarIngredientsTests(unittest.TestCase):
         )
 
 
-    def test_raspberry_rum_is_available_only_after_liquid_hydrocarbons_exist(
+    def test_raspberry_rum_requires_hydrocarbons_and_god_teaching(
         self
     ):
         universe = Universe()
@@ -114,11 +142,40 @@ class BarIngredientsTests(unittest.TestCase):
             meeting_place.drink_menu
         )
 
+        self.assertIn(
+            "raspberry_rum",
+            meeting_place
+            .how_to_mix_drinks
+            .hidden_recipes
+        )
+
         universe.liquid_hydrocarbons = True
 
         meeting_place.refresh_bar_ingredients()
-
         meeting_place.refresh_basic_drinks()
+
+        self.assertNotIn(
+            "raspberry_rum",
+            meeting_place.drink_menu
+        )
+
+        self._teach_raspberry_rum(
+            meeting_place
+        )
+
+        self.assertNotIn(
+            "raspberry_rum",
+            meeting_place
+            .how_to_mix_drinks
+            .hidden_recipes
+        )
+
+        self.assertIn(
+            "raspberry_rum",
+            meeting_place
+            .how_to_mix_drinks
+            .recipes
+        )
 
         self.assertIn(
             "raspberry_rum",
@@ -167,6 +224,10 @@ class BarIngredientsTests(unittest.TestCase):
         universe.liquid_hydrocarbons = True
         meeting_place.refresh_bar_ingredients()
 
+        self._teach_raspberry_rum(
+            meeting_place
+        )
+
         stock = (
             meeting_place
             .back_room
@@ -202,6 +263,10 @@ class BarIngredientsTests(unittest.TestCase):
 
         universe.liquid_hydrocarbons = True
         meeting_place.refresh_bar_ingredients()
+
+        self._teach_raspberry_rum(
+            meeting_place
+        )
 
         stock = (
             meeting_place
@@ -243,6 +308,10 @@ class BarIngredientsTests(unittest.TestCase):
 
         universe.liquid_hydrocarbons = True
         meeting_place.refresh_bar_ingredients()
+
+        self._teach_raspberry_rum(
+            meeting_place
+        )
 
         meeting_place.back_room.bar_ingredients[
             "liquid_hydrocarbons"
@@ -293,6 +362,10 @@ class BarIngredientsTests(unittest.TestCase):
 
         universe.liquid_hydrocarbons = True
         meeting_place.refresh_bar_ingredients()
+
+        self._teach_raspberry_rum(
+            meeting_place
+        )
 
         stock = (
             meeting_place
@@ -345,6 +418,121 @@ class BarIngredientsTests(unittest.TestCase):
             result.type,
             "cronenberg"
         )
+
+
+
+
+    def test_menu_contains_every_currently_serveable_stock_item(
+        self
+    ):
+        universe = Universe()
+        universe.universe_registry = UniverseRegistry()
+
+        meeting_place = MeetingPlace(
+            universe
+        )
+
+        meeting_place.refresh_basic_drinks()
+
+        self.assertIn(
+            "rum",
+            meeting_place.drink_menu
+        )
+
+        self.assertNotIn(
+            "liquid_hydrocarbons",
+            meeting_place.drink_menu
+        )
+
+        self.assertNotIn(
+            "raspberry_rum",
+            meeting_place.drink_menu
+        )
+
+
+
+    def test_all_fundamental_bar_drinks_are_available_from_start(
+        self
+    ):
+        universe = Universe()
+        universe.universe_registry = UniverseRegistry()
+
+        meeting_place = MeetingPlace(
+            universe
+        )
+
+        meeting_place.refresh_basic_drinks()
+
+        expected = {
+            "rum",
+            "whisky",
+            "vodka",
+            "gin",
+            "beer",
+            "wine",
+            "mead",
+            "apple_cider"
+        }
+
+        for drink_name in expected:
+            self.assertIn(
+                drink_name,
+                meeting_place.back_room.bar_ingredients
+            )
+
+            self.assertTrue(
+                meeting_place.back_room.bar_ingredients[
+                    drink_name
+                ]["available"]
+            )
+
+            self.assertTrue(
+                meeting_place.back_room.bar_ingredients[
+                    drink_name
+                ]["serve_directly"]
+            )
+
+            self.assertIn(
+                drink_name,
+                meeting_place.drink_menu
+            )
+
+
+
+    def test_all_fundamental_drinks_share_basic_drink_category(
+        self
+    ):
+        universe = Universe()
+        universe.universe_registry = UniverseRegistry()
+
+        meeting_place = MeetingPlace(
+            universe
+        )
+
+        expected = {
+            "rum",
+            "whisky",
+            "vodka",
+            "gin",
+            "beer",
+            "wine",
+            "mead",
+            "apple_cider"
+        }
+
+        for drink_name in expected:
+            stock = (
+                meeting_place
+                .back_room
+                .bar_ingredients[
+                    drink_name
+                ]
+            )
+
+            self.assertEqual(
+                stock["category"],
+                "basic_drink"
+            )
 
 
 if __name__ == "__main__":

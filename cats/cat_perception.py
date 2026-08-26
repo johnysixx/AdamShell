@@ -1,3 +1,5 @@
+from cats.cat import Cat
+
 import math
 from copy import deepcopy
 
@@ -37,7 +39,10 @@ class CatPerception:
     ):
         if not isinstance(
             cat,
-            dict
+            (
+                Cat,
+                dict
+            )
         ):
             return {
                 "name": "cat_observation_failed",
@@ -45,22 +50,24 @@ class CatPerception:
                 "observed": False
             }
 
-        if cat.get("type") != "cat":
+        if cat.type != "cat":
             return {
                 "name": "cat_observation_failed",
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "reason": "entity_is_not_cat",
                 "observed": False
             }
 
-        position = cat.get(
-            "position"
+        position = getattr(
+            cat,
+            "position",
+            None
         )
 
         if position is None:
             return {
                 "name": "cat_observation_failed",
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "reason": "cat_has_no_position",
                 "observed": False
             }
@@ -143,10 +150,7 @@ class CatPerception:
             )
         )
 
-        current_layer = cat.get(
-            "current_layer",
-            "quantum_layer"
-        )
+        current_layer = (cat.current_layer or "quantum_layer")
 
         exploration_plan = (
             CatExplorationPlanner
@@ -174,10 +178,7 @@ class CatPerception:
         )
 
         available_cat_energy = float(
-            cat.get(
-                "idea_energy",
-                0.0
-            )
+            cat.idea_energy
         )
 
         can_create_exploration_pair = bool(
@@ -220,10 +221,7 @@ class CatPerception:
             CatKnowledge.remember_olfaction(
                 cat=cat,
                 olfaction=olfaction,
-                current_layer=cat.get(
-                    "current_layer",
-                    "unknown"
-                ),
+                current_layer=(cat.current_layer or "unknown"),
                 universe_tick=getattr(
                     self.universe,
                     "universe_tick",
@@ -365,9 +363,7 @@ class CatPerception:
                 "source_layer": getattr(
                     box,
                     "current_layer",
-                    cat.get(
-                        "current_layer"
-                    )
+                    cat.current_layer
                 ),
                 "target_layer": getattr(
                     counterpart_box,
@@ -391,9 +387,11 @@ class CatPerception:
             })
 
         counterpart_observation = deepcopy(
-            cat.get(
-                "current_quantum_counterpart_observation"
-            )
+            getattr(
+            cat,
+            "current_quantum_counterpart_observation",
+            None
+        )
         )
 
         if isinstance(
@@ -484,15 +482,19 @@ class CatPerception:
             )
 
             if not valid:
-                cat.pop(
-                    "current_quantum_counterpart_observation",
-                    None
-                )
+                if hasattr(
+                    cat,
+                    "current_quantum_counterpart_observation"
+                ):
+                    delattr(
+                        cat,
+                        "current_quantum_counterpart_observation"
+                    )
 
                 counterpart_observation = None
 
         observations = {
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "position": deepcopy(
                 position
             ),
@@ -618,17 +620,14 @@ class CatPerception:
 
         event = {
             "name": "cat_environment_observed",
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "observations": deepcopy(
                 observations
             ),
             "observed": True
         }
 
-        mind = cat.setdefault(
-            "mind",
-            {}
-        )
+        mind = cat.mind
 
         mind["last_observations"] = (
             deepcopy(observations)
@@ -659,13 +658,8 @@ class CatPerception:
             if candidate is cat:
                 continue
 
-            candidate_position = (
-                candidate.get("position")
-                if isinstance(
-                    candidate,
-                    dict
-                )
-                else None
+            candidate_position = candidate.get(
+                "position"
             )
 
             if candidate_position is None:
@@ -769,10 +763,7 @@ class CatPerception:
         cat_size = max(
             0.000001,
             float(
-                cat.get(
-                    "size",
-                    1.0
-                )
+                cat.size
             )
         )
 
@@ -799,9 +790,7 @@ class CatPerception:
     ):
         observed = []
 
-        cat_layer = cat.get(
-            "current_layer"
-        )
+        cat_layer = cat.current_layer
 
         for box in getattr(
             self.universe,
@@ -814,10 +803,24 @@ class CatPerception:
                 None
             )
 
+            transfer_superposition = getattr(
+                box,
+                "is_in_cat_transfer_superposition",
+                None
+            )
+
+            cross_layer_cat_transfer = bool(
+                callable(
+                    transfer_superposition
+                )
+                and transfer_superposition()
+            )
+
             if (
                 cat_layer is not None
                 and box_layer is not None
                 and box_layer != cat_layer
+                and not cross_layer_cat_transfer
             ):
                 continue
 
@@ -1033,10 +1036,7 @@ class CatPerception:
         self,
         cat
     ):
-        traits = cat.get(
-            "special_traits",
-            []
-        )
+        traits = cat.special_traits
 
         if (
             "sees_direct_path_to_bar"
@@ -1044,9 +1044,7 @@ class CatPerception:
         ):
             return True
 
-        memory = cat.get(
-            "memory"
-        )
+        memory = cat.memory
 
         if memory is None:
             return False
@@ -1082,9 +1080,7 @@ class CatPerception:
         cat,
         box_id
     ):
-        memory = cat.get(
-            "memory"
-        )
+        memory = cat.memory
 
         if memory is None:
             return False
@@ -1132,10 +1128,7 @@ class CatPerception:
         cat_size = max(
             0.000001,
             float(
-                cat.get(
-                    "size",
-                    1.0
-                )
+                cat.size
             )
         )
 

@@ -61,9 +61,23 @@ class ChemicalAromaFoundationsTests(
             universe
         )
 
-        self.assertIn(
+        self.assertNotIn(
             "raspberry_rum",
             meeting.drink_menu
+        )
+
+        self.assertNotIn(
+            "raspberry_rum",
+            meeting
+            .how_to_mix_drinks
+            .recipes
+        )
+
+        self.assertIn(
+            "raspberry_rum",
+            meeting
+            .how_to_mix_drinks
+            .hidden_recipes
         )
 
         self.assertEqual(

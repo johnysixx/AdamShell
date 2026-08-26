@@ -1121,19 +1121,41 @@ class HowToMixDrinksTests(unittest.TestCase):
         )
 
 
-    def test_book_contains_basic_raspberry_rum_recipe(
+    def test_book_hides_raspberry_rum_until_god_teaches_it(
         self
     ):
         book = HowToMixDrinks()
 
-        self.assertIn(
+        self.assertNotIn(
             "raspberry_rum",
             book.recipes
         )
 
-        recipe = book.recipes[
+        self.assertIn(
+            "raspberry_rum",
+            book.hidden_recipes
+        )
+
+        recipe = book.hidden_recipes[
             "raspberry_rum"
         ]
+
+        self.assertTrue(
+            recipe["hidden"]
+        )
+
+        self.assertFalse(
+            recipe["learned"]
+        )
+
+        self.assertIsNone(
+            recipe["teacher"]
+        )
+
+        self.assertEqual(
+            recipe["origin"],
+            "god_secret_recipe"
+        )
 
         self.assertEqual(
             recipe["ingredients"],
@@ -1151,7 +1173,7 @@ class HowToMixDrinksTests(unittest.TestCase):
 
         self.assertEqual(
             recipe["origin"],
-            "basic_bar_recipe"
+            "god_secret_recipe"
         )
 
 

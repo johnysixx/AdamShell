@@ -177,30 +177,38 @@ class Bouncer:
         self,
         cat
     ):
-        if not isinstance(
+        learning = getattr(
             cat,
+            "learning",
+            None
+        )
+
+        if learning is None and isinstance(
+            cat,
+            dict
+        ):
+            learning = cat.get(
+                "learning",
+                {}
+            )
+
+        if not isinstance(
+            learning,
             dict
         ):
             return False
 
+        meow_knowledge = learning.get(
+            "meow_knowledge",
+            {}
+        )
+
         return bool(
-            cat.get(
-                "learning",
-                {}
-            ).get(
-                "meow_knowledge",
-                {}
-            ).get(
+            meow_knowledge.get(
                 "learned",
                 False
             )
-            and cat.get(
-                "learning",
-                {}
-            ).get(
-                "meow_knowledge",
-                {}
-            ).get(
+            and meow_knowledge.get(
                 "can_speak",
                 False
             )

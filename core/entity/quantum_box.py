@@ -190,13 +190,19 @@ class QuantumBox:
         if not self.is_in_cat_transfer_superposition():
             return True
 
-        if not isinstance(
+        if isinstance(
             observer,
             dict
         ):
-            return False
+            return observer.get(
+                "type"
+            ) == "cat"
 
-        return observer.get("type") == "cat"
+        return getattr(
+            observer,
+            "type",
+            None
+        ) == "cat"
 
     def cat_observation_state(
             self,

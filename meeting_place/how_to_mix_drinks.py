@@ -6,10 +6,13 @@ class HowToMixDrinks:
     def __init__(self):
         self.name = "how_to_mix_drinks"
         self.type = "bartender_recipe_book"
-        self.recipes = {
+        self.hidden_recipes = {
             "raspberry_rum": {
                 "name": "raspberry_rum",
-                "origin": "basic_bar_recipe",
+                "origin": "god_secret_recipe",
+                "hidden": True,
+                "learned": False,
+                "teacher": None,
                 "ingredients": {
                     "rum": {
                         "shots": 1,
@@ -23,9 +26,82 @@ class HowToMixDrinks:
             }
         }
 
+        self.recipes = {}
         UniverseLogger.boot(
             "HOW TO MIX DRINKS CREATED"
         )
+
+    def reveal_hidden_recipe(
+        self,
+        name,
+        teacher
+    ):
+        if name in self.recipes:
+            return self.recipes[
+                name
+            ]
+
+        recipe = self.hidden_recipes.get(
+            name
+        )
+
+        if recipe is None:
+            raise ValueError(
+                "Unknown hidden cocktail recipe."
+            )
+
+        revealed = {
+            key: value
+            for key, value
+            in recipe.items()
+        }
+
+        revealed[
+            "ingredients"
+        ] = {
+            ingredient_name: dict(
+                requirement
+            )
+            for (
+                ingredient_name,
+                requirement
+            )
+            in recipe[
+                "ingredients"
+            ].items()
+        }
+
+        revealed[
+            "hidden"
+        ] = False
+
+        revealed[
+            "learned"
+        ] = True
+
+        revealed[
+            "teacher"
+        ] = teacher
+
+        revealed[
+            "origin"
+        ] = "taught_by_god"
+
+        self.recipes[
+            name
+        ] = revealed
+
+        del self.hidden_recipes[
+            name
+        ]
+
+        UniverseLogger.event(
+            "HOW TO MIX DRINKS SECRET RECIPE "
+            f"REVEALED: {name} BY {teacher}"
+        )
+
+        return revealed
+
 
     def add_created_recipe(
         self,

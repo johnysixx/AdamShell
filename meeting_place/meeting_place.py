@@ -1,4 +1,5 @@
-﻿import random
+import random
+from cats.cat import Cat
 
 from universe.logger import UniverseLogger
 
@@ -608,7 +609,17 @@ class MeetingPlace:
         growth_event = None
 
         if (
-            isinstance(cat, dict)
+            (
+                isinstance(
+                    cat,
+                    dict
+                )
+                or getattr(
+                    cat,
+                    "type",
+                    None
+                ) == "cat"
+            )
             and "age_days" in cat
             and cat.get(
                 "developmental_stage"
@@ -1473,7 +1484,13 @@ class MeetingPlace:
         self,
         cat
     ):
-        if not isinstance(cat, dict):
+        if not isinstance(
+            cat,
+            (
+                Cat,
+                dict
+            )
+        ):
             raise TypeError(
                 "Cat D20 box requires a cat."
             )
@@ -1778,6 +1795,115 @@ class MeetingPlace:
 
         return recipe
 
+    def serve_basic_drink(
+        self,
+        entity,
+        drink_name
+    ):
+        self.refresh_basic_drinks()
+
+        menu_item = self.drink_menu.get(
+            drink_name
+        )
+
+        if menu_item is None:
+            raise ValueError(
+                "Drink is not currently available."
+            )
+
+        stock = (
+            self.back_room
+            .bar_ingredients
+            .get(
+                drink_name
+            )
+        )
+
+        if stock is None:
+            raise ValueError(
+                "Basic drink is not present in bar stock."
+            )
+
+        if stock.get(
+            "category"
+        ) != "basic_drink":
+            raise ValueError(
+                "Drink is not a basic drink."
+            )
+
+        if not stock.get(
+            "available",
+            False
+        ):
+            raise ValueError(
+                "Basic drink is currently unavailable."
+            )
+
+        payment = (
+            self.service_rules
+            .apply_basic_drink_payment(
+                entity
+            )
+        )
+
+        if payment.get(
+            "payment_kind"
+        ) == "unsupported":
+            raise ValueError(
+                "Entity type cannot pay for a basic drink."
+            )
+
+        bar_energy_j = float(
+            payment.get(
+                "bar_energy_j",
+                0.0
+            )
+        )
+
+        if bar_energy_j > 0.0:
+            entity_name = self._get_entity_name(
+                entity
+            )
+
+            self.add_bar_energy(
+                source=(
+                    "basic_drink_payment:"
+                    f"{entity_name}:"
+                    f"{drink_name}"
+                ),
+                amount_j=bar_energy_j
+            )
+
+        drink = {
+            "name": drink_name,
+            "type": "basic_bar_drink",
+            "category": "basic_drink"
+        }
+
+        entity_name = self._get_entity_name(
+            entity
+        )
+
+        receipt = (
+            self.bar_counter
+            .cash_register
+            .print_receipt(
+                entity=entity,
+                drink=drink,
+                payment=payment
+            )
+        )
+
+        self.emit_event(
+            f"{entity_name} drinks {drink_name}"
+        )
+
+        return {
+            "drink": drink,
+            "payment": payment,
+            "receipt": receipt
+        }
+
     def mix_basic_drink(
         self,
         drink_name
@@ -1875,13 +2001,124 @@ class MeetingPlace:
             .bar_ingredients
         )
 
-        if (
-            "rum" in ingredients
-            and "liquid_hydrocarbons" in ingredients
+        # Remove basic/direct drinks that are no longer serveable.
+        for drink_name in list(
+            self.drink_menu.keys()
         ):
+            drink = self.drink_menu[
+                drink_name
+            ]
+
+            if drink.get(
+                "menu_source"
+            ) in {
+                "direct_stock",
+                "basic_recipe"
+            }:
+                del self.drink_menu[
+                    drink_name
+                ]
+
+        # Anything explicitly marked as directly serveable
+        # appears on the menu while it is available.
+        for (
+            ingredient_name,
+            stock
+        ) in ingredients.items():
+
+            if not stock.get(
+                "available",
+                False
+            ):
+                continue
+
+            if not stock.get(
+                "serve_directly",
+                False
+            ):
+                continue
+
             self.drink_menu[
-                "raspberry_rum"
-            ] = self.raspberry_rum
+                ingredient_name
+            ] = {
+                "name": ingredient_name,
+                "type": "bar_drink",
+                "menu_source": "direct_stock"
+            }
+
+        # Basic recipes appear only when every required
+        # ingredient is currently available in sufficient stock.
+        for (
+            drink_name,
+            recipe
+        ) in self.how_to_mix_drinks.recipes.items():
+
+            if recipe.get(
+                "hidden",
+                False
+            ):
+                continue
+
+            if not recipe.get(
+                "learned",
+                True
+            ):
+                continue
+
+            can_serve = True
+
+            for (
+                ingredient_name,
+                requirement
+            ) in recipe[
+                "ingredients"
+            ].items():
+
+                stock = ingredients.get(
+                    ingredient_name
+                )
+
+                if stock is None:
+                    can_serve = False
+                    break
+
+                if not stock.get(
+                    "available",
+                    True
+                ):
+                    can_serve = False
+                    break
+
+                if requirement.get(
+                    "consumed",
+                    False
+                ):
+                    required_shots = (
+                        requirement.get(
+                            "shots",
+                            0
+                        )
+                    )
+
+                    if stock.get(
+                        "shots",
+                        0
+                    ) < required_shots:
+                        can_serve = False
+                        break
+
+            if can_serve:
+                menu_item = dict(
+                    recipe
+                )
+
+                menu_item[
+                    "menu_source"
+                ] = "basic_recipe"
+
+                self.drink_menu[
+                    drink_name
+                ] = menu_item
 
         return self.drink_menu
 
