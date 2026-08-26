@@ -1,4 +1,4 @@
-﻿from copy import deepcopy
+from copy import deepcopy
 
 from cats.cat_knowledge import (
     CatKnowledge
@@ -6,6 +6,7 @@ from cats.cat_knowledge import (
 from cats.cat_olfaction import (
     CatOlfaction
 )
+from cats.cat import Cat
 
 
 class CatIntentionExecutor:
@@ -26,9 +27,6 @@ class CatIntentionExecutor:
     }
 
     DEFERRED_INTENTS = {
-        "approach_cat": (
-            "cat_social_body_system"
-        ),
         "observe": (
             "cat_observation_body_system"
         )
@@ -50,7 +48,7 @@ class CatIntentionExecutor:
     ):
         if not isinstance(
             cat,
-            dict
+            Cat
         ):
             return self._record({
                 "name": (
@@ -60,20 +58,17 @@ class CatIntentionExecutor:
                 "executed": False
             })
 
-        if cat.get("type") != "cat":
+        if cat.type != "cat":
             return self._record({
                 "name": (
                     "cat_intention_execution_failed"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "reason": "entity_is_not_cat",
                 "executed": False
             })
 
-        mind = cat.get(
-            "mind",
-            {}
-        )
+        mind = cat.mind
 
         intention = mind.get(
             "current_intention"
@@ -84,7 +79,7 @@ class CatIntentionExecutor:
                 "name": (
                     "cat_intention_execution_skipped"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "reason": "no_current_intention",
                 "executed": False
             })
@@ -178,6 +173,13 @@ class CatIntentionExecutor:
                 )
             )
 
+        if intention_type == "approach_cat":
+            return self._execute_approach_cat(
+                cat=cat,
+                intention=intention,
+                step_size=step_size
+            )
+
         if intention_type in (
             self.DEFERRED_INTENTS
         ):
@@ -190,7 +192,7 @@ class CatIntentionExecutor:
             "name": (
                 "cat_intention_execution_failed"
             ),
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "intention": intention_type,
             "reason": "unsupported_intention",
             "executed": False
@@ -218,17 +220,15 @@ class CatIntentionExecutor:
                 "target"
             ) or {}
 
-            cat["navigation_target"] = (
+            cat.navigation_target = (
                 target.get(
                     "recipient"
                 )
             )
 
-        previous_suggestion = cat.get(
-            "suggested_intent"
-        )
+        previous_suggestion = cat.suggested_intent
 
-        cat["suggested_intent"] = (
+        cat.suggested_intent = (
             body_intent
         )
 
@@ -249,7 +249,7 @@ class CatIntentionExecutor:
                 "name": (
                     "cat_intention_body_action_failed"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "intention": intention_type,
                 "body_intent": body_intent,
                 "reason": offer.get(
@@ -284,7 +284,7 @@ class CatIntentionExecutor:
                 "name": (
                     "cat_intention_body_action_failed"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "intention": intention_type,
                 "body_intent": body_intent,
                 "reason": acceptance.get(
@@ -296,7 +296,7 @@ class CatIntentionExecutor:
                 "executed": False
             })
 
-        cat["state"] = (
+        cat.state = (
             "acting_on_own_intention"
         )
 
@@ -304,7 +304,7 @@ class CatIntentionExecutor:
             "name": (
                 "cat_intention_navigation_started"
             ),
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "intention": intention_type,
             "body_intent": body_intent,
             "target": intention.get(
@@ -329,10 +329,7 @@ class CatIntentionExecutor:
             "executed": True
         }
 
-        mind = cat.get(
-            "mind",
-            {}
-        )
+        mind = cat.mind
 
         mind[
             "active_body_execution"
@@ -372,7 +369,7 @@ class CatIntentionExecutor:
                 "name": (
                     "cat_scent_box_transfer_failed"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "reason": "missing_box_pair",
                 "executed": False
             })
@@ -388,7 +385,7 @@ class CatIntentionExecutor:
                 "name": (
                     "cat_scent_box_transfer_failed"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "reason": (
                     "cat_box_transfer_unavailable"
                 ),
@@ -421,7 +418,7 @@ class CatIntentionExecutor:
                     "name": (
                         "cat_scent_box_transfer_failed"
                     ),
-                    "cat": cat.get("name"),
+                    "cat": cat.name,
                     "identity": target.get(
                         "identity"
                     ),
@@ -436,9 +433,7 @@ class CatIntentionExecutor:
             source_box,
             "current_layer",
             None
-        ) != cat.get(
-            "current_layer"
-        ):
+        ) != cat.current_layer:
             return self._finish_scent_box_follow(
                 cat=cat,
                 intention=intention,
@@ -446,7 +441,7 @@ class CatIntentionExecutor:
                     "name": (
                         "cat_scent_box_transfer_failed"
                     ),
-                    "cat": cat.get("name"),
+                    "cat": cat.name,
                     "identity": target.get(
                         "identity"
                     ),
@@ -459,9 +454,7 @@ class CatIntentionExecutor:
                 }
             )
 
-        follow = cat.get(
-            "scent_box_follow"
-        )
+        follow = cat.scent_box_follow
 
         if (
             isinstance(follow, dict)
@@ -482,9 +475,7 @@ class CatIntentionExecutor:
                 cronenbergs=cronenbergs
             )
 
-        cat_position = cat.get(
-            "position"
-        )
+        cat_position = cat.position
 
         source_position = getattr(
             source_box,
@@ -506,7 +497,7 @@ class CatIntentionExecutor:
                 "name": (
                     "cat_scent_box_transfer_failed"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "reason": "missing_position",
                 "executed": False
             })
@@ -533,7 +524,7 @@ class CatIntentionExecutor:
                 "name": (
                     "cat_scent_box_transfer_failed"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "reason": (
                     "quantum_space_unavailable"
                 ),
@@ -543,9 +534,7 @@ class CatIntentionExecutor:
         planned = (
             quantum_space
             .plan_direct_cat_route(
-                cat_id=cat.get(
-                    "name"
-                ),
+                cat_id=cat.name,
                 start_position=dict(
                     cat_position
                 ),
@@ -563,11 +552,11 @@ class CatIntentionExecutor:
         route = planned["route"]
         route.state = "ready"
 
-        cat["active_route_id"] = (
+        cat.active_route_id = (
             route.route_id
         )
 
-        cat["scent_box_follow"] = {
+        cat.scent_box_follow = {
             "active": True,
             "arrived_at_box": False,
             "route_id": route.route_id,
@@ -581,7 +570,7 @@ class CatIntentionExecutor:
             )
         }
 
-        cat["state"] = (
+        cat.state = (
             "following_scent_to_quantum_box"
         )
 
@@ -589,7 +578,7 @@ class CatIntentionExecutor:
             "name": (
                 "cat_following_scent_to_box"
             ),
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "identity": target.get(
                 "identity"
             ),
@@ -604,10 +593,7 @@ class CatIntentionExecutor:
             "executed": True
         }
 
-        cat.setdefault(
-            "mind",
-            {}
-        )[
+        cat.mind[
             "active_body_execution"
         ] = deepcopy(
             event
@@ -623,9 +609,7 @@ class CatIntentionExecutor:
         intention,
         cronenbergs=None
     ):
-        follow = cat[
-            "scent_box_follow"
-        ]
+        follow = cat.scent_box_follow
 
         result = (
             self.universe
@@ -654,7 +638,7 @@ class CatIntentionExecutor:
         )
 
         if position is not None:
-            cat["position"] = dict(
+            cat.position = dict(
                 position
             )
 
@@ -683,7 +667,7 @@ class CatIntentionExecutor:
             "name": (
                 "cat_following_scent_to_box"
             ),
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "identity": follow.get(
                 "identity"
             ),
@@ -714,10 +698,7 @@ class CatIntentionExecutor:
             )
         }
 
-        cat.setdefault(
-            "mind",
-            {}
-        )[
+        cat.mind[
             "active_body_execution"
         ] = deepcopy(
             event
@@ -760,7 +741,7 @@ class CatIntentionExecutor:
                     "cat_scent_box_transfer_failed"
                 )
             ),
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "identity": target.get(
                 "identity"
             ),
@@ -793,10 +774,7 @@ class CatIntentionExecutor:
         intention,
         event
     ):
-        mind = cat.setdefault(
-            "mind",
-            {}
-        )
+        mind = cat.mind
 
         mind[
             "previous_intention"
@@ -814,14 +792,10 @@ class CatIntentionExecutor:
             event
         )
 
-        cat.pop(
-            "active_route_id",
-            None
-        )
+        if hasattr(cat, "active_route_id"):
+            del cat.active_route_id
 
-        follow = cat.get(
-            "scent_box_follow"
-        )
+        follow = cat.scent_box_follow
 
         if isinstance(
             follow,
@@ -880,7 +854,7 @@ class CatIntentionExecutor:
                 "name":(
                     "cat_quantum_box_travel_failed"
                         ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "reason": "invalid_target",
                 "executed": False
             })
@@ -900,13 +874,15 @@ class CatIntentionExecutor:
                 "name": (
                     "cat_quantum_box_travel_failed"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "reason": "missing_box_pair",
                 "executed": False
             })
 
-        observation = cat.get(
-            "current_quantum_counterpart_observation"
+        observation = getattr(
+            cat,
+            "current_quantum_counterpart_observation",
+            None
         )
 
         if not isinstance(
@@ -917,7 +893,7 @@ class CatIntentionExecutor:
                 "name":(
                     "cat_quantum_box_travel_failed"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "source_box_id": source_box_id,
                 "counterpart_box_id": (
                     counterpart_box_id
@@ -936,7 +912,7 @@ class CatIntentionExecutor:
                 "name":(
                     "cat_quantum_box_travel_failed"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "source_box_id": source_box_id,
                 "counterpart_box_id": (
                     counterpart_box_id
@@ -956,7 +932,7 @@ class CatIntentionExecutor:
                 "name":(
                     "cat_quantum_box_travel_failed"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "source_box_id": source_box_id,
                 "counterpart_box_id": (
                     counterpart_box_id
@@ -989,7 +965,7 @@ class CatIntentionExecutor:
                 "name":(
                     "cat_quantum_box_travel_failed"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "source_box_id": source_box_id,
                 "counterpart_box_id": (
                     counterpart_box_id
@@ -1004,14 +980,12 @@ class CatIntentionExecutor:
             source_box,
             "current_layer",
             None
-        ) != cat.get(
-            "current_layer",
-        ):
+        ) != cat.current_layer:
             return self._record({
                 "name":(
                     "cat_quantum_box_travel_failed"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "source_box_id": source_box_id,
                 "counterpart_box_id": (
                     counterpart_box_id
@@ -1028,9 +1002,7 @@ class CatIntentionExecutor:
             None
         )
 
-        cat_possition = cat.get(
-            "position"
-        )
+        cat_possition = cat.position
 
         if (
             not isinstance(
@@ -1042,7 +1014,7 @@ class CatIntentionExecutor:
                 "name":(
                     "cat_quantum_box_travel_failed"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "source_box_id": source_box_id,
                 "counterpart_box_id": (
                     counterpart_box_id
@@ -1059,7 +1031,7 @@ class CatIntentionExecutor:
                 "name":(
                     "cat_quantum_box_travel_failed"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "source_box_id": source_box_id,
                 "counterpart_box_id": (
                     counterpart_box_id
@@ -1081,7 +1053,7 @@ class CatIntentionExecutor:
                 "name":(
                     "cat_quantum_box_travel_failed"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "source_box_id": source_box_id,
                 "counterpart_box_id": (
                     counterpart_box_id
@@ -1111,7 +1083,7 @@ class CatIntentionExecutor:
                 if transferred
                 else "cat_quantum_box_travel_failed"
             ),
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "source_box_id": source_box_id,
             "counterpart_box_id": (
                 counterpart_box_id
@@ -1126,10 +1098,7 @@ class CatIntentionExecutor:
             "executed": transferred
         }
 
-        mind = cat.setdefault(
-            "mind",
-            {}
-        )
+        mind = cat.mind
 
         mind[
             "previous_intention"
@@ -1148,10 +1117,7 @@ class CatIntentionExecutor:
                 event
             )
 
-            cat.pop(
-                "current_quantum_counterpart_observation",
-                None
-            )
+            cat.current_quantum_counterpart_observation = None
 
             return self._record(
                 event
@@ -1178,9 +1144,7 @@ class CatIntentionExecutor:
             )
         )
 
-        memory = cat[
-            "memory"
-        ].remember(
+        memory = cat.memory.remember(
             event_type=(
                 "quantum_box_layer_transfer_failed"
             ),
@@ -1192,9 +1156,7 @@ class CatIntentionExecutor:
                 )
             ),
             location=deepcopy(
-                cat.get(
-                    "position"
-                )
+                cat.position
             ),
             participants=[
                 source_box_id,
@@ -1262,7 +1224,7 @@ class CatIntentionExecutor:
                     "cat_quantum_counterpart_"
                     "sensing_failed"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "reason": "missing_box_id",
                 "executed": False
             })
@@ -1291,7 +1253,7 @@ class CatIntentionExecutor:
                     "cat_quantum_counterpart_"
                     "sensing_failed"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "source_box_id": source_box_id,
                 "reason": (
                     "source_box_no_longer_exists"
@@ -1303,15 +1265,13 @@ class CatIntentionExecutor:
             source_box,
             "current_layer",
             None
-        ) != cat.get(
-            "current_layer"
-        ):
+        ) != cat.current_layer:
             return self._record({
                 "name": (
                     "cat_quantum_counterpart_"
                     "sensing_failed"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "source_box_id": source_box_id,
                 "reason": (
                     "source_box_not_in_cat_layer"
@@ -1331,10 +1291,7 @@ class CatIntentionExecutor:
                 dict
             )
             or not self._same_position(
-                cat.get(
-                    "position",
-                    {}
-                ),
+                (cat.position or {}),
                 source_position
             )
         ):
@@ -1343,7 +1300,7 @@ class CatIntentionExecutor:
                     "cat_quantum_counterpart_"
                     "sensing_failed"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "source_box_id": source_box_id,
                 "reason": (
                     "cat_not_at_source_box"
@@ -1366,7 +1323,7 @@ class CatIntentionExecutor:
                     "cat_quantum_counterpart_"
                     "sensing_failed"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "source_box_id": source_box_id,
                 "reason": (
                     "pair_no_longer_exists"
@@ -1402,7 +1359,7 @@ class CatIntentionExecutor:
                     "cat_quantum_counterpart_"
                     "sensing_failed"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "source_box_id": source_box_id,
                 "reason": (
                     "counterpart_no_longer_exists"
@@ -1430,7 +1387,7 @@ class CatIntentionExecutor:
                     "cat_quantum_counterpart_"
                     "sensing_failed"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "source_box_id": source_box_id,
                 "reason": (
                     "pair_not_reciprocal"
@@ -1471,16 +1428,11 @@ class CatIntentionExecutor:
 
         # NEN? to knowledge ani permanentn? mapa.
         # Je to jen pr?v? platn? pozorov?n?.
-        cat[
-            "current_quantum_counterpart_observation"
-        ] = deepcopy(
+        cat.current_quantum_counterpart_observation = deepcopy(
             observation
         )
 
-        mind = cat.setdefault(
-            "mind",
-            {}
-        )
+        mind = cat.mind
 
         mind[
             "previous_intention"
@@ -1496,7 +1448,7 @@ class CatIntentionExecutor:
             "name": (
                 "cat_sensed_quantum_counterpart"
             ),
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "observation": deepcopy(
                 observation
             ),
@@ -1541,7 +1493,7 @@ class CatIntentionExecutor:
                 "name": (
                     "cat_box_exploration_failed"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "reason": "missing_box_id",
                 "executed": False
             })
@@ -1569,7 +1521,7 @@ class CatIntentionExecutor:
                 "name": (
                     "cat_box_exploration_failed"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "box_id": box_id,
                 "reason": "box_not_found",
                 "executed": False
@@ -1579,15 +1531,12 @@ class CatIntentionExecutor:
             box,
             "current_layer",
             None
-        ) != cat.get(
-            "current_layer",
-            "quantum_layer"
-        ):
+        ) != (cat.current_layer or "quantum_layer"):
             return self._record({
                 "name": (
                     "cat_box_exploration_failed"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "box_id": box_id,
                 "reason": (
                     "box_not_in_cat_layer"
@@ -1595,9 +1544,7 @@ class CatIntentionExecutor:
                 "executed": False
             })
 
-        exploration = cat.get(
-            "box_exploration"
-        )
+        exploration = cat.box_exploration
 
         if (
             isinstance(
@@ -1618,10 +1565,7 @@ class CatIntentionExecutor:
                 cronenbergs=cronenbergs
             )
 
-        cat_position = cat.get(
-            "position",
-            {}
-        )
+        cat_position = (cat.position or {})
 
         box_position = getattr(
             box,
@@ -1637,7 +1581,7 @@ class CatIntentionExecutor:
                 "name": (
                     "cat_box_exploration_failed"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "box_id": box_id,
                 "reason": (
                     "box_position_missing"
@@ -1666,7 +1610,7 @@ class CatIntentionExecutor:
                 "name": (
                     "cat_box_exploration_failed"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "box_id": box_id,
                 "reason": (
                     "quantum_space_unavailable"
@@ -1677,9 +1621,7 @@ class CatIntentionExecutor:
         planned = (
             quantum_space
             .plan_direct_cat_route(
-                cat_id=cat.get(
-                    "name"
-                ),
+                cat_id=cat.name,
                 start_position=dict(
                     cat_position
                 ),
@@ -1696,11 +1638,11 @@ class CatIntentionExecutor:
         route = planned["route"]
         route.state = "ready"
 
-        cat["active_route_id"] = (
+        cat.active_route_id = (
             route.route_id
         )
 
-        cat["box_exploration"] = {
+        cat.box_exploration = {
             "active": True,
             "arrived": False,
             "box_id": box_id,
@@ -1714,7 +1656,7 @@ class CatIntentionExecutor:
             "name": (
                 "cat_approaching_box_to_explore"
             ),
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "box_id": box_id,
             "route_id": route.route_id,
             "destination": dict(
@@ -1727,10 +1669,7 @@ class CatIntentionExecutor:
             "executed": True
         }
 
-        cat.setdefault(
-            "mind",
-            {}
-        )[
+        cat.mind[
             "active_body_execution"
         ] = deepcopy(
             event
@@ -1746,9 +1685,7 @@ class CatIntentionExecutor:
         intention,
         cronenbergs=None
     ):
-        exploration = cat[
-            "box_exploration"
-        ]
+        exploration = cat.box_exploration
 
         result = (
             self.universe
@@ -1777,7 +1714,7 @@ class CatIntentionExecutor:
         )
 
         if position is not None:
-            cat["position"] = dict(
+            cat.position = dict(
                 position
             )
 
@@ -1810,7 +1747,7 @@ class CatIntentionExecutor:
                     "name": (
                         "cat_box_exploration_failed"
                     ),
-                    "cat": cat.get("name"),
+                    "cat": cat.name,
                     "reason": (
                         "box_disappeared"
                     ),
@@ -1827,7 +1764,7 @@ class CatIntentionExecutor:
             "name": (
                 "cat_approaching_box_to_explore"
             ),
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "box_id": exploration.get(
                 "box_id"
             ),
@@ -1856,10 +1793,7 @@ class CatIntentionExecutor:
             )
         }
 
-        cat.setdefault(
-            "mind",
-            {}
-        )[
+        cat.mind[
             "active_body_execution"
         ] = deepcopy(
             event
@@ -1895,9 +1829,7 @@ class CatIntentionExecutor:
             else {}
         )
 
-        memory = cat.get(
-            "memory"
-        )
+        memory = cat.memory
 
         remembered = None
 
@@ -1911,9 +1843,7 @@ class CatIntentionExecutor:
                     "universe_tick",
                     None
                 ),
-                location=cat.get(
-                    "current_layer"
-                ),
+                location=cat.current_layer,
                 participants=[
                     box_id
                 ],
@@ -1932,10 +1862,10 @@ class CatIntentionExecutor:
                 }
             )
 
-        exploration = cat.setdefault(
-            "box_exploration",
-            {}
-        )
+        if cat.box_exploration is None:
+            cat.box_exploration = {}
+
+        exploration = cat.box_exploration
 
         exploration.update({
             "active": False,
@@ -1944,15 +1874,10 @@ class CatIntentionExecutor:
             "observed": True
         })
 
-        cat.pop(
-            "active_route_id",
-            None
-        )
+        if hasattr(cat, "active_route_id"):
+            del cat.active_route_id
 
-        mind = cat.setdefault(
-            "mind",
-            {}
-        )
+        mind = cat.mind
 
         mind[
             "previous_intention"
@@ -1968,7 +1893,7 @@ class CatIntentionExecutor:
             "name": (
                 "cat_explored_quantum_box"
             ),
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "box_id": box_id,
             "position": deepcopy(
                 getattr(
@@ -2034,14 +1959,12 @@ class CatIntentionExecutor:
         ):
             return self._record({
                 "name": "cat_scent_search_failed",
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "reason": "invalid_search_direction",
                 "executed": False
             })
 
-        search = cat.get(
-            "scent_search"
-        )
+        search = cat.scent_search
 
         if (
             isinstance(search, dict)
@@ -2054,10 +1977,7 @@ class CatIntentionExecutor:
                 cronenbergs=cronenbergs
             )
 
-        start = cat.get(
-            "position",
-            {}
-        )
+        start = (cat.position or {})
 
         distance = float(
             target.get(
@@ -2098,7 +2018,7 @@ class CatIntentionExecutor:
         if quantum_space is None:
             return self._record({
                 "name": "cat_scent_search_failed",
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "reason": "quantum_space_unavailable",
                 "executed": False
             })
@@ -2106,7 +2026,7 @@ class CatIntentionExecutor:
         planned = (
             quantum_space
             .plan_direct_cat_route(
-                cat_id=cat.get("name"),
+                cat_id=cat.name,
                 start_position=dict(start),
                 destination_position=dict(
                     destination
@@ -2121,16 +2041,14 @@ class CatIntentionExecutor:
         route = planned["route"]
         route.state = "ready"
 
-        cat["active_route_id"] = (
+        cat.active_route_id = (
             route.route_id
         )
 
-        cat["scent_search"] = {
+        cat.scent_search = {
             "active": True,
             "identity": identity,
-            "layer": cat.get(
-                "current_layer"
-            ),
+            "layer": cat.current_layer,
             "route_id": route.route_id,
             "attempts": int(
                 target.get(
@@ -2162,7 +2080,7 @@ class CatIntentionExecutor:
 
         event = {
             "name": "cat_searching_for_scent",
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "identity": identity,
             "attempt": target.get(
                 "attempt",
@@ -2182,10 +2100,7 @@ class CatIntentionExecutor:
             "executed": True
         }
 
-        cat.setdefault(
-            "mind",
-            {}
-        )[
+        cat.mind[
             "active_body_execution"
         ] = deepcopy(event)
 
@@ -2197,9 +2112,7 @@ class CatIntentionExecutor:
         intention,
         cronenbergs=None
     ):
-        search = cat[
-            "scent_search"
-        ]
+        search = cat.scent_search
 
         result = (
             self.universe
@@ -2228,7 +2141,7 @@ class CatIntentionExecutor:
         )
 
         if position is not None:
-            cat["position"] = dict(
+            cat.position = dict(
                 position
             )
 
@@ -2268,10 +2181,7 @@ class CatIntentionExecutor:
             CatKnowledge.remember_olfaction(
                 cat=cat,
                 olfaction=olfaction,
-                current_layer=cat.get(
-                    "current_layer",
-                    "unknown"
-                ),
+                current_layer=(cat.current_layer or "unknown"),
                 universe_tick=getattr(
                     self.universe,
                     "universe_tick",
@@ -2283,7 +2193,7 @@ class CatIntentionExecutor:
                 self.universe
                 .quantum_space
                 .find_cat_route(
-                    cat.get("name")
+                    cat.name
                 )
             )
 
@@ -2294,10 +2204,7 @@ class CatIntentionExecutor:
             search["arrived"] = False
             search["reacquired"] = True
             search["reacquired_at"] = dict(
-                cat.get(
-                    "position",
-                    {}
-                )
+                (cat.position or {})
             )
             search[
                 "reacquired_source_id"
@@ -2305,15 +2212,10 @@ class CatIntentionExecutor:
                 "entity_id"
             )
 
-            cat.pop(
-                "active_route_id",
-                None
-            )
+            if hasattr(cat, "active_route_id"):
+                del cat.active_route_id
 
-            mind = cat.setdefault(
-                "mind",
-                {}
-            )
+            mind = cat.mind
 
             mind[
                 "previous_intention"
@@ -2330,7 +2232,7 @@ class CatIntentionExecutor:
                     "cat_reacquired_scent_"
                     "during_search"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "identity": search.get(
                     "identity"
                 ),
@@ -2338,10 +2240,7 @@ class CatIntentionExecutor:
                     "entity_id"
                 ),
                 "position": dict(
-                    cat.get(
-                        "position",
-                        {}
-                    )
+                    (cat.position or {})
                 ),
                 "olfaction": deepcopy(
                     olfaction
@@ -2372,7 +2271,7 @@ class CatIntentionExecutor:
 
         event = {
             "name": "cat_searching_for_scent",
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "identity": search.get(
                 "identity"
             ),
@@ -2401,10 +2300,7 @@ class CatIntentionExecutor:
             )
         }
 
-        cat.setdefault(
-            "mind",
-            {}
-        )[
+        cat.mind[
             "active_body_execution"
         ] = deepcopy(event)
 
@@ -2415,9 +2311,7 @@ class CatIntentionExecutor:
         cat,
         intention
     ):
-        search = cat[
-            "scent_search"
-        ]
+        search = cat.scent_search
 
         search["active"] = False
         search["arrived"] = True
@@ -2429,15 +2323,10 @@ class CatIntentionExecutor:
             )
         )
 
-        cat.pop(
-            "active_route_id",
-            None
-        )
+        if hasattr(cat, "active_route_id"):
+            del cat.active_route_id
 
-        mind = cat.setdefault(
-            "mind",
-            {}
-        )
+        mind = cat.mind
 
         mind[
             "previous_intention"
@@ -2453,7 +2342,7 @@ class CatIntentionExecutor:
             "name": (
                 "cat_completed_scent_search_step"
             ),
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "identity": search.get(
                 "identity"
             ),
@@ -2464,10 +2353,7 @@ class CatIntentionExecutor:
                 "max_attempts"
             ),
             "position": dict(
-                cat.get(
-                    "position",
-                    {}
-                )
+                (cat.position or {})
             ),
             "trail_direction": deepcopy(
                 search.get(
@@ -2516,22 +2402,20 @@ class CatIntentionExecutor:
                 "name": (
                     "cat_known_scent_follow_failed"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "reason": "invalid_scent_target",
                 "executed": False
             })
 
         if (
             layer
-            != cat.get(
-                "current_layer"
-            )
+            != cat.current_layer
         ):
             return self._record({
                 "name": (
                     "cat_known_scent_follow_failed"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "identity": target.get(
                     "identity"
                 ),
@@ -2542,9 +2426,7 @@ class CatIntentionExecutor:
                 "executed": False
             })
 
-        follow = cat.get(
-            "known_scent_follow"
-        )
+        follow = cat.known_scent_follow
 
         if (
             isinstance(
@@ -2570,10 +2452,7 @@ class CatIntentionExecutor:
                 cronenbergs=cronenbergs
             )
 
-        cat_position = cat.get(
-            "position",
-            {}
-        )
+        cat_position = (cat.position or {})
 
         already_there = all(
             abs(
@@ -2615,7 +2494,7 @@ class CatIntentionExecutor:
                 "name": (
                     "cat_known_scent_follow_failed"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "reason": (
                     "quantum_space_unavailable"
                 ),
@@ -2625,9 +2504,7 @@ class CatIntentionExecutor:
         planned = (
             quantum_space
             .plan_direct_cat_route(
-                cat_id=cat.get(
-                    "name"
-                ),
+                cat_id=cat.name,
                 start_position=dict(
                     cat_position
                 ),
@@ -2645,11 +2522,11 @@ class CatIntentionExecutor:
         route = planned["route"]
         route.state = "ready"
 
-        cat["active_route_id"] = (
+        cat.active_route_id = (
             route.route_id
         )
 
-        cat["known_scent_follow"] = {
+        cat.known_scent_follow = {
             "active": True,
             "arrived": False,
             "route_id": route.route_id,
@@ -2673,7 +2550,7 @@ class CatIntentionExecutor:
             "name": (
                 "cat_following_known_scent"
             ),
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "identity": target.get(
                 "identity"
             ),
@@ -2689,10 +2566,7 @@ class CatIntentionExecutor:
             "executed": True
         }
 
-        cat.setdefault(
-            "mind",
-            {}
-        )[
+        cat.mind[
             "active_body_execution"
         ] = deepcopy(
             event
@@ -2708,9 +2582,7 @@ class CatIntentionExecutor:
         intention,
         cronenbergs=None
     ):
-        follow = cat[
-            "known_scent_follow"
-        ]
+        follow = cat.known_scent_follow
 
         result = (
             self.universe
@@ -2739,7 +2611,7 @@ class CatIntentionExecutor:
         )
 
         if position is not None:
-            cat["position"] = dict(
+            cat.position = dict(
                 position
             )
 
@@ -2750,22 +2622,18 @@ class CatIntentionExecutor:
             return self._finish_known_scent_follow(
                 cat=cat,
                 intention=intention,
-                position=cat[
-                    "position"
-                ]
+                position=cat.position
             )
 
         event = {
             "name": (
                 "cat_following_known_scent"
             ),
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "identity": follow.get(
                 "identity"
             ),
-            "layer": cat.get(
-                "current_layer"
-            ),
+            "layer": cat.current_layer,
             "destination": dict(
                 follow[
                     "destination"
@@ -2791,10 +2659,7 @@ class CatIntentionExecutor:
             )
         }
 
-        cat.setdefault(
-            "mind",
-            {}
-        )[
+        cat.mind[
             "active_body_execution"
         ] = deepcopy(
             event
@@ -2815,10 +2680,10 @@ class CatIntentionExecutor:
             {}
         )
 
-        follow = cat.setdefault(
-            "known_scent_follow",
-            {}
-        )
+        if cat.known_scent_follow is None:
+            cat.known_scent_follow = {}
+
+        follow = cat.known_scent_follow
 
         follow.update({
             "active": False,
@@ -2839,15 +2704,10 @@ class CatIntentionExecutor:
             )
         })
 
-        cat.pop(
-            "active_route_id",
-            None
-        )
+        if hasattr(cat, "active_route_id"):
+            del cat.active_route_id
 
-        mind = cat.setdefault(
-            "mind",
-            {}
-        )
+        mind = cat.mind
 
         mind[
             "previous_intention"
@@ -2863,13 +2723,11 @@ class CatIntentionExecutor:
             "name": (
                 "cat_reached_known_scent"
             ),
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "identity": target.get(
                 "identity"
             ),
-            "layer": cat.get(
-                "current_layer"
-            ),
+            "layer": cat.current_layer,
             "destination": dict(
                 position
             ),
@@ -2937,7 +2795,7 @@ class CatIntentionExecutor:
         if listener is None:
             return self._record({
                 "name": "cat_legend_not_shared",
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "listener": target_name,
                 "reason": "listener_not_found",
                 "executed": False
@@ -2949,10 +2807,7 @@ class CatIntentionExecutor:
             universe=self.universe
         )
 
-        mind = cat.setdefault(
-            "mind",
-            {}
-        )
+        mind = cat.mind
 
         mind["previous_intention"] = deepcopy(
             intention
@@ -2962,7 +2817,7 @@ class CatIntentionExecutor:
 
         event = {
             **result,
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "intention": "share_legend",
             "decision_source": "cat_mind",
             "executed": True
@@ -3013,7 +2868,7 @@ class CatIntentionExecutor:
                     "cat_exploration_pair_"
                     "creation_failed"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "intention": (
                     "create_exploration_pair"
                 ),
@@ -3035,7 +2890,7 @@ class CatIntentionExecutor:
                     "cat_exploration_pair_"
                     "creation_failed"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "intention": (
                     "create_exploration_pair"
                 ),
@@ -3067,7 +2922,7 @@ class CatIntentionExecutor:
                     "cat_exploration_pair_"
                     "creation_failed"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "intention": (
                     "create_exploration_pair"
                 ),
@@ -3096,7 +2951,7 @@ class CatIntentionExecutor:
                     "cat_exploration_pair_"
                     "transfer_failed"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "intention": (
                     "create_exploration_pair"
                 ),
@@ -3123,7 +2978,7 @@ class CatIntentionExecutor:
             "transferred",
             False
         ):
-            cat["state"] = (
+            cat.state = (
                 "exploration_pair_created_"
                 "but_transfer_failed"
             )
@@ -3133,7 +2988,7 @@ class CatIntentionExecutor:
                     "cat_exploration_pair_"
                     "transfer_failed"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "intention": (
                     "create_exploration_pair"
                 ),
@@ -3159,7 +3014,7 @@ class CatIntentionExecutor:
         exploration_route = None
 
         if (
-            cat.get("current_layer")
+            cat.current_layer
             == "quantum_layer"
         ):
             exploration_route = (
@@ -3172,10 +3027,7 @@ class CatIntentionExecutor:
                 )
             )
 
-        mind = cat.setdefault(
-            "mind",
-            {}
-        )
+        mind = cat.mind
 
         mind["previous_intention"] = deepcopy(
             intention
@@ -3188,7 +3040,7 @@ class CatIntentionExecutor:
                 "cat_started_autonomous_"
                 "exploration_through_new_pair"
             ),
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "intention": (
                 "create_exploration_pair"
             ),
@@ -3272,44 +3124,284 @@ class CatIntentionExecutor:
         cat,
         intention
     ):
-        previous_state = cat.get(
-            "state"
-        )
+        previous_state = cat.state
 
-        cat["state"] = (
+        cat.state = (
             "resting_by_own_choice"
         )
 
-        cat.pop(
-            "suggested_intent",
-            None
-        )
+        cat.suggested_intent = None
 
-        cat.pop(
-            "intent",
-            None
-        )
+        if hasattr(cat, "intent"):
+            del cat.intent
 
-        cat.pop(
-            "active_route_id",
-            None
-        )
+        if hasattr(cat, "active_route_id"):
+            del cat.active_route_id
 
         event = {
             "name": (
                 "cat_intention_rest_started"
             ),
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "intention": "rest",
             "previous_state": previous_state,
-            "state": cat["state"],
+            "state": cat.state,
             "decision_source": "cat_mind",
             "executed": True
         }
 
-        cat[
-            "mind"
-        ][
+        cat.mind[
+            "active_body_execution"
+        ] = deepcopy(
+            event
+        )
+
+        return self._record(
+            event
+        )
+
+    def _execute_approach_cat(
+        self,
+        cat,
+        intention,
+        step_size=None
+    ):
+        target = intention.get(
+            "target"
+        )
+
+        if isinstance(
+            target,
+            dict
+        ):
+            target_name = (
+                target.get("cat")
+                or target.get("name")
+            )
+        else:
+            target_name = target
+
+        if not target_name:
+            return self._record({
+                "name": (
+                    "cat_approach_failed"
+                ),
+                "cat": cat.name,
+                "reason": (
+                    "missing_target_cat"
+                ),
+                "executed": False
+            })
+
+        target_cat = next(
+            (
+                candidate
+                for candidate
+                in self.cats_layer.cats
+                if isinstance(
+                    candidate,
+                    Cat
+                )
+                and candidate is not cat
+                and candidate.name
+                == target_name
+            ),
+            None
+        )
+
+        if target_cat is None:
+            return self._record({
+                "name": (
+                    "cat_approach_failed"
+                ),
+                "cat": cat.name,
+                "target": target_name,
+                "reason": (
+                    "target_cat_not_found"
+                ),
+                "executed": False
+            })
+
+        if (
+            target_cat.current_layer
+            != cat.current_layer
+        ):
+            return self._record({
+                "name": (
+                    "cat_approach_failed"
+                ),
+                "cat": cat.name,
+                "target": target_name,
+                "reason": (
+                    "target_cat_in_other_layer"
+                ),
+                "cat_layer": (
+                    cat.current_layer
+                ),
+                "target_layer": (
+                    target_cat.current_layer
+                ),
+                "executed": False
+            })
+
+        cat_position = cat.position
+        target_position = (
+            target_cat.position
+        )
+
+        if (
+            not isinstance(
+                cat_position,
+                dict
+            )
+            or not isinstance(
+                target_position,
+                dict
+            )
+        ):
+            return self._record({
+                "name": (
+                    "cat_approach_failed"
+                ),
+                "cat": cat.name,
+                "target": target_name,
+                "reason": (
+                    "missing_position"
+                ),
+                "executed": False
+            })
+
+        if self._same_position(
+            cat_position,
+            target_position
+        ):
+            cat.state = (
+                "near_target_cat"
+            )
+
+            event = {
+                "name": (
+                    "cat_approach_completed"
+                ),
+                "cat": cat.name,
+                "target": target_name,
+                "position": deepcopy(
+                    cat_position
+                ),
+                "arrived": True,
+                "decision_source": (
+                    "cat_mind"
+                ),
+                "executed": True
+            }
+
+            cat.mind[
+                "active_body_execution"
+            ] = deepcopy(
+                event
+            )
+
+            return self._record(
+                event
+            )
+
+        quantum_space = getattr(
+            self.universe,
+            "quantum_space",
+            None
+        )
+
+        if quantum_space is None:
+            self.universe.enable_quantum_layer()
+
+            quantum_space = getattr(
+                self.universe,
+                "quantum_space",
+                None
+            )
+
+        if quantum_space is None:
+            return self._record({
+                "name": (
+                    "cat_approach_failed"
+                ),
+                "cat": cat.name,
+                "target": target_name,
+                "reason": (
+                    "quantum_space_unavailable"
+                ),
+                "executed": False
+            })
+
+        planned = (
+            quantum_space
+            .plan_direct_cat_route(
+                cat_id=cat.name,
+                start_position=dict(
+                    cat_position
+                ),
+                destination_position=dict(
+                    target_position
+                ),
+                destination=(
+                    f"cat:{target_name}"
+                ),
+                step_size=step_size
+            )
+        )
+
+        route = planned.get(
+            "route"
+        )
+
+        if route is None:
+            return self._record({
+                "name": (
+                    "cat_approach_failed"
+                ),
+                "cat": cat.name,
+                "target": target_name,
+                "reason": planned.get(
+                    "result",
+                    "route_not_planned"
+                ),
+                "executed": False
+            })
+
+        route.state = "ready"
+
+        cat.active_route_id = (
+            route.route_id
+        )
+
+        cat.navigation_target = (
+            target_name
+        )
+
+        cat.state = (
+            "approaching_cat"
+        )
+
+        event = {
+            "name": (
+                "cat_approach_started"
+            ),
+            "cat": cat.name,
+            "target": target_name,
+            "route_id": (
+                route.route_id
+            ),
+            "destination": deepcopy(
+                target_position
+            ),
+            "arrived": False,
+            "decision_source": (
+                "cat_mind"
+            ),
+            "executed": True
+        }
+
+        cat.mind[
             "active_body_execution"
         ] = deepcopy(
             event
@@ -3334,7 +3426,7 @@ class CatIntentionExecutor:
             ]
         )
 
-        cat["state"] = (
+        cat.state = (
             "intention_waiting_for_body_system"
         )
 
@@ -3342,7 +3434,7 @@ class CatIntentionExecutor:
             "name": (
                 "cat_intention_body_action_deferred"
             ),
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "intention": intention_type,
             "target": intention.get(
                 "target"
@@ -3353,9 +3445,7 @@ class CatIntentionExecutor:
             "deferred": True
         }
 
-        cat[
-            "mind"
-        ][
+        cat.mind[
             "active_body_execution"
         ] = deepcopy(
             event

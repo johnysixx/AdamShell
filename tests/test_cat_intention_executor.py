@@ -1,4 +1,4 @@
-﻿import unittest
+import unittest
 
 from universe.universe import Universe
 from cats.cats import Cats
@@ -447,6 +447,116 @@ class CatIntentionExecutorTests(
             "active_route_id",
             self.cat
         )
+
+    def test_approach_cat_starts_direct_route(
+        self
+    ):
+        target_cat = self.cats.create_cat(
+            name="target_cat",
+            color="white",
+            fur_length="short"
+        )
+
+        target_cat["position"] = {
+            "x": 4.0,
+            "y": 0.0,
+            "z": 0.0
+        }
+
+        target_cat["current_layer"] = (
+            self.cat["current_layer"]
+        )
+
+        self.set_intention(
+            "approach_cat",
+            target="target_cat"
+        )
+
+        result = (
+            self.cats
+            .execute_cat_intention(
+                self.cat
+            )
+        )
+
+        self.assertTrue(
+            result["executed"]
+        )
+
+        self.assertEqual(
+            result["name"],
+            "cat_approach_started"
+        )
+
+        self.assertEqual(
+            result["target"],
+            "target_cat"
+        )
+
+        self.assertEqual(
+            self.cat["state"],
+            "approaching_cat"
+        )
+
+        self.assertEqual(
+            self.cat["navigation_target"],
+            "target_cat"
+        )
+
+        self.assertIn(
+            "active_route_id",
+            self.cat
+        )
+
+    def test_approach_cat_completes_when_already_near(
+        self
+    ):
+        target_cat = self.cats.create_cat(
+            name="target_cat",
+            color="white",
+            fur_length="short"
+        )
+
+        target_cat["position"] = {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        }
+
+        target_cat["current_layer"] = (
+            self.cat["current_layer"]
+        )
+
+        self.set_intention(
+            "approach_cat",
+            target="target_cat"
+        )
+
+        result = (
+            self.cats
+            .execute_cat_intention(
+                self.cat
+            )
+        )
+
+        self.assertTrue(
+            result["executed"]
+        )
+
+        self.assertTrue(
+            result["arrived"]
+        )
+
+        self.assertEqual(
+            result["name"],
+            "cat_approach_completed"
+        )
+
+        self.assertEqual(
+            self.cat["state"],
+            "near_target_cat"
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
