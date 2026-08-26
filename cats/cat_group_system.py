@@ -81,6 +81,22 @@ class CatGroupSystem:
             # believed by every individual cat.
             "knowledge": {},
 
+            # Emergent group culture.
+            "culture": {
+                "traits": {},
+                "traditions": {},
+                "preferences": {},
+                "history": []
+            },
+
+            # Stories derived from knowledge but not
+            # necessarily verified as literal fact.
+            "myths": {},
+
+            # Novel procedures created from existing
+            # knowledge.
+            "innovations": {},
+
             # Federation memberships stay separate
             # from ordinary group alliances.
             "federations": [],
