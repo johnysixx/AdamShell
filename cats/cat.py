@@ -84,6 +84,25 @@ class Cat:
             "half_siblings": []
         }
 
+        # Persistent maternal state
+        self.maternal_care = {
+            "active": False,
+            "kittens": {},
+            "care_events": 0
+        }
+
+        self.maternal_care_received = {
+            "mother": None,
+            "care_events": 0,
+            "nursing_events": 0,
+            "cleaning_events": 0,
+            "warming_events": 0,
+            "protection_events": 0,
+            "retrieval_events": 0,
+            "last_care_day": None,
+            "last_phase": None
+        }
+
         self.special_traits = []
         self.aroma = aroma
 
