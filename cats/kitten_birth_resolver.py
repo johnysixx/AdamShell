@@ -1,3 +1,7 @@
+from cats.cat_family_system import (
+    CatFamilySystem
+)
+
 from cats.physical_biology_gate import (
     PhysicalBiologyGate
 )
@@ -16,6 +20,10 @@ class KittenBirthResolver:
     ):
         self.universe = universe
         self.history = []
+
+        self.family_system = (
+            CatFamilySystem()
+        )
 
         self.biology_gate = (
             PhysicalBiologyGate(
@@ -215,6 +223,11 @@ class KittenBirthResolver:
                 "rare": embryo["rare"],
                 "born": True
             })
+
+        self.family_system.register_birth(
+            mother=mother,
+            kittens=kittens
+        )
 
         father_names = []
 

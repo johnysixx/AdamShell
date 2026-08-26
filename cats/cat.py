@@ -72,6 +72,18 @@ class Cat:
         # Persistent close feline bonds
         self.bonds = {}
 
+        # Persistent genealogy
+        self.family = {
+            "parents": {
+                "mother": None,
+                "father": None
+            },
+            "children": [],
+            "siblings": [],
+            "littermates": [],
+            "half_siblings": []
+        }
+
         self.special_traits = []
         self.aroma = aroma
 
