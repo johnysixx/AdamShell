@@ -141,7 +141,14 @@ class Cat:
             "joined_order": None,
             "shared_scent": 0.0,
             "accepted_members": [],
-            "group_events": 0
+            "group_events": 0,
+
+            # Dynamic group reputation.
+            "influence": 0.0,
+            "defense_events": 0,
+            "support_events": 0,
+            "recruitment_support": 0,
+            "recruitment_vetoes": 0
         }
 
         self.special_traits = []

@@ -612,6 +612,10 @@ class CatGroupSystem:
                     "group_defending"
                 )
 
+                member.group[
+                    "defense_events"
+                ] += 1
+
                 defenders.append(
                     member.name
                 )
