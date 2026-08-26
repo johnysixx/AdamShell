@@ -7,6 +7,9 @@ from cats.cat_olfaction import (
     CatOlfaction
 )
 from cats.cat import Cat
+from cats.cat_social_system import (
+    CatSocialSystem
+)
 
 
 class CatIntentionExecutor:
@@ -39,6 +42,12 @@ class CatIntentionExecutor:
         self.cats_layer = cats_layer
         self.universe = cats_layer.universe
         self.history = []
+
+        self.social_system = (
+            CatSocialSystem(
+                cats_layer
+            )
+        )
 
     def execute_current_intention(
         self,
@@ -3279,6 +3288,13 @@ class CatIntentionExecutor:
                 "near_target_cat"
             )
 
+            social_event = (
+                self.social_system.meet(
+                    cat,
+                    target_cat
+                )
+            )
+
             event = {
                 "name": (
                     "cat_approach_completed"
@@ -3291,6 +3307,9 @@ class CatIntentionExecutor:
                 "arrived": True,
                 "decision_source": (
                     "cat_mind"
+                ),
+                "social": deepcopy(
+                    social_event
                 ),
                 "executed": True
             }

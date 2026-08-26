@@ -3,6 +3,9 @@ import unittest
 from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat import Cat
+from cats.cat_social_system import (
+    CatSocialSystem
+)
 from cats.development_resolver import (
     CatDevelopmentResolver
 )
@@ -208,6 +211,435 @@ class CatSocialInteractionTests(
         self.assertEqual(
             result["reason"],
             "meow_not_learned"
+        )
+
+
+    def _social_pair(
+        self
+    ):
+        first = self.cats.create_cat(
+            name="first_cat",
+            color="black",
+            fur_length="short"
+        )
+
+        second = self.cats.create_cat(
+            name="second_cat",
+            color="white",
+            fur_length="short"
+        )
+
+        position = {
+            "x": 1.0,
+            "y": 2.0,
+            "z": 0.0
+        }
+
+        first.position = dict(
+            position
+        )
+
+        second.position = dict(
+            position
+        )
+
+        first.current_layer = (
+            "quantum_layer"
+        )
+
+        second.current_layer = (
+            "quantum_layer"
+        )
+
+        return (
+            first,
+            second
+        )
+
+    def test_unknown_cats_sniff_and_keep_distance(
+        self
+    ):
+        first, second = (
+            self._social_pair()
+        )
+
+        social = CatSocialSystem(
+            self.cats
+        )
+
+        result = social.meet(
+            first,
+            second
+        )
+
+        self.assertTrue(
+            result["socialized"]
+        )
+
+        self.assertEqual(
+            result["attitude"],
+            "uncertain"
+        )
+
+        names = [
+            step["name"]
+            for step
+            in result["steps"]
+        ]
+
+        self.assertIn(
+            "cat_sniffed_cat",
+            names
+        )
+
+        self.assertIn(
+            "cat_kept_social_distance",
+            names
+        )
+
+        self.assertIn(
+            second.name,
+            first.relationships
+        )
+
+        self.assertIn(
+            first.name,
+            second.relationships
+        )
+
+    def test_friendly_cats_use_affiliative_greeting(
+        self
+    ):
+        first, second = (
+            self._social_pair()
+        )
+
+        first.relationships[
+            second.name
+        ] = {
+            "familiarity": 0.8,
+            "trust": 0.9,
+            "affiliation": 0.8,
+            "tension": 0.0
+        }
+
+        second.relationships[
+            first.name
+        ] = {
+            "familiarity": 0.8,
+            "trust": 0.9,
+            "affiliation": 0.8,
+            "tension": 0.0
+        }
+
+        social = CatSocialSystem(
+            self.cats
+        )
+
+        result = social.meet(
+            first,
+            second
+        )
+
+        self.assertEqual(
+            result["attitude"],
+            "friendly"
+        )
+
+        names = [
+            step["name"]
+            for step
+            in result["steps"]
+        ]
+
+        self.assertIn(
+            "cat_nose_touch",
+            names
+        )
+
+        self.assertIn(
+            "cat_slow_blink",
+            names
+        )
+
+        self.assertIn(
+            "cat_head_bunt",
+            names
+        )
+
+        self.assertIn(
+            "cat_body_rub",
+            names
+        )
+
+        self.assertGreater(
+            first.relationships[
+                second.name
+            ]["shared_scent"],
+            0.0
+        )
+
+    def test_hostile_cats_hiss_before_physical_escalation(
+        self
+    ):
+        first, second = (
+            self._social_pair()
+        )
+
+        first.relationships[
+            second.name
+        ] = {
+            "familiarity": 0.5,
+            "trust": 0.1,
+            "affiliation": 0.0,
+            "tension": 0.8
+        }
+
+        second.relationships[
+            first.name
+        ] = {
+            "familiarity": 0.5,
+            "trust": 0.1,
+            "affiliation": 0.0,
+            "tension": 0.8
+        }
+
+        social = CatSocialSystem(
+            self.cats
+        )
+
+        result = social.meet(
+            first,
+            second
+        )
+
+        self.assertEqual(
+            result["attitude"],
+            "hostile"
+        )
+
+        names = [
+            step["name"]
+            for step
+            in result["steps"]
+        ]
+
+        self.assertIn(
+            "cat_hissed_at_cat",
+            names
+        )
+
+        self.assertIn(
+            "cat_warning_swat",
+            names
+        )
+
+        self.assertNotIn(
+            "cat_fight_started",
+            names
+        )
+
+        self.assertGreater(
+            first.relationships[
+                second.name
+            ]["tension"],
+            0.8
+        )
+
+    def test_extreme_hostility_can_escalate_to_fight(
+        self
+    ):
+        first, second = (
+            self._social_pair()
+        )
+
+        first.relationships[
+            second.name
+        ] = {
+            "familiarity": 1.0,
+            "trust": 0.0,
+            "affiliation": 0.0,
+            "tension": 1.0
+        }
+
+        second.relationships[
+            first.name
+        ] = {
+            "familiarity": 1.0,
+            "trust": 0.0,
+            "affiliation": 0.0,
+            "tension": 1.0
+        }
+
+        first.personality.setdefault(
+            "traits",
+            {}
+        )[
+            "aggression"
+        ] = 1.0
+
+        second.personality.setdefault(
+            "traits",
+            {}
+        )[
+            "aggression"
+        ] = 1.0
+
+        social = CatSocialSystem(
+            self.cats
+        )
+
+        result = social.meet(
+            first,
+            second
+        )
+
+        names = [
+            step["name"]
+            for step
+            in result["steps"]
+        ]
+
+        self.assertEqual(
+            result["attitude"],
+            "hostile"
+        )
+
+        self.assertIn(
+            "cat_hissed_at_cat",
+            names
+        )
+
+        self.assertIn(
+            "cat_warning_swat",
+            names
+        )
+
+        self.assertIn(
+            "cat_fight_started",
+            names
+        )
+
+    def test_social_meeting_is_recorded_by_both_cats(
+        self
+    ):
+        first, second = (
+            self._social_pair()
+        )
+
+        social = CatSocialSystem(
+            self.cats
+        )
+
+        social.meet(
+            first,
+            second
+        )
+
+        first_names = [
+            event.get(
+                "name"
+            )
+            for event
+            in first.social_interactions
+        ]
+
+        second_names = [
+            event.get(
+                "name"
+            )
+            for event
+            in second.social_interactions
+        ]
+
+        self.assertIn(
+            "cat_social_meeting",
+            first_names
+        )
+
+        self.assertIn(
+            "cat_social_meeting",
+            second_names
+        )
+
+    def test_approach_cat_triggers_social_meeting_when_near(
+        self
+    ):
+        first, second = (
+            self._social_pair()
+        )
+
+        first.mind[
+            "current_intention"
+        ] = {
+            "type": "approach_cat",
+            "target": second.name
+        }
+
+        result = (
+            self.cats
+            .execute_cat_intention(
+                first
+            )
+        )
+
+        self.assertEqual(
+            result["name"],
+            "cat_approach_completed"
+        )
+
+        self.assertTrue(
+            result["executed"]
+        )
+
+        self.assertIn(
+            "social",
+            result
+        )
+
+        self.assertEqual(
+            result[
+                "social"
+            ]["name"],
+            "cat_social_meeting"
+        )
+
+    def test_social_system_does_not_repeat_greeting_while_still_near(
+        self
+    ):
+        first, second = (
+            self._social_pair()
+        )
+
+        social = CatSocialSystem(
+            self.cats
+        )
+
+        first.state = (
+            "near_target_cat"
+        )
+
+        first_result = social.meet(
+            first,
+            second
+        )
+
+        self.assertTrue(
+            first_result["socialized"]
+        )
+
+        second_result = social.meet(
+            first,
+            second
+        )
+
+        self.assertFalse(
+            second_result["socialized"]
+        )
+
+        self.assertEqual(
+            second_result["reason"],
+            "already_greeted_while_near"
         )
 
 
