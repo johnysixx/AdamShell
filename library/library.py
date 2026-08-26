@@ -143,6 +143,21 @@ class Library:
                 "God is not the assigned librarian."
             )
 
+        checked_out_books = [
+            book
+            for book in self.catalog
+            if (
+                book.get("library_status")
+                == "checked_out_for_edit"
+                and book.get("holder") is god
+            )
+        ]
+
+        if checked_out_books:
+            raise RuntimeError(
+                "God must return all books checked out for edit before leaving the library."
+            )
+
         self.god_present = False
 
         self.door["god_sign"] = None

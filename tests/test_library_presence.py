@@ -274,8 +274,124 @@ class LibraryPresenceTests(unittest.TestCase):
         )
 
 
+
+    def test_universe_bootstrap_places_god_in_library_as_librarian(
+        self
+    ):
+        from multiverse import UniverseRegistry
+        from universe.bootstraps.universe_bootstrap import (
+            UniverseBootstrap
+        )
+
+        universe = Universe()
+
+        bootstrap = UniverseBootstrap(
+            UniverseRegistry(),
+            universe
+        )
+
+        bootstrap.run()
+
+        god = universe.god
+        library = universe.library
+
+        self.assertEqual(
+            god["role"],
+            "librarian"
+        )
+
+        self.assertIs(
+            library.librarian,
+            god
+        )
+
+        self.assertTrue(
+            library.god_present
+        )
+
+        self.assertEqual(
+            library.door["god_sign"],
+            "GOD IS: IN"
+        )
+
+        self.assertEqual(
+            god["book"]["library_status"],
+            "shelved"
+        )
+
+        self.assertIn(
+            god["book"],
+            library.catalog
+        )
+
+
+
+    def test_god_must_return_checked_out_book_before_leaving_library(
+        self
+    ):
+        from multiverse import UniverseRegistry
+        from universe.bootstraps.universe_bootstrap import (
+            UniverseBootstrap
+        )
+
+        universe = Universe()
+
+        bootstrap = UniverseBootstrap(
+            UniverseRegistry(),
+            universe
+        )
+
+        bootstrap.run()
+
+        god = universe.god
+        library = universe.library
+
+        library.check_out_for_edit(
+            book=god["book"],
+            editor=god
+        )
+
+        with self.assertRaises(
+            RuntimeError
+        ):
+            library.god_leaves(
+                god
+            )
+
+        library.return_book(
+            god["book"]
+        )
+
+        result = library.god_leaves(
+            god
+        )
+
+        self.assertEqual(
+            result["event"],
+            "god_left_library"
+        )
+
+        self.assertFalse(
+            library.god_present
+        )
+
+        self.assertIsNone(
+            library.door["god_sign"]
+        )
+
+        self.assertTrue(
+            library.is_open
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
 if __name__ == "__main__":
     unittest.main()
+if __name__ == "__main__":
+    unittest.main()
+if __name__ == "__main__":
+    unittest.main()
+
+
 

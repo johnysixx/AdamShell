@@ -6,6 +6,7 @@ from cats.cat_exploration_planner import (
 from cats.cat_knowledge import (
     CatKnowledge
 )
+from cats.cat import Cat
 from universe.aroma_residue import (
     AromaResidue
 )
@@ -89,17 +90,17 @@ class CatQuantumBoxTransfer:
         """
         if not isinstance(
             cat,
-            dict
+            (
+                Cat,
+                dict
+            )
         ):
             return self._failure(
                 cat,
                 "invalid_cat"
             )
 
-        source_layer = cat.get(
-            "current_layer",
-            "quantum_layer"
-        )
+        source_layer = cat.current_layer
 
         destination_layer = str(
             destination_layer
@@ -117,10 +118,7 @@ class CatQuantumBoxTransfer:
         )
 
         available_energy = float(
-            cat.get(
-                "idea_energy",
-                0.0
-            )
+            cat.idea_energy
         )
 
         if available_energy < energy_cost:
@@ -129,7 +127,7 @@ class CatQuantumBoxTransfer:
                 "insufficient_cat_energy"
             )
 
-        cat["idea_energy"] = (
+        cat.idea_energy = (
             available_energy
             - energy_cost
         )
@@ -150,9 +148,9 @@ class CatQuantumBoxTransfer:
 
         source_box.position = dict(
             source_position
-            or cat.get(
-                "position",
-                {
+            or (
+                cat.position
+                or {
                     "x": 0.0,
                     "y": 0.0,
                     "z": 0.0
@@ -201,7 +199,7 @@ class CatQuantumBoxTransfer:
             ),
             "stable": True,
             "active": True,
-            "creator_cat": cat.get("name"),
+            "creator_cat": cat.name,
             "creator_departed": False,
             "creator_returned": False,
             "anchor_box_id": source_box.id,
@@ -242,7 +240,7 @@ class CatQuantumBoxTransfer:
                 "cat_created_stable_"
                 "exploration_box_pair"
             ),
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "pair_id": pair_id,
             "source_box_id": source_box.id,
             "target_box_id": target_box.id,
@@ -250,7 +248,7 @@ class CatQuantumBoxTransfer:
             "target_layer": destination_layer,
             "energy_cost_j": energy_cost,
             "remaining_cat_energy": (
-                cat["idea_energy"]
+                cat.idea_energy
             ),
             "available_to_other_cats": True,
             "stable": True,
@@ -316,9 +314,7 @@ class CatQuantumBoxTransfer:
         Ani jedna krabice se p?i b??n?m
         pou?it? nespot?ebuje.
         """
-        cat_name = cat.get(
-            "name"
-        )
+        cat_name = cat.name
 
         pair["currently_in_use"] = True
         pair["current_user"] = cat_name
@@ -337,20 +333,20 @@ class CatQuantumBoxTransfer:
             target_box.current_layer
         )
 
-        cat["position"] = (
+        cat.position = (
             target_position
         )
 
-        cat["current_layer"] = (
+        cat.current_layer = (
             target_layer
         )
 
-        cat["state"] = (
+        cat.state = (
             "materialized_through_"
             "stable_exploration_pair"
         )
 
-        cat["quantum_transfer"].update({
+        cat.quantum_transfer.update({
             "active": False,
             "state": "collapsed",
             "cat_is_here": True,
@@ -445,9 +441,7 @@ class CatQuantumBoxTransfer:
         source_box_residue = None
         target_box_residue = None
 
-        cat_aroma = cat.get(
-            "aroma"
-        )
+        cat_aroma = cat.aroma
 
         if isinstance(
             cat_aroma,
@@ -479,9 +473,7 @@ class CatQuantumBoxTransfer:
             target_box=target_box
         )
 
-        memory = cat.get(
-            "memory"
-        )
+        memory = cat.memory
 
         remembered = None
 
@@ -763,7 +755,7 @@ class CatQuantumBoxTransfer:
         pair["dissolved"] = True
         pair["remaining_energy_j"] = 0.0
         pair["dissolved_by_return_of"] = (
-            returning_cat.get("name")
+            returning_cat.name
         )
 
         distributed_energy = (
@@ -783,7 +775,7 @@ class CatQuantumBoxTransfer:
                 "creator_cat"
             ],
             "returning_cat": (
-                returning_cat.get("name")
+                returning_cat.name
             ),
             "removed_boxes": removed_boxes,
             "energy_total_j": total_energy,
@@ -859,10 +851,7 @@ class CatQuantumBoxTransfer:
                 "target_box_not_found"
             )
 
-        if cat.get(
-            "current_layer",
-            "quantum_layer"
-        ) != source_box.current_layer:
+        if cat.current_layer != source_box.current_layer:
             return self._failure(
                 cat,
                 "cat_not_in_source_layer"
@@ -885,13 +874,13 @@ class CatQuantumBoxTransfer:
             ]
         )
 
-        cat["quantum_transfer"] = {
+        cat.quantum_transfer = {
             **deepcopy(transfer),
             "cat_is_here": True,
             "cat_is_not_here": True
         }
 
-        cat["state"] = (
+        cat.state = (
             "quantum_box_transfer_superposition"
         )
 
@@ -947,9 +936,7 @@ class CatQuantumBoxTransfer:
 
         source_box_aroma_residue = None
 
-        cat_aroma = cat.get(
-            "aroma"
-        )
+        cat_aroma = cat.aroma
 
         if isinstance(
             cat_aroma,
@@ -959,10 +946,7 @@ class CatQuantumBoxTransfer:
                 AromaResidue.transfer(
                     source_profile=cat_aroma,
                     target=source_box,
-                    source_identity=cat.get(
-                        "name",
-                        "unknown_cat"
-                    ),
+                    source_identity=cat.name,
                     fraction=0.18,
                     decay_rate=0.035
                 )
@@ -995,14 +979,14 @@ class CatQuantumBoxTransfer:
             "target_layer": None
         })
 
-        cat["position"] = target_position
-        cat["current_layer"] = target_layer
-        cat["state"] = (
+        cat.position = target_position
+        cat.current_layer = target_layer
+        cat.state = (
             "materialized_at_consumed_"
             "target_box"
         )
 
-        cat["quantum_transfer"].update({
+        cat.quantum_transfer.update({
             "active": False,
             "state": "collapsed",
             "cat_is_here": True,
@@ -1018,9 +1002,7 @@ class CatQuantumBoxTransfer:
             target_box=target_box
         )
 
-        memory = cat.get(
-            "memory"
-        )
+        memory = cat.memory
 
         remembered = None
 
@@ -1052,7 +1034,7 @@ class CatQuantumBoxTransfer:
             "name": (
                 "cat_quantum_box_transfer_completed"
             ),
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "source_box_id": source_box.id,
             "target_box_id": target_box.id,
             "source_layer": transfer[
@@ -1065,7 +1047,7 @@ class CatQuantumBoxTransfer:
             "energy_use": "cat_layer_transfer",
             "energy_j": consumed_energy,
             "energy_conserved": True,
-            "cat_state": cat["state"],
+            "cat_state": cat.state,
             "trail": trail,
             "source_box_aroma_pickup": (
                 source_box_aroma_pickup
@@ -1107,10 +1089,7 @@ class CatQuantumBoxTransfer:
         )
 
         cat_energy = float(
-            cat.get(
-                "idea_energy",
-                0.0
-            )
+            cat.idea_energy
         )
 
         if cat_energy < energy_cost:
@@ -1119,7 +1098,7 @@ class CatQuantumBoxTransfer:
                 "insufficient_cat_energy"
             )
 
-        cat["idea_energy"] = (
+        cat.idea_energy = (
             cat_energy - energy_cost
         )
 
@@ -1127,16 +1106,13 @@ class CatQuantumBoxTransfer:
             self.universe.create_quantum_box()
         )
 
-        counterpart.current_layer = cat.get(
-            "current_layer",
-            "quantum_layer"
-        )
+        counterpart.current_layer = cat.current_layer
 
         counterpart.position = dict(
             position
-            or cat.get(
-                "position",
-                {
+            or (
+                cat.position
+                or {
                     "x": 0.0,
                     "y": 0.0,
                     "z": 0.0
@@ -1153,7 +1129,7 @@ class CatQuantumBoxTransfer:
             "name": (
                 "cat_created_return_box_counterpart"
             ),
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "source_box_id": source_box.id,
             "counterpart_box_id": counterpart.id,
             "source_layer": (
@@ -1167,7 +1143,7 @@ class CatQuantumBoxTransfer:
             ),
             "energy_cost": energy_cost,
             "remaining_cat_energy": (
-                cat["idea_energy"]
+                cat.idea_energy
             ),
             "pair_event": pair_event,
             "created": True
@@ -1204,20 +1180,18 @@ class CatQuantumBoxTransfer:
                     "cat_quantum_exploration_"
                     "route_not_started"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "reason": "stable_pair_not_found",
                 "started": False
             }
 
-        if cat.get(
-            "current_layer"
-        ) != "quantum_layer":
+        if cat.current_layer != "quantum_layer":
             return {
                 "name": (
                     "cat_quantum_exploration_"
                     "route_not_started"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "reason": "cat_not_in_quantum_layer",
                 "started": False
             }
@@ -1245,7 +1219,7 @@ class CatQuantumBoxTransfer:
                     "cat_quantum_exploration_"
                     "route_not_started"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "reason": "quantum_space_unavailable",
                 "started": False
             }
@@ -1253,9 +1227,9 @@ class CatQuantumBoxTransfer:
         planned = (
             quantum_space
             .plan_direct_cat_route(
-                cat_id=cat.get("name"),
+                cat_id=cat.name,
                 start_position=dict(
-                    cat["position"]
+                    cat.position
                 ),
                 destination_position=destination,
                 destination=(
@@ -1269,11 +1243,11 @@ class CatQuantumBoxTransfer:
         route = planned["route"]
         route.state = "ready"
 
-        cat["active_route_id"] = (
+        cat.active_route_id = (
             route.route_id
         )
 
-        cat["quantum_exploration"] = {
+        cat.quantum_exploration = {
             "active": True,
             "pair_id": pair_id,
             "route_id": route.route_id,
@@ -1287,11 +1261,11 @@ class CatQuantumBoxTransfer:
                 "cat_quantum_exploration_"
                 "route_started"
             ),
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "pair_id": pair_id,
             "route_id": route.route_id,
             "start_position": dict(
-                cat["position"]
+                cat.position
             ),
             "destination": destination,
             "step_count": len(
@@ -1316,9 +1290,7 @@ class CatQuantumBoxTransfer:
         cat,
         rng=None
     ):
-        exploration = cat.get(
-            "quantum_exploration"
-        )
+        exploration = cat.quantum_exploration
 
         if not exploration:
             return {
@@ -1326,7 +1298,7 @@ class CatQuantumBoxTransfer:
                     "cat_quantum_exploration_"
                     "not_advanced"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "reason": "no_quantum_exploration",
                 "advanced": False
             }
@@ -1340,7 +1312,7 @@ class CatQuantumBoxTransfer:
                     "cat_quantum_exploration_"
                     "not_advanced"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "reason": "exploration_not_active",
                 "advanced": False
             }
@@ -1357,7 +1329,7 @@ class CatQuantumBoxTransfer:
                     "cat_quantum_exploration_"
                     "not_advanced"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "reason": "quantum_space_unavailable",
                 "advanced": False
             }
@@ -1382,7 +1354,7 @@ class CatQuantumBoxTransfer:
         )
 
         if position is not None:
-            cat["position"] = dict(
+            cat.position = dict(
                 position
             )
 
@@ -1395,10 +1367,17 @@ class CatQuantumBoxTransfer:
             exploration["active"] = False
             exploration["arrived"] = True
 
-            exploration_history = cat.setdefault(
+            exploration_history = getattr(
+                cat,
                 "quantum_exploration_history",
-                []
+                None
             )
+
+            if exploration_history is None:
+                exploration_history = []
+                cat.quantum_exploration_history = (
+                    exploration_history
+                )
 
             exploration_history.append(
                 deepcopy(
@@ -1406,7 +1385,7 @@ class CatQuantumBoxTransfer:
                 )
             )
 
-            cat["state"] = (
+            cat.state = (
                 "quantum_exploration_goal_reached"
             )
 
@@ -1420,7 +1399,7 @@ class CatQuantumBoxTransfer:
             "name": (
                 "cat_quantum_exploration_advanced"
             ),
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "pair_id": exploration[
                 "pair_id"
             ],
@@ -1480,10 +1459,7 @@ class CatQuantumBoxTransfer:
         cat,
         quantum_roll=None
     ):
-        exploration = cat.get(
-            "quantum_exploration",
-            {}
-        )
+        exploration = (cat.quantum_exploration or {})
 
         if not exploration.get(
             "arrived",
@@ -1494,7 +1470,7 @@ class CatQuantumBoxTransfer:
                     "cat_quantum_exploration_"
                     "arrival_not_resolved"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "reason": "destination_not_reached",
                 "resolved": False
             }
@@ -1507,9 +1483,7 @@ class CatQuantumBoxTransfer:
             )
         )
 
-        memory = cat.get(
-            "memory"
-        )
+        memory = cat.memory
 
         remembered = None
 
@@ -1523,16 +1497,14 @@ class CatQuantumBoxTransfer:
                     .universe_tick
                 ),
                 location=dict(
-                    cat["position"]
+                    cat.position
                 ),
                 details={
                     "target_layer": (
-                        cat.get(
-                            "current_layer"
-                        )
+                        cat.current_layer
                     ),
                     "position": dict(
-                        cat["position"]
+                        cat.position
                     ),
                     "pair_id": exploration.get(
                         "pair_id"
@@ -1543,12 +1515,9 @@ class CatQuantumBoxTransfer:
         known_place = (
             CatKnowledge.remember_place(
                 cat=cat,
-                layer=cat.get(
-                    "current_layer",
-                    "quantum_layer"
-                ),
+                layer=cat.current_layer,
                 position=dict(
-                    cat["position"]
+                    cat.position
                 ),
                 source=(
                     "direct_quantum_exploration"
@@ -1606,16 +1575,20 @@ class CatQuantumBoxTransfer:
         continuation_plan = None
 
         if action == "rest_at_destination":
-            cat["state"] = (
+            cat.state = (
                 "resting_at_quantum_"
                 "exploration_goal"
             )
 
         elif action == "continue_exploration":
-            cat.pop(
-                "exploration_goal",
-                None
-            )
+            if hasattr(
+                cat,
+                "exploration_goal"
+            ):
+                delattr(
+                    cat,
+                    "exploration_goal"
+                )
 
             continuation_plan = (
                 self.continue_quantum_exploration(
@@ -1627,11 +1600,11 @@ class CatQuantumBoxTransfer:
                 "continued",
                 False
             ):
-                cat["state"] = (
+                cat.state = (
                     "continuing_quantum_exploration"
                 )
             else:
-                cat["state"] = (
+                cat.state = (
                     "ready_to_continue_"
                     "quantum_exploration"
                 )
@@ -1649,7 +1622,7 @@ class CatQuantumBoxTransfer:
                 )
             )
 
-            cat["state"] = (
+            cat.state = (
                 "returning_to_"
                 "exploration_pair"
             )
@@ -1671,12 +1644,12 @@ class CatQuantumBoxTransfer:
                 "cat_quantum_exploration_"
                 "arrival_resolved"
             ),
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "pair_id": exploration.get(
                 "pair_id"
             ),
             "position": dict(
-                cat["position"]
+                cat.position
             ),
             "memory": remembered,
             "known_place": known_place,
@@ -1703,10 +1676,7 @@ class CatQuantumBoxTransfer:
         self,
         cat
     ):
-        exploration = cat.get(
-            "quantum_exploration",
-            {}
-        )
+        exploration = (cat.quantum_exploration or {})
 
         pair_id = exploration.get(
             "pair_id"
@@ -1722,22 +1692,20 @@ class CatQuantumBoxTransfer:
                     "cat_quantum_exploration_"
                     "continuation_failed"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "reason": (
                     "return_pair_not_found"
                 ),
                 "continued": False
             }
 
-        if cat.get(
-            "current_layer"
-        ) != "quantum_layer":
+        if cat.current_layer != "quantum_layer":
             return {
                 "name": (
                     "cat_quantum_exploration_"
                     "continuation_failed"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "reason": (
                     "cat_not_in_quantum_layer"
                 ),
@@ -1761,7 +1729,7 @@ class CatQuantumBoxTransfer:
                     "cat_quantum_exploration_"
                     "continuation_failed"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "reason": (
                     "no_continuation_destination"
                 ),
@@ -1784,9 +1752,9 @@ class CatQuantumBoxTransfer:
         planned = (
             quantum_space
             .plan_direct_cat_route(
-                cat_id=cat.get("name"),
+                cat_id=cat.name,
                 start_position=dict(
-                    cat["position"]
+                    cat.position
                 ),
                 destination_position=(
                     destination
@@ -1801,7 +1769,7 @@ class CatQuantumBoxTransfer:
         route = planned["route"]
         route.state = "ready"
 
-        cat["active_route_id"] = (
+        cat.active_route_id = (
             route.route_id
         )
 
@@ -1812,7 +1780,7 @@ class CatQuantumBoxTransfer:
             )
         ) + 1
 
-        cat["quantum_exploration"] = {
+        cat.quantum_exploration = {
             "active": True,
             "arrived": False,
             "pair_id": pair_id,
@@ -1823,7 +1791,7 @@ class CatQuantumBoxTransfer:
             "continuation": True
         }
 
-        cat["state"] = (
+        cat.state = (
             "continuing_quantum_exploration"
         )
 
@@ -1831,12 +1799,12 @@ class CatQuantumBoxTransfer:
             "name": (
                 "cat_continued_quantum_exploration"
             ),
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "pair_id": pair_id,
             "stage": stage,
             "route_id": route.route_id,
             "start_position": dict(
-                cat["position"]
+                cat.position
             ),
             "destination": destination,
             "return_pair_preserved": True,
@@ -1865,7 +1833,7 @@ class CatQuantumBoxTransfer:
                     "cat_quantum_return_"
                     "route_not_started"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "reason": (
                     "stable_pair_not_found"
                 ),
@@ -1882,7 +1850,7 @@ class CatQuantumBoxTransfer:
                     "cat_quantum_return_"
                     "route_not_started"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "reason": (
                     "remote_box_not_found"
                 ),
@@ -1901,7 +1869,7 @@ class CatQuantumBoxTransfer:
                     "cat_quantum_return_"
                     "route_not_started"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "reason": (
                     "quantum_space_unavailable"
                 ),
@@ -1920,9 +1888,9 @@ class CatQuantumBoxTransfer:
         planned = (
             quantum_space
             .plan_direct_cat_route(
-                cat_id=cat.get("name"),
+                cat_id=cat.name,
                 start_position=dict(
-                    cat["position"]
+                    cat.position
                 ),
                 destination_position=(
                     destination
@@ -1937,11 +1905,11 @@ class CatQuantumBoxTransfer:
         route = planned["route"]
         route.state = "ready"
 
-        cat["active_route_id"] = (
+        cat.active_route_id = (
             route.route_id
         )
 
-        cat["quantum_return"] = {
+        cat.quantum_return = {
             "active": True,
             "arrived_at_box": False,
             "pair_id": pair_id,
@@ -1960,7 +1928,7 @@ class CatQuantumBoxTransfer:
             "name": (
                 "cat_quantum_return_route_started"
             ),
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "pair_id": pair_id,
             "route_id": route.route_id,
             "destination": destination,
@@ -1972,9 +1940,7 @@ class CatQuantumBoxTransfer:
         cat,
         rng=None
     ):
-        returning = cat.get(
-            "quantum_return"
-        )
+        returning = cat.quantum_return
 
         if not returning or not returning.get(
             "active",
@@ -1985,7 +1951,7 @@ class CatQuantumBoxTransfer:
                     "cat_quantum_return_"
                     "not_advanced"
                 ),
-                "cat": cat.get("name"),
+                "cat": cat.name,
                 "reason": (
                     "no_active_quantum_return"
                 ),
@@ -2014,7 +1980,7 @@ class CatQuantumBoxTransfer:
         )
 
         if position is not None:
-            cat["position"] = dict(
+            cat.position = dict(
                 position
             )
 
@@ -2044,7 +2010,7 @@ class CatQuantumBoxTransfer:
                 "transferred",
                 False
             ):
-                cat["state"] = (
+                cat.state = (
                     "returned_from_"
                     "quantum_exploration"
                 )
@@ -2053,7 +2019,7 @@ class CatQuantumBoxTransfer:
             "name": (
                 "cat_quantum_return_advanced"
             ),
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "pair_id": returning[
                 "pair_id"
             ],
@@ -2084,9 +2050,9 @@ class CatQuantumBoxTransfer:
         destination
     ):
         start = dict(
-            cat.get(
-                "position",
-                {
+            (
+                cat.position
+                or {
                     "x": 0.0,
                     "y": 0.0,
                     "z": 0.0
@@ -2115,7 +2081,7 @@ class CatQuantumBoxTransfer:
             "name": (
                 "cat_stabilized_direct_quantum_path"
             ),
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "start": start,
             "destination": end,
             "distance": distance,
@@ -2173,7 +2139,7 @@ class CatQuantumBoxTransfer:
                 f"quantum_cat_trail_"
                 f"{trail_number:04d}"
             ),
-            "cat": cat.get("name"),
+            "cat": cat.name,
             "from_box": source_box.id,
             "to_box": target_box.id,
             "from_layer": (
@@ -2211,10 +2177,7 @@ class CatQuantumBoxTransfer:
         ]:
             return False
 
-        access = cat.get(
-            "access",
-            {}
-        )
+        access = cat.access
 
         return bool(
             access.get(
@@ -2251,8 +2214,14 @@ class CatQuantumBoxTransfer:
                 "cat_quantum_box_transfer_failed"
             ),
             "cat": (
-                cat.get("name")
-                if isinstance(cat, dict)
+                cat.name
+                if isinstance(
+                    cat,
+                    (
+                        Cat,
+                        dict
+                    )
+                )
                 else None
             ),
             "reason": reason,

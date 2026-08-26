@@ -1,8 +1,9 @@
-﻿from universe.layerRegistry import LayerRegistry
+from universe.layerRegistry import LayerRegistry
 from meeting_place.meeting_place import MeetingPlace
 from library import Library
 from root_universe import RootUniverse
 from idea_universe import IdeaUniverse
+from gods.gods import Gods
 from core.transitions.root_transition import RootTransition
 from cats.cat_distribution_system import CatDistributionSystem
 
@@ -35,9 +36,17 @@ class UniverseBootstrap:
             meeting_place
         )
 
+        library = Library(
+            self.universe
+        )
+
         layers.register(
             "library",
-            Library(self.universe)
+            library
+        )
+
+        self.universe.library = (
+            library
         )
 
         # Idea Universe is pre-physical.
@@ -51,6 +60,30 @@ class UniverseBootstrap:
 
         self.universe.idea_universe = (
             idea_universe
+        )
+
+        gods = Gods(
+            self.universe
+        )
+
+        god = gods.create_god(
+            name="god",
+            role="librarian"
+        )
+
+        self.universe.gods = gods
+        self.universe.god = god
+
+        library.assign_librarian(
+            god
+        )
+
+        library.god_enters(
+            god
+        )
+
+        library.shelve_book(
+            god["book"]
         )
 
         meeting_place.cat_distribution_system = (
