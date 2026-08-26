@@ -63,6 +63,9 @@ class Cat:
         # Persistent social relationships
         self.relationships = {}
 
+        # Persistent memory of cat-to-cat encounters
+        self.social_memory = {}
+
         self.special_traits = []
         self.aroma = aroma
 

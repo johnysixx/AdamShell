@@ -150,6 +150,22 @@ class CatSocialSystem:
             outcome=outcome
         )
 
+        self._remember_meeting(
+            cat,
+            other_cat,
+            attitude=attitude,
+            outcome=outcome,
+            steps=steps
+        )
+
+        self._remember_meeting(
+            other_cat,
+            cat,
+            attitude=attitude,
+            outcome=outcome,
+            steps=steps
+        )
+
         event = {
             "name": "cat_social_meeting",
             "cat": cat.name,
@@ -201,6 +217,36 @@ class CatSocialSystem:
         relation = self._relation(
             cat,
             other_cat
+        )
+
+        memory = self._memory_profile(
+            cat,
+            other_cat
+        )
+
+        positive_memory = int(
+            memory.get(
+                "friendly_count",
+                0
+            )
+        )
+
+        negative_memory = int(
+            memory.get(
+                "hostile_count",
+                0
+            )
+        )
+
+        memory_bias = max(
+            -0.30,
+            min(
+                0.30,
+                (
+                    positive_memory
+                    - negative_memory
+                ) * 0.08
+            )
         )
 
         familiarity = self._number(
@@ -276,11 +322,17 @@ class CatSocialSystem:
             + courage * 0.05
             - tension * 0.35
             - aggression * 0.15
+            + memory_bias
         )
 
         if (
             tension >= 0.65
             or trust <= 0.20
+            or (
+                negative_memory >= 3
+                and negative_memory
+                > positive_memory + 1
+            )
             or (
                 aggression >= 0.80
                 and tension >= 0.30
@@ -315,7 +367,22 @@ class CatSocialSystem:
             "empathy": empathy,
             "sociability": sociability,
             "courage": courage,
-            "aggression": aggression
+            "aggression": aggression,
+            "positive_social_memories": (
+                positive_memory
+            ),
+            "negative_social_memories": (
+                negative_memory
+            ),
+            "memory_bias": round(
+                memory_bias,
+                4
+            ),
+            "last_social_outcome": (
+                memory.get(
+                    "last_outcome"
+                )
+            )
         }
 
     def sniff(
@@ -796,6 +863,94 @@ class CatSocialSystem:
             return "kept_distance"
 
         return attitude
+
+    def _memory_profile(
+        self,
+        cat,
+        other_cat
+    ):
+        return cat.social_memory.get(
+            other_cat.name,
+            {}
+        )
+
+    def _remember_meeting(
+        self,
+        cat,
+        other_cat,
+        attitude,
+        outcome,
+        steps
+    ):
+        memory = cat.social_memory.setdefault(
+            other_cat.name,
+            {
+                "meet_count": 0,
+                "friendly_count": 0,
+                "uncertain_count": 0,
+                "hostile_count": 0,
+                "last_attitude": None,
+                "last_outcome": None,
+                "last_steps": [],
+                "recent_outcomes": []
+            }
+        )
+
+        memory[
+            "meet_count"
+        ] = int(
+            memory.get(
+                "meet_count",
+                0
+            )
+        ) + 1
+
+        counter = (
+            f"{attitude}_count"
+        )
+
+        memory[
+            counter
+        ] = int(
+            memory.get(
+                counter,
+                0
+            )
+        ) + 1
+
+        memory[
+            "last_attitude"
+        ] = attitude
+
+        memory[
+            "last_outcome"
+        ] = outcome
+
+        memory[
+            "last_steps"
+        ] = [
+            step.get(
+                "name"
+            )
+            for step in steps
+        ]
+
+        recent = list(
+            memory.get(
+                "recent_outcomes",
+                []
+            )
+        )
+
+        recent.append(
+            outcome
+        )
+
+        memory[
+            "recent_outcomes"
+        ] = recent[-5:]
+
+        return memory
 
     def _relation(
         self,

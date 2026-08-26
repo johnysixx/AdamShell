@@ -643,5 +643,239 @@ class CatSocialInteractionTests(
         )
 
 
+    def test_social_meeting_creates_memory_for_both_cats(
+        self
+    ):
+        first, second = (
+            self._social_pair()
+        )
+
+        social = CatSocialSystem(
+            self.cats
+        )
+
+        result = social.meet(
+            first,
+            second
+        )
+
+        self.assertTrue(
+            result["socialized"]
+        )
+
+        self.assertIn(
+            second.name,
+            first.social_memory
+        )
+
+        self.assertIn(
+            first.name,
+            second.social_memory
+        )
+
+        first_memory = (
+            first.social_memory[
+                second.name
+            ]
+        )
+
+        self.assertEqual(
+            first_memory["meet_count"],
+            1
+        )
+
+        self.assertEqual(
+            first_memory[
+                "uncertain_count"
+            ],
+            1
+        )
+
+        self.assertEqual(
+            first_memory[
+                "last_outcome"
+            ],
+            "kept_distance"
+        )
+
+    def test_friendly_memory_biases_future_assessment(
+        self
+    ):
+        first, second = (
+            self._social_pair()
+        )
+
+        first.relationships[
+            second.name
+        ] = {
+            "familiarity": 0.6,
+            "trust": 0.65,
+            "affiliation": 0.5,
+            "tension": 0.0
+        }
+
+        first.social_memory[
+            second.name
+        ] = {
+            "meet_count": 4,
+            "friendly_count": 4,
+            "uncertain_count": 0,
+            "hostile_count": 0,
+            "last_attitude": "friendly",
+            "last_outcome": "head_bunt",
+            "last_steps": [
+                "cat_head_bunt"
+            ],
+            "recent_outcomes": [
+                "nose_touch",
+                "head_bunt"
+            ]
+        }
+
+        social = CatSocialSystem(
+            self.cats
+        )
+
+        assessment = social.assess(
+            first,
+            second
+        )
+
+        self.assertGreater(
+            assessment[
+                "memory_bias"
+            ],
+            0.0
+        )
+
+        self.assertEqual(
+            assessment[
+                "positive_social_memories"
+            ],
+            4
+        )
+
+        self.assertEqual(
+            assessment[
+                "last_social_outcome"
+            ],
+            "head_bunt"
+        )
+
+    def test_repeated_hostile_memory_can_make_cat_hostile(
+        self
+    ):
+        first, second = (
+            self._social_pair()
+        )
+
+        first.relationships[
+            second.name
+        ] = {
+            "familiarity": 0.5,
+            "trust": 0.5,
+            "affiliation": 0.0,
+            "tension": 0.2
+        }
+
+        first.social_memory[
+            second.name
+        ] = {
+            "meet_count": 4,
+            "friendly_count": 0,
+            "uncertain_count": 0,
+            "hostile_count": 4,
+            "last_attitude": "hostile",
+            "last_outcome": "hiss",
+            "last_steps": [
+                "cat_hissed_at_cat"
+            ],
+            "recent_outcomes": [
+                "hiss",
+                "warning_swat",
+                "hiss",
+                "hiss"
+            ]
+        }
+
+        social = CatSocialSystem(
+            self.cats
+        )
+
+        assessment = social.assess(
+            first,
+            second
+        )
+
+        self.assertEqual(
+            assessment[
+                "attitude"
+            ],
+            "hostile"
+        )
+
+        self.assertLess(
+            assessment[
+                "memory_bias"
+            ],
+            0.0
+        )
+
+        self.assertEqual(
+            assessment[
+                "negative_social_memories"
+            ],
+            4
+        )
+
+    def test_social_memory_keeps_only_five_recent_outcomes(
+        self
+    ):
+        first, second = (
+            self._social_pair()
+        )
+
+        social = CatSocialSystem(
+            self.cats
+        )
+
+        for index in range(
+            7
+        ):
+            social._remember_meeting(
+                first,
+                second,
+                attitude="uncertain",
+                outcome=f"outcome_{index}",
+                steps=[]
+            )
+
+        memory = first.social_memory[
+            second.name
+        ]
+
+        self.assertEqual(
+            len(
+                memory[
+                    "recent_outcomes"
+                ]
+            ),
+            5
+        )
+
+        self.assertEqual(
+            memory[
+                "recent_outcomes"
+            ],
+            [
+                "outcome_2",
+                "outcome_3",
+                "outcome_4",
+                "outcome_5",
+                "outcome_6"
+            ]
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
