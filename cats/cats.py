@@ -1070,9 +1070,455 @@ class Cats:
         UniverseLogger.event(f"CATS EVENT: {event}")
 
     def tick(self):
-        self.tick_count += 1
-        UniverseLogger.event(f"CATS TICK {self.tick_count}")
         self._clear_events()
+        self.tick_count += 1
+
+        report = {
+            "name": "cats_tick_completed",
+            "tick": self.tick_count,
+            "cats": [],
+            "groups": [],
+            "errors": [],
+            "cronenbergs_created": []
+        }
+
+        UniverseLogger.event(
+            f"CATS TICK {self.tick_count}"
+        )
+
+        # ----------------------------------------------------
+        # INDIVIDUAL CATS
+        # ----------------------------------------------------
+
+        for cat in list(
+            self.cats
+        ):
+            result = (
+                self._run_cat_tick_operation(
+                    cat=cat,
+                    operation=(
+                        self._tick_cat_autonomously
+                    )
+                )
+            )
+
+            report[
+                "cats"
+            ].append(
+                result
+            )
+
+            if not result.get(
+                "ok",
+                True
+            ):
+                report[
+                    "errors"
+                ].append(
+                    result
+                )
+
+                cronenberg_id = result.get(
+                    "cronenberg_id"
+                )
+
+                if cronenberg_id is not None:
+                    report[
+                        "cronenbergs_created"
+                    ].append(
+                        cronenberg_id
+                    )
+
+        # ----------------------------------------------------
+        # CAT GROUPS
+        # ----------------------------------------------------
+
+        group_results = (
+            self._tick_groups()
+        )
+
+        report[
+            "groups"
+        ].extend(
+            group_results
+        )
+
+        for result in group_results:
+            if not result.get(
+                "ok",
+                True
+            ):
+                report[
+                    "errors"
+                ].append(
+                    result
+                )
+
+                cronenberg_id = result.get(
+                    "cronenberg_id"
+                )
+
+                if cronenberg_id is not None:
+                    report[
+                        "cronenbergs_created"
+                    ].append(
+                        cronenberg_id
+                    )
+
+        report[
+            "ok"
+        ] = not report[
+            "errors"
+        ]
+
+        report[
+            "error_count"
+        ] = len(
+            report[
+                "errors"
+            ]
+        )
+
+        self.emit_event({
+            "name": "cats_tick_completed",
+            "tick": self.tick_count,
+            "cats_processed": len(
+                report[
+                    "cats"
+                ]
+            ),
+            "groups_processed": len(
+                report[
+                    "groups"
+                ]
+            ),
+            "error_count": report[
+                "error_count"
+            ],
+            "cronenbergs_created": list(
+                report[
+                    "cronenbergs_created"
+                ]
+            )
+        })
+
+        return report
+
+    def _tick_cat_autonomously(
+        self,
+        cat
+    ):
+        if not getattr(
+            cat,
+            "active",
+            True
+        ):
+            return {
+                "name": (
+                    "cat_autonomous_tick_skipped"
+                ),
+                "cat": cat.name,
+                "reason": "inactive",
+                "completed": False
+            }
+
+        # ----------------------------------------------------
+        # ACTIVE QUANTUM RETURN
+        #
+        # Kocka, ktera uz jde po quantum route,
+        # nema ve stejnem ticku delat nove rozhodnuti.
+        # ----------------------------------------------------
+
+        quantum_return = getattr(
+            cat,
+            "quantum_return",
+            None
+        )
+
+        if (
+            isinstance(
+                quantum_return,
+                dict
+            )
+            and quantum_return.get(
+                "active",
+                False
+            )
+        ):
+            result = (
+                self.advance_cat_quantum_return(
+                    cat
+                )
+            )
+
+            return {
+                "name": (
+                    "cat_autonomous_tick_completed"
+                ),
+                "cat": cat.name,
+                "mode": "quantum_return",
+                "result": result,
+                "completed": True
+            }
+
+        # ----------------------------------------------------
+        # ACTIVE QUANTUM EXPLORATION
+        # ----------------------------------------------------
+
+        quantum_exploration = getattr(
+            cat,
+            "quantum_exploration",
+            None
+        )
+
+        if (
+            isinstance(
+                quantum_exploration,
+                dict
+            )
+            and quantum_exploration.get(
+                "active",
+                False
+            )
+        ):
+            result = (
+                self.advance_cat_quantum_exploration(
+                    cat
+                )
+            )
+
+            return {
+                "name": (
+                    "cat_autonomous_tick_completed"
+                ),
+                "cat": cat.name,
+                "mode": (
+                    "quantum_exploration"
+                ),
+                "result": result,
+                "completed": True
+            }
+
+        # ----------------------------------------------------
+        # NO PHYSICAL / QUANTUM POSITION
+        #
+        # Neni to chyba reality.
+        # Kocka proste nema odkud pozorovat svet.
+        # ----------------------------------------------------
+
+        if getattr(
+            cat,
+            "position",
+            None
+        ) is None:
+            return {
+                "name": (
+                    "cat_autonomous_tick_skipped"
+                ),
+                "cat": cat.name,
+                "reason": "no_position",
+                "completed": False
+            }
+
+        # ----------------------------------------------------
+        # PERCEPTION -> MIND -> INTENTION -> ACTION
+        #
+        # Socialni interakce pak muze prirozene
+        # vzniknout z vykonaneho intention,
+        # napr. approach_cat -> meet().
+        # ----------------------------------------------------
+
+        thought = self.think_and_act(
+            cat=cat,
+            cronenbergs=getattr(
+                self.universe,
+                "cronenbergs",
+                []
+            )
+        )
+
+        return {
+            "name": (
+                "cat_autonomous_tick_completed"
+            ),
+            "cat": cat.name,
+            "mode": "thought_cycle",
+            "thought": thought,
+            "completed": bool(
+                thought.get(
+                    "completed",
+                    False
+                )
+            )
+        }
+
+    def _tick_groups(self):
+        group_system = getattr(
+            self,
+            "group_system",
+            None
+        )
+
+        if group_system is None:
+            return []
+
+        from .cat_group_lifecycle_system import (
+            CatGroupLifecycleSystem
+        )
+
+        lifecycle = getattr(
+            self,
+            "group_lifecycle_system",
+            None
+        )
+
+        if (
+            lifecycle is None
+            or lifecycle.group_system
+            is not group_system
+        ):
+            lifecycle = (
+                CatGroupLifecycleSystem(
+                    group_system
+                )
+            )
+
+            self.group_lifecycle_system = (
+                lifecycle
+            )
+
+        results = []
+
+        for group_id in list(
+            group_system.groups
+        ):
+            result = (
+                self._run_group_tick_operation(
+                    group_id=group_id,
+                    operation=lifecycle.advance
+                )
+            )
+
+            results.append(
+                result
+            )
+
+        return results
+
+    def _run_cat_tick_operation(
+        self,
+        cat,
+        operation
+    ):
+        try:
+            value = operation(
+                cat
+            )
+
+            return {
+                "cat": cat.name,
+                "ok": True,
+                "result": value
+            }
+
+        except Exception as error:
+            return self._cat_tick_error(
+                error=error,
+                source_component=(
+                    f"cat:{cat.name}"
+                ),
+                source_operation=(
+                    "autonomous_tick"
+                ),
+                cat_name=cat.name
+            )
+
+    def _run_group_tick_operation(
+        self,
+        group_id,
+        operation
+    ):
+        try:
+            value = operation(
+                group_id,
+                self.cats
+            )
+
+            return {
+                "group_id": group_id,
+                "ok": True,
+                "result": value
+            }
+
+        except Exception as error:
+            return self._cat_tick_error(
+                error=error,
+                source_component=(
+                    f"cat_group:{group_id}"
+                ),
+                source_operation=(
+                    "lifecycle_advance"
+                ),
+                group_id=group_id
+            )
+
+    def _cat_tick_error(
+        self,
+        error,
+        source_component,
+        source_operation,
+        **context
+    ):
+        UniverseLogger.event(
+            "CATS TICK ERROR: "
+            f"SOURCE={source_component}."
+            f"{source_operation} "
+            f"ERROR={type(error).__name__}: "
+            f"{error}"
+        )
+
+        cronenberg = None
+
+        create_cronenberg = getattr(
+            self.universe,
+            "create_cronenberg_from_quantum_error",
+            None
+        )
+
+        if callable(
+            create_cronenberg
+        ):
+            cronenberg = create_cronenberg(
+                error=error,
+                source_component=(
+                    source_component
+                ),
+                source_operation=(
+                    source_operation
+                )
+            )
+
+        return {
+            **context,
+            "ok": False,
+            "source_component": (
+                source_component
+            ),
+            "source_operation": (
+                source_operation
+            ),
+            "error_type": type(
+                error
+            ).__name__,
+            "error_message": str(
+                error
+            ),
+            "cronenberg_id": getattr(
+                cronenberg,
+                "id",
+                None
+            )
+        }
 
     def _clear_events(self):
         self.events = []

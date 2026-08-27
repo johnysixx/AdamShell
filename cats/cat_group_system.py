@@ -15,6 +15,11 @@ class CatGroupSystem:
     ):
         self.cats_layer = cats_layer
 
+        # The active group system belongs to the
+        # cats layer so Cats.tick() can advance it.
+        if cats_layer is not None:
+            cats_layer.group_system = self
+
         self.groups = {}
 
         self.territory_system = (
@@ -109,6 +114,12 @@ class CatGroupSystem:
             "ritual_lineages": {},
             "institutions": {},
             "role_specializations": {},
+
+            # Group norms and taboos.
+            "norms": {},
+            "taboos": {},
+            "norm_violations": [],
+            "sanction_history": [],
 
             # Institutional continuity and conflict.
             "succession_history": [],
