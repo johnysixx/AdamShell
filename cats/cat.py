@@ -161,6 +161,13 @@ class Cat:
             "exposures": 0
         }
 
+        # Dynamic social roles inside groups.
+        self.group_roles = {
+            "active": {},
+            "history": [],
+            "role_events": 0
+        }
+
         self.special_traits = []
         self.aroma = aroma
 

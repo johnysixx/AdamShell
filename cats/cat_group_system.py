@@ -103,6 +103,11 @@ class CatGroupSystem:
             # Innovation genealogy.
             "innovation_tree": {},
 
+            # Stable but non-bureaucratic social structures.
+            "roles": {},
+            "rituals": {},
+            "institutions": {},
+
             # Cultural ancestry.
             "cultural_parent_group": None,
             "cultural_children": [],
