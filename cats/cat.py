@@ -208,6 +208,18 @@ class Cat:
         # Runtime world state
         # ----------------------------------------------------
 
+        # Autonomous physiological / behavioural drives.
+        self.needs = {
+            "hunger": 0.0,
+            "thirst": 0.0,
+            "fatigue": 0.0,
+            "safety": 0.0,
+            "social": 0.0,
+            "curiosity": 0.0,
+            "dominant": None,
+            "tick": 0
+        }
+
         self.position = None
         self.location = None
         self.current_layer = "quantum_layer"

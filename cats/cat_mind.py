@@ -22,6 +22,7 @@ class CatMind:
         "approach_cat",
         "share_legend",
         "observe",
+        "wander",
         "rest"
     )
 
@@ -965,12 +966,82 @@ class CatMind:
             )
 
         # OdpoÄŤinek je vĹľdy moĹľnĂ˝.
+        needs = getattr(
+            cat,
+            "needs",
+            {}
+        )
+
+        fatigue_need = float(
+            needs.get(
+                "fatigue",
+                0.0
+            )
+        )
+
+        social_need = float(
+            needs.get(
+                "social",
+                0.0
+            )
+        )
+
+        curiosity_need = float(
+            needs.get(
+                "curiosity",
+                0.0
+            )
+        )
+
+        # Needs bias decisions.
+        # They never directly execute actions.
+        if (
+            nearby_cats
+            and social_need > 0.0
+        ):
+            candidates.append(
+                cls._candidate(
+                    intention_type="approach_cat",
+                    score=(
+                        0.18
+                        + social_need * 0.72
+                        + empathy * 0.10
+                    ),
+                    reasons=[
+                        "social_need",
+                        "nearby_cat"
+                    ],
+                    target=nearby_cats[0]
+                )
+            )
+
+        if getattr(
+            cat,
+            "position",
+            None
+        ) is not None:
+            candidates.append(
+                cls._candidate(
+                    intention_type="wander",
+                    score=(
+                        0.12
+                        + curiosity_need * 0.68
+                        + curiosity * 0.12
+                    ),
+                    reasons=[
+                        "curiosity_need",
+                        "autonomous_movement"
+                    ]
+                )
+            )
+
         candidates.append(
             cls._candidate(
                 intention_type="rest",
                 score=(
                     0.15
                     + patience * 0.25
+                    + fatigue_need * 0.65
                 ),
                 reasons=[
                     "rest_is_available"

@@ -107,6 +107,13 @@ class CatIntentionExecutor:
                 step_size=step_size
             )
 
+        if intention_type == "wander":
+            return self._execute_wander(
+                cat=cat,
+                intention=intention,
+                step_size=step_size
+            )
+
         if intention_type == "rest":
             return self._execute_rest(
                 cat=cat,
@@ -3119,6 +3126,116 @@ class CatIntentionExecutor:
         }
 
         mind[
+            "active_body_execution"
+        ] = deepcopy(
+            event
+        )
+
+        return self._record(
+            event
+        )
+
+    def _execute_wander(
+        self,
+        cat,
+        intention,
+        step_size=None
+    ):
+        position = cat.position
+
+        if not isinstance(
+            position,
+            dict
+        ):
+            return self._record({
+                "name": "cat_wander_failed",
+                "cat": cat.name,
+                "reason": "missing_position",
+                "executed": False
+            })
+
+        step = (
+            1.0
+            if step_size is None
+            else max(
+                0.0,
+                float(step_size)
+            )
+        )
+
+        # Deterministic changing heading.
+        # Keeps autonomous simulation reproducible.
+        phase = (
+            int(
+                cat.needs.get(
+                    "tick",
+                    0
+                )
+            )
+            + sum(
+                ord(ch)
+                for ch in cat.name
+            )
+        )
+
+        axis = (
+            "x"
+            if phase % 2 == 0
+            else "y"
+        )
+
+        direction = (
+            1.0
+            if (
+                phase // 2
+            ) % 2 == 0
+            else -1.0
+        )
+
+        previous = deepcopy(
+            position
+        )
+
+        position.setdefault(
+            "x",
+            0.0
+        )
+
+        position.setdefault(
+            "y",
+            0.0
+        )
+
+        position.setdefault(
+            "z",
+            0.0
+        )
+
+        position[axis] = (
+            float(
+                position[axis]
+            )
+            + direction * step
+        )
+
+        cat.state = (
+            "wandering_by_own_choice"
+        )
+
+        event = {
+            "name": "cat_wandered",
+            "cat": cat.name,
+            "from_position": previous,
+            "position": deepcopy(
+                position
+            ),
+            "axis": axis,
+            "step": direction * step,
+            "decision_source": "cat_mind",
+            "executed": True
+        }
+
+        cat.mind[
             "active_body_execution"
         ] = deepcopy(
             event
