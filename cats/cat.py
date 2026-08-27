@@ -177,7 +177,16 @@ class Cat:
             "offered": 0,
             "understood": 0,
             "guided_to_bar": 0,
-            "history": []
+            "history": [],
+
+            # Responsibility for invited humans.
+            "suspended_until_tick": 0,
+            "suspension_reason": None,
+
+            # A cat that brought a problematic guest
+            # must complete Garfield remedial training.
+            "garfield_training_required": False,
+            "garfield_training": None
         }
 
         # Group norm / taboo history

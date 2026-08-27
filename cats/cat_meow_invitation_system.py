@@ -34,6 +34,46 @@ class CatMeowInvitationSystem:
                 "MEOW can only be offered by Cat."
             )
 
+        current_tick = self._current_bar_tick()
+
+        suspended_until = int(
+            cat.meow_invitations.get(
+                "suspended_until_tick",
+                0
+            )
+        )
+
+        if current_tick < suspended_until:
+            return {
+                "name": "cat_MEOW_not_offered",
+                "cat": cat.name,
+                "human": self._name(
+                    human
+                ),
+                "reason": "cat_MEOW_cooldown",
+                "current_tick": current_tick,
+                "suspended_until_tick": (
+                    suspended_until
+                ),
+                "offered": False
+            }
+
+        if cat.meow_invitations.get(
+            "garfield_training_required",
+            False
+        ):
+            return {
+                "name": "cat_MEOW_not_offered",
+                "cat": cat.name,
+                "human": self._name(
+                    human
+                ),
+                "reason": (
+                    "garfield_training_required"
+                ),
+                "offered": False
+            }
+
         evaluation = self.bonds.evaluate(
             cat,
             human
@@ -186,6 +226,29 @@ class CatMeowInvitationSystem:
         invitation[
             "used"
         ] = True
+
+    def _current_bar_tick(
+        self
+    ):
+        universe = getattr(
+            self.cats_layer,
+            "universe",
+            None
+        )
+
+        meeting_place = getattr(
+            universe,
+            "meeting_place",
+            None
+        )
+
+        return int(
+            getattr(
+                meeting_place,
+                "tick_count",
+                0
+            )
+        )
 
     def _name(
         self,

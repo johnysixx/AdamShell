@@ -48,6 +48,12 @@ class MeetingPlace:
         self.entities = []
         self.events = []
 
+        # Permanent bans caused by serious bar incidents.
+        self.bar_banned_humans = set()
+
+        # Incidents involving humans invited by cats.
+        self.cat_guest_incidents = []
+
         self.guest_visit_history = {}
         self.regular_guests = set()
 
@@ -441,6 +447,19 @@ class MeetingPlace:
     def add_entity(self, entity):
         entity_name = self._get_entity_name(entity)
 
+        if entity_name in self.bar_banned_humans:
+            UniverseLogger.event(
+                "MEETING PLACE ENTRY DENIED: "
+                f"{entity_name} IS BAR BANNED"
+            )
+
+            return {
+                "name": "meeting_place_entry_denied",
+                "entity": entity_name,
+                "reason": "bar_entry_banned",
+                "entered": False
+            }
+
         if self._is_cat(entity):
             self.bar_counter.red_button.clear_alarm()
 
@@ -525,6 +544,17 @@ class MeetingPlace:
             cat
         )
 
+        if human_name in self.bar_banned_humans:
+            return {
+                "name": (
+                    "cat_invited_human_entry_denied"
+                ),
+                "human": human_name,
+                "cat": cat_name,
+                "reason": "bar_entry_banned",
+                "entered": False
+            }
+
         if cat is None:
             return {
                 "name": (
@@ -534,6 +564,40 @@ class MeetingPlace:
                 "cat": None,
                 "reason": (
                     "inviting_cat_not_present"
+                ),
+                "entered": False
+            }
+
+        suspended_until = int(
+            cat.meow_invitations.get(
+                "suspended_until_tick",
+                0
+            )
+        )
+
+        if self.tick_count < suspended_until:
+            return {
+                "name": (
+                    "cat_invited_human_entry_denied"
+                ),
+                "human": human_name,
+                "cat": cat_name,
+                "reason": "cat_MEOW_cooldown",
+                "entered": False
+            }
+
+        if cat.meow_invitations.get(
+            "garfield_training_required",
+            False
+        ):
+            return {
+                "name": (
+                    "cat_invited_human_entry_denied"
+                ),
+                "human": human_name,
+                "cat": cat_name,
+                "reason": (
+                    "garfield_training_required"
                 ),
                 "entered": False
             }
@@ -681,6 +745,120 @@ class MeetingPlace:
             **record,
             "entered": True
         }
+
+    def record_cat_guest_incident(
+        self,
+        human,
+        category,
+        description=None,
+        cooldown_ticks=24
+    ):
+        human_name = self._get_entity_name(
+            human
+        )
+
+        guest_record = getattr(
+            self,
+            "cat_invited_guests",
+            {}
+        ).get(
+            human_name
+        )
+
+        if guest_record is None:
+            return {
+                "name": (
+                    "cat_guest_incident_not_attributed"
+                ),
+                "human": human_name,
+                "category": category,
+                "cat_responsibility": False
+            }
+
+        inviting_cat_name = guest_record.get(
+            "inviting_cat"
+        )
+
+        inviting_cat = None
+
+        for entity in self.entities:
+            if (
+                self._get_entity_name(
+                    entity
+                )
+                == inviting_cat_name
+                and self._is_cat(
+                    entity
+                )
+            ):
+                inviting_cat = entity
+                break
+
+        if inviting_cat is None:
+            return {
+                "name": (
+                    "cat_guest_incident_not_attributed"
+                ),
+                "human": human_name,
+                "category": category,
+                "inviting_cat": (
+                    inviting_cat_name
+                ),
+                "reason": (
+                    "inviting_cat_not_found"
+                ),
+                "cat_responsibility": False
+            }
+
+        from cats.cat_guest_responsibility_system import (
+            CatGuestResponsibilitySystem
+        )
+
+        responsibility = (
+            CatGuestResponsibilitySystem(
+                self
+            )
+        )
+
+        event = responsibility.handle_incident(
+            human=human,
+            cat=inviting_cat,
+            invitation_id=guest_record.get(
+                "invitation_id"
+            ),
+            category=category,
+            description=description,
+            cooldown_ticks=cooldown_ticks
+        )
+
+        event[
+            "cat_responsibility"
+        ] = True
+
+        self.cat_guest_incidents.append(
+            event
+        )
+
+        self.emit_event(
+            event
+        )
+
+        return event
+
+    def complete_garfield_training(
+        self,
+        cat
+    ):
+        from cats.garfield_training_system import (
+            GarfieldTrainingSystem
+        )
+
+        return (
+            GarfieldTrainingSystem()
+            .complete(
+                cat
+            )
+        )
 
     def emit_event(self, event):
         self.events.append(event)
