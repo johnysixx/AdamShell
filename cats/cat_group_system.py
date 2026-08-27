@@ -93,9 +93,19 @@ class CatGroupSystem:
             # necessarily verified as literal fact.
             "myths": {},
 
+            # Myth genealogy.
+            "myth_lineages": {},
+
             # Novel procedures created from existing
             # knowledge.
             "innovations": {},
+
+            # Innovation genealogy.
+            "innovation_tree": {},
+
+            # Cultural ancestry.
+            "cultural_parent_group": None,
+            "cultural_children": [],
 
             # Federation memberships stay separate
             # from ordinary group alliances.

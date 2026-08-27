@@ -1,3 +1,7 @@
+from cats.cat_group_cultural_inheritance_system import (
+    CatGroupCulturalInheritanceSystem
+)
+
 from copy import deepcopy
 
 
@@ -116,6 +120,14 @@ class CatGroupSplitSystem:
         daughter[
             "parent_group"
         ] = group_id
+
+        CatGroupCulturalInheritanceSystem(
+            self.group_system
+        ).inherit(
+            parent_group_id=group_id,
+            child_group_id=daughter_id,
+            retention=0.70
+        )
 
         for cat in departing[1:]:
             daughter[

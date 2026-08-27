@@ -1,3 +1,7 @@
+from cats.cat_group_innovation_tree_system import (
+    CatGroupInnovationTreeSystem
+)
+
 from copy import deepcopy
 from uuid import uuid4
 
@@ -16,7 +20,8 @@ class CatGroupInnovationSystem:
         knowledge_ids,
         name,
         category,
-        procedure
+        procedure,
+        parent_innovation_id=None
     ):
         group = self.group_system._group(
             group_id
@@ -108,6 +113,16 @@ class CatGroupInnovationSystem:
         ][
             innovation_id
         ] = innovation
+
+        CatGroupInnovationTreeSystem(
+            self.group_system
+        ).register(
+            group_id,
+            innovation_id,
+            parent_innovation_id=(
+                parent_innovation_id
+            )
+        )
 
         # Innovation also becomes a new piece
         # of collective knowledge.

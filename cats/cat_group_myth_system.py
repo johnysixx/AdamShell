@@ -1,3 +1,7 @@
+from cats.cat_group_myth_lineage_system import (
+    CatGroupMythLineageSystem
+)
+
 from copy import deepcopy
 from uuid import uuid4
 
@@ -82,6 +86,13 @@ class CatGroupMythSystem:
             myth_id
         ] = myth
 
+        CatGroupMythLineageSystem(
+            self.group_system
+        ).register_origin(
+            group_id,
+            myth_id
+        )
+
         event = {
             "name": "cat_group_myth_created",
             "group_id": group_id,
@@ -132,6 +143,52 @@ class CatGroupMythSystem:
             myth
         )
 
+        parent_myth_id = myth_id
+
+        root_myth_id = copied.get(
+            "lineage_root",
+            myth_id
+        )
+
+        if transformation is not None:
+            new_myth_id = (
+                "cat_myth_"
+                + uuid4().hex[:8]
+            )
+        else:
+            new_myth_id = myth_id
+
+        copied[
+            "myth_id"
+        ] = new_myth_id
+
+        copied[
+            "lineage_root"
+        ] = root_myth_id
+
+        copied[
+            "parent_version"
+        ] = (
+            parent_myth_id
+            if new_myth_id != myth_id
+            else copied.get(
+                "parent_version"
+            )
+        )
+
+        copied[
+            "generation"
+        ] = int(
+            copied.get(
+                "generation",
+                0
+            )
+        ) + (
+            1
+            if new_myth_id != myth_id
+            else 0
+        )
+
         copied[
             "retellings"
         ] += 1
@@ -180,14 +237,45 @@ class CatGroupMythSystem:
         target[
             "myths"
         ][
-            myth_id
+            new_myth_id
         ] = copied
+
+        lineage_system = (
+            CatGroupMythLineageSystem(
+                self.group_system
+            )
+        )
+
+        if root_myth_id not in target[
+            "myth_lineages"
+        ]:
+            target[
+                "myth_lineages"
+            ][
+                root_myth_id
+            ] = {
+                "root_myth": root_myth_id,
+                "versions": [
+                    root_myth_id
+                ],
+                "children": {}
+            }
+
+        if new_myth_id != parent_myth_id:
+            lineage_system.register_descendant(
+                target_group_id,
+                root_myth_id,
+                parent_myth_id,
+                new_myth_id
+            )
 
         return {
             "name": "cat_group_myth_retold",
             "source_group": source_group_id,
             "target_group": target_group_id,
-            "myth_id": myth_id,
+            "myth_id": new_myth_id,
+            "parent_myth_id": parent_myth_id,
+            "root_myth_id": root_myth_id,
             "credibility": copied[
                 "credibility"
             ],

@@ -253,9 +253,27 @@ class CatGroupCultureTests(
             ][
                 "myths"
             ][
-                created[
+                result[
                     "myth_id"
                 ]
+            ]
+        )
+
+        self.assertNotEqual(
+            result[
+                "myth_id"
+            ],
+            created[
+                "myth_id"
+            ]
+        )
+
+        self.assertEqual(
+            received[
+                "parent_version"
+            ],
+            created[
+                "myth_id"
             ]
         )
 
