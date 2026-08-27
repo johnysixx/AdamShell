@@ -64,6 +64,11 @@ class CatMeowInvitationSystem:
             "human": self._name(
                 human
             ),
+
+            # Invitation requires the inviting cat
+            # to personally escort the human.
+            "escort_required": True,
+
             "sound": "MEOW",
             "meaning": "follow_me",
             "offered": True,

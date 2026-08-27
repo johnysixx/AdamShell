@@ -113,9 +113,42 @@ class CatBarGuidanceSystem:
                 "meeting_place_cannot_admit"
             )
 
-        admission_result = add_entity(
-            human
+        escorted_entry = getattr(
+            self.meeting_place,
+            "add_cat_invited_human",
+            None
         )
+
+        if callable(
+            escorted_entry
+        ):
+            admission_result = (
+                escorted_entry(
+                    human,
+                    cat,
+                    self.invitation_system
+                )
+            )
+
+            if not admission_result.get(
+                "entered",
+                False
+            ):
+                return self._failed(
+                    cat,
+                    human,
+                    admission_result.get(
+                        "reason",
+                        "escorted_entry_denied"
+                    )
+                )
+
+        else:
+            return self._failed(
+                cat,
+                human,
+                "meeting_place_has_no_escorted_entry"
+            )
 
         self.invitation_system.mark_used(
             invitation_id

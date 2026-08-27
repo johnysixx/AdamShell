@@ -46,6 +46,10 @@ class Bouncer:
 
         self.cat_meow_history = []
 
+        # Registry-backed human MEOW invitations.
+        self.meow_invitation_system = None
+        self.cat_invited_guest_history = []
+
         UniverseLogger.boot("BOUNCER CREATED")
         UniverseLogger.boot("BOUNCER STANDS OUTSIDE THE BAR")
 
@@ -118,6 +122,193 @@ class Bouncer:
         )
 
         return True
+
+    def register_meow_invitation_system(
+        self,
+        invitation_system
+    ):
+        self.meow_invitation_system = (
+            invitation_system
+        )
+
+        return {
+            "name": (
+                "bouncer_registered_MEOW_registry"
+            ),
+            "registered": True
+        }
+
+    def can_enter_with_cat(
+        self,
+        human,
+        escorting_cat
+    ):
+        human_name = self._get_entity_name(
+            human
+        )
+
+        cat_name = self._get_entity_name(
+            escorting_cat
+        )
+
+        claim = self._entity_value(
+            human,
+            "meow_bar_invitation"
+        )
+
+        if not isinstance(
+            claim,
+            dict
+        ):
+            return {
+                "authorized": False,
+                "reason": "no_MEOW_invitation"
+            }
+
+        if (
+            claim.get(
+                "source"
+            )
+            != "cat_MEOW_invitation"
+        ):
+            return {
+                "authorized": False,
+                "reason": "invalid_MEOW_source"
+            }
+
+        if (
+            self.meow_invitation_system
+            is None
+        ):
+            return {
+                "authorized": False,
+                "reason": "MEOW_registry_unavailable"
+            }
+
+        invitation_id = claim.get(
+            "invitation_id"
+        )
+
+        invitation = (
+            self.meow_invitation_system
+            .get(
+                invitation_id
+            )
+        )
+
+        if invitation is None:
+            return {
+                "authorized": False,
+                "reason": "unknown_MEOW_invitation"
+            }
+
+        if (
+            invitation.get(
+                "human"
+            )
+            != human_name
+        ):
+            return {
+                "authorized": False,
+                "reason": "MEOW_wrong_human"
+            }
+
+        if (
+            invitation.get(
+                "cat"
+            )
+            != cat_name
+        ):
+            return {
+                "authorized": False,
+                "reason": "MEOW_wrong_cat"
+            }
+
+        if (
+            claim.get(
+                "inviting_cat"
+            )
+            != cat_name
+        ):
+            return {
+                "authorized": False,
+                "reason": "MEOW_claim_cat_mismatch"
+            }
+
+        if not invitation.get(
+            "understood",
+            False
+        ):
+            return {
+                "authorized": False,
+                "reason": "MEOW_not_understood"
+            }
+
+        if invitation.get(
+            "used",
+            False
+        ):
+            return {
+                "authorized": False,
+                "reason": "MEOW_already_used"
+            }
+
+        if (
+            invitation.get(
+                "escort_required",
+                True
+            )
+            and escorting_cat is None
+        ):
+            return {
+                "authorized": False,
+                "reason": "inviting_cat_not_present"
+            }
+
+        result = {
+            "name": (
+                "bouncer_allows_cat_invited_guest"
+            ),
+            "authorized": True,
+            "human": human_name,
+            "inviting_cat": cat_name,
+            "invitation_id": invitation_id,
+            "guest_type": "cat_invited_guest"
+        }
+
+        self.cat_invited_guest_history.append(
+            dict(
+                result
+            )
+        )
+
+        UniverseLogger.event(
+            "BOUNCER ALLOWS CAT INVITED GUEST: "
+            f"{human_name} WITH CAT {cat_name}"
+        )
+
+        return result
+
+    def _entity_value(
+        self,
+        entity,
+        key,
+        default=None
+    ):
+        if isinstance(
+            entity,
+            dict
+        ):
+            return entity.get(
+                key,
+                default
+            )
+
+        return getattr(
+            entity,
+            key,
+            default
+        )
 
     def receive_cat_meow(
         self,

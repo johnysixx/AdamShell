@@ -511,6 +511,177 @@ class MeetingPlace:
                 entity_name
             )
 
+    def add_cat_invited_human(
+        self,
+        human,
+        cat,
+        invitation_system
+    ):
+        human_name = self._get_entity_name(
+            human
+        )
+
+        cat_name = self._get_entity_name(
+            cat
+        )
+
+        if cat is None:
+            return {
+                "name": (
+                    "cat_invited_human_entry_denied"
+                ),
+                "human": human_name,
+                "cat": None,
+                "reason": (
+                    "inviting_cat_not_present"
+                ),
+                "entered": False
+            }
+
+        register = getattr(
+            self.bouncer,
+            "register_meow_invitation_system",
+            None
+        )
+
+        if callable(
+            register
+        ):
+            register(
+                invitation_system
+            )
+
+        authorization = (
+            self.bouncer
+            .can_enter_with_cat(
+                human,
+                cat
+            )
+        )
+
+        if not authorization.get(
+            "authorized",
+            False
+        ):
+            UniverseLogger.event(
+                "MEETING PLACE CAT INVITED ENTRY "
+                "DENIED: "
+                f"{human_name} "
+                f"REASON={authorization.get('reason')}"
+            )
+
+            return {
+                "name": (
+                    "cat_invited_human_entry_denied"
+                ),
+                "human": human_name,
+                "cat": cat_name,
+                "reason": authorization.get(
+                    "reason"
+                ),
+                "entered": False
+            }
+
+        # ----------------------------------------------------
+        # THE IMPORTANT RULE:
+        # The inviting cat physically enters with the human.
+        # ----------------------------------------------------
+
+        if cat not in self.entities:
+            self.add_entity(
+                cat
+            )
+
+        if cat not in self.entities:
+            return {
+                "name": (
+                    "cat_invited_human_entry_denied"
+                ),
+                "human": human_name,
+                "cat": cat_name,
+                "reason": (
+                    "inviting_cat_failed_to_enter"
+                ),
+                "entered": False
+            }
+
+        # The human is admitted only after the cat
+        # is actually inside.
+        if human not in self.entities:
+            self.bartender.prepare_for_guest()
+
+            self.entities.append(
+                human
+            )
+
+        if isinstance(
+            human,
+            dict
+        ):
+            human[
+                "current_layer"
+            ] = "meeting_place"
+
+            human[
+                "location"
+            ] = "meeting_place"
+
+        else:
+            human.current_layer = (
+                "meeting_place"
+            )
+
+            human.location = (
+                "meeting_place"
+            )
+
+        self.universe.world[
+            "meeting_place"
+        ][
+            "entities"
+        ] = self.entities
+
+        if not hasattr(
+            self,
+            "cat_invited_guests"
+        ):
+            self.cat_invited_guests = {}
+
+        record = {
+            "human": human_name,
+            "inviting_cat": cat_name,
+            "invitation_id": authorization[
+                "invitation_id"
+            ],
+            "cat_present": True,
+            "entered_together": True,
+            "permanent_access": False
+        }
+
+        self.cat_invited_guests[
+            human_name
+        ] = record
+
+        UniverseLogger.event(
+            "MEETING PLACE: CAT INVITED GUEST "
+            f"{human_name} ARRIVED WITH {cat_name}"
+        )
+
+        self.emit_event({
+            "name": (
+                "cat_invited_guest_arrived"
+            ),
+            **record
+        })
+
+        return {
+            "name": (
+                "cat_invited_human_entered"
+            ),
+            **record,
+            "entered": True
+        }
+
     def emit_event(self, event):
         self.events.append(event)
 

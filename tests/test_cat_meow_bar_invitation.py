@@ -1,6 +1,11 @@
 import unittest
 
 from universe.universe import Universe
+from multiverse import UniverseRegistry
+from meeting_place.meeting_place import (
+    MeetingPlace
+)
+
 from cats.cats import Cats
 from cats.cat_human_bond_system import (
     CatHumanBondSystem
@@ -22,29 +27,13 @@ class Human:
         self.name = name
         self.type = "human"
 
-
-class FakeMeetingPlace:
-
-    def __init__(
-        self
-    ):
-        self.entities = []
-
-    def add_entity(
-        self,
-        entity
-    ):
-        self.entities.append(
-            entity
+        self.current_layer = (
+            "physical_world"
         )
 
-        return {
-            "name": (
-                "meeting_place_entity_added"
-            ),
-            "entity": entity.name,
-            "added": True
-        }
+        self.location = (
+            "outside_bar"
+        )
 
 
 class CatMEOWBarInvitationTests(
@@ -53,6 +42,14 @@ class CatMEOWBarInvitationTests(
 
     def setUp(self):
         self.universe = Universe()
+
+        self.universe.universe_registry = (
+            UniverseRegistry()
+        )
+
+        self.meeting_place = MeetingPlace(
+            self.universe
+        )
 
         self.cats = Cats(
             self.universe
@@ -83,6 +80,47 @@ class CatMEOWBarInvitationTests(
                 significance=0.15
             )
 
+    def _understood_invitation(
+        self
+    ):
+        self._make_right_human()
+
+        invitations = (
+            CatMeowInvitationSystem(
+                self.cats
+            )
+        )
+
+        offered = invitations.offer(
+            self.cat,
+            self.human
+        )
+
+        self.assertTrue(
+            offered[
+                "offered"
+            ]
+        )
+
+        result = invitations.interpret(
+            offered[
+                "id"
+            ],
+            self.human,
+            understood=True
+        )
+
+        self.assertTrue(
+            result[
+                "understood"
+            ]
+        )
+
+        return (
+            invitations,
+            offered
+        )
+
     def test_unknown_human_is_not_MEOWed(
         self
     ):
@@ -98,7 +136,9 @@ class CatMEOWBarInvitationTests(
         )
 
         self.assertFalse(
-            result["offered"]
+            result[
+                "offered"
+            ]
         )
 
     def test_cat_can_recognize_right_human(
@@ -134,17 +174,29 @@ class CatMEOWBarInvitationTests(
         )
 
         self.assertTrue(
-            result["offered"]
+            result[
+                "offered"
+            ]
         )
 
         self.assertEqual(
-            result["sound"],
+            result[
+                "sound"
+            ],
             "MEOW"
         )
 
         self.assertEqual(
-            result["meaning"],
+            result[
+                "meaning"
+            ],
             "follow_me"
+        )
+
+        self.assertTrue(
+            result[
+                "escort_required"
+            ]
         )
 
     def test_human_can_fail_to_understand_MEOW(
@@ -164,67 +216,77 @@ class CatMEOWBarInvitationTests(
         )
 
         result = invitations.interpret(
-            offered["id"],
+            offered[
+                "id"
+            ],
             self.human,
             understood=False
         )
 
         self.assertFalse(
-            result["understood"]
+            result[
+                "understood"
+            ]
         )
 
         self.assertEqual(
-            result["name"],
+            result[
+                "name"
+            ],
             "human_heard_only_meow"
         )
 
-    def test_human_who_understands_can_be_guided_to_bar(
+    def test_human_who_understands_is_guided_by_cat_to_real_bar(
         self
     ):
-        self._make_right_human()
-
-        invitations = (
-            CatMeowInvitationSystem(
-                self.cats
-            )
-        )
-
-        offered = invitations.offer(
-            self.cat,
-            self.human
-        )
-
-        invitations.interpret(
-            offered["id"],
-            self.human,
-            understood=True
-        )
-
-        bar = FakeMeetingPlace()
+        (
+            invitations,
+            offered
+        ) = self._understood_invitation()
 
         guidance = CatBarGuidanceSystem(
             invitations,
-            bar
+            self.meeting_place
         )
 
         result = guidance.guide(
             self.cat,
             self.human,
-            offered["id"]
+            offered[
+                "id"
+            ]
         )
 
         self.assertTrue(
-            result["guided"]
+            result[
+                "guided"
+            ]
+        )
+
+        # Both must physically be in the real bar.
+        self.assertIn(
+            self.cat,
+            self.meeting_place.entities
         )
 
         self.assertIn(
             self.human,
-            bar.entities
+            self.meeting_place.entities
         )
 
         self.assertEqual(
             self.human.guided_by_cat,
             self.cat.name
+        )
+
+        self.assertEqual(
+            self.cat.current_layer,
+            "meeting_place"
+        )
+
+        self.assertEqual(
+            self.human.current_layer,
+            "meeting_place"
         )
 
         self.assertFalse(
@@ -236,55 +298,101 @@ class CatMEOWBarInvitationTests(
     def test_MEOW_invitation_is_single_use(
         self
     ):
-        self._make_right_human()
-
-        invitations = (
-            CatMeowInvitationSystem(
-                self.cats
-            )
-        )
-
-        offered = invitations.offer(
-            self.cat,
-            self.human
-        )
-
-        invitations.interpret(
-            offered["id"],
-            self.human,
-            understood=True
-        )
-
-        bar = FakeMeetingPlace()
+        (
+            invitations,
+            offered
+        ) = self._understood_invitation()
 
         guidance = CatBarGuidanceSystem(
             invitations,
-            bar
+            self.meeting_place
         )
 
         first = guidance.guide(
             self.cat,
             self.human,
-            offered["id"]
+            offered[
+                "id"
+            ]
         )
 
         second = guidance.guide(
             self.cat,
             self.human,
-            offered["id"]
+            offered[
+                "id"
+            ]
         )
 
         self.assertTrue(
-            first["guided"]
+            first[
+                "guided"
+            ]
         )
 
         self.assertFalse(
-            second["guided"]
+            second[
+                "guided"
+            ]
         )
 
         self.assertEqual(
-            second["reason"],
+            second[
+                "reason"
+            ],
             "invitation_already_used"
+        )
+
+    def test_MEOW_is_not_permanent_bar_access(
+        self
+    ):
+        (
+            invitations,
+            offered
+        ) = self._understood_invitation()
+
+        guidance = CatBarGuidanceSystem(
+            invitations,
+            self.meeting_place
+        )
+
+        result = guidance.guide(
+            self.cat,
+            self.human,
+            offered[
+                "id"
+            ]
+        )
+
+        self.assertTrue(
+            result[
+                "guided"
+            ]
+        )
+
+        guest = (
+            self.meeting_place
+            .cat_invited_guests[
+                self.human.name
+            ]
+        )
+
+        self.assertFalse(
+            guest[
+                "permanent_access"
+            ]
+        )
+
+        self.assertTrue(
+            guest[
+                "cat_present"
+            ]
+        )
+
+        self.assertTrue(
+            guest[
+                "entered_together"
+            ]
         )
 
 
