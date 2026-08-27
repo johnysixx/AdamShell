@@ -1,3 +1,7 @@
+from cats.cat_group_ritual_evolution_system import (
+    CatGroupRitualEvolutionSystem
+)
+
 from copy import deepcopy
 
 
@@ -36,6 +40,13 @@ class CatGroupRitualSystem:
         ][
             ritual_name
         ] = ritual
+
+        CatGroupRitualEvolutionSystem(
+            self.group_system
+        ).register_origin(
+            group_id,
+            ritual_name
+        )
 
         return {
             "name": "cat_group_ritual_defined",

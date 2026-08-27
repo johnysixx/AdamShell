@@ -1,3 +1,7 @@
+from cats.cat_group_institution_system import (
+    CatGroupInstitutionSystem
+)
+
 from cats.cat_group_cultural_inheritance_system import (
     CatGroupCulturalInheritanceSystem
 )
@@ -127,6 +131,14 @@ class CatGroupSplitSystem:
             parent_group_id=group_id,
             child_group_id=daughter_id,
             retention=0.70
+        )
+
+        CatGroupInstitutionSystem(
+            self.group_system
+        ).transfer_after_split(
+            parent_group_id=group_id,
+            child_group_id=daughter_id,
+            retention=0.65
         )
 
         for cat in departing[1:]:

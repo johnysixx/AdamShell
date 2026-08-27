@@ -106,7 +106,9 @@ class CatGroupSystem:
             # Stable but non-bureaucratic social structures.
             "roles": {},
             "rituals": {},
+            "ritual_lineages": {},
             "institutions": {},
+            "role_specializations": {},
 
             # Institutional continuity and conflict.
             "succession_history": [],
