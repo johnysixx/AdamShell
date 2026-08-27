@@ -108,6 +108,10 @@ class CatGroupSystem:
             "rituals": {},
             "institutions": {},
 
+            # Institutional continuity and conflict.
+            "succession_history": [],
+            "institution_conflicts": {},
+
             # Cultural ancestry.
             "cultural_parent_group": None,
             "cultural_children": [],
