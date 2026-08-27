@@ -168,6 +168,26 @@ class Cat:
             "role_events": 0
         }
 
+        # Cat -> human relationships are distinct from
+        # ordinary cat social relationships.
+        self.human_bonds = {}
+
+        # Rare interspecies MEOW invitations.
+        self.meow_invitations = {
+            "offered": 0,
+            "understood": 0,
+            "guided_to_bar": 0,
+            "history": []
+        }
+
+        # Group norm / taboo history
+        self.norms = {
+            "violations": [],
+            "sanctions": [],
+            "warnings": 0,
+            "trust_penalties": 0.0
+        }
+
         self.special_traits = []
         self.aroma = aroma
 
