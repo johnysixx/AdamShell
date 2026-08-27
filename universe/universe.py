@@ -1,4 +1,4 @@
-﻿from lifecycle import LifeCycleSystem
+from lifecycle import LifeCycleSystem
 from cats.cat_lifecycle import CatLifeCycleHandler
 import uuid
 from typing import Self
@@ -352,9 +352,7 @@ class Universe:
                 self.create_entity("AbyssSeed", streght=1)
 
     def tick(self):
-
-        if hasattr(self, "layers"):
-            self.layers.tick()
+        return self.tick_universe()
 
     def add_entity(self, entity):
         entity.universe = self
@@ -1737,16 +1735,65 @@ class Universe:
         return detected_events
 
     def tick_entities(self):
+        results = []
+
         for entity in list(self.entities):
-            if not getattr(entity, "active", True):
+            if not getattr(
+                entity,
+                "active",
+                True
+            ):
                 continue
 
-            tick = getattr(entity, "tick", None)
+            tick = getattr(
+                entity,
+                "tick",
+                None
+            )
 
-            if callable(tick):
-                tick(self)
+            if not callable(
+                tick
+            ):
+                continue
 
-        self.detect_cronenberg_pair_encounters()
+            entity_name = getattr(
+                entity,
+                "name",
+                entity.__class__.__name__
+            )
+
+            result = self._run_tick_operation(
+                phase="entities",
+                operation=tick,
+                source_component=(
+                    f"entity:{entity_name}"
+                ),
+                source_operation="tick",
+                args=(
+                    self,
+                )
+            )
+
+            results.append(
+                result
+            )
+
+        encounters = self._run_tick_operation(
+            phase="entities",
+            operation=(
+                self.detect_cronenberg_pair_encounters
+            ),
+            source_component="universe",
+            source_operation=(
+                "detect_cronenberg_pair_encounters"
+            )
+        )
+
+        results.append(
+            encounters
+        )
+
+        return results
 
 
     def _tick_aroma_residues(self):
@@ -1784,53 +1831,421 @@ class Universe:
                 ticks=1
             )
 
-    def tick_universe(self):
-        self.universe_tick += 1
+    def _run_tick_operation(
+        self,
+        phase,
+        operation,
+        source_component,
+        source_operation,
+        args=None,
+        kwargs=None
+    ):
+        args = tuple(
+            args or ()
+        )
 
-        idea_universe = getattr(
-            self,
-            "idea_universe",
+        kwargs = dict(
+            kwargs or {}
+        )
+
+        try:
+            value = operation(
+                *args,
+                **kwargs
+            )
+
+            return {
+                "phase": phase,
+                "source_component": source_component,
+                "source_operation": source_operation,
+                "ok": True,
+                "result": value
+            }
+
+        except Exception as error:
+            UniverseLogger.event(
+                "UNIVERSE TICK ERROR: "
+                f"PHASE={phase} "
+                f"SOURCE={source_component}."
+                f"{source_operation} "
+                f"ERROR={type(error).__name__}: "
+                f"{error}"
+            )
+
+            cronenberg = (
+                self.create_cronenberg_from_quantum_error(
+                    error=error,
+                    source_component=source_component,
+                    source_operation=source_operation
+                )
+            )
+
+            return {
+                "phase": phase,
+                "source_component": source_component,
+                "source_operation": source_operation,
+                "ok": False,
+                "error_type": (
+                    type(
+                        error
+                    ).__name__
+                ),
+                "error_message": str(
+                    error
+                ),
+                "cronenberg_id": getattr(
+                    cronenberg,
+                    "id",
+                    None
+                )
+            }
+
+    def _run_optional_tick(
+        self,
+        phase,
+        target,
+        source_component
+    ):
+        if target is None:
+            return {
+                "phase": phase,
+                "source_component": source_component,
+                "source_operation": "tick",
+                "ok": True,
+                "skipped": True,
+                "reason": "component_not_present"
+            }
+
+        tick = getattr(
+            target,
+            "tick",
             None
         )
 
-        if idea_universe is not None:
-            idea_universe.tick()
+        if not callable(
+            tick
+        ):
+            return {
+                "phase": phase,
+                "source_component": source_component,
+                "source_operation": "tick",
+                "ok": True,
+                "skipped": True,
+                "reason": "component_has_no_tick"
+            }
 
-        self._tick_aroma_residues()
-
-        self.tick_spacetime()
-        self.tick_quantum_unprotected()
-        self.update_physics()
-
-        self.life_cycle_system.tick_day()
-
-        self.tick_entities()
-
-        self.cronenberg_population_statistics.record_snapshot()
-
-        self.record_universe_state()
-
-        last_snapshot = self.universe_history[-1]
-
-        UniverseLogger.event(
-            f"UNIVERSE TICK={self.universe_tick} "
-            f"HISTORY={len(self.universe_history)} "
-            f"MODEL={last_snapshot.get('physics_model', 'unknown')} "
-            f"QUANTUM={last_snapshot.get('quantum_enabled', False)} "
-            f"QFLUCT={last_snapshot.get('quantum_fluctuation', 0.0):.2f} "
-            f"QUNCERT={last_snapshot.get('quantum_uncertainty', 0.0):.3f} "
-            f"QENTROPY={last_snapshot.get('quantum_entropy_delta', 0.0):.4f} "
-            f"QTOTAL={last_snapshot.get('quantum_entropy_total', 0.0):.4f} "
-            f"CENTROPY={last_snapshot.get('classical_entropy_delta', 0.0):.4f} "
-            f"CTOTAL={last_snapshot.get('classical_entropy_total', 0.0):.4f} "
-            f"ENERGY={self.energy_pool:.4f} "
-            f"GAIN={self.last_energy_gain:.4f} "
-            f"COST={self.last_pressure_cost:.4f} "
-            f"DELTA={self.last_energy_delta:.4f} "
-            f"ENTROPY={self.entropy:.4f} "
-            f"PRESSURE={self.pressure:.4f} "
-            f"CURVATURE={last_snapshot['curvature']:.2f}"
+        return self._run_tick_operation(
+            phase=phase,
+            operation=tick,
+            source_component=source_component,
+            source_operation="tick"
         )
 
+    def tick_universe(self):
+        self.universe_tick += 1
 
-        UniverseLogger.event("universe tick complete")
+        report = {
+            "tick": self.universe_tick,
+            "phases": [],
+            "errors": [],
+            "cronenbergs_created": []
+        }
+
+        def record(
+            result
+        ):
+            report[
+                "phases"
+            ].append(
+                result
+            )
+
+            if not result.get(
+                "ok",
+                True
+            ):
+                report[
+                    "errors"
+                ].append(
+                    result
+                )
+
+                cronenberg_id = (
+                    result.get(
+                        "cronenberg_id"
+                    )
+                )
+
+                if cronenberg_id is not None:
+                    report[
+                        "cronenbergs_created"
+                    ].append(
+                        cronenberg_id
+                    )
+
+            return result
+
+        # ----------------------------------------------------
+        # LAYERS
+        # ----------------------------------------------------
+
+        record(
+            self._run_optional_tick(
+                phase="layers",
+                target=getattr(
+                    self,
+                    "layers",
+                    None
+                ),
+                source_component="layers"
+            )
+        )
+
+        # ----------------------------------------------------
+        # IDEA UNIVERSE
+        # ----------------------------------------------------
+
+        record(
+            self._run_optional_tick(
+                phase="idea_universe",
+                target=getattr(
+                    self,
+                    "idea_universe",
+                    None
+                ),
+                source_component="idea_universe"
+            )
+        )
+
+        # ----------------------------------------------------
+        # AROMA / RESIDUES
+        # ----------------------------------------------------
+
+        record(
+            self._run_tick_operation(
+                phase="aroma",
+                operation=(
+                    self._tick_aroma_residues
+                ),
+                source_component="universe",
+                source_operation=(
+                    "tick_aroma_residues"
+                )
+            )
+        )
+
+        # ----------------------------------------------------
+        # SPACETIME
+        # ----------------------------------------------------
+
+        record(
+            self._run_tick_operation(
+                phase="spacetime",
+                operation=(
+                    self.tick_spacetime
+                ),
+                source_component="universe",
+                source_operation=(
+                    "tick_spacetime"
+                )
+            )
+        )
+
+        # ----------------------------------------------------
+        # QUANTUM
+        # ----------------------------------------------------
+
+        record(
+            self._run_tick_operation(
+                phase="quantum",
+                operation=(
+                    self.tick_quantum
+                ),
+                source_component="universe",
+                source_operation=(
+                    "tick_quantum"
+                )
+            )
+        )
+
+        # ----------------------------------------------------
+        # PHYSICS
+        # ----------------------------------------------------
+
+        record(
+            self._run_tick_operation(
+                phase="physics",
+                operation=(
+                    self.update_physics
+                ),
+                source_component="universe",
+                source_operation=(
+                    "update_physics"
+                )
+            )
+        )
+
+        # ----------------------------------------------------
+        # BIOLOGY / LIFECYCLE
+        # ----------------------------------------------------
+
+        record(
+            self._run_tick_operation(
+                phase="biology",
+                operation=(
+                    self.life_cycle_system
+                    .tick_day
+                ),
+                source_component=(
+                    "life_cycle_system"
+                ),
+                source_operation="tick_day"
+            )
+        )
+
+        # ----------------------------------------------------
+        # INDIVIDUAL ENTITIES
+        # Each entity has its own error boundary.
+        # ----------------------------------------------------
+
+        entity_results = (
+            self.tick_entities()
+        )
+
+        for entity_result in (
+            entity_results
+        ):
+            record(
+                entity_result
+            )
+
+        # ----------------------------------------------------
+        # CATS LAYER
+        # ----------------------------------------------------
+
+        record(
+            self._run_optional_tick(
+                phase="cats",
+                target=getattr(
+                    self,
+                    "cats_layer",
+                    None
+                ),
+                source_component="cats"
+            )
+        )
+
+        # ----------------------------------------------------
+        # MEETING PLACE
+        # ----------------------------------------------------
+
+        record(
+            self._run_optional_tick(
+                phase="meeting_place",
+                target=getattr(
+                    self,
+                    "meeting_place",
+                    None
+                ),
+                source_component=(
+                    "meeting_place"
+                )
+            )
+        )
+
+        # ----------------------------------------------------
+        # CRONENBERG STATISTICS
+        # ----------------------------------------------------
+
+        record(
+            self._run_tick_operation(
+                phase="statistics",
+                operation=(
+                    self
+                    .cronenberg_population_statistics
+                    .record_snapshot
+                ),
+                source_component=(
+                    "cronenberg_population_statistics"
+                ),
+                source_operation=(
+                    "record_snapshot"
+                )
+            )
+        )
+
+        # ----------------------------------------------------
+        # HISTORY / SNAPSHOT
+        # ----------------------------------------------------
+
+        history_result = record(
+            self._run_tick_operation(
+                phase="history",
+                operation=(
+                    self.record_universe_state
+                ),
+                source_component="universe",
+                source_operation=(
+                    "record_universe_state"
+                )
+            )
+        )
+
+        if (
+            history_result.get(
+                "ok"
+            )
+            and self.universe_history
+        ):
+            last_snapshot = (
+                self.universe_history[
+                    -1
+                ]
+            )
+
+            UniverseLogger.event(
+                f"UNIVERSE TICK={self.universe_tick} "
+                f"HISTORY={len(self.universe_history)} "
+                f"MODEL={last_snapshot.get('physics_model', 'unknown')} "
+                f"QUANTUM={last_snapshot.get('quantum_enabled', False)} "
+                f"QFLUCT={last_snapshot.get('quantum_fluctuation', 0.0):.2f} "
+                f"QUNCERT={last_snapshot.get('quantum_uncertainty', 0.0):.3f} "
+                f"QENTROPY={last_snapshot.get('quantum_entropy_delta', 0.0):.4f} "
+                f"QTOTAL={last_snapshot.get('quantum_entropy_total', 0.0):.4f} "
+                f"CENTROPY={last_snapshot.get('classical_entropy_delta', 0.0):.4f} "
+                f"CTOTAL={last_snapshot.get('classical_entropy_total', 0.0):.4f} "
+                f"ENERGY={self.energy_pool:.4f} "
+                f"GAIN={self.last_energy_gain:.4f} "
+                f"COST={self.last_pressure_cost:.4f} "
+                f"DELTA={self.last_energy_delta:.4f} "
+                f"ENTROPY={self.entropy:.4f} "
+                f"PRESSURE={self.pressure:.4f} "
+                f"CURVATURE={last_snapshot.get('curvature', 0.0):.2f}"
+            )
+
+        report[
+            "ok"
+        ] = not report[
+            "errors"
+        ]
+
+        report[
+            "error_count"
+        ] = len(
+            report[
+                "errors"
+            ]
+        )
+
+        report[
+            "cronenberg_count"
+        ] = self.cronenberg_count
+
+        UniverseLogger.event(
+            "UNIVERSE TICK COMPLETE: "
+            f"TICK={self.universe_tick} "
+            f"ERRORS={report['error_count']} "
+            f"CRONENBERGS={len(report['cronenbergs_created'])}"
+        )
+
+        return report
