@@ -151,6 +151,16 @@ class Cat:
             "recruitment_vetoes": 0
         }
 
+        # Personal cultural identity.
+        self.culture = {
+            "adopted_traditions": {},
+            "rejected_traditions": {},
+            "preferences": {},
+            "myths": {},
+            "innovations": {},
+            "exposures": 0
+        }
+
         self.special_traits = []
         self.aroma = aroma
 
