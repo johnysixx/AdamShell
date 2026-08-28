@@ -66,6 +66,7 @@ class UniverseBootstrap:
             self.universe
         )
 
+        # God exists first as the Librarian.
         god = gods.create_god(
             name="god",
             role="librarian"
@@ -74,6 +75,11 @@ class UniverseBootstrap:
         self.universe.gods = gods
         self.universe.god = god
 
+        self.universe.world[
+            "god"
+        ] = god
+
+        # God enters the Library before his book exists.
         library.assign_librarian(
             god
         )
@@ -82,8 +88,14 @@ class UniverseBootstrap:
             god
         )
 
+        # The book is created here, in the Library,
+        # as a separate event after God's own creation.
+        god_book = gods.create_book(
+            god
+        )
+
         library.shelve_book(
-            god["book"]
+            god_book
         )
 
         meeting_place.cat_distribution_system = (

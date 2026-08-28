@@ -6,7 +6,7 @@ from gods.gods import Gods
 
 class GodBookTests(unittest.TestCase):
 
-    def test_god_begins_writing_his_book_at_birth(
+    def test_god_is_born_without_book(
         self
     ):
         universe = Universe()
@@ -17,52 +17,19 @@ class GodBookTests(unittest.TestCase):
 
         god = gods.create_god(
             name="god",
-            role="creator_entity"
+            role="librarian"
         )
 
-        book = god["book"]
-
-        self.assertEqual(
-            book["type"],
-            "god_book"
+        self.assertFalse(
+            god[
+                "book_created"
+            ]
         )
 
-        self.assertEqual(
-            book["author"],
-            "god"
+        self.assertNotIn(
+            "book",
+            god
         )
-
-        self.assertEqual(
-            book["state"],
-            "being_written"
-        )
-
-        self.assertEqual(
-            book["energy_j"],
-            0.0
-        )
-
-        self.assertEqual(
-            book["location"],
-            "with_author"
-        )
-
-        self.assertEqual(
-            len(book["entries"]),
-            1
-        )
-
-        self.assertEqual(
-            book["entries"][0]["event"],
-            "god_born"
-        )
-
-        self.assertEqual(
-            book["entries"][0]["subject"],
-            "god"
-        )
-
-
 
     def test_god_starts_day_zero_in_library_not_at_bar(
         self
@@ -89,6 +56,10 @@ class GodBookTests(unittest.TestCase):
         )
 
         library.god_enters(
+            god
+        )
+
+        gods.create_book(
             god
         )
 
@@ -145,6 +116,10 @@ class GodBookTests(unittest.TestCase):
         )
 
         library.god_enters(
+            god
+        )
+
+        gods.create_book(
             god
         )
 
@@ -207,6 +182,10 @@ class GodBookTests(unittest.TestCase):
         )
 
         library.god_enters(
+            god
+        )
+
+        gods.create_book(
             god
         )
 
@@ -284,6 +263,10 @@ class GodBookTests(unittest.TestCase):
         )
 
         library.god_enters(
+            god
+        )
+
+        gods.create_book(
             god
         )
 
@@ -370,6 +353,10 @@ class GodBookTests(unittest.TestCase):
         )
 
         library.god_enters(
+            god
+        )
+
+        gods.create_book(
             god
         )
 

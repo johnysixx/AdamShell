@@ -1,4 +1,5 @@
-﻿import unittest
+from core.entity.social_entity import SocialEntity
+import unittest
 
 from universe.universe import Universe
 from multiverse import UniverseRegistry
@@ -17,11 +18,11 @@ class RegularGuestStatusTests(unittest.TestCase):
             universe
         )
 
-        guest = {
+        guest = SocialEntity.from_mapping({
             "name": "newton",
             "type": "guest",
             "life_history": []
-        }
+        })
 
         meeting_place.bouncer.allowed_guests.append(
             "newton"
@@ -229,11 +230,11 @@ class RegularGuestStatusTests(unittest.TestCase):
             }
         ]
 
-        guest = {
+        guest = SocialEntity.from_mapping({
             "name": "newton",
             "type": "guest",
             "life_history": life_history
-        }
+        })
 
         meeting_place.bartender.remember_guest(
             guest

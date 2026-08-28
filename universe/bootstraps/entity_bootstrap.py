@@ -47,41 +47,70 @@ class EntityBootstrap:
 
 
     def _create_god(self):
-        self.gods = Gods(self.universe)
-        self.god = self.gods.create_god(
-            name="god",
-            role="creator_entity"
+        # God was already created by UniverseBootstrap.
+        #
+        # EntityBootstrap does not create another God,
+        # does not make him Creator and does not assign
+        # Eden to him.
+
+        self.gods = getattr(
+            self.universe,
+            "gods",
+            None
         )
 
-        self.god["role"] = {
-            "creator_of": ["eden"],
-            "authority": "creator"
-        }
+        self.god = getattr(
+            self.universe,
+            "god",
+            None
+        )
 
-        self.god["access"] = {
-            "eden": True,
-            "universe": "via_eden",
-            "quantum_layer": "via_eden",
-            "meeting_place": True,
-            "library": "write"
-        }
+        if self.gods is None:
+            raise RuntimeError(
+                "Gods layer must exist before "
+                "EntityBootstrap."
+            )
 
-        self.god["meeting_place_access"] = {
-            "quantum_layer": True,
-            "eden": False,
-            "universe": False
-        }
+        if self.god is None:
+            self.god = (
+                self.universe.world.get(
+                    "god"
+                )
+            )
 
-        self.god["administers"] = [
-            "eden",
-            "library",
-            "root_universe"
-        ]
+        if self.god is None:
+            raise RuntimeError(
+                "Canonical God must exist before "
+                "EntityBootstrap."
+            )
 
-        self.universe.world["god"] = self.god
-        self.universe.create_entity("god")
+        if getattr(
+            self.god,
+            "type",
+            None
+        ) != "god":
+            raise RuntimeError(
+                "Canonical God is invalid."
+            )
 
-        UniverseLogger.boot("God entity created from Gods layer")
+        if getattr(
+            self.god,
+            "role",
+            None
+        ) != "librarian":
+            raise RuntimeError(
+                "Canonical God must currently "
+                "be the Librarian."
+            )
+
+        self.universe.world[
+            "god"
+        ] = self.god
+
+        UniverseLogger.boot(
+            "Canonical Librarian God reused "
+            "by EntityBootstrap"
+        )
 
 
     def _create_pazuzu(self):

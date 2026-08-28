@@ -1,4 +1,4 @@
-﻿import unittest
+import unittest
 
 from meeting_place.bar_clock import (
     BarClock
@@ -79,6 +79,53 @@ class BarClockTests(unittest.TestCase):
         self.assertEqual(
             clock.hour,
             0
+        )
+
+
+    def test_clock_can_represent_0420_without_changing_tick_rule(
+        self
+    ):
+        clock = BarClock()
+
+        for _ in range(4):
+            clock.tick()
+
+        clock.advance_minutes(
+            20
+        )
+
+        self.assertEqual(
+            clock.hour,
+            4
+        )
+
+        self.assertEqual(
+            clock.minute,
+            20
+        )
+
+        self.assertEqual(
+            clock.time_text,
+            "04:20"
+        )
+
+        clock.tick()
+
+        self.assertEqual(
+            clock.hour,
+            5
+        )
+
+        # A bar tick completes the whole hour.
+        # The minute hand starts the new hour at :00.
+        self.assertEqual(
+            clock.minute,
+            0
+        )
+
+        self.assertEqual(
+            clock.time_text,
+            "05:00"
         )
 
 

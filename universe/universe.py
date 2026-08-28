@@ -727,20 +727,6 @@ class Universe:
             f"CAT MANIFESTED: {name} FROM={source}"
         )
 
-        meeting_place = getattr(
-            self,
-            "meeting_place",
-            None
-        )
-
-        if (
-            meeting_place is not None
-            and cat not in meeting_place.entities
-        ):
-            meeting_place.entities.append(
-                cat
-            )
-
         return {
             "cat": cat,
             "entity": entity,

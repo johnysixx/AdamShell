@@ -1,3 +1,4 @@
+from core.entity.social_entity import SocialEntity
 from universe.pre_cosmic_rules import GOD_INITIAL_ENERGY_J
 from universe.logger import UniverseLogger
 
@@ -24,8 +25,8 @@ class Gods:
 
         UniverseLogger.boot("GODS LAYER CREATED")
 
-    def create_god(self, name, role="creator_entity"):
-        god = {
+    def create_god(self, name, role="god_entity"):
+        god = SocialEntity.from_mapping({
             "name": name,
             "type": "god",
             "role": role,
@@ -57,7 +58,7 @@ class Gods:
                 "eternity": True,
                 "transcendence": True,
                 "immanence": True,
-                "creative_authority": True,
+                "creative_authority": "potential",
                 "sovereignty": "potential",
                 "providence": "potential",
                 "omniscience": "potential",
@@ -78,26 +79,88 @@ class Gods:
             "created_entities": [],
             "administers": [],
 
-            "book": {
-                "type": "god_book",
-                "author": name,
-                "state": "being_written",
-                "energy_j": 0.0,
-                "location": "with_author",
-                "entries": [
-                    {
-                        "event": "god_born",
-                        "subject": name
-                    }
-                ]
-            }
-        }
+            # God is born without a book.
+            #
+            # The book is a later creation event
+            # and must not exist merely because
+            # God exists.
+            "book_created": False
+        })
 
         self.gods.append(god)
         self.universe.world["gods"]["gods"] = self.gods
 
         UniverseLogger.event(f"GOD CREATED: {name}")
         return god
+
+    def create_book(
+        self,
+        god
+    ):
+        if getattr(
+            god,
+            "type",
+            None
+        ) != "god":
+            raise TypeError(
+                "God must be a god object entity."
+            )
+
+        if god.get(
+            "type"
+        ) != "god":
+            raise ValueError(
+                "Only a god can create a god book."
+            )
+
+        if god.get(
+            "book_created",
+            False
+        ):
+            return god[
+                "book"
+            ]
+
+        book = {
+            "type": "god_book",
+            "author": god[
+                "name"
+            ],
+            "state": "being_written",
+            "energy_j": 0.0,
+            "location": "with_author",
+            # The first book is created completely empty.
+            # Its creation is recorded by Gods events,
+            # not written into the book itself.
+            "entries": []
+        }
+
+        god[
+            "book"
+        ] = book
+
+        god[
+            "book_created"
+        ] = True
+
+        event = {
+            "name": "god_book_created",
+            "god": god[
+                "name"
+            ],
+            "book": book
+        }
+
+        self.emit_event(
+            event
+        )
+
+        UniverseLogger.event(
+            "GOD BOOK CREATED: "
+            f"{god['name']}"
+        )
+
+        return book
 
     def emit_event(self, event):
         self.events.append(event)

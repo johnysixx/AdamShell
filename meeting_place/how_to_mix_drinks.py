@@ -1,4 +1,4 @@
-﻿from universe.logger import UniverseLogger
+from universe.logger import UniverseLogger
 
 
 class HowToMixDrinks:
@@ -26,7 +26,33 @@ class HowToMixDrinks:
             }
         }
 
-        self.recipes = {}
+        self.recipes = {
+            "vodka_with_lemon": {
+                "name": "vodka_with_lemon",
+                "origin": "basic_bar_recipe",
+                "hidden": False,
+                "learned": True,
+                "teacher": None,
+                "category": "basic_drink",
+                "effects": {},
+                "price_basis": "vodka",
+                "ingredients": {
+                    "vodka": {
+                        "shots": 1,
+                        "consumed": False
+                    },
+                    "lemon": {
+                        # Only a little lemon is squeezed
+                        # into the basic vodka_with_lemon.
+                        #
+                        # The whole fruit stays in stock.
+                        "shots": 1,
+                        "consumed": False,
+                        "use": "drop"
+                    }
+                }
+            }
+        }
         UniverseLogger.boot(
             "HOW TO MIX DRINKS CREATED"
         )

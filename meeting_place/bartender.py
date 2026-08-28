@@ -1,6 +1,7 @@
+from core.entity.social_entity import SocialMixin
 from universe.logger import UniverseLogger
 
-class Bartender:
+class Bartender(SocialMixin):
 
     def __init__(
         self,
@@ -76,6 +77,175 @@ class Bartender:
         UniverseLogger.event(
             f"BARTENDER OBSERVED EVENT: {event}"
         )
+
+    def begin_shift(
+        self,
+        bar_day=0,
+        shift_start_tick=0
+    ):
+        if getattr(
+            self,
+            "shift_active",
+            False
+        ):
+            return {
+                "name": "bartender_shift_already_active",
+                "bar_day": self.current_shift[
+                    "bar_day"
+                ],
+                "shift_start_tick": self.current_shift[
+                    "shift_start_tick"
+                ]
+            }
+
+        self.shift_active = True
+
+        self.current_shift = {
+            "bar_day": bar_day,
+            "shift_start_tick": shift_start_tick,
+            "state": "active"
+        }
+
+        event = {
+            "name": "bartender_shift_started",
+            "bar_day": bar_day,
+            "shift_start_tick": shift_start_tick
+        }
+
+        self.observe_event(
+            event
+        )
+
+        UniverseLogger.event(
+            "BARTENDER FIRST SHIFT STARTED"
+        )
+
+        return event
+
+    def refuse_bet(
+        self,
+        guest_name
+    ):
+        event = {
+            "name": "bartender_refused_bet",
+            "guest": guest_name,
+            "accepted": False
+        }
+
+        self.observe_event(
+            event
+        )
+
+        UniverseLogger.event(
+            "BARTENDER REFUSES BET FROM "
+            f"{guest_name}"
+        )
+
+        return event
+
+    def learn_requested_drink(
+        self,
+        guest_name,
+        drink_name
+    ):
+        # A requested drink can become known even before
+        # the bartender is able to serve it.
+        self.remember_first_order(
+            guest_name,
+            drink_name
+        )
+
+        event = {
+            "name": "bartender_learned_requested_drink",
+            "guest": guest_name,
+            "drink": drink_name
+        }
+
+        self.observe_event(
+            event
+        )
+
+        return event
+
+    def leave_for_lemon(
+        self,
+        guest_name
+    ):
+        self.current_location = "bar_yard"
+
+        event = {
+            "name": "bartender_left_for_lemon",
+            "guest": guest_name,
+            "destination": "bar_yard",
+            "reason": "fetch_lemon"
+        }
+
+        self.observe_event(
+            event
+        )
+
+        UniverseLogger.event(
+            "BARTENDER LEAVES BAR FOR A LEMON"
+        )
+
+        return event
+
+    def return_with_lemon(
+        self,
+        guest_name
+    ):
+        self.current_location = "bar"
+
+        event = {
+            "name": "bartender_returned_with_lemon",
+            "guest": guest_name,
+            "source": "bar_yard",
+            "ingredient": "lemon"
+        }
+
+        self.observe_event(
+            event
+        )
+
+        UniverseLogger.event(
+            "BARTENDER RETURNS WITH LEMON"
+        )
+
+        return event
+
+    def learn_guest_drink(
+        self,
+        drink_name,
+        teacher,
+        ingredients,
+        effects=None,
+        price_basis=None
+    ):
+        effects = dict(
+            effects or {}
+        )
+
+        entry = {
+            "kind": "learned_cocktail",
+            "drink": drink_name,
+            "teacher": teacher,
+            "ingredients": list(
+                ingredients
+            ),
+            "effects": effects,
+            "price_basis": price_basis
+        }
+
+        self.chronicle_memory.append(
+            entry
+        )
+
+        UniverseLogger.event(
+            "BARTENDER LEARNED DRINK: "
+            f"{drink_name} FROM {teacher}"
+        )
+
+        return entry
 
     def end_shift(
         self,

@@ -497,6 +497,22 @@ class CatBirthResolver:
             event
         )
 
+        # ------------------------------------------------
+        # A cat born through CatBirthResolver arrives at the
+        # MeetingPlace through the ordinary cat lifecycle.
+        #
+        # manifest_cat() only creates the cat.
+        # admit_cat() handles alarm, bartender decision,
+        # Bouncer admission and normal post-entry service.
+        # ------------------------------------------------
+        arrival = (
+            self.meeting_place
+            .admit_cat(
+                cat,
+                bartender_available=True
+            )
+        )
+
         return {
             **event,
             "cat": cat,

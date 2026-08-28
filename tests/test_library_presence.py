@@ -1,4 +1,4 @@
-﻿import unittest
+import unittest
 
 from universe.universe import Universe
 from gods.gods import Gods
@@ -242,6 +242,10 @@ class LibraryPresenceTests(unittest.TestCase):
             god
         )
 
+        gods.create_book(
+            god
+        )
+
         god["book"]["location"] = "library"
 
         self.assertEqual(
@@ -269,8 +273,8 @@ class LibraryPresenceTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            god["book"]["entries"][0]["event"],
-            "god_born"
+            god["book"]["entries"],
+            []
         )
 
 

@@ -1,4 +1,5 @@
-﻿import unittest
+from core.entity.social_entity import SocialEntity
+import unittest
 
 from universe.universe import Universe
 from multiverse import UniverseRegistry
@@ -28,11 +29,11 @@ class BartenderKnownGuestIntegrationTests(unittest.TestCase):
             }
         ]
 
-        guest = {
+        guest = SocialEntity.from_mapping({
             "name": "newton",
             "type": "guest",
             "life_history": life_history
-        }
+        })
 
         meeting_place.add_entity(
             guest

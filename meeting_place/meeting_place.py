@@ -176,6 +176,13 @@ class MeetingPlace:
             )
         )
 
+        # Initialize dynamic/fundamental bar stock.
+        #
+        # Sugar is part of the bar from the beginning.
+        # Other conditional ingredients are added only
+        # when their universe conditions exist.
+        self.refresh_bar_ingredients()
+
         self.bar_security_protocol = (
             BarSecurityProtocol(
                 geometry=self.bar_geometry,
@@ -445,6 +452,14 @@ class MeetingPlace:
         )
 
     def add_entity(self, entity):
+        if isinstance(
+            entity,
+            dict
+        ):
+            raise TypeError(
+                "MeetingPlace accepts object entities only."
+            )
+
         entity_name = self._get_entity_name(entity)
 
         if entity_name in self.bar_banned_humans:
@@ -459,9 +474,6 @@ class MeetingPlace:
                 "reason": "bar_entry_banned",
                 "entered": False
             }
-
-        if self._is_cat(entity):
-            self.bar_counter.red_button.clear_alarm()
 
         if not self.bouncer.can_enter(entity):
             UniverseLogger.event(f"MEETING PLACE ENTRY DENIED BY BOUNCER: {entity_name}")
@@ -892,6 +904,115 @@ class MeetingPlace:
         self.emit_event(f"{guest_name} asked about the dice vial")
         self.bartender.answer_about_dice_vial(guest_name)
 
+    def admit_cat(
+        self,
+        cat,
+        bartender_available=True
+    ):
+        if not self._is_cat(
+            cat
+        ):
+            raise TypeError(
+                "admit_cat requires a cat."
+            )
+
+        cat_name = (
+            self._get_entity_name(
+                cat
+            )
+        )
+
+        already_inside = any(
+            entity is cat
+            for entity
+            in self.entities
+        )
+
+        if already_inside:
+            return {
+                "name": "cat_arrival_already_completed",
+                "cat": cat_name,
+                "entered": True,
+                "already_inside": True
+            }
+
+        # --------------------------------------------
+        # Normal cat is detected.
+        # This activates the ordinary bar alarm.
+        # --------------------------------------------
+        self.handle_cat_created(
+            cat_name
+        )
+
+        red_button = (
+            self.bar_counter
+            .red_button
+        )
+
+        alarm_before = bool(
+            red_button.alarm_active
+        )
+
+        # --------------------------------------------
+        # Bartender decides whether to respond.
+        #
+        # True now means:
+        # alarm is disturbing him, so he presses it.
+        #
+        # False in some future scene means:
+        # alarm remains active.
+        # --------------------------------------------
+        bartender_responded = (
+            self.bartender
+            .respond_to_red_button_alarm(
+                red_button,
+                available=bartender_available
+            )
+        )
+
+        alarm_after_bartender = bool(
+            red_button.alarm_active
+        )
+
+        # --------------------------------------------
+        # Ordinary Bouncer + MeetingPlace entry.
+        #
+        # add_entity must NOT manipulate the alarm.
+        # --------------------------------------------
+        self.add_entity(
+            cat
+        )
+
+        entered = any(
+            entity is cat
+            for entity
+            in self.entities
+        )
+
+        return {
+            "name": "cat_arrival_completed",
+            "cat": cat_name,
+
+            "alarm_before_bartender": (
+                alarm_before
+            ),
+
+            "bartender_available": bool(
+                bartender_available
+            ),
+
+            "bartender_responded": bool(
+                bartender_responded
+            ),
+
+            "alarm_after_bartender": (
+                alarm_after_bartender
+            ),
+
+            "entered": entered,
+            "already_inside": False
+        }
+
     def handle_cat_created(self, cat_id):
         self.geometry_terminal.cat_detected(cat_id)
         self.bar_counter.red_button.activate_alarm()
@@ -1109,8 +1230,9 @@ class MeetingPlace:
             self.cat_d20_adapter
         )
 
-        self.add_entity(
-            cat
+        self.admit_cat(
+            cat,
+            bartender_available=True
         )
 
         cat_box = (
@@ -2069,6 +2191,19 @@ class MeetingPlace:
     def refresh_bar_ingredients(
         self
     ):
+        # Sugar is a fundamental bar ingredient.
+        # It exists in bar stock independently of any drink recipe.
+        if "sugar" not in self.back_room.bar_ingredients:
+            self.back_room.bar_ingredients[
+                "sugar"
+            ] = {
+                "available": True,
+                "fundamental": True,
+                "serve_directly": False,
+                "shots": 200,
+                "unit": "cube"
+            }
+
         if getattr(
             self.universe,
             "liquid_hydrocarbons",
@@ -2143,6 +2278,124 @@ class MeetingPlace:
         )
 
         return recipe
+
+    def serve_basic_drinks_on_tab(
+        self,
+        entity,
+        drink_names
+    ):
+        self.refresh_basic_drinks()
+
+        drink_names = list(
+            drink_names
+        )
+
+        if not drink_names:
+            raise ValueError(
+                "At least one drink is required."
+            )
+
+        drinks = []
+
+        for drink_name in drink_names:
+            menu_item = (
+                self.drink_menu.get(
+                    drink_name
+                )
+            )
+
+            if menu_item is None:
+                raise ValueError(
+                    "Drink is not currently available: "
+                    f"{drink_name}"
+                )
+
+            stock = (
+                self.back_room
+                .bar_ingredients
+                .get(
+                    drink_name
+                )
+            )
+
+            if stock is None:
+                raise ValueError(
+                    "Basic drink is not present "
+                    f"in bar stock: {drink_name}"
+                )
+
+            if stock.get(
+                "category"
+            ) != "basic_drink":
+                raise ValueError(
+                    "Drink is not a basic drink: "
+                    f"{drink_name}"
+                )
+
+            if not stock.get(
+                "available",
+                False
+            ):
+                raise ValueError(
+                    "Basic drink is unavailable: "
+                    f"{drink_name}"
+                )
+
+            drink = {
+                "name": drink_name,
+                "type": "basic_bar_drink",
+                "category": "basic_drink"
+            }
+
+            drinks.append(
+                drink
+            )
+
+            self.bar_counter.cash_register.add_to_tab(
+                entity=entity,
+                drink=drink
+            )
+
+        receipt = (
+            self.bar_counter
+            .cash_register
+            .print_open_tab_receipt(
+                entity
+            )
+        )
+
+        entity_name = (
+            self._get_entity_name(
+                entity
+            )
+        )
+
+        event = {
+            "name": "bar_order_served_on_open_tab",
+            "guest": entity_name,
+            "drinks": [
+                drink[
+                    "name"
+                ]
+                for drink
+                in drinks
+            ],
+            "receipt_number": receipt[
+                "receipt_number"
+            ],
+            "paid": False
+        }
+
+        self.emit_event(
+            event
+        )
+
+        return {
+            "drinks": drinks,
+            "receipt": receipt,
+            "payment": None,
+            "tab_status": "open"
+        }
 
     def serve_basic_drink(
         self,

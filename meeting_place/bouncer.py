@@ -1,6 +1,7 @@
+from core.entity.social_entity import SocialMixin
 from universe.logger import UniverseLogger
 
-class Bouncer:
+class Bouncer(SocialMixin):
 
     def __init__(
         self,
@@ -61,7 +62,7 @@ class Bouncer:
                 entity
             )
 
-            self.pet_cat(entity_name)
+            self.pet_cat(entity)
 
             allow_event = {
                 "name": "bouncer_allowed_cat",
@@ -405,8 +406,23 @@ class Bouncer:
             )
         )
 
-    def pet_cat(self, cat_name):
-        UniverseLogger.event(f"BOUNCER PETS CAT: {cat_name}")
+    def pet_cat(
+        self,
+        cat,
+        affinity_gain=0.10
+    ):
+        event = super().pet_cat(
+            cat,
+            affinity_gain=affinity_gain
+        )
+
+        UniverseLogger.event(
+            "BOUNCER PETS CAT: "
+            f"{getattr(cat, 'name', None)}"
+        )
+
+        return event
+
 
     def _get_entity_name(self, entity):
         if isinstance(entity, dict):

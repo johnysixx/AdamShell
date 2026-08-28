@@ -1,4 +1,5 @@
-﻿from universe.pre_cosmic_rules import (
+from core.entity.social_entity import SocialEntity
+from universe.pre_cosmic_rules import (
     IDEA_ENTITY_INITIAL_ENERGY_J,
     IDEA_ENTITY_ARCHETYPE_EXISTENCE_THRESHOLD_PCT,
 )
@@ -15,12 +16,24 @@ class IdeaEntities:
         self.event_history = []
         self.tick_count = 0
 
+        # The Eternal Fire does not yet exist
+        # as an actual fire.
+        #
+        # This is only its pre-physical possibility.
         self.eternal_fire = {
             "name": "eternal_fire",
-            "type": "idea_focal_point",
+            "type": "idea_fire_potential",
             "state": "unignited",
+            "actualized": False,
+
+            # Day 0 has no physical time or place.
+            "physical_time": None,
+            "physical_location": None,
+
             "requires_maintenance": True,
-            "maintainer": "pazuzu_masculine_principle",
+            "maintainer": (
+                "pazuzu_masculine_principle"
+            ),
             "interactions": []
         }
 
@@ -28,7 +41,8 @@ class IdeaEntities:
 
         self.prefysical_fire_origin = PrefysicalFireOrigin(
             eternal_fire=self.eternal_fire,
-            serpent_d20=self.serpent_d20
+            serpent_d20=self.serpent_d20,
+            universe=self.universe
         )
 
         self.permissions = {
@@ -90,7 +104,7 @@ class IdeaEntities:
                 "eden": 0.0
             }
 
-        idea_entity = {
+        idea_entity = SocialEntity.from_mapping({
             "name": name,
             "type": "idea_entity",
             "role": role,
@@ -124,7 +138,7 @@ class IdeaEntities:
             },
 
             "permissions": self.permissions
-        }
+        })
 
         self.idea_entities.append(idea_entity)
         self.universe.world["idea_entities"]["idea_entities"] = self.idea_entities

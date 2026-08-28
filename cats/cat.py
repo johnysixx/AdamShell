@@ -1,4 +1,5 @@
-class Cat:
+from core.entity.social_entity import SocialMixin
+class Cat(SocialMixin):
     """
     A living cat entity.
 
@@ -266,6 +267,9 @@ class Cat:
         self.cat_d20 = None
         self.cat_d20_box = None
 
+
+        # OBJECT INVARIANT: every Cat is type 'cat'
+        self.type = "cat"
     def _entity_name(
         self,
         entity
