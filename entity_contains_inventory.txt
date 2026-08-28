@@ -1,0 +1,2 @@
+genesis\day0_first_bar_shift.py:608: not in self.serpent
+genesis\day0_first_bar_shift.py:611: not in self.lilith

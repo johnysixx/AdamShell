@@ -1,8 +1,5 @@
 from core.entity.social_entity import SocialEntity
-from universe.pre_cosmic_rules import (
-    IDEA_ENTITY_INITIAL_ENERGY_J,
-    IDEA_ENTITY_ARCHETYPE_EXISTENCE_THRESHOLD_PCT,
-)
+from universe.pre_cosmic_rules import IDEA_ENTITY_INITIAL_ENERGY_J, IDEA_ENTITY_ARCHETYPE_EXISTENCE_THRESHOLD_PCT
 from universe.logger import UniverseLogger
 from core.entity.serpent_d20 import SerpentD20
 from idea_entities.prefysical_fire_origin import PrefysicalFireOrigin
@@ -15,204 +12,61 @@ class IdeaEntities:
         self.events = []
         self.event_history = []
         self.tick_count = 0
-
-        # The Eternal Fire does not yet exist
-        # as an actual fire.
-        #
-        # This is only its pre-physical possibility.
-        self.eternal_fire = {
-            "name": "eternal_fire",
-            "type": "idea_fire_potential",
-            "state": "unignited",
-            "actualized": False,
-
-            # Day 0 has no physical time or place.
-            "physical_time": None,
-            "physical_location": None,
-
-            "requires_maintenance": True,
-            "maintainer": (
-                "pazuzu_masculine_principle"
-            ),
-            "interactions": []
-        }
-
+        self.eternal_fire = {'name': 'eternal_fire', 'type': 'idea_fire_potential', 'state': 'unignited', 'actualized': False, 'physical_time': None, 'physical_location': None, 'requires_maintenance': True, 'maintainer': 'pazuzu_masculine_principle', 'interactions': []}
         self.serpent_d20 = SerpentD20()
-
-        self.prefysical_fire_origin = PrefysicalFireOrigin(
-            eternal_fire=self.eternal_fire,
-            serpent_d20=self.serpent_d20,
-            universe=self.universe
-        )
-
-        self.permissions = {
-            "can_exist_before_form": True,
-            "can_influence": True,
-            "can_become_process": True
-        }
-
-        self.universe.world["idea_entities"] = {
-            "type": "entity_layer",
-            "state": "created",
-            "idea_entities": self.idea_entities,
-            "eternal_fire": self.eternal_fire,
-            "serpent_d20": self.serpent_d20.public_state,
-            "prefysical_fire_origin": (
-                self.prefysical_fire_origin.public_state
-            ),
-            "events": self.events,
-            "event_history": self.event_history,
-            "permissions": self.permissions
-        }
-
-        UniverseLogger.boot("IDEA ENTITIES LAYER CREATED")
+        self.prefysical_fire_origin = PrefysicalFireOrigin(eternal_fire=self.eternal_fire, serpent_d20=self.serpent_d20, universe=self.universe)
+        self.permissions = {'can_exist_before_form': True, 'can_influence': True, 'can_become_process': True}
+        self.universe.world['idea_entities'] = {'type': 'entity_layer', 'state': 'created', 'idea_entities': self.idea_entities, 'eternal_fire': self.eternal_fire, 'serpent_d20': self.serpent_d20.public_state, 'prefysical_fire_origin': self.prefysical_fire_origin.public_state, 'events': self.events, 'event_history': self.event_history, 'permissions': self.permissions}
+        UniverseLogger.boot('IDEA ENTITIES LAYER CREATED')
 
     def update_archetype_manifestation_state(self, entity):
-        existence_pct = entity.get("existence_pct", 0.0)
-        threshold_pct = entity.get(
-            "archetype_manifestation_threshold_pct",
-            IDEA_ENTITY_ARCHETYPE_EXISTENCE_THRESHOLD_PCT
-        )
-
+        existence_pct = getattr(entity, 'existence_pct', 0.0)
+        threshold_pct = getattr(entity, 'archetype_manifestation_threshold_pct', IDEA_ENTITY_ARCHETYPE_EXISTENCE_THRESHOLD_PCT)
         possible = existence_pct >= threshold_pct
-        entity["archetype_manifestation_possible"] = possible
-
+        entity.archetype_manifestation_possible = possible
         if possible:
-            entity["archetype_manifestation_state"] = (
-                "root_archetype_possible"
-            )
+            entity.archetype_manifestation_state = 'root_archetype_possible'
         else:
-            entity["archetype_manifestation_state"] = (
-                "not_enough_existence"
-            )
-
+            entity.archetype_manifestation_state = 'not_enough_existence'
         return possible
 
-    def create_idea_entity(
-            self,
-            name,
-            role="primordial_idea_entity",
-            active=False,
-            existence_pct=0.0,
-            native_world="idea_universe",
-            existence_by_world=None
-    ):
+    def create_idea_entity(self, name, role='primordial_idea_entity', active=False, existence_pct=0.0, native_world='idea_universe', existence_by_world=None):
         if existence_by_world is None:
-            existence_by_world = {
-                "idea_universe": existence_pct,
-                "root_universe": 0.0,
-                "eden": 0.0
-            }
-
-        idea_entity = SocialEntity.from_mapping({
-            "name": name,
-            "type": "idea_entity",
-            "role": role,
-            "state": "created",
-            "active": active,
-            "forbidden": False,
-
-            "existence_pct": existence_pct,
-
-            "native_world": native_world,
-
-            "existence_by_world": existence_by_world,
-
-            "departure_intent": {
-                "wants_to_leave": False
-            },
-
-            "will": 0.0,
-            "energy_j": IDEA_ENTITY_INITIAL_ENERGY_J,
-            "idea_capacity": 0.0,
-            "archetype_manifestation_possible": False,
-            "archetype_manifestation_state": "not_enough_existence",
-            "archetype_manifestation_threshold_pct": IDEA_ENTITY_ARCHETYPE_EXISTENCE_THRESHOLD_PCT,
-
-            "pre_physical_attributes": {
-                "can_exist_before_form": True,
-                "can_influence": True,
-                "can_become_process": True,
-                "can_hold_symbolic_energy": True,
-                "can_hold_will": True
-            },
-
-            "permissions": self.permissions
-        })
-
+            existence_by_world = {'idea_universe': existence_pct, 'root_universe': 0.0, 'eden': 0.0}
+        idea_entity = SocialEntity.from_mapping({'name': name, 'type': 'idea_entity', 'role': role, 'state': 'created', 'active': active, 'forbidden': False, 'existence_pct': existence_pct, 'native_world': native_world, 'existence_by_world': existence_by_world, 'departure_intent': {'wants_to_leave': False}, 'will': 0.0, 'energy_j': IDEA_ENTITY_INITIAL_ENERGY_J, 'idea_capacity': 0.0, 'archetype_manifestation_possible': False, 'archetype_manifestation_state': 'not_enough_existence', 'archetype_manifestation_threshold_pct': IDEA_ENTITY_ARCHETYPE_EXISTENCE_THRESHOLD_PCT, 'pre_physical_attributes': {'can_exist_before_form': True, 'can_influence': True, 'can_become_process': True, 'can_hold_symbolic_energy': True, 'can_hold_will': True}, 'permissions': self.permissions})
         self.idea_entities.append(idea_entity)
-        self.universe.world["idea_entities"]["idea_entities"] = self.idea_entities
-
-        UniverseLogger.event(f"IDEA ENTITY CREATED: {name}")
+        self.universe.world['idea_entities']['idea_entities'] = self.idea_entities
+        UniverseLogger.event(f'IDEA ENTITY CREATED: {name}')
         return idea_entity
 
     def emit_event(self, event):
         self.events.append(event)
         self.event_history.append(event)
+        self.universe.world['idea_entities']['events'] = self.events
+        self.universe.world['idea_entities']['event_history'] = self.event_history
+        UniverseLogger.event(f'IDEA ENTITIES EVENT: {event}')
 
-        self.universe.world["idea_entities"]["events"] = self.events
-        self.universe.world["idea_entities"]["event_history"] = self.event_history
-
-        UniverseLogger.event(f"IDEA ENTITIES EVENT: {event}")
-
-    def record_idea_event(
-            self,
-            name,
-            participants,
-            observer=None,
-            state="unresolved",
-            meaning=None,
-    ):
-        event = {
-            "name": name,
-            "layer": "idea_entities",
-            "participants": participants,
-            "observer": observer,
-            "state": state,
-            "meaning": meaning,
-            "known_by": []
-        }
-
+    def record_idea_event(self, name, participants, observer=None, state='unresolved', meaning=None):
+        event = {'name': name, 'layer': 'idea_entities', 'participants': participants, 'observer': observer, 'state': state, 'meaning': meaning, 'known_by': []}
         if observer is not None:
-            event["known_by"].append(observer)
-
+            event['known_by'].append(observer)
         self.emit_event(event)
         return event
 
-    def record_fire_interaction(
-            self,
-            name,
-            participants,
-            observer=None,
-            state="unresolved",
-            meaning=None,
-    ):
-        interaction = {
-            "name": name,
-            "layer": "idea_entities",
-            "place": "eternal_fire",
-            "participants": participants,
-            "observer": observer,
-            "state": state,
-            "meaning": meaning,
-            "known_by": []
-        }
-
+    def record_fire_interaction(self, name, participants, observer=None, state='unresolved', meaning=None):
+        interaction = {'name': name, 'layer': 'idea_entities', 'place': 'eternal_fire', 'participants': participants, 'observer': observer, 'state': state, 'meaning': meaning, 'known_by': []}
         if observer is not None:
-            interaction["known_by"].append(observer)
-
-        self.eternal_fire["interactions"].append(interaction)
-        self.universe.world["idea_entities"]["eternal_fire"] = self.eternal_fire
-
+            interaction['known_by'].append(observer)
+        self.eternal_fire['interactions'].append(interaction)
+        self.universe.world['idea_entities']['eternal_fire'] = self.eternal_fire
         self.emit_event(interaction)
         return interaction
 
     def tick(self):
         self.tick_count += 1
-        UniverseLogger.event(f"IDEA ENTITIES TICK {self.tick_count}")
+        UniverseLogger.event(f'IDEA ENTITIES TICK {self.tick_count}')
         self._clear_events()
 
     def _clear_events(self):
         self.events = []
-        self.universe.world["idea_entities"]["events"] = self.events
-
+        self.universe.world['idea_entities']['events'] = self.events

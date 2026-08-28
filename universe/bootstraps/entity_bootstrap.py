@@ -148,9 +148,9 @@ class EntityBootstrap:
             ]
         )
 
-        self.pazuzu["alias"] = "classical_probe_debug_entity"
+        self.pazuzu.alias = "classical_probe_debug_entity"
 
-        self.pazuzu["access"] = {
+        self.pazuzu.access = {
             "cat_access": self.cats.access_rules,
             "eden": True,
             "meeting_place": True,
@@ -189,15 +189,15 @@ class EntityBootstrap:
             }
         )
 
-        self.serpent["energy_j"] = 0.0
+        self.serpent.energy_j = 0.0
 
-        self.serpent["access"] = {
+        self.serpent.access = {
             "eden": True,
             "meeting_place": True,
             "quantum_layer": "via_meeting_place"
         }
 
-        self.serpent["serpent_process"] = {
+        self.serpent.serpent_process = {
             "ready": False,
             "active": False,
             "knowledge_payload": None,
@@ -224,7 +224,7 @@ class EntityBootstrap:
             active=True
         )
 
-        self.lilith["principle"] = {
+        self.lilith.principle = {
             "name": "feminine_principle",
             "domain": [
                 "woman",
@@ -234,15 +234,15 @@ class EntityBootstrap:
             "origin": "lilith"
         }
 
-        self.lilith["access"] = {
+        self.lilith.access = {
             "meeting_place": True,
             "library": "read",
             "quantum_layer": "via_meeting_place"
         }
 
-        self.lilith["meeting_presence"] = False
-        self.lilith["known_by_bartender"] = True
-        self.lilith["history"] = [
+        self.lilith.meeting_presence = False
+        self.lilith.known_by_bartender = True
+        self.lilith.history = [
             "lilith was born as an idea entity",
             "with lilith the feminine principle came into existence"
         ]
@@ -262,12 +262,12 @@ class EntityBootstrap:
             )
         )
 
-        self.pazuzu_masculine_principle["alias"] = "pazuzu"
-        self.pazuzu_masculine_principle["world_key"] = (
+        self.pazuzu_masculine_principle.alias = "pazuzu"
+        self.pazuzu_masculine_principle.world_key = (
             "pazuzu_masculine_principle"
         )
 
-        self.pazuzu_masculine_principle["principle"] = {
+        self.pazuzu_masculine_principle.principle = {
             "name": "masculine_principle",
             "domain": [
                 "man",
@@ -277,15 +277,15 @@ class EntityBootstrap:
             "origin": "pazuzu_alias"
         }
 
-        self.pazuzu_masculine_principle["access"] = {
+        self.pazuzu_masculine_principle.access = {
             "meeting_place": False,
             "library": "read",
             "quantum_layer": True
         }
 
-        self.pazuzu_masculine_principle["meeting_presence"] = False
-        self.pazuzu_masculine_principle["known_by_bartender"] = False
-        self.pazuzu_masculine_principle["history"] = [
+        self.pazuzu_masculine_principle.meeting_presence = False
+        self.pazuzu_masculine_principle.known_by_bartender = False
+        self.pazuzu_masculine_principle.history = [
             "pazuzu masculine principle was born in the idea world",
             "with pazuzu the masculine principle came into existence",
             "pazuzu masculine principle has no access to the bar"

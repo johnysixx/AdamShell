@@ -1,0 +1,2890 @@
+core\creation\engine.py:15: birth_allowed = effects.get("birth_allowed", None)
+core\creation\engine.py:26: manifest = effects.get("manifest", None)
+core\entities\ability_set.py:43: return self._abilities.get(
+core\entities\ability_set.py:53: ability = self.get(
+core\entity\cronenberg.py:193: travel_event["energy_spent"]
+core\entity\cronenberg.py:217: layer_event["new_size"]
+core\entity\cronenberg.py:226: f"{travel_event['energy_spent']:.2f}, "
+core\entity\cronenberg.py:280: event["energy_received"]
+core\entity\cronenberg.py:285: f"{event['energy_received']:.2f} "
+core\entity\cronenberg.py:287: f"{event['required_energy']:.2f}; "
+core\entity\cronenberg.py:289: f"{event['dark_energy_produced']:.3f} "
+core\entity\cronenberg.py:319: pair_id = own_state.get(
+core\entity\cronenberg.py:325: and pair_id == other_state.get("pair_id")
+core\entity\cronenberg.py:326: and own_state.get("counterpart_id")
+core\entity\cronenberg.py:328: and other_state.get("counterpart_id")
+core\entity\cronenberg.py:373: growth_event["new_size"]
+core\entity\cronenberg.py:414: f"{digestion_event['digestion_days']} "
+core\entity\cronenberg.py:465: growth_event["new_size"]
+core\entity\existence.py:13: return entity.get(
+core\entity\existence.py:85: existence_by_world.get(
+core\entity\profile_resolver.py:81: if profile.get("entity_id") == technical_name:
+core\entity\profile_resolver.py:84: if profile.get("world_key") == technical_name:
+core\entity\profile_resolver.py:88: return profile.get("name") == technical_name
+core\entity\quantum_box.py:90: self.quantum_counterpart.update({
+core\entity\quantum_box.py:96: counterpart.quantum_counterpart.update({
+core\entity\quantum_box.py:114: self.quantum_counterpart.update({
+core\entity\quantum_box.py:128: if not self.quantum_counterpart["paired"]:
+core\entity\quantum_box.py:134: self.quantum_counterpart["box_id"]
+core\entity\quantum_box.py:141: if not target_box.energy["available"]:
+core\entity\quantum_box.py:149: "cat_name": cat.get("name"),
+core\entity\quantum_box.py:157: self.cat_transfer.update(
+core\entity\quantum_box.py:161: target_box.cat_transfer.update(
+core\entity\quantum_box.py:176: self.cat_transfer.get(
+core\entity\quantum_box.py:180: and self.cat_transfer.get(
+core\entity\quantum_box.py:197: return observer.get(
+core\entity\quantum_box.py:237: self.energy.update({
+core\entity\quantum_box.py:249: return tuple(self.content["possibilities"])
+core\entity\quantum_box.py:252: if self.collapse["collapsed"]:
+core\entity\quantum_box.py:290: if self.collapse["collapsed"]:
+core\entity\quantum_box.py:291: return self.content["resolved"]
+core\entity\quantum_box.py:298: self.content["resolved"] = result
+core\entity\quantum_box.py:301: self.collapse["collapsed"] = True
+core\entity\quantum_box.py:302: self.collapse["cause"] = cause
+core\entity\quantum_box.py:303: self.collapse["observer"] = observer
+core\entity\quantum_box.py:304: self.collapse["tick"] = tick
+core\entity\quantum_box.py:328: if self.collapse["collapsed"]:
+core\entity\quantum_box.py:329: return self.content["resolved"]
+core\entity\quantum_box.py:344: return event["result"]
+core\entity\quantum_box.py:355: if not self.collapse["collapsed"]
+core\entity\quantum_box.py:356: else self.content["resolved"]
+core\entity\quantum_box.py:358: "collapsed": self.collapse["collapsed"],
+core\entity\quantum_cat_route.py:115: if detour.get(
+core\entity\quantum_cat_route.py:131: blocked_position["x"]
+core\entity\quantum_cat_route.py:134: blocked_position["y"]
+core\entity\quantum_cat_route.py:137: blocked_position["z"]
+core\entity\quantum_die.py:50: result["resolution"] = resolution
+core\entity\quantum_die_box.py:20: "x": float(position["x"]),
+core\entity\quantum_die_box.py:21: "y": float(position["y"]),
+core\entity\quantum_die_box.py:22: "z": float(position["z"])
+core\entity\serpent_d20.py:80: hidden_plan["selected_effects"]
+core\entity\serpent_d20.py:83: "intensity": hidden_plan["intensity"],
+core\entity\serpent_d20.py:108: if item["roll_id"] == roll_id
+core\entity\serpent_d20.py:130: if event["roll_id"] != roll_id:
+core\entity\serpent_d20.py:133: event["resolved_consequences"] = deepcopy(
+core\entity\social_entity.py:42: # Old code can still use entity["name"] while migration
+core\entity\social_entity.py:127: state.update(
+core\entity\social_entity.py:131: state.update(
+core\entity\social_entity.py:137: state.update(
+core\entity\social_entity.py:272: relation = relationships.setdefault(
+core\entity\social_entity.py:282: relation.get(
+core\entity\social_entity.py:291: relation.get(
+core\entity\social_entity.py:375: relation = relationships.setdefault(
+core\entity\social_entity.py:385: relation.get(
+core\entity\social_entity.py:394: relation.get(
+core\entity\social_entity.py:476: relationships.get(
+core\entity\social_entity.py:479: ).get(
+core\entity\cronenberg_system\quantum_links.py:24: if link["target_id"] == target_id
+core\entity\cronenberg_system\quantum_links.py:25: and link["link_type"] == link_type
+core\entity\cronenberg_system\quantum_links.py:31: existing["strength"] = max(
+core\entity\cronenberg_system\quantum_links.py:32: existing["strength"],
+core\entity\cronenberg_system\quantum_links.py:57: link["target_id"] == target_id
+core\entity\cronenberg_system\quantum_links.py:65: if link["target_id"] == target_id
+core\entity\cronenberg_system\quantum_links.py:71: "target_id": link["target_id"],
+core\entity\cronenberg_system\quantum_links.py:72: "link_type": link["link_type"],
+core\entity\cronenberg_system\quantum_links.py:73: "strength": link["strength"],
+core\entity\cronenberg_system\quantum_links.py:74: "created_tick": link["created_tick"],
+core\entity\cronenberg_system\quantum_links.py:76: link["metadata"]
+core\entity\cronenberg_system\traits.py:103: for trait_name, amount in influences.get(
+core\entity\cronenberg_system\traits.py:227: return self.values.get(
+core\eternal_flame\eternal_flame.py:42: if source_idea.get("name") != "eternal_fire":
+core\eternal_flame\eternal_flame.py:48: "name": source_idea.get("name"),
+core\eternal_flame\eternal_flame.py:49: "type": source_idea.get("type"),
+core\eternal_flame\eternal_flame.py:50: "state": source_idea.get("state")
+core\interaction\rule_engine.py:46: print(f"- {c['key']} changed from {c['old']} › {c['new']}")
+core\interaction\rule_engine.py:48: state = result.get("state", {})
+core\interaction\rule_engine.py:51: clean_result["state"] = state
+core\transitions\root_transition.py:14: entity.get("name") == "serpent"
+core\transitions\root_transition.py:18: entity.get("existence_pct", 0.0) >= 100.0
+core\transitions\root_transition.py:22: entity.get("energy_j", 0.0) >= self.energy_cost_j
+core\transitions\root_transition.py:36: entity["existence_pct"] -= self.existence_cost_pct
+core\transitions\root_transition.py:37: entity["energy_j"] -= self.energy_cost_j
+core\transitions\root_transition.py:39: entity["root_transition"] = {
+core\transitions\root_transition.py:42: "creator": entity.get("name"),
+core\transitions\root_transition.py:51: transition = entity.get("root_transition")
+core\transitions\root_transition.py:57: transition.get("state") == "created"
+core\transitions\root_transition.py:61: entity.get("existence_pct", 0.0)
+core\transitions\root_transition.py:68: transition = entity.get("root_transition")
+core\transitions\root_transition.py:73: transition["can_enter"] = self.can_enter(entity)
+core\transitions\root_transition.py:75: return transition["can_enter"]
+core\transitions\root_transition.py:81: transition = entity["root_transition"]
+core\transitions\root_transition.py:83: transition["can_enter"] = True
+core\transitions\root_transition.py:84: transition["state"] = "used"
+core\transitions\root_transition.py:86: entity["current_layer"] = "root_universe"
+core\transitions\root_transition.py:87: entity["root_presence"] = True
+genesis\day0.py:143: result["result"]
+genesis\day0.py:219: fire.get(
+genesis\day0.py:223: and fire.get(
+genesis\day0_first_bar_shift.py:327: if self.first_book.get(
+genesis\day0_first_bar_shift.py:526: .get(
+genesis\day0_first_bar_shift.py:597: .get(
+genesis\day0_first_bar_shift.py:756: .get(
+genesis\day0_first_bar_shift.py:773: or not wager.get(
+genesis\day0_first_bar_shift.py:823: if cell.get(
+genesis\day0_first_bar_shift.py:904: lemon_stock = stock.setdefault(
+genesis\day0_first_bar_shift.py:1174: .get(
+genesis\day0_first_bar_shift.py:1203: ].get(
+genesis\day0_first_bar_shift.py:1222: ].get(
+genesis\day0_first_bar_shift.py:1267: recipe.get(
+genesis\day0_first_bar_shift.py:1354: .get(
+genesis\day0_first_bar_shift.py:1395: .get(
+genesis\day0_first_bar_shift.py:1405: if sugar.get(
+genesis\day0_first_bar_shift.py:1489: self.serpent.bar_state.get(
+genesis\day0_first_bar_shift.py:1498: self.lilith.setdefault(
+genesis\day0_first_bar_shift.py:1556: .get(
+genesis\day0_first_bar_shift.py:1567: effects = lilith_drink.get(
+genesis\day0_first_bar_shift.py:1573: self.lilith.get(
+genesis\day0_first_bar_shift.py:1577: + effects.get(
+genesis\day0_first_bar_shift.py:1584: self.lilith.get(
+genesis\day0_first_bar_shift.py:1588: + effects.get(
+genesis\day0_first_bar_shift.py:1705: if not discussion.get(
+genesis\day0_first_bar_shift.py:1772: self.god.get(
+genesis\day0_first_bar_shift.py:1775: ).get(
+genesis\day0_first_bar_shift.py:1860: self.god.get(
+genesis\day0_first_bar_shift.py:1863: ).get(
+genesis\day0_first_bar_shift.py:1892: self.god.get(
+genesis\day0_first_bar_shift.py:1895: ).get(
+genesis\day0_first_bar_shift.py:2001: self.god.get(
+genesis\day0_first_bar_shift.py:2004: ).get(
+genesis\day0_first_bar_shift.py:2158: self.god.get(
+genesis\day0_first_bar_shift.py:2161: ).get(
+genesis\day0_first_bar_shift.py:2174: .get(
+genesis\day0_first_bar_shift.py:2180: lemon.get(
+genesis\day0_first_bar_shift.py:2275: if not result.get(
+genesis\day0_first_bar_shift.py:2294: lemon_stock = stock.setdefault(
+genesis\day0_first_bar_shift.py:2349: self.god.get(
+genesis\day0_first_bar_shift.py:2352: ).get(
+genesis\day0_first_bar_shift.py:2365: .get(
+genesis\day0_first_bar_shift.py:2381: lemon = stock.get(
+genesis\day0_first_bar_shift.py:2385: sugar = stock.get(
+genesis\day0_first_bar_shift.py:2391: or lemon.get(
+genesis\day0_first_bar_shift.py:2410: recipe.get(
+genesis\day0_first_bar_shift.py:2413: ).get(
+genesis\day0_first_bar_shift.py:2416: ).get(
+genesis\day0_first_bar_shift.py:2424: or sugar.get(
+genesis\day0_first_bar_shift.py:2464: "price_basis": recipe.get(
+genesis\day0_first_bar_shift.py:2470: recipe.get(
+genesis\day0_first_bar_shift.py:2510: self.god.get(
+genesis\day0_first_bar_shift.py:2513: ).get(
+genesis\day0_first_bar_shift.py:2583: bar_state = self.god.get(
+genesis\day0_first_bar_shift.py:2589: bar_state.get(
+genesis\day0_first_bar_shift.py:2598: drink = bar_state.get(
+genesis\day0_first_bar_shift.py:2607: effects = drink.get(
+genesis\day0_first_bar_shift.py:2613: effects.get(
+genesis\day0_first_bar_shift.py:2620: effects.get(
+genesis\day0_first_bar_shift.py:2627: self.god.get(
+genesis\day0_first_bar_shift.py:2634: self.god.get(
+genesis\day0_first_bar_shift.py:2696: self.serpent.get(
+genesis\day0_first_bar_shift.py:2699: ).get(
+genesis\day0_first_bar_shift.py:2709: self.god.get(
+genesis\day0_first_bar_shift.py:2712: ).get(
+genesis\day0_first_bar_shift.py:2746: self.god.get(
+genesis\day0_first_bar_shift.py:2749: ).get(
+genesis\day0_first_bar_shift.py:2759: self.lilith.get(
+genesis\day0_first_bar_shift.py:2762: ).get(
+genesis\day0_first_bar_shift.py:2772: self.serpent.get(
+genesis\day0_first_bar_shift.py:2775: ).get(
+genesis\day0_first_bar_shift.py:2823: self.god.get(
+genesis\day0_first_bar_shift.py:2826: ).get(
+genesis\day0_first_bar_shift.py:2859: self.god.setdefault(
+genesis\day0_first_bar_shift.py:2955: .get(
+genesis\day0_first_bar_shift.py:2965: effects = drink.get(
+genesis\day0_first_bar_shift.py:2971: effects.get(
+genesis\day0_first_bar_shift.py:2978: effects.get(
+genesis\day0_first_bar_shift.py:2985: self.serpent.get(
+genesis\day0_first_bar_shift.py:2992: self.serpent.get(
+genesis\day0_first_bar_shift.py:3042: or self.history[-1].get(
+genesis\day0_first_bar_shift.py:3073: self.god.get(
+genesis\day0_first_bar_shift.py:3076: ).get(
+genesis\day0_first_bar_shift.py:3115: self.god.get(
+genesis\day0_first_bar_shift.py:3118: ).get(
+genesis\day0_first_bar_shift.py:3125: or order.get(
+genesis\day0_first_bar_shift.py:3207: hypothesis = discussion.get(
+genesis\day0_first_bar_shift.py:3216: if not hypothesis.get(
+genesis\day0_first_bar_shift.py:3285: self.god.get(
+genesis\day0_first_bar_shift.py:3288: ).get(
+genesis\day0_first_bar_shift.py:3298: if not wine_order.get(
+genesis\day0_first_bar_shift.py:3318: self.god.setdefault(
+genesis\day0_first_bar_shift.py:3349: hypothesis = discussion.get(
+genesis\day0_first_bar_shift.py:3354: if not hypothesis.get(
+genesis\day0_first_bar_shift.py:3380: self.god.setdefault(
+genesis\day0_first_bar_shift.py:3392: if not self.god.get(
+genesis\day0_first_bar_shift.py:3395: ).get(
+genesis\day0_first_bar_shift.py:3431: self.god.setdefault(
+genesis\day0_first_bar_shift.py:3443: self.serpent.setdefault(
+genesis\day0_first_bar_shift.py:3486: self.god.setdefault(
+genesis\day0_first_bar_shift.py:3501: if not self.god.get(
+genesis\day0_first_bar_shift.py:3504: ).get(
+genesis\day0_first_bar_shift.py:3507: ).get(
+genesis\day0_first_bar_shift.py:3538: if event.get(
+genesis\day0_first_bar_shift.py:3555: participants = wager.setdefault(
+genesis\day0_first_bar_shift.py:3633: self.god.setdefault(
+genesis\day0_first_bar_shift.py:3660: .get(
+genesis\day0_first_bar_shift.py:3670: effects = drink.get(
+genesis\day0_first_bar_shift.py:3676: self.lilith.get(
+genesis\day0_first_bar_shift.py:3681: effects.get(
+genesis\day0_first_bar_shift.py:3689: self.lilith.get(
+genesis\day0_first_bar_shift.py:3694: effects.get(
+genesis\day0_first_bar_shift.py:3727: beer_hypothesis = discussion.setdefault(
+genesis\day0_first_bar_shift.py:3749: self.serpent.get(
+genesis\day0_first_bar_shift.py:3752: ).get(
+genesis\day0_first_bar_shift.py:3792: self.lilith.get(
+genesis\day0_first_bar_shift.py:3795: ).get(
+genesis\day0_first_bar_shift.py:3805: self.god.get(
+genesis\day0_first_bar_shift.py:3808: ).get(
+genesis\day0_first_bar_shift.py:3841: self.god.get(
+genesis\day0_first_bar_shift.py:3844: ).get(
+genesis\day0_first_bar_shift.py:3854: self.lilith.get(
+genesis\day0_first_bar_shift.py:3857: ).get(
+genesis\day0_first_bar_shift.py:3933: self.serpent.get(
+genesis\day0_first_bar_shift.py:3936: ).get(
+genesis\day0_first_bar_shift.py:3972: self.serpent.get(
+genesis\day0_first_bar_shift.py:3975: ).get(
+genesis\day0_first_bar_shift.py:3989: .get(
+genesis\day0_first_bar_shift.py:3996: or lemon.get(
+genesis\day0_first_bar_shift.py:4074: proposal = wager.get(
+genesis\day0_first_bar_shift.py:4123: self.lilith.get(
+genesis\day0_first_bar_shift.py:4126: ).get(
+genesis\day0_first_bar_shift.py:4136: self.god.get(
+genesis\day0_first_bar_shift.py:4139: ).get(
+genesis\day0_first_bar_shift.py:4191: bartender_proposal = wager.get(
+genesis\day0_first_bar_shift.py:4301: cat = result.get(
+genesis\day0_first_bar_shift.py:4317: "current_layer": cat.get(
+genesis\day0_first_bar_shift.py:4320: "state": cat.get(
+genesis\day0_first_bar_shift.py:4342: proposal = wager.get(
+genesis\day0_first_bar_shift.py:4401: .get(
+genesis\day0_first_bar_shift.py:4408: or not proposal.get(
+genesis\day0_first_bar_shift.py:4472: self.cat_d20.setdefault(
+genesis\day0_first_bar_shift.py:4500: self.cat_d20.setdefault(
+genesis\day0_first_bar_shift.py:4563: self.cat_d20.get(
+genesis\day0_first_bar_shift.py:4569: if not cat_d20_state.get(
+genesis\day0_first_bar_shift.py:4578: cat_d20_state.get(
+genesis\day0_first_bar_shift.py:4611: return cat.get(
+genesis\day0_first_bar_shift.py:4682: traits = garfield.setdefault(
+genesis\day0_first_bar_shift.py:4843: .get(
+genesis\day0_first_bar_shift.py:4867: present_inside = bouncer.get(
+genesis\day0_first_bar_shift.py:4997: .get(
+genesis\day0_first_bar_shift.py:5142: .get(
+genesis\day0_first_bar_shift.py:5700: self.serpent.bar_state.get(
+genesis\day0_first_bar_shift.py:5710: self.lilith.get(
+genesis\day0_first_bar_shift.py:5713: ).get(
+genesis\day0_first_bar_shift.py:5968: .get(
+genesis\day0_first_bar_shift.py:6001: self.serpent.get(
+genesis\day0_first_bar_shift.py:6023: self.god.get(
+gods\gods.py:19: self.universe.world["gods"] = {
+gods\gods.py:91: self.universe.world["gods"]["gods"] = self.gods
+gods\gods.py:109: if god.get(
+gods\gods.py:116: if god.get(
+gods\gods.py:160: f"{god['name']}"
+gods\gods.py:186: knowledge = god.setdefault(
+gods\gods.py:191: research_book = god.setdefault(
+gods\gods.py:196: masks = god.setdefault(
+gods\gods.py:226: masks = god.get(
+gods\gods.py:242: if god.get("active_mask") == mask_name:
+gods\gods.py:243: god["active_mask"] = None
+idea_entities\idea_entities.py:54: self.universe.world["idea_entities"] = {
+idea_entities\idea_entities.py:71: existence_pct = entity.get("existence_pct", 0.0)
+idea_entities\idea_entities.py:72: threshold_pct = entity.get(
+idea_entities\idea_entities.py:78: entity["archetype_manifestation_possible"] = possible
+idea_entities\idea_entities.py:81: entity["archetype_manifestation_state"] = (
+idea_entities\idea_entities.py:85: entity["archetype_manifestation_state"] = (
+idea_entities\idea_entities.py:144: self.universe.world["idea_entities"]["idea_entities"] = self.idea_entities
+idea_entities\idea_entities.py:153: self.universe.world["idea_entities"]["events"] = self.events
+idea_entities\idea_entities.py:154: self.universe.world["idea_entities"]["event_history"] = self.event_history
+idea_entities\idea_entities.py:177: event["known_by"].append(observer)
+idea_entities\idea_entities.py:202: interaction["known_by"].append(observer)
+idea_entities\idea_entities.py:204: self.eternal_fire["interactions"].append(interaction)
+idea_entities\idea_entities.py:205: self.universe.world["idea_entities"]["eternal_fire"] = self.eternal_fire
+idea_entities\idea_entities.py:217: self.universe.world["idea_entities"]["events"] = self.events
+idea_entities\prefysical_fire_origin.py:32: eternal_fire.get(
+idea_entities\prefysical_fire_origin.py:160: self.eternal_fire.get(
+idea_entities\prefysical_fire_origin.py:334: self.eternal_fire.get(
+idea_entities\prefysical_fire_origin.py:447: self.eternal_fire.get(
+idea_entities\prefysical_fire_origin.py:456: fuel = self.eternal_fire.setdefault(
+idea_entities\prefysical_fire_origin.py:472: fuel.get(
+idea_entities\prefysical_fire_origin.py:499: fuel.get(
+idea_entities\prefysical_fire_origin.py:525: fuel.get(
+idea_entities\prefysical_fire_origin.py:532: fuel.get(
+idea_entities\prefysical_fire_origin.py:546: fuel.get(
+idea_entities\prefysical_fire_origin.py:598: masculine.get(
+idea_entities\prefysical_fire_origin.py:757: self.universe.world.get(
+universe\aroma_foundations.py:125: self.aromas.get(name)
+universe\aroma_foundations.py:133: self.mixtures.get(name)
+universe\aroma_profile.py:51: profile.setdefault(
+universe\aroma_profile.py:67: profile.get(
+universe\aroma_profile.py:74: profile.get(
+universe\aroma_profile.py:80: result.get(
+universe\aroma_profile.py:88: for residue in profile.get(
+universe\aroma_profile.py:93: residue.get(
+universe\aroma_profile.py:100: residue.get(
+universe\aroma_profile.py:106: result.get(
+universe\aroma_profile.py:128: for residue in profile.get(
+universe\aroma_profile.py:137: residue.get(
+universe\aroma_residue.py:11: aroma = target.get("aroma")
+universe\aroma_residue.py:14: target["aroma"] = (
+universe\aroma_residue.py:18: f"{target.get('name', 'unknown')}"
+universe\aroma_residue.py:25: return target["aroma"]
+universe\aroma_residue.py:114: source_profile = source.get(
+universe\aroma_residue.py:162: profile = target.get(
+universe\atomic_nuclei.py:28: particle_state = self.universe.world.get("particle_state", {})
+universe\atomic_nuclei.py:29: nucleons = self.universe.world.get("nucleons", {})
+universe\atomic_nuclei.py:31: if not particle_state.get("nucleons_formed"):
+universe\atomic_nuclei.py:33: self.public_state["state"] = self.state
+universe\atomic_nuclei.py:41: self.public_state["state"] = self.state
+universe\atomic_nuclei.py:48: self.public_state["state"] = self.state
+universe\atomic_nuclei.py:78: self.nuclear_state["nucleons_available"] = True
+universe\atomic_nuclei.py:79: self.nuclear_state["hydrogen_nucleus_formed"] = True
+universe\atomic_nuclei.py:80: self.nuclear_state["helium_nucleus_formed"] = True
+universe\atomic_nuclei.py:81: self.nuclear_state["light_nuclei_formed"] = True
+universe\atomic_nuclei.py:82: self.nuclear_state["nuclear_composition_recorded"] = True
+universe\atomic_nuclei.py:108: history = self.universe.world.setdefault("cosmic_history", [])
+universe\atomic_nuclei.py:116: self.universe.world["atomic_nuclei"] = self.public_state
+universe\atomic_nuclei.py:117: self.universe.world["light_nuclei"] = self.nuclei
+universe\atomic_nuclei.py:118: self.universe.world["nuclear_state"] = self.nuclear_state
+universe\atomic_time.py:34: isotopes = self.universe.world.get("known_isotopes", {})
+universe\atomic_time.py:38: self.public_state["state"] = self.state
+universe\atomic_time.py:43: caesium_133 = isotopes["caesium_133"]
+universe\atomic_time.py:45: self.time_standards["si_second"] = {
+universe\atomic_time.py:59: self.public_state["state"] = self.state
+universe\atomic_time.py:61: self.atomic_time_state["caesium_133_available"] = True
+universe\atomic_time.py:62: self.atomic_time_state["si_second_defined"] = True
+universe\atomic_time.py:63: self.atomic_time_state["precision_time_available"] = True
+universe\atomic_time.py:76: if not self.universe.world.get("known_isotopes"):
+universe\atomic_time.py:79: self.atomic_time_state["isotopes_available"] = True
+universe\atomic_time.py:82: history = self.universe.world.setdefault("cosmic_history", [])
+universe\atomic_time.py:90: self.universe.world["atomic_time"] = self.public_state
+universe\atomic_time.py:91: self.universe.world["time_standards"] = self.time_standards
+universe\atomic_time.py:92: self.universe.world["atomic_time_state"] = self.atomic_time_state
+universe\atoms.py:38: self.public_state["state"] = self.state
+universe\atoms.py:40: self.atom_state["neutral_atoms_available"] = True
+universe\atoms.py:41: self.atom_state["atom_count"] = len(self.atoms)
+universe\atoms.py:55: if not self.universe.world.get("elements_by_atomic_number"):
+universe\atoms.py:58: self.atom_state["periodic_table_available"] = True
+universe\atoms.py:63: atom_name = f"{element['name']}_atom"
+universe\atoms.py:69: "element_name": element["name"],
+universe\atoms.py:70: "symbol": element["symbol"],
+universe\atoms.py:75: "official_element": element["official"],
+universe\atoms.py:76: "discovered_element": element["discovered"],
+universe\atoms.py:85: history = self.universe.world.setdefault("cosmic_history", [])
+universe\atoms.py:93: self.universe.world["atoms"] = self.public_state
+universe\atoms.py:94: self.universe.world["neutral_atoms"] = self.atoms
+universe\atoms.py:95: self.universe.world["atom_state"] = self.atom_state
+universe\big_bang.py:46: self.public_state["state"] = self.state
+universe\big_bang.py:56: self.cosmic_state["spacetime_expanded"] = True
+universe\big_bang.py:66: self.cosmic_state["primordial_plasma_formed"] = True
+universe\big_bang.py:68: self.primordial_elements["energy"] = {
+universe\big_bang.py:74: self.primordial_elements["matter"] = {
+universe\big_bang.py:88: self.cosmic_state["light_nuclei_conditions_prepared"] = True
+universe\big_bang.py:90: self.primordial_elements["hydrogen"] = {
+universe\big_bang.py:97: self.primordial_elements["helium"] = {
+universe\big_bang.py:104: self.primordial_elements["trace_lithium"] = {
+universe\big_bang.py:119: self.cosmic_state["light_separated_from_darkness"] = True
+universe\big_bang.py:130: self.public_state["state"] = self.state
+universe\big_bang.py:148: self.universe.world["big_bang"] = self.public_state
+universe\big_bang.py:149: self.universe.world["cosmic_history"] = self.phases
+universe\big_bang.py:150: self.universe.world["primordial_elements"] = self.primordial_elements
+universe\big_bang.py:151: self.universe.world["cosmic_state"] = self.cosmic_state
+universe\biochemical_foundations.py:29: materials = self.universe.world.get("available_planetary_materials", {})
+universe\biochemical_foundations.py:33: self.public_state["state"] = self.state
+universe\biochemical_foundations.py:40: self.public_state["state"] = self.state
+universe\biochemical_foundations.py:70: self.biochemical_state["water_based_chemistry_possible"] = True
+universe\biochemical_foundations.py:71: self.biochemical_state["carbon_chemistry_possible"] = True
+universe\biochemical_foundations.py:72: self.biochemical_state["sugars_possible"] = True
+universe\biochemical_foundations.py:73: self.biochemical_state["amino_acids_possible"] = True
+universe\biochemical_foundations.py:74: self.biochemical_state["lipids_possible"] = True
+universe\biochemical_foundations.py:75: self.biochemical_state["fermentation_substrate_possible"] = True
+universe\biochemical_foundations.py:99: history = self.universe.world.setdefault("cosmic_history", [])
+universe\biochemical_foundations.py:107: self.universe.world["biochemical_foundations"] = self.public_state
+universe\biochemical_foundations.py:108: self.universe.world["biochemical_compounds"] = self.compounds
+universe\biochemical_foundations.py:109: self.universe.world["biochemical_state"] = self.biochemical_state
+universe\cat_recipient_registry.py:31: entity.get("id")
+universe\cat_recipient_registry.py:33: or entity.get("name")
+universe\cat_recipient_registry.py:35: or entity.get("world_key")
+universe\cat_recipient_registry.py:48: if entity.get(
+universe\cosmic_clouds.py:19: primordial_elements = self.universe.world.get("primordial_elements", {})
+universe\cosmic_clouds.py:23: self.public_state["state"] = self.state
+universe\cosmic_clouds.py:30: self.public_state["state"] = self.state
+universe\cosmic_clouds.py:65: history = self.universe.world.setdefault("cosmic_history", [])
+universe\cosmic_clouds.py:73: self.universe.world["cosmic_clouds"] = self.public_state
+universe\cosmic_clouds.py:74: self.universe.world["germinal_clouds"] = self.clouds
+universe\cronenberg_population_statistics.py:37: cronenberg.quantum_state.get(
+universe\cronenberg_population_statistics.py:41: if cronenberg.quantum_state.get(
+universe\cronenberg_population_statistics.py:49: if cronenberg.quantum_state.get(
+universe\cronenberg_population_statistics.py:222: record["critical_response"] = {
+universe\cronenberg_population_statistics.py:259: "tick": record["tick"],
+universe\cronenberg_population_statistics.py:278: record["pressure_transition"] = (
+universe\cronenberg_population_statistics.py:307: if activation.get(
+universe\cronenberg_population_statistics.py:312: activation["cat"]
+universe\cronenberg_population_statistics.py:320: "tick": record["tick"],
+universe\cronenberg_population_statistics.py:356: record["pressure_warning"] = (
+universe\cronenberg_population_statistics.py:360: record["pressure_warning"] = None
+universe\cronenberg_population_statistics.py:362: record["pressure_transition"] = None
+universe\cronenberg_population_statistics.py:363: record["pressure_warning"] = None
+universe\cronenberg_population_statistics.py:365: record["pressure_transition"] = None
+universe\cronenberg_population_statistics.py:366: record["pressure_warning"] = None
+universe\energy_gate.py:67: self.gate_state["idea_energy_j"] = self.idea_energy_j
+universe\energy_gate.py:68: self.gate_state["energy_ratio"] = energy_ratio
+universe\energy_gate.py:72: self.public_state["state"] = self.state
+universe\energy_gate.py:73: self.gate_state["threshold_reached"] = True
+universe\energy_gate.py:74: self.gate_state["physical_seed_created"] = True
+universe\energy_gate.py:75: self.gate_state["big_bang_allowed"] = True
+universe\energy_gate.py:78: self.public_state["state"] = self.state
+universe\energy_gate.py:79: self.gate_state["threshold_reached"] = False
+universe\energy_gate.py:80: self.gate_state["physical_seed_created"] = False
+universe\energy_gate.py:81: self.gate_state["big_bang_allowed"] = False
+universe\energy_gate.py:88: if not self.gate_state["big_bang_allowed"]:
+universe\energy_gate.py:95: self.gate_state["big_bang_started"] = True
+universe\energy_gate.py:105: self.gate_state["big_bang_started"] = True
+universe\energy_gate.py:111: self.universe.world["energy_gate"] = self.public_state
+universe\energy_gate.py:112: self.universe.world["energy_gate_state"] = self.gate_state
+universe\heavy_element_nucleosynthesis.py:28: elements_up_to_iron = self.universe.world.get("elements_up_to_iron", {})
+universe\heavy_element_nucleosynthesis.py:29: enriched_clouds = self.universe.world.get("enriched_clouds", [])
+universe\heavy_element_nucleosynthesis.py:33: self.public_state["state"] = self.state
+universe\heavy_element_nucleosynthesis.py:41: self.public_state["state"] = self.state
+universe\heavy_element_nucleosynthesis.py:48: self.public_state["state"] = self.state
+universe\heavy_element_nucleosynthesis.py:50: self.process_state["iron_seed_available"] = True
+universe\heavy_element_nucleosynthesis.py:51: self.process_state["supernova_enrichment_available"] = True
+universe\heavy_element_nucleosynthesis.py:52: self.process_state["neutron_capture_possible"] = True
+universe\heavy_element_nucleosynthesis.py:66: self.process_state["heavy_elements_forged"] = True
+universe\heavy_element_nucleosynthesis.py:95: composition = cloud.setdefault("composition", {})
+universe\heavy_element_nucleosynthesis.py:96: composition.update(self.heavy_elements)
+universe\heavy_element_nucleosynthesis.py:98: cloud["contains_heavy_elements"] = True
+universe\heavy_element_nucleosynthesis.py:99: cloud["can_form_metal_rich_systems"] = True
+universe\heavy_element_nucleosynthesis.py:101: self.process_state["enriched_clouds_updated"] = True
+universe\heavy_element_nucleosynthesis.py:104: history = self.universe.world.setdefault("cosmic_history", [])
+universe\heavy_element_nucleosynthesis.py:112: elements_up_to_iron = self.universe.world.get("elements_up_to_iron", {})
+universe\heavy_element_nucleosynthesis.py:115: all_elements.update(elements_up_to_iron)
+universe\heavy_element_nucleosynthesis.py:116: all_elements.update(self.heavy_elements)
+universe\heavy_element_nucleosynthesis.py:118: self.universe.world["heavy_element_nucleosynthesis"] = self.public_state
+universe\heavy_element_nucleosynthesis.py:119: self.universe.world["heavy_elements"] = self.heavy_elements
+universe\heavy_element_nucleosynthesis.py:120: self.universe.world["elements"] = all_elements
+universe\heavy_element_nucleosynthesis.py:121: self.universe.world["heavy_element_state"] = self.process_state
+universe\isotopes.py:38: self.create_isotope(6, 14, "radioactive", ["radiocarbon_dating"])
+universe\isotopes.py:39: self.create_isotope(19, 40, "radioactive", ["geological_time"])
+universe\isotopes.py:40: self.create_isotope(55, 133, "stable", ["atomic_time"])
+universe\isotopes.py:41: self.create_isotope(90, 232, "radioactive", ["geological_time"])
+universe\isotopes.py:42: self.create_isotope(92, 238, "radioactive", ["geological_time"])
+universe\isotopes.py:45: self.public_state["state"] = self.state
+universe\isotopes.py:47: self.isotope_state["reference_isotopes_available"] = True
+universe\isotopes.py:48: self.isotope_state["radioactive_isotopes_available"] = True
+universe\isotopes.py:49: self.isotope_state["atomic_time_isotope_available"] = True
+universe\isotopes.py:50: self.isotope_state["isotope_count"] = len(self.isotopes)
+universe\isotopes.py:66: if not self.universe.world.get("elements_by_atomic_number"):
+universe\isotopes.py:69: self.isotope_state["periodic_table_available"] = True
+universe\isotopes.py:78: isotope_name = f"{element['name']}_{mass_number}"
+universe\isotopes.py:84: "element_name": element["name"],
+universe\isotopes.py:85: "symbol": element["symbol"],
+universe\isotopes.py:92: "official_element": element["official"],
+universe\isotopes.py:93: "discovered_element": element["discovered"],
+universe\isotopes.py:102: history = self.universe.world.setdefault("cosmic_history", [])
+universe\isotopes.py:110: self.universe.world["isotopes"] = self.public_state
+universe\isotopes.py:111: self.universe.world["known_isotopes"] = self.isotopes
+universe\isotopes.py:112: self.universe.world["isotope_state"] = self.isotope_state
+universe\law_registry.py:54: return self.laws.get(name)
+universe\law_registry.py:68: law = self.get(name)
+universe\layerRegistry.py:16: return self.layers.get(name)
+universe\molecules.py:86: self.public_state["state"] = self.state
+universe\molecules.py:88: self.molecule_state["simple_molecules_available"] = True
+universe\molecules.py:89: self.molecule_state["organic_molecules_available"] = True
+universe\molecules.py:90: self.molecule_state["alcohols_available"] = True
+universe\molecules.py:91: self.molecule_state["molecule_count"] = len(self.molecules)
+universe\molecules.py:106: if not self.universe.world.get("elements_by_atomic_number"):
+universe\molecules.py:109: self.molecule_state["periodic_table_available"] = True
+universe\molecules.py:150: chemical_elements = self.universe.world.get("chemical_elements", {})
+universe\molecules.py:157: history = self.universe.world.setdefault("cosmic_history", [])
+universe\molecules.py:165: self.universe.world["molecules"] = self.public_state
+universe\molecules.py:166: self.universe.world["known_molecules"] = self.molecules
+universe\molecules.py:167: self.universe.world["molecule_state"] = self.molecule_state
+universe\particles.py:39: big_bang = self.universe.world.get("big_bang", {})
+universe\particles.py:41: if big_bang.get("state") != "completed":
+universe\particles.py:43: self.public_state["state"] = self.state
+universe\particles.py:50: self.public_state["state"] = self.state
+universe\particles.py:59: self.particle_state["elementary_particles_formed"] = True
+universe\particles.py:60: self.particle_state["particle_relationships_defined"] = True
+universe\particles.py:83: self.particle_state["quarks_available"] = True
+universe\particles.py:94: self.particle_state["leptons_available"] = True
+universe\particles.py:95: self.particle_state["neutrinos_available"] = True
+universe\particles.py:105: self.particle_state["gauge_bosons_available"] = True
+universe\particles.py:106: self.particle_state["higgs_available"] = True
+universe\particles.py:109: self.fields["higgs_field"] = {
+universe\particles.py:117: self.fields["gravity_field"] = {
+universe\particles.py:137: self.composite_particles["proton"] = {
+universe\particles.py:147: self.composite_particles["neutron"] = {
+universe\particles.py:157: self.particle_state["protons_formed"] = True
+universe\particles.py:158: self.particle_state["neutrons_formed"] = True
+universe\particles.py:159: self.particle_state["nucleons_formed"] = True
+universe\particles.py:162: self.interactions["strong_interaction"] = {
+universe\particles.py:165: "acts_on": ["quarks"],
+universe\particles.py:169: self.interactions["electromagnetic_interaction"] = {
+universe\particles.py:172: "acts_on": ["charged_particles"],
+universe\particles.py:176: self.interactions["weak_interaction"] = {
+universe\particles.py:183: self.interactions["higgs_mechanism"] = {
+universe\particles.py:187: "acts_on": ["massive_particles"],
+universe\particles.py:191: self.interactions["beta_decay_pattern"] = {
+universe\particles.py:198: history = self.universe.world.setdefault("cosmic_history", [])
+universe\particles.py:206: self.universe.world["particles"] = self.public_state
+universe\particles.py:207: self.universe.world["elementary_particles"] = self.elementary_particles
+universe\particles.py:208: self.universe.world["composite_particles"] = self.composite_particles
+universe\particles.py:209: self.universe.world["nucleons"] = {
+universe\particles.py:210: "proton": self.composite_particles["proton"],
+universe\particles.py:211: "neutron": self.composite_particles["neutron"]
+universe\particles.py:213: self.universe.world["particle_fields"] = self.fields
+universe\particles.py:214: self.universe.world["particle_interactions"] = self.interactions
+universe\particles.py:215: self.universe.world["particle_state"] = self.particle_state
+universe\periodic_table.py:171: self.public_state["state"] = self.state
+universe\periodic_table.py:173: self.registry_state["known_elements_registered"] = True
+universe\periodic_table.py:174: self.registry_state["known_element_count"] = len(self.elements)
+universe\periodic_table.py:230: self.registry_state["future_element_count"] = len(self.future_elements)
+universe\periodic_table.py:255: self.universe.world["periodic_table"] = self.public_state
+universe\periodic_table.py:256: self.universe.world["elements_by_atomic_number"] = self.elements
+universe\periodic_table.py:257: self.universe.world["chemical_elements"] = {
+universe\periodic_table.py:258: element["name"]: element
+universe\periodic_table.py:261: self.universe.world["future_elements"] = self.future_elements
+universe\periodic_table.py:262: self.universe.world["element_registry_state"] = self.registry_state
+universe\planetary_materials.py:27: planetary_state = self.universe.world.get("planetary_state", {})
+universe\planetary_materials.py:28: possible_materials = self.universe.world.get("planetary_materials", {})
+universe\planetary_materials.py:30: if not planetary_state.get("earth_formed"):
+universe\planetary_materials.py:32: self.public_state["state"] = self.state
+universe\planetary_materials.py:39: self.public_state["state"] = self.state
+universe\planetary_materials.py:41: if planetary_state.get("water_possible"):
+universe\planetary_materials.py:44: if planetary_state.get("ice_possible"):
+universe\planetary_materials.py:47: if planetary_state.get("minerals_possible"):
+universe\planetary_materials.py:50: if planetary_state.get("organic_molecules_possible"):
+universe\planetary_materials.py:53: self.material_state["water_available"] = "water" in self.available_materials
+universe\planetary_materials.py:54: self.material_state["ice_available"] = "ice" in self.available_materials
+universe\planetary_materials.py:55: self.material_state["minerals_available"] = "minerals" in self.available_materials
+universe\planetary_materials.py:56: self.material_state["organic_molecules_available"] = "organic_molecules" in self.available_materials
+universe\planetary_materials.py:70: material = possible_materials.get(material_name)
+universe\planetary_materials.py:82: history = self.universe.world.setdefault("cosmic_history", [])
+universe\planetary_materials.py:90: self.universe.world["planetary_material_layer"] = self.public_state
+universe\planetary_materials.py:91: self.universe.world["available_planetary_materials"] = self.available_materials
+universe\planetary_materials.py:92: self.universe.world["planetary_material_state"] = self.material_state
+universe\planets.py:57: solar_system = self.universe.world.get("solar_system")
+universe\planets.py:61: self.public_state["state"] = self.state
+universe\planets.py:67: disk = solar_system.get("protoplanetary_disk", {})
+universe\planets.py:69: if not disk.get("can_form_planets"):
+universe\planets.py:71: self.public_state["state"] = self.state
+universe\planets.py:77: available_elements = disk.get("available_elements", [])
+universe\planets.py:80: self.public_state["state"] = self.state
+universe\planets.py:149: self.planetary_state["planets_formed"] = True
+universe\planets.py:150: self.planetary_state["earth_formed"] = True
+universe\planets.py:151: self.planetary_state["water_possible"] = earth["water_possible"]
+universe\planets.py:152: self.planetary_state["ice_possible"] = earth["water_possible"]
+universe\planets.py:153: self.planetary_state["minerals_possible"] = earth["has_rocky_crust"]
+universe\planets.py:154: self.planetary_state["organic_molecules_possible"] = earth["organic_molecules_possible"]
+universe\planets.py:166: history = self.universe.world.setdefault("cosmic_history", [])
+universe\planets.py:174: self.universe.world["planets"] = self.public_state
+universe\planets.py:175: self.universe.world["solar_planets"] = self.planets
+universe\planets.py:176: self.universe.world["earth"] = self.find_planet("earth")
+universe\planets.py:177: self.universe.world["planetary_materials"] = self.planetary_materials
+universe\planets.py:178: self.universe.world["planetary_state"] = self.planetary_state
+universe\planets.py:182: if planet["name"] == name:
+universe\quantum_universe_space.py:178: return cat.get("memory")
+universe\quantum_universe_space.py:218: route_details.update(
+universe\quantum_universe_space.py:254: route_steps=plan["route_steps"],
+universe\quantum_universe_space.py:276: cat.get("name")
+universe\quantum_universe_space.py:286: cat.get(
+universe\quantum_universe_space.py:300: cat.get("position")
+universe\quantum_universe_space.py:367: target = nearest["target"]
+universe\quantum_universe_space.py:373: nearest["position"]
+universe\quantum_universe_space.py:379: planned["name"] = (
+universe\quantum_universe_space.py:384: planned["target"] = target
+universe\quantum_universe_space.py:385: planned["target_id"] = target.id
+universe\quantum_universe_space.py:386: planned["target_distance"] = (
+universe\quantum_universe_space.py:387: nearest["distance"]
+universe\quantum_universe_space.py:402: self.bar_front_door["position"]
+universe\quantum_universe_space.py:446: cat.get("name")
+universe\quantum_universe_space.py:528: manifested_cronenberg = quantum_error.get(
+universe\quantum_universe_space.py:595: if encounter.get("result") == (
+universe\quantum_universe_space.py:611: encounter["detour"]
+universe\radioactive_decay.py:67: self.public_state["state"] = self.state
+universe\radioactive_decay.py:69: self.decay_state["radioactive_decay_available"] = True
+universe\radioactive_decay.py:70: self.decay_state["radiocarbon_time_available"] = True
+universe\radioactive_decay.py:71: self.decay_state["geological_time_available"] = True
+universe\radioactive_decay.py:72: self.decay_state["decay_pattern_count"] = len(self.decay_patterns)
+universe\radioactive_decay.py:87: if not self.universe.world.get("known_isotopes"):
+universe\radioactive_decay.py:90: self.decay_state["isotopes_available"] = True
+universe\radioactive_decay.py:100: known_isotopes = self.universe.world.get("known_isotopes", {})
+universe\radioactive_decay.py:113: "parent_element": isotope["element_name"],
+universe\radioactive_decay.py:114: "parent_symbol": isotope["symbol"],
+universe\radioactive_decay.py:128: history = self.universe.world.setdefault("cosmic_history", [])
+universe\radioactive_decay.py:136: self.universe.world["radioactive_decay"] = self.public_state
+universe\radioactive_decay.py:137: self.universe.world["decay_patterns"] = self.decay_patterns
+universe\radioactive_decay.py:138: self.universe.world["decay_state"] = self.decay_state
+universe\stars.py:26: germinal_clouds = self.universe.world.get("germinal_clouds", [])
+universe\stars.py:30: if cloud.get("can_form_stars") is True
+universe\stars.py:35: self.public_state["state"] = self.state
+universe\stars.py:42: self.public_state["state"] = self.state
+universe\stars.py:49: "formed_from": star_forming_clouds[0]["name"],
+universe\stars.py:64: "formed_from": star_forming_clouds[-1]["name"],
+universe\stars.py:73: self.stellar_state["first_stars_formed"] = True
+universe\stars.py:74: self.stellar_state["stellar_fusion_possible"] = True
+universe\stars.py:75: self.stellar_state["heavy_elements_possible"] = True
+universe\stars.py:87: history = self.universe.world.setdefault("cosmic_history", [])
+universe\stars.py:95: self.universe.world["stars"] = self.public_state
+universe\stars.py:96: self.universe.world["first_stars"] = self.stars
+universe\stars.py:97: self.universe.world["stellar_state"] = self.stellar_state
+universe\stellar_nucleosynthesis.py:19: stellar_state = self.universe.world.get("stellar_state", {})
+universe\stellar_nucleosynthesis.py:20: first_stars = self.universe.world.get("first_stars", [])
+universe\stellar_nucleosynthesis.py:24: self.public_state["state"] = self.state
+universe\stellar_nucleosynthesis.py:30: if not stellar_state.get("stellar_fusion_possible"):
+universe\stellar_nucleosynthesis.py:32: self.public_state["state"] = self.state
+universe\stellar_nucleosynthesis.py:39: self.public_state["state"] = self.state
+universe\stellar_nucleosynthesis.py:41: primordial_elements = self.universe.world.get("primordial_elements", {})
+universe\stellar_nucleosynthesis.py:44: if element.get("type") == "element":
+universe\stellar_nucleosynthesis.py:91: history = self.universe.world.setdefault("cosmic_history", [])
+universe\stellar_nucleosynthesis.py:99: self.universe.world["stellar_nucleosynthesis"] = self.public_state
+universe\stellar_nucleosynthesis.py:100: self.universe.world["elements_up_to_iron"] = self.elements_up_to_iron
+universe\stellar_nucleosynthesis.py:101: self.universe.world["elements"] = self.elements_up_to_iron
+universe\stellar_systems.py:28: enriched_clouds = self.universe.world.get("enriched_clouds", [])
+universe\stellar_systems.py:32: if cloud.get("can_form_stellar_systems") is True
+universe\stellar_systems.py:37: self.public_state["state"] = self.state
+universe\stellar_systems.py:44: composition = source_cloud.get("composition", {})
+universe\stellar_systems.py:48: self.public_state["state"] = self.state
+universe\stellar_systems.py:55: "formed_from": source_cloud["name"],
+universe\stellar_systems.py:79: "formed_from": source_cloud["name"],
+universe\stellar_systems.py:101: self.system_state["stellar_systems_formed"] = True
+universe\stellar_systems.py:102: self.system_state["solar_system_formed"] = True
+universe\stellar_systems.py:103: self.system_state["planet_formation_possible"] = True
+universe\stellar_systems.py:104: self.system_state["water_formation_possible"] = solar_system["protoplanetary_disk"]["can_form_water"]
+universe\stellar_systems.py:105: self.system_state["rocky_worlds_possible"] = solar_system["protoplanetary_disk"]["can_form_rocky_worlds"]
+universe\stellar_systems.py:118: history = self.universe.world.setdefault("cosmic_history", [])
+universe\stellar_systems.py:126: self.universe.world["stellar_systems"] = self.public_state
+universe\stellar_systems.py:127: self.universe.world["systems"] = self.systems
+universe\stellar_systems.py:128: self.universe.world["solar_system"] = self.systems[0] if self.systems else None
+universe\stellar_systems.py:129: self.universe.world["stellar_system_state"] = self.system_state
+universe\supernova_enrichment.py:21: first_stars = self.universe.world.get("first_stars", [])
+universe\supernova_enrichment.py:22: elements = self.universe.world.get("elements_up_to_iron", {})
+universe\supernova_enrichment.py:26: self.public_state["state"] = self.state
+universe\supernova_enrichment.py:34: self.public_state["state"] = self.state
+universe\supernova_enrichment.py:41: self.public_state["state"] = self.state
+universe\supernova_enrichment.py:47: "source_star": first_stars[0]["name"],
+universe\supernova_enrichment.py:72: history = self.universe.world.setdefault("cosmic_history", [])
+universe\supernova_enrichment.py:80: self.universe.world["supernova_enrichment"] = self.public_state
+universe\supernova_enrichment.py:81: self.universe.world["supernovae"] = self.supernovae
+universe\supernova_enrichment.py:82: self.universe.world["enriched_clouds"] = self.enriched_clouds
+universe\universe.py:239: return self.world.get("big_bang")
+universe\universe.py:252: return self.world.get("big_bang")
+universe\universe.py:343: key = c["key"]
+universe\universe.py:368: world_entity = self.world.get(
+universe\universe.py:376: entity_type = world_entity.get("type")
+universe\universe.py:424: if self.quantum_state["enabled"]:
+universe\universe.py:425: self.entropy += self.quantum_state["entropy_delta"]
+universe\universe.py:431: self.pressure += self.world["spacetime"]["curvature"]
+universe\universe.py:448: self.physics["time"] = {
+universe\universe.py:457: self.physics["gravity"] =  {
+universe\universe.py:470: self.physics_layers["quantum"] = True
+universe\universe.py:471: self.quantum_state["enabled"] = True
+universe\universe.py:501: f"classical={self.physics_layers['classical']} "
+universe\universe.py:502: f"quantum={self.physics_layers['quantum']} "
+universe\universe.py:506: f"enabled={self.quantum_state['enabled']} "
+universe\universe.py:507: f"superposition={self.quantum_state['superposition']} "
+universe\universe.py:508: f"collapsed={self.quantum_state['collapsed']}"
+universe\universe.py:516: t = self.physics["time"]
+universe\universe.py:518: t["tick"] += 1
+universe\universe.py:519: t["pressure"] += 0.1 * t["flow"]
+universe\universe.py:521: self.energy_pool -= t["pressure"] * 0.1
+universe\universe.py:524: f"TIME={t['tick']}  PRESSURE={t['pressure']:.2f}  ENERGY={self.energy_pool:.2f}"
+universe\universe.py:528: return self.physics["time"]["tick"]
+universe\universe.py:534: self.world["spacetime"] = {
+universe\universe.py:559: spacetime = self.world["spacetime"]
+universe\universe.py:561: spacetime["time_axis"]["tick"] += 1
+universe\universe.py:563: gravity = self.physics["gravity"]
+universe\universe.py:566: if gravity and gravity["enabled"]:
+universe\universe.py:567: curvature_delta = gravity["curvature_effect"] * gravity["strength"]
+universe\universe.py:568: spacetime["curvature"] += curvature_delta
+universe\universe.py:571: f"SPACETIME TICK={spacetime['time_axis']['tick']} "
+universe\universe.py:573: f"CURVATURE={spacetime['curvature']:.2f}"
+universe\universe.py:617: tick=self.quantum_state["tick_count"],
+universe\universe.py:630: event = manifestation["event"]
+universe\universe.py:631: event["collapse_cause"] = "opened"
+universe\universe.py:632: event["box_id"] = box.id
+universe\universe.py:633: event["observer"] = observer
+universe\universe.py:646: "tick": self.quantum_state["tick_count"]
+universe\universe.py:693: cat["position"] = dict(position)
+universe\universe.py:720: "tick": self.quantum_state["tick_count"]
+universe\universe.py:745: cat["age_days"] = 98
+universe\universe.py:750: cat["quantum_box_origin"] = {
+universe\universe.py:756: traits = cat.setdefault(
+universe\universe.py:775: meow.update({
+universe\universe.py:795: skill.update({
+universe\universe.py:802: learning["complete"] = True
+universe\universe.py:808: feline_wisdom = cat.setdefault(
+universe\universe.py:831: cat["state"] = (
+universe\universe.py:849: f"AT x={box.position['x']:.3f} "
+universe\universe.py:850: f"y={box.position['y']:.3f} "
+universe\universe.py:851: f"z={box.position['z']:.3f}"
+universe\universe.py:927: if not self.quantum_state["enabled"]:
+universe\universe.py:930: self.quantum_state["tick_count"] += 1
+universe\universe.py:932: self.quantum_state["collapsed"] = False
+universe\universe.py:933: self.quantum_state["superposition"] = True
+universe\universe.py:934: self.quantum_state["observer"] = "quantum_tick"
+universe\universe.py:936: self.quantum_state["fluctuation"] += 0.01
+universe\universe.py:937: self.quantum_state["uncertainty"] = self.quantum_state["fluctuation"] * 0.5
+universe\universe.py:938: self.quantum_state["entropy_delta"] = self.quantum_state["uncertainty"] * 0.1
+universe\universe.py:939: self.quantum_state["entropy_total"] += self.quantum_state["entropy_delta"]
+universe\universe.py:941: self.quantum_state["superposition"] = False
+universe\universe.py:942: self.quantum_state["collapsed"] = True
+universe\universe.py:943: self.quantum_state["collapse_count"] += 1
+universe\universe.py:944: self.quantum_state["last_collapse_tick"] = (
+universe\universe.py:945: self.quantum_state["tick_count"]
+universe\universe.py:957: tick=self.quantum_state["tick_count"]
+universe\universe.py:970: event = manifestation["event"]
+universe\universe.py:971: event["collapse_cause"] = "spontaneous"
+universe\universe.py:972: event["box_id"] = box.id
+universe\universe.py:973: event["observer"] = None
+universe\universe.py:994: f"FLUCTUATION={self.quantum_state['fluctuation']:.2f} "
+universe\universe.py:995: f"UNCERTAINTY={self.quantum_state['uncertainty']:.3f} "
+universe\universe.py:996: f"QENTROPY={self.quantum_state['entropy_delta']:.4f} "
+universe\universe.py:1000: if not self.quantum_state["enabled"]:
+universe\universe.py:1015: curvature = self.world["spacetime"]["curvature"]
+universe\universe.py:1029: "quantum_enabled": self.quantum_state["enabled"],
+universe\universe.py:1030: "quantum_fluctuation": self.quantum_state["fluctuation"],
+universe\universe.py:1031: "quantum_uncertainty": self.quantum_state["uncertainty"],
+universe\universe.py:1032: "quantum_entropy_delta": self.quantum_state["entropy_delta"],
+universe\universe.py:1033: "quantum_entropy_total": self.quantum_state["entropy_total"],
+universe\universe.py:1056: pair_id = first.quantum_state.get(
+universe\universe.py:1135: recombined.origin.update({
+universe\universe.py:1167: first.quantum_state.update({
+universe\universe.py:1171: second.quantum_state.update({
+universe\universe.py:1254: first_pair_id = first.quantum_state.get(
+universe\universe.py:1258: second_pair_id = second.quantum_state.get(
+universe\universe.py:1271: first.quantum_state.get("counterpart_id")
+universe\universe.py:1273: or second.quantum_state.get("counterpart_id")
+universe\universe.py:1334: merged.origin.update({
+universe\universe.py:1354: first.quantum_state.update({
+universe\universe.py:1358: second.quantum_state.update({
+universe\universe.py:1383: merged.quantum_state["spin"]
+universe\universe.py:1427: original.quantum_state.get(
+universe\universe.py:1481: original.quantum_state.get(
+universe\universe.py:1493: original.quantum_state.update({
+universe\universe.py:1527: counterpart.origin.update({
+universe\universe.py:1552: original.quantum_state["spin"]
+universe\universe.py:1555: counterpart.quantum_state["spin"]
+universe\universe.py:1620: and cronenberg.quantum_state.get(
+universe\universe.py:1636: first.quantum_state.get(
+universe\universe.py:1641: second = cronenbergs_by_id.get(
+universe\universe.py:1648: pair_id = first.quantum_state.get(
+universe\universe.py:1686: if not event.get(
+universe\universe.py:1701: event["resolution"] = resolution
+universe\universe.py:1798: cats_world = self.world.get(
+universe\universe.py:1807: cats = cats_world.get(
+universe\universe.py:1949: if not result.get(
+universe\universe.py:1960: result.get(
+universe\universe.py:2181: history_result.get(
+universe\universe.py:2195: f"MODEL={last_snapshot.get('physics_model', 'unknown')} "
+universe\universe.py:2196: f"QUANTUM={last_snapshot.get('quantum_enabled', False)} "
+universe\universe.py:2197: f"QFLUCT={last_snapshot.get('quantum_fluctuation', 0.0):.2f} "
+universe\universe.py:2198: f"QUNCERT={last_snapshot.get('quantum_uncertainty', 0.0):.3f} "
+universe\universe.py:2199: f"QENTROPY={last_snapshot.get('quantum_entropy_delta', 0.0):.4f} "
+universe\universe.py:2200: f"QTOTAL={last_snapshot.get('quantum_entropy_total', 0.0):.4f} "
+universe\universe.py:2201: f"CENTROPY={last_snapshot.get('classical_entropy_delta', 0.0):.4f} "
+universe\universe.py:2202: f"CTOTAL={last_snapshot.get('classical_entropy_total', 0.0):.4f} "
+universe\universe.py:2209: f"CURVATURE={last_snapshot.get('curvature', 0.0):.2f}"
+universe\universe.py:2233: f"ERRORS={report['error_count']} "
+universe\universe.py:2234: f"CRONENBERGS={len(report['cronenbergs_created'])}"
+universe\bootstraps\eden_bootstrap.py:27: root_universe = self.layers.get("root_universe")
+universe\bootstraps\eden_bootstrap.py:34: influence = self.EDEN_INFLUENCES.get(day)
+universe\bootstraps\eden_bootstrap.py:45: self.layers.get("meeting").tick()
+universe\bootstraps\entity_bootstrap.py:29: self.pazuzu_profile.update(
+universe\bootstraps\entity_bootstrap.py:76: self.universe.world.get(
+universe\bootstraps\entity_bootstrap.py:161: self.universe.world["pazuzu"] = self.pazuzu
+universe\bootstraps\entity_bootstrap.py:163: self.universe.world["classical_probe_debug_entity"] = self.pazuzu
+universe\bootstraps\entity_bootstrap.py:207: self.universe.world["serpent"] = self.serpent
+universe\bootstraps\entity_bootstrap.py:250: self.universe.world["lilith"] = self.lilith
+universe\bootstraps\entity_bootstrap.py:295: self.universe.world["pazuzu_masculine_principle"] = (
+universe\bootstraps\idea_genesis_bootstrap.py:99: waters.state["seas"] = True
+universe\bootstraps\idea_genesis_bootstrap.py:100: waters.state["dry_land"] = True
+universe\bootstraps\idea_genesis_bootstrap.py:101: waters.state["vegetation"] = True
+universe\bootstraps\idea_genesis_bootstrap.py:204: apsu["name"],
+universe\bootstraps\idea_genesis_bootstrap.py:205: tiamat["name"]
+universe\bootstraps\idea_genesis_bootstrap.py:208: lahmu["parents"] = list(
+universe\bootstraps\idea_genesis_bootstrap.py:212: lahamu["parents"] = list(
+universe\bootstraps\idea_genesis_bootstrap.py:257: lahmu["name"],
+universe\bootstraps\idea_genesis_bootstrap.py:258: lahamu["name"]
+universe\bootstraps\idea_genesis_bootstrap.py:261: anshar["parents"] = list(
+universe\bootstraps\idea_genesis_bootstrap.py:265: kishar["parents"] = list(
+universe\bootstraps\idea_genesis_bootstrap.py:305: anshar["name"],
+universe\bootstraps\idea_genesis_bootstrap.py:306: kishar["name"]
+universe\bootstraps\idea_genesis_bootstrap.py:309: anu["parents"] = list(
+universe\bootstraps\idea_genesis_bootstrap.py:339: ea["parents"] = [
+universe\bootstraps\idea_genesis_bootstrap.py:340: anu["name"]
+universe\bootstraps\idea_genesis_bootstrap.py:343: ea["epithets"] = [
+universe\bootstraps\idea_genesis_bootstrap.py:356: anu["name"]
+universe\bootstraps\idea_genesis_bootstrap.py:407: marduk["parents"] = [
+universe\bootstraps\idea_genesis_bootstrap.py:408: ea["name"],
+universe\bootstraps\idea_genesis_bootstrap.py:409: damkina["name"]
+universe\bootstraps\idea_genesis_bootstrap.py:412: marduk["mythology"] = (
+universe\bootstraps\idea_genesis_bootstrap.py:416: marduk["manifestation_context"] = (
+universe\bootstraps\idea_genesis_bootstrap.py:424: "mask_of": god["name"],
+universe\bootstraps\idea_genesis_bootstrap.py:426: ea["name"],
+universe\bootstraps\idea_genesis_bootstrap.py:427: damkina["name"]
+universe\bootstraps\idea_genesis_bootstrap.py:438: marduk["divine_authority_granted"] = True
+universe\bootstraps\idea_genesis_bootstrap.py:439: marduk["title"] = "king_of_the_gods"
+universe\bootstraps\idea_genesis_bootstrap.py:458: if not marduk.get(
+universe\bootstraps\idea_genesis_bootstrap.py:477: if not marduk.get(
+universe\bootstraps\idea_genesis_bootstrap.py:489: tiamat["state"] = (
+universe\bootstraps\idea_genesis_bootstrap.py:505: "actor": god["name"],
+universe\bootstraps\idea_genesis_bootstrap.py:506: "target": tiamat["name"]
+universe\bootstraps\idea_genesis_bootstrap.py:517: if tiamat.get("state") != "defeated":
+universe\bootstraps\idea_genesis_bootstrap.py:522: if not marduk.get(
+universe\bootstraps\idea_genesis_bootstrap.py:536: "actor": marduk["mask_of"],
+universe\bootstraps\idea_genesis_bootstrap.py:545: "source": tiamat["name"]
+universe\bootstraps\idea_genesis_bootstrap.py:593: if not marduk.get(
+universe\bootstraps\idea_genesis_bootstrap.py:614: name = god.get("name")
+universe\bootstraps\idea_genesis_bootstrap.py:616: assignment = role_map.get(
+universe\bootstraps\idea_genesis_bootstrap.py:621: god["divine_function"] = assignment
+universe\bootstraps\idea_genesis_bootstrap.py:629: "actor": marduk["mask_of"],
+universe\bootstraps\idea_genesis_bootstrap.py:668: tiamat["primordial_aspect"] = (
+universe\bootstraps\idea_genesis_bootstrap.py:672: apsu["primordial_aspect"] = (
+universe\bootstraps\idea_genesis_bootstrap.py:686: nebula.state["waters"] = True
+universe\bootstraps\idea_genesis_bootstrap.py:687: nebula.state["deep"] = True
+universe\bootstraps\idea_genesis_bootstrap.py:688: nebula.state["chaos"] = True
+universe\bootstraps\idea_genesis_bootstrap.py:689: nebula.state["ordered"] = False
+universe\bootstraps\meeting_bootstrap.py:10: meeting = self.layers.get("meeting")
+universe\bootstraps\meeting_bootstrap.py:11: library = self.layers.get("library")
+quantum\cat_box_transfer.py:283: if not pair.get(
+quantum\cat_box_transfer.py:290: pair.get(
+quantum\cat_box_transfer.py:293: pair.get(
+quantum\cat_box_transfer.py:319: pair["currently_in_use"] = True
+quantum\cat_box_transfer.py:320: pair["current_user"] = cat_name
+quantum\cat_box_transfer.py:321: pair["use_count"] += 1
+quantum\cat_box_transfer.py:323: if cat_name not in pair["used_by"]:
+quantum\cat_box_transfer.py:324: pair["used_by"].append(
+quantum\cat_box_transfer.py:349: cat.quantum_transfer.update({
+quantum\cat_box_transfer.py:370: box.cat_transfer.update({
+quantum\cat_box_transfer.py:383: if cat_name == pair["creator_cat"]:
+quantum\cat_box_transfer.py:386: == pair["anchor_box_id"]
+quantum\cat_box_transfer.py:391: == pair["anchor_box_id"]
+quantum\cat_box_transfer.py:405: pair["creator_departed"]
+quantum\cat_box_transfer.py:414: pair["currently_in_use"] = False
+quantum\cat_box_transfer.py:415: pair["current_user"] = None
+quantum\cat_box_transfer.py:522: "pair_id": pair["pair_id"],
+quantum\cat_box_transfer.py:590: self.universe.layer_energy.get(
+quantum\cat_box_transfer.py:627: pair.get(
+quantum\cat_box_transfer.py:646: pair["remote_layer"]
+quantum\cat_box_transfer.py:693: pair["anchor_layer"],
+quantum\cat_box_transfer.py:699: pair["remote_layer"],
+quantum\cat_box_transfer.py:716: "pair_id": pair["pair_id"],
+quantum\cat_box_transfer.py:730: pair["anchor_box_id"],
+quantum\cat_box_transfer.py:731: pair["remote_box_id"]
+quantum\cat_box_transfer.py:753: pair["active"] = False
+quantum\cat_box_transfer.py:754: pair["stable"] = False
+quantum\cat_box_transfer.py:755: pair["dissolved"] = True
+quantum\cat_box_transfer.py:756: pair["remaining_energy_j"] = 0.0
+quantum\cat_box_transfer.py:757: pair["dissolved_by_return_of"] = (
+quantum\cat_box_transfer.py:773: "pair_id": pair["pair_id"],
+quantum\cat_box_transfer.py:974: source_box.cat_transfer.update({
+quantum\cat_box_transfer.py:989: cat.quantum_transfer.update({
+quantum\cat_box_transfer.py:1024: transfer["source_layer"]
+quantum\cat_box_transfer.py:1029: "trail_id": trail["trail_id"]
+quantum\cat_box_transfer.py:1171: if item.get("pair_id") == pair_id
+quantum\cat_box_transfer.py:1172: and item.get("active", False)
+quantum\cat_box_transfer.py:1243: route = planned["route"]
+quantum\cat_box_transfer.py:1285: "plan": planned["plan"]
+quantum\cat_box_transfer.py:1306: if not exploration.get(
+quantum\cat_box_transfer.py:1352: position = result.get(
+quantum\cat_box_transfer.py:1363: if result.get(
+quantum\cat_box_transfer.py:1367: exploration["active"] = False
+quantum\cat_box_transfer.py:1368: exploration["arrived"] = True
+quantum\cat_box_transfer.py:1414: "result": result.get(
+quantum\cat_box_transfer.py:1417: "arrived": result.get(
+quantum\cat_box_transfer.py:1425: result.get("result")
+quantum\cat_box_transfer.py:1446: if pair.get(
+quantum\cat_box_transfer.py:1449: and pair.get(
+quantum\cat_box_transfer.py:1464: if not exploration.get(
+quantum\cat_box_transfer.py:1480: exploration.get(
+quantum\cat_box_transfer.py:1509: "pair_id": exploration.get(
+quantum\cat_box_transfer.py:1530: "pair_id": exploration.get(
+quantum\cat_box_transfer.py:1534: exploration.get(
+quantum\cat_box_transfer.py:1599: if continuation_plan.get(
+quantum\cat_box_transfer.py:1648: "pair_id": exploration.get(
+quantum\cat_box_transfer.py:1681: pair_id = exploration.get(
+quantum\cat_box_transfer.py:1723: if not plan.get(
+quantum\cat_box_transfer.py:1740: plan["position"]
+quantum\cat_box_transfer.py:1769: route = planned["route"]
+quantum\cat_box_transfer.py:1777: exploration.get(
+quantum\cat_box_transfer.py:1844: pair["remote_box_id"]
+quantum\cat_box_transfer.py:1905: route = planned["route"]
+quantum\cat_box_transfer.py:1918: pair["remote_box_id"]
+quantum\cat_box_transfer.py:1921: pair["anchor_box_id"]
+quantum\cat_box_transfer.py:1945: if not returning or not returning.get(
+quantum\cat_box_transfer.py:1978: position = result.get(
+quantum\cat_box_transfer.py:1989: if result.get(
+quantum\cat_box_transfer.py:1997: returning["active"] = False
+quantum\cat_box_transfer.py:2009: if transfer_result.get(
+quantum\cat_box_transfer.py:2031: "arrived_at_box": result.get(
+quantum\cat_box_transfer.py:2069: start.get("x", 0.0),
+quantum\cat_box_transfer.py:2070: start.get("y", 0.0),
+quantum\cat_box_transfer.py:2071: start.get("z", 0.0)
+quantum\cat_box_transfer.py:2074: end.get("x", 0.0),
+quantum\cat_box_transfer.py:2075: end.get("y", 0.0),
+quantum\cat_box_transfer.py:2076: end.get("z", 0.0)
+quantum\cat_box_transfer.py:2109: if item["trail_id"] == trail_id
+quantum\cat_box_transfer.py:2117: trail["uses"] += 1
+quantum\cat_box_transfer.py:2118: trail["stability"] = min(
+quantum\cat_box_transfer.py:2120: trail["stability"] + float(amount)
+quantum\cat_box_transfer.py:2183: access.get(
+quantum\cat_box_transfer.py:2187: and "boxes" in access.get(
+quantum\cronenberg_pair_encounter.py:48: first_pair_id = first_state.get(
+quantum\cronenberg_pair_encounter.py:52: second_pair_id = second_state.get(
+quantum\cronenberg_pair_encounter.py:65: first_state.get("counterpart_id")
+quantum\cronenberg_pair_encounter.py:67: or second_state.get("counterpart_id")
+quantum\cronenberg_pair_encounter.py:89: first.id: first_state.get("spin"),
+quantum\cronenberg_pair_encounter.py:90: second.id: second_state.get("spin")
+quantum\cronenberg_pair_encounter_resolver.py:34: if not encounter_event.get("encountered"):
+quantum\cronenberg_pair_encounter_resolver.py:120: "pair_id": encounter_event["pair_id"],
+quantum\cronenberg_pair_encounter_resolver.py:122: encounter_event["participants"]
+quantum\cronenberg_pair_encounter_resolver.py:124: "location": encounter_event["location"],
+quantum\cronenberg_pair_encounter_resolver.py:128: "universe_tick": encounter_event.get(
+quantum\cronenberg_pair_encounter_resolver.py:139: f"RESOLVED: {encounter_event['pair_id']} "
+quantum\cronenberg_pair_encounter_resolver.py:206: first.quantum_state["spin"] = (
+quantum\cronenberg_pair_encounter_resolver.py:210: second.quantum_state["spin"] = (
+quantum\death_ripple.py:37: payload = event.get(
+quantum\death_ripple.py:42: layer = payload.get(
+quantum\death_ripple.py:63: "event_name": event.get("name"),
+quantum\death_ripple.py:64: "predator": event.get(
+quantum\death_ripple.py:67: ).get("predator"),
+quantum\death_ripple.py:68: "prey": event.get(
+quantum\death_ripple.py:71: ).get("prey"),
+quantum\death_ripple.py:72: "result_scope": result.get(
+quantum\death_ripple.py:75: "rotated_count": result.get(
+quantum\death_ripple.py:84: "scope": result.get("scope"),
+quantum\death_ripple.py:85: "rotated_count": result.get(
+quantum\director.py:26: self.god["research_book"]
+quantum\director.py:30: self.god["knowledge"]
+quantum\director.py:56: nebula.elemental_potentials.get(
+quantum\director.py:166: and entity.get("name") == "serpent"
+quantum\director.py:175: sample.get(
+quantum\director.py:180: sample.get(
+quantum\event_bus.py:25: handlers = self.subscribers.setdefault(
+quantum\event_bus.py:40: handlers = self.subscribers.get(
+quantum\event_bus.py:70: self.subscribers.get(
+quantum\quantum_die_resolver.py:19: roll_event["value"]
+quantum\quantum_die_resolver.py:38: "die": roll_event.get(
+quantum\quantum_die_resolver.py:43: "roll_number": roll_event.get(
+quantum\quantum_die_resolver.py:58: f"RESULT={resolution['result']}"
+quantum\quantum_die_resolver.py:102: "pair_id": result["pair_id"]
+quantum\quantum_die_resolver.py:132: "pair_id": pair_result["pair_id"]
+quantum\quantum_die_resolver.py:147: and cronenberg.quantum_state.get(
+quantum\quantum_die_resolver.py:151: and not cronenberg.quantum_state.get(
+quantum\quantum_die_resolver.py:155: and cronenberg.quantum_state.get(
+quantum\serpent_consequence_executor.py:42: hidden.get(
+quantum\serpent_consequence_executor.py:52: handler = self.handlers.get(
+quantum\serpent_consequence_executor.py:116: cronenberg = result.get(
+quantum\serpent_consequence_executor.py:121: "error_type": result.get(
+quantum\serpent_consequence_executor.py:124: "error_message": result.get(
+quantum\serpent_consequence_executor.py:150: ]["name"],
+quantum\serpent_consequence_executor.py:156: ]["origin"]
+quantum\serpent_consequence_executor.py:207: and not cronenberg.quantum_state.get(
+quantum\serpent_consequence_executor.py:228: counterpart = result["counterpart"]
+quantum\serpent_consequence_executor.py:231: "result": result["result"],
+quantum\serpent_consequence_executor.py:235: "pair_id": result["pair_id"],
+quantum\serpent_consequence_executor.py:237: original.quantum_state["spin"]
+quantum\serpent_consequence_executor.py:240: counterpart.quantum_state["spin"]
+quantum\serpent_roll_resolver.py:40: if public_roll.get("name") != (
+quantum\serpent_roll_resolver.py:48: public_roll["value"]
+quantum\serpent_roll_resolver.py:75: "roll_id": public_roll["roll_id"],
+meeting_place\back_room.py:92: self.world_door["cat_door"] = (
+meeting_place\back_room.py:102: visible_world_id = self.world_door.get(
+meeting_place\back_room.py:106: self.world_window["visible_world_id"] = (
+meeting_place\bartender.py:261: and event.get("name")
+meeting_place\bartender.py:263: and event.get("resolution")
+meeting_place\bartender.py:268: "subject": event.get("offender"),
+meeting_place\bartender.py:269: "observed_reason": event.get("reason"),
+meeting_place\bartender.py:438: recipe = self.mix_book.recipes.get(
+meeting_place\bartender.py:445: if recipe.get("status") != "testing":
+meeting_place\bartender.py:472: recipe = self.mix_book.recipes.get(
+meeting_place\bartender.py:481: if recipe.get("status") != "testing":
+meeting_place\bartender.py:497: if len(recipe["tastings"]) == 5:
+meeting_place\bartender.py:498: if recipe["status"] == "approved":
+meeting_place\bartender.py:502: "votes_for": recipe["votes_for"],
+meeting_place\bartender.py:503: "votes_against": recipe["votes_against"]
+meeting_place\bartender.py:514: "votes_for": recipe["votes_for"],
+meeting_place\bartender.py:515: "votes_against": recipe["votes_against"]
+meeting_place\bartender.py:541: guest.get("world_key")
+meeting_place\bartender.py:542: or guest.get("name")
+meeting_place\bartender.py:545: life_history = guest.get(
+meeting_place\bartender.py:629: serving_object["state"] = "filled"
+meeting_place\bartender.py:630: serving_object["contains"] = drink_name
+meeting_place\bartender.py:644: return drink.get("name")
+meeting_place\bartender.py:668: access_route = back_room.access.get(
+meeting_place\bartender.py:720: cat.get("world_key")
+meeting_place\bartender.py:721: or cat.get("name")
+meeting_place\bartender.py:724: meow = cat.get(
+meeting_place\bartender.py:727: ).get(
+meeting_place\bartender.py:733: meow.get(
+meeting_place\bartender.py:737: and meow.get(
+meeting_place\bartender.py:800: serving_object["state"] = "filled"
+meeting_place\bartender.py:801: serving_object["contains"] = drink_name
+meeting_place\bar_arrival_protocol.py:48: guest_id = guest.get(
+meeting_place\bar_arrival_protocol.py:63: guest["position"] = {
+meeting_place\bar_arrival_protocol.py:64: "x": destination["x"],
+meeting_place\bar_arrival_protocol.py:65: "y": destination["y"]
+meeting_place\bar_arrival_protocol.py:68: guest["state"] = "at_bar"
+meeting_place\bar_departure_protocol.py:16: guest_id = guest.get(
+meeting_place\bar_departure_protocol.py:20: position = guest.get(
+meeting_place\bar_departure_protocol.py:31: x=position["x"],
+meeting_place\bar_departure_protocol.py:32: y=position["y"]
+meeting_place\bar_departure_protocol.py:38: if place["kind"] != "customer_floor":
+meeting_place\bar_departure_protocol.py:49: guest["state"] = "leaving_bar"
+meeting_place\bar_departure_protocol.py:50: guest["position"] = None
+meeting_place\bar_entity_policy.py:27: profile.get("entity_id")
+meeting_place\bar_entity_policy.py:28: or profile.get("world_key")
+meeting_place\bar_entity_policy.py:30: or profile.get("name")
+meeting_place\bar_entity_policy.py:33: entity_type = profile.get("type")
+meeting_place\bar_entity_policy.py:35: entity_class = profile.get(
+meeting_place\bar_entity_policy.py:119: entity_name = profile.get("name")
+meeting_place\bar_entity_policy.py:120: world_key = profile.get("world_key")
+meeting_place\bar_entity_policy.py:121: alias = profile.get("alias")
+meeting_place\bar_geometry_terminal.py:51: snapshot.get(
+meeting_place\bar_geometry_terminal.py:58: snapshot.get(
+meeting_place\bar_geometry_terminal.py:65: snapshot.get(
+meeting_place\bar_geometry_terminal.py:72: geometry.get(
+meeting_place\bar_geometry_terminal.py:79: geometry.get(
+meeting_place\bar_geometry_terminal.py:85: statistics.get(
+meeting_place\bar_geometry_terminal.py:92: statistics.get(
+meeting_place\bar_geometry_terminal.py:99: statistics.get(
+meeting_place\bar_geometry_terminal.py:108: "tick": quantum_layer_map.get(
+meeting_place\bar_geometry_terminal.py:114: in quantum_layer_map.get(
+meeting_place\bar_geometry_terminal.py:120: quantum_layer_map.get(
+meeting_place\bar_hex_geometry.py:242: customer_floor.update({
+meeting_place\bar_hex_geometry.py:263: customer_upper.update({
+meeting_place\bar_hex_geometry.py:284: customer_lower.update({
+meeting_place\bar_hex_geometry.py:305: entrance.update({
+meeting_place\bar_hex_geometry.py:326: bar.update({
+meeting_place\bar_hex_geometry.py:347: bar_upper.update({
+meeting_place\bar_hex_geometry.py:368: bar_lower.update({
+meeting_place\bar_hex_geometry.py:510: candidate["x"]
+meeting_place\bar_hex_geometry.py:511: - cell["x"]
+meeting_place\bar_hex_geometry.py:515: candidate["y"]
+meeting_place\bar_hex_geometry.py:516: - cell["y"]
+meeting_place\bar_hex_geometry.py:546: candidate["x"]
+meeting_place\bar_hex_geometry.py:547: - cell["x"]
+meeting_place\bar_hex_geometry.py:551: candidate["y"]
+meeting_place\bar_hex_geometry.py:552: - cell["y"]
+meeting_place\bar_hex_geometry.py:582: not start["walkable"]
+meeting_place\bar_hex_geometry.py:583: or not destination["walkable"]
+meeting_place\bar_hex_geometry.py:598: start["name"]
+meeting_place\bar_hex_geometry.py:613: if not neighbor["walkable"]:
+meeting_place\bar_hex_geometry.py:617: neighbor["name"]
+meeting_place\bar_hex_geometry.py:631: neighbor["name"]
+meeting_place\bar_hex_geometry.py:649: if cell["kind"] == "bar"
+meeting_place\bar_hex_geometry.py:719: customer["occupied_by"]
+meeting_place\bar_hex_geometry.py:721: or bar["occupied_by"]
+meeting_place\bar_hex_geometry.py:753: customer.update({
+meeting_place\bar_hex_geometry.py:767: bar.update({
+meeting_place\bar_hex_geometry.py:841: if cell["kind"] not in {
+meeting_place\bar_hex_geometry.py:848: if cell["occupied_by"] is not None:
+meeting_place\bar_hex_geometry.py:851: cell["occupied_by"] = entity_id
+meeting_place\bar_hex_geometry.py:874: if cell["occupied_by"] != entity_id:
+meeting_place\bar_hex_geometry.py:877: cell["occupied_by"] = None
+meeting_place\bar_hex_geometry.py:889: if not start["walkable"]:
+meeting_place\bar_hex_geometry.py:895: start["name"]
+meeting_place\bar_hex_geometry.py:909: or current["kind"] == kind
+meeting_place\bar_hex_geometry.py:913: current["occupied_by"]
+meeting_place\bar_hex_geometry.py:926: if not neighbor["walkable"]:
+meeting_place\bar_hex_geometry.py:930: neighbor["name"]
+meeting_place\bar_hex_geometry.py:936: neighbor["name"]
+meeting_place\bar_hex_geometry.py:955: and cell["name"] != name
+meeting_place\bar_hex_geometry.py:961: and cell["kind"] != kind
+meeting_place\bar_hex_geometry.py:967: and cell["x"] != x
+meeting_place\bar_hex_geometry.py:973: and cell["y"] != y
+meeting_place\bar_hex_geometry.py:988: if cell["kind"] == kind
+meeting_place\bar_incident_book.py:58: entry["data"]
+meeting_place\bar_incident_book.py:61: entry.get("event")
+meeting_place\bar_incident_book.py:64: entry.get("data"),
+meeting_place\bar_incident_book.py:82: name = incident.get(
+meeting_place\bar_incident_book.py:92: category = incident.get(
+meeting_place\bar_incident_book.py:106: reason = incident.get(
+meeting_place\bar_incident_book.py:120: offender = incident.get(
+meeting_place\bar_incident_book.py:149: self.REASON_CATEGORIES.get(
+meeting_place\bar_incident_book.py:167: entry["resolved"] = False
+meeting_place\bar_incident_book.py:176: event=entry["name"],
+meeting_place\bar_incident_book.py:184: f"{entry.get('reason')}"
+meeting_place\bar_incident_book.py:209: reason = entry.get(
+meeting_place\bar_incident_book.py:214: self.REASON_RESOLUTIONS.get(
+meeting_place\bar_incident_book.py:228: entry["resolved"] = True
+meeting_place\bar_incident_book.py:229: entry["resolution"] = resolution
+meeting_place\bar_incident_book.py:233: f"{entry.get('reason')} "
+meeting_place\bar_menu_sign.py:122: ingredients = drink.get(
+meeting_place\bar_menu_sign.py:178: or self.current_screen.get(
+meeting_place\bar_menu_sign.py:201: screen = self.current_screen.get(
+meeting_place\bar_menu_sign.py:230: self.current_screen.get(
+meeting_place\bar_menu_sign.py:251: drinks = self.current_screen.get(
+meeting_place\bar_menu_sign.py:256: new_drinks = self.current_screen.get(
+meeting_place\bar_menu_sign.py:284: self.current_screen.get(
+meeting_place\bar_menu_sign.py:291: self.current_screen.get(
+meeting_place\bar_menu_sign.py:298: self.current_screen.get(
+meeting_place\bar_security_protocol.py:124: reason=incident.get(
+meeting_place\bar_security_protocol.py:153: if target["kind"] != "service_floor":
+meeting_place\bar_security_protocol.py:158: guest.get("world_key")
+meeting_place\bar_security_protocol.py:159: or guest.get("name")
+meeting_place\bar_security_protocol.py:197: guest.get("world_key")
+meeting_place\bar_security_protocol.py:198: or guest.get("name")
+meeting_place\bar_security_protocol.py:202: guest.get(
+meeting_place\bar_security_protocol.py:209: guest.get(
+meeting_place\bar_security_protocol.py:228: guest["existence_pct"] = 0.0
+meeting_place\bar_security_protocol.py:230: guest["exists_somewhere"] = (
+meeting_place\bar_security_protocol.py:237: guest["energy_j"] = 0.0
+meeting_place\bar_security_protocol.py:239: if existence_result["world"] is not None:
+meeting_place\bar_security_protocol.py:299: if existence_result["world"] is not None:
+meeting_place\bar_security_protocol.py:441: and roll.get(
+meeting_place\bar_security_protocol.py:446: roll.get(
+meeting_place\bar_service_protocol.py:20: if target["kind"] != "service_floor":
+meeting_place\bar_service_protocol.py:23: position = bartender.get(
+meeting_place\bar_service_protocol.py:31: x=position["x"],
+meeting_place\bar_service_protocol.py:32: y=position["y"]
+meeting_place\bar_service_protocol.py:37: or start["kind"] != "service_floor"
+meeting_place\bar_service_protocol.py:44: start["name"]
+meeting_place\bar_service_protocol.py:65: if neighbor["kind"] != "service_floor":
+meeting_place\bar_service_protocol.py:69: neighbor["name"]
+meeting_place\bar_service_protocol.py:75: neighbor["name"]
+meeting_place\bar_service_protocol.py:85: bartender["position"] = {
+meeting_place\bar_service_protocol.py:86: "x": target["x"],
+meeting_place\bar_service_protocol.py:87: "y": target["y"]
+meeting_place\bar_service_protocol.py:90: bartender["state"] = "behind_bar"
+meeting_place\bar_service_protocol.py:108: if service["kind"] != "service_floor":
+meeting_place\bar_service_protocol.py:111: bartender["position"] = {
+meeting_place\bar_service_protocol.py:112: "x": service["x"],
+meeting_place\bar_service_protocol.py:113: "y": service["y"]
+meeting_place\bar_service_protocol.py:116: bartender["state"] = "behind_bar"
+meeting_place\bottle_shelf.py:32: if bottle.get("type")
+meeting_place\bottle_shelf.py:39: existing["dark_energy_j"] += (
+meeting_place\bottle_shelf.py:47: f"{existing['dark_energy_j']:.3f} J"
+meeting_place\bouncer.py:115: entity["state"] = "ejected"
+meeting_place\bouncer.py:116: entity["position"] = None
+meeting_place\bouncer.py:170: claim.get(
+meeting_place\bouncer.py:189: invitation_id = claim.get(
+meeting_place\bouncer.py:195: .get(
+meeting_place\bouncer.py:207: invitation.get(
+meeting_place\bouncer.py:218: invitation.get(
+meeting_place\bouncer.py:229: claim.get(
+meeting_place\bouncer.py:239: if not invitation.get(
+meeting_place\bouncer.py:248: if invitation.get(
+meeting_place\bouncer.py:258: invitation.get(
+meeting_place\bouncer.py:303: return entity.get(
+meeting_place\bouncer.py:382: learning = cat.get(
+meeting_place\bouncer.py:393: meow_knowledge = learning.get(
+meeting_place\bouncer.py:399: meow_knowledge.get(
+meeting_place\bouncer.py:403: and meow_knowledge.get(
+meeting_place\bouncer.py:429: return entity.get("world_key") or entity.get("name")
+meeting_place\bouncer.py:435: return entity.get("type") == "cat"
+meeting_place\cash_register.py:30: entity.get("name"),
+meeting_place\cash_register.py:31: entity.get("type")
+meeting_place\cash_register.py:57: tab = self.open_tabs.setdefault(
+meeting_place\cash_register.py:85: "drink_category": drink.get(
+meeting_place\cash_register.py:150: f"{receipt['receipt_number']} "
+meeting_place\cash_register.py:152: f"ITEMS={len(receipt['items'])}"
+meeting_place\cash_register.py:177: drink_name = drink.get(
+meeting_place\cash_register.py:180: drink_category = drink.get(
+meeting_place\cash_register.py:229: entity_name = entity.get(
+meeting_place\cash_register.py:232: entity_type = entity.get(
+meeting_place\cash_register.py:252: "drink": drink["name"],
+meeting_place\cash_register.py:253: "drink_category": drink.get(
+meeting_place\cash_register.py:287: f"DRINK={drink['name']}"
+meeting_place\cronenberg_pen_terminal.py:30: "area_state": area.get(
+meeting_place\cronenberg_pen_terminal.py:48: "tree": area.get("tree", True),
+meeting_place\cronenberg_pen_terminal.py:49: "bench": area.get("bench", True),
+meeting_place\cronenberg_pen_terminal.py:63: "area_state": area.get(
+meeting_place\cronenberg_pen_terminal.py:68: "count": pen_status["count"],
+meeting_place\cronenberg_pen_terminal.py:69: "capacity": pen_status["capacity"],
+meeting_place\cronenberg_pen_terminal.py:71: pen_status["projected_lemonade"]
+meeting_place\cronenberg_pen_terminal.py:74: pen_status["total_lemonade_produced"]
+meeting_place\cronenberg_pen_terminal.py:77: pen_status["processing_count"]
+meeting_place\cronenberg_pen_terminal.py:79: "tree": area.get("tree", False),
+meeting_place\cronenberg_pen_terminal.py:80: "bench": area.get("bench", False),
+meeting_place\cronenberg_pen_terminal.py:81: "cronenbergs": pen_status["cronenbergs"]
+meeting_place\cronenberg_pen_terminal.py:86: f"{status['count']} / {status['capacity']} "
+meeting_place\cronenberg_pen_terminal.py:88: f"{status['projected_lemonade']:.2f}"
+meeting_place\cronenberg_pen_terminal.py:99: f"Area state: {status['area_state']}"
+meeting_place\cronenberg_pen_terminal.py:102: f"Pen exists: {status['pen_exists']}"
+meeting_place\cronenberg_pen_terminal.py:106: f"{status['count']} / {status['capacity']}"
+meeting_place\cronenberg_pen_terminal.py:110: f"{status['projected_lemonade']:.2f} litres"
+meeting_place\cronenberg_pen_terminal.py:114: f"{status['total_lemonade_produced']:.2f} litres"
+meeting_place\cronenberg_pen_terminal.py:118: f"{status['processing_count']}"
+meeting_place\cronenberg_pen_terminal.py:121: if not status["pen_exists"]:
+meeting_place\cronenberg_pen_terminal.py:123: f"Tree: {status['tree']}"
+meeting_place\cronenberg_pen_terminal.py:126: f"Bench: {status['bench']}"
+meeting_place\cronenberg_pen_terminal.py:129: for cronenberg in status["cronenbergs"]:
+meeting_place\cronenberg_pen_terminal.py:131: print(cronenberg["name"])
+meeting_place\cronenberg_pen_terminal.py:133: f"  age: {cronenberg['age']}"
+meeting_place\cronenberg_pen_terminal.py:136: f"  size: {cronenberg['size']:.2f}"
+meeting_place\cronenberg_pen_terminal.py:139: f"  state: {cronenberg['state']}"
+meeting_place\dice_box.py:26: "missing": ["d20"],
+meeting_place\dice_box.py:107: "name": event["name"],
+meeting_place\dice_box.py:109: event["rotated_count"]
+meeting_place\dice_box.py:116: event["visibility"]
+meeting_place\dice_box.py:124: result["die"]: (
+meeting_place\dice_box.py:125: result["value"]
+meeting_place\dice_box.py:216: "die": event["die"],
+meeting_place\dice_box.py:217: "value": event["value"]
+meeting_place\dice_box.py:280: if units_die["face_value"] == 10
+meeting_place\dice_box.py:281: else units_die["face_value"]
+meeting_place\dice_box.py:285: tens["percentile_tens"]
+meeting_place\dice_box.py:357: if die not in self.public_state["missing"]:
+meeting_place\dice_box.py:358: self.public_state["missing"].append(
+meeting_place\dice_vial.py:79: if event["roll"] <= 10:
+meeting_place\fridge.py:38: return self.items.get(item_name)
+meeting_place\glass_shelf.py:31: if glass.get("kind") == kind
+meeting_place\glass_shelf.py:47: glass["capacity_litres"] = 0.5
+meeting_place\glass_shelf.py:53: f"{glass['name']}"
+meeting_place\glass_shelf.py:58: glass_mode = decision.get("glass_mode")
+meeting_place\glass_shelf.py:59: entity_id = decision.get("entity_id")
+meeting_place\glass_shelf.py:98: f"{glass['name']}"
+meeting_place\glass_shelf.py:105: if glass.get("reserved_for") == entity_id:
+meeting_place\glass_shelf.py:149: f"{glass['name']}"
+meeting_place\how_to_mix_drinks.py:70: recipe = self.hidden_recipes.get(
+meeting_place\how_to_mix_drinks.py:177: for existing in recipe["tastings"]:
+meeting_place\how_to_mix_drinks.py:178: if existing.get("guest") == guest:
+meeting_place\how_to_mix_drinks.py:197: if tasting["liked"]:
+meeting_place\how_to_mix_drinks.py:206: if len(recipe["tastings"]) == 5:
+meeting_place\how_to_mix_drinks.py:207: if recipe["votes_for"] >= 4:
+meeting_place\how_to_mix_drinks.py:208: recipe["approved"] = True
+meeting_place\how_to_mix_drinks.py:209: recipe["status"] = "approved"
+meeting_place\how_to_mix_drinks.py:211: recipe["approved"] = False
+meeting_place\how_to_mix_drinks.py:212: recipe["status"] = "rejected"
+meeting_place\lemonade_profile.py:62: traits.get(
+meeting_place\lemonade_profile.py:85: pair["strength"]
+meeting_place\lemonade_profile.py:176: target_id = link.get(
+meeting_place\lemonade_profile.py:204: if reverse_link.get(
+meeting_place\lemonade_profile.py:210: link.get(
+meeting_place\lemonade_profile.py:219: reverse_link.get(
+meeting_place\lemonade_profile.py:244: link.get(
+meeting_place\lemonade_profile.py:248: reverse_link.get(
+meeting_place\lemonade_reservoir.py:102: profile.get("traits", {})
+meeting_place\lemonade_reservoir.py:104: "source_count": profile.get(
+meeting_place\lemonade_reservoir.py:108: "source_mass": profile.get(
+meeting_place\lemonade_reservoir.py:113: profile.get(
+meeting_place\lemonade_reservoir.py:118: "entangled_pair_count": profile.get(
+meeting_place\lemonade_reservoir.py:122: "entanglement_strength": profile.get(
+meeting_place\lemonade_reservoir.py:128: for pair in profile.get(
+meeting_place\lemonade_reservoir.py:133: "dominant_trait": profile.get(
+meeting_place\lemonade_reservoir.py:156: current_traits = current_profile.get(
+meeting_place\lemonade_reservoir.py:161: added_traits = added_profile.get(
+meeting_place\lemonade_reservoir.py:174: current_traits.get(
+meeting_place\lemonade_reservoir.py:181: added_traits.get(
+meeting_place\lemonade_reservoir.py:197: current_profile.get(
+meeting_place\lemonade_reservoir.py:203: added_profile.get(
+meeting_place\lemonade_reservoir.py:215: current_profile.get(
+meeting_place\lemonade_reservoir.py:221: added_profile.get(
+meeting_place\lemonade_reservoir.py:231: current_profile.get(
+meeting_place\lemonade_reservoir.py:237: added_profile.get(
+meeting_place\lemonade_reservoir.py:245: current_profile.get(
+meeting_place\lemonade_reservoir.py:251: added_profile.get(
+meeting_place\lemonade_reservoir.py:260: current_profile.get(
+meeting_place\lemonade_reservoir.py:266: added_profile.get(
+meeting_place\lemonade_signs.py:30: self.outside_sign["visible"]
+meeting_place\lemonade_signs.py:34: self.outside_sign["visible"] = (
+meeting_place\lemonade_signs.py:38: self.inside_sign["visible"] = (
+meeting_place\meeting_place.py:274: self.universe.world["meeting_place"] = self.state
+meeting_place\meeting_place.py:279: return self.permissions.get(entity_name) == "enter"
+meeting_place\meeting_place.py:305: staff_view["cronenberg_pen_visible"] = pen is not None
+meeting_place\meeting_place.py:306: staff_view["cronenberg_pen"] = (
+meeting_place\meeting_place.py:311: staff_view["actual_lemonade_source"] = (
+meeting_place\meeting_place.py:354: visits = self.guest_visit_history.setdefault(
+meeting_place\meeting_place.py:415: self.guest_visit_history.get(
+meeting_place\meeting_place.py:482: entity.get("type")
+meeting_place\meeting_place.py:510: entity["current_layer"] = "meeting_place"
+meeting_place\meeting_place.py:514: self.universe.world["meeting_place"]["entities"] = self.entities
+meeting_place\meeting_place.py:584: cat.meow_invitations.get(
+meeting_place\meeting_place.py:601: if cat.meow_invitations.get(
+meeting_place\meeting_place.py:638: if not authorization.get(
+meeting_place\meeting_place.py:646: f"REASON={authorization.get('reason')}"
+meeting_place\meeting_place.py:655: "reason": authorization.get(
+meeting_place\meeting_place.py:776: ).get(
+meeting_place\meeting_place.py:790: inviting_cat_name = guest_record.get(
+meeting_place\meeting_place.py:838: invitation_id=guest_record.get(
+meeting_place\meeting_place.py:883: event=event.get(
+meeting_place\meeting_place.py:1094: and cat.get(
+meeting_place\meeting_place.py:1112: "bowl": milk_bowl.get(
+meeting_place\meeting_place.py:1132: event["distribution"] = (
+meeting_place\meeting_place.py:1157: if cat.get("name") == name
+meeting_place\meeting_place.py:1191: cat = manifestation["cat"]
+meeting_place\meeting_place.py:1199: cat["special_traits"].extend([
+meeting_place\meeting_place.py:1205: cat["state"] = "arrived_at_bar"
+meeting_place\meeting_place.py:1206: cat["current_layer"] = (
+meeting_place\meeting_place.py:1210: cat["cat_d20"] = {
+meeting_place\meeting_place.py:1246: "cat": cat["name"],
+meeting_place\meeting_place.py:1250: .get("contains")
+meeting_place\meeting_place.py:1253: "box": cat_box["name"],
+meeting_place\meeting_place.py:1255: cat_box["location"]
+meeting_place\meeting_place.py:1309: if "d20_cat" in candidate.get(
+meeting_place\meeting_place.py:1334: "cat": cat["name"],
+meeting_place\meeting_place.py:1338: if box.get(
+meeting_place\meeting_place.py:1340: ) != cat["name"]:
+meeting_place\meeting_place.py:1344: "cat": cat["name"],
+meeting_place\meeting_place.py:1362: cat_d20_state.get(
+meeting_place\meeting_place.py:1368: cat_d20_state.get(
+meeting_place\meeting_place.py:1376: "cat": cat["name"],
+meeting_place\meeting_place.py:1377: "box": box["name"],
+meeting_place\meeting_place.py:1402: cat_d20_state.setdefault(
+meeting_place\meeting_place.py:1445: turn_event["interpretation"] = (
+meeting_place\meeting_place.py:1484: if "d20_cat" in cat.get(
+meeting_place\meeting_place.py:1516: base_profile["color"],
+meeting_place\meeting_place.py:1517: base_profile["fur_length"],
+meeting_place\meeting_place.py:1518: base_profile["pattern"],
+meeting_place\meeting_place.py:1519: base_profile["eye_color"],
+meeting_place\meeting_place.py:1520: base_profile["sex"]
+meeting_place\meeting_place.py:1524: self.cat_d20_canonical_profile_counts.get(
+meeting_place\meeting_place.py:1564: "cat": cat_d20["name"],
+meeting_place\meeting_place.py:1589: cat_d20["cat_d20"][
+meeting_place\meeting_place.py:1593: cat_d20["cat_d20"][
+meeting_place\meeting_place.py:1634: if prepared_event.get(
+meeting_place\meeting_place.py:1643: if prepared_event.get(
+meeting_place\meeting_place.py:1653: prepared_event.get(
+meeting_place\meeting_place.py:1690: if cat.get("name") == "gib"
+meeting_place\meeting_place.py:1709: color=profile["color"],
+meeting_place\meeting_place.py:1713: pattern=profile["pattern"],
+meeting_place\meeting_place.py:1717: sex=profile["sex"]
+meeting_place\meeting_place.py:1728: gib = manifestation["cat"]
+meeting_place\meeting_place.py:1730: gib["special_traits"].extend([
+meeting_place\meeting_place.py:1736: gib["canonical_origin"] = {
+meeting_place\meeting_place.py:1754: "cat": gib["name"],
+meeting_place\meeting_place.py:1760: prepared_event.get(
+meeting_place\meeting_place.py:1831: if "d20_cat" in cat.get(
+meeting_place\meeting_place.py:1969: if "d20_cat" not in cat.get(
+meeting_place\meeting_place.py:1986: ] = cat["name"]
+meeting_place\meeting_place.py:1988: cat["cat_d20_box"] = (
+meeting_place\meeting_place.py:2005: "occupied_by": cat["name"],
+meeting_place\meeting_place.py:2018: cat["cat_d20_box"] = (
+meeting_place\meeting_place.py:2022: cat["state"] = (
+meeting_place\meeting_place.py:2028: ]["cat_d20_box"] = (
+meeting_place\meeting_place.py:2044: self.entropy_terminal["total_entropy_served_today"] = (
+meeting_place\meeting_place.py:2047: self.entropy_terminal["total_entropy_served_ever"] = (
+meeting_place\meeting_place.py:2051: self.universe.world["meeting_place"]["entropy_terminal"] = (
+meeting_place\meeting_place.py:2056: self.universe.world["meeting_place"]["energy_reservoir"] = (
+meeting_place\meeting_place.py:2059: self.universe.world["meeting_place"]["entropy_reservoir"] = (
+meeting_place\meeting_place.py:2170: if secret_event["quantum_tick_requested"]:
+meeting_place\meeting_place.py:2173: if secret_event["box_created"]:
+meeting_place\meeting_place.py:2180: event.get("entity_energy_gain_j", 0.0)
+meeting_place\meeting_place.py:2240: recipe.get("status")
+meeting_place\meeting_place.py:2242: or not recipe.get(
+meeting_place\meeting_place.py:2251: drink_name = recipe.get(
+meeting_place\meeting_place.py:2260: recipe["menu_added_day"] = (
+meeting_place\meeting_place.py:2302: self.drink_menu.get(
+meeting_place\meeting_place.py:2316: .get(
+meeting_place\meeting_place.py:2327: if stock.get(
+meeting_place\meeting_place.py:2335: if not stock.get(
+meeting_place\meeting_place.py:2407: menu_item = self.drink_menu.get(
+meeting_place\meeting_place.py:2419: .get(
+meeting_place\meeting_place.py:2429: if stock.get(
+meeting_place\meeting_place.py:2436: if not stock.get(
+meeting_place\meeting_place.py:2451: if payment.get(
+meeting_place\meeting_place.py:2459: payment.get(
+meeting_place\meeting_place.py:2515: .recipes.get(
+meeting_place\meeting_place.py:2533: ) in recipe["ingredients"].items():
+meeting_place\meeting_place.py:2545: requirement.get(
+meeting_place\meeting_place.py:2552: requirement.get(
+meeting_place\meeting_place.py:2556: and stock.get(
+meeting_place\meeting_place.py:2579: ) in recipe["ingredients"].items():
+meeting_place\meeting_place.py:2581: if not requirement.get(
+meeting_place\meeting_place.py:2589: ]["shots"] -= requirement[
+meeting_place\meeting_place.py:2614: if drink.get(
+meeting_place\meeting_place.py:2631: if not stock.get(
+meeting_place\meeting_place.py:2637: if not stock.get(
+meeting_place\meeting_place.py:2658: if recipe.get(
+meeting_place\meeting_place.py:2664: if not recipe.get(
+meeting_place\meeting_place.py:2679: stock = ingredients.get(
+meeting_place\meeting_place.py:2687: if not stock.get(
+meeting_place\meeting_place.py:2694: if requirement.get(
+meeting_place\meeting_place.py:2699: requirement.get(
+meeting_place\meeting_place.py:2705: if stock.get(
+meeting_place\meeting_place.py:2739: added_day = recipe.get(
+meeting_place\meeting_place.py:2818: drink_name = drink.get(
+meeting_place\meeting_place.py:2960: return entity.get(
+meeting_place\meeting_place.py:2978: return entity.get(
+meeting_place\meeting_place.py:2998: entity.get(
+meeting_place\service_rules.py:87: existence_by_world.get(
+meeting_place\service_rules.py:128: existence_by_world.get(
+meeting_place\service_rules.py:152: existence_by_world.get(
+meeting_place\service_rules.py:303: return entity.get(key, default)
+meeting_place\staff_glass_shelf.py:36: f"{glass['name']}"
+meeting_place\terminals.py:67: if "excerpts" in book and isinstance(book["excerpts"], list):
+meeting_place\terminals.py:68: excerpts.extend(book["excerpts"])
+meeting_place\terminals.py:72: excerpts.append(book["excerpt"])
+meeting_place\terminals.py:76: excerpts.append(book["content"][:160])
+meeting_place\terminals.py:80: excerpts.append(book["text"][:160])
+cats\adult_vocalization_resolver.py:27: teacher_learning = teacher.get(
+cats\adult_vocalization_resolver.py:32: kitten_learning = kitten.get(
+cats\adult_vocalization_resolver.py:39: .get("skills", {})
+cats\adult_vocalization_resolver.py:40: .get("adult_meowing", {})
+cats\adult_vocalization_resolver.py:45: .get("skills", {})
+cats\adult_vocalization_resolver.py:46: .get("adult_meowing", {})
+cats\adult_vocalization_resolver.py:49: if not teacher_skill.get(
+cats\adult_vocalization_resolver.py:62: teacher_skill.get(
+cats\adult_vocalization_resolver.py:68: if not teacher_vocalizations.get(
+cats\adult_vocalization_resolver.py:81: kitten_skill.setdefault(
+cats\adult_vocalization_resolver.py:91: if kitten_vocalizations.get(
+cats\adult_vocalization_resolver.py:127: kitten_skill.update({
+cats\adult_vocalization_resolver.py:130: "teacher": teacher["name"],
+cats\adult_vocalization_resolver.py:142: "teacher": teacher["name"],
+cats\adult_vocalization_resolver.py:143: "student": kitten["name"],
+cats\adult_vocalization_resolver.py:205: "teacher": teacher["name"],
+cats\adult_vocalization_resolver.py:206: "student": kitten["name"],
+cats\adult_vocalization_resolver.py:232: "teacher": teacher.get("name"),
+cats\adult_vocalization_resolver.py:233: "student": kitten.get("name"),
+cats\cat.py:281: return entity.get(
+cats\cat.py:321: self.learning.get(
+cats\cat.py:327: if not meow_knowledge.get(
+cats\cat.py:342: meow_knowledge.get(
+cats\cats.py:109: self.universe.world["cats"] = {
+cats\cats.py:207: self.universe.world["cats"]["cats"] = self.cats
+cats\cats.py:524: recipient_layer = recipient.get(
+cats\cats.py:539: recipient_position = recipient.get(
+cats\cats.py:576: route = plan.get(
+cats\cats.py:583: "result": plan.get(
+cats\cats.py:676: offer["accepted"] = True
+cats\cats.py:750: offer["accepted"] = False
+cats\cats.py:751: offer["declined"] = True
+cats\cats.py:770: "route_id": offer.get(
+cats\cats.py:773: "destination": offer.get(
+cats\cats.py:846: "route_id": offer.get(
+cats\cats.py:849: "destination": offer.get(
+cats\cats.py:852: "suggested_intent": offer.get(
+cats\cats.py:891: "route": result.get(
+cats\cats.py:921: if not observations.get(
+cats\cats.py:944: if not decision.get(
+cats\cats.py:1064: if not self.access_rules.get("can_access_anywhere", False):
+cats\cats.py:1067: allowed_routes = self.access_rules.get("access_via", [])
+cats\cats.py:1114: if not result.get(
+cats\cats.py:1124: cronenberg_id = result.get(
+cats\cats.py:1150: if not result.get(
+cats\cats.py:1160: cronenberg_id = result.get(
+cats\cats.py:1246: and quantum_return.get(
+cats\cats.py:1282: and quantum_exploration.get(
+cats\cats.py:1348: decision = thought.get(
+cats\cats.py:1354: decision.get(
+cats\cats.py:1357: or decision.get(
+cats\cats.py:1364: cat.mind.get(
+cats\cats.py:1371: current.get(
+cats\cats.py:1395: thought.get(
+cats\cat_bar_guidance_system.py:29: .get(
+cats\cat_bar_guidance_system.py:133: if not admission_result.get(
+cats\cat_bar_guidance_system.py:140: admission_result.get(
+cats\cat_bar_guidance_system.py:224: return entity.get(
+cats\cat_birth_effect_resolver.py:303: effect["effect"]
+cats\cat_birth_resolver.py:98: result["die"]: result
+cats\cat_birth_resolver.py:99: for result in dice_result["results"]
+cats\cat_birth_resolver.py:104: rolls["d10_percentile"]
+cats\cat_birth_resolver.py:111: percentile_history[-1]["value"]
+cats\cat_birth_resolver.py:154: cat_d20_result["value"]
+cats\cat_birth_resolver.py:175: mapping["die_to_trait"].items()
+cats\cat_birth_resolver.py:182: ]["raw_value"],
+cats\cat_birth_resolver.py:185: ]["sides"],
+cats\cat_birth_resolver.py:187: cat_d20_result["value"]
+cats\cat_birth_resolver.py:206: genetics_result["profile"]
+cats\cat_birth_resolver.py:218: profile["color"] = "white"
+cats\cat_birth_resolver.py:240: woodoo_profile["eye_color"] = "gold"
+cats\cat_birth_resolver.py:269: canonical_result["profile"]
+cats\cat_birth_resolver.py:324: birth["profile"]
+cats\cat_birth_resolver.py:331: identity = canonical.get(
+cats\cat_birth_resolver.py:382: color=profile["color"],
+cats\cat_birth_resolver.py:386: pattern=profile["pattern"],
+cats\cat_birth_resolver.py:390: sex=profile["sex"]
+cats\cat_birth_resolver.py:412: birth["rolled_profile"]
+cats\cat_birth_resolver.py:420: birth["genetics"]
+cats\cat_birth_resolver.py:424: birth["trait_dice_mapping"]
+cats\cat_birth_resolver.py:428: birth["percentile"]
+cats\cat_birth_resolver.py:457: canonical.get(
+cats\cat_birth_resolver.py:475: canonical.get(
+cats\cat_birth_resolver.py:481: canonical.get(
+cats\cat_birth_resolver.py:567: mapping["die_to_trait"]
+cats\cat_birth_resolver.py:571: mapping["trait_to_die"]
+cats\cat_birth_resolver.py:609: if validation["valid"]:
+cats\cat_birth_resolver.py:631: validation.get(
+cats\cat_birth_resolver.py:637: trait_to_die.get(
+cats\cat_birth_resolver.py:642: trait = die_to_trait.get(
+cats\cat_birth_resolver.py:675: mapping["cat_d20_value"]
+cats\cat_birth_resolver.py:857: rebirth["profile"]
+cats\cat_bonding_system.py:27: relation = cat.relationships.get(
+cats\cat_bonding_system.py:32: memory = cat.social_memory.get(
+cats\cat_bonding_system.py:38: relation.get(
+cats\cat_bonding_system.py:45: relation.get(
+cats\cat_bonding_system.py:52: relation.get(
+cats\cat_bonding_system.py:59: relation.get(
+cats\cat_bonding_system.py:66: relation.get(
+cats\cat_bonding_system.py:73: memory.get(
+cats\cat_bonding_system.py:80: memory.get(
+cats\cat_bonding_system.py:144: not first["eligible"]
+cats\cat_bonding_system.py:145: or not second["eligible"]
+cats\cat_bonding_system.py:160: first["strength"],
+cats\cat_bonding_system.py:161: second["strength"]
+cats\cat_bonding_system.py:370: bond = cat.bonds.get(
+cats\cat_bonding_system.py:379: and bond.get(
+cats\cat_bonding_system.py:410: bond = cat.bonds.get(
+cats\cat_bonding_system.py:421: bond.get(
+cats\cat_bonding_system.py:496: first.get(
+cats\cat_bonding_system.py:502: second.get(
+cats\cat_bonding_system.py:508: first.get(
+cats\cat_bonding_system.py:514: second.get(
+cats\cat_bonding_system.py:520: first.get(
+cats\cat_bonding_system.py:526: second.get(
+cats\cat_cultural_adoption_system.py:32: ].get(
+cats\cat_cultural_adoption_system.py:43: traits = cat.personality.get(
+cats\cat_cultural_adoption_system.py:49: traits.get(
+cats\cat_cultural_adoption_system.py:56: traits.get(
+cats\cat_cultural_adoption_system.py:58: traits.get(
+cats\cat_cultural_adoption_system.py:66: traits.get(
+cats\cat_cultural_adoption_system.py:72: category = tradition.get(
+cats\cat_cultural_adoption_system.py:82: cat.intellect.get(
+cats\cat_cultural_adoption_system.py:94: }.get(
+cats\cat_cultural_adoption_system.py:100: tradition.get(
+cats\cat_cultural_adoption_system.py:235: ].get(
+cats\cat_cultural_adoption_system.py:262: "value": preference.get(
+cats\cat_distribution_system.py:50: recipient.get("id")
+cats\cat_distribution_system.py:51: or recipient.get("world_key")
+cats\cat_distribution_system.py:52: or recipient.get("name")
+cats\cat_distribution_system.py:65: recipient["needs_cat"] = False
+cats\cat_door.py:160: .get(
+cats\cat_door.py:164: .get(
+cats\cat_door.py:170: if not skill.get(
+cats\cat_door_registry.py:81: pair["forward"]
+cats\cat_door_registry.py:85: pair["backward"]
+cats\cat_exploration_planner.py:56: if candidate["layer"] != current_layer
+cats\cat_exploration_planner.py:77: item["score"],
+cats\cat_exploration_planner.py:78: item["layer"],
+cats\cat_exploration_planner.py:79: repr(item["position"])
+cats\cat_exploration_planner.py:90: "layer": winner["layer"],
+cats\cat_exploration_planner.py:92: winner["position"]
+cats\cat_exploration_planner.py:94: "score": winner["score"],
+cats\cat_exploration_planner.py:96: winner["reasons"]
+cats\cat_exploration_planner.py:116: knowledge.get(
+cats\cat_exploration_planner.py:137: identity = place.get(
+cats\cat_exploration_planner.py:150: place.get(
+cats\cat_exploration_planner.py:158: place.get(
+cats\cat_exploration_planner.py:167: place.get("layer")
+cats\cat_exploration_planner.py:181: "layer": place.get(
+cats\cat_exploration_planner.py:185: place.get(
+cats\cat_exploration_planner.py:190: "source_id": place.get(
+cats\cat_exploration_planner.py:193: "confidence": place.get(
+cats\cat_exploration_planner.py:198: place.get(
+cats\cat_exploration_planner.py:232: winner["position"]
+cats\cat_exploration_planner.py:259: traits = cat.personality.get(
+cats\cat_exploration_planner.py:265: traits.get(
+cats\cat_exploration_planner.py:272: traits.get(
+cats\cat_exploration_planner.py:279: traits.get(
+cats\cat_exploration_planner.py:286: cat.intellect.get(
+cats\cat_exploration_planner.py:356: key=lambda item: item["score"],
+cats\cat_exploration_planner.py:391: selected["reasons"]
+cats\cat_exploration_planner.py:423: traits = cat.personality.get(
+cats\cat_exploration_planner.py:429: traits.get(
+cats\cat_exploration_planner.py:436: traits.get(
+cats\cat_exploration_planner.py:443: cat.intellect.get(
+cats\cat_exploration_planner.py:458: if event.get(
+cats\cat_exploration_planner.py:463: details = event.get(
+cats\cat_exploration_planner.py:468: if details.get(
+cats\cat_exploration_planner.py:473: position = details.get(
+cats\cat_exploration_planner.py:513: current.get(
+cats\cat_exploration_planner.py:523: current.get(
+cats\cat_exploration_planner.py:533: current.get(
+cats\cat_exploration_planner.py:548: position["x"]
+cats\cat_exploration_planner.py:549: - visited["x"]
+cats\cat_exploration_planner.py:552: position["y"]
+cats\cat_exploration_planner.py:553: - visited["y"]
+cats\cat_exploration_planner.py:556: position["z"]
+cats\cat_exploration_planner.py:557: - visited["z"]
+cats\cat_exploration_planner.py:590: item["score"],
+cats\cat_exploration_planner.py:591: -item["direction_index"]
+cats\cat_exploration_planner.py:602: winner["position"]
+cats\cat_exploration_planner.py:604: "score": winner["score"],
+cats\cat_exploration_planner.py:631: layer = explicit_goal.get(
+cats\cat_exploration_planner.py:635: position = explicit_goal.get(
+cats\cat_exploration_planner.py:706: details = event.get(
+cats\cat_exploration_planner.py:711: event_type = event.get(
+cats\cat_exploration_planner.py:723: value = details.get(
+cats\cat_exploration_planner.py:732: location = event.get(
+cats\cat_exploration_planner.py:745: details.get(
+cats\cat_exploration_planner.py:747: details.get(
+cats\cat_exploration_planner.py:779: for heard in knowledge.get(
+cats\cat_exploration_planner.py:783: if heard.get(
+cats\cat_exploration_planner.py:789: if heard.get(
+cats\cat_exploration_planner.py:796: heard.get(
+cats\cat_exploration_planner.py:805: layer = heard.get(
+cats\cat_exploration_planner.py:809: position = heard.get(
+cats\cat_exploration_planner.py:828: "legend_id": heard.get(
+cats\cat_exploration_planner.py:831: "storyteller": heard.get(
+cats\cat_exploration_planner.py:852: traits = cat.personality.get(
+cats\cat_exploration_planner.py:858: traits.get(
+cats\cat_exploration_planner.py:865: traits.get(
+cats\cat_exploration_planner.py:872: traits.get(
+cats\cat_exploration_planner.py:879: cat.intellect.get(
+cats\cat_exploration_planner.py:886: candidate.get(
+cats\cat_exploration_planner.py:893: candidate.get(
+cats\cat_exploration_planner.py:900: candidate.get(
+cats\cat_exploration_planner.py:950: candidate.get("source")
+cats\cat_exploration_planner.py:954: candidate.get(
+cats\cat_exploration_planner.py:973: candidate.get("source")
+cats\cat_exploration_planner.py:1003: candidate["layer"],
+cats\cat_exploration_planner.py:1022: existing["known_visits"] += int(
+cats\cat_exploration_planner.py:1023: candidate.get(
+cats\cat_exploration_planner.py:1032: candidate.get(
+cats\cat_exploration_planner.py:1041: candidate.get(
+cats\cat_exploration_planner.py:1048: candidate.get("source")
+cats\cat_exploration_planner.py:1051: existing["source"] = (
+cats\cat_exploration_planner.py:1075: value.get(
+cats\cat_exploration_planner.py:1081: value.get(
+cats\cat_exploration_planner.py:1087: value.get(
+cats\cat_family_bonding_system.py:47: first.relationships.get(
+cats\cat_family_bonding_system.py:54: relationship.get(
+cats\cat_family_bonding_system.py:62: first.maternal_care_received.get(
+cats\cat_family_bonding_system.py:68: second.maternal_care_received.get(
+cats\cat_family_bonding_system.py:79: ].get(
+cats\cat_family_bonding_system.py:87: ].get(
+cats\cat_family_bonding_system.py:146: not check_first["eligible"]
+cats\cat_family_bonding_system.py:147: or not check_second["eligible"]
+cats\cat_family_bonding_system.py:218: existing = cat.bonds.get(
+cats\cat_family_bonding_system.py:223: existing.update({
+cats\cat_family_bonding_system.py:228: existing.get(
+cats\cat_family_bonding_system.py:239: existing.setdefault(
+cats\cat_family_bonding_system.py:244: existing.setdefault(
+cats\cat_family_bonding_system.py:249: existing.setdefault(
+cats\cat_family_system.py:71: father = by_name.get(
+cats\cat_family_system.py:123: parents.get(
+cats\cat_family_system.py:131: parents.get(
+cats\cat_family_system.py:250: first_parents.get(
+cats\cat_family_system.py:254: and first_parents.get(
+cats\cat_family_system.py:257: == second_parents.get(
+cats\cat_family_system.py:263: first_parents.get(
+cats\cat_family_system.py:267: and first_parents.get(
+cats\cat_family_system.py:270: == second_parents.get(
+cats\cat_genetics_validator.py:22: sex = profile.get("sex")
+cats\cat_genetics_validator.py:24: karyotype = genetics.get(
+cats\cat_genetics_validator.py:35: genetics["karyotype"] = (
+cats\cat_genetics_validator.py:40: profile.get("color")
+cats\cat_genetics_validator.py:45: profile.get("pattern")
+cats\cat_group_bonding_system.py:49: first.group.get(
+cats\cat_group_bonding_system.py:61: first.relationships.get(
+cats\cat_group_bonding_system.py:69: relation.get(
+cats\cat_group_bonding_system.py:78: relation.get(
+cats\cat_group_bonding_system.py:87: relation.get(
+cats\cat_group_bonding_system.py:113: group.get(
+cats\cat_group_bonding_system.py:195: group.get(
+cats\cat_group_conflict_system.py:61: first.get(
+cats\cat_group_conflict_system.py:66: second.get(
+cats\cat_group_conflict_system.py:73: first.get(
+cats\cat_group_conflict_system.py:76: == second.get(
+cats\cat_group_conflict_system.py:79: and first.get(
+cats\cat_group_conflict_system.py:82: == second.get(
+cats\cat_group_conflict_system.py:348: first.relationships.setdefault(
+cats\cat_group_conflict_system.py:354: relation.setdefault(
+cats\cat_group_cultural_conflict_system.py:54: ].get(
+cats\cat_group_cultural_conflict_system.py:62: ].get(
+cats\cat_group_cultural_conflict_system.py:98: first_traits.get(
+cats\cat_group_cultural_conflict_system.py:104: second_traits.get(
+cats\cat_group_cultural_conflict_system.py:190: ].get(
+cats\cat_group_cultural_conflict_system.py:202: diplomacy.get(
+cats\cat_group_cultural_inheritance_system.py:77: inherited.get(
+cats\cat_group_cultural_inheritance_system.py:106: inherited.get(
+cats\cat_group_cultural_inheritance_system.py:207: parent_traits.get(
+cats\cat_group_cultural_inheritance_system.py:213: child_traits.get(
+cats\cat_group_culture_system.py:32: tradition = traditions.setdefault(
+cats\cat_group_culture_system.py:71: traits.get(
+cats\cat_group_culture_system.py:129: record = preferences.setdefault(
+cats\cat_group_culture_system.py:197: return mapping.get(
+cats\cat_group_diplomatic_lifecycle.py:23: ].get(
+cats\cat_group_diplomatic_lifecycle.py:115: ].get(
+cats\cat_group_federation_system.py:211: if result.get(
+cats\cat_group_federation_system.py:280: federation = self.federations.get(
+cats\cat_group_hierarchy_system.py:57: item["influence"],
+cats\cat_group_hierarchy_system.py:58: item["cat"]
+cats\cat_group_hierarchy_system.py:101: traits = cat.personality.get(
+cats\cat_group_hierarchy_system.py:107: traits.get(
+cats\cat_group_hierarchy_system.py:114: cat.intellect.get(
+cats\cat_group_hierarchy_system.py:126: relation = other.relationships.get(
+cats\cat_group_hierarchy_system.py:133: relation.get(
+cats\cat_group_hierarchy_system.py:139: relation.get(
+cats\cat_group_hierarchy_system.py:145: relation.get(
+cats\cat_group_hierarchy_system.py:166: cat.group.get(
+cats\cat_group_hierarchy_system.py:176: cat.group.get(
+cats\cat_group_innovation_system.py:52: ].get(
+cats\cat_group_innovation_system.py:71: source.get(
+cats\cat_group_innovation_system.py:190: ].get(
+cats\cat_group_innovation_tree_system.py:24: ].get(
+cats\cat_group_innovation_tree_system.py:49: tree.get(
+cats\cat_group_innovation_tree_system.py:52: ).get(
+cats\cat_group_innovation_tree_system.py:134: tree.get(
+cats\cat_group_innovation_tree_system.py:137: ).get(
+cats\cat_group_institutional_conflict_system.py:25: ].get(
+cats\cat_group_institutional_conflict_system.py:31: ].get(
+cats\cat_group_institutional_conflict_system.py:49: first.get(
+cats\cat_group_institutional_conflict_system.py:54: second.get(
+cats\cat_group_institutional_conflict_system.py:63: first.get(
+cats\cat_group_institutional_conflict_system.py:68: second.get(
+cats\cat_group_institutional_conflict_system.py:76: first.get(
+cats\cat_group_institutional_conflict_system.py:79: != second.get(
+cats\cat_group_institutional_conflict_system.py:160: ].get(
+cats\cat_group_institutional_conflict_system.py:166: ].get(
+cats\cat_group_institutional_conflict_system.py:204: institution.get(
+cats\cat_group_institutional_conflict_system.py:280: ].get(
+cats\cat_group_institutional_conflict_system.py:308: mediator.group.get(
+cats\cat_group_institutional_conflict_system.py:394: ].get(
+cats\cat_group_institution_system.py:73: ].get(
+cats\cat_group_institution_system.py:90: ].get(
+cats\cat_group_knowledge_system.py:47: ].get(
+cats\cat_group_knowledge_system.py:83: existing.get(
+cats\cat_group_knowledge_system.py:92: existing.get(
+cats\cat_group_knowledge_system.py:147: ].get(
+cats\cat_group_knowledge_system.py:206: ].get(
+cats\cat_group_knowledge_system.py:227: copied.get(
+cats\cat_group_knowledge_system.py:249: ].get(
+cats\cat_group_knowledge_system.py:265: existing.get(
+cats\cat_group_knowledge_system.py:321: ].get(
+cats\cat_group_knowledge_system.py:378: ].get(
+cats\cat_group_knowledge_system.py:441: cat.knowledge.setdefault(
+cats\cat_group_knowledge_system.py:447: personal = member_knowledge.get(
+cats\cat_group_knowledge_system.py:498: cat.knowledge.setdefault(
+cats\cat_group_lifecycle_system.py:31: if group.get(
+cats\cat_group_memory_system.py:125: ].setdefault(
+cats\cat_group_memory_system.py:151: if event.get(
+cats\cat_group_memory_system.py:161: elif event.get(
+cats\cat_group_memory_system.py:171: elif event.get(
+cats\cat_group_memory_system.py:179: winner = event.get(
+cats\cat_group_memory_system.py:183: loser = event.get(
+cats\cat_group_memory_system.py:223: memory.get(
+cats\cat_group_migration_system.py:25: if group.get(
+cats\cat_group_migration_system.py:52: old_layer = group.get(
+cats\cat_group_migration_system.py:56: old_location = group.get(
+cats\cat_group_myth_lineage_system.py:23: ].get(
+cats\cat_group_myth_lineage_system.py:36: ].setdefault(
+cats\cat_group_myth_lineage_system.py:86: ].setdefault(
+cats\cat_group_myth_lineage_system.py:106: ].setdefault(
+cats\cat_group_myth_lineage_system.py:148: ].get(
+cats\cat_group_myth_system.py:30: ].get(
+cats\cat_group_myth_system.py:68: knowledge.get(
+cats\cat_group_myth_system.py:131: ].get(
+cats\cat_group_myth_system.py:148: root_myth_id = copied.get(
+cats\cat_group_myth_system.py:174: else copied.get(
+cats\cat_group_myth_system.py:182: copied.get(
+cats\cat_group_myth_system.py:300: ].get(
+cats\cat_group_myth_system.py:320: heard = cat.knowledge.setdefault(
+cats\cat_group_myth_system.py:364: ].get(
+cats\cat_group_myth_system.py:377: ].get(
+cats\cat_group_myth_system.py:393: knowledge.get(
+cats\cat_group_myth_system.py:410: knowledge.get(
+cats\cat_group_norm_institution_system.py:24: ].get(
+cats\cat_group_norm_institution_system.py:30: ].get(
+cats\cat_group_norm_institution_system.py:45: institution.setdefault(
+cats\cat_group_norm_system.py:82: ].get(
+cats\cat_group_norm_system.py:118: ].get(
+cats\cat_group_recruitment_system.py:42: item["cat"]: item[
+cats\cat_group_recruitment_system.py:59: relation = member.relationships.get(
+cats\cat_group_recruitment_system.py:65: relation.get(
+cats\cat_group_recruitment_system.py:72: relation.get(
+cats\cat_group_recruitment_system.py:79: relation.get(
+cats\cat_group_recruitment_system.py:86: relation.get(
+cats\cat_group_recruitment_system.py:93: relation.get(
+cats\cat_group_recruitment_system.py:121: ranking.get(
+cats\cat_group_recruitment_system.py:242: result.get(
+cats\cat_group_ritual_evolution_system.py:24: ].get(
+cats\cat_group_ritual_evolution_system.py:39: ].setdefault(
+cats\cat_group_ritual_evolution_system.py:93: ].get(
+cats\cat_group_ritual_evolution_system.py:117: root = parent.get(
+cats\cat_group_ritual_evolution_system.py:135: else parent.get(
+cats\cat_group_ritual_evolution_system.py:156: parent.get(
+cats\cat_group_ritual_evolution_system.py:174: parent.get(
+cats\cat_group_ritual_evolution_system.py:192: ].setdefault(
+cats\cat_group_ritual_evolution_system.py:214: ].setdefault(
+cats\cat_group_ritual_evolution_system.py:267: ].get(
+cats\cat_group_ritual_system.py:70: ].get(
+cats\cat_group_ritual_system.py:122: ].setdefault(
+cats\cat_group_role_specialization_system.py:82: .get(
+cats\cat_group_role_specialization_system.py:86: .get(
+cats\cat_group_role_specialization_system.py:102: traits = cat.personality.get(
+cats\cat_group_role_specialization_system.py:111: traits.get(
+cats\cat_group_role_specialization_system.py:133: ].setdefault(
+cats\cat_group_role_specialization_system.py:142: ].setdefault(
+cats\cat_group_role_specialization_system.py:210: ].get(
+cats\cat_group_role_system.py:73: profile = self.ROLE_PROFILES.get(
+cats\cat_group_role_system.py:85: traits = cat.personality.get(
+cats\cat_group_role_system.py:92: for trait, weight in profile.get(
+cats\cat_group_role_system.py:97: traits.get(
+cats\cat_group_role_system.py:104: cat.group.get(
+cats\cat_group_role_system.py:108: ) * profile.get(
+cats\cat_group_role_system.py:118: ) * profile.get(
+cats\cat_group_role_system.py:124: cat.group.get(
+cats\cat_group_role_system.py:128: ) * profile.get(
+cats\cat_group_role_system.py:169: "reason": check.get(
+cats\cat_group_role_system.py:182: ].setdefault(
+cats\cat_group_role_system.py:249: ].get(
+cats\cat_group_role_system.py:297: ].get(
+cats\cat_group_sanction_system.py:23: violation.get(
+cats\cat_group_sanction_system.py:25: violation.get(
+cats\cat_group_sanction_system.py:119: relation = cat.relationships.setdefault(
+cats\cat_group_sanction_system.py:129: relation.get(
+cats\cat_group_sanction_system.py:153: relation = cat.relationships.setdefault(
+cats\cat_group_sanction_system.py:163: relation.get(
+cats\cat_group_sanction_system.py:179: ].get(
+cats\cat_group_split_system.py:32: if parent.get(
+cats\cat_group_succession_system.py:71: cat.group.get(
+cats\cat_group_succession_system.py:78: cat.group.get(
+cats\cat_group_succession_system.py:125: ].get(
+cats\cat_group_succession_system.py:201: if not assigned.get(
+cats\cat_group_succession_system.py:303: leave_result.get(
+cats\cat_group_succession_system.py:321: not in institution.get(
+cats\cat_group_succession_system.py:333: institution.get(
+cats\cat_group_succession_system.py:359: not in institution.get(
+cats\cat_group_succession_system.py:371: institution.get(
+cats\cat_group_system.py:237: relation = member.relationships.get(
+cats\cat_group_system.py:243: relation.get(
+cats\cat_group_system.py:250: relation.get(
+cats\cat_group_system.py:257: relation.get(
+cats\cat_group_system.py:264: relation.get(
+cats\cat_group_system.py:468: group.get(
+cats\cat_group_system.py:496: relation.get(
+cats\cat_group_system.py:508: relation.get(
+cats\cat_group_system.py:636: threat_name = threat.get(
+cats\cat_group_system.py:654: member.personality.get(
+cats\cat_group_system.py:661: traits.get(
+cats\cat_group_system.py:668: traits.get(
+cats\cat_group_system.py:887: cat.relationships.setdefault(
+cats\cat_group_system.py:893: relation.setdefault(
+cats\cat_group_system.py:898: relation.setdefault(
+cats\cat_group_system.py:903: relation.setdefault(
+cats\cat_group_system.py:908: relation.setdefault(
+cats\cat_group_system.py:913: relation.setdefault(
+cats\cat_group_system.py:918: relation.setdefault(
+cats\cat_group_system.py:929: group = self.groups.get(
+cats\cat_group_taboo_system.py:71: ].get(
+cats\cat_guest_responsibility_system.py:92: cat.meow_invitations.get(
+cats\cat_guest_responsibility_system.py:144: return entity.get(
+cats\cat_human_bond_system.py:36: bond = cat.human_bonds.setdefault(
+cats\cat_human_bond_system.py:146: bond = cat.human_bonds.get(
+cats\cat_human_bond_system.py:203: personality = cat.personality.get(
+cats\cat_human_bond_system.py:209: personality.get(
+cats\cat_human_bond_system.py:211: personality.get(
+cats\cat_human_bond_system.py:262: return entity.get(
+cats\cat_intellect.py:70: intellect.get(
+cats\cat_intellect.py:84: intellect["score"] = score
+cats\cat_intellect.py:85: intellect["normalized"] = (
+cats\cat_intellect.py:91: intellect.setdefault(
+cats\cat_intellect.py:96: intellect.setdefault(
+cats\cat_intellect.py:101: intellect.setdefault(
+cats\cat_intellect.py:106: intellect.setdefault(
+cats\cat_intellect.py:111: intellect.setdefault(
+cats\cat_intellect.py:116: intellect.setdefault(
+cats\cat_intellect.py:158: )["score"]
+cats\cat_intellect.py:184: )["score"]
+cats\cat_intention_executor.py:82: intention = mind.get(
+cats\cat_intention_executor.py:96: intention_type = intention.get(
+cats\cat_intention_executor.py:235: target = intention.get(
+cats\cat_intention_executor.py:240: target.get(
+cats\cat_intention_executor.py:260: if not offer.get(
+cats\cat_intention_executor.py:271: "reason": offer.get(
+cats\cat_intention_executor.py:295: if not acceptance.get(
+cats\cat_intention_executor.py:306: "reason": acceptance.get(
+cats\cat_intention_executor.py:326: "target": intention.get(
+cats\cat_intention_executor.py:329: "route_id": acceptance.get(
+cats\cat_intention_executor.py:332: "destination": acceptance.get(
+cats\cat_intention_executor.py:367: target = intention.get(
+cats\cat_intention_executor.py:372: source_box_id = target.get(
+cats\cat_intention_executor.py:376: target_box_id = target.get(
+cats\cat_intention_executor.py:438: "identity": target.get(
+cats\cat_intention_executor.py:461: "identity": target.get(
+cats\cat_intention_executor.py:477: and follow.get(
+cats\cat_intention_executor.py:481: and follow.get(
+cats\cat_intention_executor.py:484: and follow.get(
+cats\cat_intention_executor.py:568: route = planned["route"]
+cats\cat_intention_executor.py:581: "identity": target.get(
+cats\cat_intention_executor.py:598: "identity": target.get(
+cats\cat_intention_executor.py:652: position = result.get(
+cats\cat_intention_executor.py:661: if result.get(
+cats\cat_intention_executor.py:669: follow["active"] = False
+cats\cat_intention_executor.py:687: "identity": follow.get(
+cats\cat_intention_executor.py:704: "route_result": result.get(
+cats\cat_intention_executor.py:710: result.get(
+cats\cat_intention_executor.py:734: target = intention.get(
+cats\cat_intention_executor.py:752: if result.get(
+cats\cat_intention_executor.py:761: "identity": target.get(
+cats\cat_intention_executor.py:766: "source_layer": target.get(
+cats\cat_intention_executor.py:769: "target_layer": target.get(
+cats\cat_intention_executor.py:775: "executed": result.get(
+cats\cat_intention_executor.py:820: follow["active"] = False
+cats\cat_intention_executor.py:835: first.get(
+cats\cat_intention_executor.py:841: second.get(
+cats\cat_intention_executor.py:860: target = intention.get(
+cats\cat_intention_executor.py:878: source_box_id = target.get(
+cats\cat_intention_executor.py:881: counterpart_box_id = target.get(
+cats\cat_intention_executor.py:923: if not observation.get(
+cats\cat_intention_executor.py:943: observation.get(
+cats\cat_intention_executor.py:1091: transferred = result.get(
+cats\cat_intention_executor.py:1107: "source_layer": target.get(
+cats\cat_intention_executor.py:1142: failure_reason = result.get(
+cats\cat_intention_executor.py:1169: .quantum_state.get(
+cats\cat_intention_executor.py:1182: "source_layer": target.get(
+cats\cat_intention_executor.py:1185: "target_layer": target.get(
+cats\cat_intention_executor.py:1222: target = intention.get(
+cats\cat_intention_executor.py:1231: source_box_id = target.get(
+cats\cat_intention_executor.py:1333: if not pairing.get(
+cats\cat_intention_executor.py:1350: counterpart_id = pairing.get(
+cats\cat_intention_executor.py:1393: not reverse_pairing.get(
+cats\cat_intention_executor.py:1397: or reverse_pairing.get(
+cats\cat_intention_executor.py:1492: target = intention.get(
+cats\cat_intention_executor.py:1501: target.get("id")
+cats\cat_intention_executor.py:1502: or target.get("box_id")
+cats\cat_intention_executor.py:1570: and exploration.get(
+cats\cat_intention_executor.py:1574: and exploration.get(
+cats\cat_intention_executor.py:1654: route = planned["route"]
+cats\cat_intention_executor.py:1728: position = result.get(
+cats\cat_intention_executor.py:1737: if result.get(
+cats\cat_intention_executor.py:1754: ) == exploration.get(
+cats\cat_intention_executor.py:1784: "box_id": exploration.get(
+cats\cat_intention_executor.py:1787: "route_id": exploration.get(
+cats\cat_intention_executor.py:1805: result.get(
+cats\cat_intention_executor.py:1886: exploration.update({
+cats\cat_intention_executor.py:1951: target = intention.get(
+cats\cat_intention_executor.py:1956: identity = target.get(
+cats\cat_intention_executor.py:1960: direction = target.get(
+cats\cat_intention_executor.py:1965: unit_vector = direction.get(
+cats\cat_intention_executor.py:1987: and search.get("active", False)
+cats\cat_intention_executor.py:1988: and search.get("identity") == identity
+cats\cat_intention_executor.py:1999: target.get(
+cats\cat_intention_executor.py:2008: start.get(
+cats\cat_intention_executor.py:2014: unit_vector.get(
+cats\cat_intention_executor.py:2057: route = planned["route"]
+cats\cat_intention_executor.py:2070: target.get(
+cats\cat_intention_executor.py:2076: target.get(
+cats\cat_intention_executor.py:2082: target.get(
+cats\cat_intention_executor.py:2101: "attempt": target.get(
+cats\cat_intention_executor.py:2105: "max_attempts": target.get(
+cats\cat_intention_executor.py:2155: position = result.get(
+cats\cat_intention_executor.py:2173: in olfaction.get(
+cats\cat_intention_executor.py:2177: if item.get(
+cats\cat_intention_executor.py:2180: ).get(
+cats\cat_intention_executor.py:2184: and item.get(
+cats\cat_intention_executor.py:2187: ).get(
+cats\cat_intention_executor.py:2189: ) == search.get(
+cats\cat_intention_executor.py:2219: search["active"] = False
+cats\cat_intention_executor.py:2220: search["arrived"] = False
+cats\cat_intention_executor.py:2221: search["reacquired"] = True
+cats\cat_intention_executor.py:2222: search["reacquired_at"] = dict(
+cats\cat_intention_executor.py:2227: ] = reacquired.get(
+cats\cat_intention_executor.py:2252: "identity": search.get(
+cats\cat_intention_executor.py:2255: "source_id": reacquired.get(
+cats\cat_intention_executor.py:2279: if result.get(
+cats\cat_intention_executor.py:2291: "identity": search.get(
+cats\cat_intention_executor.py:2294: "attempt": search.get(
+cats\cat_intention_executor.py:2297: "max_attempts": search.get(
+cats\cat_intention_executor.py:2300: "route_id": search.get(
+cats\cat_intention_executor.py:2309: search["destination"]
+cats\cat_intention_executor.py:2314: result.get("result")
+cats\cat_intention_executor.py:2332: search["active"] = False
+cats\cat_intention_executor.py:2333: search["arrived"] = True
+cats\cat_intention_executor.py:2335: search["attempts"] = int(
+cats\cat_intention_executor.py:2336: search.get(
+cats\cat_intention_executor.py:2362: "identity": search.get(
+cats\cat_intention_executor.py:2365: "attempt": search.get(
+cats\cat_intention_executor.py:2368: "max_attempts": search.get(
+cats\cat_intention_executor.py:2375: search.get(
+cats\cat_intention_executor.py:2397: target = intention.get(
+cats\cat_intention_executor.py:2402: layer = target.get(
+cats\cat_intention_executor.py:2406: position = target.get(
+cats\cat_intention_executor.py:2435: "identity": target.get(
+cats\cat_intention_executor.py:2452: and follow.get(
+cats\cat_intention_executor.py:2456: and follow.get(
+cats\cat_intention_executor.py:2458: ) == target.get(
+cats\cat_intention_executor.py:2461: and follow.get(
+cats\cat_intention_executor.py:2476: cat_position.get(
+cats\cat_intention_executor.py:2482: position.get(
+cats\cat_intention_executor.py:2532: f"{target.get('identity')}"
+cats\cat_intention_executor.py:2538: route = planned["route"]
+cats\cat_intention_executor.py:2549: "identity": target.get(
+cats\cat_intention_executor.py:2552: "source_id": target.get(
+cats\cat_intention_executor.py:2559: target.get(
+cats\cat_intention_executor.py:2570: "identity": target.get(
+cats\cat_intention_executor.py:2625: position = result.get(
+cats\cat_intention_executor.py:2634: if result.get(
+cats\cat_intention_executor.py:2649: "identity": follow.get(
+cats\cat_intention_executor.py:2671: result.get(
+cats\cat_intention_executor.py:2694: target = intention.get(
+cats\cat_intention_executor.py:2704: follow.update({
+cats\cat_intention_executor.py:2707: "identity": target.get(
+cats\cat_intention_executor.py:2710: "source_id": target.get(
+cats\cat_intention_executor.py:2717: target.get(
+cats\cat_intention_executor.py:2743: "identity": target.get(
+cats\cat_intention_executor.py:2751: target.get(
+cats\cat_intention_executor.py:2777: target = intention.get(
+cats\cat_intention_executor.py:2788: target.get("name")
+cats\cat_intention_executor.py:2789: or target.get("id")
+cats\cat_intention_executor.py:2805: if candidate.get(
+cats\cat_intention_executor.py:2828: mind["previous_intention"] = deepcopy(
+cats\cat_intention_executor.py:2832: mind["current_intention"] = None
+cats\cat_intention_executor.py:2865: target = intention.get(
+cats\cat_intention_executor.py:2870: destination_layer = target.get(
+cats\cat_intention_executor.py:2874: destination_position = target.get(
+cats\cat_intention_executor.py:2932: if not creation.get(
+cats\cat_intention_executor.py:2945: "reason": creation.get(
+cats\cat_intention_executor.py:2953: source_box = creation.get(
+cats\cat_intention_executor.py:2957: target_box = creation.get(
+cats\cat_intention_executor.py:2974: "pair_id": creation.get(
+cats\cat_intention_executor.py:2993: if not transfer.get(
+cats\cat_intention_executor.py:3020: "reason": transfer.get(
+cats\cat_intention_executor.py:3048: mind["previous_intention"] = deepcopy(
+cats\cat_intention_executor.py:3052: mind["current_intention"] = None
+cats\cat_intention_executor.py:3088: "stable": creation.get(
+cats\cat_intention_executor.py:3093: creation.get(
+cats\cat_intention_executor.py:3102: transfer.get(
+cats\cat_intention_executor.py:3108: transfer.get(
+cats\cat_intention_executor.py:3113: transfer.get(
+cats\cat_intention_executor.py:3117: "trail": transfer.get(
+cats\cat_intention_executor.py:3170: cat.needs.get(
+cats\cat_intention_executor.py:3199: position.setdefault(
+cats\cat_intention_executor.py:3204: position.setdefault(
+cats\cat_intention_executor.py:3209: position.setdefault(
+cats\cat_intention_executor.py:3295: target = intention.get(
+cats\cat_intention_executor.py:3304: target.get("cat")
+cats\cat_intention_executor.py:3305: or target.get("name")
+cats\cat_intention_executor.py:3489: route = planned.get(
+cats\cat_intention_executor.py:3500: "reason": planned.get(
+cats\cat_intention_executor.py:3575: "target": intention.get(
+cats\cat_knowledge.py:22: knowledge.setdefault(
+cats\cat_knowledge.py:27: knowledge.setdefault(
+cats\cat_knowledge.py:32: knowledge.setdefault(
+cats\cat_knowledge.py:37: knowledge.setdefault(
+cats\cat_knowledge.py:42: knowledge.setdefault(
+cats\cat_knowledge.py:47: principles = knowledge.setdefault(
+cats\cat_knowledge.py:52: principles.setdefault(
+cats\cat_knowledge.py:57: knowledge.setdefault(
+cats\cat_knowledge.py:100: knowledge["known_places"],
+cats\cat_knowledge.py:138: place["visit_count"] += 1
+cats\cat_knowledge.py:139: place["last_source"] = source
+cats\cat_knowledge.py:140: place["last_seen_tick"] = (
+cats\cat_knowledge.py:144: place["confidence"] = min(
+cats\cat_knowledge.py:147: place.get(
+cats\cat_knowledge.py:156: place.setdefault(
+cats\cat_knowledge.py:159: ).update(
+cats\cat_knowledge.py:164: place["safe_observations"] += 1
+cats\cat_knowledge.py:167: place["danger_observations"] += 1
+cats\cat_knowledge.py:170: place["safe_observations"]
+cats\cat_knowledge.py:171: + place["danger_observations"]
+cats\cat_knowledge.py:175: place["safety"] = (
+cats\cat_knowledge.py:182: place["safety"] = None
+cats\cat_knowledge.py:208: if item.get(
+cats\cat_knowledge.py:211: and item.get(
+cats\cat_knowledge.py:228: "layer": place["layer"],
+cats\cat_knowledge.py:230: place["position"]
+cats\cat_knowledge.py:240: place.get(
+cats\cat_knowledge.py:246: "safety": place.get(
+cats\cat_knowledge.py:257: reporters = legend.setdefault(
+cats\cat_knowledge.py:271: legend["confidence"] = min(
+cats\cat_knowledge.py:274: legend.get(
+cats\cat_knowledge.py:283: place.get("safety")
+cats\cat_knowledge.py:287: legend.get(
+cats\cat_knowledge.py:293: legend["safety"] = (
+cats\cat_knowledge.py:294: place["safety"]
+cats\cat_knowledge.py:298: legend["safety"] = (
+cats\cat_knowledge.py:300: + place["safety"]
+cats\cat_knowledge.py:348: listener.intellect.get(
+cats\cat_knowledge.py:355: legend.get(
+cats\cat_knowledge.py:373: if item.get(
+cats\cat_knowledge.py:375: ) == legend.get(
+cats\cat_knowledge.py:378: and item.get(
+cats\cat_knowledge.py:387: "legend_id": legend.get(
+cats\cat_knowledge.py:390: "claim_type": legend.get(
+cats\cat_knowledge.py:393: "place_id": legend.get(
+cats\cat_knowledge.py:396: "layer": legend.get(
+cats\cat_knowledge.py:400: legend.get(
+cats\cat_knowledge.py:422: heard["heard_count"] += 1
+cats\cat_knowledge.py:432: heard["credibility"] = min(
+cats\cat_knowledge.py:435: heard["credibility"]
+cats\cat_knowledge.py:461: heard.get("place_id")
+cats\cat_knowledge.py:462: != place.get("place_id")
+cats\cat_knowledge.py:466: if heard.get(
+cats\cat_knowledge.py:472: heard["verified"] = True
+cats\cat_knowledge.py:473: heard["contradicted"] = False
+cats\cat_knowledge.py:510: heard["credibility"]
+cats\cat_knowledge.py:554: if item.get(
+cats\cat_knowledge.py:577: known["encounters"] += 1
+cats\cat_knowledge.py:578: known["source"] = source
+cats\cat_knowledge.py:580: previous = known.setdefault(
+cats\cat_knowledge.py:592: previous.get(
+cats\cat_knowledge.py:598: normalized.get(
+cats\cat_knowledge.py:605: known["confidence"] = min(
+cats\cat_knowledge.py:608: known.get(
+cats\cat_knowledge.py:645: known.get(
+cats\cat_knowledge.py:659: "confidence": known.get(
+cats\cat_knowledge.py:663: "encounters": known.get(
+cats\cat_knowledge.py:671: item["similarity"],
+cats\cat_knowledge.py:672: item["confidence"]
+cats\cat_knowledge.py:709: float(first.get(key, 0.0))
+cats\cat_knowledge.py:710: * float(second.get(key, 0.0))
+cats\cat_knowledge.py:715: float(first.get(key, 0.0)) ** 2
+cats\cat_knowledge.py:720: float(second.get(key, 0.0)) ** 2
+cats\cat_knowledge.py:780: item.get(
+cats\cat_knowledge.py:783: and item.get(
+cats\cat_knowledge.py:786: and item.get(
+cats\cat_knowledge.py:847: memory.get(
+cats\cat_knowledge.py:866: memory.get(
+cats\cat_knowledge.py:910: for item in olfaction.get(
+cats\cat_knowledge.py:914: recognition = item.get(
+cats\cat_knowledge.py:920: recognition.get(
+cats\cat_knowledge.py:923: if recognition.get(
+cats\cat_knowledge.py:930: position = item.get(
+cats\cat_knowledge.py:945: source_id=item.get(
+cats\cat_knowledge.py:949: components=item.get(
+cats\cat_knowledge.py:953: perceived_intensity=item.get(
+cats\cat_knowledge.py:961: ambient = olfaction.get(
+cats\cat_knowledge.py:969: recognition = ambient.get(
+cats\cat_knowledge.py:975: recognition.get(
+cats\cat_knowledge.py:978: if recognition.get(
+cats\cat_knowledge.py:982: else ambient.get(
+cats\cat_knowledge.py:994: components=ambient.get(
+cats\cat_knowledge.py:1001: in ambient.get(
+cats\cat_knowledge.py:1026: in knowledge.get(
+cats\cat_knowledge.py:1031: memory.get("identity")
+cats\cat_knowledge.py:1033: and memory.get("layer")
+cats\cat_knowledge.py:1036: memory.get(
+cats\cat_knowledge.py:1041: and memory.get(
+cats\cat_knowledge.py:1072: if memory.get(
+cats\cat_knowledge.py:1074: ) != newest.get(
+cats\cat_knowledge.py:1100: end.get(
+cats\cat_knowledge.py:1106: start.get(
+cats\cat_knowledge.py:1121: vector["x"] ** 2
+cats\cat_knowledge.py:1122: + vector["y"] ** 2
+cats\cat_knowledge.py:1123: + vector["z"] ** 2
+cats\cat_knowledge.py:1169: current_tick = knowledge.get(
+cats\cat_knowledge.py:1198: older.get(
+cats\cat_knowledge.py:1204: newest.get(
+cats\cat_knowledge.py:1231: "from_source_id": older.get(
+cats\cat_knowledge.py:1234: "to_source_id": newest.get(
+cats\cat_knowledge.py:1264: item.get("legend_id"),
+cats\cat_knowledge.py:1265: item.get("storyteller")
+cats\cat_knowledge.py:1268: in knowledge["heard_legends"]
+cats\cat_knowledge.py:1274: if not legend.get(
+cats\cat_knowledge.py:1280: if storyteller_name not in legend.get(
+cats\cat_knowledge.py:1287: legend.get("legend_id"),
+cats\cat_knowledge.py:1307: item.get(
+cats\cat_knowledge.py:1313: item.get(
+cats\cat_knowledge.py:1346: traits = storyteller.personality.get(
+cats\cat_knowledge.py:1352: traits.get(
+cats\cat_knowledge.py:1359: traits.get(
+cats\cat_knowledge.py:1366: storyteller.intellect.get(
+cats\cat_knowledge.py:1378: legend.get(
+cats\cat_knowledge.py:1385: legend.get(
+cats\cat_knowledge.py:1453: if not selection.get(
+cats\cat_knowledge.py:1461: "reason": selection.get(
+cats\cat_knowledge.py:1486: "legend_id": legend.get(
+cats\cat_knowledge.py:1506: "legend_id": legend.get(
+cats\cat_knowledge.py:1509: "layer": legend.get(
+cats\cat_knowledge.py:1513: legend.get(
+cats\cat_knowledge.py:1543: relation = relationships.setdefault(
+cats\cat_knowledge.py:1549: relation.get(
+cats\cat_knowledge.py:1563: relation["trust"] = current
+cats\cat_knowledge.py:1565: history = relation.setdefault(
+cats\cat_knowledge.py:1603: if item.get(
+cats\cat_knowledge.py:1617: if heard.get(
+cats\cat_knowledge.py:1627: heard["contradicted"] = True
+cats\cat_knowledge.py:1628: heard["verified"] = False
+cats\cat_knowledge.py:1630: storyteller = heard.get(
+cats\cat_knowledge.py:1678: relation = relationships.get(
+cats\cat_knowledge.py:1691: relation.get(
+cats\cat_knowledge.py:1717: if place.get(
+cats\cat_knowledge.py:1740: position.get(
+cats\cat_knowledge.py:1746: position.get(
+cats\cat_knowledge.py:1752: position.get(
+cats\cat_knowledge.py:1773: f"{position['x']:.2f}:"
+cats\cat_knowledge.py:1774: f"{position['y']:.2f}:"
+cats\cat_knowledge.py:1775: f"{position['z']:.2f}"
+cats\cat_lifecycle.py:146: if not reproduction.get(
+cats\cat_lifecycle.py:164: if not pregnancy_result.get(
+cats\cat_maternal_care_system.py:74: ].get(
+cats\cat_maternal_care_system.py:261: action = mapping.get(
+cats\cat_maternal_care_system.py:262: existing_event.get(
+cats\cat_maternal_care_system.py:338: threat_name = threat.get(
+cats\cat_maternal_care_system.py:424: ].setdefault(
+cats\cat_maternal_care_system.py:498: counter = counters.get(
+cats\cat_maternal_care_system.py:526: ].setdefault(
+cats\cat_memetic_selection_system.py:24: ].get(
+cats\cat_memetic_selection_system.py:82: myth.get(
+cats\cat_memetic_selection_system.py:88: myth.get(
+cats\cat_memetic_selection_system.py:102: myth.get(
+cats\cat_memetic_selection_system.py:113: myth.get(
+cats\cat_memetic_selection_system.py:143: ].get(
+cats\cat_memetic_selection_system.py:165: cat.intellect.get(
+cats\cat_memetic_selection_system.py:172: cat.personality.get(
+cats\cat_memetic_selection_system.py:175: ).get(
+cats\cat_memetic_selection_system.py:182: innovation.get(
+cats\cat_memetic_selection_system.py:190: if innovation.get(
+cats\cat_memetic_selection_system.py:237: innovation.get(
+cats\cat_memetic_selection_system.py:251: innovation.get(
+cats\cat_memetic_selection_system.py:262: innovation.get(
+cats\cat_memetic_selection_system.py:296: myth.get(
+cats\cat_memetic_selection_system.py:333: innovation.get(
+cats\cat_memetic_selection_system.py:360: cat.personality.get(
+cats\cat_memetic_selection_system.py:363: ).get(
+cats\cat_memetic_selection_system.py:370: cat.personality.get(
+cats\cat_memetic_selection_system.py:373: ).get(
+cats\cat_memetic_selection_system.py:380: myth.get(
+cats\cat_meow_invitation_system.py:40: cat.meow_invitations.get(
+cats\cat_meow_invitation_system.py:61: if cat.meow_invitations.get(
+cats\cat_meow_invitation_system.py:146: invitation = self.invitations.get(
+cats\cat_meow_invitation_system.py:207: invitation = self.invitations.get(
+cats\cat_meow_invitation_system.py:261: return entity.get(
+cats\cat_mind.py:46: mind.setdefault(
+cats\cat_mind.py:51: mind.setdefault(
+cats\cat_mind.py:56: mind.setdefault(
+cats\cat_mind.py:61: mind.setdefault(
+cats\cat_mind.py:66: mind.setdefault(
+cats\cat_mind.py:84: traits = cat.personality.get(
+cats\cat_mind.py:90: traits.get(
+cats\cat_mind.py:97: traits.get(
+cats\cat_mind.py:104: traits.get(
+cats\cat_mind.py:111: traits.get(
+cats\cat_mind.py:118: traits.get(
+cats\cat_mind.py:126: if observations.get(
+cats\cat_mind.py:132: if observations.get(
+cats\cat_mind.py:160: ["bar_visible"]
+cats\cat_mind.py:161: if observations.get(
+cats\cat_mind.py:168: ["positive_bar_memory"]
+cats\cat_mind.py:210: huntable = observations.get(
+cats\cat_mind.py:217: observations.get(
+cats\cat_mind.py:249: observations.get(
+cats\cat_mind.py:253: and not observations.get(
+cats\cat_mind.py:288: if observations.get(
+cats\cat_mind.py:309: (cat.knowledge or {}).get(
+cats\cat_mind.py:319: current_tick = knowledge.get(
+cats\cat_mind.py:326: if place.get(
+cats\cat_mind.py:331: last_seen_tick = place.get(
+cats\cat_mind.py:380: item.get(
+cats\cat_mind.py:383: ).get(
+cats\cat_mind.py:387: in observations.get(
+cats\cat_mind.py:390: ).get(
+cats\cat_mind.py:394: if item.get(
+cats\cat_mind.py:397: ).get(
+cats\cat_mind.py:408: and reached_scent.get(
+cats\cat_mind.py:412: and reached_scent.get(
+cats\cat_mind.py:425: item.get(
+cats\cat_mind.py:433: item.get(
+cats\cat_mind.py:441: item.get(
+cats\cat_mind.py:449: identity = strongest.get(
+cats\cat_mind.py:480: strongest.get(
+cats\cat_mind.py:493: "layer": strongest.get(
+cats\cat_mind.py:496: "position": strongest.get(
+cats\cat_mind.py:499: "source_id": strongest.get(
+cats\cat_mind.py:502: "age_ticks": strongest.get(
+cats\cat_mind.py:506: "freshness": strongest.get(
+cats\cat_mind.py:517: scent_transfers = observations.get(
+cats\cat_mind.py:526: item.get(
+cats\cat_mind.py:534: best_scent_transfer.get(
+cats\cat_mind.py:544: best_scent_transfer.get(
+cats\cat_mind.py:581: best_scent_transfer.get(
+cats\cat_mind.py:586: best_scent_transfer.get(
+cats\cat_mind.py:602: intellect.get(
+cats\cat_mind.py:619: and counterpart_observation.get(
+cats\cat_mind.py:623: and counterpart_observation.get(
+cats\cat_mind.py:629: counterpart_observation.get(
+cats\cat_mind.py:635: counterpart_observation.get(
+cats\cat_mind.py:693: counterpart_observation.get(
+cats\cat_mind.py:698: counterpart_observation.get(
+cats\cat_mind.py:703: counterpart_observation.get(
+cats\cat_mind.py:711: for box_detail in observations.get(
+cats\cat_mind.py:715: if not box_detail.get(
+cats\cat_mind.py:721: if not box_detail.get(
+cats\cat_mind.py:727: if not box_detail.get(
+cats\cat_mind.py:733: if box_detail.get(
+cats\cat_mind.py:740: box_detail.get(
+cats\cat_mind.py:802: boxes = observations.get(
+cats\cat_mind.py:828: and observations.get(
+cats\cat_mind.py:834: observations.get(
+cats\cat_mind.py:841: exploration_plan.get(
+cats\cat_mind.py:884: "layer": observations.get(
+cats\cat_mind.py:887: "position": observations.get(
+cats\cat_mind.py:890: "energy_cost": observations.get(
+cats\cat_mind.py:897: nearby_cats = observations.get(
+cats\cat_mind.py:904: observations.get(
+cats\cat_mind.py:948: if observations.get(
+cats\cat_mind.py:976: needs.get(
+cats\cat_mind.py:983: needs.get(
+cats\cat_mind.py:990: needs.get(
+cats\cat_mind.py:1059: and reached_scent.get(
+cats\cat_mind.py:1064: identity = reached_scent.get(
+cats\cat_mind.py:1068: direction = reached_scent.get(
+cats\cat_mind.py:1074: item.get(
+cats\cat_mind.py:1077: ).get(
+cats\cat_mind.py:1081: and item.get(
+cats\cat_mind.py:1084: ).get(
+cats\cat_mind.py:1089: in observations.get(
+cats\cat_mind.py:1092: ).get(
+cats\cat_mind.py:1105: and direction.get(
+cats\cat_mind.py:1111: cat.personality.get(
+cats\cat_mind.py:1118: traits.get(
+cats\cat_mind.py:1125: traits.get(
+cats\cat_mind.py:1138: and previous_search.get(
+cats\cat_mind.py:1141: and previous_search.get(
+cats\cat_mind.py:1146: previous_search.get(
+cats\cat_mind.py:1169: direction.get(
+cats\cat_mind.py:1227: key=lambda item: item["score"],
+cats\cat_mind.py:1235: mind["candidates"] = deepcopy(
+cats\cat_mind.py:1327: previous = mind.get(
+cats\cat_mind.py:1331: mind["previous_intention"] = (
+cats\cat_mind.py:1335: mind["current_intention"] = (
+cats\cat_mind.py:1339: mind["decision_count"] += 1
+cats\cat_mind.py:1344: "intention": winner["type"],
+cats\cat_mind.py:1345: "target": winner.get(
+cats\cat_mind.py:1348: "score": winner["score"],
+cats\cat_mind.py:1350: winner["reasons"]
+cats\cat_mind.py:1378: mind["history"].append(
+cats\cat_mind.py:1394: previous = mind.get(
+cats\cat_mind.py:1398: mind["previous_intention"] = (
+cats\cat_mind.py:1402: mind["current_intention"] = None
+cats\cat_mind.py:1414: mind["history"].append(
+cats\cat_mind.py:1532: if event.get(
+cats\cat_need_system.py:19: needs["tick"] = int(
+cats\cat_need_system.py:20: needs.get(
+cats\cat_need_system.py:29: needs.get(
+cats\cat_need_system.py:42: needs["dominant"] = dominant
+cats\cat_need_system.py:60: needs["fatigue"] = cls._clamp(
+cats\cat_need_system.py:61: needs.get(
+cats\cat_need_system.py:72: needs["social"] = cls._clamp(
+cats\cat_need_system.py:73: needs.get(
+cats\cat_need_system.py:85: needs["curiosity"] = cls._clamp(
+cats\cat_need_system.py:86: needs.get(
+cats\cat_olfaction.py:166: item["perceived_intensity"]
+cats\cat_olfaction.py:175: ].get(
+cats\cat_olfaction.py:266: identity = profile.get(
+cats\cat_olfaction.py:322: ambient.get(
+cats\cat_olfaction.py:337: "source": ambient.get(
+cats\cat_olfaction.py:353: return entity.get(
+cats\cat_olfaction.py:396: position.get(
+cats\cat_olfaction.py:402: position.get(
+cats\cat_olfaction.py:408: position.get(
+cats\cat_olfaction.py:422: first["x"]
+cats\cat_olfaction.py:423: - second["x"]
+cats\cat_olfaction.py:426: first["y"]
+cats\cat_olfaction.py:427: - second["y"]
+cats\cat_olfaction.py:430: first["z"]
+cats\cat_olfaction.py:431: - second["z"]
+cats\cat_parental_teaching_system.py:76: skills = kitten.learning.setdefault(
+cats\cat_parental_teaching_system.py:81: skill_state = skills.setdefault(
+cats\cat_parental_teaching_system.py:92: skill_state.get(
+cats\cat_parental_teaching_system.py:112: not skill_state.get(
+cats\cat_parental_teaching_system.py:125: skill_state.get(
+cats\cat_parental_teaching_system.py:148: kitten.learning.setdefault(
+cats\cat_parental_teaching_system.py:157: family_knowledge.get(
+cats\cat_parental_teaching_system.py:214: parents.get(
+cats\cat_parental_teaching_system.py:222: parents.get(
+cats\cat_parental_teaching_system.py:260: teachers.get(
+cats\cat_parental_teaching_system.py:273: skills.get(
+cats\cat_parental_teaching_system.py:285: kitten.relationships.setdefault(
+cats\cat_parental_teaching_system.py:291: relation.setdefault(
+cats\cat_parental_teaching_system.py:296: relation.setdefault(
+cats\cat_parental_teaching_system.py:301: relation.setdefault(
+cats\cat_parental_teaching_system.py:306: relation.setdefault(
+cats\cat_perception.py:118: not item.get(
+cats\cat_perception.py:124: box_id=item["id"]
+cats\cat_perception.py:132: if item.get(
+cats\cat_perception.py:164: exploration_plan.get(
+cats\cat_perception.py:170: exploration_plan.get(
+cats\cat_perception.py:188: and exploration_plan.get(
+cats\cat_perception.py:203: if legend.get(
+cats\cat_perception.py:239: item.get(
+cats\cat_perception.py:242: ).get(
+cats\cat_perception.py:246: and item.get(
+cats\cat_perception.py:249: ).get(
+cats\cat_perception.py:262: item.get("entity_id"): item
+cats\cat_perception.py:264: in olfaction.get(
+cats\cat_perception.py:286: visible_box.get("id")
+cats\cat_perception.py:287: or visible_box.get(
+cats\cat_perception.py:297: box = boxes_by_id.get(
+cats\cat_perception.py:301: smelled = smelled_by_id.get(
+cats\cat_perception.py:311: recognition = smelled.get(
+cats\cat_perception.py:316: if not recognition.get(
+cats\cat_perception.py:334: if not counterpart.get(
+cats\cat_perception.py:340: counterpart_id = counterpart.get(
+cats\cat_perception.py:344: counterpart_box = boxes_by_id.get(
+cats\cat_perception.py:356: "identity": recognition.get(
+cats\cat_perception.py:359: "similarity": recognition.get(
+cats\cat_perception.py:402: counterpart_observation.get(
+cats\cat_perception.py:408: counterpart_observation.get(
+cats\cat_perception.py:456: ).get(
+cats\cat_perception.py:464: ).get(
+cats\cat_perception.py:471: ).get(
+cats\cat_perception.py:479: ).get(
+cats\cat_perception.py:514: item["name"]
+cats\cat_perception.py:520: item["id"]
+cats\cat_perception.py:528: item["id"]
+cats\cat_perception.py:537: item["id"]
+cats\cat_perception.py:543: item["id"]
+cats\cat_perception.py:548: item["id"]
+cats\cat_perception.py:600: item["entity_id"]
+cats\cat_perception.py:632: mind["last_observations"] = (
+cats\cat_perception.py:636: mind.setdefault(
+cats\cat_perception.py:661: candidate_position = candidate.get(
+cats\cat_perception.py:677: "name": candidate.get(
+cats\cat_perception.py:774: item["size"]
+cats\cat_perception.py:780: item["size"]
+cats\cat_perception.py:885: "occupied": occupancy.get(
+cats\cat_perception.py:890: occupancy.get(
+cats\cat_perception.py:896: occupancy.get(
+cats\cat_perception.py:916: knowledge.get(
+cats\cat_perception.py:919: ).get(
+cats\cat_perception.py:926: occupancy.get(
+cats\cat_perception.py:932: detail.update({
+cats\cat_perception.py:943: ).get(
+cats\cat_perception.py:1006: door_position = door.get(
+cats\cat_perception.py:1057: if event.get(
+cats\cat_perception.py:1066: if event.get(
+cats\cat_perception.py:1093: if event.get(
+cats\cat_perception.py:1102: if box_id in event.get(
+cats\cat_perception.py:1108: details = event.get(
+cats\cat_perception.py:1113: if details.get(
+cats\cat_perception.py:1136: item["size"] / cat_size
+cats\cat_perception.py:1156: float(first.get("x", 0.0))
+cats\cat_perception.py:1157: - float(second.get("x", 0.0))
+cats\cat_perception.py:1160: float(first.get("y", 0.0))
+cats\cat_perception.py:1161: - float(second.get("y", 0.0))
+cats\cat_perception.py:1164: float(first.get("z", 0.0))
+cats\cat_perception.py:1165: - float(second.get("z", 0.0))
+cats\cat_personality.py:39: traits = personality.setdefault(
+cats\cat_personality.py:45: traits.setdefault(
+cats\cat_personality.py:50: personality.setdefault(
+cats\cat_personality.py:55: personality.setdefault(
+cats\cat_personality.py:180: personality["traits"],
+cats\cat_personality.py:181: key=personality["traits"].get
+cats\cat_sibling_play_system.py:180: partners.get(
+cats\cat_sibling_play_system.py:212: relation = cat.relationships.setdefault(
+cats\cat_sibling_play_system.py:227: relation.get(
+cats\cat_sibling_play_system.py:239: relation.get(
+cats\cat_sibling_play_system.py:251: relation.get(
+cats\cat_sibling_play_system.py:263: relation.get(
+cats\cat_sibling_rivalry_system.py:69: first.bonds.get(
+cats\cat_sibling_rivalry_system.py:72: ).get(
+cats\cat_sibling_rivalry_system.py:248: cat.relationships.setdefault(
+cats\cat_sibling_rivalry_system.py:254: relation.setdefault(
+cats\cat_sibling_rivalry_system.py:259: relation.setdefault(
+cats\cat_sibling_rivalry_system.py:264: relation.setdefault(
+cats\cat_sibling_rivalry_system.py:269: relation.setdefault(
+cats\cat_sibling_rivalry_system.py:274: relation.setdefault(
+cats\cat_sibling_rivalry_system.py:313: rivals.get(
+cats\cat_social_system.py:96: and previous.get(
+cats\cat_social_system.py:269: memory.get(
+cats\cat_social_system.py:276: memory.get(
+cats\cat_social_system.py:322: relation.get(
+cats\cat_social_system.py:329: relation.get(
+cats\cat_social_system.py:336: relation.get(
+cats\cat_social_system.py:343: relation.get(
+cats\cat_social_system.py:350: cat.personality.get(
+cats\cat_social_system.py:415: territory["intrusion"]
+cats\cat_social_system.py:469: memory.get(
+cats\cat_social_system.py:527: relation_a.get(
+cats\cat_social_system.py:533: relation_b.get(
+cats\cat_social_system.py:542: relation_a.get(
+cats\cat_social_system.py:548: relation_b.get(
+cats\cat_social_system.py:681: cat_assessment.get(
+cats\cat_social_system.py:687: other_assessment.get(
+cats\cat_social_system.py:696: cat_assessment.get(
+cats\cat_social_system.py:702: other_assessment.get(
+cats\cat_social_system.py:778: relation.get(
+cats\cat_social_system.py:788: relation.get(
+cats\cat_social_system.py:801: relation.get(
+cats\cat_social_system.py:813: relation.get(
+cats\cat_social_system.py:825: relation.get(
+cats\cat_social_system.py:841: relation.get(
+cats\cat_social_system.py:859: relation.get(
+cats\cat_social_system.py:871: relation.get(
+cats\cat_social_system.py:883: relation.get(
+cats\cat_social_system.py:896: relation.get(
+cats\cat_social_system.py:938: step.get(
+cats\cat_social_system.py:1009: return profiles.get(
+cats\cat_social_system.py:1023: return cat.social_memory.get(
+cats\cat_social_system.py:1036: memory = cat.social_memory.setdefault(
+cats\cat_social_system.py:1053: memory.get(
+cats\cat_social_system.py:1066: memory.get(
+cats\cat_social_system.py:1083: step.get(
+cats\cat_social_system.py:1090: memory.get(
+cats\cat_social_system.py:1111: relation = cat.relationships.setdefault(
+cats\cat_social_system.py:1116: relation.setdefault(
+cats\cat_social_system.py:1121: relation.setdefault(
+cats\cat_social_system.py:1126: relation.setdefault(
+cats\cat_social_system.py:1131: relation.setdefault(
+cats\cat_social_system.py:1136: relation.setdefault(
+cats\cat_social_system.py:1141: relation.setdefault(
+cats\cat_social_system.py:1146: relation.setdefault(
+cats\cat_social_system.py:1198: event.get(
+cats\cat_social_system.py:1226: first.get(
+cats\cat_social_system.py:1232: second.get(
+cats\cat_social_system.py:1238: first.get(
+cats\cat_social_system.py:1244: second.get(
+cats\cat_social_system.py:1250: first.get(
+cats\cat_social_system.py:1256: second.get(
+cats\cat_social_system.py:1271: traits.get(
+cats\cat_territory_system.py:42: previous = cat.territories.get(
+cats\cat_territory_system.py:68: claim.get(
+cats\cat_territory_system.py:82: claim.get(
+cats\cat_territory_system.py:153: claim.get(
+cats\cat_territory_system.py:163: claim.get(
+cats\cat_territory_system.py:220: relation = cat.relationships.get(
+cats\cat_territory_system.py:226: relation.get(
+cats\cat_territory_system.py:233: relation.get(
+cats\cat_territory_system.py:240: relation.get(
+cats\cat_territory_system.py:247: relation.get(
+cats\cat_territory_system.py:267: claim.get(
+cats\cat_territory_system.py:273: claim.get(
+cats\cat_territory_system.py:276: claim.get(
+cats\cat_territory_system.py:297: claim = cat.territories.get(
+cats\cat_territory_system.py:309: return cat.territories.get(
+cats\cronenberg_encounter.py:110: event["personality"] = (
+cats\cronenberg_encounter.py:179: event["personality"] = (
+cats\cronenberg_encounter.py:285: event["personality"] = (
+cats\cronenberg_encounter.py:418: encounter_details.update(
+cats\development_resolver.py:74: reproduction["fertile"] = False
+cats\development_resolver.py:114: if not biology["allowed"]:
+cats\development_resolver.py:163: if reproduction.get(
+cats\development_resolver.py:167: reproduction["fertile"] = False
+cats\development_resolver.py:170: reproduction["fertile"] = (
+cats\duplicate_consumption_energy.py:84: if not item.get(
+cats\duplicate_consumption_energy.py:132: pending.update({
+cats\duplicate_consumption_energy.py:139: result.get(
+cats\duplicate_consumption_energy.py:152: "cat": pending["cat"],
+cats\duplicate_consumption_energy.py:153: "source": pending["source"],
+cats\duplicate_consumption_energy.py:154: "amount": pending["amount"],
+cats\duplicate_consumption_energy.py:160: result.get(
+cats\duplicate_consumption_energy.py:165: result.get(
+cats\duplicate_consumption_energy.py:169: "counterpart_id": result.get(
+cats\duplicate_consumption_energy.py:172: "fallback_reason": result.get(
+cats\duplicate_consumption_energy.py:199: and cronenberg.quantum_state.get(
+cats\estrous_cycle_resolver.py:34: phase = reproduction.get(
+cats\estrous_cycle_resolver.py:48: reproduction.get(
+cats\estrous_cycle_resolver.py:56: reproduction.get(
+cats\estrous_cycle_resolver.py:75: reproduction.get(
+cats\estrous_cycle_resolver.py:244: reproduction.get(
+cats\estrous_cycle_resolver.py:314: and not reproduction.get(
+cats\estrous_cycle_resolver.py:318: and reproduction.get(
+cats\estrous_cycle_resolver.py:322: and not reproduction.get(
+cats\estrous_cycle_resolver.py:337: if reproduction.get(
+cats\estrous_cycle_resolver.py:343: if reproduction.get(
+cats\estrous_cycle_resolver.py:349: if not reproduction.get(
+cats\feline_ability_resolver.py:61: pazuzu["name"]
+cats\feline_ability_resolver.py:89: "cat": pazuzu["name"],
+cats\feline_ability_resolver.py:108: queen["name"]
+cats\feline_ability_resolver.py:137: "cat": queen["name"],
+cats\feline_ability_resolver.py:158: if not teacher_wisdom.get(
+cats\feline_ability_resolver.py:181: domain = knowledge.get(
+cats\feline_ability_resolver.py:195: "description": knowledge.get(
+cats\feline_ability_resolver.py:199: knowledge.get(
+cats\feline_ability_resolver.py:223: "teacher": teacher["name"],
+cats\feline_ability_resolver.py:224: "student": student["name"],
+cats\feline_ability_resolver.py:272: if not permission["allowed"]:
+cats\feline_ability_resolver.py:273: if permission.get(
+cats\feline_ability_resolver.py:281: reason=permission["reason"]
+cats\feline_ability_resolver.py:288: reason=permission["reason"]
+cats\feline_ability_resolver.py:300: ].get(
+cats\feline_ability_resolver.py:320: ].get(
+cats\feline_ability_resolver.py:343: teacher_name=teacher["name"],
+cats\feline_ability_resolver.py:363: "student": student["name"],
+cats\feline_ability_resolver.py:380: "teacher": teacher["name"],
+cats\feline_ability_resolver.py:391: "teacher": teacher["name"],
+cats\feline_ability_resolver.py:392: "student": student["name"],
+cats\feline_ability_resolver.py:435: ].get(
+cats\feline_ability_resolver.py:439: if not ability or not ability.get(
+cats\feline_ability_resolver.py:467: and constraints.get(
+cats\feline_ability_resolver.py:473: method["name"]
+cats\feline_ability_resolver.py:478: and constraints.get(
+cats\feline_ability_resolver.py:484: method["name"]
+cats\feline_ability_resolver.py:561: garfield["name"]
+cats\feline_ability_resolver.py:575: garfield["name"]
+cats\feline_ability_resolver.py:583: "cat": garfield["name"],
+cats\feline_ability_resolver.py:627: teacher.get("name") == "garfield"
+cats\feline_ability_resolver.py:699: teacher_name = teacher.get(
+cats\feline_ability_resolver.py:703: parents = student.get(
+cats\feline_ability_resolver.py:709: parents.get("mother"),
+cats\feline_ability_resolver.py:710: parents.get("father")
+cats\feline_ability_resolver.py:720: ].get(
+cats\feline_ability_resolver.py:726: and ability.get(
+cats\feline_ability_resolver.py:741: f"{teacher.get('name')} attempted to "
+cats\feline_ability_resolver.py:743: f"{student.get('name')} without "
+cats\feline_ability_resolver.py:765: "teacher": teacher.get("name"),
+cats\feline_ability_resolver.py:766: "student": student.get("name"),
+cats\feline_ability_resolver.py:790: "teacher": teacher.get(
+cats\feline_ability_resolver.py:793: "student": student.get(
+cats\feline_teacher_resolver.py:27: ].get(
+cats\feline_teacher_resolver.py:45: awareness.get(
+cats\feline_teacher_resolver.py:78: ].get(
+cats\feline_teacher_resolver.py:84: and ability.get(
+cats\feline_teacher_resolver.py:96: ability.get(
+cats\feline_teacher_resolver.py:106: candidate["methods"]
+cats\feline_teacher_resolver.py:156: "student": student["name"],
+cats\feline_teacher_resolver.py:159: "teacher": teacher["name"],
+cats\feline_teacher_resolver.py:172: "teacher_cat": teacher["cat"]
+cats\feline_teacher_resolver.py:179: "student": student["name"],
+cats\feline_teacher_resolver.py:184: if search["teachers"]
+cats\feline_teacher_resolver.py:185: else search["reason"]
+cats\feline_teacher_resolver.py:218: "student": student["name"],
+cats\feline_teacher_resolver.py:221: "reason": choice["reason"],
+cats\feline_teacher_resolver.py:248: "student": student["name"],
+cats\feline_teacher_resolver.py:249: "teacher": teacher["name"],
+cats\feline_teacher_resolver.py:253: "learned": lesson.get(
+cats\feline_teacher_resolver.py:312: "student": student.get(
+cats\feline_wisdom.py:46: wisdom.setdefault(
+cats\feline_wisdom.py:51: wisdom.setdefault(
+cats\feline_wisdom.py:56: wisdom.setdefault(
+cats\feline_wisdom.py:61: wisdom.setdefault(
+cats\feline_wisdom.py:123: ].setdefault(
+cats\feline_wisdom.py:146: ability["learned"] = True
+cats\garfield_training_system.py:62: training = cat.meow_invitations.get(
+cats\genotype.py:158: if mother_genotype["sex"] != "female":
+cats\genotype.py:163: if father_genotype["sex"] != "male":
+cats\genotype.py:296: sex = genotype.get(
+cats\genotype.py:301: genotype.get(
+cats\genotype.py:308: genotype.get(
+cats\genotype.py:378: loci = genotype.get(
+cats\kitten_birth_resolver.py:53: if not biology["allowed"]:
+cats\kitten_birth_resolver.py:56: reproduction = mother.get(
+cats\kitten_birth_resolver.py:61: if mother.get("sex") != "female":
+cats\kitten_birth_resolver.py:66: if not reproduction.get(
+cats\kitten_birth_resolver.py:75: reproduction.get(
+cats\kitten_birth_resolver.py:82: reproduction.get(
+cats\kitten_birth_resolver.py:92: "mother": mother["name"],
+cats\kitten_birth_resolver.py:99: reproduction.get(
+cats\kitten_birth_resolver.py:107: reproduction.get(
+cats\kitten_birth_resolver.py:124: embryo["profile"]
+cats\kitten_birth_resolver.py:133: color=profile["color"],
+cats\kitten_birth_resolver.py:137: pattern=profile["pattern"],
+cats\kitten_birth_resolver.py:141: sex=profile["sex"]
+cats\kitten_birth_resolver.py:147: "embryo_id": embryo["id"],
+cats\kitten_birth_resolver.py:156: kitten = manifestation["cat"]
+cats\kitten_birth_resolver.py:158: kitten["state"] = "newborn"
+cats\kitten_birth_resolver.py:165: kitten["genotype"] = embryo[
+cats\kitten_birth_resolver.py:168: kitten["phenotype"] = embryo[
+cats\kitten_birth_resolver.py:171: kitten["mother_name"] = mother[
+cats\kitten_birth_resolver.py:174: kitten["father_name"] = embryo[
+cats\kitten_birth_resolver.py:177: kitten["parents"] = {
+cats\kitten_birth_resolver.py:178: "mother": mother["name"],
+cats\kitten_birth_resolver.py:184: kitten["learning"][
+cats\kitten_birth_resolver.py:186: ] = mother["name"]
+cats\kitten_birth_resolver.py:187: kitten["embryo_id"] = embryo[
+cats\kitten_birth_resolver.py:190: kitten["genetic_status"] = (
+cats\kitten_birth_resolver.py:195: kitten["rare"] = embryo["rare"]
+cats\kitten_birth_resolver.py:197: for trait in embryo.get(
+cats\kitten_birth_resolver.py:215: "embryo_id": embryo["id"],
+cats\kitten_birth_resolver.py:223: "rare": embryo["rare"],
+cats\kitten_birth_resolver.py:247: "mother": mother["name"],
+cats\kitten_birth_resolver.py:259: kitten["name"]
+cats\kitten_birth_resolver.py:308: reproduction.setdefault(
+cats\kitten_embryo_resolver.py:57: if not viability["viable"]:
+cats\kitten_embryo_resolver.py:80: "mother": mother["name"],
+cats\kitten_embryo_resolver.py:81: "father": father["name"],
+cats\kitten_embryo_resolver.py:117: "mother_name": mother["name"],
+cats\kitten_embryo_resolver.py:118: "father_name": father["name"],
+cats\kitten_embryo_resolver.py:122: phenotype["profile"]
+cats\kitten_embryo_resolver.py:128: "rare": viability["rare"],
+cats\kitten_embryo_resolver.py:141: "mother": mother["name"],
+cats\kitten_embryo_resolver.py:142: "father": father["name"],
+cats\kitten_embryo_resolver.py:144: viability["status"]
+cats\kitten_embryo_resolver.py:146: "rare": viability["rare"],
+cats\kitten_embryo_resolver.py:148: phenotype["profile"]
+cats\kitten_embryo_resolver.py:172: if mother.get("sex") != "female":
+cats\kitten_embryo_resolver.py:177: if father.get("sex") != "male":
+cats\kitten_growth.py:36: growth = kitten.setdefault(
+cats\kitten_growth.py:50: growth.setdefault(
+cats\kitten_growth.py:55: growth.setdefault(
+cats\kitten_growth.py:60: growth.setdefault(
+cats\kitten_growth.py:65: growth.setdefault(
+cats\kitten_growth.py:70: growth.setdefault(
+cats\kitten_growth.py:75: growth.setdefault(
+cats\kitten_growth.py:80: growth.setdefault(
+cats\kitten_growth.py:85: growth.setdefault(
+cats\kitten_growth.py:232: kitten.get(
+cats\kitten_growth.py:241: kitten.get(
+cats\kitten_growth.py:312: kitten.get(
+cats\kitten_growth.py:319: kitten.get(
+cats\kitten_growth.py:353: "kitten": kitten["name"],
+cats\kitten_growth.py:401: "kitten": kitten["name"],
+cats\kitten_upbringing_resolver.py:60: learning = kitten.get(
+cats\kitten_upbringing_resolver.py:74: if not learning.get(
+cats\kitten_upbringing_resolver.py:85: kitten.get(
+cats\kitten_upbringing_resolver.py:100: upbringing = kitten.setdefault(
+cats\kitten_upbringing_resolver.py:204: upbringing["phase"] = phase
+cats\kitten_upbringing_resolver.py:205: upbringing["last_processed_age"] = (
+cats\kitten_upbringing_resolver.py:208: upbringing["last_processed_day"] = (
+cats\kitten_upbringing_resolver.py:219: "kitten": kitten["name"],
+cats\kitten_upbringing_resolver.py:224: mother.get("name")
+cats\kitten_upbringing_resolver.py:229: father.get("name")
+cats\kitten_upbringing_resolver.py:253: mother.get("name")
+cats\kitten_upbringing_resolver.py:257: ].get(
+cats\kitten_upbringing_resolver.py:277: source=mother["name"]
+cats\kitten_upbringing_resolver.py:284: "kitten": kitten["name"],
+cats\kitten_upbringing_resolver.py:297: care.update({
+cats\kitten_upbringing_resolver.py:353: "kitten": kitten["name"],
+cats\kitten_upbringing_resolver.py:355: mother.get("name")
+cats\kitten_upbringing_resolver.py:376: "kitten": kitten["name"],
+cats\kitten_upbringing_resolver.py:378: mother.get("name")
+cats\kitten_upbringing_resolver.py:439: mother.get("name")
+cats\kitten_upbringing_resolver.py:445: socialization_lesson.get(
+cats\kitten_upbringing_resolver.py:462: "kitten": kitten["name"],
+cats\kitten_upbringing_resolver.py:617: "kitten": kitten["name"],
+cats\kitten_upbringing_resolver.py:619: mother.get("name")
+cats\kitten_upbringing_resolver.py:658: hunting.get(
+cats\kitten_upbringing_resolver.py:671: teacher.get("name")
+cats\kitten_upbringing_resolver.py:675: ].get(
+cats\kitten_upbringing_resolver.py:680: hunting.update({
+cats\kitten_upbringing_resolver.py:689: "kitten": kitten["name"],
+cats\kitten_upbringing_resolver.py:737: hunting.get(
+cats\kitten_upbringing_resolver.py:743: hunting["progress"] = max(
+cats\kitten_upbringing_resolver.py:760: "kitten": kitten["name"],
+cats\kitten_upbringing_resolver.py:762: mother.get("name")
+cats\kitten_upbringing_resolver.py:827: hunting.get(
+cats\kitten_upbringing_resolver.py:855: mother["name"]
+cats\kitten_upbringing_resolver.py:860: father["name"]
+cats\kitten_upbringing_resolver.py:867: ] = father["name"]
+cats\kitten_upbringing_resolver.py:869: hunting.update({
+cats\kitten_upbringing_resolver.py:896: "kitten": kitten["name"],
+cats\kitten_upbringing_resolver.py:898: mother.get("name")
+cats\kitten_upbringing_resolver.py:903: father.get("name")
+cats\kitten_upbringing_resolver.py:962: "kitten": kitten["name"],
+cats\kitten_upbringing_resolver.py:1004: "kitten": kitten["name"],
+cats\kitten_upbringing_resolver.py:1038: if not adult_meowing.get(
+cats\kitten_upbringing_resolver.py:1046: "kitten": kitten["name"],
+cats\kitten_upbringing_resolver.py:1048: teacher.get("name")
+cats\kitten_upbringing_resolver.py:1066: "kitten": kitten["name"],
+cats\kitten_upbringing_resolver.py:1080: skill.update({
+cats\kitten_upbringing_resolver.py:1083: "teacher": teacher["name"],
+cats\kitten_upbringing_resolver.py:1095: "kitten": kitten["name"],
+cats\kitten_upbringing_resolver.py:1096: "teacher": teacher["name"],
+cats\kitten_upbringing_resolver.py:1127: substitute_name = kitten.get(
+cats\kitten_upbringing_resolver.py:1130: ).get(
+cats\kitten_upbringing_resolver.py:1139: if candidate.get("name")
+cats\kitten_upbringing_resolver.py:1187: ].get(
+cats\kitten_upbringing_resolver.py:1193: and teaching.get(
+cats\kitten_upbringing_resolver.py:1203: meow = cat.learning.get(
+cats\kitten_upbringing_resolver.py:1209: meow.get(
+cats\kitten_upbringing_resolver.py:1213: and meow.get(
+cats\kitten_upbringing_resolver.py:1238: skill.get(
+cats\kitten_upbringing_resolver.py:1251: skill.update({
+cats\kitten_upbringing_resolver.py:1255: teacher.get("name")
+cats\kitten_upbringing_resolver.py:1259: ].get(
+cats\kitten_upbringing_resolver.py:1272: "student": kitten["name"],
+cats\kitten_upbringing_resolver.py:1273: "teacher": skill["teacher"],
+cats\kitten_upbringing_resolver.py:1312: teacher.get("name")
+cats\kitten_upbringing_resolver.py:1316: ].get(
+cats\kitten_upbringing_resolver.py:1321: skill.update({
+cats\kitten_upbringing_resolver.py:1330: "student": kitten["name"],
+cats\kitten_upbringing_resolver.py:1375: "kitten": kitten["name"],
+cats\kitten_upbringing_resolver.py:1376: "father": father["name"],
+cats\kitten_upbringing_resolver.py:1400: parents = kitten.get(
+cats\kitten_upbringing_resolver.py:1405: parent_name = parents.get(
+cats\kitten_upbringing_resolver.py:1413: parent_name = kitten.get(
+cats\kitten_upbringing_resolver.py:1416: ).get(
+cats\kitten_upbringing_resolver.py:1463: "kitten": kitten.get("name"),
+cats\kitten_viability_resolver.py:35: genotype.get(
+cats\kitten_viability_resolver.py:68: genotype["sex"] == "male"
+cats\mating_resolver.py:72: if not biology["allowed"]:
+cats\mating_resolver.py:80: reproduction = female.get(
+cats\mating_resolver.py:85: if not reproduction.get(
+cats\mating_resolver.py:91: "female": female.get(
+cats\mating_resolver.py:94: "male": male.get(
+cats\mating_resolver.py:111: if reproduction.get(
+cats\mating_resolver.py:120: if not reproduction.get(
+cats\mating_resolver.py:124: reproduction.update({
+cats\mating_resolver.py:146: "female": female["name"],
+cats\mating_resolver.py:147: "male": male["name"],
+cats\mating_resolver.py:148: "male_name": male["name"],
+cats\mating_resolver.py:173: male["name"]
+cats\mating_resolver.py:181: male["name"]
+cats\mating_resolver.py:188: "female": female["name"],
+cats\mating_resolver.py:189: "male": male["name"],
+cats\mating_resolver.py:200: stimulation["stimulation"]
+cats\mating_resolver.py:203: stimulation["threshold"]
+cats\mating_resolver.py:236: if not biology["allowed"]:
+cats\mating_resolver.py:239: reproduction = female.get(
+cats\mating_resolver.py:244: if reproduction.get(
+cats\mating_resolver.py:252: if not reproduction.get(
+cats\mating_resolver.py:260: contacts = reproduction.get(
+cats\mating_resolver.py:282: reproduction.update({
+cats\mating_resolver.py:301: "mother": female["name"],
+cats\mating_resolver.py:393: ]["id"]
+cats\mating_resolver.py:403: "father": father["name"],
+cats\mating_resolver.py:410: result["embryo"]
+cats\mating_resolver.py:412: if result["viable"]
+cats\mating_resolver.py:418: if not result["viable"]
+cats\mating_resolver.py:437: reproduction.update({
+cats\mating_resolver.py:449: "mother_name": female["name"],
+cats\mating_resolver.py:461: "mother": female["name"],
+cats\mating_resolver.py:525: if not biology["allowed"]:
+cats\mating_resolver.py:528: reproduction = female.get(
+cats\mating_resolver.py:533: if not reproduction.get(
+cats\mating_resolver.py:570: "mother": female["name"],
+cats\memory.py:53: if memory["event_type"] == event_type
+cats\memory.py:61: in memory["participants"]
+cats\memory.py:111: details.update(
+cats\memory.py:134: if memory["details"].get(
+cats\memory.py:144: if memory["event_type"].startswith(
+cats\meow_knowledge_resolver.py:30: kitten_learning = kitten.get(
+cats\meow_knowledge_resolver.py:35: mother_learning = mother.get(
+cats\meow_knowledge_resolver.py:40: kitten_meow = kitten_learning.get(
+cats\meow_knowledge_resolver.py:45: mother_meow = mother_learning.get(
+cats\meow_knowledge_resolver.py:50: if kitten.get("type") != "cat":
+cats\meow_knowledge_resolver.py:56: if mother.get("type") != "cat":
+cats\meow_knowledge_resolver.py:67: if not teacher_role["allowed"]:
+cats\meow_knowledge_resolver.py:70: if kitten_meow.get(
+cats\meow_knowledge_resolver.py:79: if not mother_meow.get(
+cats\meow_knowledge_resolver.py:88: if not mother_meow.get(
+cats\meow_knowledge_resolver.py:97: skills = kitten_learning.get(
+cats\meow_knowledge_resolver.py:106: if not skills.get(
+cats\meow_knowledge_resolver.py:109: ).get(
+cats\meow_knowledge_resolver.py:143: if not readiness["allowed"]:
+cats\meow_knowledge_resolver.py:148: "mother": mother.get("name"),
+cats\meow_knowledge_resolver.py:149: "kitten": kitten.get("name"),
+cats\meow_knowledge_resolver.py:151: "reason": readiness["reason"],
+cats\meow_knowledge_resolver.py:153: readiness.get(
+cats\meow_knowledge_resolver.py:167: learning = kitten["learning"]
+cats\meow_knowledge_resolver.py:179: teacher_role["role"]
+cats\meow_knowledge_resolver.py:187: teacher_role["role"]
+cats\meow_knowledge_resolver.py:199: meow.update({
+cats\meow_knowledge_resolver.py:203: "teacher": mother["name"],
+cats\meow_knowledge_resolver.py:216: learning["lessons"].append({
+cats\meow_knowledge_resolver.py:219: if teacher_role["role"]
+cats\meow_knowledge_resolver.py:223: "teacher": mother["name"],
+cats\meow_knowledge_resolver.py:224: "student": kitten["name"],
+cats\meow_knowledge_resolver.py:227: meow["contains"]
+cats\meow_knowledge_resolver.py:231: learning["complete"] = all(
+cats\meow_knowledge_resolver.py:232: skill.get(
+cats\meow_knowledge_resolver.py:237: in learning["skills"].values()
+cats\meow_knowledge_resolver.py:240: if learning["complete"]:
+cats\meow_knowledge_resolver.py:249: "mother": mother["name"],
+cats\meow_knowledge_resolver.py:250: "kitten": kitten["name"],
+cats\meow_knowledge_resolver.py:253: meow["contains"]
+cats\meow_knowledge_resolver.py:266: learning["complete"]
+cats\meow_knowledge_resolver.py:269: teacher_role["role"]
+cats\meow_knowledge_resolver.py:305: teacher_name = teacher.get(
+cats\meow_knowledge_resolver.py:309: parents = kitten.get(
+cats\meow_knowledge_resolver.py:315: # jedinì parents["mother"] oznaèuje
+cats\meow_knowledge_resolver.py:319: # learning["teacher_mother"] pak mùže být
+cats\meow_knowledge_resolver.py:321: mother_name = parents.get(
+cats\meow_knowledge_resolver.py:328: mother_name = kitten.get(
+cats\meow_knowledge_resolver.py:331: ).get(
+cats\meow_knowledge_resolver.py:356: ].get(
+cats\meow_knowledge_resolver.py:363: and teaching_ability.get(
+cats\meow_knowledge_resolver.py:377: if teacher.get("origin")
+cats\meow_knowledge_resolver.py:416: domain = knowledge.get(
+cats\meow_knowledge_resolver.py:430: "description": knowledge.get(
+cats\meow_knowledge_resolver.py:434: knowledge.get(
+cats\meow_knowledge_resolver.py:443: teacher["name"]
+cats\meow_knowledge_resolver.py:464: "teacher": teacher["name"],
+cats\meow_knowledge_resolver.py:465: "kitten": kitten["name"],
+cats\meow_knowledge_resolver.py:503: skill.update({
+cats\ovulation_resolver.py:32: reproduction.get(
+cats\ovulation_resolver.py:39: reproduction.get(
+cats\ovulation_resolver.py:55: "female": female["name"],
+cats\ovulation_resolver.py:57: male.get("name")
+cats\ovulation_resolver.py:86: reproduction.get(
+cats\ovulation_resolver.py:93: reproduction.get(
+cats\ovulation_resolver.py:116: "female": female["name"],
+cats\paternity_resolver.py:14: if contact.get(
+cats\paternity_resolver.py:18: and contact.get(
+cats\paternity_resolver.py:30: contact["_male_ref"]
+cats\paternity_resolver.py:45: if contact["male_name"]
+cats\paternity_resolver.py:61: candidate["name"]
+cats\phenotype_resolver.py:23: sex = genotype["sex"]
+cats\phenotype_resolver.py:26: genotype["orange_locus"]
+cats\phenotype_resolver.py:40: loci["black"]
+cats\phenotype_resolver.py:46: loci["dilution"],
+cats\phenotype_resolver.py:51: cls.DILUTED_COLORS.get(
+cats\phenotype_resolver.py:61: in loci["white_spotting"]
+cats\phenotype_resolver.py:68: loci["agouti"]
+cats\phenotype_resolver.py:71: loci["colorpoint"]
+cats\phenotype_resolver.py:96: loci["longhair"],
+cats\phenotype_resolver.py:104: loci["colorpoint"]
+cats\reproduction.py:77: reproduction.get(
+cats\reproduction.py:81: and not reproduction.get(
+cats\reproduction.py:107: and not reproduction.get(
