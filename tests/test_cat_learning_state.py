@@ -76,11 +76,11 @@ class CatLearningStateTests(
         )
 
         self.assertTrue(
-            cat["learning"]["complete"]
+            cat.learning["complete"]
         )
 
         self.assertFalse(
-            cat["learning"][
+            cat.learning[
                 "teaching_required"
             ]
         )
@@ -89,7 +89,7 @@ class CatLearningStateTests(
             all(
                 skill["learned"]
                 for skill
-                in cat["learning"][
+                in cat.learning[
                     "skills"
                 ].values()
             )

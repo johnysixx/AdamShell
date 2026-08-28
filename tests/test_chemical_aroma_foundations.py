@@ -127,7 +127,7 @@ class ChemicalAromaFoundationsTests(
         )
 
         self.assertEqual(
-            cat["aroma"]["identity"],
+            cat.aroma["identity"],
             "cat:pazuzu"
         )
 

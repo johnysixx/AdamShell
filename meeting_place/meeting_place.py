@@ -175,11 +175,8 @@ class MeetingPlace:
             return
         self.bartender.prepare_for_guest()
         self.entities.append(entity)
-        if isinstance(entity, dict):
-            entity.current_layer = 'meeting_place'
-        else:
-            entity.current_layer = 'meeting_place'
-            entity.location = 'meeting_place'
+        entity.current_layer = 'meeting_place'
+        entity.location = 'meeting_place'
         self.universe.world['meeting_place']['entities'] = self.entities
         UniverseLogger.event(f'MEETING PLACE: entity joined {entity_name}')
         self.emit_event(f'{entity_name} arrived at the bar')
@@ -223,12 +220,8 @@ class MeetingPlace:
         if human not in self.entities:
             self.bartender.prepare_for_guest()
             self.entities.append(human)
-        if isinstance(human, dict):
-            human['current_layer'] = 'meeting_place'
-            human['location'] = 'meeting_place'
-        else:
-            human.current_layer = 'meeting_place'
-            human.location = 'meeting_place'
+        human.current_layer = 'meeting_place'
+        human.location = 'meeting_place'
         self.universe.world['meeting_place']['entities'] = self.entities
         if not hasattr(self, 'cat_invited_guests'):
             self.cat_invited_guests = {}
@@ -786,19 +779,28 @@ class MeetingPlace:
         return self.dice_box.answer_about_d20()
 
     def _get_entity_name(self, entity):
-        if isinstance(entity, dict):
-            return getattr(entity, 'name', None)
-        return getattr(entity, 'name', None)
+        return getattr(
+            entity,
+            'name',
+            None
+        )
 
     def _get_entity_type(self, entity):
-        if isinstance(entity, dict):
-            return getattr(entity, 'type', None)
-        return getattr(entity, 'type', None)
+        return getattr(
+            entity,
+            'type',
+            None
+        )
 
     def _is_cat(self, entity):
-        if isinstance(entity, dict):
-            return getattr(entity, 'type', None) == 'cat'
-        return getattr(entity, 'type', None) == 'cat'
+        return (
+            getattr(
+                entity,
+                'type',
+                None
+            )
+            == 'cat'
+        )
 
     def process_interactions(self):
         if len(self.entities) < 2:

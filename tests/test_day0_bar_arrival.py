@@ -1,4 +1,4 @@
-﻿import unittest
+import unittest
 
 from universe.universe import Universe
 from multiverse import UniverseRegistry
@@ -127,7 +127,7 @@ class Day0BarArrivalTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            pazuzu["name"],
+            pazuzu.name,
             "pazuzu"
         )
 

@@ -57,7 +57,7 @@ class CatDistributionSystemTests(unittest.TestCase):
         self.assertEqual(cat.distribution['recipient'], 'alice')
         self.assertIn(cat, meeting_entities)
         self.assertEqual(cat.current_layer, 'meeting_place')
-        self.assertFalse(recipient['needs_cat'])
+        self.assertFalse(recipient.needs_cat)
 
     def test_first_waiting_recipient_gets_cat(self):
         cat = self.make_cat(name='traveler')
@@ -70,5 +70,5 @@ class CatDistributionSystemTests(unittest.TestCase):
         result = system.handle_after_milk(cat)
         self.assertEqual(result['recipient'], 'alice')
         self.assertEqual(cat.recipient, 'alice')
-        self.assertFalse(first['needs_cat'])
-        self.assertTrue(second['needs_cat'])
+        self.assertFalse(first.needs_cat)
+        self.assertTrue(second.needs_cat)

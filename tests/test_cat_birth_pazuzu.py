@@ -120,48 +120,48 @@ class CatBirthPazuzuTests(
         )
 
         self.assertEqual(
-            cat["name"],
+            cat.name,
             "pazuzu"
         )
 
         self.assertEqual(
-            cat["canonical_identity"],
+            cat.canonical_identity,
             "pazuzu"
         )
 
         self.assertEqual(
-            cat["color"],
+            cat.color,
             "black"
         )
 
         self.assertEqual(
-            cat["fur_length"],
+            cat.fur_length,
             "short"
         )
 
         self.assertEqual(
-            cat["pattern"],
+            cat.pattern,
             "solid"
         )
 
         self.assertEqual(
-            cat["eye_color"],
+            cat.eye_color,
             "green"
         )
 
         self.assertEqual(
-            cat["sex"],
+            cat.sex,
             "female"
         )
 
         self.assertIn(
             "pazuzu",
-            cat["special_traits"]
+            cat.special_traits
         )
 
         self.assertIn(
             "canonical_cat_pazuzu",
-            cat["special_traits"]
+            cat.special_traits
         )
 
         self.assertTrue(

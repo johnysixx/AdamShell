@@ -33,7 +33,7 @@ class CatMeowKnowledgeTests(
             origin="dice_manifestation"
         )
 
-        meow = cat["learning"][
+        meow = cat.learning[
             "meow_knowledge"
         ]
 
@@ -70,7 +70,7 @@ class CatMeowKnowledgeTests(
             origin="dice_manifestation"
         )
 
-        meow = cat["learning"][
+        meow = cat.learning[
             "meow_knowledge"
         ]
 

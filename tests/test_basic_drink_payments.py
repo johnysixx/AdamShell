@@ -10,26 +10,26 @@ class BasicDrinkPaymentTests(unittest.TestCase):
     def test_god_pays_no_existence_for_basic_drink(self):
         god = SocialEntity.from_mapping({'name': 'god', 'type': 'god', 'existence_pct': 100.0, 'energy_j': 10.0})
         result = self.rules.apply_basic_drink_payment(god)
-        self.assertEqual(god['existence_pct'], 100.0)
+        self.assertEqual(god.existence_pct, 100.0)
         self.assertEqual(result['payment_kind'], 'god_rule')
 
     def test_idea_entity_pays_small_energy_cost_for_basic_drink(self):
         entity = SocialEntity.from_mapping({'name': 'serpent', 'type': 'idea_entity', 'energy_j': 10.0})
         result = self.rules.apply_basic_drink_payment(entity)
-        self.assertLess(entity['energy_j'], 10.0)
+        self.assertLess(entity.energy_j, 10.0)
         self.assertGreater(result['energy_paid_j'], 0.0)
 
     def test_root_entity_pays_twenty_five_percent_existence(self):
         entity = SocialEntity.from_mapping({'name': 'root_guest', 'type': 'root_entity', 'existence_by_world': {'root_universe': 100.0}})
         result = self.rules.apply_basic_drink_payment(entity)
-        self.assertEqual(entity['existence_by_world']['root_universe'], 75.0)
+        self.assertEqual(entity.existence_by_world['root_universe'], 75.0)
         self.assertEqual(result['existence_paid_pct'], 25.0)
 
     def test_physical_entity_pays_ninety_percent_and_gains_idea_existence(self):
         entity = SocialEntity.from_mapping({'name': 'physical_guest', 'type': 'physical_entity', 'existence_by_world': {'physical_universe': 100.0, 'idea_universe': 0.0}})
         result = self.rules.apply_basic_drink_payment(entity)
-        self.assertEqual(entity['existence_by_world']['physical_universe'], 10.0)
-        self.assertEqual(entity['existence_by_world']['idea_universe'], 40.0)
+        self.assertEqual(entity.existence_by_world['physical_universe'], 10.0)
+        self.assertEqual(entity.existence_by_world['idea_universe'], 40.0)
         self.assertEqual(result['existence_paid_pct'], 90.0)
         self.assertEqual(result['idea_existence_gain_pct'], 40.0)
         self.assertEqual(result['existence_converted_to_energy_pct'], 50.0)

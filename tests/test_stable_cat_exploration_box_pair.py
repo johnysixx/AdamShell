@@ -35,17 +35,17 @@ class StableCatExplorationBoxPairTests(
             self.creator,
             self.other_cat
         ):
-            cat["current_layer"] = (
+            cat.current_layer = (
                 "meeting_place"
             )
 
-            cat["position"] = {
+            cat.position = {
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
             }
 
-            cat["idea_energy"] = (
+            cat.idea_energy = (
                 QUANTUM_BOX_ENERGY_COST_J
                 * 10.0
             )

@@ -978,8 +978,6 @@ class Day0FirstBarShift:
             raise RuntimeError('Garfield arrival requires cats_layer.')
 
         def cat_name_of(cat):
-            if isinstance(cat, dict):
-                return getattr(cat, 'name', None)
             return getattr(cat, 'name', None)
         existing = next((cat for cat in cats_layer.cats if cat_name_of(cat) == 'garfield'), None)
         created = False
@@ -991,15 +989,16 @@ class Day0FirstBarShift:
                 raise RuntimeError('Garfield manifestation failed.')
             garfield = manifestation['cat']
             created = True
-        if isinstance(garfield, dict):
-            traits = self._entity_attr_setdefault(garfield, 'special_traits', [])
-            garfield.canonical_identity = 'garfield'
-        else:
-            traits = getattr(garfield, 'special_traits', None)
-            if traits is None:
-                garfield.special_traits = []
-                traits = garfield.special_traits
-            garfield.canonical_identity = 'garfield'
+        traits = getattr(
+            garfield,
+            'special_traits',
+            None
+        )
+        if traits is None:
+            garfield.special_traits = []
+            traits = garfield.special_traits
+
+        garfield.canonical_identity = 'garfield'
         for trait in ('garfield', 'canonical_cat_garfield'):
             if trait not in traits:
                 traits.append(trait)
@@ -1015,18 +1014,11 @@ class Day0FirstBarShift:
     def bouncer_enters_bar_with_garfield(self):
         bouncer = self.meeting_place.bouncer
         locations = ['outside_bar', 'inside_bar']
-        if isinstance(bouncer, dict):
-            bouncer.locations = list(locations)
-            bouncer.location = 'dual_presence'
-            bouncer.state = 'inside_and_outside_bar'
-            bouncer.guards_entrance = True
-            bouncer.present_in_bar = True
-        else:
-            bouncer.locations = list(locations)
-            bouncer.location = 'dual_presence'
-            bouncer.state = 'inside_and_outside_bar'
-            bouncer.guards_entrance = True
-            bouncer.present_in_bar = True
+        bouncer.locations = list(locations)
+        bouncer.location = 'dual_presence'
+        bouncer.state = 'inside_and_outside_bar'
+        bouncer.guards_entrance = True
+        bouncer.present_in_bar = True
         event = {'name': 'bouncer_enters_bar_with_garfield', 'bouncer': 'bouncer', 'with': 'garfield', 'locations': list(locations), 'still_guards_entrance': True, 'present_inside': True, 'purpose': 'discuss_wager_judging'}
         self.meeting_place.emit_event(event)
         self.history.append(event)
@@ -1037,20 +1029,21 @@ class Day0FirstBarShift:
 
     def serpent_explains_wager_to_bouncer(self):
         bouncer = self.meeting_place.bouncer
-        if isinstance(bouncer, dict):
-            present_inside = getattr(bouncer, 'present_in_bar', False)
-        else:
-            present_inside = getattr(bouncer, 'present_in_bar', False)
+        present_inside = getattr(
+            bouncer,
+            'present_in_bar',
+            False
+        )
         if not present_inside:
             raise RuntimeError('Bouncer is not present inside the bar.')
         wager = self.serpent_lilith_drink_wager
         event = {'name': 'serpent_explains_wager_to_bouncer', 'speaker': 'serpent', 'listener': 'bouncer', 'participants': list(wager['participants']), 'contest': ['wine', 'mead', 'beer'], 'proposed_judges': ['bartender', 'bouncer']}
         self.meeting_place.emit_event(event)
         self.history.append(event)
-        if isinstance(bouncer, dict):
-            bouncer.wager_knowledge = {'known': True, 'source': 'serpent'}
-        else:
-            bouncer.wager_knowledge = {'known': True, 'source': 'serpent'}
+        bouncer.wager_knowledge = {
+            'known': True,
+            'source': 'serpent'
+        }
         return event
 
     def everyone_scratches_garfield(self):
@@ -1102,10 +1095,7 @@ class Day0FirstBarShift:
         if proposal is not None:
             proposal['bouncer_accepted'] = True
         bouncer = self.meeting_place.bouncer
-        if isinstance(bouncer, dict):
-            bouncer.wager_judge = True
-        else:
-            bouncer.wager_judge = True
+        bouncer.wager_judge = True
         return {'tastings': tasting_events, 'verdict': verdict, 'accepted': accepted, 'receipt': service['receipt']}
 
     def advance_to_bouncer_accepts_judge_role(self):

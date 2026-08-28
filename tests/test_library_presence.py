@@ -246,10 +246,10 @@ class LibraryPresenceTests(unittest.TestCase):
             god
         )
 
-        god["book"]["location"] = "library"
+        god.book["location"] = "library"
 
         self.assertEqual(
-            god["role"],
+            god.role,
             "librarian"
         )
 
@@ -268,12 +268,12 @@ class LibraryPresenceTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            god["book"]["location"],
+            god.book["location"],
             "library"
         )
 
         self.assertEqual(
-            god["book"]["entries"],
+            god.book["entries"],
             []
         )
 
@@ -300,7 +300,7 @@ class LibraryPresenceTests(unittest.TestCase):
         library = universe.library
 
         self.assertEqual(
-            god["role"],
+            god.role,
             "librarian"
         )
 
@@ -319,12 +319,12 @@ class LibraryPresenceTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            god["book"]["library_status"],
+            god.book["library_status"],
             "shelved"
         )
 
         self.assertIn(
-            god["book"],
+            god.book,
             library.catalog
         )
 
@@ -351,7 +351,7 @@ class LibraryPresenceTests(unittest.TestCase):
         library = universe.library
 
         library.check_out_for_edit(
-            book=god["book"],
+            book=god.book,
             editor=god
         )
 
@@ -363,7 +363,7 @@ class LibraryPresenceTests(unittest.TestCase):
             )
 
         library.return_book(
-            god["book"]
+            god.book
         )
 
         result = library.god_leaves(

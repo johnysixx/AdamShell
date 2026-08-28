@@ -13,9 +13,9 @@ class BarArrivalProtocolTests(unittest.TestCase):
         guest = SocialEntity.from_mapping(SocialEntity.from_mapping({'name': 'guest_1', 'type': 'human', 'state': 'entering', 'position': None}))
         result = self.protocol.arrive(guest)
         self.assertTrue(result)
-        self.assertEqual(guest['state'], 'at_bar')
-        self.assertIsNotNone(guest['position'])
-        destination = self.geometry.find_cell(x=guest['position']['x'], y=guest['position']['y'])
+        self.assertEqual(guest.state, 'at_bar')
+        self.assertIsNotNone(guest.position)
+        destination = self.geometry.find_cell(x=guest.position['x'], y=guest.position['y'])
         self.assertIsNotNone(destination)
         self.assertEqual(destination['kind'], 'customer_floor')
         self.assertNotEqual(destination['kind'], 'seating_place')
@@ -28,9 +28,9 @@ class BarArrivalProtocolTests(unittest.TestCase):
         second_result = self.protocol.arrive(guest_2)
         self.assertTrue(first_result)
         self.assertTrue(second_result)
-        self.assertNotEqual(guest_1['position'], guest_2['position'])
-        first_cell = self.geometry.find_cell(x=guest_1['position']['x'], y=guest_1['position']['y'])
-        second_cell = self.geometry.find_cell(x=guest_2['position']['x'], y=guest_2['position']['y'])
+        self.assertNotEqual(guest_1.position, guest_2.position)
+        first_cell = self.geometry.find_cell(x=guest_1.position['x'], y=guest_1.position['y'])
+        second_cell = self.geometry.find_cell(x=guest_2.position['x'], y=guest_2.position['y'])
         self.assertEqual(first_cell['occupied_by'], 'guest_1')
         self.assertEqual(second_cell['occupied_by'], 'guest_2')
 
@@ -44,9 +44,9 @@ class BarArrivalProtocolTests(unittest.TestCase):
         self.assertEqual(len(customer_floor), 4)
         occupied_customer_floor = [cell for cell in customer_floor if cell['occupied_by'] is not None]
         self.assertEqual(len(occupied_customer_floor), 4)
-        self.assertEqual(guests[3]['state'], 'at_bar')
-        self.assertIsNotNone(guests[3]['position'])
-        fourth_place = self.geometry.find_cell(x=guests[3]['position']['x'], y=guests[3]['position']['y'])
+        self.assertEqual(guests[3].state, 'at_bar')
+        self.assertIsNotNone(guests[3].position)
+        fourth_place = self.geometry.find_cell(x=guests[3].position['x'], y=guests[3].position['y'])
         released = self.geometry.release_cell('guest_4', fourth_place)
         self.assertTrue(released)
         customer_floor_after_release = [cell for cell in self.geometry.cells if cell['kind'] == 'customer_floor']
@@ -62,7 +62,7 @@ class BarArrivalProtocolTests(unittest.TestCase):
         self.assertEqual(len(customer_floor), 5)
         occupied = [cell for cell in customer_floor if cell['occupied_by'] is not None]
         self.assertEqual(len(occupied), 5)
-        positions = {(guest['position']['x'], guest['position']['y']) for guest in guests}
+        positions = {(guest.position['x'], guest.position['y']) for guest in guests}
         self.assertEqual(len(positions), 5)
 
     def test_fourth_guest_expands_complete_bar_module(self):

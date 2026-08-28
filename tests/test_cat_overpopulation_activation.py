@@ -31,7 +31,7 @@ class CatOverpopulationActivationTests(
         )
 
         self.assertEqual(
-            cat["state"],
+            cat.state,
             (
                 "aware_of_"
                 "cronenberg_overpopulation"
@@ -39,7 +39,7 @@ class CatOverpopulationActivationTests(
         )
 
         self.assertEqual(
-            cat["suggested_intent"],
+            cat.suggested_intent,
             "hunt_nearest_cronenberg"
         )
 
@@ -122,12 +122,12 @@ class CatOverpopulationActivationTests(
         )
 
         self.assertEqual(
-            cat["intent"],
+            cat.intent,
             "hunt_nearest_cronenberg"
         )
 
         self.assertEqual(
-            cat["active_route_id"],
+            cat.active_route_id,
             result["route"].route_id
         )
 
@@ -137,7 +137,7 @@ class CatOverpopulationActivationTests(
         )
 
         self.assertTrue(
-            cat["navigation_offer"][
+            cat.navigation_offer[
                 "accepted"
             ]
         )
@@ -212,7 +212,7 @@ class CatOverpopulationActivationTests(
         )
 
         self.assertTrue(
-            cat["navigation_offer"][
+            cat.navigation_offer[
                 "declined"
             ]
         )
@@ -227,7 +227,7 @@ class CatOverpopulationActivationTests(
 
         cat = created["cat"]
 
-        cat["cronenbergs_eaten"] = 10
+        cat.cronenbergs_eaten = 10
 
         result = (
             universe
@@ -243,7 +243,7 @@ class CatOverpopulationActivationTests(
         )
 
         self.assertEqual(
-            cat["suggested_intent"],
+            cat.suggested_intent,
             "return_to_bar"
         )
 
@@ -258,7 +258,7 @@ class CatOverpopulationActivationTests(
         )
 
         self.assertEqual(
-            cat["hunt_quota"],
+            cat.hunt_quota,
             10
         )
 

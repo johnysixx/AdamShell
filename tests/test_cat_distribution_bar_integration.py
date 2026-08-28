@@ -33,6 +33,6 @@ class CatDistributionBarIntegrationTests(unittest.TestCase):
         self.assertIn(cat, self.meeting_place.entities)
         self.assertNotIn(cat, self.idea_universe.entities)
         self.assertEqual(cat.current_layer, 'meeting_place')
-        self.assertFalse(recipient['needs_cat'])
+        self.assertFalse(recipient.needs_cat)
 if __name__ == '__main__':
     unittest.main()

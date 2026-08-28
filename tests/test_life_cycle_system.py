@@ -134,7 +134,7 @@ class LifeCycleSystemTests(
         )
 
         self.assertTrue(
-            cat["reproduction"]["fertile"]
+            cat.reproduction["fertile"]
         )
 
     def test_universe_tick_advances_pregnancy(self):
@@ -247,7 +247,7 @@ class LifeCycleSystemTests(
         kittens = [
             cat
             for cat in self.cats.cats
-            if cat["name"].startswith(
+            if cat.name.startswith(
                 "kitten_"
             )
         ]

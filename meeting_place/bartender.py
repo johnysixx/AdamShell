@@ -173,12 +173,15 @@ class Bartender(SocialMixin):
         return guest_name in self.known_guests
 
     def remember_guest(self, guest):
-        if isinstance(guest, dict):
-            guest_name = getattr(guest, 'world_key', None) or getattr(guest, 'name', None)
-            life_history = getattr(guest, 'life_history', None)
-        else:
-            guest_name = getattr(guest, 'world_key', None) or getattr(guest, 'name', None)
-            life_history = getattr(guest, 'life_history', None)
+        guest_name = (
+            getattr(guest, 'world_key', None)
+            or getattr(guest, 'name', None)
+        )
+        life_history = getattr(
+            guest,
+            'life_history',
+            None
+        )
         if not guest_name:
             raise ValueError('Guest requires identity.')
         self.known_guests.add(guest_name)
@@ -274,13 +277,22 @@ class Bartender(SocialMixin):
         UniverseLogger.event('BARTENDER POLISHES A GLASS')
 
     def exchange_meow_with_cat(self, cat):
-        if isinstance(cat, dict):
-            cat_name = getattr(cat, 'world_key', None) or getattr(cat, 'name', None)
-            meow = getattr(cat, 'learning', {}).get('meow_knowledge', {})
-            cat_knows_meow = bool(meow.get('learned', False) and meow.get('can_speak', False))
-        else:
-            cat_name = getattr(cat, 'name', None)
-            cat_knows_meow = False
+        cat_name = (
+            getattr(cat, 'world_key', None)
+            or getattr(cat, 'name', None)
+        )
+        meow = getattr(
+            cat,
+            'learning',
+            {}
+        ).get(
+            'meow_knowledge',
+            {}
+        )
+        cat_knows_meow = bool(
+            meow.get('learned', False)
+            and meow.get('can_speak', False)
+        )
         cat_event = {'name': 'cat_meowed_at_bartender', 'cat': cat_name, 'sound': 'MEOW', 'understood': cat_knows_meow}
         self.cat_meow_history.append(cat_event)
         UniverseLogger.event(f'CAT MEOWS AT BARTENDER: {cat_name}')

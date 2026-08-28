@@ -52,7 +52,7 @@ class CatOriginPropertyEqualityTests(
 
         for cat in self.cats:
             with self.subTest(
-                origin=cat["origin"]
+                origin=cat.origin
             ):
                 self.assertTrue(
                     required_properties
@@ -60,22 +60,22 @@ class CatOriginPropertyEqualityTests(
                 )
 
                 self.assertEqual(
-                    cat["type"],
+                    cat.type,
                     "cat"
                 )
 
                 self.assertEqual(
-                    cat["idea_energy"],
+                    cat.idea_energy,
                     100
                 )
 
                 self.assertEqual(
-                    cat["size"],
+                    cat.size,
                     1.0
                 )
 
                 self.assertEqual(
-                    cat["strength"],
+                    cat.strength,
                     1.0
                 )
 
@@ -90,10 +90,10 @@ class CatOriginPropertyEqualityTests(
 
         for cat in self.cats:
             with self.subTest(
-                origin=cat["origin"]
+                origin=cat.origin
             ):
                 self.assertEqual(
-                    cat["access"],
+                    cat.access,
                     expected_access
                 )
 
@@ -117,7 +117,7 @@ class CatOriginPropertyEqualityTests(
 
     def test_origin_is_metadata_only(self):
         observed_origins = {
-            cat["origin"]
+            cat.origin
             for cat in self.cats
         }
 

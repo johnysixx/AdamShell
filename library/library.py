@@ -354,7 +354,8 @@ class Library:
                 "Transferred energy must be positive."
             )
 
-        available = editor.get(
+        available = getattr(
+            editor,
             "energy_j",
             0.0
         )
@@ -364,7 +365,7 @@ class Library:
                 "Editor does not have enough energy."
             )
 
-        editor["energy_j"] -= amount_j
+        editor.energy_j -= amount_j
 
         book["energy_j"] = (
             book.get(

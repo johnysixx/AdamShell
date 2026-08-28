@@ -55,8 +55,6 @@ class QuantumBox:
     def is_visible_to(self, observer):
         if not self.is_in_cat_transfer_superposition():
             return True
-        if isinstance(observer, dict):
-            return getattr(observer, 'type', None) == 'cat'
         return getattr(observer, 'type', None) == 'cat'
 
     def cat_observation_state(self, observer):

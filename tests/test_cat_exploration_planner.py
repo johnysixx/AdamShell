@@ -25,11 +25,11 @@ class CatExplorationPlannerTests(
             fur_length="short"
         )
 
-        self.cat["current_layer"] = (
+        self.cat.current_layer = (
             "meeting_place"
         )
 
-        self.cat["position"] = {
+        self.cat.position = {
             "x": 1.0,
             "y": 2.0,
             "z": 3.0
@@ -58,7 +58,7 @@ class CatExplorationPlannerTests(
     def test_explicit_goal_has_priority(
         self
     ):
-        self.cat["exploration_goal"] = {
+        self.cat.exploration_goal = {
             "layer": "eden",
             "position": {
                 "x": 9.0,
@@ -92,7 +92,7 @@ class CatExplorationPlannerTests(
     def test_positive_memory_makes_layer_attractive(
         self
     ):
-        self.cat["memory"].remember(
+        self.cat.memory.remember(
             event_type="successful_exploration",
             location={
                 "x": 4.0,
@@ -129,7 +129,7 @@ class CatExplorationPlannerTests(
     def test_dangerous_memory_reduces_score(
         self
     ):
-        self.cat["memory"].remember(
+        self.cat.memory.remember(
             event_type="dangerous_location",
             location={
                 "x": 4.0,
@@ -166,7 +166,7 @@ class CatExplorationPlannerTests(
     def test_quantum_cat_can_choose_meeting_place(
         self
     ):
-        self.cat["current_layer"] = (
+        self.cat.current_layer = (
             "quantum_layer"
         )
 

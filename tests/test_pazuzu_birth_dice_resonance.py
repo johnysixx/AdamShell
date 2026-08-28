@@ -80,7 +80,7 @@ class PazuzuBirthDiceResonanceTests(
         )
 
         self.assertEqual(
-            self.pazuzu["name"],
+            self.pazuzu.name,
             "pazuzu"
         )
 
@@ -228,7 +228,7 @@ class PazuzuBirthDiceResonanceTests(
 
         self.assertEqual(
             [
-                cat["name"]
+                cat.name
                 for cat
                 in kernel.universe.cats_layer.cats
             ],

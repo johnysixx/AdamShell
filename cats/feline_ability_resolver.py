@@ -20,9 +20,9 @@ class FelineAbilityResolver:
         return {'name': 'pazuzu_human_door_method_registered', 'cat': pazuzu.name, 'method': method}
 
     def register_queen_elisabeth_door_method(self, queen):
-        FelineWisdom.add_awareness(cat=queen, knowledge_name=self.OPEN_HUMAN_DOOR, domain='feline', description='Some cats can open unlocked human doors.', known_teachers=[queen['name']])
+        FelineWisdom.add_awareness(cat=queen, knowledge_name=self.OPEN_HUMAN_DOOR, domain='feline', description='Some cats can open unlocked human doors.', known_teachers=[queen.name])
         method = FelineWisdom.learn_ability_method(cat=queen, ability_name=self.OPEN_HUMAN_DOOR, method_name=self.QUEEN_ELISABETH_METHOD, teacher_name=None, constraints={'requires_unlocked': True, 'opens_toward_cat': True, 'opens_away_from_cat': False, 'can_close': False})
-        return {'name': 'queen_elisabeth_human_door_method_registered', 'cat': queen['name'], 'method': method}
+        return {'name': 'queen_elisabeth_human_door_method_registered', 'cat': queen.name, 'method': method}
 
     def transmit_meow_awareness(self, teacher, student):
         teacher_wisdom = FelineWisdom.ensure_state(teacher)
@@ -37,7 +37,7 @@ class FelineAbilityResolver:
             copied = {'name': knowledge_name, 'domain': domain, 'known_to_exist': True, 'description': knowledge.get('description'), 'known_teachers': list(knowledge.get('known_teachers', [])), 'transfer_mode': 'awareness_only'}
             student_wisdom['awareness'][knowledge_name] = copied
             transferred.append(copied)
-        event = {'name': 'meow_ability_awareness_transmitted', 'teacher': teacher['name'], 'student': student['name'], 'transferred': transferred, 'transferred_count': len(transferred), 'methods_transferred': 0, 'transmitted': True}
+        event = {'name': 'meow_ability_awareness_transmitted', 'teacher': teacher.name, 'student': student.name, 'transferred': transferred, 'transferred_count': len(transferred), 'methods_transferred': 0, 'transmitted': True}
         teacher_wisdom['transmission_history'].append(event)
         student_wisdom['transmission_history'].append(event)
         self._record(event)
@@ -58,10 +58,10 @@ class FelineAbilityResolver:
         teacher_method = teacher_ability['methods'].get(method_name)
         if teacher_method is None:
             return self._deny(name='feline_ability_lesson_denied', teacher=teacher, student=student, reason='teacher_does_not_know_method')
-        learned_method = FelineWisdom.learn_ability_method(cat=student, ability_name=ability_name, method_name=method_name, teacher_name=teacher['name'], constraints=teacher_method['constraints'])
-        teacher_personality = CatPersonality.apply_experience(cat=teacher, source='successfully_taught_other_cat', changes={'empathy': 0.02, 'patience': 0.015}, metadata={'student': student['name'], 'ability': ability_name, 'method': method_name})
-        student_personality = CatPersonality.apply_experience(cat=student, source='learned_from_other_cat', changes={'curiosity': 0.01}, metadata={'teacher': teacher['name'], 'ability': ability_name, 'method': method_name})
-        event = {'name': 'feline_ability_method_learned', 'teacher': teacher['name'], 'student': student['name'], 'ability': ability_name, 'method': method_name, 'constraints': dict(learned_method['constraints']), 'teacher_personality': teacher_personality, 'student_personality': student_personality, 'learned': True}
+        learned_method = FelineWisdom.learn_ability_method(cat=student, ability_name=ability_name, method_name=method_name, teacher_name=teacher.name, constraints=teacher_method['constraints'])
+        teacher_personality = CatPersonality.apply_experience(cat=teacher, source='successfully_taught_other_cat', changes={'empathy': 0.02, 'patience': 0.015}, metadata={'student': student.name, 'ability': ability_name, 'method': method_name})
+        student_personality = CatPersonality.apply_experience(cat=student, source='learned_from_other_cat', changes={'curiosity': 0.01}, metadata={'teacher': teacher.name, 'ability': ability_name, 'method': method_name})
+        event = {'name': 'feline_ability_method_learned', 'teacher': teacher.name, 'student': student.name, 'ability': ability_name, 'method': method_name, 'constraints': dict(learned_method['constraints']), 'teacher_personality': teacher_personality, 'student_personality': student_personality, 'learned': True}
         FelineWisdom.ensure_state(student)['lesson_history'].append(event)
         self._record(event)
         return event
@@ -102,7 +102,7 @@ class FelineAbilityResolver:
         teacher_wisdom = FelineWisdom.ensure_state(teacher)
         knows_teaching = self._knows_ability(teacher_wisdom, self.TEACH_OTHER_CATS)
         knows_meta_teaching = self._knows_ability(teacher_wisdom, self.TEACH_TEACHING)
-        is_garfield = teacher.get('name') == 'garfield'
+        is_garfield = getattr(teacher, 'name', None) == 'garfield'
         if ability_name == self.TEACH_OTHER_CATS:
             if is_garfield:
                 return {'allowed': True, 'reason': 'garfield_teaches_teaching'}
@@ -120,8 +120,8 @@ class FelineAbilityResolver:
         return {'allowed': False, 'reason': 'teacher_has_not_learned_to_teach'}
 
     def _is_parent_of(self, teacher, student):
-        teacher_name = teacher.get('name')
-        parents = student.get('parents', {})
+        teacher_name = getattr(teacher, 'name', None)
+        parents = getattr(student, 'parents', {})
         return teacher_name in {parents.get('mother'), parents.get('father')}
 
     def _knows_ability(self, wisdom, ability_name):
@@ -129,14 +129,14 @@ class FelineAbilityResolver:
         return bool(ability and ability.get('learned', False))
 
     def _create_teaching_cronenberg(self, teacher, student, ability_name, reason):
-        error = RuntimeError(f"Forbidden feline teaching paradox: {teacher.get('name')} attempted to teach {ability_name} to {student.get('name')} without teach_teaching.")
+        error = RuntimeError(f"Forbidden feline teaching paradox: {getattr(teacher, 'name', None)} attempted to teach {ability_name} to {getattr(student, 'name', None)} without teach_teaching.")
         cronenberg = self.universe.create_cronenberg_from_quantum_error(error=error, source_component='feline_ability_resolver', source_operation='forbidden_teaching_attempt')
-        event = {'name': 'forbidden_teaching_created_cronenberg', 'teacher': teacher.get('name'), 'student': student.get('name'), 'attempted_ability': ability_name, 'reason': reason, 'cronenberg_id': cronenberg.id, 'cronenberg_created': True, 'learned': False, 'transmitted': False}
+        event = {'name': 'forbidden_teaching_created_cronenberg', 'teacher': getattr(teacher, 'name', None), 'student': getattr(student, 'name', None), 'attempted_ability': ability_name, 'reason': reason, 'cronenberg_id': cronenberg.id, 'cronenberg_created': True, 'learned': False, 'transmitted': False}
         self._record(event)
         return event
 
     def _deny(self, name, teacher, student, reason):
-        event = {'name': name, 'teacher': teacher.get('name'), 'student': student.get('name'), 'reason': reason, 'learned': False, 'transmitted': False}
+        event = {'name': name, 'teacher': getattr(teacher, 'name', None), 'student': getattr(student, 'name', None), 'reason': reason, 'learned': False, 'transmitted': False}
         self._record(event)
         return event
 

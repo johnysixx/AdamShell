@@ -148,48 +148,48 @@ class CatBirthGibTests(
         )
 
         self.assertEqual(
-            cat["name"],
+            cat.name,
             "gib"
         )
 
         self.assertEqual(
-            cat["canonical_identity"],
+            cat.canonical_identity,
             "gib"
         )
 
         self.assertEqual(
-            cat["color"],
+            cat.color,
             "black"
         )
 
         self.assertEqual(
-            cat["fur_length"],
+            cat.fur_length,
             "long"
         )
 
         self.assertEqual(
-            cat["pattern"],
+            cat.pattern,
             "solid"
         )
 
         self.assertEqual(
-            cat["eye_color"],
+            cat.eye_color,
             "green"
         )
 
         self.assertEqual(
-            cat["sex"],
+            cat.sex,
             "female"
         )
 
         self.assertIn(
             "gib",
-            cat["special_traits"]
+            cat.special_traits
         )
 
         self.assertIn(
             "canonical_cat_gib",
-            cat["special_traits"]
+            cat.special_traits
         )
 
         self.assertEqual(

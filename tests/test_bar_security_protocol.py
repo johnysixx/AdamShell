@@ -46,8 +46,8 @@ class BarSecurityProtocolTests(unittest.TestCase):
         service = self.geometry.find_cell(name='bar_service_floor')
         result = self.protocol.handle_guest_entry(guest, service)
         self.assertTrue(result)
-        self.assertEqual(guest['state'], 'ejected')
-        self.assertIsNone(guest['position'])
+        self.assertEqual(guest.state, 'ejected')
+        self.assertIsNone(guest.position)
         self.assertTrue(self.blacklist.is_banned('guest_1'))
         self.assertFalse(self.bouncer.can_enter(guest))
 
@@ -56,9 +56,9 @@ class BarSecurityProtocolTests(unittest.TestCase):
         service = self.geometry.find_cell(name='bar_service_floor')
         result = self.protocol.handle_guest_entry(guest, service)
         self.assertTrue(result)
-        self.assertEqual(guest['state'], 'ejected')
-        self.assertEqual(guest['existence_pct'], 0.0)
-        self.assertEqual(guest['energy_j'], 0.0)
+        self.assertEqual(guest.state, 'ejected')
+        self.assertEqual(guest.existence_pct, 0.0)
+        self.assertEqual(guest.energy_j, 0.0)
         self.assertEqual(self.protocol.last_confiscation, {'guest': 'guest_1', 'existence_pct': 73.5, 'energy_j': 42.0})
 
     def test_confiscation_is_followed_by_cat_d20_roll(self):
@@ -103,7 +103,7 @@ class BarSecurityProtocolTests(unittest.TestCase):
         self.assertTrue(result)
         cats.create_cat.assert_called_once_with(name='security_cat_guest_1', color='black', fur_length='short', origin='bar_security_confiscation')
         self.assertIs(self.protocol.last_security_creation, created_cat)
-        self.assertEqual(self.protocol.last_security_creation['type'], 'cat')
+        self.assertEqual(self.protocol.last_security_creation.type, 'cat')
 
     def test_failed_security_roll_creates_real_cronenberg(self):
         cat_d20 = Mock()
@@ -212,16 +212,16 @@ class BarSecurityProtocolTests(unittest.TestCase):
         service = self.geometry.find_cell(name='bar_service_floor')
         result = self.protocol.handle_guest_entry(guest, service)
         self.assertTrue(result)
-        self.assertEqual(guest['existence_by_world'], {'idea_universe': 20.0, 'root_universe': 0.0, 'eden': 40.0})
-        self.assertTrue(guest['exists_somewhere'])
+        self.assertEqual(guest.existence_by_world, {'idea_universe': 20.0, 'root_universe': 0.0, 'eden': 40.0})
+        self.assertTrue(guest.exists_somewhere)
 
     def test_ejection_marks_entity_gone_if_no_world_existence_remains(self):
         guest = SocialEntity.from_mapping({'name': 'guest_1', 'type': 'guest', 'state': 'behind_bar', 'position': {'x': 4000, 'y': 0}, 'existence_pct': 70.0, 'native_world': 'root_universe', 'existence_by_world': {'idea_universe': 0.0, 'root_universe': 70.0, 'eden': 0.0}, 'energy_j': 100.0})
         service = self.geometry.find_cell(name='bar_service_floor')
         result = self.protocol.handle_guest_entry(guest, service)
         self.assertTrue(result)
-        self.assertEqual(guest['existence_by_world'], {'idea_universe': 0.0, 'root_universe': 0.0, 'eden': 0.0})
-        self.assertFalse(guest['exists_somewhere'])
+        self.assertEqual(guest.existence_by_world, {'idea_universe': 0.0, 'root_universe': 0.0, 'eden': 0.0})
+        self.assertFalse(guest.exists_somewhere)
 
     def test_ban_applies_to_new_manifestation_of_same_identity(self):
         first_manifestation = SocialEntity.from_mapping({'name': 'guest_1', 'type': 'guest', 'state': 'behind_bar', 'position': {'x': 4000, 'y': 0}, 'existence_pct': 70.0, 'native_world': 'root_universe', 'existence_by_world': {'root_universe': 70.0, 'eden': 40.0}, 'energy_j': 100.0})

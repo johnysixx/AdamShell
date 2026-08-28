@@ -25,11 +25,11 @@ class CatQuantumBoxTransferTests(
             fur_length="short"
         )
 
-        self.cat["current_layer"] = (
+        self.cat.current_layer = (
             "meeting_place"
         )
 
-        self.cat["position"] = {
+        self.cat.position = {
             "x": 1.0,
             "y": 1.0,
             "z": 1.0
@@ -105,12 +105,12 @@ class CatQuantumBoxTransferTests(
         )
 
         self.assertEqual(
-            self.cat["current_layer"],
+            self.cat.current_layer,
             "quantum_layer"
         )
 
         self.assertEqual(
-            self.cat["position"],
+            self.cat.position,
             self.target.position
         )
 
@@ -186,7 +186,7 @@ class CatQuantumBoxTransferTests(
                 self.target.id
             )
 
-        self.cat["idea_energy"] = (
+        self.cat.idea_energy = (
             QUANTUM_BOX_ENERGY_COST_J
             + 10.0
         )
@@ -217,7 +217,7 @@ class CatQuantumBoxTransferTests(
 
         self.assertEqual(
             counterpart.position,
-            self.cat["position"]
+            self.cat.position
         )
 
         self.assertTrue(

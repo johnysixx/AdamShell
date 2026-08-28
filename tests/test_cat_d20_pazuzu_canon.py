@@ -49,7 +49,7 @@ class CatD20PazuzuCanonTests(unittest.TestCase):
         bootstrap._create_pazuzu()
 
         names = [
-            cat["name"]
+            cat.name
             for cat in universe.cats_layer.cats
         ]
 
@@ -72,27 +72,27 @@ class CatD20PazuzuCanonTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            bootstrap.pazuzu["color"],
+            bootstrap.pazuzu.color,
             "black"
         )
 
         self.assertEqual(
-            bootstrap.pazuzu["fur_length"],
+            bootstrap.pazuzu.fur_length,
             "short"
         )
 
         self.assertEqual(
-            bootstrap.pazuzu["pattern"],
+            bootstrap.pazuzu.pattern,
             "solid"
         )
 
         self.assertEqual(
-            bootstrap.pazuzu["eye_color"],
+            bootstrap.pazuzu.eye_color,
             "green"
         )
 
         self.assertEqual(
-            bootstrap.pazuzu["sex"],
+            bootstrap.pazuzu.sex,
             "female"
         )
 

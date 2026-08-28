@@ -105,37 +105,37 @@ class CatBirthCreationTests(
         )
 
         self.assertEqual(
-            cat["name"],
+            cat.name,
             "cat_0001"
         )
 
         self.assertEqual(
-            cat["color"],
+            cat.color,
             "white"
         )
 
         self.assertEqual(
-            cat["fur_length"],
+            cat.fur_length,
             "long"
         )
 
         self.assertEqual(
-            cat["pattern"],
+            cat.pattern,
             "tabby"
         )
 
         self.assertEqual(
-            cat["eye_color"],
+            cat.eye_color,
             "blue"
         )
 
         self.assertEqual(
-            cat["sex"],
+            cat.sex,
             "female"
         )
 
         self.assertIsNone(
-            cat["canonical_identity"]
+            cat.canonical_identity
         )
 
         self.assertIn(
@@ -144,12 +144,12 @@ class CatBirthCreationTests(
         )
 
         self.assertEqual(
-            cat["birth_profile"],
+            cat.birth_profile,
             birth["profile"]
         )
 
         self.assertEqual(
-            cat["rolled_birth_profile"],
+            cat.rolled_birth_profile,
             birth["rolled_profile"]
         )
 

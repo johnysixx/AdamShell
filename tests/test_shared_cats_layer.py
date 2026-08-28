@@ -40,7 +40,7 @@ class SharedCatsLayerTests(unittest.TestCase):
         )
 
         names = [
-            cat["name"]
+            cat.name
             for cat in universe.cats_layer.cats
         ]
 
