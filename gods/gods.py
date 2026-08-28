@@ -1,3 +1,4 @@
+from core.entity.social_entity import _entity_attr_setdefault
 from core.entity.social_entity import SocialEntity
 from universe.pre_cosmic_rules import GOD_INITIAL_ENERGY_J
 from universe.logger import UniverseLogger
@@ -48,9 +49,9 @@ class Gods:
         self.events = []
 
     def assume_mask(self, god, mask_name, role):
-        knowledge = god.setdefault('knowledge', set())
-        research_book = god.setdefault('research_book', [])
-        masks = god.setdefault('masks', {})
+        knowledge = _entity_attr_setdefault(god, 'knowledge', set())
+        research_book = _entity_attr_setdefault(god, 'research_book', [])
+        masks = _entity_attr_setdefault(god, 'masks', {})
         mask = SocialEntity.from_mapping({'name': mask_name, 'type': 'god_mask', 'role': role, 'active': True, 'mask_of': god, 'knowledge': knowledge, 'research_book': research_book})
         masks[mask_name] = mask
         god.active_mask = mask_name

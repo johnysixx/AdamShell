@@ -92,8 +92,6 @@ class Cat(SocialMixin):
         self.type = 'cat'
 
     def _entity_name(self, entity):
-        if isinstance(entity, dict):
-            return getattr(entity, 'name', None)
         return getattr(entity, 'name', None)
 
     def accept_pet(self, by_entity):

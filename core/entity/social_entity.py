@@ -488,3 +488,25 @@ class SocialEntity(
     EntityObject
 ):
     pass
+
+
+
+def _entity_attr_setdefault(
+    entity,
+    name,
+    default
+):
+    if not hasattr(
+        entity,
+        name
+    ):
+        setattr(
+            entity,
+            name,
+            default
+        )
+
+    return getattr(
+        entity,
+        name
+    )

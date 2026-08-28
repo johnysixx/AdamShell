@@ -44,12 +44,7 @@ class CatBarGuidanceSystem:
         return {'name': 'cat_bar_guidance_failed', 'cat': getattr(cat, 'name', None), 'human': self._name(human), 'reason': reason, 'guided': False}
 
     def _name(self, entity):
-        if isinstance(entity, dict):
-            return getattr(entity, 'name', None)
         return getattr(entity, 'name', None)
 
     def _set(self, entity, key, value):
-        if isinstance(entity, dict):
-            entity[key] = value
-        else:
-            setattr(entity, key, value)
+        setattr(entity, key, value)

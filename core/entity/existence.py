@@ -2,8 +2,6 @@ class ExistenceResolver:
 
     @staticmethod
     def _get(entity, key, default=None):
-        if isinstance(entity, dict):
-            return entity.get(key, default)
         return getattr(entity, key, default)
 
     @staticmethod

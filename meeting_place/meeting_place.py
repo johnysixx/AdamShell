@@ -161,7 +161,7 @@ class MeetingPlace:
             return {'name': 'meeting_place_entry_denied', 'entity': entity_name, 'reason': 'bar_entry_banned', 'entered': False}
         if not self.bouncer.can_enter(entity):
             UniverseLogger.event(f'MEETING PLACE ENTRY DENIED BY BOUNCER: {entity_name}')
-            entity_type = getattr(entity, 'type', None) if isinstance(entity, dict) else getattr(entity, 'type', None)
+            entity_type = getattr(entity, 'type', None)
             if entity_type == 'cronenberg':
                 if not hasattr(self, 'cronenberg_pen'):
                     from .cronenberg_pen import CronenbergPen
@@ -312,7 +312,7 @@ class MeetingPlace:
             return event
         self.bartender.serve_without_order(cat_name, milk, milk_bowl)
         growth_event = None
-        if (isinstance(cat, dict) or getattr(cat, 'type', None) == 'cat') and hasattr(cat, 'age_days') and (getattr(cat, 'developmental_stage', None) != 'adult'):
+        if getattr(cat, 'type', None) == 'cat' and hasattr(cat, 'age_days') and (getattr(cat, 'developmental_stage', None) != 'adult'):
             growth_event = self.kitten_growth.feed_cat_milk(kitten=cat, day=self.tick_count, amount=1.0, source='bartender')
         event = {'name': 'cat_drank_milk_at_bar', 'cat': cat_name, 'milk': 'milk', 'bowl': milk_bowl.get('name', 'milk_bowl'), 'growth': growth_event, 'served': True, 'tick': self.tick_count}
         self.emit_event(event)

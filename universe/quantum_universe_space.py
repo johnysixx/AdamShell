@@ -58,8 +58,6 @@ class QuantumUniverseSpace:
         self.reconfigure(cause='wave_function_collapse', rng=rng)
 
     def _get_cat_memory(self, cat):
-        if isinstance(cat, dict):
-            return getattr(cat, 'memory', None)
         return getattr(cat, 'memory', None)
 
     def _remember_cat_route_event(self, cat, route, universe, event_type, details=None):
@@ -76,10 +74,10 @@ class QuantumUniverseSpace:
         return {'name': 'cat_direct_route_planned', 'cat_id': cat_id, 'destination': destination, 'plan': plan, 'route': route}
 
     def plan_cat_route_to_nearest_huntable_cronenberg(self, cat, cronenbergs, start_position=None, step_size=None, max_size_ratio=1.2):
-        cat_id = getattr(cat, 'name', None) if isinstance(cat, dict) else getattr(cat, 'name', None)
-        cat_size = float(getattr(cat, 'size', 1.0) if isinstance(cat, dict) else getattr(cat, 'size', 1.0))
+        cat_id = getattr(cat, 'name', None)
+        cat_size = float(getattr(cat, 'size', 1.0))
         if start_position is None:
-            start_position = getattr(cat, 'position', None) if isinstance(cat, dict) else getattr(cat, 'position', None)
+            start_position = getattr(cat, 'position', None)
         if start_position is None:
             return {'name': 'cat_hunt_route_not_planned', 'result': 'cat_has_no_position', 'cat_id': cat_id}
         huntable = [cronenberg for cronenberg in cronenbergs if getattr(cronenberg, 'active', True) and getattr(cronenberg, 'is_alive', False) and (getattr(cronenberg, 'position', None) is not None) and (float(cronenberg.size) / cat_size <= float(max_size_ratio))]
@@ -106,7 +104,7 @@ class QuantumUniverseSpace:
         return next((route for route in self.cat_routes if route.cat_id == cat_id and route.observation_active), None)
 
     def advance_cat_route(self, cat, cronenbergs, encounter_system, universe, rng=None):
-        cat_id = getattr(cat, 'name', None) if isinstance(cat, dict) else getattr(cat, 'name', None)
+        cat_id = getattr(cat, 'name', None)
         route = self.find_cat_route(cat_id)
         if route is None:
             return {'result': 'no_active_route'}

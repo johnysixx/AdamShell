@@ -1,29 +1,13 @@
+from core.entity.social_entity import _entity_attr_setdefault
 from meeting_place.bar_yard import BarYard
 from cats.cat_birth_resolver import CatBirthResolver
 
 class Day0FirstBarShift:
 
-
-    def _entity_attr_setdefault(
-        self,
-        entity,
-        name,
-        default
-    ):
-        if not hasattr(
-            entity,
-            name
-        ):
-            setattr(
-                entity,
-                name,
-                default
-            )
-
-        return getattr(
-            entity,
-            name
-        )
+    def _entity_attr_setdefault(self, entity, name, default):
+        if not hasattr(entity, name):
+            setattr(entity, name, default)
+        return getattr(entity, name)
 
     def __init__(self, universe, meeting_place, library, gods, idea_entities):
         self.universe = universe
@@ -962,7 +946,7 @@ class Day0FirstBarShift:
             self.meeting_place.emit_event(event)
             self.history.append(event)
             events.append(event)
-        self.cat_d20.setdefault('social_state', {})['scratched_by'] = list(scratchers)
+        _entity_attr_setdefault(self.cat_d20, 'social_state', {})['scratched_by'] = list(scratchers)
         return events
 
     def cat_d20_sets_next_birth_to_garfield(self):
@@ -970,10 +954,10 @@ class Day0FirstBarShift:
             raise RuntimeError('CatD20 does not exist.')
         resolver = CatBirthResolver(self.universe, self.meeting_place)
         garfield_profile = dict(resolver.garfield_profile)
-        self.cat_d20.setdefault('cat_d20', {})
-        self.cat_d20['cat_d20']['canonical_target'] = 'garfield'
-        self.cat_d20['cat_d20']['canonical_profile'] = dict(garfield_profile)
-        self.cat_d20['cat_d20']['garfield_pending'] = True
+        _entity_attr_setdefault(self.cat_d20, 'cat_d20', {})
+        self.cat_d20.cat_d20['canonical_target'] = 'garfield'
+        self.cat_d20.cat_d20['canonical_profile'] = dict(garfield_profile)
+        self.cat_d20.cat_d20['garfield_pending'] = True
         event = {'name': 'cat_d20_sets_next_birth_to_garfield', 'cat': 'cat_d20', 'target_name': 'garfield', 'profile': dict(garfield_profile), 'pending': True}
         if not hasattr(self.meeting_place, 'cat_d20_secret_history'):
             self.meeting_place.cat_d20_secret_history = []
@@ -983,7 +967,7 @@ class Day0FirstBarShift:
         return event
 
     def garfield_arrives_from_cat_d20_setting(self):
-        cat_d20_state = self.cat_d20.get('cat_d20', {})
+        cat_d20_state = getattr(self.cat_d20, 'cat_d20', {})
         if not cat_d20_state.get('garfield_pending', False):
             raise RuntimeError('CatD20 has not prepared Garfield.')
         if cat_d20_state.get('canonical_target') != 'garfield':
