@@ -2,6 +2,7 @@ from cats.genotype import CatGenotype
 from cats.phenotype_resolver import CatPhenotypeResolver
 from cats.kitten_viability_resolver import KittenGeneticViabilityResolver
 
+from cats.cat_birth_objects import KittenEmbryo
 class KittenEmbryoResolver:
 
     def __init__(self, universe):
@@ -22,7 +23,7 @@ class KittenEmbryoResolver:
             self.universe.quantum_events.append(event)
             return {'embryo': None, 'viability': viability, 'cronenberg': cronenberg, 'event': event, 'viable': False}
         phenotype = CatPhenotypeResolver.resolve(genotype)
-        embryo = {'id': embryo_id, 'type': 'kitten_embryo', 'state': 'gestating', 'mother_name': mother.name, 'father_name': father.name, 'genotype': genotype, 'phenotype': phenotype, 'profile': dict(phenotype['profile']), 'viability': viability, 'genetic_status': viability['status'], 'rare': viability['rare'], 'special_traits': list(viability['special_traits'])}
+        embryo = KittenEmbryo(**{'id': embryo_id, 'type': 'kitten_embryo', 'state': 'gestating', 'mother_name': mother.name, 'father_name': father.name, 'genotype': genotype, 'phenotype': phenotype, 'profile': dict(phenotype['profile']), 'viability': viability, 'genetic_status': viability['status'], 'rare': viability['rare'], 'special_traits': list(viability['special_traits'])})
         event = {'name': 'kitten_embryo_created', 'embryo_id': embryo_id, 'mother': mother.name, 'father': father.name, 'genetic_status': viability['status'], 'rare': viability['rare'], 'profile': dict(phenotype['profile']), 'kitten_created': False, 'cronenberg_created': False}
         self.history.append(event)
         return {'embryo': embryo, 'viability': viability, 'phenotype': phenotype, 'cronenberg': None, 'event': event, 'viable': True}

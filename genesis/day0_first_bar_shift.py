@@ -72,10 +72,10 @@ class Day0FirstBarShift:
         self.library.god_enters(self.god)
         self.history.append({'name': 'god_entered_library'})
         self.first_book = self.gods.create_book(self.god)
-        self.first_book['title'] = None
-        self.first_book['entries'] = []
-        self.first_book['state'] = 'being_written'
-        self.first_book['location'] = 'library_with_author'
+        self.first_book.title = None
+        self.first_book.entries = []
+        self.first_book.state = 'being_written'
+        self.first_book.location = 'library_with_author'
         self.history.append({'name': 'god_begins_first_unnamed_book'})
         return {'god': self.god, 'book': self.first_book}
 
@@ -84,13 +84,13 @@ class Day0FirstBarShift:
             raise RuntimeError('God does not exist yet.')
         if self.first_book is None:
             raise RuntimeError('God has not created his first book.')
-        if self.first_book.get('entries') != []:
+        if self.first_book.entries != []:
             raise RuntimeError("God's first book must still be empty.")
         if self.first_book not in self.library.books:
             self.library.shelve_book(self.first_book)
-        self.first_book['title'] = None
-        self.first_book['state'] = 'being_written'
-        self.first_book['location'] = 'library'
+        self.first_book.title = None
+        self.first_book.state = 'being_written'
+        self.first_book.location = 'library'
         leave_result = self.library.god_leaves(self.god)
         self.history.append({'name': 'god_left_library', 'result': leave_result})
         self.meeting_place.add_entity(self.god)

@@ -39,9 +39,9 @@ class Day0GodTastesLilithTests(unittest.TestCase):
 
     def test_first_book_remains_empty_in_library(self):
         self.scene.advance_to_god_first_lilith_taste()
-        self.assertEqual(self.scene.first_book['entries'], [])
-        self.assertIsNone(self.scene.first_book['title'])
-        self.assertEqual(self.scene.first_book['location'], 'library')
+        self.assertEqual(self.scene.first_book.entries, [])
+        self.assertIsNone(self.scene.first_book.title)
+        self.assertEqual(self.scene.first_book.location, 'library')
 
     def test_tasting_does_not_create_creator_mask(self):
         self.scene.advance_to_god_first_lilith_taste()

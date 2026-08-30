@@ -89,21 +89,13 @@ class CatGroupSplitSystem:
                     cat.name
                 )
 
-            cat.group[
-                "group_id"
-            ] = None
+            cat.group.group_id = None
 
-            cat.group[
-                "member"
-            ] = False
+            cat.group.member = False
 
-            cat.group[
-                "joined_order"
-            ] = None
+            cat.group.joined_order = None
 
-            cat.group[
-                "accepted_members"
-            ] = []
+            cat.group.accepted_members = []
 
         created = (
             self.group_system

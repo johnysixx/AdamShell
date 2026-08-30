@@ -1,3 +1,4 @@
+from cats.cat_components import CatFamily, MaternalCare, MaternalCareReceived, SiblingPlay, SiblingRivalry, ParentalTeaching, FamilyBonding, CatGroupMembership, CatCulture, CatGroupRoles, CatMeowInvitations, CatNorms, CatNeeds
 from core.entity.social_entity import SocialMixin
 
 class Cat(SocialMixin):
@@ -38,25 +39,25 @@ class Cat(SocialMixin):
         self.social_memory = {}
         self.territories = {}
         self.bonds = {}
-        self.family = {'parents': {'mother': None, 'father': None}, 'children': [], 'siblings': [], 'littermates': [], 'half_siblings': []}
-        self.maternal_care = {'active': False, 'kittens': {}, 'care_events': 0}
-        self.maternal_care_received = {'mother': None, 'care_events': 0, 'nursing_events': 0, 'cleaning_events': 0, 'warming_events': 0, 'protection_events': 0, 'retrieval_events': 0, 'last_care_day': None, 'last_phase': None}
-        self.sibling_play = {'play_events': 0, 'partners': {}, 'last_partner': None, 'last_play_day': None}
-        self.sibling_rivalry = {'events': 0, 'rivals': {}, 'last_rival': None, 'last_resource': None}
-        self.parental_teaching = {'lessons_received': 0, 'teachers': {}, 'skills': {}, 'last_lesson': None, 'last_teacher': None}
-        self.family_bonding = {'events': 0, 'family_bonds': []}
-        self.group = {'group_id': None, 'member': False, 'joined_order': None, 'shared_scent': 0.0, 'accepted_members': [], 'group_events': 0, 'influence': 0.0, 'defense_events': 0, 'support_events': 0, 'recruitment_support': 0, 'recruitment_vetoes': 0}
-        self.culture = {'adopted_traditions': {}, 'rejected_traditions': {}, 'preferences': {}, 'myths': {}, 'innovations': {}, 'exposures': 0}
-        self.group_roles = {'active': {}, 'history': [], 'role_events': 0}
+        self.family = CatFamily(parents={'mother': None, 'father': None}, children=[], siblings=[], littermates=[], half_siblings=[])
+        self.maternal_care = MaternalCare(active=False, kittens={}, care_events=0)
+        self.maternal_care_received = MaternalCareReceived(mother=None, care_events=0, nursing_events=0, cleaning_events=0, warming_events=0, protection_events=0, retrieval_events=0, last_care_day=None, last_phase=None)
+        self.sibling_play = SiblingPlay(play_events=0, partners={}, last_partner=None, last_play_day=None)
+        self.sibling_rivalry = SiblingRivalry(events=0, rivals={}, last_rival=None, last_resource=None)
+        self.parental_teaching = ParentalTeaching(lessons_received=0, teachers={}, skills={}, last_lesson=None, last_teacher=None)
+        self.family_bonding = FamilyBonding(events=0, family_bonds=[])
+        self.group = CatGroupMembership(group_id=None, member=False, joined_order=None, shared_scent=0.0, accepted_members=[], group_events=0, influence=0.0, defense_events=0, support_events=0, recruitment_support=0, recruitment_vetoes=0)
+        self.culture = CatCulture(adopted_traditions={}, rejected_traditions={}, preferences={}, myths={}, innovations={}, exposures=0)
+        self.group_roles = CatGroupRoles(active={}, history=[], role_events=0)
         self.human_bonds = {}
-        self.meow_invitations = {'offered': 0, 'understood': 0, 'guided_to_bar': 0, 'history': [], 'suspended_until_tick': 0, 'suspension_reason': None, 'garfield_training_required': False, 'garfield_training': None}
-        self.norms = {'violations': [], 'sanctions': [], 'warnings': 0, 'trust_penalties': 0.0}
+        self.meow_invitations = CatMeowInvitations(offered=0, understood=0, guided_to_bar=0, history=[], suspended_until_tick=0, suspension_reason=None, garfield_training_required=False, garfield_training=None)
+        self.norms = CatNorms(violations=[], sanctions=[], warnings=0, trust_penalties=0.0)
         self.special_traits = []
         self.aroma = aroma
         self.social_interactions = []
         self.pet_count = 0
         self.meow_count = 0
-        self.needs = {'hunger': 0.0, 'thirst': 0.0, 'fatigue': 0.0, 'safety': 0.0, 'social': 0.0, 'curiosity': 0.0, 'dominant': None, 'tick': 0}
+        self.needs = CatNeeds(hunger=0.0, thirst=0.0, fatigue=0.0, safety=0.0, social=0.0, curiosity=0.0, dominant=None, tick=0)
         self.position = None
         self.location = None
         self.current_layer = 'quantum_layer'
@@ -112,61 +113,3 @@ class Cat(SocialMixin):
         event = {'type': 'cat_meow', 'cat': self.name, 'listener': self._entity_name(listener), 'spoken': True, 'meow_number': self.meow_count, 'topic': topic, 'contains': [topic] if topic is not None else known_contents}
         self.social_interactions.append(event)
         return event
-
-    def __getitem__(self, key):
-        return getattr(self, key)
-
-    def __setitem__(self, key, value):
-        setattr(self, key, value)
-
-    def get(self, key, default=None):
-        return getattr(self, key, default)
-
-    def __contains__(self, key):
-        return hasattr(self, key)
-
-    def keys(self):
-        return self.__dict__.keys()
-
-    def values(self):
-        return self.__dict__.values()
-
-    def items(self):
-        return self.__dict__.items()
-
-    def setdefault(self, key, default=None):
-        if not hasattr(self, key):
-            setattr(self, key, default)
-        return getattr(self, key)
-
-    def pop(self, key, default=None):
-        if hasattr(self, key):
-            value = getattr(self, key)
-            delattr(self, key)
-            return value
-        return default
-
-    def update(self, other=None, **kwargs):
-        if other is not None:
-            if hasattr(other, 'items'):
-                source = other.items()
-            else:
-                source = other
-            for key, value in source:
-                setattr(self, key, value)
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-
-    def copy(self):
-        return dict(self.__dict__)
-
-    def __iter__(self):
-        return iter(self.__dict__)
-
-    def __len__(self):
-        return len(self.__dict__)
-
-    def __delitem__(self, key):
-        if not hasattr(self, key):
-            raise KeyError(key)
-        delattr(self, key)

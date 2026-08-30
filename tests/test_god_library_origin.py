@@ -25,8 +25,8 @@ class GodLibraryOriginTests(unittest.TestCase):
         self.assertTrue(self.god.book_created)
         self.assertTrue(hasattr(self.god, 'book'))
         book = self.god.book
-        self.assertEqual(book['type'], 'god_book')
-        self.assertEqual(book['entries'], [])
+        self.assertEqual(book.type, 'god_book')
+        self.assertEqual(book.entries, [])
 
     def test_god_book_is_shelved_in_library(self):
         book = self.god.book

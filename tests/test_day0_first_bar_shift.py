@@ -56,8 +56,8 @@ class Day0FirstBarShiftTests(unittest.TestCase):
         self.assertFalse(state['serpent']['tab']['paid'])
         self.assertTrue(state['god']['in_library'])
         self.assertEqual(state['god']['role'], 'librarian')
-        self.assertIsNone(state['god']['book']['title'])
-        self.assertEqual(state['god']['book']['state'], 'being_written')
+        self.assertIsNone(state['god']['book'].title)
+        self.assertEqual(state['god']['book'].state, 'being_written')
         self.assertTrue(state['lilith']['in_bar'])
         history_names = [event['name'] for event in state['history']]
         self.assertLess(history_names.index('bartender_shift_started'), history_names.index('serpent_born'))
@@ -94,9 +94,9 @@ class Day0FirstBarShiftTests(unittest.TestCase):
         self.assertNotIn(god, self.bar.entities)
         book = self.scene.first_book
         self.assertIsNotNone(book)
-        self.assertIsNone(book['title'])
-        self.assertEqual(book['state'], 'being_written')
-        self.assertEqual(book['location'], 'library_with_author')
+        self.assertIsNone(book.title)
+        self.assertEqual(book.state, 'being_written')
+        self.assertEqual(book.location, 'library_with_author')
         lilith = self.scene.lilith
         self.assertIsNotNone(lilith)
         self.assertIn(lilith, self.bar.entities)

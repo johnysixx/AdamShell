@@ -298,7 +298,7 @@ class Cats:
         decision = thought.get('decision', {})
         intention_type = decision.get('intention') or decision.get('type')
         if intention_type is None:
-            current = cat.mind.get('current_intention') or {}
+            current = cat.mind.current_intention or {}
             intention_type = current.get('type')
         needs_after_action = CatNeedSystem.apply_action(cat, intention_type)
         return {'name': 'cat_autonomous_tick_completed', 'cat': cat.name, 'mode': 'thought_cycle', 'needs': needs_event, 'needs_after_action': needs_after_action, 'thought': thought, 'completed': bool(thought.get('completed', False))}

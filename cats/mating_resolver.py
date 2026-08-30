@@ -22,22 +22,22 @@ class CatMatingResolver:
         if not biology['allowed']:
             return biology
         self._validate_pair(female, male)
-        reproduction = female.get('reproduction', {})
+        reproduction = getattr(female, 'reproduction', {})
         if not reproduction.get('estrus_active', False):
-            return {'name': 'cat_mating_denied', 'female': female.get('name'), 'male': male.get('name'), 'reason': 'female_not_in_estrus', 'mating_recorded': False}
-        reproduction = female['reproduction']
+            return {'name': 'cat_mating_denied', 'female': getattr(female, 'name', None), 'male': getattr(male, 'name', None), 'reason': 'female_not_in_estrus', 'mating_recorded': False}
+        reproduction = female.reproduction
         current_day = int(current_day)
         if reproduction.get('pregnant', False):
             raise ValueError('A pregnant cat cannot add another potential father.')
         if not reproduction.get('mating_window_open', False):
             reproduction.update({'estrus_active': True, 'mating_window_open': True, 'mating_window_started_day': current_day, 'mating_contacts': [], 'potential_fathers': []})
         contact_number = len(reproduction['mating_contacts']) + 1
-        contact = {'name': 'cat_mating_contact', 'contact_number': contact_number, 'female': female['name'], 'male': male['name'], 'male_name': male['name'], 'successful': True, 'day': current_day, '_male_ref': male}
+        contact = {'name': 'cat_mating_contact', 'contact_number': contact_number, 'female': female.name, 'male': male.name, 'male_name': male.name, 'successful': True, 'day': current_day, '_male_ref': male}
         reproduction['mating_contacts'].append(contact)
         stimulation = self.ovulation_resolver.record_stimulation(female=female, male=male, amount=1, day=current_day)
-        if male['name'] not in reproduction['potential_fathers']:
-            reproduction['potential_fathers'].append(male['name'])
-        event = {'name': 'cat_mating_contact_recorded', 'female': female['name'], 'male': male['name'], 'day': current_day, 'contact_number': contact_number, 'mating_window_open': True, 'potential_fathers': list(reproduction['potential_fathers']), 'pregnancy_started': False, 'ovulation_stimulation': stimulation['stimulation'], 'ovulation_threshold': stimulation['threshold'], 'ovulation_threshold_reached': stimulation['threshold_reached']}
+        if male.name not in reproduction['potential_fathers']:
+            reproduction['potential_fathers'].append(male.name)
+        event = {'name': 'cat_mating_contact_recorded', 'female': female.name, 'male': male.name, 'day': current_day, 'contact_number': contact_number, 'mating_window_open': True, 'potential_fathers': list(reproduction['potential_fathers']), 'pregnancy_started': False, 'ovulation_stimulation': stimulation['stimulation'], 'ovulation_threshold': stimulation['threshold'], 'ovulation_threshold_reached': stimulation['threshold_reached']}
         self.history.append(event)
         return event
 
@@ -45,7 +45,7 @@ class CatMatingResolver:
         biology = self.biology_gate.require_physical_world(operation='close_cat_mating_window', cat=female)
         if not biology['allowed']:
             return biology
-        reproduction = female.get('reproduction', {})
+        reproduction = getattr(female, 'reproduction', {})
         if reproduction.get('pregnant', False):
             raise ValueError('Cat is already pregnant.')
         if not reproduction.get('mating_window_open', False):
@@ -56,7 +56,7 @@ class CatMatingResolver:
         ovulation = self.ovulation_resolver.resolve(female, day=current_day)
         if not ovulation['ovulation_induced']:
             reproduction.update({'estrus_active': False, 'estrous_phase': 'interestrus', 'estrous_cycle_day': 0, 'mating_window_open': False, 'mating_window_started_day': None, 'mating_contacts': [], 'potential_fathers': [], 'pregnant': False, 'embryos': []})
-            event = {'name': 'cat_mating_window_closed_without_ovulation', 'mother': female['name'], 'mating_contact_count': len(contacts), 'ovulation': ovulation, 'ovulation_induced': False, 'pregnancy_started': False, 'embryos_attempted': 0, 'viable_embryo_count': 0, 'nonviable_embryo_count': 0, 'started': False}
+            event = {'name': 'cat_mating_window_closed_without_ovulation', 'mother': female.name, 'mating_contact_count': len(contacts), 'ovulation': ovulation, 'ovulation_induced': False, 'pregnancy_started': False, 'embryos_attempted': 0, 'viable_embryo_count': 0, 'nonviable_embryo_count': 0, 'started': False}
             self.history.append(event)
             return event
         rng = rng or random
@@ -82,8 +82,8 @@ class CatMatingResolver:
             father_name = result['father']
             if father_name not in father_names:
                 father_names.append(father_name)
-        reproduction.update({'estrus_active': False, 'estrous_phase': 'diestrus', 'estrous_cycle_day': 0, 'mating_window_open': False, 'pregnant': True, 'pregnancy_day': 0, 'gestation_days': gestation_days, 'expected_birth_day': current_day + gestation_days, 'mother_name': female['name'], 'father_name': father_names[0] if len(father_names) == 1 else None, 'father_names': father_names, 'embryos': viable_embryos})
-        event = {'name': 'cat_pregnancy_started', 'mother': female['name'], 'father_names': father_names, 'multiple_sires': len(father_names) > 1, 'ovulation': ovulation, 'ovulation_induced': True, 'mating_contact_count': len(contacts), 'paternity_results': paternity_results, 'gestation_days': gestation_days, 'pregnancy_day': 0, 'started_on_day': current_day, 'expected_birth_day': current_day + gestation_days, 'embryos_attempted': embryo_count, 'viable_embryo_count': len(viable_embryos), 'nonviable_embryo_count': len(nonviable_results), 'embryo_results': embryo_results, 'started': True}
+        reproduction.update({'estrus_active': False, 'estrous_phase': 'diestrus', 'estrous_cycle_day': 0, 'mating_window_open': False, 'pregnant': True, 'pregnancy_day': 0, 'gestation_days': gestation_days, 'expected_birth_day': current_day + gestation_days, 'mother_name': female.name, 'father_name': father_names[0] if len(father_names) == 1 else None, 'father_names': father_names, 'embryos': viable_embryos})
+        event = {'name': 'cat_pregnancy_started', 'mother': female.name, 'father_names': father_names, 'multiple_sires': len(father_names) > 1, 'ovulation': ovulation, 'ovulation_induced': True, 'mating_contact_count': len(contacts), 'paternity_results': paternity_results, 'gestation_days': gestation_days, 'pregnancy_day': 0, 'started_on_day': current_day, 'expected_birth_day': current_day + gestation_days, 'embryos_attempted': embryo_count, 'viable_embryo_count': len(viable_embryos), 'nonviable_embryo_count': len(nonviable_results), 'embryo_results': embryo_results, 'started': True}
         self.history.append(event)
         if hasattr(self.universe, 'quantum_events'):
             self.universe.quantum_events.append(event)
@@ -93,7 +93,7 @@ class CatMatingResolver:
         biology = self.biology_gate.require_physical_world(operation='advance_cat_pregnancy', cat=female)
         if not biology['allowed']:
             return biology
-        reproduction = female.get('reproduction', {})
+        reproduction = getattr(female, 'reproduction', {})
         if not reproduction.get('pregnant', False):
             return {'name': 'cat_pregnancy_advance_failed', 'reason': 'cat_is_not_pregnant', 'advanced': False}
         days = int(days)
@@ -101,7 +101,7 @@ class CatMatingResolver:
             raise ValueError('Pregnancy advance must be at least one day.')
         reproduction['pregnancy_day'] += days
         ready_for_birth = reproduction['pregnancy_day'] >= reproduction['gestation_days']
-        event = {'name': 'cat_pregnancy_advanced', 'mother': female['name'], 'days_advanced': days, 'pregnancy_day': reproduction['pregnancy_day'], 'gestation_days': reproduction['gestation_days'], 'ready_for_birth': ready_for_birth, 'advanced': True}
+        event = {'name': 'cat_pregnancy_advanced', 'mother': female.name, 'days_advanced': days, 'pregnancy_day': reproduction['pregnancy_day'], 'gestation_days': reproduction['gestation_days'], 'ready_for_birth': ready_for_birth, 'advanced': True}
         self.history.append(event)
         return event
 

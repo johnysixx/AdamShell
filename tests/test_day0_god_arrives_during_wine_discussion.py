@@ -79,16 +79,12 @@ class Day0GodArrivesDuringWineDiscussionTests(
         )
 
         self.assertEqual(
-            self.scene.first_book[
-                "location"
-            ],
+            self.scene.first_book.location,
             "library"
         )
 
         self.assertEqual(
-            self.scene.first_book[
-                "entries"
-            ],
+            self.scene.first_book.entries,
             []
         )
 

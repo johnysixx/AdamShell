@@ -210,7 +210,7 @@ class KittenUpbringingResolver:
             return mother
         substitute_name = getattr(kitten, 'learning', {}).get('teacher_mother')
         if substitute_name:
-            substitute = next((candidate for candidate in cats if candidate.get('name') == substitute_name), None)
+            substitute = next((candidate for candidate in cats if getattr(candidate, 'name', None) == substitute_name), None)
             if self._is_qualified_late_teacher(substitute):
                 return substitute
         for candidate in cats:

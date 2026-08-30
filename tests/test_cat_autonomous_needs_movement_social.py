@@ -50,12 +50,12 @@ class CatAutonomousNeedsMovementSocialTests(
         self.cats.tick()
 
         self.assertEqual(
-            cat.needs["tick"],
+            cat.needs.tick,
             1
         )
 
         self.assertGreater(
-            cat.needs["hunger"],
+            cat.needs.hunger,
             0.0
         )
 
@@ -66,7 +66,7 @@ class CatAutonomousNeedsMovementSocialTests(
             "sleepy"
         )
 
-        cat.needs["fatigue"] = 1.0
+        cat.needs.fatigue = 1.0
 
         observations = (
             self.cats.observe_cat(
@@ -98,7 +98,7 @@ class CatAutonomousNeedsMovementSocialTests(
             "walker"
         )
 
-        cat.needs["curiosity"] = 1.0
+        cat.needs.curiosity = 1.0
 
         before = dict(
             cat.position
@@ -126,7 +126,7 @@ class CatAutonomousNeedsMovementSocialTests(
             0.0
         )
 
-        first.needs["social"] = 1.0
+        first.needs.social = 1.0
 
         first.personality[
             "traits"
@@ -144,3 +144,4 @@ class CatAutonomousNeedsMovementSocialTests(
 
 if __name__ == "__main__":
     unittest.main()
+

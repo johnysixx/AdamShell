@@ -1,3 +1,4 @@
+from library.god_book import GodBook
 from core.entity.social_entity import _entity_attr_setdefault
 from core.entity.social_entity import SocialEntity
 from universe.pre_cosmic_rules import GOD_INITIAL_ENERGY_J
@@ -28,7 +29,9 @@ class Gods:
             raise ValueError('Only a god can create a god book.')
         if getattr(god, 'book_created', False):
             return god.book
-        book = {'type': 'god_book', 'author': god.name, 'state': 'being_written', 'energy_j': 0.0, 'location': 'with_author', 'entries': []}
+        book = GodBook(
+            author=god.name
+        )
         god.book = book
         god.book_created = True
         event = {'name': 'god_book_created', 'god': god.name, 'book': book}

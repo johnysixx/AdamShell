@@ -246,7 +246,7 @@ class LibraryPresenceTests(unittest.TestCase):
             god
         )
 
-        god.book["location"] = "library"
+        god.book.location = "library"
 
         self.assertEqual(
             god.role,
@@ -268,12 +268,12 @@ class LibraryPresenceTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            god.book["location"],
+            god.book.location,
             "library"
         )
 
         self.assertEqual(
-            god.book["entries"],
+            god.book.entries,
             []
         )
 
@@ -319,7 +319,7 @@ class LibraryPresenceTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            god.book["library_status"],
+            god.book.library_status,
             "shelved"
         )
 

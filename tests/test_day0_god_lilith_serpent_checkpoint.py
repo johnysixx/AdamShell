@@ -70,15 +70,11 @@ class Day0GodLilithSerpentCheckpointTests(
         ]
 
         self.assertIsNone(
-            book[
-                "title"
-            ]
+            book.title
         )
 
         self.assertEqual(
-            book[
-                "entries"
-            ],
+            book.entries,
             []
         )
 
@@ -141,22 +137,16 @@ class Day0GodLilithSerpentCheckpointTests(
         )
 
         self.assertEqual(
-            self.scene.first_book[
-                "entries"
-            ],
+            self.scene.first_book.entries,
             []
         )
 
         self.assertIsNone(
-            self.scene.first_book[
-                "title"
-            ]
+            self.scene.first_book.title
         )
 
         self.assertEqual(
-            self.scene.first_book[
-                "location"
-            ],
+            self.scene.first_book.location,
             "library"
         )
 

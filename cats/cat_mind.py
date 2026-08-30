@@ -1,1540 +1,266 @@
+from cats.cat_components import CatMindState
 from cats.cat_intellect import CatIntellect
 from cats.cat_knowledge import CatKnowledge
 from copy import deepcopy
 
-
 class CatMind:
-
-    INTENTION_TYPES = (
-        "visit_bar",
-        "visit_recipient",
-        "hunt_cronenberg",
-        "track_cronenberg_scent",
-        "follow_known_scent",
-        "search_for_scent",
-        "follow_scent_through_box",
-        "avoid_cronenberg_scent",
-        "explore_box",
-        "sense_quantum_counterpart",
-        "travel_through_known_quantum_box",
-        "travel_trough_known_quantum_box",
-        "create_exploration_pair",
-        "approach_cat",
-        "share_legend",
-        "observe",
-        "wander",
-        "rest"
-    )
+    INTENTION_TYPES = ('visit_bar', 'visit_recipient', 'hunt_cronenberg', 'track_cronenberg_scent', 'follow_known_scent', 'search_for_scent', 'follow_scent_through_box', 'avoid_cronenberg_scent', 'explore_box', 'sense_quantum_counterpart', 'travel_through_known_quantum_box', 'travel_trough_known_quantum_box', 'create_exploration_pair', 'approach_cat', 'share_legend', 'observe', 'wander', 'rest')
 
     @classmethod
     def create_state(cls):
-        return {
-            "current_intention": None,
-            "previous_intention": None,
-            "candidates": [],
-            "decision_count": 0,
-            "history": []
-        }
+        return CatMindState(**{'current_intention': None, 'previous_intention': None, 'candidates': [], 'decision_count': 0, 'history': []})
 
     @classmethod
-    def ensure_state(
-        cls,
-        cat
-    ):
+    def ensure_state(cls, cat):
         mind = cat.mind
-
-        mind.setdefault(
-            "current_intention",
-            None
-        )
-
-        mind.setdefault(
-            "previous_intention",
-            None
-        )
-
-        mind.setdefault(
-            "candidates",
-            []
-        )
-
-        mind.setdefault(
-            "decision_count",
-            0
-        )
-
-        mind.setdefault(
-            "history",
-            []
-        )
-
+        if not hasattr(mind, 'current_intention'):
+            mind.current_intention = None
+        if not hasattr(mind, 'previous_intention'):
+            mind.previous_intention = None
+        if not hasattr(mind, 'candidates'):
+            mind.candidates = []
+        if not hasattr(mind, 'decision_count'):
+            mind.decision_count = 0
+        if not hasattr(mind, 'history'):
+            mind.history = []
         return mind
 
     @classmethod
-    def consider(
-        cls,
-        cat,
-        observations
-    ):
+    def consider(cls, cat, observations):
         """
-        VytvoĹ™Ă­ moĹľnĂ© Ăşmysly.
+        VytvoĹ™Ă\xad moĹľnĂ© Ăşmysly.
 
-        Nic nevykonĂˇvĂˇ a nevybĂ­rĂˇ vĂ­tÄ›ze.
+        Nic nevykonĂˇvĂˇ a nevybĂ\xadrĂˇ vĂ\xadtÄ›ze.
         """
-        traits = cat.personality.get(
-            "traits",
-            {}
-        )
-
-        curiosity = float(
-            traits.get(
-                "curiosity",
-                0.5
-            )
-        )
-
-        courage = float(
-            traits.get(
-                "courage",
-                0.5
-            )
-        )
-
-        aggression = float(
-            traits.get(
-                "aggression",
-                0.5
-            )
-        )
-
-        empathy = float(
-            traits.get(
-                "empathy",
-                0.5
-            )
-        )
-
-        patience = float(
-            traits.get(
-                "patience",
-                0.5
-            )
-        )
-
+        traits = cat.personality.get('traits', {})
+        curiosity = float(traits.get('curiosity', 0.5))
+        courage = float(traits.get('courage', 0.5))
+        aggression = float(traits.get('aggression', 0.5))
+        empathy = float(traits.get('empathy', 0.5))
+        patience = float(traits.get('patience', 0.5))
         candidates = []
-
-        if observations.get(
-            "bar_known",
-            False
-        ):
+        if observations.get('bar_known', False):
             bar_score = 0.45
-
-            if observations.get(
-                "bar_visible",
-                False
-            ):
-                bar_score += 0.10
-
-            bar_score += (
-                cls._bar_memory_score(
-                    cat
-                )
-            )
-            quantum_failure_bar_score = (
-                cls._quantum_failure_bar_score(
-                    cat
-                )
-            )
-
-            bar_score += (
-                quantum_failure_bar_score
-            )
-
-            candidates.append(
-                cls._candidate(
-                    intention_type="visit_bar",
-                    score=bar_score,
-                    reasons=[
-                        "bar_known",
-                        *(
-                            ["bar_visible"]
-                            if observations.get(
-                                "bar_visible",
-                                False
-                            )
-                            else []
-                        ),
-                        *(
-                            ["positive_bar_memory"]
-                            if cls._bar_memory_score(
-                                cat
-                            ) > 0
-                            else []
-                        ),
-                        *(
-                            [
-                                "seeking_safety_after_quantum_failure"
-                            ]
-                            if quantum_failure_bar_score > 0
-                            else []
-                        )
-                    ]
-                )
-            )
-
+            if observations.get('bar_visible', False):
+                bar_score += 0.1
+            bar_score += cls._bar_memory_score(cat)
+            quantum_failure_bar_score = cls._quantum_failure_bar_score(cat)
+            bar_score += quantum_failure_bar_score
+            candidates.append(cls._candidate(intention_type='visit_bar', score=bar_score, reasons=['bar_known', *(['bar_visible'] if observations.get('bar_visible', False) else []), *(['positive_bar_memory'] if cls._bar_memory_score(cat) > 0 else []), *(['seeking_safety_after_quantum_failure'] if quantum_failure_bar_score > 0 else [])]))
         recipient = cat.recipient
-
         if recipient is not None:
-            recipient_score = (
-                0.25
-                + empathy * 0.30
-                + curiosity * 0.10
-                + patience * 0.05
-            )
-
-            candidates.append(
-                cls._candidate(
-                    intention_type="visit_recipient",
-                    score=recipient_score,
-                    reasons=[
-                        "assigned_recipient",
-                        "empathy",
-                        "curiosity"
-                    ],
-                    target={
-                        "recipient": recipient
-                    }
-                )
-            )
-
-        huntable = observations.get(
-            "huntable_cronenbergs",
-            []
-        )
-
+            recipient_score = 0.25 + empathy * 0.3 + curiosity * 0.1 + patience * 0.05
+            candidates.append(cls._candidate(intention_type='visit_recipient', score=recipient_score, reasons=['assigned_recipient', 'empathy', 'curiosity'], target={'recipient': recipient}))
+        huntable = observations.get('huntable_cronenbergs', [])
         if huntable:
-            danger = float(
-                observations.get(
-                    "cronenberg_danger",
-                    0.5
-                )
-            )
-
-            hunt_score = (
-                0.25
-                + courage * 0.30
-                + aggression * 0.25
-                + curiosity * 0.10
-                - danger * 0.20
-            )
-
-            candidates.append(
-                cls._candidate(
-                    intention_type=(
-                        "hunt_cronenberg"
-                    ),
-                    score=hunt_score,
-                    reasons=[
-                        "huntable_cronenberg_visible",
-                        "courage",
-                        "aggression"
-                    ],
-                    target=(
-                        huntable[0]
-                    )
-                )
-            )
-
-        if (
-            observations.get(
-                "cronenberg_scent_recognized",
-                False
-            )
-            and not observations.get(
-                "visible_cronenbergs",
-                []
-            )
-        ):
-            scent_track_score = (
-                0.15
-                + courage * 0.35
-                + aggression * 0.30
-                + curiosity * 0.20
-            )
-
-            scent_avoid_score = (
-                0.15
-                + (1.0 - courage) * 0.45
-                + patience * 0.25
-                + (1.0 - aggression) * 0.15
-            )
-
-            candidates.append(
-                cls._candidate(
-                    intention_type=(
-                        "track_cronenberg_scent"
-                    ),
-                    score=scent_track_score,
-                    reasons=[
-                        "recognized_cronenberg_scent",
-                        "cronenberg_not_visible",
-                        "courage",
-                        "aggression",
-                        "curiosity"
-                    ]
-                )
-            )
-
-            if observations.get(
-                "bar_known",
-                False
-            ):
-                candidates.append(
-                    cls._candidate(
-                        intention_type=(
-                            "avoid_cronenberg_scent"
-                        ),
-                        score=scent_avoid_score,
-                        reasons=[
-                            "recognized_cronenberg_scent",
-                            "cronenberg_not_visible",
-                            "low_courage",
-                            "patience",
-                            "known_safe_bar"
-                        ]
-                    )
-                )
-
-        scent_places = (
-            (cat.knowledge or {}).get(
-                "known_scent_places",
-                []
-            )
-        )
-
+            danger = float(observations.get('cronenberg_danger', 0.5))
+            hunt_score = 0.25 + courage * 0.3 + aggression * 0.25 + curiosity * 0.1 - danger * 0.2
+            candidates.append(cls._candidate(intention_type='hunt_cronenberg', score=hunt_score, reasons=['huntable_cronenberg_visible', 'courage', 'aggression'], target=huntable[0]))
+        if observations.get('cronenberg_scent_recognized', False) and (not observations.get('visible_cronenbergs', [])):
+            scent_track_score = 0.15 + courage * 0.35 + aggression * 0.3 + curiosity * 0.2
+            scent_avoid_score = 0.15 + (1.0 - courage) * 0.45 + patience * 0.25 + (1.0 - aggression) * 0.15
+            candidates.append(cls._candidate(intention_type='track_cronenberg_scent', score=scent_track_score, reasons=['recognized_cronenberg_scent', 'cronenberg_not_visible', 'courage', 'aggression', 'curiosity']))
+            if observations.get('bar_known', False):
+                candidates.append(cls._candidate(intention_type='avoid_cronenberg_scent', score=scent_avoid_score, reasons=['recognized_cronenberg_scent', 'cronenberg_not_visible', 'low_courage', 'patience', 'known_safe_bar']))
+        scent_places = (cat.knowledge or {}).get('known_scent_places', [])
         current_layer = cat.current_layer
-
-        knowledge = (cat.knowledge or {})
-
-        current_tick = knowledge.get(
-            "scent_clock_tick"
-        )
-
+        knowledge = cat.knowledge or {}
+        current_tick = knowledge.get('scent_clock_tick')
         local_scent_places = []
-
         for place in scent_places:
-            if place.get(
-                "layer"
-            ) != current_layer:
+            if place.get('layer') != current_layer:
                 continue
-
-            last_seen_tick = place.get(
-                "last_seen_tick"
-            )
-
-            if (
-                current_tick is None
-                or last_seen_tick is None
-            ):
+            last_seen_tick = place.get('last_seen_tick')
+            if current_tick is None or last_seen_tick is None:
                 age_ticks = 0
             else:
-                age_ticks = max(
-                    0,
-                    int(current_tick)
-                    - int(last_seen_tick)
-                )
-
-            freshness = (
-                0.5
-                ** (
-                    age_ticks
-                    / 50.0
-                )
-            )
-
-            # Vzpom?nka z?st?v? ulo?en?,
-            # ale extr?mn? star? stopa u?
-            # nen? naviga?n?m podn?tem.
+                age_ticks = max(0, int(current_tick) - int(last_seen_tick))
+            freshness = 0.5 ** (age_ticks / 50.0)
             if freshness < 0.05:
                 continue
-
-            scored_place = deepcopy(
-                place
-            )
-
-            scored_place[
-                "age_ticks"
-            ] = age_ticks
-
-            scored_place[
-                "freshness"
-            ] = freshness
-
-            local_scent_places.append(
-                scored_place
-            )
-
-        reached_scent = (cat.known_scent_follow or {})
-
-        currently_smelt_identities = {
-            item.get(
-                "recognition",
-                {}
-            ).get(
-                "identity"
-            )
-            for item
-            in observations.get(
-                "olfaction",
-                {}
-            ).get(
-                "detected_aromas",
-                []
-            )
-            if item.get(
-                "recognition",
-                {}
-            ).get(
-                "recognized",
-                False
-            )
-        }
-
-        if (
-            isinstance(
-                reached_scent,
-                dict
-            )
-            and reached_scent.get(
-                "arrived",
-                False
-            )
-            and reached_scent.get(
-                "identity"
-            )
-            not in currently_smelt_identities
-        ):
+            scored_place = deepcopy(place)
+            scored_place['age_ticks'] = age_ticks
+            scored_place['freshness'] = freshness
+            local_scent_places.append(scored_place)
+        reached_scent = cat.known_scent_follow or {}
+        currently_smelt_identities = {item.get('recognition', {}).get('identity') for item in observations.get('olfaction', {}).get('detected_aromas', []) if item.get('recognition', {}).get('recognized', False)}
+        if isinstance(reached_scent, dict) and reached_scent.get('arrived', False) and (reached_scent.get('identity') not in currently_smelt_identities):
             local_scent_places = []
-
         if local_scent_places:
-            strongest = max(
-                local_scent_places,
-                key=lambda item: (
-                    (
-                        float(
-                            item.get(
-                                "confidence",
-                                0.0
-                            )
-                        )
-                        + min(
-                            1.0,
-                            float(
-                                item.get(
-                                    "last_intensity",
-                                    0.0
-                                )
-                            )
-                        )
-                    )
-                    * float(
-                        item.get(
-                            "freshness",
-                            1.0
-                        )
-                    )
-                )
-            )
-
-            identity = strongest.get(
-                "identity"
-            )
-
-            if (
-                identity
-                not in (
-                    None,
-                    "unknown_aroma",
-                    "cronenberg"
-                )
-            ):
-                scent_direction = (
-                    CatKnowledge
-                    .infer_scent_direction(
-                        cat=cat,
-                        identity=identity,
-                        layer=current_layer
-                    )
-                )
-
-                candidates.append(
-                    cls._candidate(
-                        intention_type=(
-                            "follow_known_scent"
-                        ),
-                        score=(
-                            0.15
-                            + curiosity * 0.25
-                            + courage * 0.10
-                            + float(
-                                strongest.get(
-                                    "confidence",
-                                    0.0
-                                )
-                            ) * 0.25
-                        ),
-                        reasons=[
-                            "known_scent_place",
-                            "recognized_identity",
-                            "curiosity"
-                        ],
-                        target={
-                            "identity": identity,
-                            "layer": strongest.get(
-                                "layer"
-                            ),
-                            "position": strongest.get(
-                                "position"
-                            ),
-                            "source_id": strongest.get(
-                                "source_id"
-                            ),
-                            "age_ticks": strongest.get(
-                                "age_ticks",
-                                0
-                            ),
-                            "freshness": strongest.get(
-                                "freshness",
-                                1.0
-                            ),
-                            "trail_direction": deepcopy(
-                                scent_direction
-                            )
-                        }
-                    )
-                )
-
-        scent_transfers = observations.get(
-            "scent_transfer_candidates",
-            []
-        )
-
+            strongest = max(local_scent_places, key=lambda item: (float(item.get('confidence', 0.0)) + min(1.0, float(item.get('last_intensity', 0.0)))) * float(item.get('freshness', 1.0)))
+            identity = strongest.get('identity')
+            if identity not in (None, 'unknown_aroma', 'cronenberg'):
+                scent_direction = CatKnowledge.infer_scent_direction(cat=cat, identity=identity, layer=current_layer)
+                candidates.append(cls._candidate(intention_type='follow_known_scent', score=0.15 + curiosity * 0.25 + courage * 0.1 + float(strongest.get('confidence', 0.0)) * 0.25, reasons=['known_scent_place', 'recognized_identity', 'curiosity'], target={'identity': identity, 'layer': strongest.get('layer'), 'position': strongest.get('position'), 'source_id': strongest.get('source_id'), 'age_ticks': strongest.get('age_ticks', 0), 'freshness': strongest.get('freshness', 1.0), 'trail_direction': deepcopy(scent_direction)}))
+        scent_transfers = observations.get('scent_transfer_candidates', [])
         if scent_transfers:
-            best_scent_transfer = max(
-                scent_transfers,
-                key=lambda item: float(
-                    item.get(
-                        "similarity",
-                        0.0
-                    )
-                )
-            )
-
-            identity = (
-                best_scent_transfer.get(
-                    "identity"
-                )
-            )
-
-            scent_score = (
-                0.20
-                + curiosity * 0.30
-                + courage * 0.20
-                + float(
-                    best_scent_transfer.get(
-                        "similarity",
-                        0.0
-                    )
-                ) * 0.25
-            )
-
-            if identity == "cronenberg":
-                scent_score += (
-                    aggression * 0.15
-                )
-
-            candidates.append(
-                cls._candidate(
-                    intention_type=(
-                        "follow_scent_through_box"
-                    ),
-                    score=scent_score,
-                    reasons=[
-                        "recognized_scent_on_box",
-                        "paired_quantum_box",
-                        "scent_continues_cross_layer",
-                        "curiosity"
-                    ],
-                    target={
-                        "identity": identity,
-                        "box_id": (
-                            best_scent_transfer[
-                                "box_id"
-                            ]
-                        ),
-                        "counterpart_box_id": (
-                            best_scent_transfer[
-                                "counterpart_box_id"
-                            ]
-                        ),
-                        "source_layer": (
-                            best_scent_transfer.get(
-                                "source_layer"
-                            )
-                        ),
-                        "target_layer": (
-                            best_scent_transfer.get(
-                                "target_layer"
-                            )
-                        )
-                    }
-                )
-            )
-
-        intellect = (
-            CatIntellect
-            .ensure_state(
-                cat
-            )
-        )
-
-        intellect_normalized = float(
-            intellect.get(
-                "normalized",
-                0.5
-            )
-        )
-
-        counterpart_observation = getattr(
-            cat,
-            "current_quantum_counterpart_observation",
-            None
-        )
-
-        if (
-            isinstance(
-                counterpart_observation,
-                dict
-            )
-            and counterpart_observation.get(
-                "pair_currently_valid",
-                False
-            )
-            and counterpart_observation.get(
-                "temporary",
-                False
-            )
-        ):
-            source_box_id = (
-                counterpart_observation.get(
-                    "source_box_id"
-                )
-            )
-
-            counterpart_box_id = (
-                counterpart_observation.get(
-                    "counterpart_box_id"
-                )
-            )
-
-            if (
-                source_box_id is not None
-                and counterpart_box_id is not None
-            ):
-                quantum_memory_score = (
-                    cls._quantum_travel_memory_score(
-                        cat
-                    )
-                )
-
-                negative_quantum_memories = (
-                    cat.memory.recall(
-                        event_type=(
-                            "quantum_box_layer_transfer_failed"
-                        )
-                    )
-                )
-
-                travel_score = (
-                    0.30
-                    + curiosity * 0.35
-                    + courage * 0.20
-                    + intellect_normalized * 0.15
-                    + quantum_memory_score
-                )
-
-                candidates.append(
-                    cls._candidate(
-                        intention_type=(
-                            "travel_through_known_quantum_box"
-                        ),
-                        score=travel_score,
-                        reasons=[
-                            "quantum_counterpart_sensed",
-                            "quantum_pair_currently_valid",
-                            "curiosity",
-                            "courage",
-                            *(
-                                [
-                                    "negative_quantum_travel_memory"
-                                ]
-                                if negative_quantum_memories
-                                else []
-                            )
-                        ],
-                        target={
-                            "source_box_id": (
-                                source_box_id
-                            ),
-                            "counterpart_box_id": (
-                                counterpart_box_id
-                            ),
-                            "source_layer": (
-                                counterpart_observation.get(
-                                    "source_layer"
-                                )
-                            ),
-                            "target_layer": (
-                                counterpart_observation.get(
-                                    "counterpart_layer"
-                                )
-                            ),
-                            "target_position": deepcopy(
-                                counterpart_observation.get(
-                                    "counterpart_position",
-                                    {}
-                                )
-                            )
-                        }
-                    )
-                )
-        for box_detail in observations.get(
-            "visible_box_details",
-            []
-        ):
-            if not box_detail.get(
-                "explored",
-                False
-            ):
+            best_scent_transfer = max(scent_transfers, key=lambda item: float(item.get('similarity', 0.0)))
+            identity = best_scent_transfer.get('identity')
+            scent_score = 0.2 + curiosity * 0.3 + courage * 0.2 + float(best_scent_transfer.get('similarity', 0.0)) * 0.25
+            if identity == 'cronenberg':
+                scent_score += aggression * 0.15
+            candidates.append(cls._candidate(intention_type='follow_scent_through_box', score=scent_score, reasons=['recognized_scent_on_box', 'paired_quantum_box', 'scent_continues_cross_layer', 'curiosity'], target={'identity': identity, 'box_id': best_scent_transfer['box_id'], 'counterpart_box_id': best_scent_transfer['counterpart_box_id'], 'source_layer': best_scent_transfer.get('source_layer'), 'target_layer': best_scent_transfer.get('target_layer')}))
+        intellect = CatIntellect.ensure_state(cat)
+        intellect_normalized = float(intellect.get('normalized', 0.5))
+        counterpart_observation = getattr(cat, 'current_quantum_counterpart_observation', None)
+        if isinstance(counterpart_observation, dict) and counterpart_observation.get('pair_currently_valid', False) and counterpart_observation.get('temporary', False):
+            source_box_id = counterpart_observation.get('source_box_id')
+            counterpart_box_id = counterpart_observation.get('counterpart_box_id')
+            if source_box_id is not None and counterpart_box_id is not None:
+                quantum_memory_score = cls._quantum_travel_memory_score(cat)
+                negative_quantum_memories = cat.memory.recall(event_type='quantum_box_layer_transfer_failed')
+                travel_score = 0.3 + curiosity * 0.35 + courage * 0.2 + intellect_normalized * 0.15 + quantum_memory_score
+                candidates.append(cls._candidate(intention_type='travel_through_known_quantum_box', score=travel_score, reasons=['quantum_counterpart_sensed', 'quantum_pair_currently_valid', 'curiosity', 'courage', *(['negative_quantum_travel_memory'] if negative_quantum_memories else [])], target={'source_box_id': source_box_id, 'counterpart_box_id': counterpart_box_id, 'source_layer': counterpart_observation.get('source_layer'), 'target_layer': counterpart_observation.get('counterpart_layer'), 'target_position': deepcopy(counterpart_observation.get('counterpart_position', {}))}))
+        for box_detail in observations.get('visible_box_details', []):
+            if not box_detail.get('explored', False):
                 continue
-
-            if not box_detail.get(
-                "recognized_as_quantum_box",
-                False
-            ):
+            if not box_detail.get('recognized_as_quantum_box', False):
                 continue
-
-            if not box_detail.get(
-                "paired",
-                False
-            ):
+            if not box_detail.get('paired', False):
                 continue
-
-            if box_detail.get(
-                "counterpart_known",
-                False
-            ):
+            if box_detail.get('counterpart_known', False):
                 continue
-
-            if float(
-                box_detail.get(
-                    "distance",
-                    999999.0
-                )
-            ) > 1e-9:
+            if float(box_detail.get('distance', 999999.0)) > 1e-09:
                 continue
-
-            quantum_travel_memories = (
-                cat.memory.recall(
-                    event_type=(
-                        "quantum_box_layer_transfer"
-                    )
-                )
-            )
-
-            quantum_travel_count = len(
-                quantum_travel_memories
-            )
-
-            experienced_quantum_traveler = (
-                quantum_travel_count > 0
-            )
-
-            quantum_experience_bonus = min(
-                0.20,
-                quantum_travel_count * 0.075
-            )
-
-            resonance_score = (
-                0.30
-                + curiosity * 0.35
-                + intellect_normalized * 0.30
-                + quantum_experience_bonus
-            )
-
-            candidates.append(
-                cls._candidate(
-                    intention_type=(
-                        "sense_quantum_counterpart"
-                    ),
-                    score=resonance_score,
-                    reasons=[
-                        "quantum_box_explored",
-                        "quantum_pair_resonance_possible",
-                        "curiosity",
-                        "intellect",
-                        *(
-                            [
-                                "experienced_quantum_traveler"
-                            ]
-                            if experienced_quantum_traveler
-                            else []
-                        )
-                    ],
-                    target={
-                        "box_id": box_detail[
-                            "id"
-                        ]
-                    }
-                )
-            )
-
-        boxes = observations.get(
-            "unexplored_boxes",
-            []
-        )
-
+            quantum_travel_memories = cat.memory.recall(event_type='quantum_box_layer_transfer')
+            quantum_travel_count = len(quantum_travel_memories)
+            experienced_quantum_traveler = quantum_travel_count > 0
+            quantum_experience_bonus = min(0.2, quantum_travel_count * 0.075)
+            resonance_score = 0.3 + curiosity * 0.35 + intellect_normalized * 0.3 + quantum_experience_bonus
+            candidates.append(cls._candidate(intention_type='sense_quantum_counterpart', score=resonance_score, reasons=['quantum_box_explored', 'quantum_pair_resonance_possible', 'curiosity', 'intellect', *(['experienced_quantum_traveler'] if experienced_quantum_traveler else [])], target={'box_id': box_detail['id']}))
+        boxes = observations.get('unexplored_boxes', [])
         if boxes:
-            explore_score = (
-                0.25
-                + curiosity * 0.55
-                + courage * 0.10
-            )
-
-            candidates.append(
-                cls._candidate(
-                    intention_type="explore_box",
-                    score=explore_score,
-                    reasons=[
-                        "unexplored_box_visible",
-                        "curiosity"
-                    ],
-                    target=boxes[0]
-                )
-            )
-
-        if (
-            not boxes
-            and observations.get(
-                "can_create_exploration_pair",
-                False
-            )
-        ):
-            exploration_plan = (
-                observations.get(
-                    "exploration_plan",
-                    {}
-                )
-            )
-
-            exploration_reasons = set(
-                exploration_plan.get(
-                    "reasons",
-                    []
-                )
-            )
-
-            explicit_goal_bonus = (
-                0.50
-                if (
-                    "explicit_exploration_goal"
-                    in exploration_reasons
-                )
-                else 0.0
-            )
-
-            pair_score = (
-                0.20
-                + curiosity * 0.55
-                + courage * 0.10
-                + patience * 0.05
-                + explicit_goal_bonus
-            )
-
-            reasons = [
-                "no_usable_box_visible",
-                "sufficient_energy",
-                "curiosity",
-                "quantum_pair_creation_possible"
-            ]
-
+            explore_score = 0.25 + curiosity * 0.55 + courage * 0.1
+            candidates.append(cls._candidate(intention_type='explore_box', score=explore_score, reasons=['unexplored_box_visible', 'curiosity'], target=boxes[0]))
+        if not boxes and observations.get('can_create_exploration_pair', False):
+            exploration_plan = observations.get('exploration_plan', {})
+            exploration_reasons = set(exploration_plan.get('reasons', []))
+            explicit_goal_bonus = 0.5 if 'explicit_exploration_goal' in exploration_reasons else 0.0
+            pair_score = 0.2 + curiosity * 0.55 + courage * 0.1 + patience * 0.05 + explicit_goal_bonus
+            reasons = ['no_usable_box_visible', 'sufficient_energy', 'curiosity', 'quantum_pair_creation_possible']
             if explicit_goal_bonus > 0.0:
-                reasons.append(
-                    "explicit_exploration_goal"
-                )
-
-            candidates.append(
-                cls._candidate(
-                    intention_type=(
-                        "create_exploration_pair"
-                    ),
-                    score=pair_score,
-                    reasons=reasons,
-                    target={
-                        "layer": observations.get(
-                            "exploration_destination_layer"
-                        ),
-                        "position": observations.get(
-                            "exploration_destination_position"
-                        ),
-                        "energy_cost": observations.get(
-                            "exploration_pair_energy_cost"
-                        )
-                    }
-                )
-            )
-
-        nearby_cats = observations.get(
-            "nearby_cats",
-            []
-        )
-
+                reasons.append('explicit_exploration_goal')
+            candidates.append(cls._candidate(intention_type='create_exploration_pair', score=pair_score, reasons=reasons, target={'layer': observations.get('exploration_destination_layer'), 'position': observations.get('exploration_destination_position'), 'energy_cost': observations.get('exploration_pair_energy_cost')}))
+        nearby_cats = observations.get('nearby_cats', [])
         if nearby_cats:
-            legend_count = int(
-                observations.get(
-                    "shareable_legend_count",
-                    0
-                )
-            )
-
+            legend_count = int(observations.get('shareable_legend_count', 0))
             if legend_count > 0:
-                candidates.append(
-                    cls._candidate(
-                        intention_type=(
-                            "share_legend"
-                        ),
-                        score=(
-                            0.25
-                            + patience * 0.15
-                            + curiosity * 0.15
-                        ),
-                        reasons=[
-                            "another_cat_nearby",
-                            "shareable_knowledge_exists"
-                        ],
-                        target=nearby_cats[0]
-                    )
-                )
-
+                candidates.append(cls._candidate(intention_type='share_legend', score=0.25 + patience * 0.15 + curiosity * 0.15, reasons=['another_cat_nearby', 'shareable_knowledge_exists'], target=nearby_cats[0]))
         if nearby_cats:
-            social_score = (
-                0.20
-                + empathy * 0.50
-                + curiosity * 0.10
-            )
-
-            candidates.append(
-                cls._candidate(
-                    intention_type="approach_cat",
-                    score=social_score,
-                    reasons=[
-                        "nearby_cat",
-                        "empathy"
-                    ],
-                    target=nearby_cats[0]
-                )
-            )
-
-        if observations.get(
-            "interesting_unknown",
-            False
-        ):
-            candidates.append(
-                cls._candidate(
-                    intention_type="observe",
-                    score=(
-                        0.20
-                        + curiosity * 0.40
-                        + patience * 0.20
-                    ),
-                    reasons=[
-                        "interesting_unknown",
-                        "curiosity",
-                        "patience"
-                    ]
-                )
-            )
-
-        # OdpoÄŤinek je vĹľdy moĹľnĂ˝.
-        needs = getattr(
-            cat,
-            "needs",
-            {}
-        )
-
-        fatigue_need = float(
-            needs.get(
-                "fatigue",
-                0.0
-            )
-        )
-
-        social_need = float(
-            needs.get(
-                "social",
-                0.0
-            )
-        )
-
-        curiosity_need = float(
-            needs.get(
-                "curiosity",
-                0.0
-            )
-        )
-
-        # Needs bias decisions.
-        # They never directly execute actions.
-        if (
-            nearby_cats
-            and social_need > 0.0
-        ):
-            candidates.append(
-                cls._candidate(
-                    intention_type="approach_cat",
-                    score=(
-                        0.18
-                        + social_need * 0.72
-                        + empathy * 0.10
-                    ),
-                    reasons=[
-                        "social_need",
-                        "nearby_cat"
-                    ],
-                    target=nearby_cats[0]
-                )
-            )
-
-        if getattr(
-            cat,
-            "position",
-            None
-        ) is not None:
-            candidates.append(
-                cls._candidate(
-                    intention_type="wander",
-                    score=(
-                        0.12
-                        + curiosity_need * 0.68
-                        + curiosity * 0.12
-                    ),
-                    reasons=[
-                        "curiosity_need",
-                        "autonomous_movement"
-                    ]
-                )
-            )
-
-        candidates.append(
-            cls._candidate(
-                intention_type="rest",
-                score=(
-                    0.15
-                    + patience * 0.25
-                    + fatigue_need * 0.65
-                ),
-                reasons=[
-                    "rest_is_available"
-                ]
-            )
-        )
-
-        reached_scent = (cat.known_scent_follow or {})
-
-        if (
-            isinstance(
-                reached_scent,
-                dict
-            )
-            and reached_scent.get(
-                "arrived",
-                False
-            )
-        ):
-            identity = reached_scent.get(
-                "identity"
-            )
-
-            direction = reached_scent.get(
-                "trail_direction",
-                {}
-            )
-
-            target_smelt_now = any(
-                item.get(
-                    "recognition",
-                    {}
-                ).get(
-                    "recognized",
-                    False
-                )
-                and item.get(
-                    "recognition",
-                    {}
-                ).get(
-                    "identity"
-                )
-                == identity
-                for item
-                in observations.get(
-                    "olfaction",
-                    {}
-                ).get(
-                    "detected_aromas",
-                    []
-                )
-            )
-
-            if (
-                identity is not None
-                and not target_smelt_now
-                and isinstance(
-                    direction,
-                    dict
-                )
-                and direction.get(
-                    "inferred",
-                    False
-                )
-            ):
-                traits = (
-                    cat.personality.get(
-                        "traits",
-                        {}
-                    )
-                )
-
-                curiosity = float(
-                    traits.get(
-                        "curiosity",
-                        0.5
-                    )
-                )
-
-                courage = float(
-                    traits.get(
-                        "courage",
-                        0.5
-                    )
-                )
-
-                previous_search = (cat.scent_search or {})
-
-                if (
-                    isinstance(
-                        previous_search,
-                        dict
-                    )
-                    and previous_search.get(
-                        "identity"
-                    ) == identity
-                    and previous_search.get(
-                        "layer"
-                    ) == cat.current_layer
-                ):
-                    attempts = int(
-                        previous_search.get(
-                            "attempts",
-                            0
-                        )
-                    )
+            social_score = 0.2 + empathy * 0.5 + curiosity * 0.1
+            candidates.append(cls._candidate(intention_type='approach_cat', score=social_score, reasons=['nearby_cat', 'empathy'], target=nearby_cats[0]))
+        if observations.get('interesting_unknown', False):
+            candidates.append(cls._candidate(intention_type='observe', score=0.2 + curiosity * 0.4 + patience * 0.2, reasons=['interesting_unknown', 'curiosity', 'patience']))
+        needs = getattr(cat, 'needs', {})
+        fatigue_need = float(getattr(needs, 'fatigue', 0.0))
+        social_need = float(getattr(needs, 'social', 0.0))
+        curiosity_need = float(getattr(needs, 'curiosity', 0.0))
+        if nearby_cats and social_need > 0.0:
+            candidates.append(cls._candidate(intention_type='approach_cat', score=0.18 + social_need * 0.72 + empathy * 0.1, reasons=['social_need', 'nearby_cat'], target=nearby_cats[0]))
+        if getattr(cat, 'position', None) is not None:
+            candidates.append(cls._candidate(intention_type='wander', score=0.12 + curiosity_need * 0.68 + curiosity * 0.12, reasons=['curiosity_need', 'autonomous_movement']))
+        candidates.append(cls._candidate(intention_type='rest', score=0.15 + patience * 0.25 + fatigue_need * 0.65, reasons=['rest_is_available']))
+        reached_scent = cat.known_scent_follow or {}
+        if isinstance(reached_scent, dict) and reached_scent.get('arrived', False):
+            identity = reached_scent.get('identity')
+            direction = reached_scent.get('trail_direction', {})
+            target_smelt_now = any((item.get('recognition', {}).get('recognized', False) and item.get('recognition', {}).get('identity') == identity for item in observations.get('olfaction', {}).get('detected_aromas', [])))
+            if identity is not None and (not target_smelt_now) and isinstance(direction, dict) and direction.get('inferred', False):
+                traits = cat.personality.get('traits', {})
+                curiosity = float(traits.get('curiosity', 0.5))
+                courage = float(traits.get('courage', 0.5))
+                previous_search = cat.scent_search or {}
+                if isinstance(previous_search, dict) and previous_search.get('identity') == identity and (previous_search.get('layer') == cat.current_layer):
+                    attempts = int(previous_search.get('attempts', 0))
                 else:
                     attempts = 0
-
-                max_attempts = max(
-                    1,
-                    min(
-                        3,
-                        1
-                        + int(
-                            round(
-                                curiosity * 2.0
-                            )
-                        )
-                    )
-                )
-
+                max_attempts = max(1, min(3, 1 + int(round(curiosity * 2.0))))
                 if attempts < max_attempts:
-                    direction_confidence = float(
-                        direction.get(
-                            "confidence",
-                            0.0
-                        )
-                    )
-
-                    search_distance = (
-                        1.0
-                        + curiosity
-                        + courage * 0.5
-                    )
-
-                    search_score = (
-                        0.38
-                        + curiosity * 0.18
-                        + courage * 0.08
-                        + direction_confidence * 0.20
-                        - attempts * 0.08
-                    )
-
-                    candidates.append(
-                        cls._candidate(
-                            intention_type=(
-                                "search_for_scent"
-                            ),
-                            score=search_score,
-                            reasons=[
-                                "last_known_scent_reached",
-                                "target_scent_not_detected",
-                                "trail_direction_inferred",
-                                "local_search"
-                            ],
-                            target={
-                                "identity": identity,
-                                "layer": cat.current_layer,
-                                "from_position": dict(
-                                    cat.position
-                                    or {}
-                                ),
-                                "trail_direction": (
-                                    deepcopy(
-                                        direction
-                                    )
-                                ),
-                                "attempt": (
-                                    attempts + 1
-                                ),
-                                "max_attempts": (
-                                    max_attempts
-                                ),
-                                "search_distance": (
-                                    search_distance
-                                )
-                            }
-                        )
-                    )
-
-        candidates.sort(
-            key=lambda item: item["score"],
-            reverse=True
-        )
-
-        mind = cls.ensure_state(
-            cat
-        )
-
-        mind["candidates"] = deepcopy(
-            candidates
-        )
-
-        return deepcopy(
-            candidates
-        )
+                    direction_confidence = float(direction.get('confidence', 0.0))
+                    search_distance = 1.0 + curiosity + courage * 0.5
+                    search_score = 0.38 + curiosity * 0.18 + courage * 0.08 + direction_confidence * 0.2 - attempts * 0.08
+                    candidates.append(cls._candidate(intention_type='search_for_scent', score=search_score, reasons=['last_known_scent_reached', 'target_scent_not_detected', 'trail_direction_inferred', 'local_search'], target={'identity': identity, 'layer': cat.current_layer, 'from_position': dict(cat.position or {}), 'trail_direction': deepcopy(direction), 'attempt': attempts + 1, 'max_attempts': max_attempts, 'search_distance': search_distance}))
+        candidates.sort(key=lambda item: item['score'], reverse=True)
+        mind = cls.ensure_state(cat)
+        mind.candidates = deepcopy(candidates)
+        return deepcopy(candidates)
 
     @classmethod
-    def decide(
-        cls,
-        cat,
-        observations,
-        quantum_roll=None,
-        top_count=None
-    ):
+    def decide(cls, cat, observations, quantum_roll=None, top_count=None):
         """
-        Vybere vlastnĂ­ Ăşmysl koÄŤky.
+        Vybere vlastnĂ\xad Ăşmysl koÄŤky.
 
-        Cat D20 zde neurÄŤuje seznam moĹľnostĂ­.
-        Pouze vybere mezi nejlepĹˇĂ­mi
+        Cat D20 zde neurÄŤuje seznam moĹľnostĂ\xad.
+        Pouze vybere mezi nejlepĹˇĂ\xadmi
         rozumnĂ˝mi kandidĂˇty.
         """
-        candidates = cls.consider(
-            cat=cat,
-            observations=observations
-        )
-
+        candidates = cls.consider(cat=cat, observations=observations)
         if not candidates:
-            return {
-                "name": (
-                    "cat_intention_not_selected"
-                ),
-                "cat": cat.name,
-                "reason": "no_candidates",
-                "selected": False
-            }
-
+            return {'name': 'cat_intention_not_selected', 'cat': cat.name, 'reason': 'no_candidates', 'selected': False}
         if top_count is None:
-            top_count = (
-                CatIntellect
-                .decision_finalist_count(
-                    cat=cat,
-                    candidate_count=len(
-                        candidates
-                    )
-                )
-            )
-
+            top_count = CatIntellect.decision_finalist_count(cat=cat, candidate_count=len(candidates))
         else:
-            top_count = max(
-                1,
-                int(top_count)
-            )
-
-        finalists = candidates[
-            :top_count
-        ]
-
+            top_count = max(1, int(top_count))
+        finalists = candidates[:top_count]
         if quantum_roll is None:
             winner_index = 0
-
         else:
-            quantum_roll = int(
-                quantum_roll
-            )
-
+            quantum_roll = int(quantum_roll)
             if not 1 <= quantum_roll <= 20:
-                raise ValueError(
-                    "Cat quantum decision roll "
-                    "must be between 1 and 20."
-                )
-
-            winner_index = (
-                (quantum_roll - 1)
-                * len(finalists)
-                // 20
-            )
-
-            winner_index = min(
-                winner_index,
-                len(finalists) - 1
-            )
-
-        winner = deepcopy(
-            finalists[winner_index]
-        )
-
-        mind = cls.ensure_state(
-            cat
-        )
-
-        previous = mind.get(
-            "current_intention"
-        )
-
-        mind["previous_intention"] = (
-            deepcopy(previous)
-        )
-
-        mind["current_intention"] = (
-            deepcopy(winner)
-        )
-
-        mind["decision_count"] += 1
-
-        event = {
-            "name": "cat_intention_selected",
-            "cat": cat.name,
-            "intention": winner["type"],
-            "target": winner.get(
-                "target"
-            ),
-            "score": winner["score"],
-            "reasons": list(
-                winner["reasons"]
-            ),
-            "quantum_roll": quantum_roll,
-            "intellect_score": (
-                CatIntellect
-                .ensure_state(
-                    cat
-                )[
-                    "score"
-                ]
-            ),
-            "intellect_category": (
-                CatIntellect.category(
-                    cat
-                )
-            ),
-            "finalist_count": len(
-                finalists
-            ),
-            "finalists": deepcopy(
-                finalists
-            ),
-            "previous_intention": (
-                deepcopy(previous)
-            ),
-            "selected": True
-        }
-
-        mind["history"].append(
-            deepcopy(event)
-        )
-
+                raise ValueError('Cat quantum decision roll must be between 1 and 20.')
+            winner_index = (quantum_roll - 1) * len(finalists) // 20
+            winner_index = min(winner_index, len(finalists) - 1)
+        winner = deepcopy(finalists[winner_index])
+        mind = cls.ensure_state(cat)
+        previous = mind.current_intention
+        mind.previous_intention = deepcopy(previous)
+        mind.current_intention = deepcopy(winner)
+        mind.decision_count += 1
+        event = {'name': 'cat_intention_selected', 'cat': cat.name, 'intention': winner['type'], 'target': winner.get('target'), 'score': winner['score'], 'reasons': list(winner['reasons']), 'quantum_roll': quantum_roll, 'intellect_score': CatIntellect.ensure_state(cat)['score'], 'intellect_category': CatIntellect.category(cat), 'finalist_count': len(finalists), 'finalists': deepcopy(finalists), 'previous_intention': deepcopy(previous), 'selected': True}
+        mind.history.append(deepcopy(event))
         return event
 
     @classmethod
-    def clear_intention(
-        cls,
-        cat,
-        reason
-    ):
-        mind = cls.ensure_state(
-            cat
-        )
-
-        previous = mind.get(
-            "current_intention"
-        )
-
-        mind["previous_intention"] = (
-            deepcopy(previous)
-        )
-
-        mind["current_intention"] = None
-
-        event = {
-            "name": "cat_intention_cleared",
-            "cat": cat.name,
-            "previous_intention": (
-                deepcopy(previous)
-            ),
-            "reason": reason,
-            "cleared": True
-        }
-
-        mind["history"].append(
-            deepcopy(event)
-        )
-
+    def clear_intention(cls, cat, reason):
+        mind = cls.ensure_state(cat)
+        previous = mind.current_intention
+        mind.previous_intention = deepcopy(previous)
+        mind.current_intention = None
+        event = {'name': 'cat_intention_cleared', 'cat': cat.name, 'previous_intention': deepcopy(previous), 'reason': reason, 'cleared': True}
+        mind.history.append(deepcopy(event))
         return event
 
     @classmethod
-    def _candidate(
-        cls,
-        intention_type,
-        score,
-        reasons,
-        target=None
-    ):
-        if intention_type not in (
-            cls.INTENTION_TYPES
-        ):
-            raise ValueError(
-                "Unknown cat intention: "
-                f"{intention_type}"
-            )
-
-        return {
-            "type": intention_type,
-            "target": target,
-            "score": min(
-                1.0,
-                max(
-                    0.0,
-                    float(score)
-                )
-            ),
-            "reasons": list(reasons)
-        }
+    def _candidate(cls, intention_type, score, reasons, target=None):
+        if intention_type not in cls.INTENTION_TYPES:
+            raise ValueError(f'Unknown cat intention: {intention_type}')
+        return {'type': intention_type, 'target': target, 'score': min(1.0, max(0.0, float(score))), 'reasons': list(reasons)}
 
     @classmethod
-    def _quantum_failure_bar_score(
-        cls,
-        cat
-    ):
+    def _quantum_failure_bar_score(cls, cat):
         memory = cat.memory
-
         if memory is None:
             return 0.0
-
-        failures = memory.recall(
-            event_type=(
-                "quantum_box_layer_transfer_failed"
-            )
-        )
-
-        return min(
-            0.30,
-            len(failures) * 0.10
-        )
+        failures = memory.recall(event_type='quantum_box_layer_transfer_failed')
+        return min(0.3, len(failures) * 0.1)
 
     @classmethod
-    def _quantum_travel_memory_score(
-        cls,
-        cat
-    ):
+    def _quantum_travel_memory_score(cls, cat):
         memory = cat.memory
-
         if memory is None:
             return 0.0
+        successful = memory.recall(event_type='quantum_box_layer_transfer')
+        failed = memory.recall(event_type='quantum_box_layer_transfer_failed')
+        positive_bonus = min(0.2, len(successful) * 0.075)
+        negative_penalty = min(0.3, len(failed) * 0.1)
+        return positive_bonus - negative_penalty
 
-        successful = memory.recall(
-            event_type=(
-                "quantum_box_layer_transfer"
-            )
-        )
-
-        failed = memory.recall(
-            event_type=(
-                "quantum_box_layer_transfer_failed"
-            )
-        )
-
-        positive_bonus = min(
-            0.20,
-            len(successful) * 0.075
-        )
-
-        negative_penalty = min(
-            0.30,
-            len(failed) * 0.10
-        )
-
-        return (
-            positive_bonus
-            - negative_penalty
-        )
     @classmethod
-    def _bar_memory_score(
-        cls,
-        cat
-    ):
+    def _bar_memory_score(cls, cat):
         memory = cat.memory
-
         if memory is None:
             return 0.0
-
-        events = getattr(
-            memory,
-            "events",
-            []
-        )
-
-        positive_types = {
-            "bar_entry",
-            "cat_drank_milk_at_bar",
-            "bouncer_petted_cat",
-            "safe_at_bar"
-        }
-
-        positive_count = sum(
-            1
-            for event in events
-            if event.get(
-                "event_type"
-            ) in positive_types
-        )
-
-        return min(
-            0.30,
-            positive_count * 0.06
-        )
+        events = getattr(memory, 'events', [])
+        positive_types = {'bar_entry', 'cat_drank_milk_at_bar', 'bouncer_petted_cat', 'safe_at_bar'}
+        positive_count = sum((1 for event in events if event.get('event_type') in positive_types))
+        return min(0.3, positive_count * 0.06)

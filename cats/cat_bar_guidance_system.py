@@ -11,13 +11,13 @@ class CatBarGuidanceSystem:
         invitation = self.invitation_system.get(invitation_id)
         if invitation is None:
             return self._failed(cat, human, 'unknown_invitation')
-        if invitation['cat'] != cat.name:
+        if invitation.cat != cat.name:
             return self._failed(cat, human, 'wrong_cat')
-        if invitation['human'] != self._name(human):
+        if invitation.human != self._name(human):
             return self._failed(cat, human, 'wrong_human')
-        if not invitation['understood']:
+        if not invitation.understood:
             return self._failed(cat, human, 'MEOW_not_understood')
-        if invitation['used']:
+        if invitation.used:
             return self._failed(cat, human, 'invitation_already_used')
         temporary_access = {'source': 'cat_MEOW_invitation', 'inviting_cat': cat.name, 'invitation_id': invitation_id, 'permanent': False}
         self._set(human, 'meow_bar_invitation', temporary_access)

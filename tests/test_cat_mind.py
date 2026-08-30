@@ -16,9 +16,9 @@ class CatMindTests(unittest.TestCase):
 
     def test_new_cat_has_empty_mind(self):
         mind = self.cat.mind
-        self.assertIsNone(mind['current_intention'])
-        self.assertEqual(mind['decision_count'], 0)
-        self.assertEqual(mind['history'], [])
+        self.assertIsNone(mind.current_intention)
+        self.assertEqual(mind.decision_count, 0)
+        self.assertEqual(mind.history, [])
 
     def test_curious_cat_prefers_new_box(self):
         self.traits()['curiosity'] = 1.0
@@ -51,9 +51,9 @@ class CatMindTests(unittest.TestCase):
     def test_decision_is_preserved_in_history(self):
         result = CatMind.decide(cat=self.cat, observations={'bar_known': True})
         mind = self.cat.mind
-        self.assertEqual(mind['decision_count'], 1)
-        self.assertEqual(len(mind['history']), 1)
-        self.assertEqual(mind['current_intention']['type'], result['intention'])
+        self.assertEqual(mind.decision_count, 1)
+        self.assertEqual(len(mind.history), 1)
+        self.assertEqual(mind.current_intention['type'], result['intention'])
 
     def test_personality_changes_future_decision(self):
         observations = {'huntable_cronenbergs': ['cronenberg_small'], 'cronenberg_danger': 0.5, 'unexplored_boxes': ['box_alpha']}

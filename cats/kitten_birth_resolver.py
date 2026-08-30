@@ -1,6 +1,7 @@
 from cats.cat_family_system import CatFamilySystem
 from cats.physical_biology_gate import PhysicalBiologyGate
 from cats.development_resolver import CatDevelopmentResolver
+from cats.cat_birth_objects import CatLitter
 
 class KittenBirthResolver:
 
@@ -30,35 +31,35 @@ class KittenBirthResolver:
         birth_results = []
         for embryo in embryos:
             kitten_name = self._next_kitten_name()
-            profile = dict(embryo['profile'])
+            profile = dict(embryo.profile)
             manifestation = self.universe.manifest_cat(name=kitten_name, source='kitten_birth_resolver', color=profile['color'], fur_length=profile['fur_length'], pattern=profile['pattern'], eye_color=profile['eye_color'], sex=profile['sex'])
             if manifestation is None:
-                birth_results.append({'embryo_id': embryo['id'], 'kitten': None, 'born': False, 'reason': 'manifest_cat_failed'})
+                birth_results.append({'embryo_id': embryo.id, 'kitten': None, 'born': False, 'reason': 'manifest_cat_failed'})
                 continue
             kitten = manifestation['cat']
             kitten.state = 'newborn'
             self.development_resolver.initialize_newborn(kitten, birth_day=current_day)
-            kitten.genotype = embryo['genotype']
-            kitten.phenotype = embryo['phenotype']
+            kitten.genotype = embryo.genotype
+            kitten.phenotype = embryo.phenotype
             kitten.mother_name = mother.name
-            kitten.father_name = embryo['father_name']
-            kitten.parents = {'mother': mother.name, 'father': embryo['father_name']}
+            kitten.father_name = embryo.father_name
+            kitten.parents = {'mother': mother.name, 'father': embryo.father_name}
             kitten.learning['teacher_mother'] = mother.name
-            kitten.embryo_id = embryo['id']
-            kitten.genetic_status = embryo['genetic_status']
-            kitten.rare = embryo['rare']
-            for trait in embryo.get('special_traits', []):
+            kitten.embryo_id = embryo.id
+            kitten.genetic_status = embryo.genetic_status
+            kitten.rare = embryo.rare
+            for trait in getattr(embryo, 'special_traits', []):
                 if trait not in kitten.special_traits:
                     kitten.special_traits.append(trait)
             kittens.append(kitten)
-            birth_results.append({'embryo_id': embryo['id'], 'kitten': kitten_name, 'father': embryo['father_name'], 'genetic_status': embryo['genetic_status'], 'rare': embryo['rare'], 'born': True})
+            birth_results.append({'embryo_id': embryo.id, 'kitten': kitten_name, 'father': embryo.father_name, 'genetic_status': embryo.genetic_status, 'rare': embryo.rare, 'born': True})
         self.family_system.register_birth(mother=mother, kittens=kittens)
         father_names = []
         for kitten in kittens:
             father_name = kitten.father_name
             if father_name not in father_names:
                 father_names.append(father_name)
-        litter = {'name': 'cat_litter_born', 'litter_number': litter_number, 'mother': mother.name, 'father_names': father_names, 'multiple_sires': len(father_names) > 1, 'embryos_present': len(embryos), 'kittens_born': len(kittens), 'kitten_names': [kitten.name for kitten in kittens], 'birth_results': birth_results, 'pregnancy_day': pregnancy_day, 'gestation_days': gestation_days, 'birth_day': current_day, 'born': True}
+        litter = CatLitter(**{'name': 'cat_litter_born', 'litter_number': litter_number, 'mother': mother.name, 'father_names': father_names, 'multiple_sires': len(father_names) > 1, 'embryos_present': len(embryos), 'kittens_born': len(kittens), 'kitten_names': [kitten.name for kitten in kittens], 'birth_results': birth_results, 'pregnancy_day': pregnancy_day, 'gestation_days': gestation_days, 'birth_day': current_day, 'born': True})
         reproduction['pregnant'] = False
         reproduction['pregnancy_day'] = None
         reproduction['gestation_days'] = None

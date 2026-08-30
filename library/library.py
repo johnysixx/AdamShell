@@ -147,9 +147,17 @@ class Library:
             book
             for book in self.catalog
             if (
-                book.get("library_status")
+                getattr(
+                    book,
+                    "library_status",
+                    None
+                )
                 == "checked_out_for_edit"
-                and book.get("holder") is god
+                and getattr(
+                    book,
+                    "holder",
+                    None
+                ) is god
             )
         ]
 
@@ -185,15 +193,7 @@ class Library:
                 book
             )
 
-        book["location"] = (
-            "library_shelf"
-        )
-
-        book["library_status"] = (
-            "shelved"
-        )
-
-        book["holder"] = None
+        book.shelve()
 
         self.state[
             "books"
@@ -205,7 +205,7 @@ class Library:
 
         UniverseLogger.event(
             "BOOK SHELVED: "
-            f"{book.get('author', 'unknown')}"
+            f"{getattr(book, 'author', 'unknown')}"
         )
 
         return True
@@ -226,28 +226,22 @@ class Library:
                 "Book is not registered in the library catalog."
             )
 
-        if book.get(
-            "library_status"
+        if getattr(
+            book,
+            "library_status",
+            None
         ) != "shelved":
             raise RuntimeError(
                 "Book is not available on the shelf."
             )
 
-        book[
-            "library_status"
-        ] = "checked_out_for_edit"
-
-        book[
-            "holder"
-        ] = editor
-
-        book[
-            "location"
-        ] = "with_god"
+        book.check_out_for_edit(
+            editor
+        )
 
         UniverseLogger.event(
             "BOOK CHECKED OUT FOR EDIT: "
-            f"{book.get('author', 'unknown')}"
+            f"{getattr(book, 'author', 'unknown')}"
         )
 
         return True
@@ -261,21 +255,11 @@ class Library:
                 "Book is not registered in the library catalog."
             )
 
-        book[
-            "library_status"
-        ] = "shelved"
-
-        book[
-            "holder"
-        ] = None
-
-        book[
-            "location"
-        ] = "library_shelf"
+        book.return_to_shelf()
 
         UniverseLogger.event(
             "BOOK RETURNED: "
-            f"{book.get('author', 'unknown')}"
+            f"{getattr(book, 'author', 'unknown')}"
         )
 
         return True
@@ -291,29 +275,31 @@ class Library:
                 "Book is not registered in the library catalog."
             )
 
-        if book.get(
-            "library_status"
+        if getattr(
+            book,
+            "library_status",
+            None
         ) != "checked_out_for_edit":
             raise RuntimeError(
                 "Book must be checked out for edit before writing."
             )
 
-        if book.get(
-            "holder"
+        if getattr(
+            book,
+            "holder",
+            None
         ) is not editor:
             raise RuntimeError(
                 "Only the current holder may edit the book."
             )
 
-        book[
-            "entries"
-        ].append(
-            dict(entry)
+        book.write_entry(
+            entry
         )
 
         UniverseLogger.event(
             "BOOK ENTRY WRITTEN: "
-            f"{book.get('author', 'unknown')}"
+            f"{getattr(book, 'author', 'unknown')}"
         )
 
         return True
@@ -329,15 +315,19 @@ class Library:
                 "Book is not registered in the library catalog."
             )
 
-        if book.get(
-            "library_status"
+        if getattr(
+            book,
+            "library_status",
+            None
         ) != "checked_out_for_edit":
             raise RuntimeError(
                 "Book must be checked out for edit before receiving energy."
             )
 
-        if book.get(
-            "holder"
+        if getattr(
+            book,
+            "holder",
+            None
         ) is not editor:
             raise RuntimeError(
                 "Only the current holder may transfer energy into the book."
@@ -367,12 +357,8 @@ class Library:
 
         editor.energy_j -= amount_j
 
-        book["energy_j"] = (
-            book.get(
-                "energy_j",
-                0.0
-            )
-            + amount_j
+        book.receive_energy(
+            amount_j
         )
 
         UniverseLogger.event(
@@ -394,7 +380,9 @@ class Library:
             return
 
         self.books.append(book)
-        UniverseLogger.event(f"BOOK ADDED: {book['title']}")
+        UniverseLogger.event(
+            f"BOOK ADDED: {book.title}"
+        )
 
     def read_books(self, entity_name):
         if not self.can_read(entity_name):
