@@ -2,6 +2,7 @@ import unittest
 
 from meeting_place.bar_counter import BarCounter
 from meeting_place.bartender import Bartender
+from meeting_place.bar_objects import RecipeTasting
 from meeting_place.how_to_mix_drinks import (
     HowToMixDrinks
 )
@@ -108,24 +109,28 @@ class HowToMixDrinksTests(unittest.TestCase):
             "singularity"
         ]
 
-        self.assertEqual(
+        self.assertIsInstance(
             tasting,
-            {
-                "guest": "newton",
-                "liked": True,
-                "comment": "needs more lemon"
-            }
+            RecipeTasting
+        )
+
+        self.assertIs(
+            recipe.tastings[0],
+            tasting
         )
 
         self.assertEqual(
-            recipe.tastings,
-            [
-                {
-                    "guest": "newton",
-                    "liked": True,
-                    "comment": "needs more lemon"
-                }
-            ]
+            tasting.guest,
+            "newton"
+        )
+
+        self.assertTrue(
+            tasting.liked
+        )
+
+        self.assertEqual(
+            tasting.comment,
+            "needs more lemon"
         )
 
         self.assertEqual(
@@ -235,13 +240,9 @@ class HowToMixDrinksTests(unittest.TestCase):
             comment="needs more lemon"
         )
 
-        self.assertEqual(
+        self.assertIsInstance(
             tasting,
-            {
-                "guest": "newton",
-                "liked": True,
-                "comment": "needs more lemon"
-            }
+            RecipeTasting
         )
 
         recipe = book.recipes[
@@ -259,12 +260,12 @@ class HowToMixDrinksTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            recipe.tastings[-1]["guest"],
+            recipe.tastings[-1].guest,
             "newton"
         )
 
         self.assertEqual(
-            recipe.tastings[-1]["comment"],
+            recipe.tastings[-1].comment,
             "needs more lemon"
         )
 
@@ -1180,7 +1181,6 @@ class HowToMixDrinksTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
 
 
 

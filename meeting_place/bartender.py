@@ -1,6 +1,10 @@
 from core.entity.social_entity import SocialMixin
 from universe.logger import UniverseLogger
-from .bar_objects import BarOrigin, BarShift
+from .bar_objects import (
+    BarOrigin,
+    BarShift,
+    DrinkRecipe,
+)
 
 class Bartender(SocialMixin):
 
@@ -116,7 +120,12 @@ class Bartender(SocialMixin):
         if self.mix_book is not None:
             recipe = self.mix_book.add_created_recipe(name=drink, ingredients=ingredients)
         else:
-            recipe = {'name': drink, 'origin': 'created_by_bartender', 'status': 'testing', 'ingredients': list(ingredients), 'tastings': [], 'votes_for': 0, 'votes_against': 0, 'approved': False}
+            recipe = DrinkRecipe(
+                name=drink,
+                origin='created_by_bartender',
+                status='testing',
+                ingredients=list(ingredients),
+            )
         event = {'kind': 'created_cocktail', 'drink': drink}
         self.chronicle_memory.append(event)
         UniverseLogger.event(f'BARTENDER CREATED COCKTAIL: {drink}')

@@ -414,6 +414,23 @@ class RecipeIngredientRequirement:
 
 
 @dataclass(slots=True)
+class RecipeTasting:
+    guest: str
+    liked: bool
+    comment: str | None = None
+
+    def to_dict(self):
+        return {
+            "guest":
+                self.guest,
+            "liked":
+                self.liked,
+            "comment":
+                self.comment,
+        }
+
+
+@dataclass(slots=True)
 class DrinkRecipe:
     name: str
     origin: str
@@ -438,7 +455,7 @@ class DrinkRecipe:
     price_basis: str | None = None
     status: str | None = None
 
-    tastings: list[dict] = field(
+    tastings: list[RecipeTasting] = field(
         default_factory=list
     )
 
@@ -471,9 +488,7 @@ class DrinkRecipe:
         for existing in self.tastings:
 
             if (
-                existing.get(
-                    "guest"
-                )
+                existing.guest
                 == guest
             ):
                 raise ValueError(
@@ -481,20 +496,17 @@ class DrinkRecipe:
                     "this cocktail."
                 )
 
-        tasting = {
-            "guest":
-                guest,
-            "liked":
-                bool(liked),
-            "comment":
-                comment,
-        }
+        tasting = RecipeTasting(
+            guest=guest,
+            liked=bool(liked),
+            comment=comment,
+        )
 
         self.tastings.append(
             tasting
         )
 
-        if tasting["liked"]:
+        if tasting.liked:
             self.votes_for += 1
         else:
             self.votes_against += 1
@@ -575,7 +587,7 @@ class DrinkRecipe:
             result[
                 "tastings"
             ] = [
-                dict(item)
+                item.to_dict()
                 for item
                 in self.tastings
             ]
