@@ -48,7 +48,7 @@ class CatGroupSuccessionSystem:
 
     def handle_departure(self, group_id, cat, cats, reason='cat_left_group'):
         group = self.group_system._group(group_id)
-        roles = list(cat.group_roles['active'].keys())
+        roles = list(cat.group_roles.active.keys())
         succession_events = []
         for role in roles:
             succession_events.append(self.succeed(group_id, cat, role, cats, reason=reason))

@@ -13,8 +13,8 @@ class CatCrossLayerScentNavigationTests(unittest.TestCase):
         self.cats = Cats(self.universe)
         self.pazuzu = self.cats.create_cat(name='pazuzu', color='black', fur_length='short')
         self.tracker = self.cats.create_cat(name='tracker', color='gray', fur_length='short')
-        self.tracker['current_layer'] = 'meeting_place'
-        self.tracker['position'] = {'x': 0.0, 'y': 0.0, 'z': 0.0}
+        self.tracker.current_layer = 'meeting_place'
+        self.tracker.position = {'x': 0.0, 'y': 0.0, 'z': 0.0}
         self.source = self.universe.create_quantum_box(layer='meeting_place')
         self.target = self.universe.create_quantum_box(layer='quantum_layer')
         self.source.position = {'x': 1.0, 'y': 0.0, 'z': 0.0}
@@ -34,7 +34,7 @@ class CatCrossLayerScentNavigationTests(unittest.TestCase):
     def test_mind_can_choose_to_follow_scent_through_box(self):
         perception = CatPerception(self.cats)
         observations = perception.observe(self.tracker)
-        traits = self.tracker['personality']['traits']
+        traits = self.tracker.personality['traits']
         traits['curiosity'] = 1.0
         traits['courage'] = 1.0
         candidates = CatMind.consider(cat=self.tracker, observations=observations)

@@ -50,9 +50,7 @@ class CatGroupAllianceSystem:
 
         if (
             second_group_id
-            in first[
-                "alliances"
-            ]
+            in first.alliances
         ):
             return {
                 "name": "cat_group_alliance_preserved",
@@ -119,15 +117,11 @@ class CatGroupAllianceSystem:
                 "formed": False
             }
 
-        first[
-            "alliances"
-        ].append(
+        first.alliances.append(
             second_group_id
         )
 
-        second[
-            "alliances"
-        ].append(
+        second.alliances.append(
             first_group_id
         )
 
@@ -139,17 +133,13 @@ class CatGroupAllianceSystem:
             "formed": True
         }
 
-        first[
-            "history"
-        ].append(
+        first.history.append(
             deepcopy(
                 event
             )
         )
 
-        second[
-            "history"
-        ].append(
+        second.history.append(
             deepcopy(
                 event
             )
@@ -170,9 +160,7 @@ class CatGroupAllianceSystem:
 
         if (
             second_group_id
-            not in first[
-                "alliances"
-            ]
+            not in first.alliances
         ):
             return {
                 "name": (
@@ -234,9 +222,7 @@ class CatGroupAllianceSystem:
 
         if (
             second_group_id
-            not in first[
-                "alliances"
-            ]
+            not in first.alliances
         ):
             return {
                 "name": (
@@ -246,15 +232,11 @@ class CatGroupAllianceSystem:
                 "broken": False
             }
 
-        first[
-            "alliances"
-        ].remove(
+        first.alliances.remove(
             second_group_id
         )
 
-        second[
-            "alliances"
-        ].remove(
+        second.alliances.remove(
             first_group_id
         )
 
@@ -278,17 +260,13 @@ class CatGroupAllianceSystem:
             "broken": True
         }
 
-        first[
-            "history"
-        ].append(
+        first.history.append(
             deepcopy(
                 event
             )
         )
 
-        second[
-            "history"
-        ].append(
+        second.history.append(
             deepcopy(
                 event
             )

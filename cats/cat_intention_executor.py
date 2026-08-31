@@ -70,7 +70,7 @@ class CatIntentionExecutor:
         cat.state = 'acting_on_own_intention'
         event = {'name': 'cat_intention_navigation_started', 'cat': cat.name, 'intention': intention_type, 'body_intent': body_intent, 'target': intention.get('target'), 'route_id': acceptance.get('route_id'), 'destination': acceptance.get('destination'), 'decision_source': 'cat_mind', 'navigation_offer': {key: value for key, value in offer.items() if key not in {'route', 'plan'}}, 'executed': True}
         mind = cat.mind
-        mind['active_body_execution'] = deepcopy(event)
+        mind.active_body_execution = deepcopy(event)
         return self._record(event)
 
     def _execute_follow_scent_through_box(self, cat, intention, cronenbergs=None, step_size=None):
@@ -131,9 +131,9 @@ class CatIntentionExecutor:
 
     def _finish_scent_box_follow(self, cat, intention, event):
         mind = cat.mind
-        mind['previous_intention'] = deepcopy(intention)
-        mind['current_intention'] = None
-        mind['active_body_execution'] = deepcopy(event)
+        mind.previous_intention = deepcopy(intention)
+        mind.current_intention = None
+        mind.active_body_execution = deepcopy(event)
         if hasattr(cat, 'active_route_id'):
             del cat.active_route_id
         follow = cat.scent_box_follow
@@ -178,10 +178,10 @@ class CatIntentionExecutor:
         transferred = result.get('transferred', False)
         event = {'name': 'cat_traveled_through_known_quantum_box' if transferred else 'cat_quantum_box_travel_failed', 'cat': cat.name, 'source_box_id': source_box_id, 'counterpart_box_id': counterpart_box_id, 'source_layer': target.get('source_layer'), 'transfer': deepcopy(result), 'decision_source': 'cat_mind', 'executed': transferred}
         mind = cat.mind
-        mind['previous_intention'] = deepcopy(intention)
-        mind['current_intention'] = None
+        mind.previous_intention = deepcopy(intention)
+        mind.current_intention = None
         if transferred:
-            mind['active_body_execution'] = deepcopy(event)
+            mind.active_body_execution = deepcopy(event)
             cat.current_quantum_counterpart_observation = None
             return self._record(event)
         failure_reason = result.get('reason', 'quantum_transfer_failed')
@@ -190,7 +190,7 @@ class CatIntentionExecutor:
         event['reason'] = failure_reason
         event['cronenberg_id'] = cronenberg.id
         event['memory'] = deepcopy(memory)
-        mind['active_body_execution'] = deepcopy(event)
+        mind.active_body_execution = deepcopy(event)
         return self._record(event)
 
     def _execute_sense_quantum_counterpart(self, cat, intention):
@@ -222,10 +222,10 @@ class CatIntentionExecutor:
         observation = {'source_box_id': source_box_id, 'counterpart_box_id': counterpart.id, 'source_layer': getattr(source_box, 'current_layer', None), 'counterpart_layer': getattr(counterpart, 'current_layer', None), 'counterpart_position': deepcopy(getattr(counterpart, 'position', {})), 'observed_tick': getattr(self.universe, 'universe_tick', None), 'temporary': True, 'pair_currently_valid': True}
         cat.current_quantum_counterpart_observation = deepcopy(observation)
         mind = cat.mind
-        mind['previous_intention'] = deepcopy(intention)
-        mind['current_intention'] = None
+        mind.previous_intention = deepcopy(intention)
+        mind.current_intention = None
         event = {'name': 'cat_sensed_quantum_counterpart', 'cat': cat.name, 'observation': deepcopy(observation), 'decision_source': 'cat_mind', 'executed': True}
-        mind['active_body_execution'] = deepcopy(event)
+        mind.active_body_execution = deepcopy(event)
         return self._record(event)
 
     def _execute_explore_box(self, cat, intention, cronenbergs=None, step_size=None):
@@ -291,10 +291,10 @@ class CatIntentionExecutor:
         if hasattr(cat, 'active_route_id'):
             del cat.active_route_id
         mind = cat.mind
-        mind['previous_intention'] = deepcopy(intention)
-        mind['current_intention'] = None
+        mind.previous_intention = deepcopy(intention)
+        mind.current_intention = None
         event = {'name': 'cat_explored_quantum_box', 'cat': cat.name, 'box_id': box_id, 'position': deepcopy(getattr(box, 'position', {})), 'observation': deepcopy(observation), 'memory': deepcopy(remembered), 'arrived': True, 'decision_source': 'cat_mind', 'executed': True}
-        mind['active_body_execution'] = deepcopy(event)
+        mind.active_body_execution = deepcopy(event)
         return self._record(event)
 
     def _execute_search_for_scent(self, cat, intention, cronenbergs=None, step_size=None):
@@ -343,10 +343,10 @@ class CatIntentionExecutor:
             if hasattr(cat, 'active_route_id'):
                 del cat.active_route_id
             mind = cat.mind
-            mind['previous_intention'] = deepcopy(intention)
-            mind['current_intention'] = None
+            mind.previous_intention = deepcopy(intention)
+            mind.current_intention = None
             event = {'name': 'cat_reacquired_scent_during_search', 'cat': cat.name, 'identity': search.get('identity'), 'source_id': reacquired.get('entity_id'), 'position': dict(cat.position or {}), 'olfaction': deepcopy(olfaction), 'search_interrupted': True, 'decision_source': 'cat_mind', 'executed': True}
-            mind['active_body_execution'] = deepcopy(event)
+            mind.active_body_execution = deepcopy(event)
             return self._record(event)
         if result.get('arrived', False):
             return self._finish_scent_search(cat=cat, intention=intention)
@@ -362,10 +362,10 @@ class CatIntentionExecutor:
         if hasattr(cat, 'active_route_id'):
             del cat.active_route_id
         mind = cat.mind
-        mind['previous_intention'] = deepcopy(intention)
-        mind['current_intention'] = None
+        mind.previous_intention = deepcopy(intention)
+        mind.current_intention = None
         event = {'name': 'cat_completed_scent_search_step', 'cat': cat.name, 'identity': search.get('identity'), 'attempt': search.get('attempts'), 'max_attempts': search.get('max_attempts'), 'position': dict(cat.position or {}), 'trail_direction': deepcopy(search.get('trail_direction')), 'arrived': True, 'decision_source': 'cat_mind', 'executed': True}
-        mind['active_body_execution'] = deepcopy(event)
+        mind.active_body_execution = deepcopy(event)
         return self._record(event)
 
     def _execute_follow_known_scent(self, cat, intention, cronenbergs=None, step_size=None):
@@ -416,10 +416,10 @@ class CatIntentionExecutor:
         if hasattr(cat, 'active_route_id'):
             del cat.active_route_id
         mind = cat.mind
-        mind['previous_intention'] = deepcopy(intention)
-        mind['current_intention'] = None
+        mind.previous_intention = deepcopy(intention)
+        mind.current_intention = None
         event = {'name': 'cat_reached_known_scent', 'cat': cat.name, 'identity': target.get('identity'), 'layer': cat.current_layer, 'destination': dict(position), 'trail_direction': deepcopy(target.get('trail_direction')), 'arrived': True, 'decision_source': 'cat_mind', 'executed': True}
-        mind['active_body_execution'] = deepcopy(event)
+        mind.active_body_execution = deepcopy(event)
         return self._record(event)
 
     def _execute_share_legend(self, cat, intention):
@@ -439,10 +439,10 @@ class CatIntentionExecutor:
             return self._record({'name': 'cat_legend_not_shared', 'cat': cat.name, 'listener': target_name, 'reason': 'listener_not_found', 'executed': False})
         result = CatKnowledge.share_legend(storyteller=cat, listener=listener, universe=self.universe)
         mind = cat.mind
-        mind['previous_intention'] = deepcopy(intention)
-        mind['current_intention'] = None
+        mind.previous_intention = deepcopy(intention)
+        mind.current_intention = None
         event = {**result, 'cat': cat.name, 'intention': 'share_legend', 'decision_source': 'cat_mind', 'executed': True}
-        mind['active_body_execution'] = deepcopy(event)
+        mind.active_body_execution = deepcopy(event)
         return self._record(event)
 
     def _execute_exploration_pair_creation(self, cat, intention):
@@ -477,10 +477,10 @@ class CatIntentionExecutor:
         if cat.current_layer == 'quantum_layer':
             exploration_route = transfer_system.start_quantum_exploration_route(cat=cat, pair_id=creation['pair_id'])
         mind = cat.mind
-        mind['previous_intention'] = deepcopy(intention)
-        mind['current_intention'] = None
+        mind.previous_intention = deepcopy(intention)
+        mind.current_intention = None
         event = {'name': 'cat_started_autonomous_exploration_through_new_pair', 'cat': cat.name, 'intention': 'create_exploration_pair', 'pair_id': creation['pair_id'], 'source_box_id': source_box.id, 'target_box_id': target_box.id, 'source_layer': creation['source_layer'], 'target_layer': creation['target_layer'], 'energy_cost_j': creation['energy_cost_j'], 'remaining_cat_energy': creation['remaining_cat_energy'], 'creation': {'created': True, 'stable': creation.get('stable', True), 'available_to_other_cats': creation.get('available_to_other_cats', True)}, 'transfer': {'transferred': True, 'pair_remains_stable': transfer.get('pair_remains_stable', False), 'target_box_consumed': transfer.get('target_box_consumed'), 'destination_layer': transfer.get('target_layer'), 'trail': transfer.get('trail')}, 'exploration_route': exploration_route, 'decision_source': 'cat_mind', 'executed': True}
-        mind['active_body_execution'] = deepcopy(event)
+        mind.active_body_execution = deepcopy(event)
         return self._record(event)
 
     def _execute_wander(self, cat, intention, step_size=None):

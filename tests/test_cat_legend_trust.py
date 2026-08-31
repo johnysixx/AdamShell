@@ -24,7 +24,7 @@ class CatLegendTrustTests(unittest.TestCase):
         self.listener.relationships = {'pazuzu': {'trust': 1.0}}
         trusted = CatKnowledge.hear_legend(self.listener, self.storyteller, self.legend)
         other = self.cats.create_cat(name='skeptic', color='gray', fur_length='short')
-        other['relationships'] = {'pazuzu': {'trust': 0.0}}
+        other.relationships = {'pazuzu': {'trust': 0.0}}
         skeptical = CatKnowledge.hear_legend(other, self.storyteller, self.legend)
         self.assertGreater(trusted['credibility'], skeptical['credibility'])
 

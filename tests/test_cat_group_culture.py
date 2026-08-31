@@ -113,9 +113,7 @@ class CatGroupCultureTests(
         )
 
         self.assertEqual(
-            profile[
-                "traditions"
-            ][
+            profile.traditions[
                 "evening_box_patrol"
             ][
                 "occurrences"
@@ -124,9 +122,7 @@ class CatGroupCultureTests(
         )
 
         self.assertGreater(
-            profile[
-                "traits"
-            ][
+            profile.traits[
                 "curious"
             ],
             0.0
@@ -151,9 +147,7 @@ class CatGroupCultureTests(
         )
 
         self.assertEqual(
-            profile[
-                "preferences"
-            ][
+            profile.preferences[
                 "sleeping_place"
             ][
                 "value"
@@ -188,18 +182,14 @@ class CatGroupCultureTests(
             result["created"]
         )
 
-        myth = self.groups.groups[
-            self.group_id
-        ][
-            "myths"
-        ][
+        myth = self.groups.groups[self.group_id].myths[
             result[
                 "myth_id"
             ]
         ]
 
         self.assertFalse(
-            myth["verified"]
+            myth.verified
         )
 
     def test_myth_can_change_during_retelling(
@@ -248,11 +238,7 @@ class CatGroupCultureTests(
         )
 
         received = (
-            self.groups.groups[
-                second_group
-            ][
-                "myths"
-            ][
+            self.groups.groups[second_group].myths[
                 result[
                     "myth_id"
                 ]
@@ -269,18 +255,14 @@ class CatGroupCultureTests(
         )
 
         self.assertEqual(
-            received[
-                "parent_version"
-            ],
+            received.parent_version,
             created[
                 "myth_id"
             ]
         )
 
         self.assertEqual(
-            received[
-                "transformations"
-            ],
+            received.transformations,
             1
         )
 
@@ -356,11 +338,7 @@ class CatGroupCultureTests(
             result[
                 "innovation_id"
             ],
-            self.groups.groups[
-                self.group_id
-            ][
-                "knowledge"
-            ]
+            self.groups.groups[self.group_id].knowledge
         )
 
     def test_successful_trials_can_verify_innovation(
@@ -399,17 +377,13 @@ class CatGroupCultureTests(
             )
 
         record = (
-            self.groups.groups[
-                self.group_id
-            ][
-                "innovations"
-            ][
+            self.groups.groups[self.group_id].innovations[
                 innovation_id
             ]
         )
 
         self.assertTrue(
-            record["verified"]
+            record.verified
         )
 
 

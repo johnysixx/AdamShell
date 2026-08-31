@@ -164,12 +164,12 @@ class CatBirthCreationTests(
         second = self.resolver.create_cat()
 
         self.assertEqual(
-            first["cat"]["name"],
+            first["cat"].name,
             "cat_0001"
         )
 
         self.assertEqual(
-            second["cat"]["name"],
+            second["cat"].name,
             "cat_0002"
         )
 
@@ -189,7 +189,7 @@ class CatBirthCreationTests(
         )
 
         self.assertEqual(
-            result["cat"]["name"],
+            result["cat"].name,
             "micka"
         )
 

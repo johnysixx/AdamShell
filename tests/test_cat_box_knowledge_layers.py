@@ -31,7 +31,7 @@ class CatBoxKnowledgeLayerTests(unittest.TestCase):
         self.assertIn('occupied', detail)
 
     def test_explored_box_reveals_quantum_state(self):
-        self.cat.mind['current_intention'] = {'type': 'explore_box', 'target': self.box.id, 'score': 1.0, 'reasons': ['test']}
+        self.cat.mind.current_intention = {'type': 'explore_box', 'target': self.box.id, 'score': 1.0, 'reasons': ['test']}
         result = self.cats.execute_cat_intention(self.cat)
         for _ in range(10):
             if result['name'] == 'cat_explored_quantum_box':

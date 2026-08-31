@@ -25,7 +25,7 @@ class CatQuantumBoxPairingPrincipleTests(unittest.TestCase):
         return next((item for item in observed['visible_box_details'] if item['id'] == self.box.id))
 
     def explore_box(self):
-        self.cat.mind['current_intention'] = {'type': 'explore_box', 'target': self.box.id, 'score': 1.0, 'reasons': ['test']}
+        self.cat.mind.current_intention = {'type': 'explore_box', 'target': self.box.id, 'score': 1.0, 'reasons': ['test']}
         result = self.cats.execute_cat_intention(self.cat)
         for _ in range(10):
             if result['name'] == 'cat_explored_quantum_box':

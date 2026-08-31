@@ -35,7 +35,7 @@ class CatQuantumCounterpartSensingTests(unittest.TestCase):
     def test_sensing_reveals_current_counterpart_location(self):
         candidates = CatMind.consider(cat=self.cat, observations=self.observations())
         intention = next((candidate for candidate in candidates if candidate['type'] == 'sense_quantum_counterpart'))
-        self.cat.mind['current_intention'] = intention
+        self.cat.mind.current_intention = intention
         result = self.cats.execute_cat_intention(self.cat)
         self.assertEqual(result['name'], 'cat_sensed_quantum_counterpart')
         observation = result['observation']
@@ -48,7 +48,7 @@ class CatQuantumCounterpartSensingTests(unittest.TestCase):
     def test_counterpart_observation_disappears_with_pair(self):
         candidates = CatMind.consider(cat=self.cat, observations=self.observations())
         intention = next((candidate for candidate in candidates if candidate['type'] == 'sense_quantum_counterpart'))
-        self.cat.mind['current_intention'] = intention
+        self.cat.mind.current_intention = intention
         result = self.cats.execute_cat_intention(self.cat)
         self.assertTrue(result['observation']['pair_currently_valid'])
         before = self.observations()
@@ -56,7 +56,7 @@ class CatQuantumCounterpartSensingTests(unittest.TestCase):
         self.universe.quantum_boxes.remove(self.target)
         after = self.observations()
         self.assertIsNone(after['quantum_counterpart_observation'])
-        self.assertNotIn('current_quantum_counterpart_observation', self.cat)
+        self.assertFalse(hasattr(self.cat, 'current_quantum_counterpart_observation'))
 
     def test_previous_quantum_travel_increases_sensing_score(self):
         inexperienced_candidates = CatMind.consider(cat=self.cat, observations=self.observations())
@@ -85,7 +85,7 @@ class CatQuantumCounterpartSensingTests(unittest.TestCase):
     def test_failed_quantum_travel_reduces_travel_score(self):
         candidates = CatMind.consider(cat=self.cat, observations=self.observations())
         sense = next((candidate for candidate in candidates if candidate['type'] == 'sense_quantum_counterpart'))
-        self.cat.mind['current_intention'] = sense
+        self.cat.mind.current_intention = sense
         result = self.cats.execute_cat_intention(self.cat)
         self.assertTrue(result['executed'])
         before_candidates = CatMind.consider(cat=self.cat, observations=self.observations())

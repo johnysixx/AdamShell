@@ -44,7 +44,7 @@ class CatAutonomousExplorationPairTests(unittest.TestCase):
         self.assertTrue(execution['transfer']['transferred'])
         self.assertTrue(execution['transfer']['pair_remains_stable'])
         self.assertFalse(execution['transfer']['target_box_consumed'])
-        self.assertIsNone(self.cat.mind['current_intention'])
+        self.assertIsNone(self.cat.mind.current_intention)
 
     def test_existing_unexplored_box_is_preferred(self):
         box = self.universe.create_quantum_box(layer='meeting_place')

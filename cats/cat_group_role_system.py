@@ -31,10 +31,10 @@ class CatGroupRoleSystem:
         holders = group.roles.setdefault(role, [])
         if cat.name not in holders:
             holders.append(cat.name)
-        cat.group_roles['active'][role] = {'group_id': group_id, 'score': check['score']}
-        cat.group_roles['role_events'] += 1
+        cat.group_roles.active[role] = {'group_id': group_id, 'score': check['score']}
+        cat.group_roles.role_events += 1
         event = {'name': 'cat_group_role_assigned', 'group_id': group_id, 'cat': cat.name, 'role': role, 'score': check['score'], 'assigned': True}
-        cat.group_roles['history'].append(deepcopy(event))
+        cat.group_roles.history.append(deepcopy(event))
         group.history.append(deepcopy(event))
         return event
 
@@ -43,9 +43,9 @@ class CatGroupRoleSystem:
         holders = group.roles.get(role, [])
         if cat.name in holders:
             holders.remove(cat.name)
-        cat.group_roles['active'].pop(role, None)
+        cat.group_roles.active.pop(role, None)
         event = {'name': 'cat_group_role_released', 'group_id': group_id, 'cat': cat.name, 'role': role, 'reason': reason, 'released': True}
-        cat.group_roles['history'].append(deepcopy(event))
+        cat.group_roles.history.append(deepcopy(event))
         return event
 
     def holders(self, group_id, role):

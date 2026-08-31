@@ -23,13 +23,13 @@ class CatLegendReputationTests(unittest.TestCase):
         self.assertAlmostEqual(trust, 0.6)
 
     def test_contradicted_legend_decreases_trust(self):
-        result = CatKnowledge.contradict_heard_legend(cat=self.listener, legend_id=self.legend['legend_id'])
+        result = CatKnowledge.contradict_heard_legend(cat=self.listener, legend_id=self.legend.legend_id)
         self.assertTrue(result['contradicted'])
         trust = self.listener.relationships['pazuzu']['trust']
         self.assertAlmostEqual(trust, 0.35)
 
     def test_trust_history_is_recorded(self):
-        CatKnowledge.contradict_heard_legend(self.listener, self.legend['legend_id'])
+        CatKnowledge.contradict_heard_legend(self.listener, self.legend.legend_id)
         history = self.listener.relationships['pazuzu']['trust_history']
         self.assertEqual(len(history), 1)
         self.assertEqual(history[0]['reason'], 'personal_observation_contradicted')
@@ -43,7 +43,7 @@ class CatLegendReputationTests(unittest.TestCase):
         self.assertEqual(self.listener.relationships['pazuzu']['trust'], 0.0)
 
     def test_contradicted_legend_is_not_used_for_planning(self):
-        CatKnowledge.contradict_heard_legend(self.listener, self.legend['legend_id'])
+        CatKnowledge.contradict_heard_legend(self.listener, self.legend.legend_id)
         self.listener.current_layer = 'meeting_place'
         result = CatExplorationPlanner.choose_destination(cat=self.listener, universe=self.universe)
         heard_candidates = [candidate for candidate in result['candidates'] if candidate.get('source') == 'heard_legend']

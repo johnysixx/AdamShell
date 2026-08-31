@@ -8,7 +8,7 @@ class CatGroupRoleSpecializationSystem:
 
     def specialize(self, group_id, cat, base_role, specialization):
         group = self.group_system._group(group_id)
-        if base_role not in cat.group_roles['active']:
+        if base_role not in cat.group_roles.active:
             return {'name': 'cat_role_specialization_denied', 'reason': 'base_role_not_held', 'specialized': False}
         profile = self.SPECIALIZATIONS.get(base_role, {}).get(specialization)
         if profile is None:
@@ -22,9 +22,9 @@ class CatGroupRoleSpecializationSystem:
         holders = group.role_specializations[base_role].setdefault(specialization, [])
         if cat.name not in holders:
             holders.append(cat.name)
-        cat.group_roles['active'][specialization] = {'group_id': group_id, 'base_role': base_role, 'specialized': True}
+        cat.group_roles.active[specialization] = {'group_id': group_id, 'base_role': base_role, 'specialized': True}
         event = {'name': 'cat_group_role_specialized', 'group_id': group_id, 'cat': cat.name, 'base_role': base_role, 'specialization': specialization, 'specialized': True}
-        cat.group_roles['history'].append(deepcopy(event))
+        cat.group_roles.history.append(deepcopy(event))
         group.history.append(deepcopy(event))
         return event
 

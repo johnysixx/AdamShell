@@ -34,7 +34,7 @@ class FelineTeacherResolver:
         for teacher in search['teachers']:
             methods = teacher["methods"]
             if method_name is None or method_name in methods:
-                event = {'name': 'feline_ability_teacher_chosen', 'student': student.name, 'ability': ability_name, 'requested_method': method_name, 'teacher': teacher["name"], 'available_methods': list(methods), 'chosen': True}
+                event = {'name': 'feline_ability_teacher_chosen', 'student': student.name, 'ability': ability_name, 'requested_method': method_name, 'teacher': teacher['name'], 'available_methods': list(methods), 'chosen': True}
                 self._record(event)
                 return {**event, 'teacher_cat': teacher["cat"]}
         event = {'name': 'feline_ability_teacher_not_found', 'student': student.name, 'ability': ability_name, 'requested_method': method_name, 'reason': 'no_teacher_knows_requested_method' if search['teachers'] else search['reason'], 'chosen': False}
@@ -48,7 +48,7 @@ class FelineTeacherResolver:
         teacher = choice['teacher_cat']
         selected_method = method_name if method_name is not None else choice['available_methods'][0]
         lesson = ability_resolver.teach_method(teacher=teacher, student=student, ability_name=ability_name, method_name=selected_method)
-        event = {'name': 'feline_ability_lesson_requested', 'student': student.name, 'teacher': teacher["name"], 'ability': ability_name, 'method': selected_method, 'lesson': lesson, 'learned': lesson.get('learned', False)}
+        event = {'name': 'feline_ability_lesson_requested', 'student': student.name, 'teacher': teacher.name, 'ability': ability_name, 'method': selected_method, 'lesson': lesson, 'learned': lesson.get('learned', False)}
         self._record(event)
         return event
 

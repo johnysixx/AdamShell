@@ -54,7 +54,7 @@ class CatSocialInteractionTests(unittest.TestCase):
 
     def test_newborn_cannot_use_adult_meow_before_learning(self):
         kitten = self.cats.create_cat(name='kitten', color='white', fur_length='short', origin='kitten_birth_resolver')
-        kitten['mother_name'] = 'mother'
+        kitten.mother_name = 'mother'
         development = CatDevelopmentResolver(self.universe)
         development.initialize_newborn(kitten, birth_day=0)
         result = kitten.meow_to({'name': 'listener_4'})
@@ -135,7 +135,7 @@ class CatSocialInteractionTests(unittest.TestCase):
 
     def test_approach_cat_triggers_social_meeting_when_near(self):
         first, second = self._social_pair()
-        first.mind['current_intention'] = {'type': 'approach_cat', 'target': second.name}
+        first.mind.current_intention = {'type': 'approach_cat', 'target': second.name}
         result = self.cats.execute_cat_intention(first)
         self.assertEqual(result['name'], 'cat_approach_completed')
         self.assertTrue(result['executed'])
@@ -198,11 +198,11 @@ class CatSocialInteractionTests(unittest.TestCase):
         first.location = 'window'
         territory = CatTerritorySystem(self.cats)
         claim = territory.claim(first, strength=0.6)
-        self.assertEqual(claim['owner'], first.name)
-        self.assertEqual(claim['location'], 'window')
+        self.assertEqual(claim.owner, first.name)
+        self.assertEqual(claim.location, 'window')
         marked = territory.scent_mark(first)
-        self.assertEqual(marked['scent_marks'], 2)
-        self.assertGreater(marked['strength'], 0.6)
+        self.assertEqual(marked.scent_marks, 2)
+        self.assertGreater(marked.strength, 0.6)
 
     def test_unknown_cat_is_intruder_in_claimed_territory(self):
         first, second = self._social_pair()
@@ -315,8 +315,8 @@ class CatSocialInteractionTests(unittest.TestCase):
         mother, kitten = self._social_pair()
         mother.name = 'mother'
         kitten.name = 'kitten'
-        kitten.family['parents']['mother'] = mother.name
-        mother.family['children'].append(kitten.name)
+        kitten.family.parents['mother'] = mother.name
+        mother.family.children.append(kitten.name)
         social = CatSocialSystem(self.cats)
         assessment = social.assess(kitten, mother)
         self.assertEqual(assessment['family_relation'], 'mother')
@@ -324,12 +324,12 @@ class CatSocialInteractionTests(unittest.TestCase):
 
     def test_littermates_get_stronger_bonus_than_half_siblings(self):
         first, second = self._social_pair()
-        first.family['littermates'].append(second.name)
-        first.family['siblings'].append(second.name)
+        first.family.littermates.append(second.name)
+        first.family.siblings.append(second.name)
         social = CatSocialSystem(self.cats)
         full = social.assess(first, second)
-        first.family['siblings'].clear()
-        first.family['half_siblings'].append(second.name)
+        first.family.siblings.clear()
+        first.family.half_siblings.append(second.name)
         half = social.assess(first, second)
         self.assertEqual(full['family_relation'], 'sibling_littermate')
         self.assertEqual(half['family_relation'], 'half_sibling_littermate')
@@ -339,8 +339,8 @@ class CatSocialInteractionTests(unittest.TestCase):
         first, second = self._social_pair()
         first.location = 'nest'
         second.location = 'nest'
-        first.family['littermates'].append(second.name)
-        first.family['siblings'].append(second.name)
+        first.family.littermates.append(second.name)
+        first.family.siblings.append(second.name)
         territory = CatTerritorySystem(self.cats)
         territory.claim(first, strength=1.0)
         social = CatSocialSystem(self.cats)
@@ -350,8 +350,8 @@ class CatSocialInteractionTests(unittest.TestCase):
 
     def test_family_does_not_override_real_hostile_history(self):
         first, second = self._social_pair()
-        first.family['littermates'].append(second.name)
-        first.family['siblings'].append(second.name)
+        first.family.littermates.append(second.name)
+        first.family.siblings.append(second.name)
         first.relationships[second.name] = {'familiarity': 0.8, 'trust': 0.1, 'affiliation': 0.0, 'shared_scent': 0.3, 'tension': 0.9}
         first.social_memory[second.name] = {'meet_count': 5, 'friendly_count': 0, 'uncertain_count': 0, 'hostile_count': 5, 'last_attitude': 'hostile', 'last_outcome': 'hiss', 'last_steps': [], 'recent_outcomes': ['hiss', 'hiss', 'warning_swat']}
         social = CatSocialSystem(self.cats)

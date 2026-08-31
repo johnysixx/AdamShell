@@ -13,9 +13,9 @@ class CatGroupInstitutionalConflictSystem:
         second = group.institutions.get(second_institution)
         if first is None or second is None:
             return {'name': 'cat_institution_conflict_detection_denied', 'reason': 'unknown_institution', 'conflict': False}
-        shared_roles = sorted(set(first.get('roles', [])).intersection(second.get('roles', [])))
-        shared_rituals = sorted(set(first.get('rituals', [])).intersection(second.get('rituals', [])))
-        different_purpose = first.get('purpose') != second.get('purpose')
+        shared_roles = sorted(set(getattr(first, 'roles', [])).intersection(getattr(second, 'roles', [])))
+        shared_rituals = sorted(set(getattr(first, 'rituals', [])).intersection(getattr(second, 'rituals', [])))
+        different_purpose = getattr(first, 'purpose', None) != getattr(second, 'purpose', None)
         score = len(shared_roles) * 0.3 + len(shared_rituals) * 0.15 + (0.15 if different_purpose and shared_roles else 0.0)
         score = min(1.0, score)
         if score >= 0.6:
@@ -49,7 +49,7 @@ class CatGroupInstitutionalConflictSystem:
         conflict = group.institution_conflicts.get(conflict_id)
         if conflict is None:
             return {'name': 'cat_institution_mediation_denied', 'reason': 'unknown_conflict', 'mediated': False}
-        if 'mediator' not in mediator.group_roles['active']:
+        if 'mediator' not in mediator.group_roles.active:
             return {'name': 'cat_institution_mediation_denied', 'reason': 'cat_not_mediator', 'mediated': False}
         influence = float(mediator.group.influence)
         reduction = min(0.5, 0.15 + influence * 0.3)

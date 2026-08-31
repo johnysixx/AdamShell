@@ -9,7 +9,7 @@ class CatCulturalAdoptionSystem:
     def evaluate_tradition(self, cat, group_id, tradition_name):
         self._require_cat(cat)
         group = self.group_system._group(group_id)
-        tradition = group.culture['traditions'].get(tradition_name)
+        tradition = group.culture.traditions.get(tradition_name)
         if tradition is None:
             return {'tradition': tradition_name, 'known': False, 'adopt': False}
         traits = cat.personality.get('traits', {})
@@ -26,13 +26,13 @@ class CatCulturalAdoptionSystem:
         evaluation = self.evaluate_tradition(cat, group_id, tradition_name)
         if not evaluation['known']:
             return {'name': 'cat_cultural_exposure_denied', 'reason': 'unknown_tradition', 'adopted': False}
-        cat.culture['exposures'] += 1
+        cat.culture.exposures += 1
         if evaluation['adopt']:
-            cat.culture['adopted_traditions'][tradition_name] = {'group_id': group_id, 'score': evaluation['score'], 'category': evaluation['category']}
-            cat.culture['rejected_traditions'].pop(tradition_name, None)
+            cat.culture.adopted_traditions[tradition_name] = {'group_id': group_id, 'score': evaluation['score'], 'category': evaluation['category']}
+            cat.culture.rejected_traditions.pop(tradition_name, None)
             outcome = 'adopted'
         else:
-            cat.culture['rejected_traditions'][tradition_name] = {'group_id': group_id, 'score': evaluation['score'], 'category': evaluation['category']}
+            cat.culture.rejected_traditions[tradition_name] = {'group_id': group_id, 'score': evaluation['score'], 'category': evaluation['category']}
             outcome = 'rejected'
         event = {'name': 'cat_cultural_tradition_evaluated', 'cat': cat.name, 'group_id': group_id, 'tradition': tradition_name, 'score': evaluation['score'], 'outcome': outcome, 'adopted': outcome == 'adopted'}
         cat.social_interactions.append(deepcopy(event))
@@ -41,10 +41,10 @@ class CatCulturalAdoptionSystem:
     def adopt_preference(self, cat, group_id, preference_name):
         self._require_cat(cat)
         group = self.group_system._group(group_id)
-        preference = group.culture['preferences'].get(preference_name)
+        preference = group.culture.preferences.get(preference_name)
         if preference is None:
             return {'name': 'cat_cultural_preference_denied', 'reason': 'unknown_preference', 'adopted': False}
-        cat.culture['preferences'][preference_name] = deepcopy(preference)
+        cat.culture.preferences[preference_name] = deepcopy(preference)
         return {'name': 'cat_cultural_preference_adopted', 'cat': cat.name, 'preference': preference_name, 'value': preference.get('value'), 'adopted': True}
 
     def _require_cat(self, cat):

@@ -73,7 +73,7 @@ class CatMatingResolver:
             father = paternity['father']
             embryo_result = self.embryo_resolver.create_embryo(mother=female, father=father, rng=rng)
             embryo_results.append(embryo_result)
-            paternity_results.append({'embryo_id': embryo_result['embryo']['id'] if embryo_result['embryo'] is not None else embryo_result['event']['embryo_id'], 'father': father.name, 'selection': paternity['event']})
+            paternity_results.append({'embryo_id': embryo_result['embryo'].id if embryo_result['embryo'] is not None else embryo_result['event']['embryo_id'], 'father': father.name, 'selection': paternity['event']})
         viable_embryos = [result['embryo'] for result in embryo_results if result['viable']]
         nonviable_results = [result for result in embryo_results if not result['viable']]
         current_day = int(current_day)

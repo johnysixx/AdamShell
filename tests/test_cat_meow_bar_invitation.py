@@ -34,8 +34,8 @@ class CatMEOWBarInvitationTests(unittest.TestCase):
         self._make_right_human()
         invitations = CatMeowInvitationSystem(self.cats)
         offered = invitations.offer(self.cat, self.human)
-        self.assertTrue(offered['offered'])
-        result = invitations.interpret(offered['id'], self.human, understood=True)
+        self.assertTrue(offered.offered)
+        result = invitations.interpret(offered.id, self.human, understood=True)
         self.assertTrue(result['understood'])
         return (invitations, offered)
 
@@ -53,23 +53,23 @@ class CatMEOWBarInvitationTests(unittest.TestCase):
         self._make_right_human()
         invitations = CatMeowInvitationSystem(self.cats)
         result = invitations.offer(self.cat, self.human)
-        self.assertTrue(result['offered'])
-        self.assertEqual(result['sound'], 'MEOW')
-        self.assertEqual(result['meaning'], 'follow_me')
-        self.assertTrue(result['escort_required'])
+        self.assertTrue(result.offered)
+        self.assertEqual(result.sound, 'MEOW')
+        self.assertEqual(result.meaning, 'follow_me')
+        self.assertTrue(result.escort_required)
 
     def test_human_can_fail_to_understand_MEOW(self):
         self._make_right_human()
         invitations = CatMeowInvitationSystem(self.cats)
         offered = invitations.offer(self.cat, self.human)
-        result = invitations.interpret(offered['id'], self.human, understood=False)
+        result = invitations.interpret(offered.id, self.human, understood=False)
         self.assertFalse(result['understood'])
         self.assertEqual(result['name'], 'human_heard_only_meow')
 
     def test_human_who_understands_is_guided_by_cat_to_real_bar(self):
         invitations, offered = self._understood_invitation()
         guidance = CatBarGuidanceSystem(invitations, self.meeting_place)
-        result = guidance.guide(self.cat, self.human, offered['id'])
+        result = guidance.guide(self.cat, self.human, offered.id)
         self.assertTrue(result['guided'])
         self.assertIn(self.cat, self.meeting_place.entities)
         self.assertIn(self.human, self.meeting_place.entities)
@@ -81,8 +81,8 @@ class CatMEOWBarInvitationTests(unittest.TestCase):
     def test_MEOW_invitation_is_single_use(self):
         invitations, offered = self._understood_invitation()
         guidance = CatBarGuidanceSystem(invitations, self.meeting_place)
-        first = guidance.guide(self.cat, self.human, offered['id'])
-        second = guidance.guide(self.cat, self.human, offered['id'])
+        first = guidance.guide(self.cat, self.human, offered.id)
+        second = guidance.guide(self.cat, self.human, offered.id)
         self.assertTrue(first['guided'])
         self.assertFalse(second['guided'])
         self.assertEqual(second['reason'], 'invitation_already_used')
@@ -90,11 +90,11 @@ class CatMEOWBarInvitationTests(unittest.TestCase):
     def test_MEOW_is_not_permanent_bar_access(self):
         invitations, offered = self._understood_invitation()
         guidance = CatBarGuidanceSystem(invitations, self.meeting_place)
-        result = guidance.guide(self.cat, self.human, offered['id'])
+        result = guidance.guide(self.cat, self.human, offered.id)
         self.assertTrue(result['guided'])
         guest = self.meeting_place.cat_invited_guests[self.human.name]
-        self.assertFalse(guest["permanent_access"])
-        self.assertTrue(guest["cat_present"])
-        self.assertTrue(guest["entered_together"])
+        self.assertFalse(guest['permanent_access'])
+        self.assertTrue(guest['cat_present'])
+        self.assertTrue(guest['entered_together'])
 if __name__ == '__main__':
     unittest.main()

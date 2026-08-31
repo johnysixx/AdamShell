@@ -107,26 +107,18 @@ class CatGroupFederationKnowledgeTests(
         )
 
         record = (
-            self.groups.groups[
-                self.first_group
-            ][
-                "knowledge"
-            ][
+            self.groups.groups[self.first_group].knowledge[
                 "safe_back_room"
             ]
         )
 
         self.assertEqual(
-            record[
-                "origin_cat"
-            ],
+            record.origin_cat,
             self.first_cat.name
         )
 
         self.assertTrue(
-            record[
-                "verified"
-            ]
+            record.verified
         )
 
     def test_group_information_is_not_personal_verification(
@@ -176,15 +168,11 @@ class CatGroupFederationKnowledgeTests(
         )
 
         self.assertFalse(
-            received[
-                "verified"
-            ]
+            received.verified
         )
 
         self.assertEqual(
-            received[
-                "received_via"
-            ],
+            received.received_via,
             "own_group"
         )
 
@@ -209,26 +197,18 @@ class CatGroupFederationKnowledgeTests(
         )
 
         received = (
-            self.groups.groups[
-                self.second_group
-            ][
-                "knowledge"
-            ][
+            self.groups.groups[self.second_group].knowledge[
                 "safe_route"
             ]
         )
 
         self.assertLess(
-            received[
-                "confidence"
-            ],
+            received.confidence,
             1.0
         )
 
         self.assertFalse(
-            received[
-                "verified"
-            ]
+            received.verified
         )
 
     def test_verification_can_raise_confidence(
@@ -247,15 +227,9 @@ class CatGroupFederationKnowledgeTests(
         )
 
         before = (
-            self.groups.groups[
-                self.first_group
-            ][
-                "knowledge"
-            ][
+            self.groups.groups[self.first_group].knowledge[
                 "safe_route"
-            ][
-                "confidence"
-            ]
+            ].confidence
         )
 
         self.knowledge.verify(
@@ -266,15 +240,9 @@ class CatGroupFederationKnowledgeTests(
         )
 
         after = (
-            self.groups.groups[
-                self.first_group
-            ][
-                "knowledge"
-            ][
+            self.groups.groups[self.first_group].knowledge[
                 "safe_route"
-            ][
-                "confidence"
-            ]
+            ].confidence
         )
 
         self.assertGreater(
@@ -304,19 +272,13 @@ class CatGroupFederationKnowledgeTests(
         )
 
         record = (
-            self.groups.groups[
-                self.first_group
-            ][
-                "knowledge"
-            ][
+            self.groups.groups[self.first_group].knowledge[
                 "box_warning"
             ]
         )
 
         self.assertLess(
-            record[
-                "confidence"
-            ],
+            record.confidence,
             0.8
         )
 
@@ -400,11 +362,7 @@ class CatGroupFederationKnowledgeTests(
 
         self.assertIn(
             "cronenberg_scent",
-            self.groups.groups[
-                self.second_group
-            ][
-                "knowledge"
-            ]
+            self.groups.groups[self.second_group].knowledge
         )
 
     def test_ordinary_conflict_memory_can_decay(

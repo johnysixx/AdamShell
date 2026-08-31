@@ -23,7 +23,7 @@ class CatGroupTabooSystem:
         taboo.violations += 1
         event = CatTabooViolation(**{'name': 'cat_group_taboo_violated', 'group_id': group_id, 'cat': cat.name, 'taboo_id': taboo_id, 'taboo_name': taboo.name, 'severity': taboo.severity, 'target': deepcopy(taboo.target), 'context': deepcopy(context), 'violated': True})
         group.norm_violations.append(deepcopy(event))
-        cat.norms['violations'].append(deepcopy(event))
+        cat.norms.violations.append(deepcopy(event))
         return event
 
     def _clamp(self, value):

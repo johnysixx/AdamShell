@@ -27,7 +27,7 @@ class QuantumBoxCatProfileTests(unittest.TestCase):
     def test_ordinary_manifested_cat_is_not_changed(self):
         result = self.universe.manifest_cat(name='ordinary_cat', source='test')
         cat = result['cat']
-        self.assertNotIn('quantum_box_origin', cat)
+        self.assertFalse(hasattr(cat, 'quantum_box_origin'))
         self.assertNotIn('juvenile_quantum_cat', cat.special_traits)
 if __name__ == '__main__':
     unittest.main()

@@ -201,10 +201,10 @@ class MeetingPlace:
             return {'name': 'cat_invited_human_entry_denied', 'human': human_name, 'cat': cat_name, 'reason': 'bar_entry_banned', 'entered': False}
         if cat is None:
             return {'name': 'cat_invited_human_entry_denied', 'human': human_name, 'cat': None, 'reason': 'inviting_cat_not_present', 'entered': False}
-        suspended_until = int(cat.meow_invitations.get('suspended_until_tick', 0))
+        suspended_until = int(getattr(cat.meow_invitations, 'suspended_until_tick', 0))
         if self.tick_count < suspended_until:
             return {'name': 'cat_invited_human_entry_denied', 'human': human_name, 'cat': cat_name, 'reason': 'cat_MEOW_cooldown', 'entered': False}
-        if cat.meow_invitations.get('garfield_training_required', False):
+        if getattr(cat.meow_invitations, 'garfield_training_required', False):
             return {'name': 'cat_invited_human_entry_denied', 'human': human_name, 'cat': cat_name, 'reason': 'garfield_training_required', 'entered': False}
         register = getattr(self.bouncer, 'register_meow_invitation_system', None)
         if callable(register):
@@ -247,7 +247,7 @@ class MeetingPlace:
         from cats.cat_guest_responsibility_system import CatGuestResponsibilitySystem
         responsibility = CatGuestResponsibilitySystem(self)
         event = responsibility.handle_incident(human=human, cat=inviting_cat, invitation_id=guest_record.get('invitation_id'), category=category, description=description, cooldown_ticks=cooldown_ticks)
-        event['cat_responsibility'] = True
+        event.cat_responsibility = True
         self.cat_guest_incidents.append(event)
         self.emit_event(event)
         return event

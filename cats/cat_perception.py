@@ -87,8 +87,8 @@ class CatPerception:
         observations = {'cat': cat.name, 'position': deepcopy(position), 'vision_radius': radius, 'bar_known': bar_observation['known'], 'bar_visible': bar_observation['visible'], 'bar_distance': bar_observation['distance'], 'nearby_cats': [item['name'] for item in nearby_cats], 'nearby_cat_details': nearby_cats, 'visible_cronenbergs': [item['id'] for item in visible_cronenbergs], 'visible_cronenberg_details': visible_cronenbergs, 'huntable_cronenbergs': [item['id'] for item in huntable_cronenbergs], 'huntable_cronenberg_details': huntable_cronenbergs, 'cronenberg_danger': danger, 'visible_boxes': [item['id'] for item in visible_boxes], 'visible_box_details': visible_boxes, 'unexplored_boxes': [item['id'] for item in unexplored_boxes], 'occupied_transfer_boxes': [item['id'] for item in occupied_transfer_boxes], 'occupied_transfer_box_details': occupied_transfer_boxes, 'interesting_unknown': bool(unexplored_boxes), 'quantum_counterpart_observation': deepcopy(counterpart_observation), 'current_layer': current_layer, 'available_cat_energy': available_cat_energy, 'can_create_exploration_pair': can_create_exploration_pair, 'exploration_pair_energy_cost': exploration_pair_energy_cost, 'exploration_destination_layer': exploration_destination_layer, 'exploration_destination_position': exploration_destination_position, 'exploration_plan': deepcopy(exploration_plan), 'shareable_legend_count': shareable_legend_count, 'olfaction': deepcopy(olfaction), 'scent_memories': deepcopy(scent_memories), 'scent_transfer_candidates': deepcopy(scent_transfer_candidates), 'smelled_entities': [item['entity_id'] for item in olfaction['detected_aromas']], 'ozone_detected': olfaction['ozone_detected'], 'cronenberg_scent_recognized': cronenberg_scent_recognized, 'smelled_cronenbergs': deepcopy(smelled_cronenbergs), 'observed': True}
         event = {'name': 'cat_environment_observed', 'cat': cat.name, 'observations': deepcopy(observations), 'observed': True}
         mind = cat.mind
-        mind['last_observations'] = deepcopy(observations)
-        mind.setdefault('observation_history', []).append(deepcopy(event))
+        mind.last_observations = deepcopy(observations)
+        getattr(mind, 'observation_history', []).append(deepcopy(event))
         self._record(event)
         return observations
 
@@ -97,13 +97,13 @@ class CatPerception:
         for candidate in self.cats_layer.cats:
             if candidate is cat:
                 continue
-            candidate_position = candidate.get('position')
+            candidate_position = candidate.position
             if candidate_position is None:
                 continue
             distance = self._distance(position, candidate_position)
             if distance > radius:
                 continue
-            observed.append({'name': candidate.get('name'), 'distance': distance, 'position': deepcopy(candidate_position)})
+            observed.append({'name': candidate.name, 'distance': distance, 'position': deepcopy(candidate_position)})
         observed.sort(key=lambda item: item['distance'])
         return observed
 

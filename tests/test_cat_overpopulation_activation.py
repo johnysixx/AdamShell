@@ -43,15 +43,9 @@ class CatOverpopulationActivationTests(
             "hunt_nearest_cronenberg"
         )
 
-        self.assertNotIn(
-            "intent",
-            cat
-        )
+        self.assertFalse(hasattr(cat, 'intent'))
 
-        self.assertNotIn(
-            "travel_via",
-            cat
-        )
+        self.assertFalse(hasattr(cat, 'travel_via'))
 
         self.assertTrue(
             result["cat_access_unchanged"]
@@ -192,15 +186,9 @@ class CatOverpopulationActivationTests(
             result["declined"]
         )
 
-        self.assertNotIn(
-            "intent",
-            cat
-        )
+        self.assertFalse(hasattr(cat, 'intent'))
 
-        self.assertNotIn(
-            "active_route_id",
-            cat
-        )
+        self.assertFalse(hasattr(cat, 'active_route_id'))
 
         self.assertFalse(
             result["route"].observation_active
@@ -247,15 +235,9 @@ class CatOverpopulationActivationTests(
             "return_to_bar"
         )
 
-        self.assertNotIn(
-            "intent",
-            cat
-        )
+        self.assertFalse(hasattr(cat, 'intent'))
 
-        self.assertNotIn(
-            "travel_via",
-            cat
-        )
+        self.assertFalse(hasattr(cat, 'travel_via'))
 
         self.assertEqual(
             cat.hunt_quota,

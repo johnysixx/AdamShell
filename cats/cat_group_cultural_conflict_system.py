@@ -8,12 +8,12 @@ class CatGroupCulturalConflictSystem:
     def compare(self, first_group_id, second_group_id):
         first = self.group_system._group(first_group_id)
         second = self.group_system._group(second_group_id)
-        first_culture = first['culture']
-        second_culture = second['culture']
+        first_culture = first.culture
+        second_culture = second.culture
         conflicts = []
         agreements = []
-        first_preferences = first_culture['preferences']
-        second_preferences = second_culture['preferences']
+        first_preferences = first_culture.preferences
+        second_preferences = second_culture.preferences
         shared_preferences = set(first_preferences).intersection(second_preferences)
         for name in shared_preferences:
             first_value = first_preferences[name].get('value')
@@ -22,8 +22,8 @@ class CatGroupCulturalConflictSystem:
                 agreements.append(name)
             else:
                 conflicts.append({'type': 'preference', 'name': name, 'first': first_value, 'second': second_value})
-        first_traits = first_culture['traits']
-        second_traits = second_culture['traits']
+        first_traits = first_culture.traits
+        second_traits = second_culture.traits
         trait_keys = set(first_traits).union(second_traits)
         trait_distance = 0.0
         for key in trait_keys:
@@ -54,8 +54,8 @@ class CatGroupCulturalConflictSystem:
             if diplomacy is not None:
                 diplomacy['score'] = max(-1.0, min(1.0, self._number(diplomacy.get('score', 0.0)) + diplomacy_delta))
         event = {'name': 'cat_group_cultural_interaction', **result, 'diplomacy_delta': diplomacy_delta}
-        first['history'].append(deepcopy(event))
-        second['history'].append(deepcopy(event))
+        first.history.append(deepcopy(event))
+        second.history.append(deepcopy(event))
         return event
 
     def _number(self, value):

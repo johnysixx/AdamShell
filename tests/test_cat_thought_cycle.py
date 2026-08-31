@@ -29,7 +29,7 @@ class CatThoughtCycleTests(unittest.TestCase):
         self.assertEqual(result['execution']['box_id'], box.id)
 
     def test_missing_position_stops_cycle(self):
-        self.cat.pop('position')
+        delattr(self.cat, 'position')
         result = self.cats.think_and_act(cat=self.cat)
         self.assertFalse(result['completed'])
         self.assertEqual(result['observation']['reason'], 'cat_has_no_position')
@@ -51,7 +51,7 @@ class CatThoughtCycleTests(unittest.TestCase):
         self.assertTrue(first_cycle['completed'])
         self.assertEqual(first_cycle['decision']['intention'], 'sense_quantum_counterpart')
         self.assertTrue(first_cycle['execution']['executed'])
-        self.assertIn('current_quantum_counterpart_observation', self.cat)
+        self.assertTrue(hasattr(self.cat, 'current_quantum_counterpart_observation'))
         second_cycle = self.cats.think_and_act(cat=self.cat)
         self.assertTrue(second_cycle['completed'])
         self.assertEqual(second_cycle['decision']['intention'], 'travel_through_known_quantum_box')

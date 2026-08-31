@@ -33,11 +33,11 @@ class CatBarGuidanceSystem:
         else:
             return self._failed(cat, human, 'meeting_place_has_no_escorted_entry')
         self.invitation_system.mark_used(invitation_id)
-        cat.meow_invitations['understood'] += 1
-        cat.meow_invitations['guided_to_bar'] += 1
+        cat.meow_invitations.understood += 1
+        cat.meow_invitations.guided_to_bar += 1
         event = {'name': 'cat_guided_human_to_bar', 'cat': cat.name, 'human': self._name(human), 'invitation_id': invitation_id, 'access': temporary_access, 'admission_result': deepcopy(admission_result), 'guided': True, 'permanent_access': False}
         self.history.append(deepcopy(event))
-        cat.meow_invitations['history'].append(deepcopy(event))
+        cat.meow_invitations.history.append(deepcopy(event))
         return event
 
     def _failed(self, cat, human, reason):

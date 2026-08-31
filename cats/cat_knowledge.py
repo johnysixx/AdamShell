@@ -55,7 +55,7 @@ class CatKnowledge:
     def publish_legend(cls, universe, cat, place, claim_type='place_discovered'):
         legends = cls.ensure_universe_legends(universe)
         place_id = place['place_id']
-        legend = next((item for item in legends if item.get('place_id') == place_id and item.get('claim_type') == claim_type), None)
+        legend = next((item for item in legends if getattr(item, 'place_id', None) == place_id and getattr(item, 'claim_type', None) == claim_type), None)
         cat_name = cat.name
         if legend is None:
             legend = CatLegend(**{'legend_id': f'cat_legend_{len(legends) + 1:04d}', 'claim_type': claim_type, 'place_id': place_id, 'layer': place['layer'], 'position': deepcopy(place['position']), 'discoverer': cat_name, 'reported_by': [cat_name], 'verification_count': 1, 'confidence': min(1.0, float(place.get('confidence', 0.55))), 'safety': place.get('safety'), 'active': True})
@@ -262,7 +262,7 @@ class CatKnowledge:
             candidates.append(deepcopy(legend))
         if not candidates:
             return {'selected': False, 'reason': 'no_shareable_legend', 'storyteller': storyteller_name, 'listener': listener_name}
-        candidates.sort(key=lambda item: (float(item.get('confidence', 0.0)), int(item.get('verification_count', 0))), reverse=True)
+        candidates.sort(key=lambda item: (float(getattr(item, 'confidence', 0.0)), int(getattr(item, 'verification_count', 0))), reverse=True)
         return {'selected': True, 'legend': candidates[0], 'candidate_count': len(candidates), 'storyteller': storyteller_name, 'listener': listener_name}
 
     @classmethod

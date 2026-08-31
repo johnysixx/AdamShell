@@ -54,12 +54,12 @@ class KittenUpbringingResolverTests(
             origin="kitten_birth_resolver"
         )
 
-        self.kitten["parents"] = {
+        self.kitten.parents = {
             "mother": "mother",
             "father": "father"
         }
 
-        self.kitten["mother_name"] = "mother"
+        self.kitten.mother_name = "mother"
 
         self.development.initialize_newborn(
             self.kitten,
@@ -70,7 +70,7 @@ class KittenUpbringingResolverTests(
         self,
         age_days
     ):
-        self.kitten["age_days"] = age_days
+        self.kitten.age_days = age_days
 
         return self.resolver.tick_day(
             kitten=self.kitten,
@@ -111,9 +111,7 @@ class KittenUpbringingResolverTests(
         )
 
         self.assertFalse(
-            self.kitten[
-                "learning"
-            ][
+            self.kitten.learning[
                 "skills"
             ][
                 "socialization"
@@ -135,9 +133,7 @@ class KittenUpbringingResolverTests(
             event_names
         )
 
-        experience = self.kitten[
-            "upbringing"
-        ][
+        experience = self.kitten.upbringing[
             "cronenberg_experience"
         ]
 
@@ -171,9 +167,7 @@ class KittenUpbringingResolverTests(
             event_names
         )
 
-        socialization = self.kitten[
-            "learning"
-        ][
+        socialization = self.kitten.learning[
             "skills"
         ][
             "socialization"
@@ -187,9 +181,7 @@ class KittenUpbringingResolverTests(
     def test_day_eighteen_teaches_litter_box(self):
         self.run_at_age(18)
 
-        skill = self.kitten[
-            "learning"
-        ][
+        skill = self.kitten.learning[
             "skills"
         ][
             "litter_box"
@@ -207,9 +199,7 @@ class KittenUpbringingResolverTests(
     def test_day_nineteen_teaches_boxes(self):
         self.run_at_age(19)
 
-        skill = self.kitten[
-            "learning"
-        ][
+        skill = self.kitten.learning[
             "skills"
         ][
             "box_travel"
@@ -222,9 +212,7 @@ class KittenUpbringingResolverTests(
     def test_day_twenty_teaches_cat_doors(self):
         self.run_at_age(20)
 
-        skill = self.kitten[
-            "learning"
-        ][
+        skill = self.kitten.learning[
             "skills"
         ][
             "cat_door_travel"
@@ -279,9 +267,7 @@ class KittenUpbringingResolverTests(
             event_names
         )
 
-        experience = self.kitten[
-            "upbringing"
-        ][
+        experience = self.kitten.upbringing[
             "cronenberg_experience"
         ]
 
@@ -310,9 +296,7 @@ class KittenUpbringingResolverTests(
             "tracking_and_chasing"
         )
 
-        hunting = self.kitten[
-            "learning"
-        ][
+        hunting = self.kitten.learning[
             "skills"
         ][
             "hunting"
@@ -360,9 +344,7 @@ class KittenUpbringingResolverTests(
             event_names
         )
 
-        experience = self.kitten[
-            "upbringing"
-        ][
+        experience = self.kitten.upbringing[
             "cronenberg_experience"
         ]
 
@@ -371,9 +353,7 @@ class KittenUpbringingResolverTests(
             1
         )
 
-        hunting = self.kitten[
-            "learning"
-        ][
+        hunting = self.kitten.learning[
             "skills"
         ][
             "hunting"
@@ -433,9 +413,7 @@ class KittenUpbringingResolverTests(
         )
 
         self.assertEqual(
-            self.kitten[
-                "learning"
-            ][
+            self.kitten.learning[
                 "hunting_teacher_father"
             ],
             "father"
@@ -448,17 +426,13 @@ class KittenUpbringingResolverTests(
         for age in range(36, 40):
             self.run_at_age(age)
 
-        hunting = self.kitten[
-            "learning"
-        ][
+        hunting = self.kitten.learning[
             "skills"
         ][
             "hunting"
         ]
 
-        experience = self.kitten[
-            "upbringing"
-        ][
+        experience = self.kitten.upbringing[
             "cronenberg_experience"
         ]
 

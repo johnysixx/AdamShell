@@ -30,7 +30,7 @@ class CatScentSearchTests(unittest.TestCase):
     def test_search_is_physical_and_limited(self):
         candidates = CatMind.consider(cat=self.cat, observations=self.observations())
         intention = next((candidate for candidate in candidates if candidate['type'] == 'search_for_scent'))
-        self.cat.mind['current_intention'] = intention
+        self.cat.mind.current_intention = intention
         first = self.cats.execute_cat_intention(self.cat)
         self.assertEqual(first['name'], 'cat_searching_for_scent')
         self.assertEqual(self.cat.position, {'x': 3.0, 'y': 0.0, 'z': 0.0})
@@ -42,7 +42,7 @@ class CatScentSearchTests(unittest.TestCase):
         self.assertEqual(result['name'], 'cat_completed_scent_search_step')
         self.assertGreater(self.cat.position['x'], 3.0)
         self.assertEqual(self.cat.scent_search['attempts'], 1)
-        self.assertIsNone(self.cat.mind['current_intention'])
+        self.assertIsNone(self.cat.mind.current_intention)
 
     def test_search_stops_when_target_scent_is_reacquired(self):
         pazuzu = self.cats.create_cat(name='pazuzu', color='black', fur_length='short')
@@ -53,7 +53,7 @@ class CatScentSearchTests(unittest.TestCase):
         self.cats.learn_cat_aroma(observer=self.cat, observed_cat=pazuzu)
         candidates = CatMind.consider(cat=self.cat, observations=self.observations())
         intention = next((candidate for candidate in candidates if candidate['type'] == 'search_for_scent'))
-        self.cat.mind['current_intention'] = intention
+        self.cat.mind.current_intention = intention
         started = self.cats.execute_cat_intention(self.cat)
         self.assertEqual(started['name'], 'cat_searching_for_scent')
         reacquired = self.cats.execute_cat_intention(self.cat)
@@ -62,8 +62,8 @@ class CatScentSearchTests(unittest.TestCase):
         self.assertTrue(reacquired['search_interrupted'])
         self.assertFalse(self.cat.scent_search['active'])
         self.assertTrue(self.cat.scent_search['reacquired'])
-        self.assertIsNone(self.cat.mind['current_intention'])
-        self.assertNotIn('active_route_id', self.cat)
+        self.assertIsNone(self.cat.mind.current_intention)
+        self.assertFalse(hasattr(self.cat, 'active_route_id'))
         route = self.universe.quantum_space.find_cat_route(self.cat.name)
         self.assertIsNone(route)
         memories = self.cat.knowledge['known_scent_places']
@@ -79,7 +79,7 @@ class CatScentSearchTests(unittest.TestCase):
 
     def test_exhausted_search_returns_cat_to_normal_decision_candidates(self):
         self.cat.scent_search = {'active': False, 'identity': 'cat:pazuzu', 'layer': 'quantum_layer', 'attempts': 3, 'max_attempts': 3, 'arrived': True}
-        self.cat.mind['current_intention'] = None
+        self.cat.mind.current_intention = None
         candidates = CatMind.consider(cat=self.cat, observations=self.observations())
         self.assertTrue(candidates)
         types = {candidate['type'] for candidate in candidates}
@@ -88,6 +88,6 @@ class CatScentSearchTests(unittest.TestCase):
         decision = CatMind.decide(cat=self.cat, observations=self.observations(), quantum_roll=None)
         self.assertTrue(decision['selected'])
         self.assertNotEqual(decision['intention'], 'search_for_scent')
-        self.assertIsNotNone(self.cat.mind['current_intention'])
+        self.assertIsNotNone(self.cat.mind.current_intention)
 if __name__ == '__main__':
     unittest.main()

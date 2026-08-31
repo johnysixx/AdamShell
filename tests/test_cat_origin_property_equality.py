@@ -56,7 +56,7 @@ class CatOriginPropertyEqualityTests(
             ):
                 self.assertTrue(
                     required_properties
-                    .issubset(cat)
+                    .issubset(vars(cat))
                 )
 
                 self.assertEqual(
@@ -127,7 +127,7 @@ class CatOriginPropertyEqualityTests(
         )
 
         shared_property_names = [
-            set(cat.keys())
+            set(vars(cat).keys())
             - {"name", "origin"}
             for cat in self.cats
         ]

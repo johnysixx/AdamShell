@@ -34,7 +34,7 @@ class CatGroupNormSystem:
         violation = CatNormViolation(**{'name': 'cat_group_norm_violated', 'group_id': group_id, 'cat': cat.name, 'norm_id': norm_id, 'norm_name': norm.name, 'importance': norm.importance, 'context': deepcopy(context), 'violated': True})
         group.norm_violations.append(deepcopy(violation))
         group.history.append(deepcopy(violation))
-        cat.norms['violations'].append(deepcopy(violation))
+        cat.norms.violations.append(deepcopy(violation))
         return violation
 
     def _clamp(self, value):

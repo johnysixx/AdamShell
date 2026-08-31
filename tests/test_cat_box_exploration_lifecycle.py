@@ -19,7 +19,7 @@ class CatBoxExplorationLifecycleTests(unittest.TestCase):
     def test_cat_physically_explores_box(self):
         before = CatPerception(self.cats).observe(self.cat)
         self.assertIn(self.box.id, before['unexplored_boxes'])
-        self.cat.mind['current_intention'] = {'type': 'explore_box', 'target': self.box.id, 'score': 1.0, 'reasons': ['test']}
+        self.cat.mind.current_intention = {'type': 'explore_box', 'target': self.box.id, 'score': 1.0, 'reasons': ['test']}
         first = self.cats.execute_cat_intention(self.cat)
         self.assertEqual(first['name'], 'cat_approaching_box_to_explore')
         self.assertEqual(self.cat.position, {'x': 0.0, 'y': 0.0, 'z': 0.0})
@@ -32,7 +32,7 @@ class CatBoxExplorationLifecycleTests(unittest.TestCase):
         self.assertEqual(self.cat.position, self.box.position)
         self.assertTrue(self.cat.box_exploration['arrived'])
         self.assertTrue(self.cat.box_exploration['observed'])
-        self.assertIsNone(self.cat.mind['current_intention'])
+        self.assertIsNone(self.cat.mind.current_intention)
         after = CatPerception(self.cats).observe(self.cat)
         self.assertNotIn(self.box.id, after['unexplored_boxes'])
 if __name__ == '__main__':

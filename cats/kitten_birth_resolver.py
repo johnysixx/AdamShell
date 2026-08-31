@@ -76,7 +76,7 @@ class KittenBirthResolver:
         reproduction.setdefault('litters', []).append(litter)
         self.history.append(litter)
         self.universe.quantum_events.append(litter)
-        return {**litter, 'kittens': kittens}
+        return {**litter.to_dict(), 'kittens': kittens}
 
     def _next_kitten_name(self):
         cats_layer = getattr(self.universe, 'cats_layer', None)

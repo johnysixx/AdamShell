@@ -15,10 +15,10 @@ class CatMeowInvitationSystem:
         if not isinstance(cat, Cat):
             raise TypeError('MEOW can only be offered by Cat.')
         current_tick = self._current_bar_tick()
-        suspended_until = int(cat.meow_invitations.get('suspended_until_tick', 0))
+        suspended_until = int(getattr(cat.meow_invitations, 'suspended_until_tick', 0))
         if current_tick < suspended_until:
             return {'name': 'cat_MEOW_not_offered', 'cat': cat.name, 'human': self._name(human), 'reason': 'cat_MEOW_cooldown', 'current_tick': current_tick, 'suspended_until_tick': suspended_until, 'offered': False}
-        if cat.meow_invitations.get('garfield_training_required', False):
+        if getattr(cat.meow_invitations, 'garfield_training_required', False):
             return {'name': 'cat_MEOW_not_offered', 'cat': cat.name, 'human': self._name(human), 'reason': 'garfield_training_required', 'offered': False}
         evaluation = self.bonds.evaluate(cat, human)
         if not evaluation['right_human']:
@@ -26,8 +26,8 @@ class CatMeowInvitationSystem:
         invitation_id = 'MEOW_' + uuid4().hex[:8]
         invitation = CatMeowInvitation(**{'id': invitation_id, 'name': 'cat_MEOW_invitation', 'cat': cat.name, 'human': self._name(human), 'escort_required': True, 'sound': 'MEOW', 'meaning': 'follow_me', 'offered': True, 'understood': None, 'accepted': False, 'used': False})
         self.invitations[invitation_id] = invitation
-        cat.meow_invitations['offered'] += 1
-        cat.meow_invitations['history'].append(deepcopy(invitation))
+        cat.meow_invitations.offered += 1
+        cat.meow_invitations.history.append(deepcopy(invitation))
         return deepcopy(invitation)
 
     def interpret(self, invitation_id, human, understood):

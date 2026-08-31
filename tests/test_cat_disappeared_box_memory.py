@@ -19,7 +19,7 @@ class CatDisappearedBoxMemoryTests(unittest.TestCase):
 
     def test_disappeared_box_memory_is_not_current_box_target(self):
         box_id = self.box.id
-        self.cat.mind['current_intention'] = {'type': 'explore_box', 'target': box_id, 'score': 1.0, 'reasons': ['test']}
+        self.cat.mind.current_intention = {'type': 'explore_box', 'target': box_id, 'score': 1.0, 'reasons': ['test']}
         result = self.cats.execute_cat_intention(self.cat)
         for _ in range(10):
             if result['name'] == 'cat_explored_quantum_box':

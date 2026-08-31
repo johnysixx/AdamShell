@@ -14,9 +14,9 @@ class CatMemeticSelectionSystem:
         rejected = []
         for cat in self.group_system._member_objects(group, cats):
             score = self._myth_score(cat, myth)
-            cat.culture['exposures'] += 1
+            cat.culture.exposures += 1
             if score >= 0.45:
-                cat.culture['myths'][myth_id] = {'score': score, 'group_id': group_id}
+                cat.culture.myths[myth_id] = {'score': score, 'group_id': group_id}
                 adopted.append(cat.name)
             else:
                 rejected.append(cat.name)
@@ -40,7 +40,7 @@ class CatMemeticSelectionSystem:
             verified_bonus = 0.15 if getattr(innovation, 'verified', False) else 0.0
             score = intellect * 0.35 + curiosity * 0.25 + confidence * 0.3 + verified_bonus + 0.1
             if score >= 0.5:
-                cat.culture['innovations'][innovation_id] = {'score': round(score, 4), 'group_id': group_id}
+                cat.culture.innovations[innovation_id] = {'score': round(score, 4), 'group_id': group_id}
                 adopted.append(cat.name)
             else:
                 rejected.append(cat.name)

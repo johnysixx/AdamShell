@@ -20,7 +20,7 @@ class CatGroupInstitutionSystem:
         if institution is None:
             return {'name': 'cat_group_institution_maintenance_denied', 'reason': 'unknown_institution', 'maintained': False}
         roles_present = all((bool(group.roles.get(role)) for role in institution.roles))
-        rituals_present = all((ritual in group.rituals and group.rituals[ritual]['performances'] > 0 for ritual in institution.rituals))
+        rituals_present = all((ritual in group.rituals and group.rituals[ritual].performances > 0 for ritual in institution.rituals))
         if roles_present and rituals_present:
             institution.continuity = min(1.0, float(institution.continuity) + 0.05)
             institution.generations += 1
@@ -36,11 +36,11 @@ class CatGroupInstitutionSystem:
         parent = self.group_system._group(parent_group_id)
         child = self.group_system._group(child_group_id)
         inherited = []
-        for name, institution in parent['institutions'].items():
+        for name, institution in parent.institutions.items():
             copied = deepcopy(institution)
-            copied['continuity'] = max(0.0, min(1.0, float(copied['continuity']) * retention))
-            copied['generations'] += 1
-            copied['inherited_from'] = parent_group_id
-            child['institutions'][name] = copied
+            copied.continuity = max(0.0, min(1.0, float(copied.continuity) * retention))
+            copied.generations += 1
+            copied.inherited_from = parent_group_id
+            child.institutions[name] = copied
             inherited.append(name)
         return {'name': 'cat_group_institutions_inherited', 'parent_group': parent_group_id, 'child_group': child_group_id, 'institutions': inherited}

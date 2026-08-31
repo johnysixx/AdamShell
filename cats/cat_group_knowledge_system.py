@@ -14,8 +14,8 @@ class CatGroupKnowledgeSystem:
         existing = group.knowledge.get(knowledge_id)
         record = CatGroupKnowledgeRecord(**{'knowledge_id': knowledge_id, 'category': category, 'content': deepcopy(content), 'origin_cat': cat.name, 'origin_group': group_id, 'source_type': source_type, 'confidence': confidence, 'verified': bool(verified), 'verification_count': 1 if verified else 0, 'contradiction_count': 0, 'transmission_path': [{'type': source_type, 'source': cat.name, 'group': group_id}]})
         if existing is not None:
-            record.verification_count += int(existing.get('verification_count', 0))
-            record.contradiction_count += int(existing.get('contradiction_count', 0))
+            record.verification_count += int(getattr(existing, 'verification_count', 0))
+            record.contradiction_count += int(getattr(existing, 'contradiction_count', 0))
         group.knowledge[knowledge_id] = record
         self._offer_to_member(cat, record, transmission='personal_experience')
         event = {'name': 'cat_group_knowledge_contributed', 'group_id': group_id, 'cat': cat.name, 'knowledge_id': knowledge_id, 'category': category, 'confidence': confidence, 'verified': bool(verified), 'contributed': True}
@@ -37,21 +37,21 @@ class CatGroupKnowledgeSystem:
     def transmit_between_groups(self, source_group_id, target_group_id, knowledge_id, transmission='allied_group'):
         source = self.group_system._group(source_group_id)
         target = self.group_system._group(target_group_id)
-        record = source['knowledge'].get(knowledge_id)
+        record = source.knowledge.get(knowledge_id)
         if record is None:
             return {'name': 'cat_group_knowledge_transmission_denied', 'reason': 'source_does_not_know', 'transmitted': False}
         copied = deepcopy(record)
-        copied['confidence'] = self._clamp(float(copied.get('confidence', 0.0)) * 0.88)
-        copied['verified'] = False
-        copied['transmission_path'].append({'type': transmission, 'source_group': source_group_id, 'target_group': target_group_id})
-        existing = target['knowledge'].get(knowledge_id)
+        copied.confidence = self._clamp(float(getattr(copied, 'confidence', 0.0)) * 0.88)
+        copied.verified = False
+        copied.transmission_path.append({'type': transmission, 'source_group': source_group_id, 'target_group': target_group_id})
+        existing = target.knowledge.get(knowledge_id)
         if existing is None:
-            target['knowledge'][knowledge_id] = copied
-        elif copied['confidence'] > float(existing.get('confidence', 0.0)):
-            target['knowledge'][knowledge_id] = copied
-        event = {'name': 'cat_group_knowledge_transmitted', 'source_group': source_group_id, 'target_group': target_group_id, 'knowledge_id': knowledge_id, 'confidence': copied['confidence'], 'transmission': transmission, 'transmitted': True}
-        source['history'].append(deepcopy(event))
-        target['history'].append(deepcopy(event))
+            target.knowledge[knowledge_id] = copied
+        elif copied.confidence > float(getattr(existing, 'confidence', 0.0)):
+            target.knowledge[knowledge_id] = copied
+        event = {'name': 'cat_group_knowledge_transmitted', 'source_group': source_group_id, 'target_group': target_group_id, 'knowledge_id': knowledge_id, 'confidence': copied.confidence, 'transmission': transmission, 'transmitted': True}
+        source.history.append(deepcopy(event))
+        target.history.append(deepcopy(event))
         return event
 
     def propagate_to_members(self, group_id, cats, knowledge_id):
@@ -84,9 +84,9 @@ class CatGroupKnowledgeSystem:
         member_knowledge = cat.knowledge.setdefault('group_received_knowledge', {})
         personal = member_knowledge.get(knowledge_id)
         if personal is not None:
-            personal['confidence'] = record.confidence
-            personal['verified'] = bool(confirmed)
-            personal['verified_by'] = cat.name
+            personal.confidence = record.confidence
+            personal.verified = bool(confirmed)
+            personal.verified_by = cat.name
         event = {'name': 'cat_group_knowledge_verified', 'group_id': group_id, 'cat': cat.name, 'knowledge_id': knowledge_id, 'outcome': outcome, 'confidence': record.confidence}
         group.history.append(deepcopy(event))
         return event
@@ -95,8 +95,8 @@ class CatGroupKnowledgeSystem:
         received = cat.knowledge.setdefault('group_received_knowledge', {})
         copy = deepcopy(record)
         if transmission != 'personal_experience':
-            copy['verified'] = False
-        copy['received_via'] = transmission
+            copy.verified = False
+        copy.received_via = transmission
         received[record.knowledge_id] = copy
         return copy
 

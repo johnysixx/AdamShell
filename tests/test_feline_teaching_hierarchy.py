@@ -14,7 +14,7 @@ class FelineTeachingHierarchyTests(unittest.TestCase):
         self.pazuzu = self.cats.create_cat(name='pazuzu', color='black', fur_length='short', origin='canonical_birth')
         self.foreign_cat = self.cats.create_cat(name='foreign_cat', color='gray', fur_length='short', origin='natural_birth')
         self.kitten = self.cats.create_cat(name='kitten', color='black', fur_length='short', origin='kitten_birth_resolver')
-        self.kitten['parents'] = {'mother': None, 'father': 'pazuzu'}
+        self.kitten.parents = {'mother': None, 'father': 'pazuzu'}
         self.resolver.register_garfield_teaching_abilities(self.garfield)
         self.resolver.register_pazuzu_door_method(self.pazuzu)
 
@@ -39,7 +39,7 @@ class FelineTeachingHierarchyTests(unittest.TestCase):
         self.teach_pazuzu_to_teach()
         result = self.resolver.teach_method(teacher=self.pazuzu, student=self.kitten, ability_name='teach_other_cats', method_name='garfield_teaching_method')
         self.assertTrue(result['learned'])
-        self.assertTrue(self.kitten['feline_wisdom']['abilities']['teach_other_cats']['learned'])
+        self.assertTrue(self.kitten.feline_wisdom['abilities']['teach_other_cats']['learned'])
 
     def test_forbidden_foreign_teacher_creation_makes_cronenberg(self):
         self.teach_pazuzu_to_teach()
@@ -49,7 +49,7 @@ class FelineTeachingHierarchyTests(unittest.TestCase):
         self.assertTrue(result['cronenberg_created'])
         self.assertEqual(self.universe.cronenberg_count, previous_count + 1)
         self.assertEqual(self.universe.cronenbergs[-1].id, result['cronenberg_id'])
-        self.assertNotIn('teach_other_cats', self.foreign_cat['feline_wisdom']['abilities'])
+        self.assertNotIn('teach_other_cats', self.foreign_cat.feline_wisdom['abilities'])
 
     def test_meta_teacher_can_create_foreign_teacher(self):
         self.teach_pazuzu_to_teach()

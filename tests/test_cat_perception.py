@@ -26,7 +26,7 @@ class CatPerceptionTests(unittest.TestCase):
         near = self.create_other_cat('near', {'x': 2.0, 'y': 0.0, 'z': 0.0})
         self.create_other_cat('far', {'x': 20.0, 'y': 0.0, 'z': 0.0})
         result = self.cats.observe_cat(self.cat)
-        self.assertIn(near['name'], result['nearby_cats'])
+        self.assertIn(near.name, result['nearby_cats'])
         self.assertNotIn('far', result['nearby_cats'])
 
     def test_cat_distinguishes_huntable_cronenberg(self):
@@ -53,7 +53,7 @@ class CatPerceptionTests(unittest.TestCase):
 
     def test_observation_is_stored_in_mind(self):
         result = self.cats.observe_cat(self.cat)
-        self.assertEqual(self.cat.mind['last_observations']['position'], result['position'])
-        self.assertEqual(len(self.cat.mind['observation_history']), 1)
+        self.assertEqual(self.cat.mind.last_observations['position'], result['position'])
+        self.assertEqual(len(self.cat.mind.observation_history), 1)
 if __name__ == '__main__':
     unittest.main()

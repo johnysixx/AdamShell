@@ -138,21 +138,11 @@ class CatGroupCulturalEvolutionTests(
 
         self.assertIn(
             "night_patrol",
-            self.groups.groups[
-                daughter
-            ][
-                "culture"
-            ][
-                "traditions"
-            ]
+            self.groups.groups[daughter].culture.traditions
         )
 
         self.assertEqual(
-            self.groups.groups[
-                daughter
-            ][
-                "cultural_parent_group"
-            ],
+            self.groups.groups[daughter].cultural_parent_group,
             self.parent
         )
 
@@ -260,29 +250,21 @@ class CatGroupCulturalEvolutionTests(
             ]
         )
 
-        child = self.groups.groups[
-            second
-        ][
-            "myths"
-        ][
+        child = self.groups.groups[second].myths[
             result[
                 "myth_id"
             ]
         ]
 
         self.assertEqual(
-            child[
-                "parent_version"
-            ],
+            child.parent_version,
             created[
                 "myth_id"
             ]
         )
 
         self.assertEqual(
-            child[
-                "generation"
-            ],
+            child.generation,
             1
         )
 
@@ -349,20 +331,14 @@ class CatGroupCulturalEvolutionTests(
             descendants
         )
 
-        record = self.groups.groups[
-            self.parent
-        ][
-            "innovations"
-        ][
+        record = self.groups.groups[self.parent].innovations[
             second[
                 "innovation_id"
             ]
         ]
 
         self.assertEqual(
-            record[
-                "generation"
-            ],
+            record.generation,
             1
         )
 

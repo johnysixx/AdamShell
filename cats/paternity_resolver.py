@@ -11,6 +11,6 @@ class MultipleSirePaternityResolver:
         father = rng.choice(weighted_fathers)
         father_name = father.name
         contact_count = sum((1 for contact in successful_contacts if contact['male_name'] == father_name))
-        event = {'name': 'kitten_father_selected', 'father': father_name, 'successful_contact_count': contact_count, 'total_successful_contacts': len(successful_contacts), 'weighted_candidate_names': [candidate['name'] for candidate in weighted_fathers]}
+        event = {'name': 'kitten_father_selected', 'father': father_name, 'successful_contact_count': contact_count, 'total_successful_contacts': len(successful_contacts), 'weighted_candidate_names': [candidate.name for candidate in weighted_fathers]}
         self.history.append(event)
         return {'father': father, 'event': event}

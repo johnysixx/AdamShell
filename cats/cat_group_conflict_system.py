@@ -58,30 +58,16 @@ class CatGroupConflictSystem:
             )
 
         shared_territories = set(
-            first.get(
-                "territories",
-                {}
-            )
+            first.territories
         ).intersection(
-            second.get(
-                "territories",
-                {}
-            )
+            second.territories
         )
 
         same_place = bool(
-            first.get(
-                "current_layer"
-            )
-            == second.get(
-                "current_layer"
-            )
-            and first.get(
-                "current_location"
-            )
-            == second.get(
-                "current_location"
-            )
+            first.current_layer
+            == second.current_layer
+            and first.current_location
+            == second.current_location
         )
 
         conflict_possible = bool(
@@ -154,13 +140,9 @@ class CatGroupConflictSystem:
             loser = first_group_id
             outcome = "second_group_prevailed"
 
-        first[
-            "conflict_count"
-        ] += 1
+        first.conflict_count += 1
 
-        second[
-            "conflict_count"
-        ] += 1
+        second.conflict_count += 1
 
         first_members = (
             self.group_system
@@ -215,17 +197,13 @@ class CatGroupConflictSystem:
             "conflict": True
         }
 
-        first[
-            "history"
-        ].append(
+        first.history.append(
             deepcopy(
                 event
             )
         )
 
-        second[
-            "history"
-        ].append(
+        second.history.append(
             deepcopy(
                 event
             )

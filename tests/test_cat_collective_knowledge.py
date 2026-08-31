@@ -26,7 +26,7 @@ class CatCollectiveKnowledgeTests(unittest.TestCase):
     def test_cat_can_publish_legend(self):
         place = CatKnowledge.remember_place(self.cat, 'quantum_layer', {'x': 5.0, 'y': 0.0, 'z': 0.0})
         legend = CatKnowledge.publish_legend(universe=self.universe, cat=self.cat, place=place)
-        self.assertEqual(legend['discoverer'], 'pazuzu')
+        self.assertEqual(legend.discoverer, 'pazuzu')
         self.assertEqual(len(self.universe.cat_legends), 1)
 
     def test_other_cat_confirms_existing_legend(self):
@@ -36,7 +36,7 @@ class CatCollectiveKnowledgeTests(unittest.TestCase):
         second_place = CatKnowledge.remember_place(other, 'quantum_layer', {'x': 5.0, 'y': 0.0, 'z': 0.0})
         legend = CatKnowledge.publish_legend(self.universe, other, second_place)
         self.assertEqual(len(self.universe.cat_legends), 1)
-        self.assertEqual(legend['verification_count'], 2)
-        self.assertIn('garfield', legend['reported_by'])
+        self.assertEqual(legend.verification_count, 2)
+        self.assertIn('garfield', legend.reported_by)
 if __name__ == '__main__':
     unittest.main()

@@ -167,11 +167,7 @@ class CatGroupDiplomacyTests(
 
         self.assertIn(
             self.second_group,
-            self.groups.groups[
-                self.first_group
-            ][
-                "alliances"
-            ]
+            self.groups.groups[self.first_group].alliances
         )
 
     def test_allied_groups_can_defend_together(

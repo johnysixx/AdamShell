@@ -65,17 +65,17 @@ class Bouncer(SocialMixin):
         invitation = self.meow_invitation_system.get(invitation_id)
         if invitation is None:
             return {'authorized': False, 'reason': 'unknown_MEOW_invitation'}
-        if invitation.get('human') != human_name:
+        if invitation.human != human_name:
             return {'authorized': False, 'reason': 'MEOW_wrong_human'}
-        if invitation.get('cat') != cat_name:
+        if invitation.cat != cat_name:
             return {'authorized': False, 'reason': 'MEOW_wrong_cat'}
         if claim.get('inviting_cat') != cat_name:
             return {'authorized': False, 'reason': 'MEOW_claim_cat_mismatch'}
-        if not invitation.get('understood', False):
+        if not invitation.understood:
             return {'authorized': False, 'reason': 'MEOW_not_understood'}
-        if invitation.get('used', False):
+        if invitation.used:
             return {'authorized': False, 'reason': 'MEOW_already_used'}
-        if invitation.get('escort_required', True) and escorting_cat is None:
+        if invitation.escort_required and escorting_cat is None:
             return {'authorized': False, 'reason': 'inviting_cat_not_present'}
         result = {'name': 'bouncer_allows_cat_invited_guest', 'authorized': True, 'human': human_name, 'inviting_cat': cat_name, 'invitation_id': invitation_id, 'guest_type': 'cat_invited_guest'}
         self.cat_invited_guest_history.append(dict(result))

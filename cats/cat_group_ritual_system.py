@@ -26,7 +26,7 @@ class CatGroupRitualSystem:
         ritual.strength = min(1.0, float(ritual.strength) + 0.1)
         ritual.last_participants = participant_names
         culture = group.culture
-        tradition = culture['traditions'].setdefault(ritual_name, {'name': ritual_name, 'category': 'ritual', 'occurrences': 0, 'strength': 0.0})
+        tradition = culture.traditions.setdefault(ritual_name, {'name': ritual_name, 'category': 'ritual', 'occurrences': 0, 'strength': 0.0})
         tradition['occurrences'] += 1
         tradition['strength'] = min(1.0, float(tradition['strength']) + 0.08)
         event = {'name': 'cat_group_ritual_performed', 'group_id': group_id, 'ritual': ritual_name, 'participants': participant_names, 'strength': ritual.strength, 'performed': True}

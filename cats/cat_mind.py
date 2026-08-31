@@ -8,7 +8,7 @@ class CatMind:
 
     @classmethod
     def create_state(cls):
-        return CatMindState(**{'current_intention': None, 'previous_intention': None, 'candidates': [], 'decision_count': 0, 'history': []})
+        return CatMindState(**{'current_intention': None, 'previous_intention': None, 'candidates': [], 'decision_count': 0, 'history': []}, observation_history=[])
 
     @classmethod
     def ensure_state(cls, cat):

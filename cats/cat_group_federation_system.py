@@ -17,7 +17,7 @@ class CatGroupFederationSystem:
         federation_id = 'cat_federation_' + uuid4().hex[:8]
         federation = CatFederation(**{'id': federation_id, 'name': name if name is not None else federation_id, 'founder_group': founder_group_id, 'groups': [founder_group_id], 'history': []})
         self.federations[federation_id] = federation
-        founder['federations'].append(federation_id)
+        founder.federations.append(federation_id)
         return {'name': 'cat_federation_created', 'federation_id': federation_id, 'founder_group': founder_group_id, 'created': True}
 
     def admit(self, federation_id, group_id):

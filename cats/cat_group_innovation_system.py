@@ -1,3 +1,4 @@
+from cats.cat_social_objects import CatGroupKnowledgeRecord
 from cats.cat_group_innovation_tree_system import CatGroupInnovationTreeSystem
 from copy import deepcopy
 from uuid import uuid4
@@ -19,13 +20,13 @@ class CatGroupInnovationSystem:
             if record is None:
                 return {'name': 'cat_group_innovation_denied', 'reason': 'missing_knowledge', 'missing': knowledge_id, 'created': False}
             sources.append(record)
-        confidence = sum((float(source.get('confidence', 0.0)) for source in sources)) / len(sources)
+        confidence = sum((float(getattr(source, 'confidence', 0.0)) for source in sources)) / len(sources)
         confidence *= 0.7
         innovation_id = 'cat_innovation_' + uuid4().hex[:8]
         innovation = CatGroupInnovation(**{'innovation_id': innovation_id, 'name': name, 'category': category, 'source_knowledge': knowledge_ids, 'procedure': deepcopy(procedure), 'origin_group': group_id, 'confidence': self._clamp(confidence), 'verified': False, 'successful_trials': 0, 'failed_trials': 0})
         group.innovations[innovation_id] = innovation
         CatGroupInnovationTreeSystem(self.group_system).register(group_id, innovation_id, parent_innovation_id=parent_innovation_id)
-        group.knowledge[innovation_id] = {'knowledge_id': innovation_id, 'category': category, 'content': deepcopy(procedure), 'origin_cat': None, 'origin_group': group_id, 'source_type': 'innovation', 'confidence': innovation.confidence, 'verified': False, 'verification_count': 0, 'contradiction_count': 0, 'transmission_path': [{'type': 'innovation', 'group': group_id}]}
+        group.knowledge[innovation_id] = CatGroupKnowledgeRecord(**{'knowledge_id': innovation_id, 'category': category, 'content': deepcopy(procedure), 'origin_cat': None, 'origin_group': group_id, 'source_type': 'innovation', 'confidence': innovation.confidence, 'verified': False, 'verification_count': 0, 'contradiction_count': 0, 'transmission_path': [{'type': 'innovation', 'group': group_id}]})
         event = {'name': 'cat_group_innovation_created', 'group_id': group_id, 'innovation_id': innovation_id, 'innovation_name': name, 'sources': knowledge_ids, 'confidence': innovation.confidence, 'created': True}
         group.history.append(deepcopy(event))
         return event
@@ -44,12 +45,12 @@ class CatGroupInnovationSystem:
         if innovation.successful_trials >= 2 and innovation.confidence >= 0.7:
             innovation.verified = True
         knowledge = group.knowledge[innovation_id]
-        knowledge['confidence'] = innovation.confidence
-        knowledge['verified'] = innovation.verified
+        knowledge.confidence = innovation.confidence
+        knowledge.verified = innovation.verified
         if success:
-            knowledge['verification_count'] += 1
+            knowledge.verification_count += 1
         else:
-            knowledge['contradiction_count'] += 1
+            knowledge.contradiction_count += 1
         return {'name': 'cat_group_innovation_trial', 'group_id': group_id, 'innovation_id': innovation_id, 'success': bool(success), 'confidence': innovation.confidence, 'verified': innovation.verified, 'tested': True}
 
     def _clamp(self, value):

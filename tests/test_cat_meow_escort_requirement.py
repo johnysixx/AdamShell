@@ -30,9 +30,9 @@ class CatMEOWEscortRequirementTests(unittest.TestCase):
             bonds.remember_interaction(self.cat, self.human, positive=True, significance=0.15)
         self.invitations = CatMeowInvitationSystem(self.cats)
         self.offered = self.invitations.offer(self.cat, self.human)
-        self.assertTrue(self.offered['offered'])
-        self.invitations.interpret(self.offered['id'], self.human, understood=True)
-        self.human.meow_bar_invitation = {'source': 'cat_MEOW_invitation', 'inviting_cat': self.cat.name, 'invitation_id': self.offered['id'], 'permanent': False}
+        self.assertTrue(self.offered.offered)
+        self.invitations.interpret(self.offered.id, self.human, understood=True)
+        self.human.meow_bar_invitation = {'source': 'cat_MEOW_invitation', 'inviting_cat': self.cat.name, 'invitation_id': self.offered.id, 'permanent': False}
         self.meeting.bouncer.register_meow_invitation_system(self.invitations)
 
     def test_valid_MEOW_without_cat_does_not_admit(self):
@@ -52,24 +52,24 @@ class CatMEOWEscortRequirementTests(unittest.TestCase):
 
     def test_guidance_brings_cat_and_human_together(self):
         guidance = CatBarGuidanceSystem(self.invitations, self.meeting)
-        result = guidance.guide(self.cat, self.human, self.offered['id'])
+        result = guidance.guide(self.cat, self.human, self.offered.id)
         self.assertTrue(result['guided'])
         self.assertIn(self.cat, self.meeting.entities)
         self.assertIn(self.human, self.meeting.entities)
         self.assertEqual(self.cat.current_layer, 'meeting_place')
         self.assertEqual(self.human.current_layer, 'meeting_place')
         guest = self.meeting.cat_invited_guests[self.human.name]
-        self.assertTrue(guest["cat_present"])
-        self.assertTrue(guest["entered_together"])
-        self.assertEqual(guest["inviting_cat"], self.cat.name)
+        self.assertTrue(guest['cat_present'])
+        self.assertTrue(guest['entered_together'])
+        self.assertEqual(guest['inviting_cat'], self.cat.name)
 
     def test_invitation_becomes_used_only_after_entry(self):
         guidance = CatBarGuidanceSystem(self.invitations, self.meeting)
-        before = self.invitations.get(self.offered['id'])
-        self.assertFalse(before['used'])
-        result = guidance.guide(self.cat, self.human, self.offered['id'])
+        before = self.invitations.get(self.offered.id)
+        self.assertFalse(before.used)
+        result = guidance.guide(self.cat, self.human, self.offered.id)
         self.assertTrue(result['guided'])
-        after = self.invitations.get(self.offered['id'])
-        self.assertTrue(after['used'])
+        after = self.invitations.get(self.offered.id)
+        self.assertTrue(after.used)
 if __name__ == '__main__':
     unittest.main()

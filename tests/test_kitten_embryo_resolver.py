@@ -67,17 +67,17 @@ class KittenEmbryoResolverTests(
         )
 
         self.assertEqual(
-            embryo["state"],
+            embryo.state,
             "gestating"
         )
 
         self.assertEqual(
-            embryo["genetic_status"],
+            embryo.genetic_status,
             "standard"
         )
 
         self.assertFalse(
-            embryo["rare"]
+            embryo.rare
         )
 
         self.assertIsNone(
@@ -116,21 +116,21 @@ class KittenEmbryoResolverTests(
         )
 
         self.assertEqual(
-            embryo["genetic_status"],
+            embryo.genetic_status,
             "rare_valid"
         )
 
         self.assertTrue(
-            embryo["rare"]
+            embryo.rare
         )
 
         self.assertEqual(
-            embryo["profile"]["sex"],
+            embryo.profile["sex"],
             "male"
         )
 
         self.assertEqual(
-            embryo["profile"]["color"],
+            embryo.profile["color"],
             "tortoiseshell"
         )
 
