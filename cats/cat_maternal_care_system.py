@@ -75,6 +75,363 @@ class CatMaternalCareSystem:
         self._record_state_only(mother=mother, kitten=kitten, event=sync_event)
         return sync_event
 
+    def provide_foster_care(
+        self,
+        foster_mother,
+        kitten,
+        age_days,
+        current_day=None
+    ):
+        self._require_cat(
+            foster_mother
+        )
+
+        self._require_cat(
+            kitten
+        )
+
+        received = (
+            kitten
+            .maternal_care_received
+        )
+
+        registered = (
+            getattr(
+                received,
+                "foster_mother",
+                None
+            )
+            == foster_mother.name
+            and kitten.name
+            in getattr(
+                foster_mother
+                .emergency_nursing,
+                "foster_kittens",
+                []
+            )
+            and bool(
+                getattr(
+                    foster_mother
+                    .emergency_nursing,
+                    "active",
+                    False
+                )
+            )
+        )
+
+        if not registered:
+            return {
+                "name":
+                    "foster_maternal_care_denied",
+                "foster_mother":
+                    foster_mother.name,
+                "kitten":
+                    kitten.name,
+                "reason":
+                    "foster_relationship_not_active",
+                "provided":
+                    False,
+            }
+
+        phase = self.care_phase(
+            age_days
+        )
+
+        actions = []
+
+        if (
+            phase
+            != "maternal_independence"
+        ):
+            actions.append(
+                "nursing"
+            )
+
+        actions.append(
+            "cleaning"
+        )
+
+        if (
+            phase
+            == "neonatal_maternal_care"
+        ):
+            actions.append(
+                "warming"
+            )
+
+        actions.append(
+            "protection"
+        )
+
+        if phase in {
+            "neonatal_maternal_care",
+            "complete_maternal_care"
+        }:
+            actions.append(
+                "retrieval"
+            )
+
+        event = {
+            "name":
+                "cat_foster_maternal_care",
+            "foster_mother":
+                foster_mother.name,
+            "kitten":
+                kitten.name,
+            "age_days":
+                int(age_days),
+            "day":
+                current_day,
+            "phase":
+                phase,
+            "actions":
+                list(actions),
+            "provided":
+                True,
+        }
+
+        self._record_foster(
+            foster_mother,
+            kitten,
+            event
+        )
+
+        return event
+
+    def record_foster_upbringing_care(
+        self,
+        foster_mother,
+        kitten,
+        events,
+        age_days,
+        current_day=None
+    ):
+        self._require_cat(
+            foster_mother
+        )
+
+        self._require_cat(
+            kitten
+        )
+
+        if (
+            getattr(
+                kitten
+                .maternal_care_received,
+                "foster_mother",
+                None
+            )
+            != foster_mother.name
+        ):
+            return {
+                "name":
+                    "foster_upbringing_sync_denied",
+                "foster_mother":
+                    foster_mother.name,
+                "kitten":
+                    kitten.name,
+                "synced":
+                    False,
+                "reason":
+                    "not_registered_foster_mother",
+            }
+
+        mapping = {
+            "fed_by_mother":
+                "nursing",
+            "cleaned_by_mother":
+                "cleaning",
+            "warmed_by_mother":
+                "warming",
+            "protected_by_mother":
+                "protection",
+        }
+
+        actions = []
+
+        for existing_event in events:
+
+            if not isinstance(
+                existing_event,
+                dict
+            ):
+                continue
+
+            action = mapping.get(
+                existing_event.get(
+                    "name"
+                )
+            )
+
+            if (
+                action is not None
+                and action not in actions
+            ):
+                actions.append(
+                    action
+                )
+
+        event = {
+            "name":
+                "foster_upbringing_care_synced",
+            "foster_mother":
+                foster_mother.name,
+            "kitten":
+                kitten.name,
+            "age_days":
+                int(age_days),
+            "day":
+                current_day,
+            "phase":
+                self.care_phase(
+                    age_days
+                ),
+            "actions":
+                actions,
+            "synced":
+                True,
+        }
+
+        self._record_foster(
+            foster_mother,
+            kitten,
+            event,
+            append_interactions=False
+        )
+
+        return event
+
+    def _record_foster(
+        self,
+        foster_mother,
+        kitten,
+        event,
+        append_interactions=True
+    ):
+        state = (
+            foster_mother
+            .maternal_care
+        )
+
+        kitten_state = (
+            state
+            .kittens
+            .setdefault(
+                kitten.name,
+                {
+                    "care_events": 0,
+                    "last_care_day": None,
+                    "last_phase": None,
+                }
+            )
+        )
+
+        state.active = (
+            event["phase"]
+            != "maternal_independence"
+        )
+
+        state.care_events += 1
+
+        kitten_state[
+            "care_events"
+        ] += 1
+
+        kitten_state[
+            "last_care_day"
+        ] = event["day"]
+
+        kitten_state[
+            "last_phase"
+        ] = event["phase"]
+
+        received = (
+            kitten
+            .maternal_care_received
+        )
+
+        received.foster_mother = (
+            foster_mother.name
+        )
+
+        received.care_events += 1
+        received.foster_care_events += 1
+
+        received.last_care_day = (
+            event["day"]
+        )
+
+        received.last_phase = (
+            event["phase"]
+        )
+
+        counters = {
+            "nursing":
+                "nursing_events",
+            "cleaning":
+                "cleaning_events",
+            "warming":
+                "warming_events",
+            "protection":
+                "protection_events",
+            "retrieval":
+                "retrieval_events",
+        }
+
+        for action in event[
+            "actions"
+        ]:
+
+            counter = counters.get(
+                action
+            )
+
+            if counter is not None:
+                setattr(
+                    received,
+                    counter,
+                    getattr(
+                        received,
+                        counter
+                    )
+                    + 1
+                )
+
+            if action == "nursing":
+
+                received.foster_nursing_events += 1
+
+                (
+                    foster_mother
+                    .emergency_nursing
+                    .milk_feedings
+                ) += 1
+
+                received.needs_milk = False
+
+        if append_interactions:
+
+            foster_mother.social_interactions.append(
+                deepcopy(event)
+            )
+
+            kitten.social_interactions.append(
+                deepcopy(event)
+            )
+
+        emit_event = getattr(
+            self.cats_layer,
+            "emit_event",
+            None
+        )
+
+        if callable(
+            emit_event
+        ):
+            emit_event(
+                deepcopy(event)
+            )
+
     def protect_from_threat(self, mother, kitten, threat, current_day=None):
         self._require_cat(mother)
         self._require_cat(kitten)

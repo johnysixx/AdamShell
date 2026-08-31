@@ -1,4 +1,4 @@
-from cats.cat_components import CatFamily, MaternalCare, MaternalCareReceived, SiblingPlay, SiblingRivalry, ParentalTeaching, FamilyBonding, CatGroupMembership, CatCulture, CatGroupRoles, CatMeowInvitations, CatNorms, CatNeeds
+from cats.cat_components import CatFamily, MaternalCare, MaternalCareReceived, SiblingPlay, SiblingRivalry, ParentalTeaching, FamilyBonding, CatGroupMembership, CatCulture, CatGroupRoles, CatMeowInvitations, CatNorms, CatNeeds, CatEmergencyNursing
 from core.entity.social_entity import SocialMixin
 
 class Cat(SocialMixin):
@@ -41,7 +41,11 @@ class Cat(SocialMixin):
         self.bonds = {}
         self.family = CatFamily(parents={'mother': None, 'father': None}, children=[], siblings=[], littermates=[], half_siblings=[])
         self.maternal_care = MaternalCare(active=False, kittens={}, care_events=0)
-        self.maternal_care_received = MaternalCareReceived(mother=None, care_events=0, nursing_events=0, cleaning_events=0, warming_events=0, protection_events=0, retrieval_events=0, last_care_day=None, last_phase=None)
+        self.maternal_care_received = MaternalCareReceived(mother=None, foster_mother=None, care_events=0, foster_care_events=0, nursing_events=0, foster_nursing_events=0, cleaning_events=0, warming_events=0, protection_events=0, retrieval_events=0, last_care_day=None, last_phase=None, needs_milk=False, needs_teaching=False, rescued_to_bar=False, garfield_advice_received=False)
+        self.emergency_nursing = CatEmergencyNursing.create_state(
+            name=name,
+            sex=sex
+        )
         self.sibling_play = SiblingPlay(play_events=0, partners={}, last_partner=None, last_play_day=None)
         self.sibling_rivalry = SiblingRivalry(events=0, rivals={}, last_rival=None, last_resource=None)
         self.parental_teaching = ParentalTeaching(lessons_received=0, teachers={}, skills={}, last_lesson=None, last_teacher=None)

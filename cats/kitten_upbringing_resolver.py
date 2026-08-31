@@ -76,8 +76,42 @@ class KittenUpbringingResolver:
         care = kitten.upbringing['care']
         care.update({'fed_today': True, 'cleaned_today': True, 'warmed_today': True, 'protected_today': True, 'mother_present': mother is not None})
         if mother is not None:
-            maternal_sync = CatMaternalCareSystem().record_upbringing_care(mother=mother, kitten=kitten, events=events, age_days=age_days, current_day=current_day)
-            events.append(maternal_sync)
+            care_system = CatMaternalCareSystem()
+
+            if (
+                getattr(
+                    kitten.maternal_care_received,
+                    "foster_mother",
+                    None
+                )
+                == mother.name
+            ):
+                maternal_sync = (
+                    care_system
+                    .record_foster_upbringing_care(
+                        foster_mother=mother,
+                        kitten=kitten,
+                        events=events,
+                        age_days=age_days,
+                        current_day=current_day
+                    )
+                )
+
+            else:
+                maternal_sync = (
+                    care_system
+                    .record_upbringing_care(
+                        mother=mother,
+                        kitten=kitten,
+                        events=events,
+                        age_days=age_days,
+                        current_day=current_day
+                    )
+                )
+
+            events.append(
+                maternal_sync
+            )
         return events
 
     def _provide_reduced_care(self, kitten, mother, age_days, current_day):
@@ -267,16 +301,87 @@ class KittenUpbringingResolver:
         kitten.upbringing['cronenberg_experience']['father_food_deliveries'] += 1
         return event
 
-    def _find_parent(self, kitten, cats, parent_role):
-        parents = getattr(kitten, 'parents', {})
-        parent_name = parents.get(parent_role)
-        if parent_name is None and parent_role == 'mother':
-            parent_name = getattr(kitten, 'learning', {}).get('teacher_mother')
-        if parent_name is None:
-            return None
-        for cat in cats:
-            if cat.name == parent_name:
-                return cat
+    def _find_parent(
+        self,
+        kitten,
+        cats,
+        parent_role
+    ):
+        parents = getattr(
+            kitten,
+            "parents",
+            {}
+        )
+
+        parent_name = parents.get(
+            parent_role
+        )
+
+        if parent_name is not None:
+
+            for cat in cats:
+
+                if (
+                    cat.name
+                    == parent_name
+                    and getattr(
+                        cat,
+                        "active",
+                        True
+                    )
+                ):
+                    return cat
+
+        if parent_role == "mother":
+
+            foster_name = getattr(
+                kitten
+                .maternal_care_received,
+                "foster_mother",
+                None
+            )
+
+            if foster_name is not None:
+
+                for cat in cats:
+
+                    if (
+                        cat.name
+                        == foster_name
+                        and getattr(
+                            cat,
+                            "active",
+                            True
+                        )
+                    ):
+                        return cat
+
+            teacher_name = (
+                getattr(
+                    kitten,
+                    "learning",
+                    {}
+                )
+                .get(
+                    "teacher_mother"
+                )
+            )
+
+            if teacher_name is not None:
+
+                for cat in cats:
+
+                    if (
+                        cat.name
+                        == teacher_name
+                        and getattr(
+                            cat,
+                            "active",
+                            True
+                        )
+                    ):
+                        return cat
+
         return None
 
     def _create_upbringing_state(self):

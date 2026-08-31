@@ -22,3 +22,47 @@ class GarfieldTrainingSystem:
         event = {'name': 'garfield_training_completed', 'cat': cat.name, 'instructor': 'Garfield', 'completed': True}
         cat.meow_invitations.history.append(deepcopy(event))
         return event
+
+
+    def advise_emergency_lactation(
+        self,
+        cat,
+        kittens
+    ):
+        state = cat.emergency_nursing
+
+        kitten_names = [
+            kitten.name
+            for kitten in kittens
+        ]
+
+        state.garfield_consultations += 1
+
+        event = {
+            "name":
+                "garfield_advised_emergency_lactation",
+            "instructor":
+                "Garfield",
+            "cat":
+                cat.name,
+            "kittens":
+                kitten_names,
+            "advice": [
+                "keep_the_kittens_warm",
+                "nurse_them_frequently",
+                "teach_them_as_they_grow",
+                "do_not_replace_their_biological_history",
+            ],
+            "advised":
+                True,
+        }
+
+        state.last_advice = deepcopy(
+            event
+        )
+
+        cat.social_interactions.append(
+            deepcopy(event)
+        )
+
+        return event
