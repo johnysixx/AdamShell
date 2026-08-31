@@ -18,10 +18,10 @@ class Day0GodReceivesLilithTests(unittest.TestCase):
     def test_tree_is_stripped_after_one_plus_six_lemons(self):
         self.scene.advance_to_lemon_restock_after_god_order()
         tree = self.scene.bar_yard.lemon_tree
-        self.assertEqual(tree['lemons'], 0)
-        self.assertFalse(tree['has_lemons'])
-        self.assertEqual(tree['state'], 'stripped')
-        self.assertEqual(tree['months_since_stripped'], 0)
+        self.assertEqual(tree.lemons, 0)
+        self.assertFalse(tree.has_lemons)
+        self.assertEqual(tree.state, 'stripped')
+        self.assertEqual(tree.months_since_stripped, 0)
 
     def test_bar_has_six_lemons_before_second_attempt(self):
         self.scene.advance_to_lemon_restock_after_god_order()

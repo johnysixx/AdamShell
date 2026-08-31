@@ -30,6 +30,15 @@ from .bar_menu_sign import BarMenuSign
 from cats.duplicate_consumption_energy import DuplicateConsumptionEnergy
 from cats.kitten_growth import KittenGrowth
 from universe.aroma_foundations import AromaFoundations
+from .bar_objects import (
+    CronenbergArea,
+    AmbientAroma,
+    EntropyTerminal,
+    MeetingPlaceAccess,
+    MeetingPlacePermissions,
+    MeetingPlaceState,
+    CatD20Box,
+)
 
 class MeetingPlace:
     BAR_HALF_YEAR_DAYS = 180
@@ -45,7 +54,7 @@ class MeetingPlace:
         self.regular_guests = set()
         self.back_room_black_box = BackRoomBlackBox()
         self.bar_clock = BarClock()
-        self.cronenberg_area = {'state': 'lemon_courtyard', 'location': 'behind_bar', 'tree': True, 'tree_type': 'lemon_tree', 'lemons_visible': True, 'bench': True}
+        self.cronenberg_area = CronenbergArea(state='lemon_courtyard', location='behind_bar', tree=True, tree_type='lemon_tree', lemons_visible=True, bench=True)
         self.cronenberg_lemonade_total = 0.0
         self.cronenberg_processing_count = 0
         self.cronenberg_processing_history = []
@@ -63,7 +72,7 @@ class MeetingPlace:
         self.new_drinks = {}
         self.bar_menu_sign = BarMenuSign(drink_menu=self.drink_menu, new_drinks=self.new_drinks)
         self.bar_counter.attach_menu_sign(self.bar_menu_sign)
-        self.ambient_aroma = {'dominant_source': 'raspberry_rum', 'profile': dict(self.raspberry_rum['aroma_profile'])}
+        self.ambient_aroma = AmbientAroma(dominant_source='raspberry_rum', profile=dict(self.raspberry_rum['aroma_profile']))
         self.fridge = BarFridge()
         self.energy_reservoir = BarEnergyReservoir()
         self.entropy_reservoir = BarEntropyReservoir()
@@ -79,7 +88,7 @@ class MeetingPlace:
         self.back_room = BackRoom(self.universe.universe_registry)
         self.total_entropy_served_today = 0
         self.total_entropy_served_ever = 0
-        self.entropy_terminal = {'name': 'entropy_terminal', 'type': 'bar_terminal', 'total_entropy_served_today': self.total_entropy_served_today, 'total_entropy_served_ever': self.total_entropy_served_ever}
+        self.entropy_terminal = EntropyTerminal(name='entropy_terminal', type='bar_terminal', total_entropy_served_today=self.total_entropy_served_today, total_entropy_served_ever=self.total_entropy_served_ever)
         self.how_to_mix_drinks = HowToMixDrinks()
         self.bartender = Bartender(self.bar_counter.hidden_story_book, mix_book=self.how_to_mix_drinks, on_cocktail_approved=self.add_approved_cocktail)
         self.refresh_bar_ingredients()
@@ -91,14 +100,14 @@ class MeetingPlace:
         self.bar_security_protocol.incident_book = self.bar_incident_book
         self.duplicate_consumption_energy = DuplicateConsumptionEnergy(universe)
         self.kitten_growth = KittenGrowth(universe)
-        self.access = {'from': ['eden', 'library', 'quantum_layer'], 'exit_to': ['library', 'quantum_layer'], 'root_universe': False}
-        self.permissions = {'god': 'enter', 'serpent': 'enter', 'pazuzu': 'enter', 'classical_probe_debug_entity': 'enter'}
-        self.state = {'type': 'meeting_layer', 'state': 'initialized', 'access': self.access, 'permissions': self.permissions, 'entities': self.entities, 'bar_counter': self.bar_counter.name, 'hidden_story_book': self.bar_counter.hidden_story_book.name, 'bar_cloth': self.bar_counter.bar_cloth, 'milk_bowl': self.bar_counter.milk_bowl, 'dice_vial': self.dice_vial.public_state, 'dice_box': self.dice_box.public_state, 'fridge': self.fridge.public_state, 'drink_menu': self.drink_menu, 'ambient_aroma': self.ambient_aroma, 'energy_reservoir': self.energy_reservoir.public_state, 'entropy_reservoir': self.entropy_reservoir.public_state, 'geometry_terminal': self.geometry_terminal.public_state, 'back_room': self.back_room.public_state, 'back_room_black_box': self.back_room_black_box.public_state, 'terminals': self.terminals.terminals, 'bouncer': self.bouncer.name, 'service_rules': 'bar_service_rules', 'entropy_terminal': self.entropy_terminal, 'bartender': self.bartender.name}
-        self.universe.world['meeting_place'] = self.state
+        self.access = MeetingPlaceAccess(from_layers=['eden', 'library', 'quantum_layer'], exit_to=['library', 'quantum_layer'], root_universe=False)
+        self.permissions = MeetingPlacePermissions(god='enter', serpent='enter', pazuzu='enter', classical_probe_debug_entity='enter')
+        self.state = MeetingPlaceState(type='meeting_layer', state='initialized', access=self.access, permissions=self.permissions, entities=self.entities, bar_counter=self.bar_counter.name, hidden_story_book=self.bar_counter.hidden_story_book.name, bar_cloth=self.bar_counter.bar_cloth, milk_bowl=self.bar_counter.milk_bowl, dice_vial=self.dice_vial.public_state, dice_box=self.dice_box.public_state, fridge=self.fridge.public_state, drink_menu=self.drink_menu, ambient_aroma=self.ambient_aroma, energy_reservoir=self.energy_reservoir.public_state, entropy_reservoir=self.entropy_reservoir.public_state, geometry_terminal=self.geometry_terminal.public_state, back_room=self.back_room.public_state, back_room_black_box=self.back_room_black_box.public_state, terminals=self.terminals.terminals, bouncer=self.bouncer.name, service_rules='bar_service_rules', entropy_terminal=self.entropy_terminal, bartender=self.bartender.name)
+        self.universe.world['meeting_place'] = self.state.to_dict()
         UniverseLogger.boot('MEETING PLACE INITIALIZED')
 
     def can_enter(self, entity_name):
-        return self.permissions.get(entity_name) == 'enter'
+        return self.permissions.allows(entity_name)
 
     def observe_lemon_courtyard(self, observer_role):
         staff_roles = {'bartender', 'bouncer', 'bar_staff'}
@@ -113,13 +122,13 @@ class MeetingPlace:
         return staff_view
 
     def create_cronenberg_pen_area(self):
-        self.cronenberg_area = {'state': 'lemon_courtyard_with_hidden_pen', 'location': 'behind_bar', 'tree': True, 'bench': True}
+        self.cronenberg_area = CronenbergArea(state='lemon_courtyard_with_hidden_pen', location='behind_bar', tree=True, tree_type='lemon_tree', lemons_visible=True, bench=True)
         UniverseLogger.event('A HIDDEN CRONENBERG PEN IS CREATED BEHIND THE LEMON COURTYARD')
 
     def restore_cronenberg_clearing(self):
         if hasattr(self, 'cronenberg_pen'):
             del self.cronenberg_pen
-        self.cronenberg_area = {'state': 'lemon_courtyard', 'location': 'behind_bar', 'tree': True, 'tree_type': 'lemon_tree', 'lemons_visible': True, 'bench': True}
+        self.cronenberg_area = CronenbergArea(state='lemon_courtyard', location='behind_bar', tree=True, tree_type='lemon_tree', lemons_visible=True, bench=True)
         UniverseLogger.event('HIDDEN CRONENBERG PEN DISAPPEARS; LEMON COURTYARD REMAINS UNCHANGED')
 
     def record_guest_visit(self, guest_name):
@@ -307,7 +316,7 @@ class MeetingPlace:
         growth_event = None
         if getattr(cat, 'type', None) == 'cat' and hasattr(cat, 'age_days') and (getattr(cat, 'developmental_stage', None) != 'adult'):
             growth_event = self.kitten_growth.feed_cat_milk(kitten=cat, day=self.tick_count, amount=1.0, source='bartender')
-        event = {'name': 'cat_drank_milk_at_bar', 'cat': cat_name, 'milk': 'milk', 'bowl': milk_bowl.get('name', 'milk_bowl'), 'growth': growth_event, 'served': True, 'tick': self.tick_count}
+        event = {'name': 'cat_drank_milk_at_bar', 'cat': cat_name, 'milk': 'milk', 'bowl': getattr(milk_bowl, 'name', 'milk_bowl'), 'growth': growth_event, 'served': True, 'tick': self.tick_count}
         self.emit_event(event)
         cat_distribution_system = getattr(self, 'cat_distribution_system', None)
         if cat_distribution_system is not None:
@@ -330,7 +339,7 @@ class MeetingPlace:
         self.universe.d20_registry.register(self.cat_d20_adapter)
         self.admit_cat(cat, bartender_available=True)
         cat_box = self.place_cat_d20_box(cat)
-        event = {'name': 'cat_d20_welcomed_at_bar', 'cat': cat.name, 'milk_served': self.bar_counter.milk_bowl.get('contains') == 'milk', 'box': cat_box['name'], 'box_location': cat_box['location'], 'cat_entered_box': True, 'tick': getattr(self.universe, 'universe_tick', 0)}
+        event = {'name': 'cat_d20_welcomed_at_bar', 'cat': cat.name, 'milk_served': self.bar_counter.milk_bowl.contains == 'milk', 'box': cat_box.name, 'box_location': cat_box.location, 'cat_entered_box': True, 'tick': getattr(self.universe, 'universe_tick', 0)}
         self.emit_event(event)
         UniverseLogger.event('CAT D20 ARRIVED AS A CAT, DRANK MILK, AND ENTERED HER OWN BOX ON THE BAR')
         return {'name': 'cat_d20_arrival_completed', 'cat': cat, 'entity': manifestation['entity'], 'box': cat_box, 'event': event, 'created': True}
@@ -345,20 +354,20 @@ class MeetingPlace:
         box = getattr(self, 'cat_d20_box', None)
         if box is None:
             return {'name': 'cat_d20_turn_failed', 'result': 'cat_d20_box_missing', 'cat': cat.name, 'turned': False}
-        if box.get('occupied_by') != cat.name:
+        if box.occupied_by != cat.name:
             return {'name': 'cat_d20_turn_failed', 'result': 'cat_d20_not_in_box', 'cat': cat.name, 'turned': False}
         rng = rng or random
         value = int(rng.randint(1, 20))
         cat_d20_state = cat.cat_d20
         previous_value = cat_d20_state.get('current_value')
         turn_count = int(cat_d20_state.get('turn_count', 0)) + 1
-        turn_event = {'name': 'cat_d20_turned_in_box', 'cat': cat.name, 'box': box['name'], 'previous_value': previous_value, 'value': value, 'turn_number': turn_count, 'turned_by': 'herself', 'was_thrown': False, 'visibility': 'secret_cat_event', 'tick': getattr(self.universe, 'universe_tick', 0), 'turned': True}
+        turn_event = {'name': 'cat_d20_turned_in_box', 'cat': cat.name, 'box': box.name, 'previous_value': previous_value, 'value': value, 'turn_number': turn_count, 'turned_by': 'herself', 'was_thrown': False, 'visibility': 'secret_cat_event', 'tick': getattr(self.universe, 'universe_tick', 0), 'turned': True}
         cat_d20_state['current_value'] = value
         cat_d20_state['turn_count'] = turn_count
         cat_d20_state.setdefault('turn_history', []).append(dict(turn_event))
         cat.state = 'turned_in_cat_d20_box'
-        box['last_cat_d20_value'] = value
-        box['turn_count'] = turn_count
+        box.last_cat_d20_value = value
+        box.turn_count = turn_count
         if not hasattr(self, 'cat_d20_secret_history'):
             self.cat_d20_secret_history = []
         self.cat_d20_secret_history.append(dict(turn_event))
@@ -477,10 +486,10 @@ class MeetingPlace:
             raise ValueError('This box is reserved for Cat D20.')
         existing_box = getattr(self, 'cat_d20_box', None)
         if existing_box is not None:
-            existing_box['occupied_by'] = cat.name
+            existing_box.occupied_by = cat.name
             cat.cat_d20_box = existing_box
             return existing_box
-        self.cat_d20_box = {'name': 'cat_d20_box', 'type': 'cat_box', 'location': 'on_bar_counter', 'state': 'occupied', 'material': 'wood', 'size': 'kitten_sized', 'purpose': 'safe_place_for_cat_d20_to_sleep_and_turn', 'occupied_by': cat.name, 'access': {'cats': True, 'bartender': 'may_place_and_clean', 'guests': 'look_but_do_not_touch'}, 'throwable': False}
+        self.cat_d20_box = CatD20Box(name='cat_d20_box', type='cat_box', location='on_bar_counter', state='occupied', material='wood', size='kitten_sized', purpose='safe_place_for_cat_d20_to_sleep_and_turn', occupied_by=cat.name, access={'cats': True, 'bartender': 'may_place_and_clean', 'guests': 'look_but_do_not_touch'}, throwable=False, last_cat_d20_value=None, turn_count=0)
         cat.cat_d20_box = self.cat_d20_box
         cat.state = 'resting_in_cat_d20_box'
         self.universe.world['meeting_place']['cat_d20_box'] = self.cat_d20_box
@@ -489,8 +498,8 @@ class MeetingPlace:
         return self.cat_d20_box
 
     def sync_entropy_terminal_to_world(self):
-        self.entropy_terminal['total_entropy_served_today'] = self.total_entropy_served_today
-        self.entropy_terminal['total_entropy_served_ever'] = self.total_entropy_served_ever
+        self.entropy_terminal.total_entropy_served_today = self.total_entropy_served_today
+        self.entropy_terminal.total_entropy_served_ever = self.total_entropy_served_ever
         self.universe.world['meeting_place']['entropy_terminal'] = self.entropy_terminal
 
     def sync_reservoirs_to_world(self):

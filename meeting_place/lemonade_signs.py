@@ -1,22 +1,23 @@
-﻿from universe.logger import UniverseLogger
+from universe.logger import UniverseLogger
+from .bar_objects import LemonadeSign
 
 
 class LemonadeSigns:
 
     def __init__(self):
-        self.outside_sign = {
-            "name": "outside_lemonade_sign",
-            "location": "outside_bar",
-            "text": "WE HAVE LEMONADE!",
-            "visible": False
-        }
+        self.outside_sign = LemonadeSign(
+            name="outside_lemonade_sign",
+            location="outside_bar",
+            text="WE HAVE LEMONADE!",
+            visible=False
+        )
 
-        self.inside_sign = {
-            "name": "inside_lemonade_sign",
-            "location": "inside_bar",
-            "text": "FREE LEMONADE",
-            "visible": False
-        }
+        self.inside_sign = LemonadeSign(
+            name="inside_lemonade_sign",
+            location="inside_bar",
+            text="FREE LEMONADE",
+            visible=False
+        )
 
     def sync_with_reservoir(
         self,
@@ -27,15 +28,15 @@ class LemonadeSigns:
         )
 
         changed = (
-            self.outside_sign["visible"]
+            self.outside_sign.visible
             != visible
         )
 
-        self.outside_sign["visible"] = (
+        self.outside_sign.visible = (
             visible
         )
 
-        self.inside_sign["visible"] = (
+        self.inside_sign.visible = (
             visible
         )
 
@@ -56,10 +57,6 @@ class LemonadeSigns:
     @property
     def public_state(self):
         return {
-            "outside_sign": dict(
-                self.outside_sign
-            ),
-            "inside_sign": dict(
-                self.inside_sign
-            )
+            "outside_sign": self.outside_sign.to_dict(),
+            "inside_sign": self.inside_sign.to_dict()
         }

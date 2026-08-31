@@ -1,4 +1,6 @@
-﻿class BarGeometryTerminal:
+from .bar_objects import GeometryStatusSign
+
+class BarGeometryTerminal:
 
     def __init__(self):
         self.name = "bar_geometry_terminal"
@@ -13,15 +15,13 @@
         self.detected_cat_id = None
         self.arrived_cat_id = None
 
-        self.status_sign = {
-            "name": "cat_arrival_status_sign",
-            "type": "illuminated_bar_wall_sign",
-            "location": (
-                "bar_wall_next_to_quantum_map"
-            ),
-            "cat_detected_light": False,
-            "cat_arrived_light": False
-        }
+        self.status_sign = GeometryStatusSign(
+            name="cat_arrival_status_sign",
+            type="illuminated_bar_wall_sign",
+            location="bar_wall_next_to_quantum_map",
+            cat_detected_light=False,
+            cat_arrived_light=False
+        )
 
         self.active_quantum_box_count = 0
         self.total_quantum_box_count = 0
@@ -131,13 +131,9 @@
         self.detected_cat_id = cat_id
         self.arrived_cat_id = None
 
-        self.status_sign[
-            "cat_detected_light"
-        ] = True
+        self.status_sign.cat_detected_light = True
 
-        self.status_sign[
-            "cat_arrived_light"
-        ] = False
+        self.status_sign.cat_arrived_light = False
 
     def cat_arrived(
         self,
@@ -146,13 +142,9 @@
         self.detected_cat_id = None
         self.arrived_cat_id = cat_id
 
-        self.status_sign[
-            "cat_detected_light"
-        ] = False
+        self.status_sign.cat_detected_light = False
 
-        self.status_sign[
-            "cat_arrived_light"
-        ] = True
+        self.status_sign.cat_arrived_light = True
 
     def display_text(self):
         return (
@@ -181,9 +173,7 @@
             "quantum_layer_map": (
                 self.quantum_layer_map
             ),
-            "status_sign": dict(
-                self.status_sign
-            ),
+            "status_sign": self.status_sign.to_dict(),
             "detected_cat_id": (
                 self.detected_cat_id
             ),

@@ -30,7 +30,7 @@ class QuantumBoxCatBarMeowTests(unittest.TestCase):
         names = [event['name'] for event in self.bar.bartender.cat_meow_history]
         self.assertIn('cat_meowed_at_bartender', names)
         self.assertIn('bartender_replied_meow', names)
-        self.assertEqual(self.bar.bar_counter.milk_bowl['contains'], 'milk')
+        self.assertEqual(self.bar.bar_counter.milk_bowl.contains, 'milk')
 
     def test_bar_milk_makes_quantum_kitten_grow(self):
         size_before = self.cat.size

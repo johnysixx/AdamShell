@@ -20,6 +20,7 @@ class BarStoryBook:
 
 from .red_button import RedButton
 from .cash_register import CashRegister
+from .bar_objects import BarCloth, MilkBowl
 
 
 class BarCounter:
@@ -33,12 +34,12 @@ class BarCounter:
 
         self.hidden_story_book = BarStoryBook()
 
-        self.bar_cloth = {
-            "name": "bar_cloth",
-            "type": "bar_tool",
-            "location": "under_bar_counter",
-            "visible_use": "wiping_bar"
-        }
+        self.bar_cloth = BarCloth(
+            name="bar_cloth",
+            type="bar_tool",
+            location="under_bar_counter",
+            visible_use="wiping_bar"
+        )
 
         UniverseLogger.boot("BAR CLOTH PLACED UNDER BAR COUNTER")
 
@@ -46,13 +47,14 @@ class BarCounter:
 
         self.cash_register = CashRegister()
 
-        self.milk_bowl = {
-            "name": "milk_bowl",
-            "type": "bar_serving_object",
-            "state": "empty",
-            "location": "under_bar_counter_next_to_bar_cloth",
-            "intended_use": "serving_milk_to_cats"
-        }
+        self.milk_bowl = MilkBowl(
+            name="milk_bowl",
+            type="bar_serving_object",
+            state="empty",
+            location="under_bar_counter_next_to_bar_cloth",
+            intended_use="serving_milk_to_cats",
+            contains=None
+        )
 
         UniverseLogger.boot("MILK BOWL PLACED UNDER BAR COUNTER NEXT TO BAR CLOTH")
 

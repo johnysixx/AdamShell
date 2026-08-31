@@ -243,7 +243,7 @@ class CatDoorIntegrationTests(
             self.meeting_place
             .back_room
             .world_door
-            .get("cat_door")
+            .cat_door
         )
 
         self.assertIsNotNone(
@@ -257,9 +257,7 @@ class CatDoorIntegrationTests(
 
         self.assertNotIn(
             "has_cat_door",
-            self.meeting_place
-            .back_room
-            .world_door
+            vars(self.meeting_place.back_room.world_door)
         )
 
 

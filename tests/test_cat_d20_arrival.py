@@ -23,9 +23,9 @@ class CatD20ArrivalTests(unittest.TestCase):
         self.assertFalse(cat.cat_d20["can_be_thrown"])
         self.assertTrue(bar.bartender.knows_guest(cat.name))
         self.assertIn(cat, bar.entities)
-        self.assertEqual(bar.bar_counter.milk_bowl['contains'], 'milk')
-        self.assertEqual(box['occupied_by'], cat.name)
-        self.assertEqual(box['location'], 'on_bar_counter')
+        self.assertEqual(bar.bar_counter.milk_bowl.contains, 'milk')
+        self.assertEqual(box.occupied_by, cat.name)
+        self.assertEqual(box.location, 'on_bar_counter')
         self.assertIs(universe.world['meeting_place']['cat_d20_box'], box)
 
     def test_second_welcome_does_not_create_duplicate(self):

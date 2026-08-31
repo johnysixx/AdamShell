@@ -1,5 +1,6 @@
 from .universe_manual import UniverseManual
 from .cronenberg_pen_terminal import CronenbergPenTerminal
+from .bar_objects import BackRoomAccess, WorldDoor, WorldWindow, WorldKeypad
 
 
 class BackRoom:
@@ -65,31 +66,31 @@ class BackRoom:
 
         self.cronenberg_pen_terminal = CronenbergPenTerminal()
 
-        self.access = {
-            "bartender": "main_door",
-            "cats": "cat_door"
-        }
+        self.access = BackRoomAccess(
+            bartender="main_door",
+            cats="cat_door"
+        )
 
-        self.world_door = {
-            "locked": True,
-            "current_world_id": None,
-            "cat_door": None
-        }
+        self.world_door = WorldDoor(
+            locked=True,
+            current_world_id=None,
+            cat_door=None
+        )
 
-        self.world_window = {
-            "visible_world_id": None
-        }
+        self.world_window = WorldWindow(
+            visible_world_id=None
+        )
 
-        self.world_keypad = {
-            "allowed_user": "bartender",
-            "entered_world_id": None
-        }
+        self.world_keypad = WorldKeypad(
+            allowed_user="bartender",
+            entered_world_id=None
+        )
 
     def attach_world_cat_door(
         self,
         cat_door
     ):
-        self.world_door["cat_door"] = (
+        self.world_door.cat_door = (
             cat_door
         )
 
@@ -99,11 +100,9 @@ class BackRoom:
         if observer_name != "bartender":
             return None
 
-        visible_world_id = self.world_door.get(
-            "current_world_id"
-        )
+        visible_world_id = self.world_door.current_world_id
 
-        self.world_window["visible_world_id"] = (
+        self.world_window.visible_world_id = (
             visible_world_id
         )
 
@@ -114,33 +113,25 @@ class BackRoom:
         return {
             "name": self.name,
             "type": self.type,
-            "access": self.access,
+            "access": self.access.to_dict(),
             "universe_manual": (
                 self.universe_manual.public_state
             ),
             "world_door": {
                 "locked": (
-                    self.world_door[
-                        "locked"
-                    ]
+                    self.world_door.locked
                 ),
                 "current_world_id": (
-                    self.world_door[
-                        "current_world_id"
-                    ]
+                    self.world_door.current_world_id
                 ),
                 "cat_door": (
-                    self.world_door[
-                        "cat_door"
-                    ].public_state
-                    if self.world_door[
-                        "cat_door"
-                    ] is not None
+                    self.world_door.cat_door.public_state
+                    if self.world_door.cat_door is not None
                     else None
                 )
             },
-            "world_window": self.world_window,
-            "world_keypad": self.world_keypad
+            "world_window": self.world_window.to_dict(),
+            "world_keypad": self.world_keypad.to_dict()
         }
 
 

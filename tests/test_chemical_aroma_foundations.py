@@ -81,9 +81,7 @@ class ChemicalAromaFoundationsTests(
         )
 
         self.assertEqual(
-            meeting.ambient_aroma[
-                "dominant_source"
-            ],
+            meeting.ambient_aroma.dominant_source,
             "raspberry_rum"
         )
 

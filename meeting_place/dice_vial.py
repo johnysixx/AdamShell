@@ -1,6 +1,7 @@
 import random
 
 from universe.logger import UniverseLogger
+from .bar_objects import DiceVialContainer, DiceVialMedium, DiceVialDie
 
 
 class DiceVial:
@@ -10,28 +11,28 @@ class DiceVial:
         self.type = "bar_artifact"
         self.location = "on_bar_counter"
 
-        self.container = {
-            "type": "glass_vial",
-            "state": "sealed"
-        }
+        self.container = DiceVialContainer(
+            type="glass_vial",
+            state="sealed"
+        )
 
-        self.medium = {
-            "type": "glowing_oily_liquid",
-            "state": "shimmering"
-        }
+        self.medium = DiceVialMedium(
+            type="glowing_oily_liquid",
+            state="shimmering"
+        )
 
-        self.dice = {
-            "type": "d20",
-            "state": "floating"
-        }
+        self.dice = DiceVialDie(
+            type="d20",
+            state="floating"
+        )
 
         self.public_state = {
             "name": self.name,
             "type": self.type,
             "location": self.location,
-            "container": self.container,
-            "medium": self.medium,
-            "dice": self.dice,
+            "container": self.container.to_dict(),
+            "medium": self.medium.to_dict(),
+            "dice": self.dice.to_dict(),
             "display_state": "displayed",
             "visibility_scope": "inside_bar_only"
         }

@@ -1,5 +1,6 @@
 from core.entity.social_entity import SocialMixin
 from universe.logger import UniverseLogger
+from .bar_objects import BarOrigin, BarShift
 
 class Bartender(SocialMixin):
 
@@ -11,7 +12,7 @@ class Bartender(SocialMixin):
         self.mix_book = mix_book
         self.on_cocktail_approved = on_cocktail_approved
         self.current_location = 'meeting_place'
-        self.origin = {'layer': 'meeting_place', 'event': 'bartender was born in the bar'}
+        self.origin = BarOrigin(layer='meeting_place', event='bartender was born in the bar')
         self.event_memory = []
         self.chronicle_memory = []
         self.regular_drinks = {}
@@ -45,9 +46,9 @@ class Bartender(SocialMixin):
 
     def begin_shift(self, bar_day=0, shift_start_tick=0):
         if getattr(self, 'shift_active', False):
-            return {'name': 'bartender_shift_already_active', 'bar_day': self.current_shift['bar_day'], 'shift_start_tick': self.current_shift['shift_start_tick']}
+            return {'name': 'bartender_shift_already_active', 'bar_day': self.current_shift.bar_day, 'shift_start_tick': self.current_shift.shift_start_tick}
         self.shift_active = True
-        self.current_shift = {'bar_day': bar_day, 'shift_start_tick': shift_start_tick, 'state': 'active'}
+        self.current_shift = BarShift(bar_day=bar_day, shift_start_tick=shift_start_tick, state='active')
         event = {'name': 'bartender_shift_started', 'bar_day': bar_day, 'shift_start_tick': shift_start_tick}
         self.observe_event(event)
         UniverseLogger.event('BARTENDER FIRST SHIFT STARTED')
@@ -223,6 +224,9 @@ class Bartender(SocialMixin):
         if isinstance(serving_object, dict):
             serving_object['state'] = 'filled'
             serving_object['contains'] = drink_name
+        else:
+            serving_object.state = 'filled'
+            serving_object.contains = drink_name
         event = f'{guest_name} was served {drink_name} in {serving_object_name}'
         self.observe_event(event)
         UniverseLogger.event(f'BARTENDER POURS DRINK: {drink_name} into {serving_object_name} for {guest_name}')
@@ -251,7 +255,7 @@ class Bartender(SocialMixin):
         return universe_manual.read(self)
 
     def enter_back_room(self, back_room):
-        access_route = back_room.access.get(self.name)
+        access_route = getattr(back_room.access, self.name, None)
         if access_route != 'main_door':
             return False
         self.current_location = back_room.name
@@ -307,6 +311,9 @@ class Bartender(SocialMixin):
         if isinstance(serving_object, dict):
             serving_object['state'] = 'filled'
             serving_object['contains'] = drink_name
+        else:
+            serving_object.state = 'filled'
+            serving_object.contains = drink_name
         event = f'{guest_name} was served {drink_name} in {serving_object_name}'
         self.observe_event(event)
         UniverseLogger.event(f'BARTENDER SERVES WITHOUT ORDER: {drink_name} into {serving_object_name} for {guest_name}')

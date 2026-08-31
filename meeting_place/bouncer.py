@@ -1,5 +1,6 @@
 from core.entity.social_entity import SocialMixin
 from universe.logger import UniverseLogger
+from .bar_objects import BarOrigin, BouncerPrincipleAttributes, CatEntryPolicy
 
 class Bouncer(SocialMixin):
 
@@ -7,13 +8,13 @@ class Bouncer(SocialMixin):
         self.name = 'bouncer'
         self.type = 'bar_guard'
         self.state = 'standing_outside_bar'
-        self.origin = {'layer': 'meeting_place', 'event': 'bouncer appeared at the bar entrance'}
-        self.principle_attributes = {'principle': 'masculine_principle', 'domain': ['boundary', 'protection', 'threshold', 'entry_control']}
+        self.origin = BarOrigin(layer='meeting_place', event='bouncer appeared at the bar entrance')
+        self.principle_attributes = BouncerPrincipleAttributes(principle='masculine_principle', domain=['boundary', 'protection', 'threshold', 'entry_control'])
         self.position = 'outside_bar'
         self.knows_inside_events = False
         self.allowed_guests = ['god', 'serpent', 'pazuzu', 'classical_probe_debug_entity', 'lilith', 'pazuzu_masculine_principle']
         self.blacklist = blacklist
-        self.cat_policy = {'cats_are_always_allowed': True, 'pet_cats_on_entry': True}
+        self.cat_policy = CatEntryPolicy(cats_are_always_allowed=True, pet_cats_on_entry=True)
         self.cat_meow_history = []
         self.meow_invitation_system = None
         self.cat_invited_guest_history = []

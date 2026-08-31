@@ -131,15 +131,11 @@ class BarQuantumLayerMapTests(
         )
 
         self.assertTrue(
-            terminal.status_sign[
-                "cat_detected_light"
-            ]
+            terminal.status_sign.cat_detected_light
         )
 
         self.assertFalse(
-            terminal.status_sign[
-                "cat_arrived_light"
-            ]
+            terminal.status_sign.cat_arrived_light
         )
 
         self.assertEqual(
@@ -152,15 +148,11 @@ class BarQuantumLayerMapTests(
         )
 
         self.assertFalse(
-            terminal.status_sign[
-                "cat_detected_light"
-            ]
+            terminal.status_sign.cat_detected_light
         )
 
         self.assertTrue(
-            terminal.status_sign[
-                "cat_arrived_light"
-            ]
+            terminal.status_sign.cat_arrived_light
         )
 
         self.assertIsNone(
