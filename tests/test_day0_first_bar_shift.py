@@ -79,9 +79,9 @@ class Day0FirstBarShiftTests(unittest.TestCase):
         self.assertTrue(serpent.bar_state['bet']['offered'])
         self.assertFalse(serpent.bar_state['bet']['accepted'])
         tab = self.bar.bar_counter.cash_register.open_tabs['serpent']
-        self.assertEqual(tab['status'], 'open')
-        self.assertFalse(tab['paid'])
-        self.assertEqual([item['drink'] for item in tab['items']], ['wine', 'beer', 'mead'])
+        self.assertEqual(tab.status, 'open')
+        self.assertFalse(tab.paid)
+        self.assertEqual([item.drink for item in tab.items], ['wine', 'beer', 'mead'])
         self.assertEqual(len(self.bar.bar_counter.cash_register.receipts), 1)
         receipt = self.bar.bar_counter.cash_register.receipts[0]
         self.assertEqual(receipt['status'], 'open_unpaid')

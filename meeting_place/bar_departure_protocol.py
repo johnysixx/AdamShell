@@ -13,7 +13,7 @@ class BarDepartureProtocol:
         place = self.geometry.find_cell(x=position['x'], y=position['y'])
         if place is None:
             return False
-        if place['kind'] != 'customer_floor':
+        if place.kind != 'customer_floor':
             return False
         released = self.geometry.release_cell(guest_id, place)
         if not released:

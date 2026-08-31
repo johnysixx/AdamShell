@@ -58,7 +58,7 @@ class BarSecurityProtocol:
     def handle_guest_entry(self, guest, target):
         if guest is None or target is None:
             return False
-        if target['kind'] != 'service_floor':
+        if target.kind != 'service_floor':
             return False
         guest_name = getattr(guest, 'world_key', None) or getattr(guest, 'name', None)
         incident = {'name': 'bar_security_incident', 'category': 'access_violation', 'reason': 'unauthorized_area', 'offender': guest_name}

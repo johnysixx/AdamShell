@@ -190,14 +190,14 @@ class Day0FirstBarShift:
     def serpent_moves_from_bar_to_existing_table(self):
         if self.serpent is None:
             raise RuntimeError('Serpent does not exist.')
-        seating_cells = [cell for cell in self.meeting_place.bar_geometry.cells if cell.get('seating', False)]
+        seating_cells = [cell for cell in self.meeting_place.bar_geometry.cells if cell.seating]
         if not seating_cells:
             raise RuntimeError('No existing seating place in bar.')
         seat = seating_cells[0]
-        self.serpent.bar_state['seat'] = seat['name']
+        self.serpent.bar_state['seat'] = seat.name
         self.serpent.bar_state['location'] = 'table'
         self.serpent.bar_state['activity'] = 'waiting_for_lilith'
-        event = {'name': 'serpent_moves_to_existing_table', 'guest': 'serpent', 'from': 'bar_counter', 'to': seat['name']}
+        event = {'name': 'serpent_moves_to_existing_table', 'guest': 'serpent', 'from': 'bar_counter', 'to': seat.name}
         self.meeting_place.emit_event(event)
         self.history.append(event)
         return event
@@ -1313,4 +1313,4 @@ class Day0FirstBarShift:
         serpent_tab = None
         if self.serpent is not None:
             serpent_tab = self.meeting_place.bar_counter.cash_register.open_tabs.get('serpent')
-        return {'bar_time': self.meeting_place.bar_clock.time_text, 'shift_active': getattr(self.meeting_place.bartender, 'shift_active', False), 'serpent': {'exists': self.serpent is not None, 'in_bar': self.serpent in self.meeting_place.entities if self.serpent is not None else False, 'bar_state': getattr(self.serpent, 'bar_state', None) if self.serpent is not None else None, 'tab': serpent_tab}, 'god': {'exists': self.god is not None, 'in_library': self.library.god_present if self.god is not None else False, 'role': getattr(self.god, 'role', None) if self.god is not None else None, 'book': self.first_book}, 'lilith': {'exists': self.lilith is not None, 'in_bar': self.lilith in self.meeting_place.entities if self.lilith is not None else False}, 'history': list(self.history)}
+        return {'bar_time': self.meeting_place.bar_clock.time_text, 'shift_active': getattr(self.meeting_place.bartender, 'shift_active', False), 'serpent': {'exists': self.serpent is not None, 'in_bar': self.serpent in self.meeting_place.entities if self.serpent is not None else False, 'bar_state': getattr(self.serpent, 'bar_state', None) if self.serpent is not None else None, 'tab': serpent_tab.to_dict() if serpent_tab is not None else None}, 'god': {'exists': self.god is not None, 'in_library': self.library.god_present if self.god is not None else False, 'role': getattr(self.god, 'role', None) if self.god is not None else None, 'book': self.first_book}, 'lilith': {'exists': self.lilith is not None, 'in_bar': self.lilith in self.meeting_place.entities if self.lilith is not None else False}, 'history': list(self.history)}

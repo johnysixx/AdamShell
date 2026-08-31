@@ -1,4 +1,6 @@
 from universe.logger import UniverseLogger
+from meeting_place.bar_objects import BarInventoryItem
+
 
 class BarFridge:
 
@@ -7,33 +9,35 @@ class BarFridge:
         self.type = "physical_bar_object"
         self.state = "closed"
         self.location = "behind_bar_counter_left"
-
         self.items = {
-            "milk": {
-                "name": "milk",
-                "type": "bar_drink_ingredient",
-                "form": "liquid",
-                "state": "cold",
-                "stored_in": "bar_fridge",
-                "suitable_for": [
+            "milk": BarInventoryItem(
+                name="milk",
+                type="bar_drink_ingredient",
+                form="liquid",
+                state="cold",
+                stored_in="bar_fridge",
+                suitable_for=[
                     "cat",
                     "pazuzu",
-                    "classical_probe_debug_entity"
-                ]
-            }
+                    "classical_probe_debug_entity",
+                ],
+            )
         }
+        UniverseLogger.boot("BAR FRIDGE CREATED")
+        UniverseLogger.boot("MILK STORED IN BAR FRIDGE")
 
-        self.public_state = {
+    @property
+    def public_state(self):
+        return {
             "name": self.name,
             "type": self.type,
             "state": self.state,
             "location": self.location,
-            "items": self.items
+            "items": {
+                name: item.to_dict()
+                for name, item in self.items.items()
+            },
         }
-
-        UniverseLogger.boot("BAR FRIDGE CREATED")
-        UniverseLogger.boot("MILK STORED IN BAR FRIDGE")
 
     def get_item(self, item_name):
         return self.items.get(item_name)
-    

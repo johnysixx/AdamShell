@@ -1,4 +1,4 @@
-﻿import unittest
+import unittest
 
 from meeting_place.bar_hex_geometry import (
     BarHexGeometry
@@ -29,30 +29,11 @@ class BarHexGeometryTests(
         self
     ):
         for cell in self.geometry.cells:
-            self.assertIn(
-                "x",
-                cell
-            )
-
-            self.assertIn(
-                "y",
-                cell
-            )
-
-            self.assertNotIn(
-                "q",
-                cell
-            )
-
-            self.assertNotIn(
-                "r",
-                cell
-            )
-
-            self.assertNotIn(
-                "z",
-                cell
-            )
+            self.assertTrue(hasattr(cell, "x"))
+            self.assertTrue(hasattr(cell, "y"))
+            self.assertFalse(hasattr(cell, "q"))
+            self.assertFalse(hasattr(cell, "r"))
+            self.assertFalse(hasattr(cell, "z"))
 
     def test_center_table_is_immutable_origin(
         self
@@ -66,22 +47,22 @@ class BarHexGeometryTests(
         )
 
         self.assertEqual(
-            table["x"],
+            table.x,
             0
         )
 
         self.assertEqual(
-            table["y"],
+            table.y,
             0
         )
 
         self.assertEqual(
-            table["kind"],
+            table.kind,
             "table"
         )
 
         self.assertTrue(
-            table["immutable"]
+            table.immutable
         )
 
     def test_center_has_two_immutable_chairs(
@@ -99,39 +80,39 @@ class BarHexGeometryTests(
         self.assertIsNotNone(right)
 
         self.assertEqual(
-            left["x"],
+            left.x,
             -1000
         )
 
         self.assertEqual(
-            left["y"],
+            left.y,
             0
         )
 
         self.assertEqual(
-            right["x"],
+            right.x,
             1000
         )
 
         self.assertEqual(
-            right["y"],
+            right.y,
             0
         )
 
         self.assertTrue(
-            left["seating"]
+            left.seating
         )
 
         self.assertTrue(
-            right["seating"]
+            right.seating
         )
 
         self.assertTrue(
-            left["immutable"]
+            left.immutable
         )
 
         self.assertTrue(
-            right["immutable"]
+            right.immutable
         )
 
     def test_center_has_four_permanent_clearance_hexes(
@@ -148,15 +129,15 @@ class BarHexGeometryTests(
 
         for cell in clearance:
             self.assertTrue(
-                cell["immutable"]
+                cell.immutable
             )
 
             self.assertTrue(
-                cell["walkable"]
+                cell.walkable
             )
 
             self.assertFalse(
-                cell["furniture_allowed"]
+                cell.furniture_allowed
             )
 
     def test_immutable_core_contains_seven_hexes(
@@ -165,7 +146,7 @@ class BarHexGeometryTests(
         immutable = [
             cell
             for cell in self.geometry.cells
-            if cell["immutable"]
+            if cell.immutable
         ]
 
         self.assertEqual(
@@ -197,8 +178,8 @@ class BarHexGeometryTests(
             cell
             for cell in self.geometry.cells
             if (
-                cell["name"] != "center_table"
-                and cell["immutable"]
+                cell.name != "center_table"
+                and cell.immutable
             )
         ]
 
@@ -209,13 +190,13 @@ class BarHexGeometryTests(
 
         for cell in ring:
             dx = (
-                cell["x"]
-                - center["x"]
+                cell.x
+                - center.x
             )
 
             dy = (
-                cell["y"]
-                - center["y"]
+                cell.y
+                - center.y
             )
 
             distance = (
@@ -236,7 +217,7 @@ class BarHexGeometryTests(
         ring = [
             cell
             for cell in self.geometry.cells
-            if cell["ring"] == 2
+            if cell.ring == 2
         ]
 
         self.assertEqual(
@@ -247,13 +228,13 @@ class BarHexGeometryTests(
         open_floor = [
             cell
             for cell in ring
-            if cell["kind"] == "open_floor"
+            if cell.kind == "open_floor"
         ]
 
         customer_floor = [
             cell
             for cell in ring
-            if cell["kind"] == "customer_floor"
+            if cell.kind == "customer_floor"
         ]
 
         self.assertEqual(
@@ -268,11 +249,11 @@ class BarHexGeometryTests(
 
         for cell in ring:
             self.assertTrue(
-                cell["walkable"]
+                cell.walkable
             )
 
             self.assertFalse(
-                cell["immutable"]
+                cell.immutable
             )
 
 
@@ -282,7 +263,7 @@ class BarHexGeometryTests(
         ring = [
             cell
             for cell in self.geometry.cells
-            if cell.get("ring") == 3
+            if cell.ring == 3
         ]
 
         self.assertEqual(
@@ -296,11 +277,11 @@ class BarHexGeometryTests(
         ring = [
             cell
             for cell in self.geometry.cells
-            if cell.get("ring") == 3
+            if cell.ring == 3
         ]
 
         kinds = {
-            cell["kind"]
+            cell.kind
             for cell in ring
         }
 
@@ -345,38 +326,38 @@ class BarHexGeometryTests(
         self.assertIsNotNone(back_room)
 
         self.assertEqual(
-            entrance["y"],
+            entrance.y,
             0
         )
 
         self.assertEqual(
-            table["y"],
+            table.y,
             0
         )
 
         self.assertEqual(
-            bar["y"],
+            bar.y,
             0
         )
 
         self.assertEqual(
-            back_room["y"],
+            back_room.y,
             0
         )
 
         self.assertLess(
-            entrance["x"],
-            table["x"]
+            entrance.x,
+            table.x
         )
 
         self.assertLess(
-            table["x"],
-            bar["x"]
+            table.x,
+            bar.x
         )
 
         self.assertLess(
-            bar["x"],
-            back_room["x"]
+            bar.x,
+            back_room.x
         )
 
     def test_main_axis_features_have_correct_roles(
@@ -395,28 +376,28 @@ class BarHexGeometryTests(
         )
 
         self.assertTrue(
-            entrance["door"]
+            entrance.door
         )
 
         self.assertTrue(
-            entrance["walkable"]
+            entrance.walkable
         )
 
         self.assertEqual(
-            bar["kind"],
+            bar.kind,
             "bar"
         )
 
         self.assertFalse(
-            bar["walkable"]
+            bar.walkable
         )
 
         self.assertTrue(
-            back_room["door"]
+            back_room.door
         )
 
         self.assertEqual(
-            back_room["connects_to"],
+            back_room.connects_to,
             "back_room"
         )
 
@@ -427,7 +408,7 @@ class BarHexGeometryTests(
         counter = [
             cell
             for cell in self.geometry.cells
-            if cell["kind"] == "bar"
+            if cell.kind == "bar"
         ]
 
         self.assertEqual(
@@ -443,8 +424,8 @@ class BarHexGeometryTests(
 
         actual_positions = {
             (
-                cell["x"],
-                cell["y"]
+                cell.x,
+                cell.y
             )
             for cell in counter
         }
@@ -456,16 +437,16 @@ class BarHexGeometryTests(
 
         for cell in counter:
             self.assertEqual(
-                cell["ring"],
+                cell.ring,
                 3
             )
 
             self.assertFalse(
-                cell["walkable"]
+                cell.walkable
             )
 
             self.assertFalse(
-                cell["furniture_allowed"]
+                cell.furniture_allowed
             )
 
 
@@ -487,49 +468,49 @@ class BarHexGeometryTests(
         self.assertIsNotNone(service)
 
         self.assertEqual(
-            service["kind"],
+            service.kind,
             "service_floor"
         )
 
         self.assertEqual(
-            service["y"],
+            service.y,
             0
         )
 
         self.assertTrue(
-            service["walkable"]
+            service.walkable
         )
 
         self.assertFalse(
-            service["seating"]
+            service.seating
         )
 
         self.assertFalse(
-            service["standing"]
+            service.standing
         )
 
         self.assertFalse(
-            service["furniture_allowed"]
+            service.furniture_allowed
         )
 
         self.assertEqual(
-            service["x"],
+            service.x,
             4000
         )
 
         self.assertEqual(
-            back_room["x"],
+            back_room.x,
             6000
         )
 
         self.assertLess(
-            bar["x"],
-            service["x"]
+            bar.x,
+            service.x
         )
 
         self.assertLess(
-            service["x"],
-            back_room["x"]
+            service.x,
+            back_room.x
         )
 
 
@@ -539,7 +520,7 @@ class BarHexGeometryTests(
         service = [
             cell
             for cell in self.geometry.cells
-            if cell["kind"] == "service_floor"
+            if cell.kind == "service_floor"
         ]
 
         self.assertEqual(
@@ -558,8 +539,8 @@ class BarHexGeometryTests(
 
         actual_positions = {
             (
-                cell["x"],
-                cell["y"]
+                cell.x,
+                cell.y
             )
             for cell in service
         }
@@ -571,19 +552,19 @@ class BarHexGeometryTests(
 
         for cell in service:
             self.assertTrue(
-                cell["walkable"]
+                cell.walkable
             )
 
             self.assertFalse(
-                cell["seating"]
+                cell.seating
             )
 
             self.assertFalse(
-                cell["standing"]
+                cell.standing
             )
 
             self.assertFalse(
-                cell["furniture_allowed"]
+                cell.furniture_allowed
             )
 
 
@@ -593,7 +574,7 @@ class BarHexGeometryTests(
         service = [
             cell
             for cell in self.geometry.cells
-            if cell["kind"] == "service_floor"
+            if cell.kind == "service_floor"
         ]
 
         self.assertEqual(
@@ -612,8 +593,8 @@ class BarHexGeometryTests(
 
         actual_positions = {
             (
-                cell["x"],
-                cell["y"]
+                cell.x,
+                cell.y
             )
             for cell in service
         }
@@ -625,19 +606,19 @@ class BarHexGeometryTests(
 
         for cell in service:
             self.assertTrue(
-                cell["walkable"]
+                cell.walkable
             )
 
             self.assertFalse(
-                cell["seating"]
+                cell.seating
             )
 
             self.assertFalse(
-                cell["standing"]
+                cell.standing
             )
 
             self.assertFalse(
-                cell["furniture_allowed"]
+                cell.furniture_allowed
             )
 
 
@@ -662,40 +643,40 @@ class BarHexGeometryTests(
         self.assertIsNotNone(service)
 
         self.assertEqual(
-            customer["kind"],
+            customer.kind,
             "customer_floor"
         )
 
         self.assertTrue(
-            customer["walkable"]
+            customer.walkable
         )
 
         self.assertEqual(
-            bar["kind"],
+            bar.kind,
             "bar"
         )
 
         self.assertFalse(
-            bar["walkable"]
+            bar.walkable
         )
 
         self.assertEqual(
-            service["kind"],
+            service.kind,
             "service_floor"
         )
 
         self.assertTrue(
-            service["walkable"]
+            service.walkable
         )
 
         self.assertLess(
-            customer["x"],
-            bar["x"]
+            customer.x,
+            bar.x
         )
 
         self.assertLess(
-            bar["x"],
-            service["x"]
+            bar.x,
+            service.x
         )
 
 
@@ -705,7 +686,7 @@ class BarHexGeometryTests(
         customer = [
             cell
             for cell in self.geometry.cells
-            if cell["kind"] == "customer_floor"
+            if cell.kind == "customer_floor"
         ]
 
         self.assertEqual(
@@ -721,8 +702,8 @@ class BarHexGeometryTests(
 
         actual_positions = {
             (
-                cell["x"],
-                cell["y"]
+                cell.x,
+                cell.y
             )
             for cell in customer
         }
@@ -734,24 +715,24 @@ class BarHexGeometryTests(
 
         for cell in customer:
             self.assertEqual(
-                cell["ring"],
+                cell.ring,
                 2
             )
 
             self.assertTrue(
-                cell["walkable"]
+                cell.walkable
             )
 
             self.assertFalse(
-                cell["seating"]
+                cell.seating
             )
 
             self.assertFalse(
-                cell["standing"]
+                cell.standing
             )
 
             self.assertFalse(
-                cell["furniture_allowed"]
+                cell.furniture_allowed
             )
 
 
@@ -772,7 +753,7 @@ class BarHexGeometryTests(
         )
 
         names = {
-            cell["name"]
+            cell.name
             for cell in neighbors
         }
 
@@ -826,11 +807,11 @@ class BarHexGeometryTests(
 
         for cell in path:
             self.assertTrue(
-                cell["walkable"]
+                cell.walkable
             )
 
         names = {
-            cell["name"]
+            cell.name
             for cell in path
         }
 
@@ -877,7 +858,7 @@ class BarHexGeometryTests(
 
         for cell in path:
             self.assertTrue(
-                cell["walkable"]
+                cell.walkable
             )
 
 
@@ -919,12 +900,12 @@ class BarHexGeometryTests(
         )
 
         self.assertEqual(
-            seat["kind"],
+            seat.kind,
             "seating_place"
         )
 
         self.assertTrue(
-            seat["walkable"]
+            seat.walkable
         )
 
         path = self.geometry.shortest_walkable_path(
@@ -953,7 +934,7 @@ class BarHexGeometryTests(
         places = [
             cell
             for cell in self.geometry.cells
-            if cell["kind"] in {
+            if cell.kind in {
                 "seating_place",
                 "standing_place"
             }
@@ -965,13 +946,12 @@ class BarHexGeometryTests(
         )
 
         for cell in places:
-            self.assertIn(
-                "occupied_by",
-                cell
+            self.assertTrue(
+                hasattr(cell, "occupied_by")
             )
 
             self.assertIsNone(
-                cell["occupied_by"]
+                cell.occupied_by
             )
 
 
@@ -991,7 +971,7 @@ class BarHexGeometryTests(
             first_seat
         )
 
-        first_seat["occupied_by"] = "entity_1"
+        first_seat.occupied_by = "entity_1"
 
         second_seat = self.geometry.nearest_reachable_cell(
             entrance,
@@ -1008,7 +988,7 @@ class BarHexGeometryTests(
         )
 
         self.assertIsNone(
-            second_seat["occupied_by"]
+            second_seat.occupied_by
         )
 
 
@@ -1034,7 +1014,7 @@ class BarHexGeometryTests(
         )
 
         self.assertEqual(
-            seat["occupied_by"],
+            seat.occupied_by,
             "entity_1"
         )
 
@@ -1070,7 +1050,7 @@ class BarHexGeometryTests(
         )
 
         self.assertEqual(
-            seat["occupied_by"],
+            seat.occupied_by,
             "entity_1"
         )
 
@@ -1102,7 +1082,7 @@ class BarHexGeometryTests(
         )
 
         self.assertIsNone(
-            seat["occupied_by"]
+            seat.occupied_by
         )
 
 
@@ -1133,7 +1113,7 @@ class BarHexGeometryTests(
         )
 
         self.assertEqual(
-            seat["occupied_by"],
+            seat.occupied_by,
             "entity_1"
         )
 
@@ -1144,19 +1124,19 @@ class BarHexGeometryTests(
         customer = [
             cell
             for cell in self.geometry.cells
-            if cell["kind"] == "customer_floor"
+            if cell.kind == "customer_floor"
         ]
 
         bar = [
             cell
             for cell in self.geometry.cells
-            if cell["kind"] == "bar"
+            if cell.kind == "bar"
         ]
 
         service = [
             cell
             for cell in self.geometry.cells
-            if cell["kind"] == "service_floor"
+            if cell.kind == "service_floor"
         ]
 
         self.assertEqual(
@@ -1185,8 +1165,8 @@ class BarHexGeometryTests(
 
         actual_service_positions = {
             (
-                cell["x"],
-                cell["y"]
+                cell.x,
+                cell.y
             )
             for cell in service
         }
@@ -1201,12 +1181,12 @@ class BarHexGeometryTests(
         )
 
         self.assertEqual(
-            back_room["x"],
+            back_room.x,
             6000
         )
 
         self.assertEqual(
-            back_room["y"],
+            back_room.y,
             0
         )
 

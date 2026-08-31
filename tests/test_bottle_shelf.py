@@ -1,4 +1,4 @@
-﻿import unittest
+import unittest
 
 from meeting_place.bottle_shelf import BottleShelf
 
@@ -43,22 +43,22 @@ class BottleShelfTests(
         )
 
         self.assertEqual(
-            bottle["name"],
+            bottle.name,
             "dark_energy_bottle"
         )
 
         self.assertEqual(
-            bottle["type"],
+            bottle.type,
             "dark_energy_bottle"
         )
 
         self.assertEqual(
-            bottle["location"],
+            bottle.location,
             "bottle_shelf"
         )
 
         self.assertEqual(
-            bottle["dark_energy_j"],
+            bottle.dark_energy_j,
             5.0
         )
 
@@ -87,7 +87,7 @@ class BottleShelfTests(
         )
 
         self.assertEqual(
-            first["dark_energy_j"],
+            first.dark_energy_j,
             7.0
         )
 

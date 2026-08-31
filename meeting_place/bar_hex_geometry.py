@@ -1,4 +1,6 @@
-﻿class BarHexGeometry:
+from meeting_place.bar_objects import BarHexCell
+
+class BarHexGeometry:
 
     HEX_WIDTH = 1000
     HEX_HEIGHT = 1000
@@ -33,23 +35,21 @@
         ring=None,
         occupied_by=None
     ):
-        return {
-            "name": name,
-            "x": x,
-            "y": y,
-            "kind": kind,
-            "walkable": walkable,
-            "standing": standing,
-            "seating": seating,
-            "door": door,
-            "connects_to": connects_to,
-            "immutable": immutable,
-            "furniture_allowed": (
-                furniture_allowed
-            ),
-            "ring": ring,
-            "occupied_by": occupied_by
-        }
+        return BarHexCell(
+            name=name,
+            x=x,
+            y=y,
+            kind=kind,
+            walkable=walkable,
+            standing=standing,
+            seating=seating,
+            door=door,
+            connects_to=connects_to,
+            immutable=immutable,
+            furniture_allowed=furniture_allowed,
+            ring=ring,
+            occupied_by=occupied_by,
+        )
 
     def build_immutable_core(self):
         self.cells = [
@@ -239,16 +239,14 @@
                 "Customer floor axis hex is missing."
             )
 
-        customer_floor.update({
-            "name": "main_bar_customer_floor",
-            "kind": "customer_floor",
-            "walkable": True,
-            "standing": False,
-            "seating": False,
-            "door": False,
-            "connects_to": None,
-            "furniture_allowed": False
-        })
+        customer_floor.name = 'main_bar_customer_floor'
+        customer_floor.kind = 'customer_floor'
+        customer_floor.walkable = True
+        customer_floor.standing = False
+        customer_floor.seating = False
+        customer_floor.door = False
+        customer_floor.connects_to = None
+        customer_floor.furniture_allowed = False
 
         customer_upper = self.find_cell(
             x=1500,
@@ -260,16 +258,14 @@
                 "Upper customer frontage hex is missing."
             )
 
-        customer_upper.update({
-            "name": "main_bar_customer_upper",
-            "kind": "customer_floor",
-            "walkable": True,
-            "standing": False,
-            "seating": False,
-            "door": False,
-            "connects_to": None,
-            "furniture_allowed": False
-        })
+        customer_upper.name = 'main_bar_customer_upper'
+        customer_upper.kind = 'customer_floor'
+        customer_upper.walkable = True
+        customer_upper.standing = False
+        customer_upper.seating = False
+        customer_upper.door = False
+        customer_upper.connects_to = None
+        customer_upper.furniture_allowed = False
 
         customer_lower = self.find_cell(
             x=1500,
@@ -281,16 +277,14 @@
                 "Lower customer frontage hex is missing."
             )
 
-        customer_lower.update({
-            "name": "main_bar_customer_lower",
-            "kind": "customer_floor",
-            "walkable": True,
-            "standing": False,
-            "seating": False,
-            "door": False,
-            "connects_to": None,
-            "furniture_allowed": False
-        })
+        customer_lower.name = 'main_bar_customer_lower'
+        customer_lower.kind = 'customer_floor'
+        customer_lower.walkable = True
+        customer_lower.standing = False
+        customer_lower.seating = False
+        customer_lower.door = False
+        customer_lower.connects_to = None
+        customer_lower.furniture_allowed = False
 
         entrance = self.find_cell(
             x=-3000,
@@ -302,16 +296,14 @@
                 "Entrance axis hex is missing."
             )
 
-        entrance.update({
-            "name": "entrance_door",
-            "kind": "entrance",
-            "walkable": True,
-            "standing": False,
-            "seating": False,
-            "door": True,
-            "connects_to": "outside_front_door",
-            "furniture_allowed": False
-        })
+        entrance.name = 'entrance_door'
+        entrance.kind = 'entrance'
+        entrance.walkable = True
+        entrance.standing = False
+        entrance.seating = False
+        entrance.door = True
+        entrance.connects_to = 'outside_front_door'
+        entrance.furniture_allowed = False
 
         bar = self.find_cell(
             x=3000,
@@ -323,16 +315,14 @@
                 "Main bar axis hex is missing."
             )
 
-        bar.update({
-            "name": "main_bar",
-            "kind": "bar",
-            "walkable": False,
-            "standing": False,
-            "seating": False,
-            "door": False,
-            "connects_to": None,
-            "furniture_allowed": False
-        })
+        bar.name = 'main_bar'
+        bar.kind = 'bar'
+        bar.walkable = False
+        bar.standing = False
+        bar.seating = False
+        bar.door = False
+        bar.connects_to = None
+        bar.furniture_allowed = False
 
         bar_upper = self.find_cell(
             x=2500,
@@ -344,16 +334,14 @@
                 "Upper bar counter hex is missing."
             )
 
-        bar_upper.update({
-            "name": "main_bar_upper",
-            "kind": "bar",
-            "walkable": False,
-            "standing": False,
-            "seating": False,
-            "door": False,
-            "connects_to": None,
-            "furniture_allowed": False
-        })
+        bar_upper.name = 'main_bar_upper'
+        bar_upper.kind = 'bar'
+        bar_upper.walkable = False
+        bar_upper.standing = False
+        bar_upper.seating = False
+        bar_upper.door = False
+        bar_upper.connects_to = None
+        bar_upper.furniture_allowed = False
 
         bar_lower = self.find_cell(
             x=2500,
@@ -365,16 +353,14 @@
                 "Lower bar counter hex is missing."
             )
 
-        bar_lower.update({
-            "name": "main_bar_lower",
-            "kind": "bar",
-            "walkable": False,
-            "standing": False,
-            "seating": False,
-            "door": False,
-            "connects_to": None,
-            "furniture_allowed": False
-        })
+        bar_lower.name = 'main_bar_lower'
+        bar_lower.kind = 'bar'
+        bar_lower.walkable = False
+        bar_lower.standing = False
+        bar_lower.seating = False
+        bar_lower.door = False
+        bar_lower.connects_to = None
+        bar_lower.furniture_allowed = False
 
         self.cells.append(
             self._cell(
@@ -507,13 +493,13 @@
                 continue
 
             dx = (
-                candidate["x"]
-                - cell["x"]
+                candidate.x
+                - cell.x
             )
 
             dy = (
-                candidate["y"]
-                - cell["y"]
+                candidate.y
+                - cell.y
             )
 
             distance = (
@@ -543,13 +529,13 @@
                 continue
 
             dx = (
-                candidate["x"]
-                - cell["x"]
+                candidate.x
+                - cell.x
             )
 
             dy = (
-                candidate["y"]
-                - cell["y"]
+                candidate.y
+                - cell.y
             )
 
             distance = (
@@ -579,8 +565,8 @@
             return None
 
         if (
-            not start["walkable"]
-            or not destination["walkable"]
+            not start.walkable
+            or not destination.walkable
         ):
             return None
 
@@ -595,7 +581,7 @@
         ]
 
         visited = {
-            start["name"]
+            start.name
         }
 
         cursor = 0
@@ -610,11 +596,11 @@
             for neighbor in self.neighbors(
                 current
             ):
-                if not neighbor["walkable"]:
+                if not neighbor.walkable:
                     continue
 
                 if (
-                    neighbor["name"]
+                    neighbor.name
                     in visited
                 ):
                     continue
@@ -628,7 +614,7 @@
                     return new_path
 
                 visited.add(
-                    neighbor["name"]
+                    neighbor.name
                 )
 
                 queue.append(
@@ -646,7 +632,7 @@
         bar_cells = [
             cell
             for cell in self.cells
-            if cell["kind"] == "bar"
+            if cell.kind == "bar"
         ]
 
         bar_count = len(
@@ -716,9 +702,9 @@
             return None
 
         if (
-            customer["occupied_by"]
+            customer.occupied_by
             is not None
-            or bar["occupied_by"]
+            or bar.occupied_by
             is not None
         ):
             return None
@@ -750,33 +736,29 @@
             + 1
         )
 
-        customer.update({
-            "name": (
-                "dynamic_customer_floor_"
-                f"{module_number:02d}"
-            ),
-            "kind": "customer_floor",
-            "walkable": True,
-            "standing": False,
-            "seating": False,
-            "door": False,
-            "connects_to": None,
-            "furniture_allowed": False
-        })
+        customer.name = (
+            "dynamic_customer_floor_"
+            f"{module_number:02d}"
+        )
+        customer.kind = "customer_floor"
+        customer.walkable = True
+        customer.standing = False
+        customer.seating = False
+        customer.door = False
+        customer.connects_to = None
+        customer.furniture_allowed = False
 
-        bar.update({
-            "name": (
-                "dynamic_bar_"
-                f"{module_number:02d}"
-            ),
-            "kind": "bar",
-            "walkable": False,
-            "standing": False,
-            "seating": False,
-            "door": False,
-            "connects_to": None,
-            "furniture_allowed": False
-        })
+        bar.name = (
+            "dynamic_bar_"
+            f"{module_number:02d}"
+        )
+        bar.kind = "bar"
+        bar.walkable = False
+        bar.standing = False
+        bar.seating = False
+        bar.door = False
+        bar.connects_to = None
+        bar.furniture_allowed = False
 
         self.cells.append(
             self._cell(
@@ -838,17 +820,17 @@
         if not belongs_to_geometry:
             return False
 
-        if cell["kind"] not in {
+        if cell.kind not in {
             "seating_place",
             "standing_place",
             "customer_floor"
         }:
             return False
 
-        if cell["occupied_by"] is not None:
+        if cell.occupied_by is not None:
             return False
 
-        cell["occupied_by"] = entity_id
+        cell.occupied_by = entity_id
 
         return True
 
@@ -871,10 +853,10 @@
         if not belongs_to_geometry:
             return False
 
-        if cell["occupied_by"] != entity_id:
+        if cell.occupied_by != entity_id:
             return False
 
-        cell["occupied_by"] = None
+        cell.occupied_by = None
 
         return True
 
@@ -886,13 +868,13 @@
         if start is None:
             return None
 
-        if not start["walkable"]:
+        if not start.walkable:
             return None
 
         queue = [start]
 
         visited = {
-            start["name"]
+            start.name
         }
 
         cursor = 0
@@ -906,11 +888,11 @@
 
             matches_kind = (
                 kind is None
-                or current["kind"] == kind
+                or current.kind == kind
             )
 
             is_available = (
-                current["occupied_by"]
+                current.occupied_by
                 is None
             )
 
@@ -923,17 +905,17 @@
             for neighbor in self.neighbors(
                 current
             ):
-                if not neighbor["walkable"]:
+                if not neighbor.walkable:
                     continue
 
                 if (
-                    neighbor["name"]
+                    neighbor.name
                     in visited
                 ):
                     continue
 
                 visited.add(
-                    neighbor["name"]
+                    neighbor.name
                 )
 
                 queue.append(
@@ -952,25 +934,25 @@
         for cell in self.cells:
             if (
                 name is not None
-                and cell["name"] != name
+                and cell.name != name
             ):
                 continue
 
             if (
                 kind is not None
-                and cell["kind"] != kind
+                and cell.kind != kind
             ):
                 continue
 
             if (
                 x is not None
-                and cell["x"] != x
+                and cell.x != x
             ):
                 continue
 
             if (
                 y is not None
-                and cell["y"] != y
+                and cell.y != y
             ):
                 continue
 
@@ -985,7 +967,7 @@
         return [
             cell
             for cell in self.cells
-            if cell["kind"] == kind
+            if cell.kind == kind
         ]
 
     @property
@@ -999,7 +981,7 @@
                 self.cells
             ),
             "cells": [
-                dict(cell)
+                cell.to_dict()
                 for cell in self.cells
             ]
         }

@@ -1,4 +1,5 @@
-﻿import unittest
+from types import SimpleNamespace
+import unittest
 
 from meeting_place.bar_hex_geometry import (
     BarHexGeometry
@@ -23,11 +24,11 @@ class BarServiceProtocolTests(
     def test_bartender_starts_behind_center_of_bar(
         self
     ):
-        bartender = {
-            "name": "bartender",
-            "state": "created",
-            "position": None
-        }
+        bartender = SimpleNamespace(
+            name="bartender",
+            state="created",
+            position=None,
+        )
 
         result = self.protocol.place_bartender(
             bartender
@@ -38,17 +39,17 @@ class BarServiceProtocolTests(
         )
 
         self.assertEqual(
-            bartender["state"],
+            bartender.state,
             "behind_bar"
         )
 
         self.assertIsNotNone(
-            bartender["position"]
+            bartender.position
         )
 
         cell = self.geometry.find_cell(
-            x=bartender["position"]["x"],
-            y=bartender["position"]["y"]
+            x=bartender.position["x"],
+            y=bartender.position["y"]
         )
 
         self.assertIsNotNone(
@@ -56,12 +57,12 @@ class BarServiceProtocolTests(
         )
 
         self.assertEqual(
-            cell["name"],
+            cell.name,
             "bar_service_floor"
         )
 
         self.assertEqual(
-            cell["kind"],
+            cell.kind,
             "service_floor"
         )
 
@@ -69,11 +70,11 @@ class BarServiceProtocolTests(
     def test_bartender_can_move_only_within_service_area(
         self
     ):
-        bartender = {
-            "name": "bartender",
-            "state": "created",
-            "position": None
-        }
+        bartender = SimpleNamespace(
+            name="bartender",
+            state="created",
+            position=None,
+        )
 
         self.assertTrue(
             self.protocol.place_bartender(
@@ -99,10 +100,10 @@ class BarServiceProtocolTests(
         )
 
         self.assertEqual(
-            bartender["position"],
+            bartender.position,
             {
-                "x": target_service["x"],
-                "y": target_service["y"]
+                "x": target_service.x,
+                "y": target_service.y
             }
         )
 
@@ -115,7 +116,7 @@ class BarServiceProtocolTests(
         )
 
         position_before = dict(
-            bartender["position"]
+            bartender.position
         )
 
         rejected = self.protocol.move_bartender(
@@ -128,7 +129,7 @@ class BarServiceProtocolTests(
         )
 
         self.assertEqual(
-            bartender["position"],
+            bartender.position,
             position_before
         )
 

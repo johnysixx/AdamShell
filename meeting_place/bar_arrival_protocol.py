@@ -23,6 +23,6 @@ class BarArrivalProtocol:
         occupied = self.geometry.occupy_cell(guest_id, destination)
         if not occupied:
             return False
-        guest.position = {'x': destination['x'], 'y': destination['y']}
+        guest.position = {'x': destination.x, 'y': destination.y}
         guest.state = 'at_bar'
         return True
