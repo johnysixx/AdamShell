@@ -1,3 +1,4 @@
+from meeting_place.bar_objects import DrinkRecipe
 import unittest
 
 from universe.universe import Universe
@@ -140,15 +141,7 @@ class BarMenuSignIntegrationTests(unittest.TestCase):
             universe
         )
 
-        recipe = {
-            "name": "singularity",
-            "status": "approved",
-            "approved": True,
-            "ingredients": [
-                "raspberry_rum",
-                "lemonade"
-            ]
-        }
+        recipe = DrinkRecipe(name="singularity", origin="test_recipe", status="approved", approved=True, ingredients=["raspberry_rum", "lemonade"])
 
         meeting_place.add_approved_cocktail(
             recipe
@@ -168,11 +161,15 @@ class BarMenuSignIntegrationTests(unittest.TestCase):
             meeting_place.new_drinks
         )
 
-        self.assertIs(
+        self.assertIsInstance(
             meeting_place.drink_menu[
                 "singularity"
             ],
-            recipe
+            dict
+        )
+        self.assertEqual(
+            meeting_place.drink_menu["singularity"]["name"],
+            recipe.name
         )
 
         meeting_place.bar_menu_sign.open()
@@ -222,12 +219,7 @@ class BarMenuSignIntegrationTests(unittest.TestCase):
             universe
         )
 
-        recipe = {
-            "name": "singularity",
-            "status": "approved",
-            "approved": True,
-            "ingredients": []
-        }
+        recipe = DrinkRecipe(name="singularity", origin="test_recipe", status="approved", approved=True, ingredients=[])
 
         meeting_place.add_approved_cocktail(
             recipe
@@ -277,19 +269,14 @@ class BarMenuSignIntegrationTests(unittest.TestCase):
         ):
             meeting_place.tick()
 
-        recipe = {
-            "name": "singularity",
-            "status": "approved",
-            "approved": True,
-            "ingredients": []
-        }
+        recipe = DrinkRecipe(name="singularity", origin="test_recipe", status="approved", approved=True, ingredients=[])
 
         meeting_place.add_approved_cocktail(
             recipe
         )
 
         self.assertEqual(
-            recipe["menu_added_day"],
+            recipe.menu_added_day,
             50
         )
 
@@ -327,12 +314,7 @@ class BarMenuSignIntegrationTests(unittest.TestCase):
             universe
         )
 
-        recipe = {
-            "name": "singularity",
-            "status": "approved",
-            "approved": True,
-            "ingredients": []
-        }
+        recipe = DrinkRecipe(name="singularity", origin="test_recipe", status="approved", approved=True, ingredients=[])
 
         meeting_place.add_approved_cocktail(
             recipe

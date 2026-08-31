@@ -57,9 +57,7 @@ class Day0GodLilithLemonCronenbergTests(
         )
 
         self.assertEqual(
-            lemon[
-                "shots"
-            ],
+            lemon.shots,
             0
         )
 
@@ -133,16 +131,12 @@ class Day0GodLilithLemonCronenbergTests(
         )
 
         self.assertEqual(
-            lemon[
-                "shots"
-            ],
+            lemon.shots,
             6
         )
 
         self.assertTrue(
-            lemon[
-                "available"
-            ]
+            lemon.available
         )
 
         self.assertEqual(

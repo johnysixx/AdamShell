@@ -69,9 +69,7 @@ class Day0LilithLemonConservationTests(
         )
 
         self.assertEqual(
-            stock[
-                "shots"
-            ],
+            stock.shots,
             1
         )
 
@@ -79,9 +77,7 @@ class Day0LilithLemonConservationTests(
 
         # A drop of lemon is not the whole lemon.
         self.assertEqual(
-            stock[
-                "shots"
-            ],
+            stock.shots,
             1
         )
 
@@ -115,9 +111,7 @@ class Day0LilithLemonConservationTests(
         )
 
         self.assertEqual(
-            stock[
-                "shots"
-            ],
+            stock.shots,
             0
         )
 

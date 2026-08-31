@@ -48,12 +48,12 @@ class Day0BartenderJudgeProposalAndWaterTests(unittest.TestCase):
 
     def test_lemon_slice_does_not_consume_whole_lemon(self):
         self.scene.advance_to_wager_vote_proposal()
-        lemon_before = self.bar.back_room.bar_ingredients['lemon']['shots']
+        lemon_before = self.bar.back_room.bar_ingredients['lemon'].shots
         self.scene.serpent_orders_water_at_bar()
         self.scene.god_rejects_participant_vote_and_proposes_bartender()
         self.scene.lilith_and_god_leave_table_for_bar()
         self.scene.bartender_serves_serpent_water_with_free_lemon_slice()
-        lemon_after = self.bar.back_room.bar_ingredients['lemon']['shots']
+        lemon_after = self.bar.back_room.bar_ingredients['lemon'].shots
         self.assertEqual(lemon_after, lemon_before)
 
     def test_everyone_ends_at_bar(self):

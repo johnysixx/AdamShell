@@ -1,3 +1,4 @@
+from meeting_place.bar_objects import BarIngredientStock
 from .universe_manual import UniverseManual
 from .cronenberg_pen_terminal import CronenbergPenTerminal
 from .bar_objects import BackRoomAccess, WorldDoor, WorldWindow, WorldKeypad
@@ -58,6 +59,11 @@ class BackRoom:
                 "serve_directly": True,
                 "category": "basic_drink"
             }
+        }
+
+        self.bar_ingredients = {
+            name: BarIngredientStock(name=name, **state)
+            for name, state in self.bar_ingredients.items()
         }
 
         self.universe_manual = UniverseManual(

@@ -1,3 +1,4 @@
+from meeting_place.bar_objects import BarIngredientStock, DrinkRecipe
 import random
 from cats.cat import Cat
 from universe.logger import UniverseLogger
@@ -582,21 +583,35 @@ class MeetingPlace:
 
     def refresh_bar_ingredients(self):
         if 'sugar' not in self.back_room.bar_ingredients:
-            self.back_room.bar_ingredients['sugar'] = {'available': True, 'fundamental': True, 'serve_directly': False, 'shots': 200, 'unit': 'cube'}
+            self.back_room.bar_ingredients['sugar'] = BarIngredientStock(
+                name='sugar',
+                available=True,
+                fundamental=True,
+                serve_directly=False,
+                shots=200,
+                unit='cube',
+            )
         if getattr(self.universe, 'liquid_hydrocarbons', False):
-            self.back_room.bar_ingredients['liquid_hydrocarbons'] = {'available': True, 'fundamental': False, 'shots': 200}
+            if 'liquid_hydrocarbons' not in self.back_room.bar_ingredients:
+                self.back_room.bar_ingredients['liquid_hydrocarbons'] = BarIngredientStock(
+                    name='liquid_hydrocarbons',
+                    available=True,
+                    fundamental=False,
+                    serve_directly=False,
+                    shots=200,
+                )
         self.refresh_basic_drinks()
         return self.back_room.bar_ingredients
 
     def add_approved_cocktail(self, recipe):
-        if not isinstance(recipe, dict):
-            raise ValueError('Approved cocktail requires recipe.')
-        if recipe.get('status') != 'approved' or not recipe.get('approved', False):
+        if not isinstance(recipe, DrinkRecipe):
+            raise ValueError('Approved cocktail requires DrinkRecipe.')
+        if recipe.status != 'approved' or not recipe.approved:
             raise ValueError('Cocktail is not approved.')
-        drink_name = recipe.get('name')
+        drink_name = recipe.name
         if not drink_name:
             raise ValueError('Approved cocktail requires name.')
-        recipe['menu_added_day'] = self.bar_clock.day
+        recipe.menu_added_day = self.bar_clock.day
         self.new_drinks[drink_name] = recipe
         self.bartender.chronicle_memory.append({'kind': 'new_menu_drink', 'drink': drink_name})
         UniverseLogger.event(f'BAR NEW DRINK ADDED: {drink_name}')
@@ -615,9 +630,9 @@ class MeetingPlace:
             stock = self.back_room.bar_ingredients.get(drink_name)
             if stock is None:
                 raise ValueError(f'Basic drink is not present in bar stock: {drink_name}')
-            if stock.get('category') != 'basic_drink':
+            if stock.category != 'basic_drink':
                 raise ValueError(f'Drink is not a basic drink: {drink_name}')
-            if not stock.get('available', False):
+            if not stock.available:
                 raise ValueError(f'Basic drink is unavailable: {drink_name}')
             drink = {'name': drink_name, 'type': 'basic_bar_drink', 'category': 'basic_drink'}
             drinks.append(drink)
@@ -636,9 +651,9 @@ class MeetingPlace:
         stock = self.back_room.bar_ingredients.get(drink_name)
         if stock is None:
             raise ValueError('Basic drink is not present in bar stock.')
-        if stock.get('category') != 'basic_drink':
+        if stock.category != 'basic_drink':
             raise ValueError('Drink is not a basic drink.')
-        if not stock.get('available', False):
+        if not stock.available:
             raise ValueError('Basic drink is currently unavailable.')
         payment = self.service_rules.apply_basic_drink_payment(entity)
         if payment.get('payment_kind') == 'unsupported':
@@ -657,18 +672,20 @@ class MeetingPlace:
         recipe = self.how_to_mix_drinks.recipes.get(drink_name)
         if recipe is None:
             raise ValueError('Unknown basic drink recipe.')
+        if not isinstance(recipe.ingredients, dict):
+            raise ValueError('Basic drink recipe requires ingredient requirements.')
         ingredients = self.back_room.bar_ingredients
-        for ingredient_name, requirement in recipe['ingredients'].items():
+        for ingredient_name, requirement in recipe.ingredients.items():
             if ingredient_name not in ingredients:
                 raise ValueError('Missing drink ingredient.')
             stock = ingredients[ingredient_name]
-            required_shots = requirement.get('shots', 0)
-            if requirement.get('consumed', False) and stock.get('shots', 0) < required_shots:
+            required_shots = requirement.shots
+            if requirement.consumed and (stock.shots is None or stock.shots < required_shots):
                 return self.universe.create_cronenberg_from_quantum_error(error=RuntimeError('Bar ingredient depleted.'), source_component='meeting_place', source_operation='mix_basic_drink')
-        for ingredient_name, requirement in recipe['ingredients'].items():
-            if not requirement.get('consumed', False):
+        for ingredient_name, requirement in recipe.ingredients.items():
+            if not requirement.consumed:
                 continue
-            self.back_room.bar_ingredients[ingredient_name]['shots'] -= requirement['shots']
+            self.back_room.bar_ingredients[ingredient_name].consume(requirement.shots)
         return {'name': drink_name, 'type': 'mixed_bar_drink'}
 
     def refresh_basic_drinks(self):
@@ -678,32 +695,34 @@ class MeetingPlace:
             if drink.get('menu_source') in {'direct_stock', 'basic_recipe'}:
                 del self.drink_menu[drink_name]
         for ingredient_name, stock in ingredients.items():
-            if not stock.get('available', False):
+            if not stock.available:
                 continue
-            if not stock.get('serve_directly', False):
+            if not stock.serve_directly:
                 continue
             self.drink_menu[ingredient_name] = {'name': ingredient_name, 'type': 'bar_drink', 'menu_source': 'direct_stock'}
         for drink_name, recipe in self.how_to_mix_drinks.recipes.items():
-            if recipe.get('hidden', False):
+            if recipe.hidden:
                 continue
-            if not recipe.get('learned', True):
+            if not recipe.learned:
+                continue
+            if not isinstance(recipe.ingredients, dict):
                 continue
             can_serve = True
-            for ingredient_name, requirement in recipe['ingredients'].items():
+            for ingredient_name, requirement in recipe.ingredients.items():
                 stock = ingredients.get(ingredient_name)
                 if stock is None:
                     can_serve = False
                     break
-                if not stock.get('available', True):
+                if not stock.available:
                     can_serve = False
                     break
-                if requirement.get('consumed', False):
-                    required_shots = requirement.get('shots', 0)
-                    if stock.get('shots', 0) < required_shots:
+                if requirement.consumed:
+                    required_shots = requirement.shots
+                    if stock.shots is None or stock.shots < required_shots:
                         can_serve = False
                         break
             if can_serve:
-                menu_item = dict(recipe)
+                menu_item = recipe.to_dict()
                 menu_item['menu_source'] = 'basic_recipe'
                 self.drink_menu[drink_name] = menu_item
         return self.drink_menu
@@ -712,7 +731,7 @@ class MeetingPlace:
         current_day = self.bar_clock.day
         to_promote = []
         for drink_name, recipe in self.new_drinks.items():
-            added_day = recipe.get('menu_added_day')
+            added_day = recipe.menu_added_day
             if added_day is None:
                 continue
             if current_day - added_day >= 90:
@@ -724,7 +743,7 @@ class MeetingPlace:
         if drink_name not in self.new_drinks:
             raise ValueError('Unknown new drink.')
         recipe = self.new_drinks.pop(drink_name)
-        self.drink_menu[drink_name] = recipe
+        self.drink_menu[drink_name] = recipe.to_dict()
         self.bartender.chronicle_memory.append({'kind': 'drink_promoted', 'drink': drink_name})
         UniverseLogger.event(f'BAR DRINK PROMOTED: {drink_name}')
         return recipe

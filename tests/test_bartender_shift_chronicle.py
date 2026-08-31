@@ -565,7 +565,7 @@ class BartenderShiftChronicleTests(unittest.TestCase):
         ]
 
         self.assertEqual(
-            recipe["ingredients"],
+            recipe.ingredients,
             [
                 "raspberry_rum",
                 "lemonade"

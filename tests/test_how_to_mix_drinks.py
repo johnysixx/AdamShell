@@ -1,4 +1,4 @@
-﻿import unittest
+import unittest
 
 from meeting_place.bar_counter import BarCounter
 from meeting_place.bartender import Bartender
@@ -34,22 +34,22 @@ class HowToMixDrinksTests(unittest.TestCase):
         ]
 
         self.assertEqual(
-            recipe["name"],
+            recipe.name,
             "singularity"
         )
 
         self.assertEqual(
-            recipe["origin"],
+            recipe.origin,
             "created_by_bartender"
         )
 
         self.assertEqual(
-            recipe["status"],
+            recipe.status,
             "testing"
         )
 
         self.assertEqual(
-            recipe["ingredients"],
+            recipe.ingredients,
             [
                 "raspberry_rum",
                 "lemonade"
@@ -57,22 +57,22 @@ class HowToMixDrinksTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            recipe["tastings"],
+            recipe.tastings,
             []
         )
 
         self.assertEqual(
-            recipe["votes_for"],
+            recipe.votes_for,
             0
         )
 
         self.assertEqual(
-            recipe["votes_against"],
+            recipe.votes_against,
             0
         )
 
         self.assertFalse(
-            recipe["approved"]
+            recipe.approved
         )
 
         self.assertEqual(
@@ -118,7 +118,7 @@ class HowToMixDrinksTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            recipe["tastings"],
+            recipe.tastings,
             [
                 {
                     "guest": "newton",
@@ -129,22 +129,22 @@ class HowToMixDrinksTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            recipe["votes_for"],
+            recipe.votes_for,
             1
         )
 
         self.assertEqual(
-            recipe["votes_against"],
+            recipe.votes_against,
             0
         )
 
         self.assertEqual(
-            recipe["status"],
+            recipe.status,
             "testing"
         )
 
         self.assertFalse(
-            recipe["approved"]
+            recipe.approved
         )
 
 
@@ -190,17 +190,17 @@ class HowToMixDrinksTests(unittest.TestCase):
         ]
 
         self.assertEqual(
-            recipe["tastings"],
+            recipe.tastings,
             []
         )
 
         self.assertEqual(
-            recipe["votes_for"],
+            recipe.votes_for,
             0
         )
 
         self.assertEqual(
-            recipe["votes_against"],
+            recipe.votes_against,
             0
         )
 
@@ -249,22 +249,22 @@ class HowToMixDrinksTests(unittest.TestCase):
         ]
 
         self.assertEqual(
-            recipe["votes_for"],
+            recipe.votes_for,
             1
         )
 
         self.assertEqual(
-            recipe["votes_against"],
+            recipe.votes_against,
             0
         )
 
         self.assertEqual(
-            recipe["tastings"][-1]["guest"],
+            recipe.tastings[-1]["guest"],
             "newton"
         )
 
         self.assertEqual(
-            recipe["tastings"][-1]["comment"],
+            recipe.tastings[-1]["comment"],
             "needs more lemon"
         )
 
@@ -314,17 +314,17 @@ class HowToMixDrinksTests(unittest.TestCase):
         ]
 
         self.assertEqual(
-            len(recipe["tastings"]),
+            len(recipe.tastings),
             1
         )
 
         self.assertEqual(
-            recipe["votes_for"],
+            recipe.votes_for,
             1
         )
 
         self.assertEqual(
-            recipe["votes_against"],
+            recipe.votes_against,
             0
         )
 
@@ -385,26 +385,26 @@ class HowToMixDrinksTests(unittest.TestCase):
         ]
 
         self.assertEqual(
-            len(recipe["tastings"]),
+            len(recipe.tastings),
             5
         )
 
         self.assertEqual(
-            recipe["votes_for"],
+            recipe.votes_for,
             4
         )
 
         self.assertEqual(
-            recipe["votes_against"],
+            recipe.votes_against,
             1
         )
 
         self.assertTrue(
-            recipe["approved"]
+            recipe.approved
         )
 
         self.assertEqual(
-            recipe["status"],
+            recipe.status,
             "approved"
         )
 
@@ -475,21 +475,21 @@ class HowToMixDrinksTests(unittest.TestCase):
         ]
 
         self.assertEqual(
-            recipe["votes_for"],
+            recipe.votes_for,
             3
         )
 
         self.assertEqual(
-            recipe["votes_against"],
+            recipe.votes_against,
             2
         )
 
         self.assertFalse(
-            recipe["approved"]
+            recipe.approved
         )
 
         self.assertEqual(
-            recipe["status"],
+            recipe.status,
             "rejected"
         )
 
@@ -781,12 +781,12 @@ class HowToMixDrinksTests(unittest.TestCase):
         ]
 
         self.assertEqual(
-            recipe["status"],
+            recipe.status,
             "rejected"
         )
 
         self.assertFalse(
-            recipe["approved"]
+            recipe.approved
         )
 
         self.assertNotIn(
@@ -865,12 +865,12 @@ class HowToMixDrinksTests(unittest.TestCase):
         ]
 
         self.assertEqual(
-            recipe["status"],
+            recipe.status,
             "rejected"
         )
 
         self.assertFalse(
-            recipe["approved"]
+            recipe.approved
         )
 
         self.assertNotIn(
@@ -1031,12 +1031,12 @@ class HowToMixDrinksTests(unittest.TestCase):
         ]
 
         self.assertEqual(
-            recipe["status"],
+            recipe.status,
             "rejected"
         )
 
         self.assertFalse(
-            recipe["approved"]
+            recipe.approved
         )
 
         self.assertNotIn(
@@ -1141,38 +1141,39 @@ class HowToMixDrinksTests(unittest.TestCase):
         ]
 
         self.assertTrue(
-            recipe["hidden"]
+            recipe.hidden
         )
 
         self.assertFalse(
-            recipe["learned"]
+            recipe.learned
         )
 
         self.assertIsNone(
-            recipe["teacher"]
+            recipe.teacher
         )
 
         self.assertEqual(
-            recipe["origin"],
+            recipe.origin,
             "god_secret_recipe"
         )
 
         self.assertEqual(
-            recipe["ingredients"],
-            {
-                "rum": {
-                    "shots": 1,
-                    "consumed": False
-                },
-                "liquid_hydrocarbons": {
-                    "shots": 1,
-                    "consumed": True
-                }
-            }
+            recipe.ingredients["rum"].shots,
+            1
+        )
+        self.assertFalse(
+            recipe.ingredients["rum"].consumed
+        )
+        self.assertEqual(
+            recipe.ingredients["liquid_hydrocarbons"].shots,
+            1
+        )
+        self.assertTrue(
+            recipe.ingredients["liquid_hydrocarbons"].consumed
         )
 
         self.assertEqual(
-            recipe["origin"],
+            recipe.origin,
             "god_secret_recipe"
         )
 

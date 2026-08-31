@@ -68,7 +68,7 @@ class QuantumDirector:
             was_hidden = 'raspberry_rum' in book.hidden_recipes
             recipe = book.reveal_hidden_recipe(name='raspberry_rum', teacher='god')
             if was_hidden:
-                meeting_place.bartender.learn_cocktail(drink='raspberry_rum', teacher='god', ingredients=list(recipe['ingredients'].keys()))
+                meeting_place.bartender.learn_cocktail(drink='raspberry_rum', teacher='god', ingredients=list(recipe.ingredients.keys()))
                 taught_cocktail = 'raspberry_rum'
             meeting_place.refresh_basic_drinks()
         entry = {'event': 'director_arrived_at_bar', 'sample': dict(sample), 'serpent_present': present_serpent is not None, 'met': present_serpent, 'taught_cocktail': taught_cocktail}

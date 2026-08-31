@@ -22,14 +22,14 @@ class Day0LilithDrinkOriginTests(unittest.TestCase):
 
     def test_sugar_exists_from_bar_start(self):
         sugar = self.bar.back_room.bar_ingredients['sugar']
-        self.assertTrue(sugar['available'])
-        self.assertEqual(sugar['unit'], 'cube')
+        self.assertTrue(sugar.available)
+        self.assertEqual(sugar.unit, 'cube')
 
     def test_bartender_brings_lemon_into_stock(self):
         self.scene.bartender_returns_with_lemon()
         lemon = self.bar.back_room.bar_ingredients['lemon']
-        self.assertTrue(lemon['available'])
-        self.assertEqual(lemon['shots'], 1)
+        self.assertTrue(lemon.available)
+        self.assertEqual(lemon.shots, 1)
 
     def test_vodka_with_lemon_is_basic_and_has_no_effects(self):
         self.scene.bartender_returns_with_lemon()
@@ -44,16 +44,16 @@ class Day0LilithDrinkOriginTests(unittest.TestCase):
         self.scene.lilith_corrects_vodka_with_lemon()
         learned = self.scene.bartender_learns_lilith_drink()
         recipe = learned['recipe']
-        self.assertEqual(recipe['ingredients']['lemon']['use'], 'whole')
-        self.assertEqual(recipe['ingredients']['sugar']['shots'], 1)
-        self.assertEqual(recipe['price_basis'], 'vodka')
+        self.assertEqual(recipe.ingredients['lemon'].use, 'whole')
+        self.assertEqual(recipe.ingredients['sugar'].shots, 1)
+        self.assertEqual(recipe.price_basis, 'vodka')
 
     def test_lilith_has_only_energy_and_creative_will_effects(self):
         self.scene.bartender_returns_with_lemon()
         self.scene.bartender_makes_vodka_with_lemon()
         self.scene.lilith_corrects_vodka_with_lemon()
         learned = self.scene.bartender_learns_lilith_drink()
-        self.assertEqual(set(learned['recipe']['effects'].keys()), {'energy_j', 'creative_will'})
+        self.assertEqual(set(learned['recipe'].effects.keys()), {'energy_j', 'creative_will'})
 
     def test_lilith_effect_increases_energy_and_creative_will(self):
         self.scene.bartender_returns_with_lemon()

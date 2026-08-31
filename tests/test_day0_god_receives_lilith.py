@@ -25,7 +25,7 @@ class Day0GodReceivesLilithTests(unittest.TestCase):
 
     def test_bar_has_six_lemons_before_second_attempt(self):
         self.scene.advance_to_lemon_restock_after_god_order()
-        self.assertEqual(self.bar.back_room.bar_ingredients['lemon']['shots'], 6)
+        self.assertEqual(self.bar.back_room.bar_ingredients['lemon'].shots, 6)
 
     def test_gods_lilith_uses_current_two_sugar_recipe(self):
         result = self.scene.advance_to_god_holding_lilith()
@@ -35,7 +35,7 @@ class Day0GodReceivesLilithTests(unittest.TestCase):
 
     def test_successful_god_drink_consumes_one_of_six_lemons(self):
         self.scene.advance_to_god_holding_lilith()
-        self.assertEqual(self.bar.back_room.bar_ingredients['lemon']['shots'], 5)
+        self.assertEqual(self.bar.back_room.bar_ingredients['lemon'].shots, 5)
 
     def test_god_receives_open_unpaid_receipt(self):
         result = self.scene.advance_to_god_holding_lilith()

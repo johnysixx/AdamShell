@@ -255,3 +255,298 @@ class BarTab:
             result["latest_receipt_number"] = self.latest_receipt_number
         return result
 
+from dataclasses import dataclass, field
+
+
+@dataclass(slots=True)
+class BarIngredientStock:
+    name: str
+    available: bool
+    fundamental: bool
+    serve_directly: bool = False
+    category: str | None = None
+    shots: float | int | None = None
+    unit: str | None = None
+
+    def consume(
+        self,
+        amount
+    ):
+        amount = float(
+            amount
+        )
+
+        if self.shots is None:
+            raise ValueError(
+                f"Ingredient {self.name} "
+                "has no consumable shot stock."
+            )
+
+        if (
+            float(self.shots)
+            < amount
+        ):
+            return False
+
+        self.shots -= amount
+
+        if (
+            isinstance(
+                self.shots,
+                float
+            )
+            and self.shots.is_integer()
+        ):
+            self.shots = int(
+                self.shots
+            )
+
+        return True
+
+    def to_dict(self):
+        result = {
+            "name":
+                self.name,
+            "available":
+                self.available,
+            "fundamental":
+                self.fundamental,
+            "serve_directly":
+                self.serve_directly,
+        }
+
+        if self.category is not None:
+            result[
+                "category"
+            ] = self.category
+
+        if self.shots is not None:
+            result[
+                "shots"
+            ] = self.shots
+
+        if self.unit is not None:
+            result[
+                "unit"
+            ] = self.unit
+
+        return result
+
+
+@dataclass(slots=True)
+class RecipeIngredientRequirement:
+    shots: float | int = 1
+    consumed: bool = False
+    use: str | None = None
+    unit: str | None = None
+
+    def to_dict(self):
+        result = {
+            "shots":
+                self.shots,
+            "consumed":
+                self.consumed,
+        }
+
+        if self.use is not None:
+            result[
+                "use"
+            ] = self.use
+
+        if self.unit is not None:
+            result[
+                "unit"
+            ] = self.unit
+
+        return result
+
+
+@dataclass(slots=True)
+class DrinkRecipe:
+    name: str
+    origin: str
+
+    ingredients: (
+        dict[
+            str,
+            RecipeIngredientRequirement
+        ]
+        | list[str]
+    )
+
+    hidden: bool = False
+    learned: bool = True
+    teacher: str | None = None
+    category: str | None = None
+
+    effects: dict = field(
+        default_factory=dict
+    )
+
+    price_basis: str | None = None
+    status: str | None = None
+
+    tastings: list[dict] = field(
+        default_factory=list
+    )
+
+    votes_for: int = 0
+    votes_against: int = 0
+    approved: bool = False
+    menu_added_day: int | None = None
+    revision: int | None = None
+    revision_reason: str | None = None
+
+    def reveal(
+        self,
+        teacher
+    ):
+        self.hidden = False
+        self.learned = True
+        self.teacher = teacher
+        self.origin = (
+            "taught_by_god"
+        )
+
+        return self
+
+    def record_tasting(
+        self,
+        guest,
+        liked,
+        comment=None
+    ):
+        for existing in self.tastings:
+
+            if (
+                existing.get(
+                    "guest"
+                )
+                == guest
+            ):
+                raise ValueError(
+                    "Guest already tasted "
+                    "this cocktail."
+                )
+
+        tasting = {
+            "guest":
+                guest,
+            "liked":
+                bool(liked),
+            "comment":
+                comment,
+        }
+
+        self.tastings.append(
+            tasting
+        )
+
+        if tasting["liked"]:
+            self.votes_for += 1
+        else:
+            self.votes_against += 1
+
+        if len(self.tastings) == 5:
+
+            if self.votes_for >= 4:
+                self.approved = True
+                self.status = (
+                    "approved"
+                )
+
+            else:
+                self.approved = False
+                self.status = (
+                    "rejected"
+                )
+
+        return tasting
+
+    def to_dict(self):
+
+        if isinstance(
+            self.ingredients,
+            dict
+        ):
+            ingredients = {
+                name:
+                    requirement.to_dict()
+                for name, requirement
+                in self.ingredients.items()
+            }
+
+        else:
+            ingredients = list(
+                self.ingredients
+            )
+
+        result = {
+            "name":
+                self.name,
+            "origin":
+                self.origin,
+            "hidden":
+                self.hidden,
+            "learned":
+                self.learned,
+            "teacher":
+                self.teacher,
+            "ingredients":
+                ingredients,
+            "effects":
+                dict(self.effects),
+            "votes_for":
+                self.votes_for,
+            "votes_against":
+                self.votes_against,
+            "approved":
+                self.approved,
+        }
+
+        if self.category is not None:
+            result[
+                "category"
+            ] = self.category
+
+        if self.price_basis is not None:
+            result[
+                "price_basis"
+            ] = self.price_basis
+
+        if self.status is not None:
+            result[
+                "status"
+            ] = self.status
+
+        if self.tastings:
+            result[
+                "tastings"
+            ] = [
+                dict(item)
+                for item
+                in self.tastings
+            ]
+
+        elif self.status is not None:
+            result[
+                "tastings"
+            ] = []
+
+        if self.menu_added_day is not None:
+            result[
+                "menu_added_day"
+            ] = self.menu_added_day
+
+        if self.revision is not None:
+            result[
+                "revision"
+            ] = self.revision
+
+        if self.revision_reason is not None:
+            result[
+                "revision_reason"
+            ] = self.revision_reason
+
+        return result
+

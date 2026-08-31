@@ -142,7 +142,7 @@ class Bartender(SocialMixin):
         recipe = self.mix_book.recipes.get(drink)
         if recipe is None:
             return False
-        if recipe.get('status') != 'testing':
+        if recipe.status != 'testing':
             return False
         UniverseLogger.event(f'BARTENDER OFFERS COCKTAIL TASTING: {drink} TO {guest}')
         return True
@@ -155,17 +155,17 @@ class Bartender(SocialMixin):
         recipe = self.mix_book.recipes.get(drink)
         if recipe is None:
             raise ValueError('Unknown cocktail recipe.')
-        if recipe.get('status') != 'testing':
+        if recipe.status != 'testing':
             raise ValueError('Cocktail is not in testing.')
         tasting = self.mix_book.record_tasting(drink=drink, guest=guest, liked=liked, comment=comment)
         recipe = self.mix_book.recipes[drink]
-        if len(recipe['tastings']) == 5:
-            if recipe['status'] == 'approved':
-                result_event = {'kind': 'cocktail_approved', 'drink': drink, 'votes_for': recipe['votes_for'], 'votes_against': recipe['votes_against']}
+        if len(recipe.tastings) == 5:
+            if recipe.status == 'approved':
+                result_event = {'kind': 'cocktail_approved', 'drink': drink, 'votes_for': recipe.votes_for, 'votes_against': recipe.votes_against}
                 if self.on_cocktail_approved is not None:
                     self.on_cocktail_approved(recipe)
             else:
-                result_event = {'kind': 'cocktail_rejected', 'drink': drink, 'votes_for': recipe['votes_for'], 'votes_against': recipe['votes_against']}
+                result_event = {'kind': 'cocktail_rejected', 'drink': drink, 'votes_for': recipe.votes_for, 'votes_against': recipe.votes_against}
             self.chronicle_memory.append(result_event)
         UniverseLogger.event(f'BARTENDER RECORDS COCKTAIL TASTING: {drink} BY {guest}')
         return tasting

@@ -1,3 +1,4 @@
+from meeting_place.bar_objects import BarIngredientStock, DrinkRecipe, RecipeIngredientRequirement
 from core.entity.social_entity import _entity_attr_setdefault
 from meeting_place.bar_yard import BarYard
 from cats.cat_birth_resolver import CatBirthResolver
@@ -209,14 +210,17 @@ class Day0FirstBarShift:
         if not result['picked']:
             raise RuntimeError('Bartender failed to pick lemon.')
         stock = self.meeting_place.back_room.bar_ingredients
-        lemon_stock = stock.setdefault('lemon', {'available': True, 'fundamental': False, 'serve_directly': False, 'shots': 0, 'unit': 'fruit'})
-        lemon_stock['shots'] += 1
-        lemon_stock['available'] = True
+        lemon_stock = stock.get('lemon')
+        if lemon_stock is None:
+            lemon_stock = BarIngredientStock(name='lemon', available=True, fundamental=False, serve_directly=False, shots=0, unit='fruit')
+            stock['lemon'] = lemon_stock
+        lemon_stock.shots += 1
+        lemon_stock.available = True
         returned = self.meeting_place.bartender.return_with_lemon(guest_name='lilith')
         self.meeting_place.refresh_basic_drinks()
         self.history.append({'name': 'lemon_added_to_bar_stock', 'amount': 1})
         self.history.append(returned)
-        return {'picked': result, 'stock': dict(lemon_stock), 'returned': returned}
+        return {'picked': result, 'stock': lemon_stock.to_dict(), 'returned': returned}
 
     def bartender_makes_vodka_with_lemon(self):
         if 'lemon' not in self.meeting_place.back_room.bar_ingredients:
@@ -242,7 +246,7 @@ class Day0FirstBarShift:
 
     def bartender_learns_lilith_drink(self):
         mix_book = self.meeting_place.how_to_mix_drinks
-        recipe = {'name': 'lilith', 'origin': 'taught_by_lilith', 'hidden': False, 'learned': True, 'teacher': 'lilith', 'category': 'learned_drink', 'price_basis': 'vodka', 'effects': {'energy_j': 1.0, 'creative_will': 0.1}, 'ingredients': {'vodka': {'shots': 1, 'consumed': False}, 'lemon': {'shots': 1, 'consumed': True, 'use': 'whole'}, 'sugar': {'shots': 1, 'consumed': True, 'unit': 'cube'}}}
+        recipe = DrinkRecipe(name='lilith', origin='taught_by_lilith', hidden=False, learned=True, teacher='lilith', category='learned_drink', price_basis='vodka', effects={'energy_j': 1.0, 'creative_will': 0.1}, ingredients={'vodka': RecipeIngredientRequirement(shots=1, consumed=False), 'lemon': RecipeIngredientRequirement(shots=1, consumed=True, use='whole'), 'sugar': RecipeIngredientRequirement(shots=1, consumed=True, unit='cube')})
         mix_book.recipes['lilith'] = recipe
         learned = self.meeting_place.bartender.learn_guest_drink(drink_name='lilith', teacher='lilith', ingredients=['vodka', 'whole_lemon', 'sugar_cube'], effects={'energy_j': 1.0, 'creative_will': 0.1}, price_basis='vodka')
         self.meeting_place.refresh_basic_drinks()
@@ -251,7 +255,7 @@ class Day0FirstBarShift:
 
     def apply_lilith_drink_effect(self, entity):
         recipe = self.meeting_place.how_to_mix_drinks.recipes['lilith']
-        effects = recipe['effects']
+        effects = recipe.effects
         entity.energy_j = float(getattr(entity, 'energy_j', 0.0)) + float(effects['energy_j'])
         entity.creative_will = float(getattr(entity, 'creative_will', 0.0)) + float(effects['creative_will'])
         return {'name': 'lilith_drink_effect_applied', 'energy_j': effects['energy_j'], 'creative_will': effects['creative_will']}
@@ -264,13 +268,13 @@ class Day0FirstBarShift:
         for ingredient_name in ('vodka', 'lemon', 'sugar'):
             if ingredient_name not in stock:
                 raise RuntimeError(f'Missing ingredient for lilith: {ingredient_name}')
-        if stock['lemon'].get('shots', 0) < 1:
+        if stock['lemon'].shots < 1:
             return self.universe.create_cronenberg_from_quantum_error(error=RuntimeError('No lemon for lilith.'), source_component='meeting_place', source_operation='bartender_mixes_final_lilith')
-        if stock['sugar'].get('shots', 0) < 1:
+        if stock['sugar'].shots < 1:
             return self.universe.create_cronenberg_from_quantum_error(error=RuntimeError('No sugar for lilith.'), source_component='meeting_place', source_operation='bartender_mixes_final_lilith')
-        stock['lemon']['shots'] -= 1
-        stock['sugar']['shots'] -= 1
-        drink = {'name': 'lilith', 'type': 'learned_bar_drink', 'category': 'learned_drink', 'ingredients': {'vodka': 1, 'lemon': 'whole', 'sugar': 1}, 'price_basis': 'vodka', 'effects': dict(recipe.get('effects', {}))}
+        stock['lemon'].consume(1)
+        stock['sugar'].consume(1)
+        drink = {'name': 'lilith', 'type': 'learned_bar_drink', 'category': 'learned_drink', 'ingredients': {'vodka': 1, 'lemon': 'whole', 'sugar': 1}, 'price_basis': 'vodka', 'effects': dict(recipe.effects)}
         self.lilith_order['final_drink'] = drink
         self.lilith_order['served'] = True
         event = {'name': 'bartender_mixes_final_lilith', 'guest': 'lilith', 'drink': 'lilith', 'sugar_cubes': 1}
@@ -301,15 +305,15 @@ class Day0FirstBarShift:
         sugar = self.meeting_place.back_room.bar_ingredients.get('sugar')
         if sugar is None:
             raise RuntimeError('Sugar is not in bar stock.')
-        if sugar.get('shots', 0) < 1:
+        if sugar.shots < 1:
             return self.universe.create_cronenberg_from_quantum_error(error=RuntimeError('Bar sugar depleted.'), source_component='meeting_place', source_operation='bartender_adds_second_sugar_cube')
-        sugar['shots'] -= 1
+        sugar.consume(1)
         drink = self.lilith_order['final_drink']
         drink['ingredients']['sugar'] = 2
         recipe = self.meeting_place.how_to_mix_drinks.recipes['lilith']
-        recipe['ingredients']['sugar']['shots'] = 2
-        recipe['revision'] = 2
-        recipe['revision_reason'] = 'lilith_requested_second_sugar_cube'
+        recipe.ingredients['sugar'].shots = 2
+        recipe.revision = 2
+        recipe.revision_reason = 'lilith_requested_second_sugar_cube'
         event = {'name': 'bartender_adds_second_sugar_cube', 'guest': 'lilith', 'drink': 'lilith', 'final_sugar_cubes': 2, 'recipe_updated': True}
         self.meeting_place.emit_event(event)
         self.history.append(event)
@@ -478,7 +482,7 @@ class Day0FirstBarShift:
         if getattr(self.god, 'bar_state', {}).get('order') != 'lilith':
             raise RuntimeError('God has not ordered lilith.')
         lemon = self.meeting_place.back_room.bar_ingredients.get('lemon')
-        lemon_count = lemon.get('shots', 0) if lemon is not None else 0
+        lemon_count = lemon.shots if lemon is not None else 0
         if lemon_count > 0:
             raise RuntimeError('This scene requires the bar to be out of lemons.')
         error = RuntimeError("No lemon available for God's lilith.")
@@ -503,15 +507,18 @@ class Day0FirstBarShift:
                 raise RuntimeError('Bartender failed while restocking lemons.')
             picked.append(result)
         stock = self.meeting_place.back_room.bar_ingredients
-        lemon_stock = stock.setdefault('lemon', {'available': True, 'fundamental': False, 'serve_directly': False, 'shots': 0, 'unit': 'fruit'})
-        lemon_stock['shots'] += amount
-        lemon_stock['available'] = True
+        lemon_stock = stock.get('lemon')
+        if lemon_stock is None:
+            lemon_stock = BarIngredientStock(name='lemon', available=True, fundamental=False, serve_directly=False, shots=0, unit='fruit')
+            stock['lemon'] = lemon_stock
+        lemon_stock.shots += amount
+        lemon_stock.available = True
         self.meeting_place.bartender.current_location = 'bar'
-        returned = {'name': 'bartender_returns_with_lemon_stock', 'source': 'bar_yard', 'ingredient': 'lemon', 'amount': amount, 'stock_after': lemon_stock['shots']}
+        returned = {'name': 'bartender_returns_with_lemon_stock', 'source': 'bar_yard', 'ingredient': 'lemon', 'amount': amount, 'stock_after': lemon_stock.shots}
         self.meeting_place.emit_event(returned)
         self.history.append(returned)
         self.meeting_place.refresh_basic_drinks()
-        return {'picked': picked, 'returned': returned, 'stock': dict(lemon_stock)}
+        return {'picked': picked, 'returned': returned, 'stock': lemon_stock.to_dict()}
 
     def bartender_mixes_gods_lilith_after_restock(self):
         if getattr(self.god, 'bar_state', {}).get('order') != 'lilith':
@@ -522,17 +529,17 @@ class Day0FirstBarShift:
         stock = self.meeting_place.back_room.bar_ingredients
         lemon = stock.get('lemon')
         sugar = stock.get('sugar')
-        if lemon is None or lemon.get('shots', 0) < 1:
+        if lemon is None or lemon.shots < 1:
             return self.universe.create_cronenberg_from_quantum_error(error=RuntimeError('No lemon after lemon restock.'), source_component='meeting_place', source_operation='bartender_mixes_gods_lilith_after_restock')
-        required_sugar = recipe.get('ingredients', {}).get('sugar', {}).get('shots', 2)
-        if sugar is None or sugar.get('shots', 0) < required_sugar:
+        required_sugar = recipe.ingredients['sugar'].shots
+        if sugar is None or sugar.shots < required_sugar:
             return self.universe.create_cronenberg_from_quantum_error(error=RuntimeError("Not enough sugar for God's lilith."), source_component='meeting_place', source_operation='bartender_mixes_gods_lilith_after_restock')
-        lemon['shots'] -= 1
-        sugar['shots'] -= required_sugar
-        drink = {'name': 'lilith', 'type': 'learned_bar_drink', 'category': 'learned_drink', 'ingredients': {'vodka': 1, 'lemon': 'whole', 'sugar': required_sugar}, 'price_basis': recipe.get('price_basis', 'vodka'), 'effects': dict(recipe.get('effects', {}))}
+        lemon.consume(1)
+        sugar.consume(required_sugar)
+        drink = {'name': 'lilith', 'type': 'learned_bar_drink', 'category': 'learned_drink', 'ingredients': {'vodka': 1, 'lemon': 'whole', 'sugar': required_sugar}, 'price_basis': recipe.price_basis or 'vodka', 'effects': dict(recipe.effects)}
         self.god.bar_state['prepared_drink'] = drink
         self.god.bar_state['activity'] = 'waiting_for_lilith_service'
-        event = {'name': 'bartender_mixes_gods_lilith', 'guest': 'god', 'drink': 'lilith', 'lemon_used': 1, 'sugar_cubes_used': required_sugar, 'lemons_remaining': lemon['shots']}
+        event = {'name': 'bartender_mixes_gods_lilith', 'guest': 'god', 'drink': 'lilith', 'lemon_used': 1, 'sugar_cubes_used': required_sugar, 'lemons_remaining': lemon.shots}
         self.meeting_place.emit_event(event)
         self.history.append(event)
         return drink
@@ -842,7 +849,7 @@ class Day0FirstBarShift:
         if order is None:
             raise RuntimeError('Serpent has not ordered water.')
         lemon = self.meeting_place.back_room.bar_ingredients.get('lemon')
-        if lemon is None or lemon.get('shots', 0) < 1:
+        if lemon is None or lemon.shots < 1:
             return self.universe.create_cronenberg_from_quantum_error(error=RuntimeError('No lemon available for water garnish.'), source_component='meeting_place', source_operation='bartender_serves_serpent_water')
         drink = {'name': 'water_with_lemon_slice', 'type': 'basic_bar_drink', 'base': 'water', 'garnish': {'ingredient': 'lemon', 'amount': 'slice', 'price': 0}, 'price_basis': 'water'}
         order['served'] = True

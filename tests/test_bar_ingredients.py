@@ -24,9 +24,7 @@ class BarIngredientsTests(unittest.TestCase):
             drink="raspberry_rum",
             teacher="god",
             ingredients=list(
-                recipe[
-                    "ingredients"
-                ].keys()
+                recipe.ingredients.keys()
             )
         )
 
@@ -53,13 +51,13 @@ class BarIngredientsTests(unittest.TestCase):
         self.assertTrue(
             meeting_place.back_room.bar_ingredients[
                 "rum"
-            ]["available"]
+            ].available
         )
 
         self.assertTrue(
             meeting_place.back_room.bar_ingredients[
                 "rum"
-            ]["fundamental"]
+            ].fundamental
         )
 
 
@@ -81,7 +79,7 @@ class BarIngredientsTests(unittest.TestCase):
         self.assertTrue(
             meeting_place.back_room.bar_ingredients[
                 "rum"
-            ]["available"]
+            ].available
         )
 
         self.assertNotIn(
@@ -123,7 +121,7 @@ class BarIngredientsTests(unittest.TestCase):
             .back_room
             .bar_ingredients[
                 "liquid_hydrocarbons"
-            ]["available"]
+            ].available
         )
 
 
@@ -206,7 +204,7 @@ class BarIngredientsTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            stock["shots"],
+            stock.shots,
             200
         )
 
@@ -237,7 +235,7 @@ class BarIngredientsTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            stock["shots"],
+            stock.shots,
             200
         )
 
@@ -246,7 +244,7 @@ class BarIngredientsTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            stock["shots"],
+            stock.shots,
             199
         )
 
@@ -277,7 +275,7 @@ class BarIngredientsTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            stock["shots"],
+            stock.shots,
             200
         )
 
@@ -286,7 +284,7 @@ class BarIngredientsTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            stock["shots"],
+            stock.shots,
             199
         )
 
@@ -315,7 +313,7 @@ class BarIngredientsTests(unittest.TestCase):
 
         meeting_place.back_room.bar_ingredients[
             "liquid_hydrocarbons"
-        ]["shots"] = 0
+        ].shots = 0
 
         cronenberg_count_before = len(
             universe.cronenbergs
@@ -375,7 +373,7 @@ class BarIngredientsTests(unittest.TestCase):
             ]
         )
 
-        stock["shots"] = 1
+        stock.shots = 1
 
         cronenberg_count_before = len(
             universe.cronenbergs
@@ -391,7 +389,7 @@ class BarIngredientsTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            stock["shots"],
+            stock.shots,
             0
         )
 
@@ -405,7 +403,7 @@ class BarIngredientsTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            stock["shots"],
+            stock.shots,
             0
         )
 
@@ -483,13 +481,13 @@ class BarIngredientsTests(unittest.TestCase):
             self.assertTrue(
                 meeting_place.back_room.bar_ingredients[
                     drink_name
-                ]["available"]
+                ].available
             )
 
             self.assertTrue(
                 meeting_place.back_room.bar_ingredients[
                     drink_name
-                ]["serve_directly"]
+                ].serve_directly
             )
 
             self.assertIn(
@@ -530,7 +528,7 @@ class BarIngredientsTests(unittest.TestCase):
             )
 
             self.assertEqual(
-                stock["category"],
+                stock.category,
                 "basic_drink"
             )
 

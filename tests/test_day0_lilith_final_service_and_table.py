@@ -40,16 +40,16 @@ class Day0LilithFinalServiceAndTableTests(unittest.TestCase):
     def test_final_recipe_has_two_sugar_cubes(self):
         result = self.scene.advance_to_good_drink_discussion()
         recipe = result['revised']['recipe']
-        self.assertEqual(recipe['ingredients']['sugar']['shots'], 2)
-        self.assertEqual(recipe['revision'], 2)
+        self.assertEqual(recipe.ingredients['sugar'].shots, 2)
+        self.assertEqual(recipe.revision, 2)
 
     def test_price_stays_same_as_vodka(self):
         result = self.scene.advance_to_good_drink_discussion()
-        self.assertEqual(result['revised']['recipe']['price_basis'], 'vodka')
+        self.assertEqual(result['revised']['recipe'].price_basis, 'vodka')
 
     def test_effects_remain_only_energy_and_creative_will(self):
         result = self.scene.advance_to_good_drink_discussion()
-        self.assertEqual(set(result['revised']['recipe']['effects'].keys()), {'energy_j', 'creative_will'})
+        self.assertEqual(set(result['revised']['recipe'].effects.keys()), {'energy_j', 'creative_will'})
 
     def test_lilith_then_joins_serpent(self):
         result = self.scene.advance_to_good_drink_discussion()
