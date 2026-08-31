@@ -34,9 +34,9 @@ class Day0LilithDrinkOriginTests(unittest.TestCase):
     def test_vodka_with_lemon_is_basic_and_has_no_effects(self):
         self.scene.bartender_returns_with_lemon()
         drink = self.scene.bartender_makes_vodka_with_lemon()
-        self.assertEqual(drink['name'], 'vodka_with_lemon')
-        self.assertEqual(drink['price_basis'], 'vodka')
-        self.assertEqual(drink['effects'], {})
+        self.assertEqual(drink.name, 'vodka_with_lemon')
+        self.assertEqual(drink.price_basis, 'vodka')
+        self.assertEqual(drink.effects, {})
 
     def test_lilith_recipe_uses_whole_lemon_and_sugar_cube(self):
         self.scene.bartender_returns_with_lemon()

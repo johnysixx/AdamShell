@@ -289,7 +289,7 @@ class BarIngredientsTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            drink["name"],
+            drink.name,
             "raspberry_rum"
         )
 
@@ -384,7 +384,7 @@ class BarIngredientsTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            drink["name"],
+            drink.name,
             "raspberry_rum"
         )
 
@@ -535,7 +535,6 @@ class BarIngredientsTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
 
 
 

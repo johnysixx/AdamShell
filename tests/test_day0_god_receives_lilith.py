@@ -30,8 +30,8 @@ class Day0GodReceivesLilithTests(unittest.TestCase):
     def test_gods_lilith_uses_current_two_sugar_recipe(self):
         result = self.scene.advance_to_god_holding_lilith()
         drink = result['drink']
-        self.assertEqual(drink['ingredients']['lemon'], 'whole')
-        self.assertEqual(drink['ingredients']['sugar'], 2)
+        self.assertEqual(drink.ingredients['lemon'], 'whole')
+        self.assertEqual(drink.ingredients['sugar'], 2)
 
     def test_successful_god_drink_consumes_one_of_six_lemons(self):
         self.scene.advance_to_god_holding_lilith()

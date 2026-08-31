@@ -30,7 +30,7 @@ class Day0GodReceivesWineTests(unittest.TestCase):
 
     def test_bartender_serves_god_wine(self):
         result = self.scene.advance_to_god_receives_wine()
-        self.assertEqual(result['service']['drink']['name'], 'wine')
+        self.assertEqual(result['service']['drink'].name, 'wine')
         self.assertTrue(self.scene.god.bar_state['wine_order']['served'])
 
     def test_god_has_not_tasted_wine_yet(self):

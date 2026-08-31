@@ -104,9 +104,7 @@ class Day0LilithLemonConservationTests(
         )
 
         self.assertEqual(
-            drink[
-                "name"
-            ],
+            drink.name,
             "lilith"
         )
 

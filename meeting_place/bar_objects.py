@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from core.entity.component_object import ComponentObject
 
 
@@ -256,6 +258,56 @@ class BarTab:
         return result
 
 from dataclasses import dataclass, field
+
+
+@dataclass(slots=True)
+class BarDrink:
+    name: str
+    type: str
+    category: str | None = None
+    ingredients: dict = field(default_factory=dict)
+    price_basis: str | None = None
+    effects: dict = field(default_factory=dict)
+    base: str | None = None
+    garnish: dict | None = None
+    preparation: dict | None = None
+
+    def to_dict(self):
+        result = {
+            "name": self.name,
+            "type": self.type,
+        }
+
+        if self.category is not None:
+            result["category"] = self.category
+
+        if self.ingredients:
+            result["ingredients"] = deepcopy(
+                self.ingredients
+            )
+
+        if self.price_basis is not None:
+            result["price_basis"] = self.price_basis
+
+        if self.effects:
+            result["effects"] = deepcopy(
+                self.effects
+            )
+
+        if self.base is not None:
+            result["base"] = self.base
+
+        if self.garnish is not None:
+            result["garnish"] = deepcopy(
+                self.garnish
+            )
+
+        if self.preparation is not None:
+            result["preparation"] = deepcopy(
+                self.preparation
+            )
+
+        return result
 
 
 @dataclass(slots=True)
@@ -549,4 +601,3 @@ class DrinkRecipe:
             ] = self.revision_reason
 
         return result
-

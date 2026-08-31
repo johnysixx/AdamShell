@@ -94,7 +94,7 @@ class Day0BouncerTastingAndJudgeTests(
 
         self.assertEqual(
             [
-                drink["name"]
+                drink.name
                 for drink in service["drinks"]
             ],
             [

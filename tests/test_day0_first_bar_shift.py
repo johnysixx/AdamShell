@@ -36,7 +36,7 @@ class Day0FirstBarShiftTests(unittest.TestCase):
         self.scene.start_shift()
         self.scene.serpent_is_born_and_enters()
         result = self.scene.serpent_orders_first_drinks()
-        self.assertEqual([drink['name'] for drink in result['drinks']], ['wine', 'beer', 'mead'])
+        self.assertEqual([drink.name for drink in result['drinks']], ['wine', 'beer', 'mead'])
         self.assertIsNone(result['payment'])
         self.assertFalse(result['receipt']['paid'])
         self.assertEqual(result['receipt']['status'], 'open_unpaid')

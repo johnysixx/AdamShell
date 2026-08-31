@@ -30,11 +30,26 @@ class CashRegister:
             self.open_tabs[entity_name] = tab
         return tab
 
+    def _drink_identity(self, drink):
+        if isinstance(drink, dict):
+            return (
+                drink.get("name"),
+                drink.get("category"),
+            )
+
+        return (
+            getattr(drink, "name", str(drink)),
+            getattr(drink, "category", None),
+        )
+
     def add_to_tab(self, entity, drink):
         tab = self.open_tab(entity)
+        drink_name, drink_category = (
+            self._drink_identity(drink)
+        )
         tab.add_item(
-            drink=drink["name"],
-            drink_category=drink.get("category"),
+            drink=drink_name,
+            drink_category=drink_category,
         )
         return tab
 
@@ -67,12 +82,9 @@ class CashRegister:
         self.receipt_count += 1
         items = []
         for drink in drinks:
-            if isinstance(drink, dict):
-                drink_name = drink.get("name")
-                drink_category = drink.get("category")
-            else:
-                drink_name = str(drink)
-                drink_category = None
+            drink_name, drink_category = (
+                self._drink_identity(drink)
+            )
             items.append({
                 "drink": drink_name,
                 "drink_category": drink_category,
@@ -101,13 +113,16 @@ class CashRegister:
         self.receipt_count += 1
         entity_name = getattr(entity, "name", None)
         entity_type = getattr(entity, "type", None)
+        drink_name, drink_category = (
+            self._drink_identity(drink)
+        )
         receipt = {
             "receipt_number": self.receipt_count,
             "type": "bar_receipt",
             "guest": entity_name,
             "guest_type": entity_type,
-            "drink": drink["name"],
-            "drink_category": drink.get("category"),
+            "drink": drink_name,
+            "drink_category": drink_category,
             "payment": dict(payment),
         }
         if entity_type == "god":
@@ -120,6 +135,6 @@ class CashRegister:
         UniverseLogger.event(
             "CASH REGISTER PRINTED RECEIPT: "
             f"{self.receipt_count} FOR={entity_name} "
-            f"DRINK={drink['name']}"
+            f"DRINK={drink_name}"
         )
         return receipt

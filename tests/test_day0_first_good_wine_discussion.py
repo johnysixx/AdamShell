@@ -27,7 +27,7 @@ class Day0FirstGoodWineDiscussionTests(unittest.TestCase):
     def test_lilith_drink_applies_its_effects_when_drunk(self):
         energy_before = getattr(self.scene.lilith, 'energy_j', 0.0)
         will_before = getattr(self.scene.lilith, 'creative_will', 0.0)
-        effects = self.scene.lilith_order['final_drink']['effects']
+        effects = self.scene.lilith_order['final_drink'].effects
         self.scene.lilith_and_serpent_take_first_table_drinks()
         self.assertEqual(self.scene.lilith.energy_j, energy_before + effects.get('energy_j', 0.0))
         self.assertEqual(self.scene.lilith.creative_will, will_before + effects.get('creative_will', 0.0))

@@ -42,9 +42,9 @@ class Day0BartenderJudgeProposalAndWaterTests(unittest.TestCase):
     def test_serpent_gets_water_with_free_lemon_slice(self):
         result = self.scene.advance_to_everyone_at_bar_with_serpents_water()
         drink = result['water']['drink']
-        self.assertEqual(drink['name'], 'water_with_lemon_slice')
-        self.assertEqual(drink['garnish']['ingredient'], 'lemon')
-        self.assertEqual(drink['garnish']['price'], 0)
+        self.assertEqual(drink.name, 'water_with_lemon_slice')
+        self.assertEqual(drink.garnish['ingredient'], 'lemon')
+        self.assertEqual(drink.garnish['price'], 0)
 
     def test_lemon_slice_does_not_consume_whole_lemon(self):
         self.scene.advance_to_wager_vote_proposal()

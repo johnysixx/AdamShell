@@ -49,7 +49,7 @@ class BasicDrinkPaymentTests(unittest.TestCase):
         before = meeting_place.energy_reservoir.energy_j
         result = meeting_place.serve_basic_drink(entity=entity, drink_name='rum')
         after = meeting_place.energy_reservoir.energy_j
-        self.assertEqual(result['drink']['name'], 'rum')
+        self.assertEqual(result['drink'].name, 'rum')
         self.assertGreater(result['payment']['bar_energy_j'], 0.0)
         self.assertEqual(after - before, result['payment']['bar_energy_j'])
 

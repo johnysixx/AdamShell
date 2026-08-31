@@ -24,7 +24,7 @@ class Day0LilithFinalServiceAndTableTests(unittest.TestCase):
 
     def test_lilith_gets_drink_and_receipt(self):
         result = self.scene.advance_to_good_drink_discussion()
-        self.assertEqual(result['served']['drink']['name'], 'lilith')
+        self.assertEqual(result['served']['drink'].name, 'lilith')
         self.assertFalse(result['served']['receipt']['paid'])
         self.assertEqual(result['served']['receipt']['status'], 'open_unpaid')
 

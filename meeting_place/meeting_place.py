@@ -1,4 +1,8 @@
-from meeting_place.bar_objects import BarIngredientStock, DrinkRecipe
+from meeting_place.bar_objects import (
+    BarDrink,
+    BarIngredientStock,
+    DrinkRecipe,
+)
 import random
 from cats.cat import Cat
 from universe.logger import UniverseLogger
@@ -634,12 +638,16 @@ class MeetingPlace:
                 raise ValueError(f'Drink is not a basic drink: {drink_name}')
             if not stock.available:
                 raise ValueError(f'Basic drink is unavailable: {drink_name}')
-            drink = {'name': drink_name, 'type': 'basic_bar_drink', 'category': 'basic_drink'}
+            drink = BarDrink(
+                name=drink_name,
+                type='basic_bar_drink',
+                category='basic_drink',
+            )
             drinks.append(drink)
             self.bar_counter.cash_register.add_to_tab(entity=entity, drink=drink)
         receipt = self.bar_counter.cash_register.print_open_tab_receipt(entity)
         entity_name = self._get_entity_name(entity)
-        event = {'name': 'bar_order_served_on_open_tab', 'guest': entity_name, 'drinks': [drink['name'] for drink in drinks], 'receipt_number': receipt['receipt_number'], 'paid': False}
+        event = {'name': 'bar_order_served_on_open_tab', 'guest': entity_name, 'drinks': [drink.name for drink in drinks], 'receipt_number': receipt['receipt_number'], 'paid': False}
         self.emit_event(event)
         return {'drinks': drinks, 'receipt': receipt, 'payment': None, 'tab_status': 'open'}
 
@@ -662,7 +670,11 @@ class MeetingPlace:
         if bar_energy_j > 0.0:
             entity_name = self._get_entity_name(entity)
             self.add_bar_energy(source=f'basic_drink_payment:{entity_name}:{drink_name}', amount_j=bar_energy_j)
-        drink = {'name': drink_name, 'type': 'basic_bar_drink', 'category': 'basic_drink'}
+        drink = BarDrink(
+            name=drink_name,
+            type='basic_bar_drink',
+            category='basic_drink',
+        )
         entity_name = self._get_entity_name(entity)
         receipt = self.bar_counter.cash_register.print_receipt(entity=entity, drink=drink, payment=payment)
         self.emit_event(f'{entity_name} drinks {drink_name}')
@@ -686,7 +698,11 @@ class MeetingPlace:
             if not requirement.consumed:
                 continue
             self.back_room.bar_ingredients[ingredient_name].consume(requirement.shots)
-        return {'name': drink_name, 'type': 'mixed_bar_drink'}
+        return BarDrink(
+            name=drink_name,
+            type='mixed_bar_drink',
+            category=recipe.category,
+        )
 
     def refresh_basic_drinks(self):
         ingredients = self.back_room.bar_ingredients
