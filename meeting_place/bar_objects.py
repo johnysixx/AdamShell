@@ -15,11 +15,30 @@ class BarShift(BarObject):
     pass
 
 
+class BarServingVessel:
+
+    def fill(
+        self,
+        contents
+    ):
+        self.state = "filled"
+        self.contains = contents
+        return self
+
+    def empty(self):
+        self.state = "empty"
+        self.contains = None
+        return self
+
+
 class BarCloth(BarObject):
     pass
 
 
-class MilkBowl(BarObject):
+class MilkBowl(
+    BarServingVessel,
+    BarObject
+):
     pass
 
 
@@ -142,7 +161,7 @@ class BarHexCell:
 
 
 @dataclass(slots=True)
-class BarGlass:
+class BarGlass(BarServingVessel):
     name: str | None
     type: str
     owner: str | None
@@ -154,6 +173,7 @@ class BarGlass:
     reservation_number: int | None = None
     created_for_entity: str | None = None
     capacity_litres: float | None = None
+    contains: str | None = None
 
     def to_dict(self):
         result = {
@@ -174,6 +194,8 @@ class BarGlass:
             result["created_for_entity"] = self.created_for_entity
         if self.capacity_litres is not None:
             result["capacity_litres"] = self.capacity_litres
+        if self.contains is not None:
+            result["contains"] = self.contains
         return result
 
 

@@ -230,12 +230,9 @@ class Bartender(SocialMixin):
         drink_name = self.get_drink_name(drink)
         serving_object_name = self.get_drink_name(serving_object)
         self.remember_first_order(guest_name, drink_name)
-        if isinstance(serving_object, dict):
-            serving_object['state'] = 'filled'
-            serving_object['contains'] = drink_name
-        else:
-            serving_object.state = 'filled'
-            serving_object.contains = drink_name
+        serving_object.fill(
+            drink_name
+        )
         event = f'{guest_name} was served {drink_name} in {serving_object_name}'
         self.observe_event(event)
         UniverseLogger.event(f'BARTENDER POURS DRINK: {drink_name} into {serving_object_name} for {guest_name}')
@@ -317,12 +314,9 @@ class Bartender(SocialMixin):
     def serve_without_order(self, guest_name, drink, serving_object):
         drink_name = self.get_drink_name(drink)
         serving_object_name = self.get_drink_name(serving_object)
-        if isinstance(serving_object, dict):
-            serving_object['state'] = 'filled'
-            serving_object['contains'] = drink_name
-        else:
-            serving_object.state = 'filled'
-            serving_object.contains = drink_name
+        serving_object.fill(
+            drink_name
+        )
         event = f'{guest_name} was served {drink_name} in {serving_object_name}'
         self.observe_event(event)
         UniverseLogger.event(f'BARTENDER SERVES WITHOUT ORDER: {drink_name} into {serving_object_name} for {guest_name}')
