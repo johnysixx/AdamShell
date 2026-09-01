@@ -39,7 +39,7 @@ class Day0BalancedWineAcidityTests(unittest.TestCase):
 
     def test_god_still_has_not_tasted_wine(self):
         self.scene.advance_to_balanced_acidity_idea()
-        self.assertFalse(self.scene.god.bar_state['wine_order'].tasted)
+        self.assertFalse(self.scene.god.bar_state.wine_order.tasted)
 
     def test_discussion_remains_unresolved(self):
         self.scene.advance_to_balanced_acidity_idea()

@@ -21,8 +21,8 @@ class Day0GodBrowsesDrinkMenuTests(unittest.TestCase):
 
     def test_god_moves_to_menu_and_browses_drinks(self):
         result = self.scene.advance_to_god_browsing_menu()
-        self.assertEqual(self.scene.god.bar_state['location'], 'drink_menu')
-        self.assertEqual(self.scene.god.bar_state['activity'], 'browsing_drinks')
+        self.assertEqual(self.scene.god.bar_state.location, 'drink_menu')
+        self.assertEqual(self.scene.god.bar_state.activity, 'browsing_drinks')
         self.assertTrue(isinstance(result['browsed']['available_drinks'], list))
 
     def test_lilith_and_serpent_continue_talking_while_god_browses(self):

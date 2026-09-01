@@ -18,7 +18,7 @@ class Day0ThirdWineIdeaTests(unittest.TestCase):
     def test_god_finishes_browsing_and_orders_lilith(self):
         result = self.scene.advance_to_third_wine_idea()
         self.assertEqual(result['god_order']['drink'], 'lilith')
-        self.assertEqual(self.scene.god.bar_state['activity'], 'ordered_lilith')
+        self.assertEqual(self.scene.god.bar_state.activity, 'ordered_lilith')
 
     def test_serpent_tastes_mead_then_beer(self):
         result = self.scene.advance_to_third_wine_idea()

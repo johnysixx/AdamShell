@@ -36,8 +36,8 @@ class Day0BartenderJudgeProposalAndWaterTests(unittest.TestCase):
 
     def test_lilith_and_god_move_to_bar(self):
         self.scene.advance_to_everyone_at_bar_with_serpents_water()
-        self.assertEqual(self.scene.lilith.bar_state['location'], 'bar_counter')
-        self.assertEqual(self.scene.god.bar_state['location'], 'bar_counter')
+        self.assertEqual(self.scene.lilith.bar_state.location, 'bar_counter')
+        self.assertEqual(self.scene.god.bar_state.location, 'bar_counter')
 
     def test_serpent_gets_water_with_free_lemon_slice(self):
         result = self.scene.advance_to_everyone_at_bar_with_serpents_water()
@@ -58,8 +58,8 @@ class Day0BartenderJudgeProposalAndWaterTests(unittest.TestCase):
 
     def test_everyone_ends_at_bar(self):
         self.scene.advance_to_everyone_at_bar_with_serpents_water()
-        self.assertEqual(self.scene.serpent.bar_state['location'], 'bar_counter')
-        self.assertEqual(self.scene.lilith.bar_state['location'], 'bar_counter')
-        self.assertEqual(self.scene.god.bar_state['location'], 'bar_counter')
+        self.assertEqual(self.scene.serpent.bar_state.location, 'bar_counter')
+        self.assertEqual(self.scene.lilith.bar_state.location, 'bar_counter')
+        self.assertEqual(self.scene.god.bar_state.location, 'bar_counter')
 if __name__ == '__main__':
     unittest.main()

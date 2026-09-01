@@ -20,23 +20,23 @@ class Day0SerpentCallsGodToTableTests(unittest.TestCase):
         event = self.scene.serpent_notices_god_and_calls_him_over()
         self.assertEqual(event['caller'], 'serpent')
         self.assertEqual(event['called'], 'god')
-        self.assertEqual(self.scene.god.bar_state['called_to_table_by'], 'serpent')
+        self.assertEqual(self.scene.god.bar_state.called_to_table_by, 'serpent')
 
     def test_god_comes_to_existing_table(self):
         result = self.scene.advance_to_god_at_table()
-        self.assertEqual(self.scene.god.bar_state['location'], 'table')
-        self.assertEqual(self.scene.god.bar_state['activity'], 'at_table')
+        self.assertEqual(self.scene.god.bar_state.location, 'table')
+        self.assertEqual(self.scene.god.bar_state.activity, 'at_table')
         self.assertEqual(result['joined']['with'], ['serpent', 'lilith'])
 
     def test_god_brings_lilith_to_table(self):
         result = self.scene.advance_to_god_at_table()
         self.assertEqual(result['joined']['drink_in_hand'], 'lilith')
-        self.assertEqual(self.scene.god.bar_state['drink'].name, 'lilith')
+        self.assertEqual(self.scene.god.bar_state.drink.name, 'lilith')
 
     def test_serpent_and_lilith_remain_at_table(self):
         self.scene.advance_to_god_at_table()
-        self.assertEqual(self.scene.serpent.bar_state['location'], 'table')
-        self.assertEqual(self.scene.lilith.bar_state['location'], 'table')
+        self.assertEqual(self.scene.serpent.bar_state.location, 'table')
+        self.assertEqual(self.scene.lilith.bar_state.location, 'table')
 
     def test_call_precedes_god_joining_table(self):
         self.scene.advance_to_god_at_table()

@@ -19,7 +19,7 @@ class Day0SerpentReturnsToBarTests(unittest.TestCase):
         result = self.scene.advance_to_serpent_at_bar_lilith_with_god()
         self.assertEqual(result['serpent']['from'], 'table')
         self.assertEqual(result['serpent']['to'], 'bar_counter')
-        self.assertEqual(self.scene.serpent.bar_state['location'], 'bar_counter')
+        self.assertEqual(self.scene.serpent.bar_state.location, 'bar_counter')
 
     def test_serpent_leaves_because_only_bad_beer_remains(self):
         result = self.scene.advance_to_serpent_at_bar_lilith_with_god()
@@ -28,8 +28,8 @@ class Day0SerpentReturnsToBarTests(unittest.TestCase):
 
     def test_lilith_and_god_remain_at_table(self):
         self.scene.advance_to_serpent_at_bar_lilith_with_god()
-        self.assertEqual(self.scene.lilith.bar_state['location'], 'table')
-        self.assertEqual(self.scene.god.bar_state['location'], 'table')
+        self.assertEqual(self.scene.lilith.bar_state.location, 'table')
+        self.assertEqual(self.scene.god.bar_state.location, 'table')
 
     def test_lilith_and_god_continue_talking(self):
         result = self.scene.advance_to_serpent_at_bar_lilith_with_god()

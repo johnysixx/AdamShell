@@ -904,6 +904,93 @@ class BarDrinkOrder:
 
 
 @dataclass(slots=True)
+class BarGuestBet:
+    offered: bool = False
+    accepted: bool = False
+
+    def to_dict(self):
+        return {
+            "offered": self.offered,
+            "accepted": self.accepted,
+        }
+
+
+@dataclass(slots=True)
+class BarGuestState:
+    seat: str | None = None
+    drinks: list[str] = field(
+        default_factory=list
+    )
+    activity: str | None = None
+    tab: str | None = None
+    paid: bool | None = None
+    receipt_number: int | str | None = None
+    bet: BarGuestBet | None = None
+    location: str | None = None
+    table_with: str | list[str] | None = None
+    order: str | None = None
+    prepared_drink: BarDrink | None = None
+    drink: BarDrink | None = None
+    lilith_tasted: bool | None = None
+    called_to_table_by: str | None = None
+    wine_order: BarDrinkOrder | None = None
+    wine: BarDrink | None = None
+    mead_finished_by: str | None = None
+    participates_in_drink_wager: bool | None = None
+    water_order: BarDrinkOrder | None = None
+
+    def to_dict(self):
+        result = {}
+
+        if self.drinks:
+            result["drinks"] = list(
+                self.drinks
+            )
+
+        for name in (
+            "seat",
+            "activity",
+            "tab",
+            "paid",
+            "receipt_number",
+            "location",
+            "table_with",
+            "order",
+            "lilith_tasted",
+            "called_to_table_by",
+            "mead_finished_by",
+            "participates_in_drink_wager",
+        ):
+            value = getattr(
+                self,
+                name
+            )
+
+            if value is not None:
+                result[name] = deepcopy(
+                    value
+                )
+
+        for name in (
+            "bet",
+            "prepared_drink",
+            "drink",
+            "wine_order",
+            "wine",
+            "water_order",
+        ):
+            value = getattr(
+                self,
+                name
+            )
+
+            if value is not None:
+                result[name] = value.to_dict()
+
+        return result
+
+
+@dataclass(slots=True)
 class BarIngredientStock:
     name: str
     available: bool

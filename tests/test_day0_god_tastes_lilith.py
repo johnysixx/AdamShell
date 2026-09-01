@@ -19,7 +19,7 @@ class Day0GodTastesLilithTests(unittest.TestCase):
         self.scene.advance_to_god_holding_lilith()
         energy_before = float(self.scene.god.energy_j)
         will_before = float(self.scene.god.creative_will)
-        drink = self.scene.god.bar_state['drink']
+        drink = self.scene.god.bar_state.drink
         effects = drink.effects
         event = self.scene.god_tastes_lilith()
         self.assertEqual(self.scene.god.energy_j, energy_before + float(effects.get('energy_j', 0.0)))
@@ -28,8 +28,8 @@ class Day0GodTastesLilithTests(unittest.TestCase):
 
     def test_god_is_now_tasting_lilith(self):
         self.scene.advance_to_god_first_lilith_taste()
-        self.assertEqual(self.scene.god.bar_state['activity'], 'tasting_lilith')
-        self.assertTrue(self.scene.god.bar_state['lilith_tasted'])
+        self.assertEqual(self.scene.god.bar_state.activity, 'tasting_lilith')
+        self.assertTrue(self.scene.god.bar_state.lilith_tasted)
 
     def test_gods_bill_remains_open_and_unpaid(self):
         result = self.scene.advance_to_god_first_lilith_taste()

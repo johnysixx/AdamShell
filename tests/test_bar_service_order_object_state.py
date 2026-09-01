@@ -95,9 +95,7 @@ class BarServiceOrderObjectStateTests(
     ):
         scene = self._scene()
         result = scene.advance_to_god_receives_wine()
-        order = scene.god.bar_state[
-            "wine_order"
-        ]
+        order = scene.god.bar_state.wine_order
 
         self.assertIsInstance(
             order,
@@ -129,16 +127,12 @@ class BarServiceOrderObjectStateTests(
     ):
         scene = self._scene()
         scene.advance_to_god_receives_wine()
-        order = scene.god.bar_state[
-            "wine_order"
-        ]
+        order = scene.god.bar_state.wine_order
 
         scene.god_tastes_existing_wine_and_rejects_it()
 
         self.assertIs(
-            scene.god.bar_state[
-                "wine_order"
-            ],
+            scene.god.bar_state.wine_order,
             order
         )
         self.assertTrue(
@@ -153,9 +147,7 @@ class BarServiceOrderObjectStateTests(
             scene
             .advance_to_everyone_at_bar_with_serpents_water()
         )
-        order = scene.serpent.bar_state[
-            "water_order"
-        ]
+        order = scene.serpent.bar_state.water_order
 
         self.assertIsInstance(
             order,
@@ -185,9 +177,7 @@ class BarServiceOrderObjectStateTests(
     ):
         scene = self._scene()
         result = scene.advance_to_god_receives_wine()
-        order = scene.god.bar_state[
-            "wine_order"
-        ]
+        order = scene.god.bar_state.wine_order
         event = result["order"]
 
         self.assertIsInstance(

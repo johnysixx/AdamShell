@@ -46,7 +46,7 @@ class Day0GodReceivesLilithTests(unittest.TestCase):
     def test_god_has_not_drunk_lilith_yet(self):
         result = self.scene.advance_to_god_holding_lilith()
         self.assertFalse(result['service']['receipt']['paid'])
-        self.assertEqual(self.scene.god.bar_state['activity'], 'holding_lilith')
+        self.assertEqual(self.scene.god.bar_state.activity, 'holding_lilith')
 
     def test_cronenberg_precedes_successful_second_attempt(self):
         self.scene.advance_to_god_holding_lilith()

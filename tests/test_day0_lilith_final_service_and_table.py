@@ -54,7 +54,7 @@ class Day0LilithFinalServiceAndTableTests(unittest.TestCase):
     def test_lilith_then_joins_serpent(self):
         result = self.scene.advance_to_good_drink_discussion()
         self.assertEqual(result['moved']['with'], 'serpent')
-        self.assertEqual(self.scene.lilith.bar_state['location'], 'table')
+        self.assertEqual(self.scene.lilith.bar_state.location, 'table')
 
     def test_discussion_starts_without_answer_yet(self):
         result = self.scene.advance_to_good_drink_discussion()

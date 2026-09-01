@@ -28,22 +28,44 @@ class Day0SerpentMovesBeforeBartenderReturnsTests(unittest.TestCase):
         self.scene.serpent_and_lilith_agree_on_table()
         event = self.scene.serpent_moves_from_bar_to_existing_table()
         self.assertEqual(event['from'], 'bar_counter')
-        self.assertEqual(self.scene.serpent.bar_state['location'], 'table')
-        self.assertEqual(self.scene.serpent.bar_state['activity'], 'waiting_for_lilith')
+        self.assertEqual(self.scene.serpent.bar_state.location, 'table')
+        self.assertEqual(self.scene.serpent.bar_state.activity, 'waiting_for_lilith')
 
     def test_lilith_remains_at_bar_when_serpent_leaves(self):
         self.scene.serpent_and_lilith_agree_on_table()
         self.scene.serpent_moves_from_bar_to_existing_table()
         self.assertIn(self.scene.lilith, self.bar.entities)
-        self.assertNotEqual(getattr(self.scene.lilith, 'bar_state', {}).get('location'), 'table')
+        self.assertNotEqual(
+            getattr(
+                getattr(
+                    self.scene.lilith,
+                    'bar_state',
+                    None
+                ),
+                'location',
+                None
+            ),
+            'table'
+        )
 
     def test_bartender_returns_to_find_only_lilith_at_counter(self):
         self.scene.serpent_and_lilith_agree_on_table()
         self.scene.serpent_moves_from_bar_to_existing_table()
         result = self.scene.bartender_returns_with_lemon()
         self.assertEqual(self.bar.bartender.current_location, 'bar')
-        self.assertEqual(self.scene.serpent.bar_state['location'], 'table')
-        self.assertNotEqual(getattr(self.scene.lilith, 'bar_state', {}).get('location'), 'table')
+        self.assertEqual(self.scene.serpent.bar_state.location, 'table')
+        self.assertNotEqual(
+            getattr(
+                getattr(
+                    self.scene.lilith,
+                    'bar_state',
+                    None
+                ),
+                'location',
+                None
+            ),
+            'table'
+        )
         self.assertEqual(result['returned']['ingredient'], 'lemon')
 if __name__ == '__main__':
     unittest.main()

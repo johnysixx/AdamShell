@@ -30,7 +30,7 @@ class Day0GodJoinsDrinkWagerTests(unittest.TestCase):
     def test_god_accepts(self):
         result = self.scene.advance_to_three_way_drink_wager()
         self.assertEqual(result['accepted']['participant'], 'god')
-        self.assertTrue(self.scene.god.bar_state['participates_in_drink_wager'])
+        self.assertTrue(self.scene.god.bar_state.participates_in_drink_wager)
 
     def test_wager_now_has_three_participants(self):
         self.scene.advance_to_three_way_drink_wager()
