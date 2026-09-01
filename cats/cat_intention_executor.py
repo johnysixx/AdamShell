@@ -209,15 +209,15 @@ class CatIntentionExecutor:
         source_position = getattr(source_box, 'position', None)
         if not isinstance(source_position, dict) or not self._same_position(cat.position or {}, source_position):
             return self._record({'name': 'cat_quantum_counterpart_sensing_failed', 'cat': cat.name, 'source_box_id': source_box_id, 'reason': 'cat_not_at_source_box', 'executed': False})
-        pairing = getattr(source_box, 'quantum_counterpart', {})
-        if not pairing.get('paired', False):
+        pairing = getattr(source_box, 'quantum_counterpart', None)
+        if pairing is None or not pairing.paired:
             return self._record({'name': 'cat_quantum_counterpart_sensing_failed', 'cat': cat.name, 'source_box_id': source_box_id, 'reason': 'pair_no_longer_exists', 'executed': False})
-        counterpart_id = pairing.get('box_id')
+        counterpart_id = pairing.box_id
         counterpart = next((box for box in getattr(self.universe, 'quantum_boxes', []) if getattr(box, 'id', None) == counterpart_id), None)
         if counterpart is None:
             return self._record({'name': 'cat_quantum_counterpart_sensing_failed', 'cat': cat.name, 'source_box_id': source_box_id, 'reason': 'counterpart_no_longer_exists', 'executed': False})
-        reverse_pairing = getattr(counterpart, 'quantum_counterpart', {})
-        if not reverse_pairing.get('paired', False) or reverse_pairing.get('box_id') != source_box_id:
+        reverse_pairing = getattr(counterpart, 'quantum_counterpart', None)
+        if reverse_pairing is None or not reverse_pairing.paired or reverse_pairing.box_id != source_box_id:
             return self._record({'name': 'cat_quantum_counterpart_sensing_failed', 'cat': cat.name, 'source_box_id': source_box_id, 'reason': 'pair_not_reciprocal', 'executed': False})
         observation = {'source_box_id': source_box_id, 'counterpart_box_id': counterpart.id, 'source_layer': getattr(source_box, 'current_layer', None), 'counterpart_layer': getattr(counterpart, 'current_layer', None), 'counterpart_position': deepcopy(getattr(counterpart, 'position', {})), 'observed_tick': getattr(self.universe, 'universe_tick', None), 'temporary': True, 'pair_currently_valid': True}
         cat.current_quantum_counterpart_observation = deepcopy(observation)

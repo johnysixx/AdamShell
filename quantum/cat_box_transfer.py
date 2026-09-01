@@ -367,16 +367,9 @@ class CatQuantumBoxTransfer:
         ):
             box.state = "superposition"
 
-            box.cat_transfer.update({
-                "active": False,
-                "state": "completed",
-                "cat_name": None,
-                "source_box_id": None,
-                "target_box_id": None,
-                "source_layer": None,
-                "target_layer": None,
-                "started_tick": None
-            })
+            box.cat_transfer.complete(
+                clear_source=True
+            )
 
         creator_returned = False
 
@@ -971,13 +964,9 @@ class CatQuantumBoxTransfer:
         source_box.clear_counterpart()
 
         source_box.state = "superposition"
-        source_box.cat_transfer.update({
-            "active": False,
-            "state": "completed",
-            "cat_name": None,
-            "target_box_id": None,
-            "target_layer": None
-        })
+        source_box.cat_transfer.complete(
+            clear_source=False
+        )
 
         cat.position = target_position
         cat.current_layer = target_layer
@@ -2172,9 +2161,7 @@ class CatQuantumBoxTransfer:
         cat,
         box
     ):
-        if not box.quantum_counterpart[
-            "paired"
-        ]:
+        if not box.quantum_counterpart.paired:
             return False
 
         access = cat.access

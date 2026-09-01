@@ -37,9 +37,9 @@ class CatQuantumBoxLayerVisibilityTests(unittest.TestCase):
         self.assertNotIn(self.target.id, smelled_ids)
 
     def test_local_box_still_knows_counterpart(self):
-        self.assertTrue(self.source['quantum_counterpart']['paired'] if isinstance(self.source, dict) else self.source.quantum_counterpart['paired'])
-        counterpart = self.source['quantum_counterpart'] if isinstance(self.source, dict) else self.source.quantum_counterpart
-        self.assertEqual(counterpart['box_id'], self.target.id)
-        self.assertEqual(counterpart['layer'], 'quantum_layer')
+        counterpart = self.source.quantum_counterpart
+        self.assertTrue(counterpart.paired)
+        self.assertEqual(counterpart.box_id, self.target.id)
+        self.assertEqual(counterpart.layer, 'quantum_layer')
 if __name__ == '__main__':
     unittest.main()

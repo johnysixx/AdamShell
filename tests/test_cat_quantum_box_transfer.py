@@ -70,16 +70,14 @@ class CatQuantumBoxTransferTests(
     ):
         self.assertTrue(
             self.source
-            .quantum_counterpart[
-                "paired"
-            ]
+            .quantum_counterpart
+            .paired
         )
 
         self.assertEqual(
             self.source
-            .quantum_counterpart[
-                "box_id"
-            ],
+            .quantum_counterpart
+            .box_id,
             self.target.id
         )
 
@@ -222,9 +220,8 @@ class CatQuantumBoxTransferTests(
 
         self.assertTrue(
             self.source
-            .quantum_counterpart[
-                "paired"
-            ]
+            .quantum_counterpart
+            .paired
         )
 
     def test_transfer_creates_quantum_trail(

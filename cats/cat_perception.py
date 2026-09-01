@@ -64,11 +64,11 @@ class CatPerception:
             if not recognition.get('recognized', False):
                 continue
             counterpart = getattr(box, 'quantum_counterpart', None)
-            if not isinstance(counterpart, dict):
+            if counterpart is None:
                 continue
-            if not counterpart.get('paired', False):
+            if not counterpart.paired:
                 continue
-            counterpart_id = counterpart.get('box_id')
+            counterpart_id = counterpart.box_id
             counterpart_box = boxes_by_id.get(counterpart_id)
             if counterpart_box is None:
                 continue
@@ -79,7 +79,7 @@ class CatPerception:
             counterpart_id = counterpart_observation.get('counterpart_box_id')
             source_box = next((box for box in getattr(self.universe, 'quantum_boxes', []) if getattr(box, 'id', None) == source_id), None)
             counterpart_box = next((box for box in getattr(self.universe, 'quantum_boxes', []) if getattr(box, 'id', None) == counterpart_id), None)
-            valid = source_box is not None and counterpart_box is not None and getattr(source_box, 'quantum_counterpart', {}).get('paired', False) and (getattr(source_box, 'quantum_counterpart', {}).get('box_id') == counterpart_id) and getattr(counterpart_box, 'quantum_counterpart', {}).get('paired', False) and (getattr(counterpart_box, 'quantum_counterpart', {}).get('box_id') == source_id)
+            valid = source_box is not None and counterpart_box is not None and source_box.quantum_counterpart.paired and (source_box.quantum_counterpart.box_id == counterpart_id) and counterpart_box.quantum_counterpart.paired and (counterpart_box.quantum_counterpart.box_id == source_id)
             if not valid:
                 if hasattr(cat, 'current_quantum_counterpart_observation'):
                     delattr(cat, 'current_quantum_counterpart_observation')
@@ -152,7 +152,7 @@ class CatPerception:
                 knowledge = CatKnowledge.ensure_cat_knowledge(cat)
                 pairing_principle_known = bool(knowledge.get('known_principles', {}).get('quantum_boxes_are_paired', False))
                 recognized_as_quantum_box = occupancy.get('recognized_as_quantum_box', True)
-                detail.update({'state': getattr(box, 'state', None), 'collapsed': bool(getattr(box, 'collapse', {}).get('collapsed', False)), 'recognized_as_quantum_box': recognized_as_quantum_box, 'paired': bool(recognized_as_quantum_box and pairing_principle_known), 'counterpart_known': False})
+                detail.update({'state': getattr(box, 'state', None), 'collapsed': bool(box.collapse.collapsed), 'recognized_as_quantum_box': recognized_as_quantum_box, 'paired': bool(recognized_as_quantum_box and pairing_principle_known), 'counterpart_known': False})
             observed.append(detail)
         observed.sort(key=lambda item: item['distance'])
         return observed
