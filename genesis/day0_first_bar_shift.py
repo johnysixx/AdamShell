@@ -7,9 +7,14 @@ from meeting_place.bar_objects import (
     BarDrinkOrder,
     BarDrinkWager,
     BarGuestBet,
+    BarGuestKnowledge,
     BarGuestState,
+    BarTasteKnowledge,
     BarIngredientStock,
+    BarWagerKnowledge,
     BarWagerDecisionMethod,
+    BarWineAssessment,
+    BarWineDiscussionKnowledge,
     BarWineHypothesis,
     DrinkRecipe,
     RecipeIngredientRequirement,
@@ -872,7 +877,17 @@ class Day0FirstBarShift:
         event = {'name': 'serpent_explains_wine_discussion_to_god', 'speaker': 'serpent', 'listener': 'god', 'summary': {'fuller_flavor': True, 'sweetness': True, 'bitterness': True}}
         self.meeting_place.emit_event(event)
         self.history.append(event)
-        self._entity_attr_setdefault(self.god, 'bar_knowledge', {})['wine_discussion'] = {'heard': True, 'ideas': [idea.to_dict() for idea in discussion.ideas]}
+        knowledge = self._entity_attr_setdefault(
+            self.god,
+            'bar_knowledge',
+            BarGuestKnowledge()
+        )
+        knowledge.wine_discussion = (
+            BarWineDiscussionKnowledge
+            .from_discussion(
+                discussion
+            )
+        )
         return event
 
     def lilith_rejects_bitterness_and_proposes_acidity(self):
@@ -1033,9 +1048,21 @@ class Day0FirstBarShift:
         if not wine_order.served:
             raise RuntimeError("God's wine has not been served.")
         wine_order.mark_tasted()
-        assessment = {'quality': 'bad', 'body': 'watery', 'comparison': 'water_in_which_someone_soaked_grapes'}
-        self._entity_attr_setdefault(self.god, 'bar_knowledge', {})['existing_wine'] = assessment
-        event = {'name': 'god_tastes_existing_wine', 'guest': 'god', 'drink': 'wine', 'assessment': assessment}
+        assessment = BarWineAssessment(
+            quality='bad',
+            body='watery',
+            comparison=(
+                'water_in_which_someone_'
+                'soaked_grapes'
+            ),
+        )
+        knowledge = self._entity_attr_setdefault(
+            self.god,
+            'bar_knowledge',
+            BarGuestKnowledge()
+        )
+        knowledge.existing_wine = assessment
+        event = {'name': 'god_tastes_existing_wine', 'guest': 'god', 'drink': 'wine', 'assessment': assessment.to_dict()}
         self.meeting_place.emit_event(event)
         self.history.append(event)
         return event
@@ -1048,16 +1075,33 @@ class Day0FirstBarShift:
         explanation = {'name': 'lilith_explains_sweetness_to_god', 'speaker': 'lilith', 'listener': 'god', 'principle': 'sweetness', 'meaning': 'good_wine_should_have_some_sweetness'}
         self.meeting_place.emit_event(explanation)
         self.history.append(explanation)
-        self._entity_attr_setdefault(self.god, 'bar_knowledge', {})['sweetness_explained'] = True
+        self._entity_attr_setdefault(
+            self.god,
+            'bar_knowledge',
+            BarGuestKnowledge()
+        ).sweetness_explained = True
         return explanation
 
     def god_finishes_serpents_mead_and_understands_sweetness(self):
-        if not getattr(self.god, 'bar_knowledge', {}).get('sweetness_explained', False):
+        knowledge = getattr(
+            self.god,
+            'bar_knowledge',
+            None
+        )
+        if (
+            knowledge is None
+            or not knowledge.sweetness_explained
+        ):
             raise RuntimeError('Lilith has not explained sweetness yet.')
         event = {'name': 'god_finishes_serpents_mead_and_understands_sweetness', 'guest': 'god', 'drink': 'mead', 'source': 'serpent', 'finished': True, 'understands': {'sweetness': True}, 'assessment': {'sweet': True, 'good': False}}
         self.meeting_place.emit_event(event)
         self.history.append(event)
-        self._entity_attr_setdefault(self.god, 'bar_knowledge', {})['sweetness'] = {'understood': True, 'example': 'mead', 'example_is_sweet': True, 'example_is_good': False}
+        knowledge.sweetness = BarTasteKnowledge(
+            understood=True,
+            example='mead',
+            example_is_sweet=True,
+            example_is_good=False,
+        )
         self._entity_attr_setdefault(
             self.serpent,
             'bar_state',
@@ -1072,11 +1116,27 @@ class Day0FirstBarShift:
         event = {'name': 'serpent_tells_god_about_drink_wager', 'speaker': 'serpent', 'listener': 'god', 'wager': wager.to_dict(), 'contest': ['wine', 'mead', 'beer']}
         self.meeting_place.emit_event(event)
         self.history.append(event)
-        self._entity_attr_setdefault(self.god, 'bar_knowledge', {})['drink_wager'] = {'known': True, 'source': 'serpent'}
+        self._entity_attr_setdefault(
+            self.god,
+            'bar_knowledge',
+            BarGuestKnowledge()
+        ).drink_wager = BarWagerKnowledge(
+            known=True,
+            source='serpent',
+        )
         return event
 
     def serpent_offers_god_wager_participation(self):
-        if not getattr(self.god, 'bar_knowledge', {}).get('drink_wager', {}).get('known', False):
+        knowledge = getattr(
+            self.god,
+            'bar_knowledge',
+            None
+        )
+        if (
+            knowledge is None
+            or knowledge.drink_wager is None
+            or not knowledge.drink_wager.known
+        ):
             raise RuntimeError('God does not know about the wager.')
         event = {'name': 'serpent_offers_god_wager_participation', 'offered_by': 'serpent', 'offered_to': 'god', 'accepted': None}
         self.meeting_place.emit_event(event)
@@ -1105,7 +1165,14 @@ class Day0FirstBarShift:
         event = {'name': 'god_tastes_beer_and_understands_bitterness', 'guest': 'god', 'drink': 'beer', 'assessment': {'good': None, 'not_so_bad': True}, 'understands': {'bitterness': True}, 'wine_conclusion': {'bitterness_belongs_in_wine': False}}
         self.meeting_place.emit_event(event)
         self.history.append(event)
-        self._entity_attr_setdefault(self.god, 'bar_knowledge', {})['bitterness'] = {'understood': True, 'example': 'beer'}
+        self._entity_attr_setdefault(
+            self.god,
+            'bar_knowledge',
+            BarGuestKnowledge()
+        ).bitterness = BarTasteKnowledge(
+            understood=True,
+            example='beer',
+        )
         discussion = self.serpent_lilith_good_drink_discussion
         discussion.current_hypothesis.bitterness = False
         return event
@@ -1516,10 +1583,12 @@ class Day0FirstBarShift:
         event = {'name': 'serpent_explains_wager_to_bouncer', 'speaker': 'serpent', 'listener': 'bouncer', 'participants': list(wager.participants), 'contest': ['wine', 'mead', 'beer'], 'proposed_judges': ['bartender', 'bouncer']}
         self.meeting_place.emit_event(event)
         self.history.append(event)
-        bouncer.wager_knowledge = {
-            'known': True,
-            'source': 'serpent'
-        }
+        bouncer.wager_knowledge = (
+            BarWagerKnowledge(
+                known=True,
+                source='serpent',
+            )
+        )
         return event
 
     def everyone_scratches_garfield(self):

@@ -22,7 +22,7 @@ class Day0BeerBitternessTests(unittest.TestCase):
     def test_god_understands_bitterness(self):
         result = self.scene.advance_to_bitterness_split_between_wine_and_beer()
         self.assertTrue(result['god_beer']['understands']['bitterness'])
-        self.assertTrue(self.scene.god.bar_knowledge['bitterness']['understood'])
+        self.assertTrue(self.scene.god.bar_knowledge.bitterness.understood)
 
     def test_god_rejects_bitterness_for_wine(self):
         result = self.scene.advance_to_bitterness_split_between_wine_and_beer()

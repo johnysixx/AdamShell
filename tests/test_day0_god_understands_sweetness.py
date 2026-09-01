@@ -32,7 +32,7 @@ class Day0GodUnderstandsSweetnessTests(unittest.TestCase):
     def test_lilith_explains_sweetness(self):
         result = self.scene.advance_to_god_understands_sweetness()
         self.assertEqual(result['explanation']['principle'], 'sweetness')
-        self.assertTrue(self.scene.god.bar_knowledge['sweetness_explained'])
+        self.assertTrue(self.scene.god.bar_knowledge.sweetness_explained)
 
     def test_god_finishes_serpents_mead(self):
         result = self.scene.advance_to_god_understands_sweetness()

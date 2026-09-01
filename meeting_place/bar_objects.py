@@ -991,6 +991,123 @@ class BarGuestState:
 
 
 @dataclass(slots=True)
+class BarWineDiscussionKnowledge:
+    heard: bool = False
+    ideas: list[BarDrinkIdea] = field(
+        default_factory=list
+    )
+
+    @classmethod
+    def from_discussion(cls, discussion):
+        return cls(
+            heard=True,
+            ideas=deepcopy(
+                discussion.ideas
+            ),
+        )
+
+    def to_dict(self):
+        return {
+            "heard": self.heard,
+            "ideas": [
+                idea.to_dict()
+                for idea in self.ideas
+            ],
+        }
+
+
+@dataclass(slots=True)
+class BarWineAssessment:
+    quality: str
+    body: str
+    comparison: str
+
+    def to_dict(self):
+        return {
+            "quality": self.quality,
+            "body": self.body,
+            "comparison": self.comparison,
+        }
+
+
+@dataclass(slots=True)
+class BarTasteKnowledge:
+    understood: bool
+    example: str
+    example_is_sweet: bool | None = None
+    example_is_good: bool | None = None
+
+    def to_dict(self):
+        result = {
+            "understood": self.understood,
+            "example": self.example,
+        }
+
+        if self.example_is_sweet is not None:
+            result["example_is_sweet"] = (
+                self.example_is_sweet
+            )
+
+        if self.example_is_good is not None:
+            result["example_is_good"] = (
+                self.example_is_good
+            )
+
+        return result
+
+
+@dataclass(slots=True)
+class BarWagerKnowledge:
+    known: bool = False
+    source: str | None = None
+
+    def to_dict(self):
+        result = {
+            "known": self.known,
+        }
+
+        if self.source is not None:
+            result["source"] = self.source
+
+        return result
+
+
+@dataclass(slots=True)
+class BarGuestKnowledge:
+    wine_discussion: (
+        BarWineDiscussionKnowledge | None
+    ) = None
+    existing_wine: BarWineAssessment | None = None
+    sweetness_explained: bool = False
+    sweetness: BarTasteKnowledge | None = None
+    drink_wager: BarWagerKnowledge | None = None
+    bitterness: BarTasteKnowledge | None = None
+
+    def to_dict(self):
+        result = {
+            "sweetness_explained":
+                self.sweetness_explained,
+        }
+
+        for name in (
+            "wine_discussion",
+            "existing_wine",
+            "sweetness",
+            "drink_wager",
+            "bitterness",
+        ):
+            value = getattr(
+                self,
+                name
+            )
+
+            if value is not None:
+                result[name] = value.to_dict()
+
+        return result
+
+
+@dataclass(slots=True)
 class BarIngredientStock:
     name: str
     available: bool

@@ -19,7 +19,7 @@ class Day0GodJoinsDrinkWagerTests(unittest.TestCase):
         result = self.scene.advance_to_three_way_drink_wager()
         self.assertEqual(result['explained']['speaker'], 'serpent')
         self.assertEqual(result['explained']['listener'], 'god')
-        self.assertTrue(self.scene.god.bar_knowledge['drink_wager']['known'])
+        self.assertTrue(self.scene.god.bar_knowledge.drink_wager.known)
 
     def test_serpent_offers_participation(self):
         result = self.scene.advance_to_three_way_drink_wager()

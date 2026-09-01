@@ -155,15 +155,11 @@ class Day0BouncerDualPresenceTests(
         )
 
         self.assertTrue(
-            knowledge[
-                "known"
-            ]
+            knowledge.known
         )
 
         self.assertEqual(
-            knowledge[
-                "source"
-            ],
+            knowledge.source,
             "serpent"
         )
 
