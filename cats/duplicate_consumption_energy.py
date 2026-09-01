@@ -196,9 +196,8 @@ class DuplicateConsumptionEnergy:
                     "is_alive",
                     False
                 )
-                and cronenberg.quantum_state.get(
-                    "counterpart_id"
-                ) is None
+                and cronenberg.quantum_state
+                .counterpart_id is None
             ),
             None
         )

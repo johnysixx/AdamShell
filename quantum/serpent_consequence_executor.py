@@ -204,9 +204,8 @@ class SerpentConsequenceExecutor:
             cronenberg
             for cronenberg in self.universe.cronenbergs
             if cronenberg.is_alive
-            and not cronenberg.quantum_state.get(
-                "counterpart_id"
-            )
+            and cronenberg.quantum_state
+            .counterpart_id is None
         ]
 
         if not candidates:
@@ -234,10 +233,10 @@ class SerpentConsequenceExecutor:
             "counterpart_id": counterpart.id,
             "pair_id": result["pair_id"],
             "original_spin": (
-                original.quantum_state["spin"]
+                original.quantum_state.spin
             ),
             "counterpart_spin": (
-                counterpart.quantum_state["spin"]
+                counterpart.quantum_state.spin
             ),
             "counterpart_location": (
                 counterpart.location

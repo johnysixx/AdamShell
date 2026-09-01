@@ -15,6 +15,9 @@ from core.entity.cronenberg_system.growth import (
 )
 from core.entity.cronenberg_system.traits import CronenbergTraits
 from core.entity.cronenberg_system.quantum_links import CronenbergQuantumLinks
+from core.entity.cronenberg_system.quantum_state import (
+    CronenbergQuantumState
+)
 from universe.aroma_profile import AromaProfile
 
 
@@ -88,14 +91,9 @@ class Cronenberg(Entity):
             owner_id=self.id
         )
 
-        self.quantum_state = {
-            "spin": 0.5,
-            "entangled": False,
-            "pair_id": None,
-            "counterpart_id": None,
-            "counterpart_potential": True,
-            "counterpart_manifested": False
-        }
+        self.quantum_state = (
+            CronenbergQuantumState()
+        )
 
         self.profile = None
         self.bar_policy = None
@@ -307,25 +305,35 @@ class Cronenberg(Entity):
         own_state = getattr(
             self,
             "quantum_state",
-            {}
+            None
         )
 
         other_state = getattr(
             other,
             "quantum_state",
-            {}
+            None
         )
 
-        pair_id = own_state.get(
-            "pair_id"
-        )
+        if not isinstance(
+            own_state,
+            CronenbergQuantumState
+        ):
+            return False
+
+        if not isinstance(
+            other_state,
+            CronenbergQuantumState
+        ):
+            return False
+
+        pair_id = own_state.pair_id
 
         return (
             pair_id is not None
-            and pair_id == other_state.get("pair_id")
-            and own_state.get("counterpart_id")
+            and pair_id == other_state.pair_id
+            and own_state.counterpart_id
             == other.id
-            and other_state.get("counterpart_id")
+            and other_state.counterpart_id
             == self.id
         )
 
@@ -545,7 +553,9 @@ class Cronenberg(Entity):
             "active": self.active,
             "location": self.location,
             "origin": dict(self.origin),
-            "quantum_state": dict(self.quantum_state),
+            "quantum_state": (
+                self.quantum_state.to_dict()
+            ),
             "alive": self.is_alive,
             "age": self.age,
             "energy": self.energy,

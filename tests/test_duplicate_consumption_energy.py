@@ -154,9 +154,7 @@ class DuplicateConsumptionEnergyTests(
         )
 
         self.assertIsNotNone(
-            original.quantum_state[
-                "counterpart_id"
-            ]
+            original.quantum_state.counterpart_id
         )
 
     def test_missing_twin_target_falls_back(

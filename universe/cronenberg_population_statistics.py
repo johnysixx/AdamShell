@@ -34,21 +34,17 @@ class CronenbergPopulationStatistics:
         ]
 
         active_pair_ids = {
-            cronenberg.quantum_state.get(
-                "pair_id"
-            )
+            cronenberg.quantum_state.pair_id
             for cronenberg in active
-            if cronenberg.quantum_state.get(
-                "pair_id"
-            ) is not None
+            if cronenberg.quantum_state
+            .pair_id is not None
         }
 
         standalone = [
             cronenberg
             for cronenberg in active
-            if cronenberg.quantum_state.get(
-                "pair_id"
-            ) is None
+            if cronenberg.quantum_state
+            .pair_id is None
         ]
 
         merged = [

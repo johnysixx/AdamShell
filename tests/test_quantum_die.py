@@ -87,22 +87,16 @@ class QuantumDieTests(unittest.TestCase):
                 cronenberg.quantum_state
             )
 
-            pair_id = quantum_state[
-                "pair_id"
-            ]
+            pair_id = quantum_state.pair_id
 
             self.assertIsNotNone(pair_id)
 
             self.assertTrue(
-                quantum_state[
-                    "entangled"
-                ]
+                quantum_state.entangled
             )
 
             self.assertTrue(
-                quantum_state[
-                    "counterpart_manifested"
-                ]
+                quantum_state.counterpart_manifested
             )
 
             pair_groups.setdefault(
@@ -125,12 +119,8 @@ class QuantumDieTests(unittest.TestCase):
 
             self.assertEqual(
                 {
-                    first.quantum_state[
-                        "spin"
-                    ],
-                    second.quantum_state[
-                        "spin"
-                    ]
+                    first.quantum_state.spin,
+                    second.quantum_state.spin
                 },
                 {
                     0.5,
@@ -139,16 +129,12 @@ class QuantumDieTests(unittest.TestCase):
             )
 
             self.assertEqual(
-                first.quantum_state[
-                    "counterpart_id"
-                ],
+                first.quantum_state.counterpart_id,
                 second.id
             )
 
             self.assertEqual(
-                second.quantum_state[
-                    "counterpart_id"
-                ],
+                second.quantum_state.counterpart_id,
                 first.id
             )
 

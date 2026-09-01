@@ -1,5 +1,9 @@
 from copy import deepcopy
 
+from core.entity.cronenberg_system.quantum_state import (
+    CronenbergQuantumState
+)
+
 
 class CronenbergPairEncounter:
 
@@ -36,22 +40,33 @@ class CronenbergPairEncounter:
         first_state = getattr(
             first,
             "quantum_state",
-            {}
+            None
         )
 
         second_state = getattr(
             second,
             "quantum_state",
-            {}
+            None
         )
 
-        first_pair_id = first_state.get(
-            "pair_id"
-        )
+        if not isinstance(
+            first_state,
+            CronenbergQuantumState
+        ):
+            return self._not_encountered(
+                reason="first_quantum_state_missing"
+            )
 
-        second_pair_id = second_state.get(
-            "pair_id"
-        )
+        if not isinstance(
+            second_state,
+            CronenbergQuantumState
+        ):
+            return self._not_encountered(
+                reason="second_quantum_state_missing"
+            )
+
+        first_pair_id = first_state.pair_id
+        second_pair_id = second_state.pair_id
 
         if (
             first_pair_id is None
@@ -62,9 +77,9 @@ class CronenbergPairEncounter:
             )
 
         if (
-            first_state.get("counterpart_id")
+            first_state.counterpart_id
             != second.id
-            or second_state.get("counterpart_id")
+            or second_state.counterpart_id
             != first.id
         ):
             return self._not_encountered(
@@ -86,8 +101,8 @@ class CronenbergPairEncounter:
                 second.id
             ],
             "spins": {
-                first.id: first_state.get("spin"),
-                second.id: second_state.get("spin")
+                first.id: first_state.spin,
+                second.id: second_state.spin
             },
             "universe_tick": universe_tick,
             "resolution": None

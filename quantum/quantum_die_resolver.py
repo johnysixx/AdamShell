@@ -144,17 +144,12 @@ class QuantumDieResolver:
                     True
                 )
                 and cronenberg.is_alive
-                and cronenberg.quantum_state.get(
-                    "counterpart_potential",
-                    True
-                )
-                and not cronenberg.quantum_state.get(
-                    "counterpart_manifested",
-                    False
-                )
-                and cronenberg.quantum_state.get(
-                    "counterpart_id"
-                ) is None
+                and cronenberg.quantum_state
+                .counterpart_potential
+                and not cronenberg.quantum_state
+                .counterpart_manifested
+                and cronenberg.quantum_state
+                .counterpart_id is None
             ),
             None
         )

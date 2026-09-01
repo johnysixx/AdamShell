@@ -103,12 +103,12 @@ class CronenbergQuantumTransformationTests(
         )
 
         self.assertEqual(
-            merged.quantum_state["spin"],
+            merged.quantum_state.spin,
             0.0
         )
 
         self.assertFalse(
-            merged.quantum_state["entangled"]
+            merged.quantum_state.entangled
         )
 
         self.assertEqual(
@@ -234,20 +234,16 @@ class CronenbergQuantumTransformationTests(
         )
 
         self.assertEqual(
-            recombined.quantum_state["spin"],
+            recombined.quantum_state.spin,
             0.0
         )
 
         self.assertTrue(
-            recombined.quantum_state[
-                "counterpart_potential"
-            ]
+            recombined.quantum_state.counterpart_potential
         )
 
         self.assertFalse(
-            recombined.quantum_state[
-                "counterpart_manifested"
-            ]
+            recombined.quantum_state.counterpart_manifested
         )
 
         self.assertEqual(

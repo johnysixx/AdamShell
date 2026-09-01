@@ -55,31 +55,27 @@ class CronenbergQuantumPairTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            original.quantum_state["spin"],
+            original.quantum_state.spin,
             0.5
         )
 
         self.assertEqual(
-            counterpart.quantum_state["spin"],
+            counterpart.quantum_state.spin,
             -0.5
         )
 
         self.assertEqual(
-            original.quantum_state["pair_id"],
-            counterpart.quantum_state["pair_id"]
+            original.quantum_state.pair_id,
+            counterpart.quantum_state.pair_id
         )
 
         self.assertEqual(
-            original.quantum_state[
-                "counterpart_id"
-            ],
+            original.quantum_state.counterpart_id,
             counterpart.id
         )
 
         self.assertEqual(
-            counterpart.quantum_state[
-                "counterpart_id"
-            ],
+            counterpart.quantum_state.counterpart_id,
             original.id
         )
 
@@ -122,7 +118,7 @@ class CronenbergQuantumPairTests(unittest.TestCase):
 
         self.assertEqual(
             together["pair_id"],
-            original.quantum_state["pair_id"]
+            original.quantum_state.pair_id
         )
 
     def test_tick_entities_resolves_reencounter_after_separation(self):
@@ -658,12 +654,12 @@ class CronenbergQuantumPairTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            original.quantum_state["spin"],
+            original.quantum_state.spin,
             -0.5
         )
 
         self.assertEqual(
-            counterpart.quantum_state["spin"],
+            counterpart.quantum_state.spin,
             0.5
         )
 
@@ -886,7 +882,7 @@ class CronenbergQuantumPairTests(unittest.TestCase):
 
         merge_pair_id = (
             merge_first
-            .quantum_state["pair_id"]
+            .quantum_state.pair_id
         )
 
         merge_encounter = (
@@ -923,21 +919,19 @@ class CronenbergQuantumPairTests(unittest.TestCase):
         )
 
         self.assertIsNone(
-            merged.quantum_state["pair_id"]
+            merged.quantum_state.pair_id
         )
 
         self.assertIsNone(
-            merged.quantum_state[
-                "counterpart_id"
-            ]
+            merged.quantum_state.counterpart_id
         )
 
         self.assertFalse(
-            merged.quantum_state["entangled"]
+            merged.quantum_state.entangled
         )
 
         self.assertNotEqual(
-            merged.quantum_state["pair_id"],
+            merged.quantum_state.pair_id,
             merge_pair_id
         )
 
@@ -950,7 +944,7 @@ class CronenbergQuantumPairTests(unittest.TestCase):
 
         consume_pair_id = (
             consume_first
-            .quantum_state["pair_id"]
+            .quantum_state.pair_id
         )
 
         consumption_encounter = (
@@ -989,27 +983,19 @@ class CronenbergQuantumPairTests(unittest.TestCase):
         )
 
         self.assertIsNone(
-            recombined.quantum_state[
-                "pair_id"
-            ]
+            recombined.quantum_state.pair_id
         )
 
         self.assertIsNone(
-            recombined.quantum_state[
-                "counterpart_id"
-            ]
+            recombined.quantum_state.counterpart_id
         )
 
         self.assertFalse(
-            recombined.quantum_state[
-                "entangled"
-            ]
+            recombined.quantum_state.entangled
         )
 
         self.assertNotEqual(
-            recombined.quantum_state[
-                "pair_id"
-            ],
+            recombined.quantum_state.pair_id,
             consume_pair_id
         )
 
@@ -1087,12 +1073,12 @@ class CronenbergQuantumPairTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            merged.quantum_state["spin"],
+            merged.quantum_state.spin,
             0.0
         )
 
         self.assertFalse(
-            merged.quantum_state["entangled"]
+            merged.quantum_state.entangled
         )
 
     def test_quantum_pair_consumption_effect(self):
@@ -1186,12 +1172,12 @@ class CronenbergQuantumPairTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            recombined.quantum_state["spin"],
+            recombined.quantum_state.spin,
             0.0
         )
 
         self.assertFalse(
-            recombined.quantum_state["entangled"]
+            recombined.quantum_state.entangled
         )
 
         self.assertAlmostEqual(

@@ -195,19 +195,15 @@ class CronenbergPairEncounterResolver:
         first,
         second
     ):
-        first_before = first.quantum_state[
-            "spin"
-        ]
+        first_before = first.quantum_state.spin
 
-        second_before = second.quantum_state[
-            "spin"
-        ]
+        second_before = second.quantum_state.spin
 
-        first.quantum_state["spin"] = (
+        first.quantum_state.spin = (
             second_before
         )
 
-        second.quantum_state["spin"] = (
+        second.quantum_state.spin = (
             first_before
         )
 
@@ -215,16 +211,12 @@ class CronenbergPairEncounterResolver:
             "first": {
                 "id": first.id,
                 "before": first_before,
-                "after": first.quantum_state[
-                    "spin"
-                ]
+                "after": first.quantum_state.spin
             },
             "second": {
                 "id": second.id,
                 "before": second_before,
-                "after": second.quantum_state[
-                    "spin"
-                ]
+                "after": second.quantum_state.spin
             }
         }
 

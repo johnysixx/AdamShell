@@ -417,7 +417,7 @@ class Universe:
             raise ValueError('Cronenbergs are not quantum counterparts.')
         if not first.active or not second.active:
             raise ValueError('Quantum pair consumption requires two active Cronenbergs.')
-        pair_id = first.quantum_state.get('pair_id')
+        pair_id = first.quantum_state.pair_id
         combined_size = float(first.size) + float(second.size)
         combined_energy = max(0.0, float(first.energy)) + max(0.0, float(second.energy))
         retained_energy = combined_energy * 0.4
@@ -432,7 +432,7 @@ class Universe:
         recombined.juice_value = recombined_size
         recombined.energy = retained_energy
         recombined.age = max(first.age, second.age)
-        recombined.quantum_state = {'spin': 0.0, 'entangled': False, 'pair_id': None, 'counterpart_id': None, 'counterpart_potential': True, 'counterpart_manifested': False}
+        recombined.quantum_state.reset(spin=0.0)
         recombined.recombined_from = [first.id, second.id]
         recombined.origin.update({'recombined_from': list(recombined.recombined_from), 'former_pair_id': pair_id, 'consumption_location': first.location, 'released_energy': released_energy, 'dark_energy_created': dark_energy})
         first.active = False
@@ -443,8 +443,8 @@ class Universe:
         second.location = 'quantum_consumption_history'
         first.recombined_into = recombined.id
         second.recombined_into = recombined.id
-        first.quantum_state.update({'entangled': False})
-        second.quantum_state.update({'entangled': False})
+        first.quantum_state.disentangle()
+        second.quantum_state.disentangle()
         self.energy_pool += released_energy
         if not hasattr(self, 'dark_energy'):
             self.dark_energy = 0.0
@@ -464,11 +464,11 @@ class Universe:
             raise ValueError('First Cronenberg is not registered.')
         if second not in self.cronenbergs:
             raise ValueError('Second Cronenberg is not registered.')
-        first_pair_id = first.quantum_state.get('pair_id')
-        second_pair_id = second.quantum_state.get('pair_id')
+        first_pair_id = first.quantum_state.pair_id
+        second_pair_id = second.quantum_state.pair_id
         if first_pair_id is None or first_pair_id != second_pair_id:
             raise ValueError('Cronenbergs do not belong to the same quantum pair.')
-        if first.quantum_state.get('counterpart_id') != second.id or second.quantum_state.get('counterpart_id') != first.id:
+        if first.quantum_state.counterpart_id != second.id or second.quantum_state.counterpart_id != first.id:
             raise ValueError('Cronenbergs are not mutual quantum counterparts.')
         if not first.active or not second.active:
             raise ValueError('Only active Cronenbergs can merge.')
@@ -480,7 +480,7 @@ class Universe:
         merged.energy = float(first.energy) + float(second.energy)
         merged.juice_value = merged.size
         merged.age = max(first.age, second.age)
-        merged.quantum_state = {'spin': 0.0, 'entangled': False, 'pair_id': None, 'counterpart_id': None}
+        merged.quantum_state.reset(spin=0.0)
         merged.merged_from = [first.id, second.id]
         merged.origin.update({'merged_from': list(merged.merged_from), 'former_pair_id': first_pair_id, 'merge_location': first.location})
         first.active = False
@@ -491,12 +491,12 @@ class Universe:
         second.merged_into = merged.id
         first.location = 'merged_history'
         second.location = 'merged_history'
-        first.quantum_state.update({'entangled': False})
-        second.quantum_state.update({'entangled': False})
+        first.quantum_state.disentangle()
+        second.quantum_state.disentangle()
         self.cronenbergs.append(merged)
         self.cronenberg_count += 1
         self.add_entity(merged)
-        event = {'name': 'cronenberg_quantum_pair_merged', 'pair_id': first_pair_id, 'parents': [first.id, second.id], 'merged_id': merged.id, 'merged_size': merged.size, 'merged_energy': merged.energy, 'merged_spin': merged.quantum_state['spin'], 'source': source, 'tick': self.quantum_state['tick_count']}
+        event = {'name': 'cronenberg_quantum_pair_merged', 'pair_id': first_pair_id, 'parents': [first.id, second.id], 'merged_id': merged.id, 'merged_size': merged.size, 'merged_energy': merged.energy, 'merged_spin': merged.quantum_state.spin, 'source': source, 'tick': self.quantum_state['tick_count']}
         self.quantum_events.append(event)
         UniverseLogger.event(f'CRONENBERG QUANTUM PAIR MERGED: {first.id} + {second.id} -> {merged.id}')
         return {'result': 'quantum_pair_merged', 'first': first, 'second': second, 'merged': merged, 'event': event}
@@ -506,11 +506,11 @@ class Universe:
             raise ValueError('Original Cronenberg is not registered in this universe.')
         if not getattr(original, 'is_alive', False):
             raise ValueError('Quantum counterpart requires a living Cronenberg.')
-        existing_counterpart_id = original.quantum_state.get('counterpart_id')
+        existing_counterpart_id = original.quantum_state.counterpart_id
         if existing_counterpart_id is not None:
             existing = next((cronenberg for cronenberg in self.cronenbergs if cronenberg.id == existing_counterpart_id), None)
             if existing is not None:
-                return {'result': 'counterpart_already_exists', 'original': original, 'counterpart': existing, 'pair_id': original.quantum_state['pair_id']}
+                return {'result': 'counterpart_already_exists', 'original': original, 'counterpart': existing, 'pair_id': original.quantum_state.pair_id}
         pair_id = f'cronenberg_pair_{uuid.uuid4().hex[:8]}'
         counterpart = Cronenberg(error=RuntimeError('Cronenberg quantum counterpart manifestation.'), source_component='cronenberg_quantum_counterpart', source_operation=source, quantum_tick=self.quantum_state['tick_count'])
         counterpart.size = original.size
@@ -519,8 +519,15 @@ class Universe:
         counterpart.age = original.age
         counterpart.state = 'born_as_quantum_counterpart'
         counterpart.location = 'quantum_layer'
-        counterpart.quantum_state = {'spin': -float(original.quantum_state.get('spin', 0.5)), 'entangled': True, 'pair_id': pair_id, 'counterpart_id': original.id, 'counterpart_potential': True, 'counterpart_manifested': True}
-        original.quantum_state.update({'entangled': True, 'pair_id': pair_id, 'counterpart_id': counterpart.id, 'counterpart_potential': True, 'counterpart_manifested': True})
+        counterpart.quantum_state.pair_with(
+            pair_id=pair_id,
+            counterpart_id=original.id,
+            spin=-float(original.quantum_state.spin),
+        )
+        original.quantum_state.pair_with(
+            pair_id=pair_id,
+            counterpart_id=counterpart.id,
+        )
         metadata = {'pair_id': pair_id, 'created_by': source, 'spin_relation': 'opposite'}
         original.quantum_link_system.add_link(target_id=counterpart.id, link_type='quantum_counterpart', strength=1.0, created_tick=self.quantum_state['tick_count'], metadata=metadata)
         counterpart.quantum_link_system.add_link(target_id=original.id, link_type='quantum_counterpart', strength=1.0, created_tick=self.quantum_state['tick_count'], metadata=metadata)
@@ -528,7 +535,7 @@ class Universe:
         self.cronenbergs.append(counterpart)
         self.cronenberg_count += 1
         self.add_entity(counterpart)
-        event = {'name': 'cronenberg_quantum_counterpart_created', 'original_id': original.id, 'counterpart_id': counterpart.id, 'pair_id': pair_id, 'original_spin': original.quantum_state['spin'], 'counterpart_spin': counterpart.quantum_state['spin'], 'source': source, 'tick': self.quantum_state['tick_count']}
+        event = {'name': 'cronenberg_quantum_counterpart_created', 'original_id': original.id, 'counterpart_id': counterpart.id, 'pair_id': pair_id, 'original_spin': original.quantum_state.spin, 'counterpart_spin': counterpart.quantum_state.spin, 'source': source, 'tick': self.quantum_state['tick_count']}
         self.quantum_events.append(event)
         UniverseLogger.event(f'CRONENBERG QUANTUM COUNTERPART CREATED: {original.id} <-> {counterpart.id}')
         return {'result': 'counterpart_created', 'original': original, 'counterpart': counterpart, 'pair_id': pair_id, 'event': event}
@@ -545,17 +552,17 @@ class Universe:
         return self.trigger_quantum_error(error=RuntimeError('Test quantum geometry failure.'), source_component='quantum_geometry_engine', source_operation='test_failure')
 
     def detect_cronenberg_pair_encounters(self):
-        active_cronenbergs = [cronenberg for cronenberg in self.cronenbergs if getattr(cronenberg, 'active', True) and cronenberg.is_alive and (cronenberg.quantum_state.get('pair_id') is not None)]
+        active_cronenbergs = [cronenberg for cronenberg in self.cronenbergs if getattr(cronenberg, 'active', True) and cronenberg.is_alive and (cronenberg.quantum_state.pair_id is not None)]
         current_encounters = set()
         detected_events = []
         processed_pair_ids = set()
         cronenbergs_by_id = {cronenberg.id: cronenberg for cronenberg in active_cronenbergs}
         for first in active_cronenbergs:
-            counterpart_id = first.quantum_state.get('counterpart_id')
+            counterpart_id = first.quantum_state.counterpart_id
             second = cronenbergs_by_id.get(counterpart_id)
             if second is None:
                 continue
-            pair_id = first.quantum_state.get('pair_id')
+            pair_id = first.quantum_state.pair_id
             if pair_id in processed_pair_ids:
                 continue
             processed_pair_ids.add(pair_id)
