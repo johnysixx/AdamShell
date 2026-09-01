@@ -9,6 +9,10 @@ from meeting_place.bouncer import Bouncer
 from meeting_place.bar_blacklist import BarBlacklist
 from meeting_place.bar_incident_book import BarIncidentBook
 from meeting_place.bar_hex_geometry import BarHexGeometry
+from meeting_place.bar_objects import (
+    BarSecurityConfiscation,
+    BarSecurityEnergyAllocation,
+)
 from meeting_place.bar_security_protocol import BarSecurityProtocol
 from core.entity.cronenberg import Cronenberg
 
@@ -59,7 +63,18 @@ class BarSecurityProtocolTests(unittest.TestCase):
         self.assertEqual(guest.state, 'ejected')
         self.assertEqual(guest.existence_pct, 0.0)
         self.assertEqual(guest.energy_j, 0.0)
-        self.assertEqual(self.protocol.last_confiscation, {'guest': 'guest_1', 'existence_pct': 73.5, 'energy_j': 42.0})
+        self.assertIsInstance(
+            self.protocol.last_confiscation,
+            BarSecurityConfiscation
+        )
+        self.assertEqual(
+            self.protocol.last_confiscation.to_dict(),
+            {
+                'guest': 'guest_1',
+                'existence_pct': 73.5,
+                'energy_j': 42.0,
+            }
+        )
 
     def test_confiscation_is_followed_by_cat_d20_roll(self):
         cat_d20 = Mock()
@@ -136,14 +151,32 @@ class BarSecurityProtocolTests(unittest.TestCase):
 
     def test_confiscated_energy_is_split_25_50_25(self):
         allocation = self.protocol.split_confiscated_energy(100.0)
-        self.assertEqual(allocation, {'entity_energy_j': 25.0, 'multiverse_energy_j': 50.0, 'bar_energy_j': 25.0})
+        self.assertIsInstance(
+            allocation,
+            BarSecurityEnergyAllocation
+        )
+        self.assertEqual(
+            allocation.to_dict(),
+            {
+                'entity_energy_j': 25.0,
+                'multiverse_energy_j': 50.0,
+                'bar_energy_j': 25.0,
+            }
+        )
 
     def test_confiscated_energy_is_allocated_after_ejection(self):
         guest = SocialEntity.from_mapping({'name': 'guest_1', 'type': 'guest', 'state': 'behind_bar', 'position': {'x': 4000, 'y': 0}, 'existence_pct': 100.0, 'energy_j': 80.0})
         service = self.geometry.find_cell(name='bar_service_floor')
         result = self.protocol.handle_guest_entry(guest, service)
         self.assertTrue(result)
-        self.assertEqual(self.protocol.last_energy_allocation, {'entity_energy_j': 20.0, 'multiverse_energy_j': 40.0, 'bar_energy_j': 20.0})
+        self.assertEqual(
+            self.protocol.last_energy_allocation.to_dict(),
+            {
+                'entity_energy_j': 20.0,
+                'multiverse_energy_j': 40.0,
+                'bar_energy_j': 20.0,
+            }
+        )
 
     def test_security_cat_uses_quantum_box_with_forced_cat_result(self):
         cat_d20 = Mock()
@@ -169,7 +202,14 @@ class BarSecurityProtocolTests(unittest.TestCase):
         result = self.protocol.handle_guest_entry(guest, service)
         self.assertTrue(result)
         self.assertEqual(self.protocol.last_creation_energy_j, 25.0)
-        self.assertEqual(self.protocol.last_energy_allocation, {'entity_energy_j': 25.0, 'multiverse_energy_j': 50.0, 'bar_energy_j': 25.0})
+        self.assertEqual(
+            self.protocol.last_energy_allocation.to_dict(),
+            {
+                'entity_energy_j': 25.0,
+                'multiverse_energy_j': 50.0,
+                'bar_energy_j': 25.0,
+            }
+        )
 
     def test_multiverse_share_returns_to_universe_energy_pool(self):
         universe = Mock()
@@ -182,7 +222,10 @@ class BarSecurityProtocolTests(unittest.TestCase):
         self.assertTrue(result)
         self.assertEqual(universe.energy_pool, 145.0)
         self.assertEqual(universe.dark_sector.dark_energy_j, 5.0)
-        self.assertEqual(self.protocol.last_energy_allocation['multiverse_energy_j'], 50.0)
+        self.assertEqual(
+            self.protocol.last_energy_allocation.multiverse_energy_j,
+            50.0
+        )
 
     def test_bar_share_goes_to_bar_energy_reservoir(self):
         bar_energy_reservoir = Mock()
@@ -192,7 +235,10 @@ class BarSecurityProtocolTests(unittest.TestCase):
         result = self.protocol.handle_guest_entry(guest, service)
         self.assertTrue(result)
         bar_energy_reservoir.add_energy.assert_called_once_with(source='bar_security_confiscation', amount_j=20.0)
-        self.assertEqual(self.protocol.last_energy_allocation['bar_energy_j'], 25.0)
+        self.assertEqual(
+            self.protocol.last_energy_allocation.bar_energy_j,
+            25.0
+        )
         self.assertEqual(self.protocol.last_bar_dark_energy_j, 5.0)
 
     def test_bar_share_splits_energy_and_dark_energy(self):

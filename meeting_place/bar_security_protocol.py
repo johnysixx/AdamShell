@@ -1,5 +1,9 @@
 from core.entity.cronenberg import Cronenberg
 from core.entity.existence import ExistenceResolver
+from meeting_place.bar_objects import (
+    BarSecurityConfiscation,
+    BarSecurityEnergyAllocation,
+)
 
 class BarSecurityProtocol:
 
@@ -26,8 +30,12 @@ class BarSecurityProtocol:
         return 'cat'
 
     def split_confiscated_energy(self, energy_j):
-        energy_j = float(energy_j)
-        return {'entity_energy_j': energy_j * 0.25, 'multiverse_energy_j': energy_j * 0.5, 'bar_energy_j': energy_j * 0.25}
+        return (
+            BarSecurityEnergyAllocation
+            .from_confiscated_energy(
+                energy_j
+            )
+        )
 
     def handle_bartender_red_button_press(self, reason):
         red_button = self.bar_counter.red_button
@@ -68,36 +76,57 @@ class BarSecurityProtocol:
         ejected = self.bouncer.eject(guest)
         if not ejected:
             return False
-        if isinstance(guest, dict):
-            guest_name = getattr(guest, 'world_key', None) or getattr(guest, 'name', None)
-            existence_pct = float(getattr(guest, 'existence_pct', 0.0))
-            energy_j = float(getattr(guest, 'energy_j', 0.0))
-            self.last_confiscation = {'guest': guest_name, 'existence_pct': existence_pct, 'energy_j': energy_j}
-            existence_result = ExistenceResolver.remove_from_strongest_world(guest)
-            guest.existence_pct = 0.0
-            guest.exists_somewhere = ExistenceResolver.exists_anywhere(guest)
-            guest.energy_j = 0.0
-            if existence_result['world'] is not None:
-                self.last_confiscation['existence_world'] = existence_result['world']
-                self.last_confiscation['removed_existence_pct'] = existence_result['removed_existence_pct']
-        else:
-            guest_name = getattr(guest, 'name', None)
-            existence_pct = float(getattr(guest, 'existence_pct', 0.0))
-            energy_j = float(getattr(guest, 'energy_j', 0.0))
-            self.last_confiscation = {'guest': guest_name, 'existence_pct': existence_pct, 'energy_j': energy_j}
-            existence_result = ExistenceResolver.remove_from_strongest_world(guest)
-            guest.existence_pct = 0.0
-            guest.exists_somewhere = ExistenceResolver.exists_anywhere(guest)
-            guest.energy_j = 0.0
-            if existence_result['world'] is not None:
-                self.last_confiscation['existence_world'] = existence_result['world']
-                self.last_confiscation['removed_existence_pct'] = existence_result['removed_existence_pct']
+        existence_pct = float(
+            getattr(
+                guest,
+                'existence_pct',
+                0.0
+            )
+        )
+        energy_j = float(
+            getattr(
+                guest,
+                'energy_j',
+                0.0
+            )
+        )
+        self.last_confiscation = (
+            BarSecurityConfiscation(
+                guest=guest_name,
+                existence_pct=existence_pct,
+                energy_j=energy_j,
+            )
+        )
+        existence_result = (
+            ExistenceResolver
+            .remove_from_strongest_world(
+                guest
+            )
+        )
+        guest.existence_pct = 0.0
+        guest.exists_somewhere = (
+            ExistenceResolver
+            .exists_anywhere(
+                guest
+            )
+        )
+        guest.energy_j = 0.0
+        if existence_result['world'] is not None:
+            self.last_confiscation.record_existence_removal(
+                world=existence_result[
+                    'world'
+                ],
+                removed_existence_pct=
+                    existence_result[
+                        'removed_existence_pct'
+                    ],
+            )
         self.last_energy_allocation = self.split_confiscated_energy(energy_j)
-        self.last_creation_energy_j = self.last_energy_allocation['entity_energy_j']
+        self.last_creation_energy_j = self.last_energy_allocation.entity_energy_j
         universe = getattr(self, 'universe', None)
         if universe is not None:
             energy_pool = getattr(universe, 'energy_pool', None)
-            multiverse_energy_j = self.last_energy_allocation['multiverse_energy_j']
+            multiverse_energy_j = self.last_energy_allocation.multiverse_energy_j
             multiverse_dark_energy_j = multiverse_energy_j * 0.1
             multiverse_ordinary_energy_j = multiverse_energy_j - multiverse_dark_energy_j
             if isinstance(energy_pool, (int, float)):
@@ -107,7 +136,7 @@ class BarSecurityProtocol:
                 dark_energy_j = getattr(dark_sector, 'dark_energy_j', None)
                 if isinstance(dark_energy_j, (int, float)):
                     dark_sector.dark_energy_j = float(dark_energy_j) + multiverse_dark_energy_j
-        bar_energy_j = self.last_energy_allocation['bar_energy_j']
+        bar_energy_j = self.last_energy_allocation.bar_energy_j
         bar_dark_energy_j = bar_energy_j * 0.2
         bar_ordinary_energy_j = bar_energy_j - bar_dark_energy_j
         self.last_bar_dark_energy_j = bar_dark_energy_j

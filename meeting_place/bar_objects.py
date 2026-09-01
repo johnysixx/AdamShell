@@ -217,6 +217,76 @@ class DarkEnergyBottle:
 
 
 @dataclass(slots=True)
+class BarSecurityConfiscation:
+    guest: str | None
+    existence_pct: float
+    energy_j: float
+    existence_world: str | None = None
+    removed_existence_pct: float | None = None
+
+    def record_existence_removal(
+        self,
+        world,
+        removed_existence_pct
+    ):
+        self.existence_world = world
+        self.removed_existence_pct = float(
+            removed_existence_pct
+        )
+
+    def to_dict(self):
+        result = {
+            "guest": self.guest,
+            "existence_pct": self.existence_pct,
+            "energy_j": self.energy_j,
+        }
+
+        if self.existence_world is not None:
+            result[
+                "existence_world"
+            ] = self.existence_world
+
+        if self.removed_existence_pct is not None:
+            result[
+                "removed_existence_pct"
+            ] = self.removed_existence_pct
+
+        return result
+
+
+@dataclass(slots=True)
+class BarSecurityEnergyAllocation:
+    entity_energy_j: float
+    multiverse_energy_j: float
+    bar_energy_j: float
+
+    @classmethod
+    def from_confiscated_energy(
+        cls,
+        energy_j
+    ):
+        energy_j = float(
+            energy_j
+        )
+
+        return cls(
+            entity_energy_j=
+                energy_j * 0.25,
+            multiverse_energy_j=
+                energy_j * 0.5,
+            bar_energy_j=
+                energy_j * 0.25,
+        )
+
+    def to_dict(self):
+        return {
+            "entity_energy_j": self.entity_energy_j,
+            "multiverse_energy_j": self.multiverse_energy_j,
+            "bar_energy_j": self.bar_energy_j,
+        }
+
+
+@dataclass(slots=True)
 class BarTabItem:
     drink: str
     drink_category: str | None = None
