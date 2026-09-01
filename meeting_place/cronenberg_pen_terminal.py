@@ -22,12 +22,13 @@ class CronenbergPenTerminal:
         area = getattr(
             meeting_place,
             "cronenberg_area",
-            {}
+            None
         )
 
         if pen is None:
             status = {
-                "area_state": area.get(
+                "area_state": getattr(
+                    area,
                     "state",
                     "clearing"
                 ),
@@ -45,8 +46,16 @@ class CronenbergPenTerminal:
                     "cronenberg_processing_count",
                     0
                 ),
-                "tree": area.get("tree", True),
-                "bench": area.get("bench", True),
+                "tree": getattr(
+                    area,
+                    "tree",
+                    True
+                ),
+                "bench": getattr(
+                    area,
+                    "bench",
+                    True
+                ),
                 "cronenbergs": []
             }
 
@@ -60,7 +69,8 @@ class CronenbergPenTerminal:
         pen_status = pen.get_status()
 
         status = {
-            "area_state": area.get(
+            "area_state": getattr(
+                area,
                 "state",
                 "cronenberg_pen"
             ),
@@ -76,8 +86,16 @@ class CronenbergPenTerminal:
             "processing_count": (
                 pen_status["processing_count"]
             ),
-            "tree": area.get("tree", False),
-            "bench": area.get("bench", False),
+            "tree": getattr(
+                area,
+                "tree",
+                False
+            ),
+            "bench": getattr(
+                area,
+                "bench",
+                False
+            ),
             "cronenbergs": pen_status["cronenbergs"]
         }
 
