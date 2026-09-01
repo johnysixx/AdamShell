@@ -18,6 +18,9 @@ from core.entity.cronenberg_system.quantum_links import CronenbergQuantumLinks
 from core.entity.cronenberg_system.quantum_state import (
     CronenbergQuantumState
 )
+from core.entity.cronenberg_system.origin import (
+    CronenbergOrigin
+)
 from universe.aroma_profile import AromaProfile
 
 
@@ -98,14 +101,12 @@ class Cronenberg(Entity):
         self.profile = None
         self.bar_policy = None
 
-        self.origin = {
-            "layer": "quantum_layer",
-            "source_component": source_component,
-            "source_operation": source_operation,
-            "quantum_tick": quantum_tick,
-            "error_type": type(error).__name__,
-            "error_message": str(error)
-        }
+        self.origin = CronenbergOrigin.from_error(
+            error=error,
+            source_component=source_component,
+            source_operation=source_operation,
+            quantum_tick=quantum_tick,
+        )
 
     @property
     def quantum_links(self):
@@ -552,7 +553,7 @@ class Cronenberg(Entity):
             "state": self.state,
             "active": self.active,
             "location": self.location,
-            "origin": dict(self.origin),
+            "origin": self.origin.to_dict(),
             "quantum_state": (
                 self.quantum_state.to_dict()
             ),

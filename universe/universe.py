@@ -434,7 +434,13 @@ class Universe:
         recombined.age = max(first.age, second.age)
         recombined.quantum_state.reset(spin=0.0)
         recombined.recombined_from = [first.id, second.id]
-        recombined.origin.update({'recombined_from': list(recombined.recombined_from), 'former_pair_id': pair_id, 'consumption_location': first.location, 'released_energy': released_energy, 'dark_energy_created': dark_energy})
+        recombined.origin.mark_recombined(
+            source_ids=recombined.recombined_from,
+            former_pair_id=pair_id,
+            consumption_location=first.location,
+            released_energy=released_energy,
+            dark_energy_created=dark_energy,
+        )
         first.active = False
         second.active = False
         first.state = 'destroyed_by_quantum_pair_consumption'
@@ -482,7 +488,11 @@ class Universe:
         merged.age = max(first.age, second.age)
         merged.quantum_state.reset(spin=0.0)
         merged.merged_from = [first.id, second.id]
-        merged.origin.update({'merged_from': list(merged.merged_from), 'former_pair_id': first_pair_id, 'merge_location': first.location})
+        merged.origin.mark_merged(
+            source_ids=merged.merged_from,
+            former_pair_id=first_pair_id,
+            merge_location=first.location,
+        )
         first.active = False
         second.active = False
         first.state = 'quantum_merged'
@@ -531,7 +541,10 @@ class Universe:
         metadata = {'pair_id': pair_id, 'created_by': source, 'spin_relation': 'opposite'}
         original.quantum_link_system.add_link(target_id=counterpart.id, link_type='quantum_counterpart', strength=1.0, created_tick=self.quantum_state['tick_count'], metadata=metadata)
         counterpart.quantum_link_system.add_link(target_id=original.id, link_type='quantum_counterpart', strength=1.0, created_tick=self.quantum_state['tick_count'], metadata=metadata)
-        counterpart.origin.update({'counterpart_of': original.id, 'pair_id': pair_id, 'spin_relation': 'opposite', 'manifested_in': 'quantum_layer'})
+        counterpart.origin.mark_counterpart(
+            counterpart_of=original.id,
+            pair_id=pair_id,
+        )
         self.cronenbergs.append(counterpart)
         self.cronenberg_count += 1
         self.add_entity(counterpart)

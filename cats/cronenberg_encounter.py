@@ -1,5 +1,8 @@
 import random
 
+from core.entity.cronenberg_system.origin import (
+    CronenbergOrigin
+)
 from universe.logger import UniverseLogger
 from cats.cat_personality import CatPersonality
 from cats.cat import Cat
@@ -391,8 +394,8 @@ class CatCronenbergEncounter:
             "cronenberg_energy": float(
                 getattr(cronenberg, "energy", 0.0)
             ),
-            "origin": dict(
-                getattr(cronenberg, "origin", {})
+            "origin": self._origin_snapshot(
+                cronenberg
             ),
             "traits": (
                 cronenberg.traits.snapshot()
@@ -432,6 +435,18 @@ class CatCronenbergEncounter:
             ],
             details=encounter_details
         )
+
+    def _origin_snapshot(self, cronenberg):
+        origin = getattr(
+            cronenberg,
+            "origin",
+            None
+        )
+
+        if isinstance(origin, CronenbergOrigin):
+            return origin.to_dict()
+
+        return dict(origin or {})
 
     def _escape_chance(
         self,
