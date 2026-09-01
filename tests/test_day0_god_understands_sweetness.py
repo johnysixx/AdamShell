@@ -54,9 +54,9 @@ class Day0GodUnderstandsSweetnessTests(unittest.TestCase):
     def test_wine_hypothesis_remains_unresolved(self):
         self.scene.advance_to_god_understands_sweetness()
         discussion = self.scene.serpent_lilith_good_drink_discussion
-        self.assertEqual(discussion['current_hypothesis']['acidity'], 'moderate')
-        self.assertTrue(discussion['current_hypothesis']['sweetness'])
-        self.assertFalse(discussion['resolved'])
+        self.assertEqual(discussion.current_hypothesis.acidity, 'moderate')
+        self.assertTrue(discussion.current_hypothesis.sweetness)
+        self.assertFalse(discussion.resolved)
 
     def test_event_order(self):
         self.scene.advance_to_god_understands_sweetness()

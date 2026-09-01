@@ -57,8 +57,8 @@ class Day0GodReceivesWineTests(unittest.TestCase):
 
     def test_wine_hypothesis_does_not_change_yet(self):
         self.scene.advance_to_god_receives_wine()
-        hypothesis = self.scene.serpent_lilith_good_drink_discussion['current_hypothesis']
-        self.assertEqual(hypothesis, {'fuller_flavor': True, 'sweetness': True, 'bitterness': False, 'acidity': True})
-        self.assertFalse(self.scene.serpent_lilith_good_drink_discussion['resolved'])
+        hypothesis = self.scene.serpent_lilith_good_drink_discussion.current_hypothesis
+        self.assertEqual(hypothesis.to_dict(), {'fuller_flavor': True, 'sweetness': True, 'bitterness': False, 'acidity': True})
+        self.assertFalse(self.scene.serpent_lilith_good_drink_discussion.resolved)
 if __name__ == '__main__':
     unittest.main()

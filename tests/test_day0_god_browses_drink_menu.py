@@ -33,7 +33,7 @@ class Day0GodBrowsesDrinkMenuTests(unittest.TestCase):
 
     def test_discussion_remains_unresolved(self):
         self.scene.advance_to_god_browsing_menu()
-        self.assertFalse(self.scene.serpent_lilith_good_drink_discussion['resolved'])
+        self.assertFalse(self.scene.serpent_lilith_good_drink_discussion.resolved)
 
     def test_order_of_events(self):
         self.scene.advance_to_god_browsing_menu()

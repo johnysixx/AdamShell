@@ -53,7 +53,7 @@ class Day0SerpentCallsGodToTableTests(unittest.TestCase):
     def test_wine_discussion_is_not_changed_by_arrival(self):
         self.scene.advance_to_god_at_table()
         discussion = self.scene.serpent_lilith_good_drink_discussion
-        self.assertEqual(len(discussion['ideas']), 3)
-        self.assertFalse(discussion['resolved'])
+        self.assertEqual(len(discussion.ideas), 3)
+        self.assertFalse(discussion.resolved)
 if __name__ == '__main__':
     unittest.main()

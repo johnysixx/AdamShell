@@ -78,6 +78,160 @@ class BarConversation:
 
 
 @dataclass(slots=True)
+class BarDrinkIdea:
+    subject: str
+    source: str | None = None
+    lilith: dict | None = None
+    serpent: dict | None = None
+    observation: str | dict | None = None
+    desired_property: dict | None = None
+    assessment: dict | None = None
+    proposal: dict | None = None
+    revision: dict | None = None
+    agrees_with: str | None = None
+    qualification: dict | None = None
+    meaning: str | None = None
+
+    def to_dict(self):
+        result = {
+            "subject": self.subject,
+        }
+
+        for name in (
+            "source",
+            "lilith",
+            "serpent",
+            "observation",
+            "desired_property",
+            "assessment",
+            "proposal",
+            "revision",
+            "agrees_with",
+            "qualification",
+            "meaning",
+        ):
+            value = getattr(
+                self,
+                name
+            )
+
+            if value is not None:
+                result[name] = deepcopy(
+                    value
+                )
+
+        return result
+
+
+@dataclass(slots=True)
+class BarWineHypothesis:
+    fuller_flavor: bool = True
+    sweetness: bool = False
+    bitterness: bool = False
+    acidity: bool | str | None = None
+
+    def to_dict(self):
+        result = {
+            "fuller_flavor":
+                self.fuller_flavor,
+            "sweetness": self.sweetness,
+            "bitterness": self.bitterness,
+        }
+
+        if self.acidity is not None:
+            result["acidity"] = self.acidity
+
+        return result
+
+
+@dataclass(slots=True)
+class BarBeerHypothesis:
+    bitterness: str | None = None
+    resolved: bool = False
+
+    def to_dict(self):
+        return {
+            "bitterness": self.bitterness,
+            "resolved": self.resolved,
+        }
+
+
+@dataclass(slots=True)
+class BarDrinkDiscussion:
+    name: str = (
+        "serpent_lilith_good_drink_discussion"
+    )
+    participants: list[str] = field(
+        default_factory=lambda: [
+            "serpent",
+            "lilith",
+        ]
+    )
+    subjects: list[str] = field(
+        default_factory=lambda: [
+            "wine",
+            "mead",
+            "beer",
+        ]
+    )
+    question: str = (
+        "what_should_good_wine_mead_or_beer_be_like"
+    )
+    ideas: list[BarDrinkIdea] = field(
+        default_factory=list
+    )
+    resolved: bool = False
+    current_hypothesis: (
+        BarWineHypothesis | None
+    ) = None
+    beer_hypothesis: (
+        BarBeerHypothesis | None
+    ) = None
+
+    def add_idea(self, idea):
+        self.ideas.append(
+            idea
+        )
+        self.resolved = False
+        return idea
+
+    def to_dict(self):
+        result = {
+            "name": self.name,
+            "participants": list(
+                self.participants
+            ),
+            "subjects": list(
+                self.subjects
+            ),
+            "question": self.question,
+            "ideas": [
+                idea.to_dict()
+                for idea in self.ideas
+            ],
+            "resolved": self.resolved,
+        }
+
+        if self.current_hypothesis is not None:
+            result[
+                "current_hypothesis"
+            ] = (
+                self.current_hypothesis
+                .to_dict()
+            )
+
+        if self.beer_hypothesis is not None:
+            result[
+                "beer_hypothesis"
+            ] = (
+                self.beer_hypothesis
+                .to_dict()
+            )
+
+        return result
+
+
+@dataclass(slots=True)
 class BarDrinkWagerChallenge:
     make_something_better: bool = True
     eligible_drinks: list[str] = field(

@@ -59,8 +59,8 @@ class Day0LilithFinalServiceAndTableTests(unittest.TestCase):
     def test_discussion_starts_without_answer_yet(self):
         result = self.scene.advance_to_good_drink_discussion()
         discussion = result['discussion']
-        self.assertEqual(discussion['subjects'], ['wine', 'mead', 'beer'])
-        self.assertEqual(discussion['ideas'], [])
-        self.assertFalse(discussion['resolved'])
+        self.assertEqual(discussion.subjects, ['wine', 'mead', 'beer'])
+        self.assertEqual(discussion.ideas, [])
+        self.assertFalse(discussion.resolved)
 if __name__ == '__main__':
     unittest.main()

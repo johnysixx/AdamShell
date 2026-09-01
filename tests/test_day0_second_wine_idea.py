@@ -31,18 +31,18 @@ class Day0SecondWineIdeaTests(unittest.TestCase):
     def test_lilith_adds_sweetness_as_wine_property(self):
         result = self.scene.advance_to_second_wine_idea()
         idea = result['wine_idea']['idea']
-        self.assertEqual(idea['subject'], 'wine')
-        self.assertTrue(idea['desired_property']['sweetness'])
+        self.assertEqual(idea.subject, 'wine')
+        self.assertTrue(idea.desired_property['sweetness'])
 
     def test_wine_discussion_now_has_two_ideas(self):
         self.scene.advance_to_second_wine_idea()
-        ideas = self.scene.serpent_lilith_good_drink_discussion['ideas']
+        ideas = self.scene.serpent_lilith_good_drink_discussion.ideas
         self.assertEqual(len(ideas), 2)
-        self.assertEqual(ideas[0]['serpent']['proposal'], 'flavor_should_be_fuller')
-        self.assertTrue(ideas[1]['desired_property']['sweetness'])
+        self.assertEqual(ideas[0].serpent['proposal'], 'flavor_should_be_fuller')
+        self.assertTrue(ideas[1].desired_property['sweetness'])
 
     def test_discussion_is_still_unresolved(self):
         self.scene.advance_to_second_wine_idea()
-        self.assertFalse(self.scene.serpent_lilith_good_drink_discussion['resolved'])
+        self.assertFalse(self.scene.serpent_lilith_good_drink_discussion.resolved)
 if __name__ == '__main__':
     unittest.main()

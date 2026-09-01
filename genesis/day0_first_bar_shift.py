@@ -1,9 +1,13 @@
 from meeting_place.bar_objects import (
+    BarBeerHypothesis,
     BarConversation,
     BarDrink,
+    BarDrinkDiscussion,
+    BarDrinkIdea,
     BarDrinkWager,
     BarIngredientStock,
     BarWagerDecisionMethod,
+    BarWineHypothesis,
     DrinkRecipe,
     RecipeIngredientRequirement,
 )
@@ -399,9 +403,21 @@ class Day0FirstBarShift:
         discussion = getattr(self, 'serpent_lilith_good_drink_discussion', None)
         if discussion is None:
             raise RuntimeError('Good drink discussion has not started.')
-        observation = {'subject': 'wine', 'lilith': {'observation': 'wine_tastes_like_water'}, 'serpent': {'agrees': True, 'proposal': 'flavor_should_be_fuller'}}
-        discussion['ideas'].append(observation)
-        discussion['resolved'] = False
+        observation = BarDrinkIdea(
+            subject='wine',
+            lilith={
+                'observation':
+                    'wine_tastes_like_water',
+            },
+            serpent={
+                'agrees': True,
+                'proposal':
+                    'flavor_should_be_fuller',
+            },
+        )
+        discussion.add_idea(
+            observation
+        )
         event = {'name': 'first_good_wine_observation', 'subject': 'wine', 'wine_tastes_like_water': True, 'desired_flavor': 'fuller'}
         self.meeting_place.emit_event(event)
         self.history.append(event)
@@ -411,7 +427,7 @@ class Day0FirstBarShift:
         discussion = getattr(self, 'serpent_lilith_good_drink_discussion', None)
         if discussion is None:
             raise RuntimeError('Good drink discussion has not started.')
-        if not discussion.get('ideas'):
+        if not discussion.ideas:
             raise RuntimeError('First wine observation has not happened yet.')
         god = self.god_leaves_library_and_enters_bar()
         event = {'name': 'god_arrives_during_wine_discussion', 'guest': 'god', 'from': 'library', 'to': 'bar'}
@@ -449,7 +465,7 @@ class Day0FirstBarShift:
         event = {'name': 'serpent_and_lilith_continue_wine_discussion', 'participants': ['serpent', 'lilith'], 'subject': 'wine', 'previous_idea': 'flavor_should_be_fuller', 'new_idea': None}
         self.meeting_place.emit_event(event)
         self.history.append(event)
-        discussion['resolved'] = False
+        discussion.resolved = False
         return event
 
     def bartender_asks_god_for_order(self):
@@ -476,9 +492,17 @@ class Day0FirstBarShift:
         tasting = {'name': 'lilith_tastes_mead', 'guest': 'lilith', 'drink': 'mead'}
         self.meeting_place.emit_event(tasting)
         self.history.append(tasting)
-        idea = {'subject': 'wine', 'source': 'lilith', 'observation': 'wine_should_be_sweet', 'desired_property': {'sweetness': True}}
-        discussion['ideas'].append(idea)
-        discussion['resolved'] = False
+        idea = BarDrinkIdea(
+            subject='wine',
+            source='lilith',
+            observation='wine_should_be_sweet',
+            desired_property={
+                'sweetness': True,
+            },
+        )
+        discussion.add_idea(
+            idea
+        )
         event = {'name': 'lilith_says_wine_should_be_sweet', 'subject': 'wine', 'desired_property': 'sweet'}
         self.meeting_place.emit_event(event)
         self.history.append(event)
@@ -515,9 +539,20 @@ class Day0FirstBarShift:
         discussion = getattr(self, 'serpent_lilith_good_drink_discussion', None)
         if discussion is None:
             raise RuntimeError('Good drink discussion has not started.')
-        observation = {'subject': 'wine', 'source': 'serpent', 'assessment': {'sweetness': 'good', 'full_body': 'still_missing'}, 'proposal': {'bitterness': True}}
-        discussion['ideas'].append(observation)
-        discussion['resolved'] = False
+        observation = BarDrinkIdea(
+            subject='wine',
+            source='serpent',
+            assessment={
+                'sweetness': 'good',
+                'full_body': 'still_missing',
+            },
+            proposal={
+                'bitterness': True,
+            },
+        )
+        discussion.add_idea(
+            observation
+        )
         event = {'name': 'serpent_proposes_bitterness_for_wine', 'subject': 'wine', 'sweetness': 'good_but_not_enough', 'desired_property': 'bitterness'}
         self.meeting_place.emit_event(event)
         self.history.append(event)
@@ -672,7 +707,7 @@ class Day0FirstBarShift:
         event = {'name': 'serpent_explains_wine_discussion_to_god', 'speaker': 'serpent', 'listener': 'god', 'summary': {'fuller_flavor': True, 'sweetness': True, 'bitterness': True}}
         self.meeting_place.emit_event(event)
         self.history.append(event)
-        self._entity_attr_setdefault(self.god, 'bar_knowledge', {})['wine_discussion'] = {'heard': True, 'ideas': list(discussion['ideas'])}
+        self._entity_attr_setdefault(self.god, 'bar_knowledge', {})['wine_discussion'] = {'heard': True, 'ideas': [idea.to_dict() for idea in discussion.ideas]}
         return event
 
     def lilith_rejects_bitterness_and_proposes_acidity(self):
@@ -680,10 +715,28 @@ class Day0FirstBarShift:
         event = {'name': 'lilith_rejects_bitterness_for_wine', 'speaker': 'lilith', 'rejected_property': 'bitterness', 'reason': 'does_not_feel_right_for_wine'}
         self.meeting_place.emit_event(event)
         self.history.append(event)
-        idea = {'subject': 'wine', 'source': 'lilith', 'revision': {'remove': 'bitterness', 'add': 'acidity'}, 'desired_property': {'acidity': True}}
-        discussion['ideas'].append(idea)
-        discussion['current_hypothesis'] = {'fuller_flavor': True, 'sweetness': True, 'bitterness': False, 'acidity': True}
-        discussion['resolved'] = False
+        idea = BarDrinkIdea(
+            subject='wine',
+            source='lilith',
+            revision={
+                'remove': 'bitterness',
+                'add': 'acidity',
+            },
+            desired_property={
+                'acidity': True,
+            },
+        )
+        discussion.add_idea(
+            idea
+        )
+        discussion.current_hypothesis = (
+            BarWineHypothesis(
+                fuller_flavor=True,
+                sweetness=True,
+                bitterness=False,
+                acidity=True,
+            )
+        )
         proposal_event = {'name': 'lilith_proposes_acidity_for_wine', 'subject': 'wine', 'desired_property': 'acidity'}
         self.meeting_place.emit_event(proposal_event)
         self.history.append(proposal_event)
@@ -745,15 +798,27 @@ class Day0FirstBarShift:
 
     def serpent_agrees_with_acidity_but_wants_balance(self):
         discussion = self.serpent_lilith_good_drink_discussion
-        hypothesis = discussion.get('current_hypothesis')
+        hypothesis = discussion.current_hypothesis
         if hypothesis is None:
             raise RuntimeError('Current wine hypothesis does not exist.')
-        if not hypothesis.get('acidity', False):
+        if not hypothesis.acidity:
             raise RuntimeError('Acidity has not been proposed yet.')
-        idea = {'subject': 'wine', 'source': 'serpent', 'agrees_with': 'acidity', 'qualification': {'acidity': 'moderate'}, 'meaning': 'acidity_is_right_but_too_much_would_make_the_wine_bad'}
-        discussion['ideas'].append(idea)
-        discussion['current_hypothesis']['acidity'] = 'moderate'
-        discussion['resolved'] = False
+        idea = BarDrinkIdea(
+            subject='wine',
+            source='serpent',
+            agrees_with='acidity',
+            qualification={
+                'acidity': 'moderate',
+            },
+            meaning=(
+                'acidity_is_right_but_too_much_'
+                'would_make_the_wine_bad'
+            ),
+        )
+        discussion.add_idea(
+            idea
+        )
+        hypothesis.acidity = 'moderate'
         event = {'name': 'serpent_says_wine_needs_moderate_acidity', 'speaker': 'serpent', 'subject': 'wine', 'agrees_acidity': True, 'too_much_acidity': 'bad', 'desired_acidity': 'moderate'}
         self.meeting_place.emit_event(event)
         self.history.append(event)
@@ -775,8 +840,8 @@ class Day0FirstBarShift:
 
     def lilith_explains_sweetness_to_god(self):
         discussion = self.serpent_lilith_good_drink_discussion
-        hypothesis = discussion.get('current_hypothesis', {})
-        if not hypothesis.get('sweetness', False):
+        hypothesis = discussion.current_hypothesis
+        if hypothesis is None or not hypothesis.sweetness:
             raise RuntimeError('Sweetness is not part of the wine hypothesis.')
         explanation = {'name': 'lilith_explains_sweetness_to_god', 'speaker': 'lilith', 'listener': 'god', 'principle': 'sweetness', 'meaning': 'good_wine_should_have_some_sweetness'}
         self.meeting_place.emit_event(explanation)
@@ -834,7 +899,7 @@ class Day0FirstBarShift:
         self.history.append(event)
         self._entity_attr_setdefault(self.god, 'bar_knowledge', {})['bitterness'] = {'understood': True, 'example': 'beer'}
         discussion = self.serpent_lilith_good_drink_discussion
-        discussion['current_hypothesis']['bitterness'] = False
+        discussion.current_hypothesis.bitterness = False
         return event
 
     def lilith_sips_lilith_and_reacts_to_beer(self):
@@ -848,9 +913,14 @@ class Day0FirstBarShift:
         self.meeting_place.emit_event(event)
         self.history.append(event)
         discussion = self.serpent_lilith_good_drink_discussion
-        beer_hypothesis = discussion.setdefault('beer_hypothesis', {'bitterness': None, 'resolved': False})
-        beer_hypothesis['bitterness'] = 'allowed'
-        beer_hypothesis['resolved'] = False
+        if discussion.beer_hypothesis is None:
+            discussion.beer_hypothesis = (
+                BarBeerHypothesis()
+            )
+        discussion.beer_hypothesis.bitterness = (
+            'allowed'
+        )
+        discussion.beer_hypothesis.resolved = False
         return event
 
     def serpent_leaves_table_for_bar(self):
@@ -1372,10 +1442,11 @@ class Day0FirstBarShift:
             raise RuntimeError('Serpent is not at table.')
         if getattr(self.lilith, 'bar_state', {}).get('location') != 'table':
             raise RuntimeError('Lilith is not at table.')
-        discussion = {'name': 'serpent_lilith_good_drink_discussion', 'participants': ['serpent', 'lilith'], 'subjects': ['wine', 'mead', 'beer'], 'question': 'what_should_good_wine_mead_or_beer_be_like', 'ideas': [], 'resolved': False}
+        discussion = BarDrinkDiscussion()
         self.serpent_lilith_good_drink_discussion = discussion
-        self.meeting_place.emit_event(discussion)
-        self.history.append(discussion)
+        event = discussion.to_dict()
+        self.meeting_place.emit_event(event)
+        self.history.append(event)
         return discussion
 
     def advance_to_good_drink_discussion(self):

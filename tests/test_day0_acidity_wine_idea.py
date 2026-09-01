@@ -29,12 +29,15 @@ class Day0AcidityWineIdeaTests(unittest.TestCase):
     def test_lilith_proposes_acidity(self):
         result = self.scene.advance_to_acidity_wine_idea()
         idea = result['revised']['idea']
-        self.assertTrue(idea['desired_property']['acidity'])
+        self.assertTrue(idea.desired_property['acidity'])
 
     def test_current_hypothesis_replaces_bitterness_with_acidity(self):
         self.scene.advance_to_acidity_wine_idea()
-        hypothesis = self.scene.serpent_lilith_good_drink_discussion['current_hypothesis']
-        self.assertEqual(hypothesis, {'fuller_flavor': True, 'sweetness': True, 'bitterness': False, 'acidity': True})
+        hypothesis = self.scene.serpent_lilith_good_drink_discussion.current_hypothesis
+        self.assertTrue(hypothesis.fuller_flavor)
+        self.assertTrue(hypothesis.sweetness)
+        self.assertFalse(hypothesis.bitterness)
+        self.assertTrue(hypothesis.acidity)
 
     def test_lilith_gives_serpent_her_drink_to_taste(self):
         result = self.scene.advance_to_acidity_wine_idea()
@@ -56,6 +59,6 @@ class Day0AcidityWineIdeaTests(unittest.TestCase):
 
     def test_discussion_stays_unresolved(self):
         self.scene.advance_to_acidity_wine_idea()
-        self.assertFalse(self.scene.serpent_lilith_good_drink_discussion['resolved'])
+        self.assertFalse(self.scene.serpent_lilith_good_drink_discussion.resolved)
 if __name__ == '__main__':
     unittest.main()

@@ -27,7 +27,7 @@ class Day0BeerBitternessTests(unittest.TestCase):
     def test_god_rejects_bitterness_for_wine(self):
         result = self.scene.advance_to_bitterness_split_between_wine_and_beer()
         self.assertFalse(result['god_beer']['wine_conclusion']['bitterness_belongs_in_wine'])
-        self.assertFalse(self.scene.serpent_lilith_good_drink_discussion['current_hypothesis']['bitterness'])
+        self.assertFalse(self.scene.serpent_lilith_good_drink_discussion.current_hypothesis.bitterness)
 
     def test_lilith_disagrees_that_beer_is_good(self):
         result = self.scene.advance_to_bitterness_split_between_wine_and_beer()
@@ -36,9 +36,9 @@ class Day0BeerBitternessTests(unittest.TestCase):
     def test_lilith_accepts_bitterness_for_good_beer(self):
         result = self.scene.advance_to_bitterness_split_between_wine_and_beer()
         self.assertTrue(result['lilith']['beer_conclusion']['bitterness_allowed'])
-        beer = self.scene.serpent_lilith_good_drink_discussion['beer_hypothesis']
-        self.assertEqual(beer['bitterness'], 'allowed')
-        self.assertFalse(beer['resolved'])
+        beer = self.scene.serpent_lilith_good_drink_discussion.beer_hypothesis
+        self.assertEqual(beer.bitterness, 'allowed')
+        self.assertFalse(beer.resolved)
 
     def test_lilith_sip_applies_lilith_effects(self):
         self.scene.advance_to_three_way_drink_wager()

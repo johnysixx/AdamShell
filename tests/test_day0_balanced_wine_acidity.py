@@ -27,15 +27,15 @@ class Day0BalancedWineAcidityTests(unittest.TestCase):
 
     def test_desired_acidity_becomes_moderate(self):
         self.scene.advance_to_balanced_acidity_idea()
-        hypothesis = self.scene.serpent_lilith_good_drink_discussion['current_hypothesis']
-        self.assertEqual(hypothesis['acidity'], 'moderate')
+        hypothesis = self.scene.serpent_lilith_good_drink_discussion.current_hypothesis
+        self.assertEqual(hypothesis.acidity, 'moderate')
 
     def test_other_wine_properties_remain_unchanged(self):
         self.scene.advance_to_balanced_acidity_idea()
-        hypothesis = self.scene.serpent_lilith_good_drink_discussion['current_hypothesis']
-        self.assertTrue(hypothesis['fuller_flavor'])
-        self.assertTrue(hypothesis['sweetness'])
-        self.assertFalse(hypothesis['bitterness'])
+        hypothesis = self.scene.serpent_lilith_good_drink_discussion.current_hypothesis
+        self.assertTrue(hypothesis.fuller_flavor)
+        self.assertTrue(hypothesis.sweetness)
+        self.assertFalse(hypothesis.bitterness)
 
     def test_god_still_has_not_tasted_wine(self):
         self.scene.advance_to_balanced_acidity_idea()
@@ -43,6 +43,6 @@ class Day0BalancedWineAcidityTests(unittest.TestCase):
 
     def test_discussion_remains_unresolved(self):
         self.scene.advance_to_balanced_acidity_idea()
-        self.assertFalse(self.scene.serpent_lilith_good_drink_discussion['resolved'])
+        self.assertFalse(self.scene.serpent_lilith_good_drink_discussion.resolved)
 if __name__ == '__main__':
     unittest.main()
