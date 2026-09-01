@@ -1,9 +1,12 @@
 ﻿import random
+from dataclasses import dataclass
+from typing import ClassVar
 
 
-class CronenbergTraits:
+@dataclass(slots=True)
+class CronenbergTraitValues:
 
-    TRAIT_NAMES = (
+    NAMES: ClassVar[tuple[str, ...]] = (
         "acidity",
         "sweetness",
         "bitterness",
@@ -12,8 +15,96 @@ class CronenbergTraits:
         "dark_energy_affinity",
         "growth_efficiency",
         "cat_scent",
-        "quantum_coherence"
+        "quantum_coherence",
     )
+
+    acidity: float
+    sweetness: float
+    bitterness: float
+    viscosity: float
+    stability: float
+    dark_energy_affinity: float
+    growth_efficiency: float
+    cat_scent: float
+    quantum_coherence: float
+
+    @classmethod
+    def randomized(cls, rng):
+        return cls(
+            acidity=rng.uniform(0.50, 1.50),
+            sweetness=rng.uniform(0.50, 1.50),
+            bitterness=rng.uniform(0.50, 1.50),
+            viscosity=rng.uniform(0.50, 1.50),
+            stability=rng.uniform(0.50, 1.50),
+            dark_energy_affinity=rng.uniform(
+                0.50,
+                1.50,
+            ),
+            growth_efficiency=rng.uniform(
+                0.50,
+                1.50,
+            ),
+            cat_scent=rng.uniform(0.50, 1.50),
+            quantum_coherence=rng.uniform(
+                0.50,
+                1.50,
+            ),
+        )
+
+    def value_for(
+        self,
+        trait_name,
+        default=None,
+    ):
+        if trait_name not in self.NAMES:
+            return default
+
+        return getattr(self, trait_name)
+
+    def shift(self, trait_name, amount):
+        if trait_name not in self.NAMES:
+            raise KeyError(trait_name)
+
+        setattr(
+            self,
+            trait_name,
+            getattr(self, trait_name)
+            + float(amount),
+        )
+
+    def normalize(self):
+        for trait_name in self.NAMES:
+            setattr(
+                self,
+                trait_name,
+                round(
+                    max(
+                        0.10,
+                        min(
+                            2.00,
+                            getattr(
+                                self,
+                                trait_name,
+                            ),
+                        ),
+                    ),
+                    4,
+                ),
+            )
+
+    def to_dict(self):
+        return {
+            trait_name: getattr(
+                self,
+                trait_name,
+            )
+            for trait_name in self.NAMES
+        }
+
+
+class CronenbergTraits:
+
+    TRAIT_NAMES = CronenbergTraitValues.NAMES
 
     def __init__(
         self,
@@ -30,10 +121,10 @@ class CronenbergTraits:
         self.error_type = type(error).__name__
         self.quantum_tick = quantum_tick
 
-        self.values = {
-            trait_name: rng.uniform(0.50, 1.50)
-            for trait_name in self.TRAIT_NAMES
-        }
+        self.values = (
+            CronenbergTraitValues
+            .randomized(rng)
+        )
 
         self.birth_influences = []
 
@@ -48,10 +139,9 @@ class CronenbergTraits:
         amount,
         reason
     ):
-        old_value = self.values[trait_name]
-
-        self.values[trait_name] = (
-            old_value + float(amount)
+        self.values.shift(
+            trait_name,
+            amount,
         )
 
         self.birth_influences.append({
@@ -207,32 +297,20 @@ class CronenbergTraits:
             )
 
     def _normalize(self):
-        for trait_name in self.TRAIT_NAMES:
-            self.values[trait_name] = round(
-                max(
-                    0.10,
-                    min(
-                        2.00,
-                        self.values[trait_name]
-                    )
-                ),
-                4
-            )
+        self.values.normalize()
 
-    def get(
+    def value_for(
         self,
         trait_name,
         default=None
     ):
-        return self.values.get(
+        return self.values.value_for(
             trait_name,
             default
         )
 
     def snapshot(self):
-        return dict(
-            self.values
-        )
+        return self.values.to_dict()
 
     @property
     def public_state(self):

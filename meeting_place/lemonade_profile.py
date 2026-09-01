@@ -59,7 +59,7 @@
                     trait_value = 1.0
                 else:
                     trait_value = float(
-                        traits.get(
+                        traits.value_for(
                             trait_name,
                             1.0
                         )
