@@ -783,7 +783,14 @@ class Day0FirstBarShift:
     def god_orders_wine_to_judge_discussion(self):
         if getattr(self.god, 'bar_state', {}).get('location') != 'table':
             raise RuntimeError('God is not at the table.')
-        self.god.bar_state['wine_order'] = {'drink': 'wine', 'purpose': 'judge_wine_discussion', 'served': False, 'tasted': False}
+        self.god.bar_state['wine_order'] = (
+            BarDrinkOrder(
+                guest='god',
+                drink='wine',
+                purpose='judge_wine_discussion',
+                tasted=False,
+            )
+        )
         event = {'name': 'god_orders_wine_to_judge_discussion', 'guest': 'god', 'drink': 'wine', 'purpose': 'judge_wine_discussion'}
         self.meeting_place.emit_event(event)
         self.history.append(event)
@@ -791,7 +798,7 @@ class Day0FirstBarShift:
 
     def bartender_serves_god_wine_and_receipt(self):
         order = getattr(self.god, 'bar_state', {}).get('wine_order')
-        if order is None or order.get('drink') != 'wine':
+        if order is None or order.drink != 'wine':
             raise RuntimeError('God has not ordered wine.')
         drink = BarDrink(
             name='wine',
@@ -801,8 +808,12 @@ class Day0FirstBarShift:
         cash_register = self.meeting_place.bar_counter.cash_register
         cash_register.add_to_tab(entity=self.god, drink=drink)
         receipt = cash_register.print_open_tab_receipt(self.god)
-        order['served'] = True
-        order['tasted'] = False
+        order.complete(
+            drink
+        )
+        order.attach_receipt(
+            receipt['receipt_number']
+        )
         self.god.bar_state['wine'] = drink
         self.god.bar_state['receipt_number'] = receipt['receipt_number']
         event = {'name': 'bartender_serves_god_wine_and_receipt', 'guest': 'god', 'drink': 'wine', 'receipt_number': receipt['receipt_number'], 'paid': False, 'tasted': False}
@@ -842,9 +853,9 @@ class Day0FirstBarShift:
         wine_order = getattr(self.god, 'bar_state', {}).get('wine_order')
         if wine_order is None:
             raise RuntimeError('God has no wine to taste.')
-        if not wine_order.get('served', False):
+        if not wine_order.served:
             raise RuntimeError("God's wine has not been served.")
-        wine_order['tasted'] = True
+        wine_order.mark_tasted()
         assessment = {'quality': 'bad', 'body': 'watery', 'comparison': 'water_in_which_someone_soaked_grapes'}
         self._entity_attr_setdefault(self.god, 'bar_knowledge', {})['existing_wine'] = assessment
         event = {'name': 'god_tastes_existing_wine', 'guest': 'god', 'drink': 'wine', 'assessment': assessment}
@@ -993,7 +1004,13 @@ class Day0FirstBarShift:
         order = {'name': 'serpent_orders_water', 'guest': 'serpent', 'drink': 'water'}
         self.meeting_place.emit_event(order)
         self.history.append(order)
-        self.serpent.bar_state['water_order'] = {'drink': 'water', 'served': False}
+        self.serpent.bar_state['water_order'] = (
+            BarDrinkOrder(
+                guest='serpent',
+                drink='water',
+                tasted=False,
+            )
+        )
         return order
 
     def bartender_serves_serpent_water_with_free_lemon_slice(self):
@@ -1015,7 +1032,9 @@ class Day0FirstBarShift:
             },
             price_basis='water',
         )
-        order['served'] = True
+        order.complete(
+            drink
+        )
         self.serpent.bar_state['drink'] = drink
         self.serpent.bar_state['activity'] = 'holding_water'
         event = {'name': 'bartender_serves_serpent_water_with_free_lemon_slice', 'guest': 'serpent', 'drink': 'water', 'lemon_slice': True, 'lemon_slice_price': 0, 'whole_lemon_consumed': False}

@@ -830,9 +830,11 @@ class BarDrink:
 class BarDrinkOrder:
     guest: str
     drink: str
-    base: str
-    garnish: str
+    base: str | None = None
+    garnish: str | None = None
+    purpose: str | None = None
     served: bool = False
+    tasted: bool | None = None
     waiting_for: str | None = None
     bartender_attempt: BarDrink | None = None
     final_drink: BarDrink | None = None
@@ -852,14 +854,33 @@ class BarDrinkOrder:
         self.receipt_number = receipt_number
         return receipt_number
 
+    def mark_tasted(self):
+        if not self.served:
+            raise RuntimeError(
+                "Drink order has not been served."
+            )
+
+        self.tasted = True
+        return self
+
     def to_dict(self):
         result = {
             "guest": self.guest,
             "drink": self.drink,
-            "base": self.base,
-            "garnish": self.garnish,
             "served": self.served,
         }
+
+        if self.base is not None:
+            result["base"] = self.base
+
+        if self.garnish is not None:
+            result["garnish"] = self.garnish
+
+        if self.purpose is not None:
+            result["purpose"] = self.purpose
+
+        if self.tasted is not None:
+            result["tasted"] = self.tasted
 
         if self.waiting_for is not None:
             result["waiting_for"] = self.waiting_for

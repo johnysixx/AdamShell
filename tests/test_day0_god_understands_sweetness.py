@@ -27,7 +27,7 @@ class Day0GodUnderstandsSweetnessTests(unittest.TestCase):
 
     def test_god_has_now_tasted_the_wine(self):
         self.scene.advance_to_god_understands_sweetness()
-        self.assertTrue(self.scene.god.bar_state['wine_order']['tasted'])
+        self.assertTrue(self.scene.god.bar_state['wine_order'].tasted)
 
     def test_lilith_explains_sweetness(self):
         result = self.scene.advance_to_god_understands_sweetness()
