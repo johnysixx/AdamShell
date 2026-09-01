@@ -44,7 +44,7 @@ class Day0BeerBitternessTests(unittest.TestCase):
         self.scene.advance_to_three_way_drink_wager()
         energy_before = float(getattr(self.scene.lilith, 'energy_j', 0.0))
         will_before = float(getattr(self.scene.lilith, 'creative_will', 0.0))
-        effects = self.scene.lilith_order['final_drink'].effects
+        effects = self.scene.lilith_order.final_drink.effects
         self.scene.god_tastes_beer_and_understands_bitterness()
         self.scene.lilith_sips_lilith_and_reacts_to_beer()
         self.assertEqual(self.scene.lilith.energy_j, energy_before + float(effects.get('energy_j', 0.0)))

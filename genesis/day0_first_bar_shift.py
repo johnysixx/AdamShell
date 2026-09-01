@@ -4,6 +4,7 @@ from meeting_place.bar_objects import (
     BarDrink,
     BarDrinkDiscussion,
     BarDrinkIdea,
+    BarDrinkOrder,
     BarDrinkWager,
     BarIngredientStock,
     BarWagerDecisionMethod,
@@ -115,7 +116,13 @@ class Day0FirstBarShift:
     def lilith_orders_vodka_with_lemon(self):
         if self.lilith is None:
             raise RuntimeError('Lilith does not exist yet.')
-        self.lilith_order = {'guest': 'lilith', 'drink': 'vodka_with_lemon', 'base': 'vodka', 'garnish': 'lemon', 'served': False, 'waiting_for': 'lemon'}
+        self.lilith_order = BarDrinkOrder(
+            guest='lilith',
+            drink='vodka_with_lemon',
+            base='vodka',
+            garnish='lemon',
+            waiting_for='lemon',
+        )
         self.history.append({'name': 'lilith_orders_vodka_with_lemon'})
         unavailable = {'name': 'bartender_reports_missing_lemon', 'guest': 'lilith', 'ingredient': 'lemon', 'available': False}
         self.meeting_place.emit_event(unavailable)
@@ -127,7 +134,10 @@ class Day0FirstBarShift:
         self.history.append(learned)
         left = self.meeting_place.bartender.leave_for_lemon(guest_name='lilith')
         self.history.append(left)
-        return {'order': dict(self.lilith_order), 'bartender': left}
+        return {
+            'order': self.lilith_order.to_dict(),
+            'bartender': left,
+        }
 
     def serpent_and_lilith_begin_conversation(self):
         if self.serpent is None:
@@ -267,8 +277,9 @@ class Day0FirstBarShift:
         drink.price_basis = 'vodka'
         drink.effects = {}
         drink.preparation = {'vodka': 1, 'lemon': 'drop'}
-        self.lilith_order['served'] = False
-        self.lilith_order['bartender_attempt'] = drink
+        self.lilith_order.record_attempt(
+            drink
+        )
         event = {'name': 'bartender_makes_vodka_with_lemon', 'guest': 'lilith', 'drink': 'vodka_with_lemon', 'price_basis': 'vodka', 'effects': {}}
         self.meeting_place.emit_event(event)
         self.history.append(event)
@@ -324,8 +335,9 @@ class Day0FirstBarShift:
             price_basis='vodka',
             effects=dict(recipe.effects),
         )
-        self.lilith_order['final_drink'] = drink
-        self.lilith_order['served'] = True
+        self.lilith_order.complete(
+            drink
+        )
         event = {'name': 'bartender_mixes_final_lilith', 'guest': 'lilith', 'drink': 'lilith', 'sugar_cubes': 1}
         self.meeting_place.emit_event(event)
         self.history.append(event)
@@ -335,14 +347,16 @@ class Day0FirstBarShift:
         drink = self.bartender_mixes_final_lilith()
         self.meeting_place.bar_counter.cash_register.add_to_tab(entity=self.lilith, drink=drink)
         receipt = self.meeting_place.bar_counter.cash_register.print_open_tab_receipt(self.lilith)
-        self.lilith_order['receipt_number'] = receipt['receipt_number']
+        self.lilith_order.attach_receipt(
+            receipt['receipt_number']
+        )
         event = {'name': 'bartender_hands_lilith_drink_and_receipt', 'guest': 'lilith', 'drink': 'lilith', 'receipt_number': receipt['receipt_number'], 'paid': False}
         self.meeting_place.emit_event(event)
         self.history.append(event)
         return {'drink': drink, 'receipt': receipt}
 
     def lilith_tastes_and_requests_second_sugar_cube(self):
-        drink = self.lilith_order.get('final_drink')
+        drink = self.lilith_order.final_drink
         if drink is None:
             raise RuntimeError('Lilith has no drink to taste.')
         event = {'name': 'lilith_tastes_and_requests_second_sugar_cube', 'guest': 'lilith', 'drink': 'lilith', 'request': {'ingredient': 'sugar', 'amount': 1, 'unit': 'cube'}}
@@ -357,7 +371,7 @@ class Day0FirstBarShift:
         if sugar.shots < 1:
             return self.universe.create_cronenberg_from_quantum_error(error=RuntimeError('Bar sugar depleted.'), source_component='meeting_place', source_operation='bartender_adds_second_sugar_cube')
         sugar.consume(1)
-        drink = self.lilith_order['final_drink']
+        drink = self.lilith_order.final_drink
         drink.ingredients['sugar'] = 2
         recipe = self.meeting_place.how_to_mix_drinks.recipes['lilith']
         recipe.ingredients['sugar'].shots = 2
@@ -385,7 +399,7 @@ class Day0FirstBarShift:
         discussion = getattr(self, 'serpent_lilith_good_drink_discussion', None)
         if discussion is None:
             raise RuntimeError('Good drink discussion has not started.')
-        lilith_drink = self.lilith_order.get('final_drink')
+        lilith_drink = self.lilith_order.final_drink
         if lilith_drink is None:
             raise RuntimeError('Lilith has no drink.')
         effects = lilith_drink.effects
@@ -743,7 +757,7 @@ class Day0FirstBarShift:
         return {'rejection': event, 'idea': idea, 'proposal': proposal_event}
 
     def lilith_gives_serpent_taste_of_lilith(self):
-        drink = self.lilith_order.get('final_drink')
+        drink = self.lilith_order.final_drink
         if drink is None:
             raise RuntimeError('Lilith does not have her drink.')
         effects = drink.effects
@@ -903,7 +917,7 @@ class Day0FirstBarShift:
         return event
 
     def lilith_sips_lilith_and_reacts_to_beer(self):
-        drink = self.lilith_order.get('final_drink')
+        drink = self.lilith_order.final_drink
         if drink is None:
             raise RuntimeError('Lilith has no lilith to sip.')
         effects = drink.effects

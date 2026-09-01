@@ -827,6 +827,62 @@ class BarDrink:
 
 
 @dataclass(slots=True)
+class BarDrinkOrder:
+    guest: str
+    drink: str
+    base: str
+    garnish: str
+    served: bool = False
+    waiting_for: str | None = None
+    bartender_attempt: BarDrink | None = None
+    final_drink: BarDrink | None = None
+    receipt_number: int | str | None = None
+
+    def record_attempt(self, drink):
+        self.served = False
+        self.bartender_attempt = drink
+        return drink
+
+    def complete(self, drink):
+        self.final_drink = drink
+        self.served = True
+        return drink
+
+    def attach_receipt(self, receipt_number):
+        self.receipt_number = receipt_number
+        return receipt_number
+
+    def to_dict(self):
+        result = {
+            "guest": self.guest,
+            "drink": self.drink,
+            "base": self.base,
+            "garnish": self.garnish,
+            "served": self.served,
+        }
+
+        if self.waiting_for is not None:
+            result["waiting_for"] = self.waiting_for
+
+        if self.bartender_attempt is not None:
+            result["bartender_attempt"] = (
+                self.bartender_attempt.to_dict()
+            )
+
+        if self.final_drink is not None:
+            result["final_drink"] = (
+                self.final_drink.to_dict()
+            )
+
+        if self.receipt_number is not None:
+            result["receipt_number"] = (
+                self.receipt_number
+            )
+
+        return result
+
+
+@dataclass(slots=True)
 class BarIngredientStock:
     name: str
     available: bool

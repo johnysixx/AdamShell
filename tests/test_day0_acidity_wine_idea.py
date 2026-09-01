@@ -50,7 +50,7 @@ class Day0AcidityWineIdeaTests(unittest.TestCase):
         self.scene.advance_to_god_at_table()
         energy_before = float(getattr(self.scene.serpent, 'energy_j', 0.0))
         will_before = float(getattr(self.scene.serpent, 'creative_will', 0.0))
-        effects = self.scene.lilith_order['final_drink'].effects
+        effects = self.scene.lilith_order.final_drink.effects
         self.scene.serpent_explains_wine_discussion_to_god()
         self.scene.lilith_rejects_bitterness_and_proposes_acidity()
         self.scene.lilith_gives_serpent_taste_of_lilith()
