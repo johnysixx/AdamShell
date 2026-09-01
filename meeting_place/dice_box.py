@@ -1,34 +1,28 @@
 import random
 
+from meeting_place.bar_objects import (
+    DiceBoxState,
+)
 from universe.logger import UniverseLogger
+
 
 class DiceBox:
 
     def __init__(self):
-        self.name = "dice_box"
-        self.type = "bar_object"
-        self.location = "on_bar_counter"
-
-        self.contents = [
-            "d4",
-            "d6",
-            "d8",
-            "d10",
-            "d10_percentile",
-            "d12"
-        ]
-
-        self.public_state = {
-            "name": self.name,
-            "type": self.type,
-            "location": self.location,
-            "contents": self.contents,
-            "missing": ["d20"],
-            "display_state": "closed_box_on_bar_counter",
-            "visibility_scope": "inside_bar_only"
-        }
+        self.state = DiceBoxState()
+        self.name = self.state.name
+        self.type = self.state.type
+        self.location = self.state.location
 
         UniverseLogger.boot("DICE BOX PLACED ON BAR COUNTER")
+
+    @property
+    def contents(self):
+        return self.state.contents
+
+    @property
+    def public_state(self):
+        return self.state.to_dict()
 
     def rotate_named_die(
         self,
@@ -118,14 +112,9 @@ class DiceBox:
             }
         )
 
-        self.public_state[
-            "last_all_rotation"
-        ] = {
-            result["die"]: (
-                result["value"]
-            )
-            for result in results
-        }
+        self.state.record_all_rotation(
+            results
+        )
 
         UniverseLogger.event(
             "ALL DICE SECRETLY ROTATE "
@@ -210,12 +199,9 @@ class DiceBox:
             dict(event)
         )
 
-        self.public_state[
-            "last_secret_rotation"
-        ] = {
-            "die": event["die"],
-            "value": event["value"]
-        }
+        self.state.record_rotation(
+            event
+        )
 
     def rotate_random_die(
         self,
@@ -331,9 +317,9 @@ class DiceBox:
             dict(event)
         )
 
-        self.public_state[
-            "last_percentile_rotation"
-        ] = percentile_value
+        self.state.record_percentile_rotation(
+            percentile_value
+        )
 
         UniverseLogger.event(
             "PERCENTILE DICE SECRETLY ROTATE "
@@ -349,19 +335,13 @@ class DiceBox:
         return "I do not know"
 
     def remove_next_die(self):
-        if not self.contents:
+        die = self.state.remove_next_die()
+
+        if die is None:
             return None
-
-        die = self.contents.pop()
-
-        if die not in self.public_state["missing"]:
-            self.public_state["missing"].append(
-                die
-            )
 
         UniverseLogger.event(
             f"DIE MISSING FROM BOX: {die}"
         )
 
         return die
-

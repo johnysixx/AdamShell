@@ -512,6 +512,159 @@ class DiceVialDie(BarObject):
     pass
 
 
+@dataclass(slots=True)
+class DiceBoxRotationState:
+    die: str
+    value: int
+
+    @classmethod
+    def from_event(
+        cls,
+        event
+    ):
+        return cls(
+            die=event["die"],
+            value=int(
+                event["value"]
+            ),
+        )
+
+    def to_dict(self):
+        return {
+            "die": self.die,
+            "value": self.value,
+        }
+
+
+@dataclass(slots=True)
+class DiceBoxState:
+    name: str = "dice_box"
+    type: str = "bar_object"
+    location: str = "on_bar_counter"
+    contents: list[str] = field(
+        default_factory=lambda: [
+            "d4",
+            "d6",
+            "d8",
+            "d10",
+            "d10_percentile",
+            "d12",
+        ]
+    )
+    missing: list[str] = field(
+        default_factory=lambda: [
+            "d20"
+        ]
+    )
+    display_state: str = (
+        "closed_box_on_bar_counter"
+    )
+    visibility_scope: str = (
+        "inside_bar_only"
+    )
+    last_secret_rotation: (
+        DiceBoxRotationState | None
+    ) = None
+    last_all_rotation: list[
+        DiceBoxRotationState
+    ] = field(default_factory=list)
+    last_percentile_rotation: (
+        int | None
+    ) = None
+
+    def record_rotation(
+        self,
+        event
+    ):
+        rotation = (
+            DiceBoxRotationState
+            .from_event(event)
+        )
+        self.last_secret_rotation = (
+            rotation
+        )
+        return rotation
+
+    def record_all_rotation(
+        self,
+        events
+    ):
+        self.last_all_rotation = [
+            DiceBoxRotationState
+            .from_event(event)
+            for event in events
+        ]
+        return list(
+            self.last_all_rotation
+        )
+
+    def record_percentile_rotation(
+        self,
+        value
+    ):
+        self.last_percentile_rotation = (
+            int(value)
+        )
+        return self.last_percentile_rotation
+
+    def remove_next_die(self):
+        if not self.contents:
+            return None
+
+        die = self.contents.pop()
+
+        if die not in self.missing:
+            self.missing.append(
+                die
+            )
+
+        return die
+
+    def to_dict(self):
+        result = {
+            "name": self.name,
+            "type": self.type,
+            "location": self.location,
+            "contents": list(
+                self.contents
+            ),
+            "missing": list(
+                self.missing
+            ),
+            "display_state":
+                self.display_state,
+            "visibility_scope":
+                self.visibility_scope,
+        }
+
+        if self.last_secret_rotation is not None:
+            result[
+                "last_secret_rotation"
+            ] = (
+                self.last_secret_rotation
+                .to_dict()
+            )
+
+        if self.last_all_rotation:
+            result[
+                "last_all_rotation"
+            ] = {
+                rotation.die:
+                    rotation.value
+                for rotation in
+                self.last_all_rotation
+            }
+
+        if self.last_percentile_rotation is not None:
+            result[
+                "last_percentile_rotation"
+            ] = (
+                self.last_percentile_rotation
+            )
+
+        return result
+
+
 class LemonadeSign(BarObject):
     pass
 
