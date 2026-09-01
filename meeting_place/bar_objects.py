@@ -553,6 +553,139 @@ class MeetingPlaceState(BarObject):
 class CatD20Box(BarObject):
     pass
 
+
+@dataclass(slots=True)
+class CatD20Profile:
+    color: str
+    fur_length: str
+    pattern: str
+    eye_color: str
+    sex: str
+
+    @classmethod
+    def from_dict(
+        cls,
+        values
+    ):
+        return cls(
+            color=values["color"],
+            fur_length=values[
+                "fur_length"
+            ],
+            pattern=values["pattern"],
+            eye_color=values[
+                "eye_color"
+            ],
+            sex=values["sex"],
+        )
+
+    def to_dict(self):
+        return {
+            "color": self.color,
+            "fur_length": self.fur_length,
+            "pattern": self.pattern,
+            "eye_color": self.eye_color,
+            "sex": self.sex,
+        }
+
+
+@dataclass(slots=True)
+class CatD20State:
+    is_cat: bool = True
+    is_die: bool = False
+    sides: int = 20
+    roll_method: str = (
+        "turns_herself_in_box"
+    )
+    can_be_thrown: bool = False
+    visibility: str = (
+        "appears_to_be_a_small_cat"
+    )
+    current_value: int | None = None
+    turn_count: int = 0
+    turn_history: list[dict] = field(
+        default_factory=list
+    )
+    canonical_target: str | None = None
+    canonical_profile: (
+        CatD20Profile | None
+    ) = None
+    garfield_pending: bool = False
+    last_manifested_target: (
+        str | None
+    ) = None
+
+    def record_turn(
+        self,
+        event
+    ):
+        self.current_value = int(
+            event["value"]
+        )
+        self.turn_count = int(
+            event["turn_number"]
+        )
+        self.turn_history.append(
+            deepcopy(event)
+        )
+        return self.current_value
+
+    def prepare_target(
+        self,
+        target,
+        profile,
+        pending=False
+    ):
+        self.canonical_target = target
+        self.canonical_profile = profile
+        self.garfield_pending = bool(
+            pending
+        )
+        return profile
+
+    def mark_manifested(
+        self,
+        target
+    ):
+        self.garfield_pending = False
+        self.last_manifested_target = (
+            target
+        )
+        return target
+
+    def to_dict(self):
+        result = {
+            "is_cat": self.is_cat,
+            "is_die": self.is_die,
+            "sides": self.sides,
+            "roll_method": self.roll_method,
+            "can_be_thrown":
+                self.can_be_thrown,
+            "visibility": self.visibility,
+            "current_value":
+                self.current_value,
+            "turn_count": self.turn_count,
+            "turn_history": deepcopy(
+                self.turn_history
+            ),
+            "canonical_target":
+                self.canonical_target,
+            "garfield_pending":
+                self.garfield_pending,
+            "last_manifested_target":
+                self.last_manifested_target,
+        }
+
+        if self.canonical_profile is not None:
+            result[
+                "canonical_profile"
+            ] = (
+                self.canonical_profile
+                .to_dict()
+            )
+
+        return result
+
 @dataclass(slots=True)
 class BarHexCell:
     name: str

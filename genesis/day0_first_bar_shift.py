@@ -1,5 +1,7 @@
 from meeting_place.bar_objects import (
     BarBeerHypothesis,
+    CatD20Profile,
+    CatD20State,
     BarConversation,
     BarDrink,
     BarDrinkDiscussion,
@@ -1494,10 +1496,25 @@ class Day0FirstBarShift:
             raise RuntimeError('CatD20 does not exist.')
         resolver = CatBirthResolver(self.universe, self.meeting_place)
         garfield_profile = dict(resolver.garfield_profile)
-        _entity_attr_setdefault(self.cat_d20, 'cat_d20', {})
-        self.cat_d20.cat_d20['canonical_target'] = 'garfield'
-        self.cat_d20.cat_d20['canonical_profile'] = dict(garfield_profile)
-        self.cat_d20.cat_d20['garfield_pending'] = True
+        cat_d20_state = getattr(
+            self.cat_d20,
+            'cat_d20',
+            None
+        )
+        if not isinstance(
+            cat_d20_state,
+            CatD20State
+        ):
+            raise RuntimeError(
+                'CatD20 state is missing.'
+            )
+        cat_d20_state.prepare_target(
+            target='garfield',
+            profile=CatD20Profile.from_dict(
+                garfield_profile
+            ),
+            pending=True,
+        )
         event = {'name': 'cat_d20_sets_next_birth_to_garfield', 'cat': 'cat_d20', 'target_name': 'garfield', 'profile': dict(garfield_profile), 'pending': True}
         if not hasattr(self.meeting_place, 'cat_d20_secret_history'):
             self.meeting_place.cat_d20_secret_history = []
@@ -1507,12 +1524,27 @@ class Day0FirstBarShift:
         return event
 
     def garfield_arrives_from_cat_d20_setting(self):
-        cat_d20_state = getattr(self.cat_d20, 'cat_d20', {})
-        if not cat_d20_state.get('garfield_pending', False):
+        cat_d20_state = getattr(
+            self.cat_d20,
+            'cat_d20',
+            None
+        )
+        if not isinstance(
+            cat_d20_state,
+            CatD20State
+        ):
+            raise RuntimeError(
+                'CatD20 state is missing.'
+            )
+        if not cat_d20_state.garfield_pending:
             raise RuntimeError('CatD20 has not prepared Garfield.')
-        if cat_d20_state.get('canonical_target') != 'garfield':
+        if cat_d20_state.canonical_target != 'garfield':
             raise RuntimeError('CatD20 target is not Garfield.')
-        profile = dict(cat_d20_state['canonical_profile'])
+        profile = (
+            cat_d20_state
+            .canonical_profile
+            .to_dict()
+        )
         cats_layer = getattr(self.universe, 'cats_layer', None)
         if cats_layer is None:
             raise RuntimeError('Garfield arrival requires cats_layer.')
@@ -1543,8 +1575,9 @@ class Day0FirstBarShift:
             if trait not in traits:
                 traits.append(trait)
         ordinary_arrival = self.meeting_place.admit_cat(garfield, bartender_available=True)
-        cat_d20_state['garfield_pending'] = False
-        cat_d20_state['last_manifested_target'] = 'garfield'
+        cat_d20_state.mark_manifested(
+            'garfield'
+        )
         self.garfield = garfield
         event = {'name': 'garfield_arrives_at_bar', 'cat': 'garfield', 'source': 'cat_d20', 'created': created, 'arrival': ordinary_arrival}
         self.meeting_place.emit_event(event)

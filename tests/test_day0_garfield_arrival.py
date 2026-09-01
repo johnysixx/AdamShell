@@ -37,7 +37,7 @@ class Day0GarfieldArrivalTests(unittest.TestCase):
     def test_cat_d20_sets_garfield_target(self):
         result = self.scene.advance_to_garfield_arrival()
         self.assertEqual(result['prepared']['target_name'], 'garfield')
-        self.assertEqual(self.scene.cat_d20.cat_d20["last_manifested_target"], 'garfield')
+        self.assertEqual(self.scene.cat_d20.cat_d20.last_manifested_target, 'garfield')
 
     def test_garfield_arrives(self):
         result = self.scene.advance_to_garfield_arrival()

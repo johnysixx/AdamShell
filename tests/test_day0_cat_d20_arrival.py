@@ -34,8 +34,8 @@ class Day0CatD20ArrivalTests(unittest.TestCase):
         result = self.scene.advance_to_cat_d20_arrival()
         cat = result['cat_d20']['cat']
         self.assertIn('d20_cat', getattr(cat, 'special_traits', []))
-        self.assertTrue(cat.cat_d20["is_cat"])
-        self.assertFalse(cat.cat_d20["is_die"])
+        self.assertTrue(cat.cat_d20.is_cat)
+        self.assertFalse(cat.cat_d20.is_die)
 
     def test_existing_welcome_lifecycle_is_used(self):
         result = self.scene.advance_to_cat_d20_arrival()

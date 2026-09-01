@@ -43,6 +43,8 @@ from .bar_objects import (
     MeetingPlacePermissions,
     MeetingPlaceState,
     CatD20Box,
+    CatD20Profile,
+    CatD20State,
 )
 
 class MeetingPlace:
@@ -339,7 +341,7 @@ class MeetingPlace:
         cat.special_traits.extend(['d20_cat', 'born_as_cat_d20', 'secret_probability_sense'])
         cat.state = 'arrived_at_bar'
         cat.current_layer = 'meeting_place'
-        cat.cat_d20 = {'is_cat': True, 'is_die': False, 'sides': 20, 'roll_method': 'turns_herself_in_box', 'can_be_thrown': False, 'visibility': 'appears_to_be_a_small_cat'}
+        cat.cat_d20 = CatD20State()
         self.cat_d20_adapter = CatD20Adapter(self)
         self.universe.d20_registry.register(self.cat_d20_adapter)
         self.admit_cat(cat, bartender_available=True)
@@ -364,12 +366,12 @@ class MeetingPlace:
         rng = rng or random
         value = int(rng.randint(1, 20))
         cat_d20_state = cat.cat_d20
-        previous_value = cat_d20_state.get('current_value')
-        turn_count = int(cat_d20_state.get('turn_count', 0)) + 1
+        previous_value = cat_d20_state.current_value
+        turn_count = cat_d20_state.turn_count + 1
         turn_event = {'name': 'cat_d20_turned_in_box', 'cat': cat.name, 'box': box.name, 'previous_value': previous_value, 'value': value, 'turn_number': turn_count, 'turned_by': 'herself', 'was_thrown': False, 'visibility': 'secret_cat_event', 'tick': getattr(self.universe, 'universe_tick', 0), 'turned': True}
-        cat_d20_state['current_value'] = value
-        cat_d20_state['turn_count'] = turn_count
-        cat_d20_state.setdefault('turn_history', []).append(dict(turn_event))
+        cat_d20_state.record_turn(
+            turn_event
+        )
         cat.state = 'turned_in_cat_d20_box'
         box.last_cat_d20_value = value
         box.turn_count = turn_count
@@ -411,8 +413,12 @@ class MeetingPlace:
             profile = dict(base_profile)
             all_dice_rotation_requested = False
         event = {'name': 'cat_d20_prepared_canonical_pazuzu_profile', 'cat': cat_d20.name, 'profile': dict(profile), 'base_profile': dict(base_profile), 'profile_occurrence': occurrence, 'target_name': target_name, 'all_dice_rotation_requested': all_dice_rotation_requested, 'mode': 'canonical_turn', 'random': False, 'prepared': target_name is not None, 'visibility': 'secret_cat_event', 'tick': getattr(self.universe, 'universe_tick', 0)}
-        cat_d20.cat_d20['canonical_target'] = target_name
-        cat_d20.cat_d20['canonical_profile'] = dict(profile)
+        cat_d20.cat_d20.prepare_target(
+            target=target_name,
+            profile=CatD20Profile.from_dict(
+                profile
+            ),
+        )
         if not hasattr(self, 'cat_d20_secret_history'):
             self.cat_d20_secret_history = []
         self.cat_d20_secret_history.append(dict(event))
