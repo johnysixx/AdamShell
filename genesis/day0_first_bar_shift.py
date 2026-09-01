@@ -1,4 +1,5 @@
 from meeting_place.bar_objects import (
+    BarConversation,
     BarDrink,
     BarIngredientStock,
     DrinkRecipe,
@@ -30,7 +31,9 @@ class Day0FirstBarShift:
         self.first_book = None
         self.bar_yard = BarYard()
         self.lilith_order = None
-        self.serpent_lilith_conversation = {'started': False, 'participants': [], 'content': []}
+        self.serpent_lilith_conversation = (
+            BarConversation()
+        )
 
     def start_shift(self):
         event = self.meeting_place.bartender.begin_shift(bar_day=0, shift_start_tick=self.meeting_place.tick_count)
@@ -127,14 +130,19 @@ class Day0FirstBarShift:
             raise RuntimeError('Lilith is not in the scene.')
         if self.meeting_place.bartender.current_location != 'bar_yard':
             raise RuntimeError('This conversation begins while the bartender is away for the lemon.')
-        self.serpent_lilith_conversation = {'started': True, 'participants': ['serpent', 'lilith'], 'content': []}
+        self.serpent_lilith_conversation.begin(
+            participants=[
+                'serpent',
+                'lilith',
+            ]
+        )
         event = {'name': 'serpent_and_lilith_begin_conversation', 'participants': ['serpent', 'lilith'], 'bartender_present': False}
         self.meeting_place.emit_event(event)
         self.history.append(event)
         return event
 
     def serpent_and_lilith_taste_first_drinks(self):
-        if not self.serpent_lilith_conversation.get('started', False):
+        if not self.serpent_lilith_conversation.started:
             raise RuntimeError('Serpent and Lilith are not talking yet.')
         drinks = ['wine', 'beer', 'mead']
         serpent_tasting = {drink: 'dislikes' for drink in drinks}
@@ -144,12 +152,21 @@ class Day0FirstBarShift:
         self.lilith.first_bar_drink_tasting = lilith_tasting
         self.meeting_place.emit_event(event)
         self.history.append(event)
-        self.serpent_lilith_conversation['content'].append({'speaker': 'serpent', 'meaning': 'none_of_the_existing_wine_beer_or_mead_tastes_good'})
-        self.serpent_lilith_conversation['content'].append({'speaker': 'lilith', 'meaning': 'agrees'})
+        self.serpent_lilith_conversation.add_line(
+            speaker='serpent',
+            meaning=(
+                'none_of_the_existing_wine_'
+                'beer_or_mead_tastes_good'
+            ),
+        )
+        self.serpent_lilith_conversation.add_line(
+            speaker='lilith',
+            meaning='agrees',
+        )
         return event
 
     def serpent_proposes_drink_wager_to_lilith(self):
-        if not self.serpent_lilith_conversation.get('started', False):
+        if not self.serpent_lilith_conversation.started:
             raise RuntimeError('Serpent and Lilith are not talking yet.')
         if not hasattr(self.serpent, 'first_bar_drink_tasting') or not hasattr(self.lilith, 'first_bar_drink_tasting'):
             raise RuntimeError('They must taste the drinks first.')
@@ -158,7 +175,10 @@ class Day0FirstBarShift:
         event = {'name': 'serpent_proposes_drink_wager_to_lilith', 'wager': wager}
         self.meeting_place.emit_event(event)
         self.history.append(event)
-        self.serpent_lilith_conversation['content'].append({'speaker': 'serpent', 'meaning': 'proposes_drink_wager'})
+        self.serpent_lilith_conversation.add_line(
+            speaker='serpent',
+            meaning='proposes_drink_wager',
+        )
         return wager
 
     def lilith_accepts_drink_wager(self):
@@ -172,7 +192,10 @@ class Day0FirstBarShift:
         event = {'name': 'lilith_accepts_drink_wager', 'wager': wager}
         self.meeting_place.emit_event(event)
         self.history.append(event)
-        self.serpent_lilith_conversation['content'].append({'speaker': 'lilith', 'meaning': 'accepts_drink_wager'})
+        self.serpent_lilith_conversation.add_line(
+            speaker='lilith',
+            meaning='accepts_drink_wager',
+        )
         return wager
 
     def play_serpent_lilith_first_conversation(self):
@@ -182,7 +205,7 @@ class Day0FirstBarShift:
         return {'tasting': tasting, 'wager': wager, 'accepted': accepted}
 
     def serpent_and_lilith_agree_on_table(self):
-        if not self.serpent_lilith_conversation.get('started', False):
+        if not self.serpent_lilith_conversation.started:
             raise RuntimeError('Serpent and Lilith are not talking.')
         wager = getattr(self, 'serpent_lilith_drink_wager', None)
         if wager is None or not wager.get('accepted', False):
@@ -190,7 +213,10 @@ class Day0FirstBarShift:
         event = {'name': 'serpent_and_lilith_agree_on_table', 'participants': ['serpent', 'lilith'], 'agreed': True}
         self.meeting_place.emit_event(event)
         self.history.append(event)
-        self.serpent_lilith_conversation['content'].append({'speaker': 'serpent_and_lilith', 'meaning': 'agree_to_move_to_table'})
+        self.serpent_lilith_conversation.add_line(
+            speaker='serpent_and_lilith',
+            meaning='agree_to_move_to_table',
+        )
         return event
 
     def serpent_moves_from_bar_to_existing_table(self):

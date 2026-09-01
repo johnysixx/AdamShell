@@ -215,15 +215,12 @@ class Day0SerpentLilithDrinkWagerTests(
 
         content = (
             self.scene
-            .serpent_lilith_conversation[
-                "content"
-            ]
+            .serpent_lilith_conversation
+            .content
         )
 
         meanings = [
-            item[
-                "meaning"
-            ]
+            item.meaning
             for item in content
         ]
 

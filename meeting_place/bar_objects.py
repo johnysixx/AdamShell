@@ -1,4 +1,5 @@
 from copy import deepcopy
+from dataclasses import dataclass, field
 
 from core.entity.component_object import ComponentObject
 
@@ -13,6 +14,67 @@ class BarOrigin(BarObject):
 
 class BarShift(BarObject):
     pass
+
+
+@dataclass(slots=True)
+class BarConversationLine:
+    speaker: str
+    meaning: str
+
+    def to_dict(self):
+        return {
+            "speaker": self.speaker,
+            "meaning": self.meaning,
+        }
+
+
+@dataclass(slots=True)
+class BarConversation:
+    started: bool = False
+    participants: list[str] = field(
+        default_factory=list
+    )
+    content: list[BarConversationLine] = field(
+        default_factory=list
+    )
+
+    def begin(
+        self,
+        participants
+    ):
+        self.started = True
+        self.participants = list(
+            participants
+        )
+        self.content = []
+        return self
+
+    def add_line(
+        self,
+        speaker,
+        meaning
+    ):
+        line = BarConversationLine(
+            speaker=speaker,
+            meaning=meaning,
+        )
+        self.content.append(
+            line
+        )
+        return line
+
+    def to_dict(self):
+        return {
+            "started": self.started,
+            "participants": list(
+                self.participants
+            ),
+            "content": [
+                line.to_dict()
+                for line
+                in self.content
+            ],
+        }
 
 
 class BarServingVessel:
@@ -122,9 +184,6 @@ class MeetingPlaceState(BarObject):
 
 class CatD20Box(BarObject):
     pass
-
-from dataclasses import dataclass, field
-
 
 @dataclass(slots=True)
 class BarHexCell:
@@ -348,9 +407,6 @@ class BarTab:
         if self.latest_receipt_number is not None:
             result["latest_receipt_number"] = self.latest_receipt_number
         return result
-
-from dataclasses import dataclass, field
-
 
 @dataclass(slots=True)
 class BarDrink:

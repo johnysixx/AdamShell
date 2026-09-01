@@ -164,16 +164,14 @@ class Day0GodLilithSerpentCheckpointTests(
 
         self.assertTrue(
             self.scene
-            .serpent_lilith_conversation[
-                "started"
-            ]
+            .serpent_lilith_conversation
+            .started
         )
 
         self.assertEqual(
             self.scene
-            .serpent_lilith_conversation[
-                "participants"
-            ],
+            .serpent_lilith_conversation
+            .participants,
             [
                 "serpent",
                 "lilith"
@@ -182,9 +180,8 @@ class Day0GodLilithSerpentCheckpointTests(
 
         self.assertEqual(
             self.scene
-            .serpent_lilith_conversation[
-                "content"
-            ],
+            .serpent_lilith_conversation
+            .content,
             []
         )
 
