@@ -31,8 +31,8 @@ class Day0BartenderJudgeProposalAndWaterTests(unittest.TestCase):
 
     def test_bartender_judge_proposal_is_not_accepted_yet(self):
         self.scene.advance_to_everyone_at_bar_with_serpents_water()
-        proposal = self.scene.serpent_lilith_drink_wager['bartender_judge_proposal']
-        self.assertFalse(proposal['accepted'])
+        proposal = self.scene.serpent_lilith_drink_wager.bartender_judge_proposal
+        self.assertFalse(proposal.accepted)
 
     def test_lilith_and_god_move_to_bar(self):
         self.scene.advance_to_everyone_at_bar_with_serpents_water()

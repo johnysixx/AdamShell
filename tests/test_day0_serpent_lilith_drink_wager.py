@@ -119,19 +119,15 @@ class Day0SerpentLilithDrinkWagerTests(
         )
 
         self.assertFalse(
-            wager[
-                "challenge"
-            ][
-                "existing_better_example"
-            ]
+            wager
+            .challenge
+            .existing_better_example
         )
 
         self.assertEqual(
-            wager[
-                "challenge"
-            ][
-                "eligible_drinks"
-            ],
+            wager
+            .challenge
+            .eligible_drinks,
             [
                 "wine",
                 "beer",
@@ -150,31 +146,21 @@ class Day0SerpentLilithDrinkWagerTests(
         )
 
         self.assertEqual(
-            wager[
-                "proposed_by"
-            ],
+            wager.proposed_by,
             "serpent"
         )
 
         self.assertEqual(
-            wager[
-                "stakes"
-            ][
-                "loser"
-            ],
+            wager.stakes.loser,
             "pays_winners_bar_tabs"
         )
 
         self.assertFalse(
-            wager[
-                "resolved"
-            ]
+            wager.resolved
         )
 
         self.assertIsNone(
-            wager[
-                "winner"
-            ]
+            wager.winner
         )
 
     def test_lilith_accepts_wager(
@@ -190,22 +176,16 @@ class Day0SerpentLilithDrinkWagerTests(
         )
 
         self.assertTrue(
-            wager[
-                "accepted"
-            ]
+            wager.accepted
         )
 
         self.assertEqual(
-            wager[
-                "accepted_by"
-            ],
+            wager.accepted_by,
             "lilith"
         )
 
         self.assertFalse(
-            wager[
-                "resolved"
-            ]
+            wager.resolved
         )
 
     def test_conversation_records_the_agreement(

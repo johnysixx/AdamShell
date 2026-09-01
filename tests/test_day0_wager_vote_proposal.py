@@ -101,21 +101,16 @@ class Day0WagerVoteProposalTests(
 
         method = (
             self.scene
-            .serpent_lilith_drink_wager[
-                "decision_method_proposal"
-            ]
+            .serpent_lilith_drink_wager
+            .decision_method_proposal
         )
 
         self.assertTrue(
-            method[
-                "proposed"
-            ]
+            method.proposed
         )
 
         self.assertFalse(
-            method[
-                "accepted"
-            ]
+            method.accepted
         )
 
     def test_wager_remains_unresolved(
@@ -129,15 +124,11 @@ class Day0WagerVoteProposalTests(
         )
 
         self.assertFalse(
-            wager[
-                "resolved"
-            ]
+            wager.resolved
         )
 
         self.assertIsNone(
-            wager[
-                "winner"
-            ]
+            wager.winner
         )
 
 

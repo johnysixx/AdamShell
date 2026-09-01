@@ -133,15 +133,12 @@ class Day0BartenderBouncerPanelTests(
 
         proposal = (
             self.scene
-            .serpent_lilith_drink_wager[
-                "tasting_panel_proposal"
-            ]
+            .serpent_lilith_drink_wager
+            .tasting_panel_proposal
         )
 
         self.assertFalse(
-            proposal[
-                "accepted"
-            ]
+            proposal.accepted
         )
 
     def test_wager_still_has_no_winner(
@@ -155,15 +152,11 @@ class Day0BartenderBouncerPanelTests(
         )
 
         self.assertFalse(
-            wager[
-                "resolved"
-            ]
+            wager.resolved
         )
 
         self.assertIsNone(
-            wager[
-                "winner"
-            ]
+            wager.winner
         )
 
 

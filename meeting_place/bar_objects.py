@@ -77,6 +77,220 @@ class BarConversation:
         }
 
 
+@dataclass(slots=True)
+class BarDrinkWagerChallenge:
+    make_something_better: bool = True
+    eligible_drinks: list[str] = field(
+        default_factory=lambda: [
+            "wine",
+            "beer",
+            "mead",
+        ]
+    )
+    existing_better_example: bool = False
+
+    def to_dict(self):
+        return {
+            "make_something_better":
+                self.make_something_better,
+            "eligible_drinks": list(
+                self.eligible_drinks
+            ),
+            "existing_better_example":
+                self.existing_better_example,
+        }
+
+
+@dataclass(slots=True)
+class BarDrinkWagerStakes:
+    winner: str = (
+        "has_bar_tabs_paid_by_loser"
+    )
+    loser: str = (
+        "pays_winners_bar_tabs"
+    )
+
+    def to_dict(self):
+        return {
+            "winner": self.winner,
+            "loser": self.loser,
+        }
+
+
+@dataclass(slots=True)
+class BarWagerDecisionMethod:
+    type: str
+    voters: list[str] = field(
+        default_factory=list
+    )
+    judges: list[str] = field(
+        default_factory=list
+    )
+    judge: str | None = None
+    proposed_by: str | None = None
+    proposed: bool | None = None
+    accepted: bool | None = None
+    accepted_by: list[str] = field(
+        default_factory=list
+    )
+    bouncer_present: bool | None = None
+    bouncer_accepted: bool | None = None
+
+    def accept(self, participants):
+        self.accepted = True
+        self.accepted_by = list(
+            participants
+        )
+        return self
+
+    def to_dict(self):
+        result = {
+            "type": self.type,
+        }
+
+        if self.voters:
+            result["voters"] = list(
+                self.voters
+            )
+
+        if self.judges:
+            result["judges"] = list(
+                self.judges
+            )
+
+        if self.judge is not None:
+            result["judge"] = self.judge
+
+        if self.proposed_by is not None:
+            result[
+                "proposed_by"
+            ] = self.proposed_by
+
+        if self.proposed is not None:
+            result["proposed"] = (
+                self.proposed
+            )
+
+        if self.accepted is not None:
+            result["accepted"] = (
+                self.accepted
+            )
+
+        if self.accepted_by:
+            result["accepted_by"] = list(
+                self.accepted_by
+            )
+
+        if self.bouncer_present is not None:
+            result[
+                "bouncer_present"
+            ] = self.bouncer_present
+
+        if self.bouncer_accepted is not None:
+            result[
+                "bouncer_accepted"
+            ] = self.bouncer_accepted
+
+        return result
+
+
+@dataclass(slots=True)
+class BarDrinkWager:
+    name: str = (
+        "serpent_lilith_drink_wager"
+    )
+    participants: list[str] = field(
+        default_factory=lambda: [
+            "serpent",
+            "lilith",
+        ]
+    )
+    challenge: BarDrinkWagerChallenge = field(
+        default_factory=BarDrinkWagerChallenge
+    )
+    stakes: BarDrinkWagerStakes = field(
+        default_factory=BarDrinkWagerStakes
+    )
+    proposed_by: str = "serpent"
+    accepted_by: str | None = None
+    accepted: bool = False
+    resolved: bool = False
+    winner: str | None = None
+    loser: str | None = None
+    type: str | None = None
+    decision_method_proposal: (
+        BarWagerDecisionMethod | None
+    ) = None
+    bartender_judge_proposal: (
+        BarWagerDecisionMethod | None
+    ) = None
+    tasting_panel_proposal: (
+        BarWagerDecisionMethod | None
+    ) = None
+    decision_method: (
+        BarWagerDecisionMethod | None
+    ) = None
+
+    def accept(self, participant):
+        self.accepted = True
+        self.accepted_by = participant
+        return self
+
+    def add_participant(
+        self,
+        participant,
+        wager_type=None
+    ):
+        if participant not in self.participants:
+            self.participants.append(
+                participant
+            )
+
+        if wager_type is not None:
+            self.type = wager_type
+
+        self.resolved = False
+        self.winner = None
+        return self
+
+    def to_dict(self):
+        result = {
+            "name": self.name,
+            "participants": list(
+                self.participants
+            ),
+            "challenge": (
+                self.challenge.to_dict()
+            ),
+            "stakes": self.stakes.to_dict(),
+            "proposed_by": self.proposed_by,
+            "accepted_by": self.accepted_by,
+            "accepted": self.accepted,
+            "resolved": self.resolved,
+            "winner": self.winner,
+            "loser": self.loser,
+        }
+
+        if self.type is not None:
+            result["type"] = self.type
+
+        for name in (
+            "decision_method_proposal",
+            "bartender_judge_proposal",
+            "tasting_panel_proposal",
+            "decision_method",
+        ):
+            value = getattr(
+                self,
+                name
+            )
+
+            if value is not None:
+                result[name] = value.to_dict()
+
+        return result
+
+
 class BarServingVessel:
 
     def fill(

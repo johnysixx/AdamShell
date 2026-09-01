@@ -35,14 +35,14 @@ class Day0GodJoinsDrinkWagerTests(unittest.TestCase):
     def test_wager_now_has_three_participants(self):
         self.scene.advance_to_three_way_drink_wager()
         wager = self.scene.serpent_lilith_drink_wager
-        self.assertEqual(wager['participants'], ['serpent', 'lilith', 'god'])
-        self.assertEqual(wager['type'], 'three_way_drink_wager')
+        self.assertEqual(wager.participants, ['serpent', 'lilith', 'god'])
+        self.assertEqual(wager.type, 'three_way_drink_wager')
 
     def test_wager_is_still_unresolved(self):
         self.scene.advance_to_three_way_drink_wager()
         wager = self.scene.serpent_lilith_drink_wager
-        self.assertFalse(wager['resolved'])
-        self.assertIsNone(wager['winner'])
+        self.assertFalse(wager.resolved)
+        self.assertIsNone(wager.winner)
 
     def test_joining_wager_does_not_create_creator_mask(self):
         self.scene.advance_to_three_way_drink_wager()

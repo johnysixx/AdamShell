@@ -1,7 +1,9 @@
 from meeting_place.bar_objects import (
     BarConversation,
     BarDrink,
+    BarDrinkWager,
     BarIngredientStock,
+    BarWagerDecisionMethod,
     DrinkRecipe,
     RecipeIngredientRequirement,
 )
@@ -170,9 +172,9 @@ class Day0FirstBarShift:
             raise RuntimeError('Serpent and Lilith are not talking yet.')
         if not hasattr(self.serpent, 'first_bar_drink_tasting') or not hasattr(self.lilith, 'first_bar_drink_tasting'):
             raise RuntimeError('They must taste the drinks first.')
-        wager = {'name': 'serpent_lilith_drink_wager', 'participants': ['serpent', 'lilith'], 'challenge': {'make_something_better': True, 'eligible_drinks': ['wine', 'beer', 'mead'], 'existing_better_example': False}, 'stakes': {'winner': 'has_bar_tabs_paid_by_loser', 'loser': 'pays_winners_bar_tabs'}, 'proposed_by': 'serpent', 'accepted_by': None, 'accepted': False, 'resolved': False, 'winner': None, 'loser': None}
+        wager = BarDrinkWager()
         self.serpent_lilith_drink_wager = wager
-        event = {'name': 'serpent_proposes_drink_wager_to_lilith', 'wager': wager}
+        event = {'name': 'serpent_proposes_drink_wager_to_lilith', 'wager': wager.to_dict()}
         self.meeting_place.emit_event(event)
         self.history.append(event)
         self.serpent_lilith_conversation.add_line(
@@ -185,11 +187,12 @@ class Day0FirstBarShift:
         wager = getattr(self, 'serpent_lilith_drink_wager', None)
         if wager is None:
             raise RuntimeError('Serpent has not proposed the wager.')
-        if wager['accepted']:
+        if wager.accepted:
             raise RuntimeError('The wager is already accepted.')
-        wager['accepted'] = True
-        wager['accepted_by'] = 'lilith'
-        event = {'name': 'lilith_accepts_drink_wager', 'wager': wager}
+        wager.accept(
+            participant='lilith'
+        )
+        event = {'name': 'lilith_accepts_drink_wager', 'wager': wager.to_dict()}
         self.meeting_place.emit_event(event)
         self.history.append(event)
         self.serpent_lilith_conversation.add_line(
@@ -208,7 +211,7 @@ class Day0FirstBarShift:
         if not self.serpent_lilith_conversation.started:
             raise RuntimeError('Serpent and Lilith are not talking.')
         wager = getattr(self, 'serpent_lilith_drink_wager', None)
-        if wager is None or not wager.get('accepted', False):
+        if wager is None or not wager.accepted:
             raise RuntimeError('Their wager must already be accepted.')
         event = {'name': 'serpent_and_lilith_agree_on_table', 'participants': ['serpent', 'lilith'], 'agreed': True}
         self.meeting_place.emit_event(event)
@@ -795,7 +798,7 @@ class Day0FirstBarShift:
         wager = getattr(self, 'serpent_lilith_drink_wager', None)
         if wager is None:
             raise RuntimeError('Serpent and Lilith have no drink wager.')
-        event = {'name': 'serpent_tells_god_about_drink_wager', 'speaker': 'serpent', 'listener': 'god', 'wager': wager, 'contest': ['wine', 'mead', 'beer']}
+        event = {'name': 'serpent_tells_god_about_drink_wager', 'speaker': 'serpent', 'listener': 'god', 'wager': wager.to_dict(), 'contest': ['wine', 'mead', 'beer']}
         self.meeting_place.emit_event(event)
         self.history.append(event)
         self._entity_attr_setdefault(self.god, 'bar_knowledge', {})['drink_wager'] = {'known': True, 'source': 'serpent'}
@@ -815,14 +818,12 @@ class Day0FirstBarShift:
             raise RuntimeError('God has not been offered participation.')
         offers[-1]['accepted'] = True
         wager = self.serpent_lilith_drink_wager
-        participants = wager.setdefault('participants', ['serpent', 'lilith'])
-        if 'god' not in participants:
-            participants.append('god')
-        wager['type'] = 'three_way_drink_wager'
-        wager['resolved'] = False
-        wager['winner'] = None
+        wager.add_participant(
+            participant='god',
+            wager_type='three_way_drink_wager'
+        )
         self.god.bar_state['participates_in_drink_wager'] = True
-        event = {'name': 'god_accepts_drink_wager', 'participant': 'god', 'participants': list(participants), 'resolved': False}
+        event = {'name': 'god_accepts_drink_wager', 'participant': 'god', 'participants': list(wager.participants), 'resolved': False}
         self.meeting_place.emit_event(event)
         self.history.append(event)
         return event
@@ -886,8 +887,18 @@ class Day0FirstBarShift:
         wager = getattr(self, 'serpent_lilith_drink_wager', None)
         if wager is None:
             raise RuntimeError('Drink wager does not exist.')
-        proposal = {'name': 'lilith_proposes_participant_vote', 'speaker': 'lilith', 'decision_method': {'type': 'participant_vote', 'voters': ['serpent', 'lilith', 'god'], 'proposed': True, 'accepted': False}}
-        wager['decision_method_proposal'] = proposal['decision_method']
+        method = BarWagerDecisionMethod(
+            type='participant_vote',
+            voters=[
+                'serpent',
+                'lilith',
+                'god',
+            ],
+            proposed=True,
+            accepted=False,
+        )
+        wager.decision_method_proposal = method
+        proposal = {'name': 'lilith_proposes_participant_vote', 'speaker': 'lilith', 'decision_method': method.to_dict()}
         self.meeting_place.emit_event(proposal)
         self.history.append(proposal)
         return proposal
@@ -930,11 +941,18 @@ class Day0FirstBarShift:
 
     def god_rejects_participant_vote_and_proposes_bartender(self):
         wager = self.serpent_lilith_drink_wager
-        proposal = wager.get('decision_method_proposal')
+        proposal = wager.decision_method_proposal
         if proposal is None:
             raise RuntimeError('Lilith has not proposed participant voting.')
         event = {'name': 'god_rejects_participant_vote_and_proposes_bartender', 'speaker': 'god', 'rejects': {'type': 'participant_vote'}, 'proposes': {'type': 'bartender_judges', 'judge': 'bartender'}}
-        wager['bartender_judge_proposal'] = {'type': 'bartender_judges', 'judge': 'bartender', 'proposed_by': 'god', 'accepted': False}
+        wager.bartender_judge_proposal = (
+            BarWagerDecisionMethod(
+                type='bartender_judges',
+                judge='bartender',
+                proposed_by='god',
+                accepted=False,
+            )
+        )
         self.meeting_place.emit_event(event)
         self.history.append(event)
         return event
@@ -955,10 +973,12 @@ class Day0FirstBarShift:
 
     def lilith_explains_wager_and_bartender_judge_proposal(self):
         wager = self.serpent_lilith_drink_wager
-        bartender_proposal = wager.get('bartender_judge_proposal')
+        bartender_proposal = (
+            wager.bartender_judge_proposal
+        )
         if bartender_proposal is None:
             raise RuntimeError('God has not proposed bartender as judge.')
-        event = {'name': 'lilith_explains_wager_and_bartender_judge_proposal', 'speaker': 'lilith', 'listener': 'bartender', 'wager': {'participants': list(wager['participants']), 'contest': ['wine', 'mead', 'beer']}, 'proposal': {'judge': 'bartender'}}
+        event = {'name': 'lilith_explains_wager_and_bartender_judge_proposal', 'speaker': 'lilith', 'listener': 'bartender', 'wager': {'participants': list(wager.participants), 'contest': ['wine', 'mead', 'beer']}, 'proposal': {'judge': 'bartender'}}
         self.meeting_place.emit_event(event)
         self.history.append(event)
         return event
@@ -971,9 +991,17 @@ class Day0FirstBarShift:
 
     def bartender_proposes_bouncer_as_second_taster(self):
         wager = self.serpent_lilith_drink_wager
-        proposal = {'type': 'tasting_panel', 'judges': ['bartender', 'bouncer'], 'proposed_by': 'bartender', 'accepted': False}
-        wager['tasting_panel_proposal'] = proposal
-        event = {'name': 'bartender_proposes_bouncer_as_second_taster', 'speaker': 'bartender', 'proposal': proposal}
+        proposal = BarWagerDecisionMethod(
+            type='tasting_panel',
+            judges=[
+                'bartender',
+                'bouncer',
+            ],
+            proposed_by='bartender',
+            accepted=False,
+        )
+        wager.tasting_panel_proposal = proposal
+        event = {'name': 'bartender_proposes_bouncer_as_second_taster', 'speaker': 'bartender', 'proposal': proposal.to_dict()}
         self.meeting_place.emit_event(event)
         self.history.append(event)
         return event
@@ -990,21 +1018,33 @@ class Day0FirstBarShift:
 
     def wager_participants_accept_two_judge_panel(self):
         wager = self.serpent_lilith_drink_wager
-        proposal = wager.get('tasting_panel_proposal')
+        proposal = wager.tasting_panel_proposal
         if proposal is None:
             raise RuntimeError('Bartender+bouncer panel was not proposed.')
         approvals = ['lilith', 'god', 'serpent']
-        proposal['accepted'] = True
-        proposal['accepted_by'] = list(approvals)
-        wager['decision_method'] = {'type': 'tasting_panel', 'judges': ['bartender', 'bouncer']}
+        proposal.accept(
+            participants=approvals
+        )
+        wager.decision_method = (
+            BarWagerDecisionMethod(
+                type='tasting_panel',
+                judges=[
+                    'bartender',
+                    'bouncer',
+                ],
+            )
+        )
         event = {'name': 'wager_participants_accept_two_judge_panel', 'accepted_by': approvals, 'judges': ['bartender', 'bouncer']}
         self.meeting_place.emit_event(event)
         self.history.append(event)
         return event
 
     def bartender_suggests_inviting_bouncer_inside(self):
-        proposal = self.serpent_lilith_drink_wager.get('tasting_panel_proposal')
-        if proposal is None or not proposal.get('accepted', False):
+        proposal = (
+            self.serpent_lilith_drink_wager
+            .tasting_panel_proposal
+        )
+        if proposal is None or not proposal.accepted:
             raise RuntimeError('Two-judge panel has not been accepted.')
         event = {'name': 'bartender_suggests_inviting_bouncer_inside', 'speaker': 'bartender', 'invite': 'bouncer', 'purpose': 'agree_on_wager_judging', 'bouncer_entered': False}
         self.meeting_place.emit_event(event)
@@ -1097,9 +1137,12 @@ class Day0FirstBarShift:
         event = {'name': 'bouncer_enters_bar_with_garfield', 'bouncer': 'bouncer', 'with': 'garfield', 'locations': list(locations), 'still_guards_entrance': True, 'present_inside': True, 'purpose': 'discuss_wager_judging'}
         self.meeting_place.emit_event(event)
         self.history.append(event)
-        proposal = self.serpent_lilith_drink_wager.get('tasting_panel_proposal')
+        proposal = (
+            self.serpent_lilith_drink_wager
+            .tasting_panel_proposal
+        )
         if proposal is not None:
-            proposal['bouncer_present'] = True
+            proposal.bouncer_present = True
         return event
 
     def serpent_explains_wager_to_bouncer(self):
@@ -1112,7 +1155,7 @@ class Day0FirstBarShift:
         if not present_inside:
             raise RuntimeError('Bouncer is not present inside the bar.')
         wager = self.serpent_lilith_drink_wager
-        event = {'name': 'serpent_explains_wager_to_bouncer', 'speaker': 'serpent', 'listener': 'bouncer', 'participants': list(wager['participants']), 'contest': ['wine', 'mead', 'beer'], 'proposed_judges': ['bartender', 'bouncer']}
+        event = {'name': 'serpent_explains_wager_to_bouncer', 'speaker': 'serpent', 'listener': 'bouncer', 'participants': list(wager.participants), 'contest': ['wine', 'mead', 'beer'], 'proposed_judges': ['bartender', 'bouncer']}
         self.meeting_place.emit_event(event)
         self.history.append(event)
         bouncer.wager_knowledge = {
@@ -1170,9 +1213,12 @@ class Day0FirstBarShift:
         accepted = {'name': 'bouncer_accepts_wager_judge_role', 'bouncer': 'bouncer', 'role': 'tasting_judge', 'accepted': True}
         self.meeting_place.emit_event(accepted)
         self.history.append(accepted)
-        proposal = self.serpent_lilith_drink_wager.get('tasting_panel_proposal')
+        proposal = (
+            self.serpent_lilith_drink_wager
+            .tasting_panel_proposal
+        )
         if proposal is not None:
-            proposal['bouncer_accepted'] = True
+            proposal.bouncer_accepted = True
         bouncer = self.meeting_place.bouncer
         bouncer.wager_judge = True
         return {'tastings': tasting_events, 'verdict': verdict, 'accepted': accepted, 'receipt': service['receipt']}
