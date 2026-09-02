@@ -1,4 +1,11 @@
-﻿class BigBang:
+﻿from copy import deepcopy
+
+from universe.big_bang_state import (
+    BigBangCosmicState,
+)
+
+
+class BigBang:
 
     def __init__(self, universe):
         self.universe = universe
@@ -10,22 +17,24 @@
 
         self.primordial_elements = {}
 
-        self.cosmic_state = {
-            "spacetime_expanded": False,
-            "primordial_plasma_formed": False,
-            "light_nuclei_conditions_prepared": False,
-            "light_separated_from_darkness": False,
-            "darkness_present": True
-        }
+        self.cosmic_state = BigBangCosmicState()
 
-        self.public_state = {
+        self.public_state = self._build_public_state()
+
+    def _build_public_state(self):
+        return {
             "name": self.name,
             "type": self.type,
             "state": self.state,
-            "phases": self.phases,
-            "primordial_elements": self.primordial_elements,
-            "cosmic_state": self.cosmic_state
+            "phases": deepcopy(self.phases),
+            "primordial_elements": deepcopy(
+                self.primordial_elements
+            ),
+            "cosmic_state": self.cosmic_state.to_dict(),
         }
+
+    def _refresh_public_state(self):
+        self.public_state = self._build_public_state()
 
     def explode(self):
         return self.run_process()
@@ -43,8 +52,6 @@
 
     def begin(self):
         self.state = "in_progress"
-        self.public_state["state"] = self.state
-
         self.record_phase(
             name="primordial_void",
             description="Before form, stars, worlds, or drink foundations, the universe begins as primordial potential."
@@ -53,7 +60,7 @@
         print("💥 BIG BANG PROCESS STARTED")
 
     def expand_spacetime(self):
-        self.cosmic_state["spacetime_expanded"] = True
+        self.cosmic_state.spacetime_expanded = True
 
         self.record_phase(
             name="spacetime_expansion",
@@ -63,7 +70,7 @@
         print("SPACETIME BEGINS TO EXPAND")
 
     def form_primordial_plasma(self):
-        self.cosmic_state["primordial_plasma_formed"] = True
+        self.cosmic_state.primordial_plasma_formed = True
 
         self.primordial_elements["energy"] = {
             "name": "energy",
@@ -85,7 +92,10 @@
         print("PRIMORDIAL PLASMA FORMED")
 
     def form_light_elements(self):
-        self.cosmic_state["light_nuclei_conditions_prepared"] = True
+        (
+            self.cosmic_state
+            .light_nuclei_conditions_prepared
+        ) = True
 
         self.primordial_elements["hydrogen"] = {
             "name": "hydrogen",
@@ -116,7 +126,10 @@
         print("LIGHT NUCLEI CONDITIONS PREPARED")
 
     def separate_light_from_darkness(self):
-        self.cosmic_state["light_separated_from_darkness"] = True
+        (
+            self.cosmic_state
+            .light_separated_from_darkness
+        ) = True
 
         self.record_phase(
             name="light_separated_from_darkness",
@@ -127,8 +140,6 @@
 
     def complete(self):
         self.state = "completed"
-        self.public_state["state"] = self.state
-
         self.record_phase(
             name="big_bang_completed",
             description="The origin process is complete. The universe now contains spacetime, primordial plasma, and light elements."
@@ -143,6 +154,7 @@
         }
 
         self.phases.append(phase)
+        self._refresh_public_state()
 
     def write_to_world(self):
         self.universe.world["big_bang"] = self.public_state
