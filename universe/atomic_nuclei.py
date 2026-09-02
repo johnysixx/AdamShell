@@ -28,7 +28,11 @@
         particle_state = self.universe.world.get("particle_state", {})
         nucleons = self.universe.world.get("nucleons", {})
 
-        if not particle_state.get("nucleons_formed"):
+        if not getattr(
+            particle_state,
+            "nucleons_formed",
+            False,
+        ):
             self.state = "failed"
             self.public_state["state"] = self.state
 
