@@ -1,4 +1,11 @@
-﻿class AtomicNuclei:
+﻿from copy import deepcopy
+
+from universe.nuclear_state import (
+    NuclearFormationState,
+)
+
+
+class AtomicNuclei:
 
     def __init__(self, universe):
         self.universe = universe
@@ -8,48 +15,38 @@
 
         self.nuclei = {}
 
-        self.nuclear_state = {
-            "nucleons_available": False,
-            "hydrogen_nucleus_formed": False,
-            "helium_nucleus_formed": False,
-            "light_nuclei_formed": False,
-            "nuclear_composition_recorded": False
-        }
+        self.nuclear_state = NuclearFormationState()
 
-        self.public_state = {
+        self.public_state = self._build_public_state()
+
+    def _build_public_state(self):
+        return {
             "name": self.name,
             "type": self.type,
             "state": self.state,
-            "nuclei": self.nuclei,
-            "nuclear_state": self.nuclear_state
+            "nuclei": deepcopy(self.nuclei),
+            "nuclear_state": (
+                self.nuclear_state.to_dict()
+            ),
         }
 
+    def _refresh_public_state(self):
+        self.public_state = self._build_public_state()
+
     def form_light_nuclei(self):
-        particle_state = self.universe.world.get("particle_state", {})
-        nucleons = self.universe.world.get("nucleons", {})
+        return (
+            self.universe
+            .quantum_error_boundary.execute(
+                operation=(
+                    self._form_light_nuclei_unprotected
+                ),
+                source_component="atomic_nuclei",
+                source_operation="form_light_nuclei",
+            )
+        )
 
-        if not getattr(
-            particle_state,
-            "nucleons_formed",
-            False,
-        ):
-            self.state = "failed"
-            self.public_state["state"] = self.state
-
-            print("ATOMIC NUCLEI FORMATION FAILED: nucleons are missing")
-            self.write_to_world()
-            return self.public_state
-
-        if "proton" not in nucleons or "neutron" not in nucleons:
-            self.state = "failed"
-            self.public_state["state"] = self.state
-
-            print("ATOMIC NUCLEI FORMATION FAILED: proton or neutron is missing")
-            self.write_to_world()
-            return self.public_state
-
+    def _form_light_nuclei_unprotected(self):
         self.state = "formed"
-        self.public_state["state"] = self.state
 
         self.add_nucleus(
             name="hydrogen_nucleus",
@@ -79,11 +76,14 @@
             element_name="lithium"
         )
 
-        self.nuclear_state["nucleons_available"] = True
-        self.nuclear_state["hydrogen_nucleus_formed"] = True
-        self.nuclear_state["helium_nucleus_formed"] = True
-        self.nuclear_state["light_nuclei_formed"] = True
-        self.nuclear_state["nuclear_composition_recorded"] = True
+        self.nuclear_state.nucleons_available = True
+        self.nuclear_state.hydrogen_nucleus_formed = True
+        self.nuclear_state.helium_nucleus_formed = True
+        self.nuclear_state.light_nuclei_formed = True
+        (
+            self.nuclear_state
+            .nuclear_composition_recorded
+        ) = True
 
         self.record_history()
         self.write_to_world()
@@ -117,6 +117,7 @@
         })
 
     def write_to_world(self):
+        self._refresh_public_state()
         self.universe.world["atomic_nuclei"] = self.public_state
         self.universe.world["light_nuclei"] = self.nuclei
         self.universe.world["nuclear_state"] = self.nuclear_state
