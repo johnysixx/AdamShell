@@ -28,6 +28,7 @@ from quantum.cat_box_transfer import CatQuantumBoxTransfer
 from cats.cat_door_registry import CatDoorRegistry
 from universe.cat_recipient_registry import CatRecipientRegistry
 from universe.aroma_residue import AromaResidue
+from universe.physics_layers import UniversePhysicsLayers
 from universe.quantum_state import UniverseQuantumState
 
 class Universe:
@@ -51,7 +52,7 @@ class Universe:
         self.entities = []
         self.entity_memory = {}
         self.physics_model = 'symbolic_classical'
-        self.physics_layers = {'classical': True, 'quantum': False}
+        self.physics_layers = UniversePhysicsLayers()
         self.quantum_die_resolver = QuantumDieResolver(self)
         self.cronenberg_pair_encounter = CronenbergPairEncounter()
         self.cronenberg_pair_encounter_resolver = CronenbergPairEncounterResolver(self)
@@ -220,7 +221,7 @@ class Universe:
         UniverseLogger.event(f'Physics enabled: {law}')
 
     def enable_quantum_layer(self):
-        self.physics_layers['quantum'] = True
+        self.physics_layers.enable_quantum()
         self.quantum_state.enable()
         self.physics_model = 'symbolic_quantum'
         if not hasattr(self, 'quantum_die_box'):
@@ -238,7 +239,7 @@ class Universe:
         self.bind_spacetime()
         UniverseLogger.event('Physics booted')
         UniverseLogger.event(f'Physics model: {self.physics_model}')
-        UniverseLogger.event(f"Physics layers: classical={self.physics_layers['classical']} quantum={self.physics_layers['quantum']} ")
+        UniverseLogger.event(f"Physics layers: classical={self.physics_layers.classical} quantum={self.physics_layers.quantum} ")
         UniverseLogger.event(f"Quantum state: enabled={self.quantum_state.enabled} superposition={self.quantum_state.superposition} collapsed={self.quantum_state.collapsed}")
 
     def tick_time(self):
