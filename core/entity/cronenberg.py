@@ -24,6 +24,9 @@ from core.entity.cronenberg_system.origin import (
 from core.entity.cronenberg_system.consumption import (
     CronenbergConsumptionRecord
 )
+from core.entity.cronenberg_system.chemical_marker import (
+    CronenbergChemicalMarker
+)
 from universe.aroma_profile import AromaProfile
 
 
@@ -63,10 +66,12 @@ class Cronenberg(Entity):
             intensity=1.0
         )
 
-        self.aroma_chemical_marker = {
-            "molecule": "ozone",
-            "formula": "O3"
-        }
+        self.aroma_chemical_marker = (
+            CronenbergChemicalMarker(
+                molecule="ozone",
+                formula="O3",
+            )
+        )
 
         self.metabolism = (
             CronenbergMetabolism()

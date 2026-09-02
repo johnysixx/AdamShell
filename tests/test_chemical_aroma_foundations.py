@@ -177,9 +177,9 @@ class ChemicalAromaFoundationsTests(
         )
 
         self.assertEqual(
-            cronenberg.aroma_chemical_marker[
-                "formula"
-            ],
+            cronenberg
+            .aroma_chemical_marker
+            .formula,
             "O3"
         )
 
