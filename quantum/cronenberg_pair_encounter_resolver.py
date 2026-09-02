@@ -174,15 +174,11 @@ class CronenbergPairEncounterResolver:
         }
 
     def _quantum_tick(self):
-        before = self.universe.quantum_state[
-            "tick_count"
-        ]
+        before = self.universe.quantum_state.tick_count
 
         result = self.universe.tick_quantum()
 
-        after = self.universe.quantum_state[
-            "tick_count"
-        ]
+        after = self.universe.quantum_state.tick_count
 
         return {
             "before_tick": before,

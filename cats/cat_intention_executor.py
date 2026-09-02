@@ -186,7 +186,7 @@ class CatIntentionExecutor:
             return self._record(event)
         failure_reason = result.get('reason', 'quantum_transfer_failed')
         cronenberg = self.universe.create_cronenberg_from_quantum_error(error=RuntimeError(f'Cat quantum box transfer failed: {failure_reason}'), source_component='cat_intention_executor', source_operation='quantum_box_travel_failed')
-        memory = cat.memory.remember(event_type='quantum_box_layer_transfer_failed', universe_tick=self.universe.quantum_state.get('tick_count', 0), location=deepcopy(cat.position), participants=[source_box_id, counterpart_box_id], details={'source_layer': target.get('source_layer'), 'target_layer': target.get('target_layer'), 'reason': failure_reason, 'cronenberg_id': cronenberg.id})
+        memory = cat.memory.remember(event_type='quantum_box_layer_transfer_failed', universe_tick=self.universe.quantum_state.tick_count, location=deepcopy(cat.position), participants=[source_box_id, counterpart_box_id], details={'source_layer': target.get('source_layer'), 'target_layer': target.get('target_layer'), 'reason': failure_reason, 'cronenberg_id': cronenberg.id})
         event['reason'] = failure_reason
         event['cronenberg_id'] = cronenberg.id
         event['memory'] = deepcopy(memory)

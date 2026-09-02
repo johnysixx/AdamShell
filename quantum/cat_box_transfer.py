@@ -216,10 +216,7 @@ class CatQuantumBoxTransfer:
             "use_count": 0,
             "used_by": [],
             "created_tick": (
-                self.universe
-                .quantum_state[
-                    "tick_count"
-                ]
+                self.universe.quantum_state.tick_count
             )
         }
 
@@ -862,9 +859,7 @@ class CatQuantumBoxTransfer:
         transfer = source_box.begin_cat_transfer(
             cat=cat,
             target_box=target_box,
-            tick=self.universe.quantum_state[
-                "tick_count"
-            ]
+            tick=self.universe.quantum_state.tick_count
         )
 
         cat.quantum_transfer = {
