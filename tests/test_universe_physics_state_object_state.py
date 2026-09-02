@@ -4,6 +4,9 @@ from universe.physics_state import (
     UniverseGravityState,
     UniverseTimeState,
 )
+from universe.spacetime import (
+    UniverseSpacetimeState
+)
 from universe.universe import Universe
 
 
@@ -137,7 +140,7 @@ class UniversePhysicsStateObjectStateTests(
             0.01,
         )
 
-    def test_gravity_updates_dict_boundary(
+    def test_gravity_updates_spacetime_object(
         self
     ):
         universe = Universe()
@@ -148,13 +151,16 @@ class UniversePhysicsStateObjectStateTests(
         universe.tick_spacetime()
 
         spacetime = universe.world["spacetime"]
-        self.assertIsInstance(spacetime, dict)
+        self.assertIsInstance(
+            spacetime,
+            UniverseSpacetimeState,
+        )
         self.assertEqual(
-            spacetime["time_axis"]["tick"],
+            spacetime.time_axis.tick,
             1,
         )
         self.assertAlmostEqual(
-            spacetime["curvature"],
+            spacetime.curvature,
             0.01,
         )
         self.assertAlmostEqual(

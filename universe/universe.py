@@ -34,6 +34,7 @@ from universe.physics_state import (
     UniverseTimeState,
 )
 from universe.quantum_state import UniverseQuantumState
+from universe.spacetime import UniverseSpacetimeState
 
 class Universe:
 
@@ -204,7 +205,10 @@ class Universe:
             self.entropy += self.quantum_state.entropy_delta
         self.pressure = self.entropy / (len(self.entities) + 1)
         if 'spacetime' in self.world:
-            self.pressure += self.world['spacetime']['curvature']
+            self.pressure += (
+                self.world['spacetime']
+                .curvature
+            )
         self.energy_pool += len(self.entities) * 0.02
         self.last_energy_gain = 0.05
         self.energy_pool += self.last_energy_gain
@@ -270,7 +274,9 @@ class Universe:
         return self.energy_pool
 
     def bind_spacetime(self):
-        self.world['spacetime'] = {'linked': True, 'curvature': 0.0, 'time_axis': {'tick': 0, 'flow': 1.0, 'state': 'global'}, 'space_axis': {'dimensions': 3, 'state': 'global', 'expanded': True}}
+        self.world['spacetime'] = (
+            UniverseSpacetimeState()
+        )
         UniverseLogger.event('time and space are bound into spacetime')
 
     def tick_spacetime(self):
@@ -278,15 +284,15 @@ class Universe:
             UniverseLogger.event('No spacetime bound yet')
             return
         spacetime = self.world['spacetime']
-        spacetime['time_axis']['tick'] += 1
         gravity = self.physics['gravity']
         curvature_delta = 0.0
         if gravity and gravity.enabled:
             curvature_delta = (
                 gravity.curvature_delta
             )
-            spacetime['curvature'] += curvature_delta
-            UniverseLogger.event(f"SPACETIME TICK={spacetime['time_axis']['tick']} DELTA={curvature_delta:.2f} CURVATURE={spacetime['curvature']:.2f}")
+        spacetime.advance(curvature_delta)
+        if gravity and gravity.enabled:
+            UniverseLogger.event(f"SPACETIME TICK={spacetime.time_axis.tick} DELTA={curvature_delta:.2f} CURVATURE={spacetime.curvature:.2f}")
 
     def open_quantum_box(self, box_id, observer=None, rng=None):
         return self.quantum_error_boundary.execute(operation=lambda: self._open_quantum_box_unprotected(box_id=box_id, observer=observer, rng=rng), source_component='quantum_box', source_operation='open_quantum_box')
@@ -414,7 +420,10 @@ class Universe:
     def record_universe_state(self):
         curvature = 0.0
         if 'spacetime' in self.world:
-            curvature = self.world['spacetime']['curvature']
+            curvature = (
+                self.world['spacetime']
+                .curvature
+            )
         snapshot = {'tick': self.universe_tick, 'energy': self.energy_pool, 'gain': self.last_energy_gain, 'cost': self.last_pressure_cost, 'delta': self.last_energy_delta, 'classical_entropy_delta': self.last_classical_entropy_delta, 'classical_entropy_total': self.classical_entropy_total, 'entropy': self.entropy, 'pressure': self.pressure, 'curvature': curvature, 'physics_model': self.physics_model, 'quantum_enabled': self.quantum_state.enabled, 'quantum_fluctuation': self.quantum_state.fluctuation, 'quantum_uncertainty': self.quantum_state.uncertainty, 'quantum_entropy_delta': self.quantum_state.entropy_delta, 'quantum_entropy_total': self.quantum_state.entropy_total}
         self.universe_history.append(snapshot)
 
