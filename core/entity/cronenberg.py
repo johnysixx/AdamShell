@@ -21,6 +21,9 @@ from core.entity.cronenberg_system.quantum_state import (
 from core.entity.cronenberg_system.origin import (
     CronenbergOrigin
 )
+from core.entity.cronenberg_system.consumption import (
+    CronenbergConsumptionRecord
+)
 from universe.aroma_profile import AromaProfile
 
 
@@ -391,16 +394,18 @@ class Cronenberg(Entity):
             )
         )
 
-        self.consumed_cronenbergs.append({
-            "name": other.name,
-            "mass": consumed_mass,
-            "energy": consumed_energy,
-            "digestion_days": (
-                digestion_event[
-                    "digestion_days"
-                ]
+        self.consumed_cronenbergs.append(
+            CronenbergConsumptionRecord(
+                name=other.name,
+                mass=consumed_mass,
+                energy=consumed_energy,
+                digestion_days=(
+                    digestion_event[
+                        "digestion_days"
+                    ]
+                ),
             )
-        })
+        )
 
         other.state = (
             "consumed_by_cronenberg"
@@ -585,7 +590,9 @@ class Cronenberg(Entity):
             ),
             "traits": self.traits.public_state,
             "quantum_links": self.quantum_links,
-            "consumed_cronenbergs": list(
+            "consumed_cronenbergs": [
+                record.to_dict()
+                for record in
                 self.consumed_cronenbergs
-            )
+            ]
         }
