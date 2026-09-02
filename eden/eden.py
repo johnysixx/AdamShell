@@ -233,8 +233,7 @@ class Eden:
         UniverseLogger.event("sedmeho dne buh odpocival")
 
     def get_time(self):
-        return self.universe.physics["time"]["tick"]
-
+        return self.universe.physics["time"].tick
 
 
 

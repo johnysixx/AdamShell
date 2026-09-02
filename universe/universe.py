@@ -29,6 +29,10 @@ from cats.cat_door_registry import CatDoorRegistry
 from universe.cat_recipient_registry import CatRecipientRegistry
 from universe.aroma_residue import AromaResidue
 from universe.physics_layers import UniversePhysicsLayers
+from universe.physics_state import (
+    UniverseGravityState,
+    UniverseTimeState,
+)
 from universe.quantum_state import UniverseQuantumState
 
 class Universe:
@@ -210,11 +214,15 @@ class Universe:
 
     def enable_physics(self, law):
         if law == 'time':
-            self.physics['time'] = {'tick': 0, 'flow': 1.0, 'state': 'linear', 'pressure': 0.0}
+            self.physics['time'] = (
+                UniverseTimeState()
+            )
             UniverseLogger.event('Physics enabled: time')
             return
         if law == 'gravity':
-            self.physics['gravity'] = {'enabled': True, 'strength': 1.0, 'curvature_effect': 0.01}
+            self.physics['gravity'] = (
+                UniverseGravityState()
+            )
             UniverseLogger.event('Physics enabled: gravity')
             return
         self.physics[law] = True
@@ -243,15 +251,20 @@ class Universe:
         UniverseLogger.event(f"Quantum state: enabled={self.quantum_state.enabled} superposition={self.quantum_state.superposition} collapsed={self.quantum_state.collapsed}")
 
     def tick_time(self):
-        if 'time' in self.physics:
-            t = self.physics['time']
-            t['tick'] += 1
-            t['pressure'] += 0.1 * t['flow']
-            self.energy_pool -= t['pressure'] * 0.1
-            UniverseLogger.event(f"TIME={t['tick']}  PRESSURE={t['pressure']:.2f}  ENERGY={self.energy_pool:.2f}")
+        time_state = self.physics['time']
+
+        if not isinstance(
+            time_state,
+            UniverseTimeState,
+        ):
+            return
+
+        pressure = time_state.advance()
+        self.energy_pool -= pressure * 0.1
+        UniverseLogger.event(f"TIME={time_state.tick}  PRESSURE={time_state.pressure:.2f}  ENERGY={self.energy_pool:.2f}")
 
     def get_time(self):
-        return self.physics['time']['tick']
+        return self.physics['time'].tick
 
     def get_energy(self):
         return self.energy_pool
@@ -268,8 +281,10 @@ class Universe:
         spacetime['time_axis']['tick'] += 1
         gravity = self.physics['gravity']
         curvature_delta = 0.0
-        if gravity and gravity['enabled']:
-            curvature_delta = gravity['curvature_effect'] * gravity['strength']
+        if gravity and gravity.enabled:
+            curvature_delta = (
+                gravity.curvature_delta
+            )
             spacetime['curvature'] += curvature_delta
             UniverseLogger.event(f"SPACETIME TICK={spacetime['time_axis']['tick']} DELTA={curvature_delta:.2f} CURVATURE={spacetime['curvature']:.2f}")
 
