@@ -1,4 +1,7 @@
-﻿from universe.periodic_table import PeriodicTable
+﻿from copy import deepcopy
+
+from universe.atom_state import AtomFormationState
+from universe.periodic_table import PeriodicTable
 
 
 class Atoms:
@@ -12,21 +15,35 @@ class Atoms:
         self.periodic_table = PeriodicTable(universe)
         self.atoms = {}
 
-        self.atom_state = {
-            "periodic_table_available": False,
-            "neutral_atoms_available": False,
-            "atom_count": 0
-        }
+        self.atom_state = AtomFormationState()
 
-        self.public_state = {
+        self.public_state = self._build_public_state()
+
+    def _build_public_state(self):
+        return {
             "name": self.name,
             "type": self.type,
             "state": self.state,
-            "atoms": self.atoms,
-            "atom_state": self.atom_state
+            "atoms": deepcopy(self.atoms),
+            "atom_state": self.atom_state.to_dict(),
         }
 
+    def _refresh_public_state(self):
+        self.public_state = self._build_public_state()
+
     def form_reference_atoms(self):
+        return (
+            self.universe
+            .quantum_error_boundary.execute(
+                operation=(
+                    self._form_reference_atoms_unprotected
+                ),
+                source_component="atoms",
+                source_operation="form_reference_atoms",
+            )
+        )
+
+    def _form_reference_atoms_unprotected(self):
         self.ensure_periodic_table()
 
         self.create_neutral_atom(1)
@@ -35,10 +52,9 @@ class Atoms:
         self.create_neutral_atom(119)
 
         self.state = "formed"
-        self.public_state["state"] = self.state
 
-        self.atom_state["neutral_atoms_available"] = True
-        self.atom_state["atom_count"] = len(self.atoms)
+        self.atom_state.neutral_atoms_available = True
+        self.atom_state.atom_count = len(self.atoms)
 
         self.record_history()
         self.write_to_world()
@@ -55,7 +71,7 @@ class Atoms:
         if not self.universe.world.get("elements_by_atomic_number"):
             self.periodic_table.build_known_table()
 
-        self.atom_state["periodic_table_available"] = True
+        self.atom_state.periodic_table_available = True
 
     def create_neutral_atom(self, atomic_number):
         element = self.periodic_table.get_element(atomic_number)
@@ -90,6 +106,7 @@ class Atoms:
         })
 
     def write_to_world(self):
+        self._refresh_public_state()
         self.universe.world["atoms"] = self.public_state
         self.universe.world["neutral_atoms"] = self.atoms
         self.universe.world["atom_state"] = self.atom_state
