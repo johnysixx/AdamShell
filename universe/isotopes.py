@@ -1,4 +1,9 @@
-﻿from universe.periodic_table import PeriodicTable
+﻿from copy import deepcopy
+
+from universe.isotope_state import (
+    IsotopeFormationState,
+)
+from universe.periodic_table import PeriodicTable
 
 
 class Isotopes:
@@ -12,23 +17,37 @@ class Isotopes:
         self.periodic_table = PeriodicTable(universe)
         self.isotopes = {}
 
-        self.isotope_state = {
-            "periodic_table_available": False,
-            "reference_isotopes_available": False,
-            "radioactive_isotopes_available": False,
-            "atomic_time_isotope_available": False,
-            "isotope_count": 0
-        }
+        self.isotope_state = IsotopeFormationState()
 
-        self.public_state = {
+        self.public_state = self._build_public_state()
+
+    def _build_public_state(self):
+        return {
             "name": self.name,
             "type": self.type,
             "state": self.state,
-            "isotopes": self.isotopes,
-            "isotope_state": self.isotope_state
+            "isotopes": deepcopy(self.isotopes),
+            "isotope_state": (
+                self.isotope_state.to_dict()
+            ),
         }
 
+    def _refresh_public_state(self):
+        self.public_state = self._build_public_state()
+
     def form_reference_isotopes(self):
+        return (
+            self.universe
+            .quantum_error_boundary.execute(
+                operation=(
+                    self._form_reference_isotopes_unprotected
+                ),
+                source_component="isotopes",
+                source_operation="form_reference_isotopes",
+            )
+        )
+
+    def _form_reference_isotopes_unprotected(self):
         self.ensure_periodic_table()
 
         self.create_isotope(1, 1, "stable", ["atoms", "water"])
@@ -42,12 +61,19 @@ class Isotopes:
         self.create_isotope(92, 238, "radioactive", ["geological_time"])
 
         self.state = "formed"
-        self.public_state["state"] = self.state
 
-        self.isotope_state["reference_isotopes_available"] = True
-        self.isotope_state["radioactive_isotopes_available"] = True
-        self.isotope_state["atomic_time_isotope_available"] = True
-        self.isotope_state["isotope_count"] = len(self.isotopes)
+        self.isotope_state.reference_isotopes_available = True
+        (
+            self.isotope_state
+            .radioactive_isotopes_available
+        ) = True
+        (
+            self.isotope_state
+            .atomic_time_isotope_available
+        ) = True
+        self.isotope_state.isotope_count = len(
+            self.isotopes
+        )
 
         self.record_history()
         self.write_to_world()
@@ -66,7 +92,7 @@ class Isotopes:
         if not self.universe.world.get("elements_by_atomic_number"):
             self.periodic_table.build_known_table()
 
-        self.isotope_state["periodic_table_available"] = True
+        self.isotope_state.periodic_table_available = True
 
     def create_isotope(self, atomic_number, mass_number, stability, future_use):
         if mass_number < atomic_number:
@@ -107,6 +133,7 @@ class Isotopes:
         })
 
     def write_to_world(self):
+        self._refresh_public_state()
         self.universe.world["isotopes"] = self.public_state
         self.universe.world["known_isotopes"] = self.isotopes
         self.universe.world["isotope_state"] = self.isotope_state
