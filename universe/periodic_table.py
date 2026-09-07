@@ -1,4 +1,9 @@
-﻿DIGIT_ROOTS = {
+﻿from universe.periodic_table_state import (
+    PeriodicTableRegistryState,
+)
+
+
+DIGIT_ROOTS = {
     "0": ("nil", "n"),
     "1": ("un", "u"),
     "2": ("bi", "b"),
@@ -145,33 +150,47 @@ class PeriodicTable:
         self.elements = {}
         self.future_elements = {}
 
-        self.registry_state = {
-            "known_elements_registered": False,
-            "known_element_count": 0,
-            "future_element_generation_available": True,
-            "future_element_count": 0
-        }
+        self.registry_state = PeriodicTableRegistryState()
 
-        self.public_state = {
+        self.public_state = self._build_public_state()
+
+    def _build_public_state(self):
+        return {
             "name": self.name,
             "type": self.type,
             "state": self.state,
-            "registry_state": self.registry_state
+            "registry_state": self.registry_state.to_dict(),
         }
 
+    def _refresh_public_state(self):
+        self.public_state = self._build_public_state()
+
     def build_known_table(self):
+        return (
+            self.universe
+            .quantum_error_boundary.execute(
+                operation=(
+                    self._build_known_table_unprotected
+                ),
+                source_component="periodic_table",
+                source_operation="build_known_table",
+            )
+        )
+
+    def _build_known_table_unprotected(self):
         for atomic_number, symbol, name in KNOWN_ELEMENTS:
             self.elements[atomic_number] = self.create_known_element(
                 atomic_number=atomic_number,
                 symbol=symbol,
                 name=name
-            )
+        )
 
         self.state = "registered"
-        self.public_state["state"] = self.state
 
-        self.registry_state["known_elements_registered"] = True
-        self.registry_state["known_element_count"] = len(self.elements)
+        self.registry_state.known_elements_registered = True
+        self.registry_state.known_element_count = len(
+            self.elements
+        )
 
         self.write_to_world()
 
@@ -227,7 +246,9 @@ class PeriodicTable:
         }
 
         self.future_elements[atomic_number] = element
-        self.registry_state["future_element_count"] = len(self.future_elements)
+        self.registry_state.future_element_count = len(
+            self.future_elements
+        )
 
         self.write_to_world()
 
@@ -252,6 +273,7 @@ class PeriodicTable:
         return letters.capitalize()
 
     def write_to_world(self):
+        self._refresh_public_state()
         self.universe.world["periodic_table"] = self.public_state
         self.universe.world["elements_by_atomic_number"] = self.elements
         self.universe.world["chemical_elements"] = {
