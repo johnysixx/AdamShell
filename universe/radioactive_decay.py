@@ -1,4 +1,7 @@
-﻿from universe.isotopes import Isotopes
+﻿from copy import deepcopy
+
+from universe.decay_state import RadioactiveDecayState
+from universe.isotopes import Isotopes
 
 
 class RadioactiveDecay:
@@ -12,23 +15,35 @@ class RadioactiveDecay:
         self.isotopes_layer = Isotopes(universe)
         self.decay_patterns = {}
 
-        self.decay_state = {
-            "isotopes_available": False,
-            "radioactive_decay_available": False,
-            "radiocarbon_time_available": False,
-            "geological_time_available": False,
-            "decay_pattern_count": 0
-        }
+        self.decay_state = RadioactiveDecayState()
 
-        self.public_state = {
+        self.public_state = self._build_public_state()
+
+    def _build_public_state(self):
+        return {
             "name": self.name,
             "type": self.type,
             "state": self.state,
-            "decay_patterns": self.decay_patterns,
-            "decay_state": self.decay_state
+            "decay_patterns": deepcopy(self.decay_patterns),
+            "decay_state": self.decay_state.to_dict(),
         }
 
+    def _refresh_public_state(self):
+        self.public_state = self._build_public_state()
+
     def define_reference_decay(self):
+        return (
+            self.universe
+            .quantum_error_boundary.execute(
+                operation=(
+                    self._define_reference_decay_unprotected
+                ),
+                source_component="radioactive_decay",
+                source_operation="define_reference_decay",
+            )
+        )
+
+    def _define_reference_decay_unprotected(self):
         self.ensure_isotopes()
 
         self.create_decay_pattern(
@@ -64,12 +79,13 @@ class RadioactiveDecay:
         )
 
         self.state = "defined"
-        self.public_state["state"] = self.state
 
-        self.decay_state["radioactive_decay_available"] = True
-        self.decay_state["radiocarbon_time_available"] = True
-        self.decay_state["geological_time_available"] = True
-        self.decay_state["decay_pattern_count"] = len(self.decay_patterns)
+        self.decay_state.radioactive_decay_available = True
+        self.decay_state.radiocarbon_time_available = True
+        self.decay_state.geological_time_available = True
+        self.decay_state.decay_pattern_count = len(
+            self.decay_patterns
+        )
 
         self.record_history()
         self.write_to_world()
@@ -87,7 +103,7 @@ class RadioactiveDecay:
         if not self.universe.world.get("known_isotopes"):
             self.isotopes_layer.form_reference_isotopes()
 
-        self.decay_state["isotopes_available"] = True
+        self.decay_state.isotopes_available = True
 
     def create_decay_pattern(
         self,
@@ -133,6 +149,7 @@ class RadioactiveDecay:
         })
 
     def write_to_world(self):
+        self._refresh_public_state()
         self.universe.world["radioactive_decay"] = self.public_state
         self.universe.world["decay_patterns"] = self.decay_patterns
         self.universe.world["decay_state"] = self.decay_state
