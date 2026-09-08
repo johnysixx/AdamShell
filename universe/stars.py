@@ -1,4 +1,9 @@
-﻿class Stars:
+﻿from copy import deepcopy
+
+from universe.stellar_state import StellarFormationState
+
+
+class Stars:
 
     def __init__(self, universe):
         self.universe = universe
@@ -8,21 +13,33 @@
 
         self.stars = []
 
-        self.stellar_state = {
-            "first_stars_formed": False,
-            "stellar_fusion_possible": False,
-            "heavy_elements_possible": False
-        }
+        self.stellar_state = StellarFormationState()
 
-        self.public_state = {
+        self.public_state = self._build_public_state()
+
+    def _build_public_state(self):
+        return {
             "name": self.name,
             "type": self.type,
             "state": self.state,
-            "stars": self.stars,
-            "stellar_state": self.stellar_state
+            "stars": deepcopy(self.stars),
+            "stellar_state": self.stellar_state.to_dict(),
         }
 
+    def _refresh_public_state(self):
+        self.public_state = self._build_public_state()
+
     def form_first_stars(self):
+        return (
+            self.universe
+            .quantum_error_boundary.execute(
+                operation=self._form_first_stars_unprotected,
+                source_component="stars",
+                source_operation="form_first_stars",
+            )
+        )
+
+    def _form_first_stars_unprotected(self):
         germinal_clouds = self.universe.world.get("germinal_clouds", [])
 
         star_forming_clouds = [
@@ -32,14 +49,12 @@
 
         if not star_forming_clouds:
             self.state = "failed"
-            self.public_state["state"] = self.state
 
             print("STAR FORMATION FAILED: no germinal clouds ready")
             self.write_to_world()
             return self.public_state
 
         self.state = "formed"
-        self.public_state["state"] = self.state
 
         self.stars.append({
             "name": "first_star",
@@ -70,9 +85,9 @@
             "can_create_heavy_elements": True
         })
 
-        self.stellar_state["first_stars_formed"] = True
-        self.stellar_state["stellar_fusion_possible"] = True
-        self.stellar_state["heavy_elements_possible"] = True
+        self.stellar_state.first_stars_formed = True
+        self.stellar_state.stellar_fusion_possible = True
+        self.stellar_state.heavy_elements_possible = True
 
         self.record_history()
         self.write_to_world()
@@ -92,6 +107,7 @@
         })
 
     def write_to_world(self):
+        self._refresh_public_state()
         self.universe.world["stars"] = self.public_state
         self.universe.world["first_stars"] = self.stars
         self.universe.world["stellar_state"] = self.stellar_state

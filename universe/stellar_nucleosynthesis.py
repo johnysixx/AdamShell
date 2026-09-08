@@ -27,7 +27,7 @@
             self.write_to_world()
             return self.public_state
 
-        if not stellar_state.get("stellar_fusion_possible"):
+        if not stellar_state.stellar_fusion_possible:
             self.state = "failed"
             self.public_state["state"] = self.state
 
