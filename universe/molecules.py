@@ -1,4 +1,7 @@
-﻿from universe.periodic_table import PeriodicTable
+﻿from copy import deepcopy
+
+from universe.molecule_state import MoleculeFormationState
+from universe.periodic_table import PeriodicTable
 
 
 class Molecules:
@@ -13,23 +16,35 @@ class Molecules:
 
         self.molecules = {}
 
-        self.molecule_state = {
-            "periodic_table_available": False,
-            "simple_molecules_available": False,
-            "organic_molecules_available": False,
-            "alcohols_available": False,
-            "molecule_count": 0
-        }
+        self.molecule_state = MoleculeFormationState()
 
-        self.public_state = {
+        self.public_state = self._build_public_state()
+
+    def _build_public_state(self):
+        return {
             "name": self.name,
             "type": self.type,
             "state": self.state,
-            "molecules": self.molecules,
-            "molecule_state": self.molecule_state
+            "molecules": deepcopy(self.molecules),
+            "molecule_state": self.molecule_state.to_dict(),
         }
 
+    def _refresh_public_state(self):
+        self.public_state = self._build_public_state()
+
     def form_reference_molecules(self):
+        return (
+            self.universe
+            .quantum_error_boundary.execute(
+                operation=(
+                    self._form_reference_molecules_unprotected
+                ),
+                source_component="molecules",
+                source_operation="form_reference_molecules",
+            )
+        )
+
+    def _form_reference_molecules_unprotected(self):
         self.ensure_periodic_table()
 
         self.create_molecule(
@@ -83,12 +98,13 @@ class Molecules:
         )
 
         self.state = "formed"
-        self.public_state["state"] = self.state
 
-        self.molecule_state["simple_molecules_available"] = True
-        self.molecule_state["organic_molecules_available"] = True
-        self.molecule_state["alcohols_available"] = True
-        self.molecule_state["molecule_count"] = len(self.molecules)
+        self.molecule_state.simple_molecules_available = True
+        self.molecule_state.organic_molecules_available = True
+        self.molecule_state.alcohols_available = True
+        self.molecule_state.molecule_count = len(
+            self.molecules
+        )
 
         self.record_history()
         self.write_to_world()
@@ -106,7 +122,7 @@ class Molecules:
         if not self.universe.world.get("elements_by_atomic_number"):
             self.periodic_table.build_known_table()
 
-        self.molecule_state["periodic_table_available"] = True
+        self.molecule_state.periodic_table_available = True
 
     def create_molecule(self, name, formula, components, category, meaning, future_use):
         self.require_elements(components)
@@ -162,6 +178,7 @@ class Molecules:
         })
 
     def write_to_world(self):
+        self._refresh_public_state()
         self.universe.world["molecules"] = self.public_state
         self.universe.world["known_molecules"] = self.molecules
         self.universe.world["molecule_state"] = self.molecule_state
