@@ -1,4 +1,11 @@
-﻿class StellarNucleosynthesis:
+﻿from copy import deepcopy
+
+from universe.stellar_nucleosynthesis_state import (
+    StellarNucleosynthesisState,
+)
+
+
+class StellarNucleosynthesis:
 
     def __init__(self, universe):
         self.universe = universe
@@ -8,12 +15,25 @@
 
         self.elements_up_to_iron = {}
 
-        self.public_state = {
+        self.stellar_nucleosynthesis_state = StellarNucleosynthesisState()
+
+        self.public_state = self._build_public_state()
+
+    def _build_public_state(self):
+        return {
             "name": self.name,
             "type": self.type,
             "state": self.state,
-            "elements_up_to_iron": self.elements_up_to_iron
+            "elements_up_to_iron": deepcopy(
+                self.elements_up_to_iron
+            ),
+            "stellar_nucleosynthesis_state": (
+                self.stellar_nucleosynthesis_state.to_dict()
+            ),
         }
+
+    def _refresh_public_state(self):
+        self.public_state = self._build_public_state()
 
     def forge_elements_up_to_iron(self):
         stellar_state = self.universe.world.get("stellar_state", {})
@@ -21,7 +41,7 @@
 
         if not first_stars:
             self.state = "failed"
-            self.public_state["state"] = self.state
+            self.stellar_nucleosynthesis_state.failed = True
 
             print("STELLAR NUCLEOSYNTHESIS FAILED: no stars available")
             self.write_to_world()
@@ -29,21 +49,26 @@
 
         if not stellar_state.stellar_fusion_possible:
             self.state = "failed"
-            self.public_state["state"] = self.state
+            self.stellar_nucleosynthesis_state.failed = True
 
-            print("STELLAR NUCLEOSYNTHESIS FAILED: stellar fusion is not possible yet")
+            print(
+                "STELLAR NUCLEOSYNTHESIS FAILED: "
+                "stellar fusion is not possible yet"
+            )
             self.write_to_world()
             return self.public_state
 
         self.state = "forged"
-        self.public_state["state"] = self.state
+        self.stellar_nucleosynthesis_state.stellar_fusion_active = True
 
-        primordial_elements = self.universe.world.get("primordial_elements", {})
+        primordial_elements = self.universe.world.get(
+            "primordial_elements",
+            {},
+        )
 
         for element_name, element in primordial_elements.items():
             if element.get("type") == "element":
                 self.elements_up_to_iron[element_name] = element
-
 
         self.add_stellar_element("beryllium", 4)
         self.add_stellar_element("boron", 5)
@@ -69,6 +94,12 @@
         self.add_stellar_element("manganese", 25)
         self.add_stellar_element("iron", 26)
 
+        self.stellar_nucleosynthesis_state.elements_up_to_iron_forged = True
+        self.stellar_nucleosynthesis_state.iron_limit_reached = True
+        self.stellar_nucleosynthesis_state.element_count = len(
+            self.elements_up_to_iron
+        )
+
         self.record_history()
         self.write_to_world()
 
@@ -92,10 +123,22 @@
 
         history.append({
             "name": "elements_up_to_iron_forged",
-            "description": "The first stars forge elements through stellar nucleosynthesis, reaching the iron limit."
+            "description": (
+                "The first stars forge elements through stellar "
+                "nucleosynthesis, reaching the iron limit."
+            )
         })
 
     def write_to_world(self):
-        self.universe.world["stellar_nucleosynthesis"] = self.public_state
-        self.universe.world["elements_up_to_iron"] = self.elements_up_to_iron
+        self._refresh_public_state()
+
+        self.universe.world["stellar_nucleosynthesis"] = (
+            self.public_state
+        )
+        self.universe.world["elements_up_to_iron"] = (
+            self.elements_up_to_iron
+        )
         self.universe.world["elements"] = self.elements_up_to_iron
+        self.universe.world["stellar_nucleosynthesis_state"] = (
+            self.stellar_nucleosynthesis_state
+        )
