@@ -1,4 +1,9 @@
-﻿from universe.planet_state import PlanetFormationState
+﻿from copy import deepcopy
+
+from universe.planet_state import PlanetFormationState
+from universe.planetary_material_state import (
+    PlanetaryMaterialState,
+)
 
 
 class PlanetaryMaterials:
@@ -11,22 +16,35 @@ class PlanetaryMaterials:
 
         self.available_materials = {}
 
-        self.material_state = {
-            "water_available": False,
-            "ice_available": False,
-            "minerals_available": False,
-            "organic_molecules_available": False
-        }
+        self.material_state = PlanetaryMaterialState()
 
-        self.public_state = {
+        self.public_state = self._build_public_state()
+
+    def _build_public_state(self):
+        return {
             "name": self.name,
             "type": self.type,
             "state": self.state,
-            "available_materials": self.available_materials,
-            "material_state": self.material_state
+            "available_materials": deepcopy(
+                self.available_materials
+            ),
+            "material_state": self.material_state.to_dict(),
         }
 
+    def _refresh_public_state(self):
+        self.public_state = self._build_public_state()
+
     def materialize(self):
+        return (
+            self.universe
+            .quantum_error_boundary.execute(
+                operation=self._materialize_unprotected,
+                source_component="planetary_materials",
+                source_operation="materialize",
+            )
+        )
+
+    def _materialize_unprotected(self):
         planetary_state = self.universe.world.get(
             "planetary_state",
             PlanetFormationState(),
@@ -35,14 +53,12 @@ class PlanetaryMaterials:
 
         if not planetary_state.earth_formed:
             self.state = "failed"
-            self.public_state["state"] = self.state
 
             print("PLANETARY MATERIALIZATION FAILED: Earth has not formed yet")
             self.write_to_world()
             return self.public_state
 
         self.state = "materialized"
-        self.public_state["state"] = self.state
 
         if planetary_state.water_possible:
             self.make_available("water", possible_materials)
@@ -56,10 +72,18 @@ class PlanetaryMaterials:
         if planetary_state.organic_molecules_possible:
             self.make_available("organic_molecules", possible_materials)
 
-        self.material_state["water_available"] = "water" in self.available_materials
-        self.material_state["ice_available"] = "ice" in self.available_materials
-        self.material_state["minerals_available"] = "minerals" in self.available_materials
-        self.material_state["organic_molecules_available"] = "organic_molecules" in self.available_materials
+        self.material_state.water_available = (
+            "water" in self.available_materials
+        )
+        self.material_state.ice_available = (
+            "ice" in self.available_materials
+        )
+        self.material_state.minerals_available = (
+            "minerals" in self.available_materials
+        )
+        self.material_state.organic_molecules_available = (
+            "organic_molecules" in self.available_materials
+        )
 
         self.record_history()
         self.write_to_world()
@@ -93,6 +117,7 @@ class PlanetaryMaterials:
         })
 
     def write_to_world(self):
+        self._refresh_public_state()
         self.universe.world["planetary_material_layer"] = self.public_state
         self.universe.world["available_planetary_materials"] = self.available_materials
         self.universe.world["planetary_material_state"] = self.material_state
