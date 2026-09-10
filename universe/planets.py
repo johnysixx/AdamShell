@@ -1,4 +1,9 @@
-﻿class Planets:
+﻿from copy import deepcopy
+
+from universe.planet_state import PlanetFormationState
+
+
+class Planets:
 
     def __init__(self, universe):
         self.universe = universe
@@ -35,30 +40,40 @@
             }
         }
 
-        self.planetary_state = {
-            "planets_formed": False,
-            "earth_formed": False,
-            "water_possible": False,
-            "ice_possible": False,
-            "minerals_possible": False,
-            "organic_molecules_possible": False
-        }
+        self.planetary_state = PlanetFormationState()
 
-        self.public_state = {
+        self.public_state = self._build_public_state()
+
+    def _build_public_state(self):
+        return {
             "name": self.name,
             "type": self.type,
             "state": self.state,
-            "planets": self.planets,
-            "planetary_materials": self.planetary_materials,
-            "planetary_state": self.planetary_state
+            "planets": deepcopy(self.planets),
+            "planetary_materials": deepcopy(
+                self.planetary_materials
+            ),
+            "planetary_state": self.planetary_state.to_dict(),
         }
 
+    def _refresh_public_state(self):
+        self.public_state = self._build_public_state()
+
     def form_planets(self):
+        return (
+            self.universe
+            .quantum_error_boundary.execute(
+                operation=self._form_planets_unprotected,
+                source_component="planets",
+                source_operation="form_planets",
+            )
+        )
+
+    def _form_planets_unprotected(self):
         solar_system = self.universe.world.get("solar_system")
 
         if solar_system is None:
             self.state = "failed"
-            self.public_state["state"] = self.state
 
             print("PLANET FORMATION FAILED: no solar system available")
             self.write_to_world()
@@ -68,7 +83,6 @@
 
         if not disk.get("can_form_planets"):
             self.state = "failed"
-            self.public_state["state"] = self.state
 
             print("PLANET FORMATION FAILED: protoplanetary disk cannot form planets")
             self.write_to_world()
@@ -77,7 +91,6 @@
         available_elements = disk.get("available_elements", [])
 
         self.state = "formed"
-        self.public_state["state"] = self.state
 
         self.planets.append({
             "name": "mercury",
@@ -146,12 +159,20 @@
             "orbit": 8
         })
 
-        self.planetary_state["planets_formed"] = True
-        self.planetary_state["earth_formed"] = True
-        self.planetary_state["water_possible"] = earth["water_possible"]
-        self.planetary_state["ice_possible"] = earth["water_possible"]
-        self.planetary_state["minerals_possible"] = earth["has_rocky_crust"]
-        self.planetary_state["organic_molecules_possible"] = earth["organic_molecules_possible"]
+        self.planetary_state.planets_formed = True
+        self.planetary_state.earth_formed = True
+        self.planetary_state.water_possible = (
+            earth["water_possible"]
+        )
+        self.planetary_state.ice_possible = (
+            earth["water_possible"]
+        )
+        self.planetary_state.minerals_possible = (
+            earth["has_rocky_crust"]
+        )
+        self.planetary_state.organic_molecules_possible = (
+            earth["organic_molecules_possible"]
+        )
 
         self.record_history()
         self.write_to_world()
@@ -171,6 +192,7 @@
         })
 
     def write_to_world(self):
+        self._refresh_public_state()
         self.universe.world["planets"] = self.public_state
         self.universe.world["solar_planets"] = self.planets
         self.universe.world["earth"] = self.find_planet("earth")

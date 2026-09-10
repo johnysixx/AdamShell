@@ -1,4 +1,7 @@
-﻿class PlanetaryMaterials:
+﻿from universe.planet_state import PlanetFormationState
+
+
+class PlanetaryMaterials:
 
     def __init__(self, universe):
         self.universe = universe
@@ -24,10 +27,13 @@
         }
 
     def materialize(self):
-        planetary_state = self.universe.world.get("planetary_state", {})
+        planetary_state = self.universe.world.get(
+            "planetary_state",
+            PlanetFormationState(),
+        )
         possible_materials = self.universe.world.get("planetary_materials", {})
 
-        if not planetary_state.get("earth_formed"):
+        if not planetary_state.earth_formed:
             self.state = "failed"
             self.public_state["state"] = self.state
 
@@ -38,16 +44,16 @@
         self.state = "materialized"
         self.public_state["state"] = self.state
 
-        if planetary_state.get("water_possible"):
+        if planetary_state.water_possible:
             self.make_available("water", possible_materials)
 
-        if planetary_state.get("ice_possible"):
+        if planetary_state.ice_possible:
             self.make_available("ice", possible_materials)
 
-        if planetary_state.get("minerals_possible"):
+        if planetary_state.minerals_possible:
             self.make_available("minerals", possible_materials)
 
-        if planetary_state.get("organic_molecules_possible"):
+        if planetary_state.organic_molecules_possible:
             self.make_available("organic_molecules", possible_materials)
 
         self.material_state["water_available"] = "water" in self.available_materials
