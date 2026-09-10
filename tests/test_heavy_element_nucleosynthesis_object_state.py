@@ -1,0 +1,129 @@
+﻿import unittest
+
+from universe.heavy_element_nucleosynthesis import (
+    HeavyElementNucleosynthesis,
+)
+from universe.heavy_element_nucleosynthesis_state import (
+    HeavyElementNucleosynthesisState,
+)
+from universe.universe import Universe
+
+
+class HeavyElementNucleosynthesisObjectStateTests(unittest.TestCase):
+
+    def _forged_process(self):
+        universe = Universe()
+
+        universe.world["elements_up_to_iron"] = {
+            "iron": {
+                "name": "iron",
+                "type": "element",
+                "atomic_number": 26,
+                "state": "forged",
+            }
+        }
+
+        universe.world["enriched_clouds"] = [
+            {
+                "name": "enriched_cloud",
+                "composition": {},
+            }
+        ]
+
+        process = HeavyElementNucleosynthesis(universe)
+        result = process.forge_heavy_elements()
+
+        return universe, process, result
+
+    def test_state_is_object_only(self):
+        state = HeavyElementNucleosynthesisState()
+
+        self.assertFalse(hasattr(state, "get"))
+        self.assertFalse(hasattr(state, "keys"))
+
+        with self.assertRaises(TypeError):
+            _ = state["heavy_elements_forged"]
+
+    def test_initial_values_are_preserved(self):
+        state = HeavyElementNucleosynthesisState()
+
+        self.assertFalse(state.iron_seed_available)
+        self.assertFalse(state.supernova_enrichment_available)
+        self.assertFalse(state.neutron_capture_possible)
+        self.assertFalse(state.heavy_elements_forged)
+        self.assertFalse(state.enriched_clouds_updated)
+
+    def test_forging_mutates_same_state_object(self):
+        _, process, _ = self._forged_process()
+
+        state = process.process_state
+
+        self.assertIs(process.process_state, state)
+        self.assertTrue(state.iron_seed_available)
+        self.assertTrue(state.supernova_enrichment_available)
+        self.assertTrue(state.neutron_capture_possible)
+        self.assertTrue(state.heavy_elements_forged)
+        self.assertTrue(state.enriched_clouds_updated)
+
+    def test_world_stores_state_object(self):
+        universe, process, _ = self._forged_process()
+
+        self.assertIs(
+            universe.world["heavy_element_state"],
+            process.process_state,
+        )
+
+    def test_public_result_remains_dict_boundary(self):
+        _, _, result = self._forged_process()
+
+        self.assertIsInstance(result, dict)
+        self.assertIsInstance(
+            result["process_state"],
+            dict,
+        )
+        self.assertIsInstance(
+            result["heavy_elements"],
+            dict,
+        )
+        self.assertTrue(
+            result["process_state"]["heavy_elements_forged"]
+        )
+
+    def test_public_result_is_detached(self):
+        _, process, result = self._forged_process()
+
+        result["process_state"]["heavy_elements_forged"] = False
+        result["heavy_elements"]["gold"]["atomic_number"] = 999
+
+        self.assertTrue(process.process_state.heavy_elements_forged)
+        self.assertEqual(
+            process.heavy_elements["gold"]["atomic_number"],
+            79,
+        )
+
+    def test_failure_preserves_object_state(self):
+        universe = Universe()
+        process = HeavyElementNucleosynthesis(universe)
+
+        result = process.forge_heavy_elements()
+
+        self.assertEqual(process.state, "failed")
+        self.assertFalse(process.process_state.iron_seed_available)
+        self.assertFalse(process.process_state.heavy_elements_forged)
+        self.assertEqual(
+            result["process_state"]["iron_seed_available"],
+            False,
+        )
+
+    def test_to_dict_is_detached_boundary(self):
+        state = HeavyElementNucleosynthesisState()
+        state.heavy_elements_forged = True
+
+        snapshot = state.to_dict()
+        snapshot["heavy_elements_forged"] = False
+
+        self.assertTrue(state.heavy_elements_forged)
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -1,4 +1,11 @@
-﻿class HeavyElementNucleosynthesis:
+﻿from copy import deepcopy
+
+from universe.heavy_element_nucleosynthesis_state import (
+    HeavyElementNucleosynthesisState,
+)
+
+
+class HeavyElementNucleosynthesis:
 
     def __init__(self, universe):
         self.universe = universe
@@ -8,48 +15,57 @@
 
         self.heavy_elements = {}
 
-        self.process_state = {
-            "iron_seed_available": False,
-            "supernova_enrichment_available": False,
-            "neutron_capture_possible": False,
-            "heavy_elements_forged": False,
-            "enriched_clouds_updated": False
-        }
+        self.process_state = HeavyElementNucleosynthesisState()
 
-        self.public_state = {
+        self.public_state = self._build_public_state()
+
+    def _build_public_state(self):
+        return {
             "name": self.name,
             "type": self.type,
             "state": self.state,
-            "heavy_elements": self.heavy_elements,
-            "process_state": self.process_state
+            "heavy_elements": deepcopy(self.heavy_elements),
+            "process_state": self.process_state.to_dict(),
         }
 
+    def _refresh_public_state(self):
+        self.public_state = self._build_public_state()
+
     def forge_heavy_elements(self):
-        elements_up_to_iron = self.universe.world.get("elements_up_to_iron", {})
-        enriched_clouds = self.universe.world.get("enriched_clouds", [])
+        elements_up_to_iron = self.universe.world.get(
+            "elements_up_to_iron",
+            {},
+        )
+        enriched_clouds = self.universe.world.get(
+            "enriched_clouds",
+            [],
+        )
 
         if "iron" not in elements_up_to_iron:
             self.state = "failed"
-            self.public_state["state"] = self.state
 
-            print("HEAVY ELEMENT NUCLEOSYNTHESIS FAILED: iron seed is missing")
+            print(
+                "HEAVY ELEMENT NUCLEOSYNTHESIS FAILED: "
+                "iron seed is missing"
+            )
             self.write_to_world()
             return self.public_state
 
         if not enriched_clouds:
             self.state = "failed"
-            self.public_state["state"] = self.state
 
-            print("HEAVY ELEMENT NUCLEOSYNTHESIS FAILED: no enriched clouds available")
+            print(
+                "HEAVY ELEMENT NUCLEOSYNTHESIS FAILED: "
+                "no enriched clouds available"
+            )
             self.write_to_world()
             return self.public_state
 
         self.state = "forged"
-        self.public_state["state"] = self.state
 
-        self.process_state["iron_seed_available"] = True
-        self.process_state["supernova_enrichment_available"] = True
-        self.process_state["neutron_capture_possible"] = True
+        self.process_state.iron_seed_available = True
+        self.process_state.supernova_enrichment_available = True
+        self.process_state.neutron_capture_possible = True
 
         self.add_heavy_element("cobalt", 27)
         self.add_heavy_element("nickel", 28)
@@ -63,7 +79,7 @@
         self.add_heavy_element("lead", 82)
         self.add_heavy_element("uranium", 92)
 
-        self.process_state["heavy_elements_forged"] = True
+        self.process_state.heavy_elements_forged = True
 
         self.update_enriched_clouds(enriched_clouds)
         self.record_history()
@@ -86,8 +102,8 @@
             "requires": [
                 "iron_seed",
                 "supernova_enrichment",
-                "neutron_capture"
-            ]
+                "neutron_capture",
+            ],
         }
 
     def update_enriched_clouds(self, enriched_clouds):
@@ -98,24 +114,37 @@
             cloud["contains_heavy_elements"] = True
             cloud["can_form_metal_rich_systems"] = True
 
-        self.process_state["enriched_clouds_updated"] = True
+        self.process_state.enriched_clouds_updated = True
 
     def record_history(self):
         history = self.universe.world.setdefault("cosmic_history", [])
 
         history.append({
             "name": "heavy_elements_forged",
-            "description": "After the iron limit, neutron capture and explosive stellar processes forge heavy elements and enrich stellar clouds."
+            "description": (
+                "After the iron limit, neutron capture and explosive "
+                "stellar processes forge heavy elements and enrich "
+                "stellar clouds."
+            ),
         })
 
     def write_to_world(self):
-        elements_up_to_iron = self.universe.world.get("elements_up_to_iron", {})
+        elements_up_to_iron = self.universe.world.get(
+            "elements_up_to_iron",
+            {},
+        )
 
         all_elements = {}
         all_elements.update(elements_up_to_iron)
         all_elements.update(self.heavy_elements)
 
-        self.universe.world["heavy_element_nucleosynthesis"] = self.public_state
+        self._refresh_public_state()
+
+        self.universe.world["heavy_element_nucleosynthesis"] = (
+            self.public_state
+        )
         self.universe.world["heavy_elements"] = self.heavy_elements
         self.universe.world["elements"] = all_elements
-        self.universe.world["heavy_element_state"] = self.process_state
+        self.universe.world["heavy_element_state"] = (
+            self.process_state
+        )
