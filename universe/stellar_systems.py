@@ -1,4 +1,11 @@
-﻿class StellarSystems:
+﻿from copy import deepcopy
+
+from universe.stellar_system_state import (
+    StellarSystemFormationState,
+)
+
+
+class StellarSystems:
 
     def __init__(self, universe):
         self.universe = universe
@@ -8,23 +15,35 @@
 
         self.systems = []
 
-        self.system_state = {
-            "stellar_systems_formed": False,
-            "solar_system_formed": False,
-            "planet_formation_possible": False,
-            "water_formation_possible": False,
-            "rocky_worlds_possible": False
-        }
+        self.system_state = StellarSystemFormationState()
 
-        self.public_state = {
+        self.public_state = self._build_public_state()
+
+    def _build_public_state(self):
+        return {
             "name": self.name,
             "type": self.type,
             "state": self.state,
-            "systems": self.systems,
-            "system_state": self.system_state
+            "systems": deepcopy(self.systems),
+            "system_state": self.system_state.to_dict(),
         }
 
+    def _refresh_public_state(self):
+        self.public_state = self._build_public_state()
+
     def form_stellar_systems(self):
+        return (
+            self.universe
+            .quantum_error_boundary.execute(
+                operation=(
+                    self._form_stellar_systems_unprotected
+                ),
+                source_component="stellar_systems",
+                source_operation="form_stellar_systems",
+            )
+        )
+
+    def _form_stellar_systems_unprotected(self):
         enriched_clouds = self.universe.world.get("enriched_clouds", [])
 
         system_forming_clouds = [
@@ -34,7 +53,6 @@
 
         if not system_forming_clouds:
             self.state = "failed"
-            self.public_state["state"] = self.state
 
             print("STELLAR SYSTEM FORMATION FAILED: no enriched clouds available")
             self.write_to_world()
@@ -45,7 +63,6 @@
         available_elements = list(composition.keys())
 
         self.state = "formed"
-        self.public_state["state"] = self.state
 
         solar_system = {
             "name": "solar_system",
@@ -98,11 +115,19 @@
         self.systems.append(solar_system)
         self.systems.append(deep_system)
 
-        self.system_state["stellar_systems_formed"] = True
-        self.system_state["solar_system_formed"] = True
-        self.system_state["planet_formation_possible"] = True
-        self.system_state["water_formation_possible"] = solar_system["protoplanetary_disk"]["can_form_water"]
-        self.system_state["rocky_worlds_possible"] = solar_system["protoplanetary_disk"]["can_form_rocky_worlds"]
+        self.system_state.stellar_systems_formed = True
+        self.system_state.solar_system_formed = True
+        self.system_state.planet_formation_possible = True
+        self.system_state.water_formation_possible = (
+            solar_system["protoplanetary_disk"][
+                "can_form_water"
+            ]
+        )
+        self.system_state.rocky_worlds_possible = (
+            solar_system["protoplanetary_disk"][
+                "can_form_rocky_worlds"
+            ]
+        )
 
         self.record_history()
         self.write_to_world()
@@ -123,6 +148,7 @@
         })
 
     def write_to_world(self):
+        self._refresh_public_state()
         self.universe.world["stellar_systems"] = self.public_state
         self.universe.world["systems"] = self.systems
         self.universe.world["solar_system"] = self.systems[0] if self.systems else None
