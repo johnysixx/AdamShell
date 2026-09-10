@@ -1,4 +1,11 @@
-﻿class BiochemicalFoundations:
+﻿from copy import deepcopy
+
+from universe.biochemical_state import (
+    BiochemicalFoundationState,
+)
+
+
+class BiochemicalFoundations:
 
     def __init__(self, universe):
         self.universe = universe
@@ -8,36 +15,44 @@
 
         self.compounds = {}
 
-        self.biochemical_state = {
-            "water_based_chemistry_possible": False,
-            "carbon_chemistry_possible": False,
-            "sugars_possible": False,
-            "amino_acids_possible": False,
-            "lipids_possible": False,
-            "fermentation_substrate_possible": False
-        }
+        self.biochemical_state = BiochemicalFoundationState()
+        self.public_state = self._build_public_state()
 
-        self.public_state = {
+    def _build_public_state(self):
+        return {
             "name": self.name,
             "type": self.type,
             "state": self.state,
-            "compounds": self.compounds,
-            "biochemical_state": self.biochemical_state
+            "compounds": deepcopy(self.compounds),
+            "biochemical_state": self.biochemical_state.to_dict(),
         }
 
+    def _refresh_public_state(self):
+        self.public_state = self._build_public_state()
+
     def form_biochemical_foundations(self):
+        return (
+            self.universe
+            .quantum_error_boundary.execute(
+                operation=(
+                    self._form_biochemical_foundations_unprotected
+                ),
+                source_component="biochemical_foundations",
+                source_operation="form_biochemical_foundations",
+            )
+        )
+
+    def _form_biochemical_foundations_unprotected(self):
         materials = self.universe.world.get("available_planetary_materials", {})
 
         if "water" not in materials or "organic_molecules" not in materials:
             self.state = "failed"
-            self.public_state["state"] = self.state
 
             print("BIOCHEMICAL FOUNDATION FAILED: missing water or organic molecules")
             self.write_to_world()
             return self.public_state
 
         self.state = "formed"
-        self.public_state["state"] = self.state
 
         self.add_compound(
             name="sugars",
@@ -67,12 +82,12 @@
             future_use=["fermentation", "alcohol_base", "bar_drinks"]
         )
 
-        self.biochemical_state["water_based_chemistry_possible"] = True
-        self.biochemical_state["carbon_chemistry_possible"] = True
-        self.biochemical_state["sugars_possible"] = True
-        self.biochemical_state["amino_acids_possible"] = True
-        self.biochemical_state["lipids_possible"] = True
-        self.biochemical_state["fermentation_substrate_possible"] = True
+        self.biochemical_state.water_based_chemistry_possible = True
+        self.biochemical_state.carbon_chemistry_possible = True
+        self.biochemical_state.sugars_possible = True
+        self.biochemical_state.amino_acids_possible = True
+        self.biochemical_state.lipids_possible = True
+        self.biochemical_state.fermentation_substrate_possible = True
 
         self.record_history()
         self.write_to_world()
@@ -104,6 +119,7 @@
         })
 
     def write_to_world(self):
+        self._refresh_public_state()
         self.universe.world["biochemical_foundations"] = self.public_state
         self.universe.world["biochemical_compounds"] = self.compounds
         self.universe.world["biochemical_state"] = self.biochemical_state
