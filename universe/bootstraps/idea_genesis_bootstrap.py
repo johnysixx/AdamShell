@@ -11,8 +11,6 @@ class IdeaGenesisBootstrap:
         nebula = self.idea_universe.primordial_waters
         nebula.light = True
         nebula.order_started = True
-        nebula.state['light'] = True
-        nebula.state['order_started'] = True
         self.idea_universe.events.append({'kind': 'genesis', 'word': 'let_there_be_light'})
         return nebula
 
@@ -23,8 +21,6 @@ class IdeaGenesisBootstrap:
         nebula = self.idea_universe.primordial_waters
         nebula.space = True
         nebula.can_expand = True
-        nebula.state['space'] = True
-        nebula.state['can_expand'] = True
         self.idea_universe.events.append({'kind': 'genesis', 'word': 'let_there_be_space'})
         return nebula
 
@@ -35,9 +31,6 @@ class IdeaGenesisBootstrap:
         waters.seas = True
         waters.dry_land = True
         waters.vegetation = True
-        waters.state['seas'] = True
-        waters.state['dry_land'] = True
-        waters.state['vegetation'] = True
         self.idea_universe.events.append({'kind': 'genesis', 'word': 'let_there_be_land_and_vegetation'})
         return waters
 
@@ -184,10 +177,6 @@ class IdeaGenesisBootstrap:
         nebula.deep = True
         nebula.chaos = True
         nebula.ordered = False
-        nebula.state['waters'] = True
-        nebula.state['deep'] = True
-        nebula.state['chaos'] = True
-        nebula.state['ordered'] = False
         self.idea_universe.add_entity(tiamat)
         self.idea_universe.add_entity(apsu)
         serpent = None
