@@ -286,9 +286,7 @@ class PrimordialNebulaTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            nebula.state[
-                "elemental_potentials"
-            ],
+            nebula.state.elemental_potentials,
             {}
         )
 
@@ -605,7 +603,6 @@ if __name__ == "__main__":
     unittest.main()
 if __name__ == "__main__":
     unittest.main()
-
 
 
 
