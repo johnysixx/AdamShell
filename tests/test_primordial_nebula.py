@@ -23,7 +23,7 @@ class PrimordialNebulaTests(unittest.TestCase):
         )
 
         self.assertIsNone(
-            idea_universe.state[
+            idea_universe.public_state[
                 "primordial_nebula"
             ]
         )
@@ -603,7 +603,6 @@ if __name__ == "__main__":
     unittest.main()
 if __name__ == "__main__":
     unittest.main()
-
 
 
 

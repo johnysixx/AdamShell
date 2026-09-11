@@ -111,7 +111,7 @@ class PrimordialWatersObjectStateTests(unittest.TestCase):
         idea_universe, _ = self._genesis()
 
         self.assertIs(
-            idea_universe.state["primordial_waters"],
+            idea_universe.public_state["primordial_waters"],
             idea_universe.primordial_waters,
         )
 
