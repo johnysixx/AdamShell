@@ -49,7 +49,9 @@ class CatQuantumBoxTransfer:
             universe,
             "dark_sector"
         ):
-            universe.dark_sector = DarkSector()
+            universe.dark_sector = DarkSector(
+                universe=universe
+            )
 
     def pair_boxes(
         self,

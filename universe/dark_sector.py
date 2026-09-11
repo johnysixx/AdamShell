@@ -3,6 +3,7 @@ from universe.energy_gate import (
     SPEED_OF_LIGHT_M_S,
 )
 from universe.pre_cosmic_rules import IDEA_DIMENSIONS
+from universe.dark_sector_state import DarkSectorState
 
 
 QUANTUM_BOX_ENERGY_COST_J = (
@@ -16,18 +17,42 @@ DARK_ENERGY_QUANTUM_THRESHOLD_J = (
 
 class DarkSector:
 
-    def __init__(self):
+    def __init__(self, universe=None):
+        self.universe = universe
         self.name = "dark_sector"
         self.type = "cosmic_dark_sector"
 
-        self.dark_energy_j = 0.0
-        self.dark_matter_kg = 0.0
-
-        self.quantum_threshold_j = (
-            DARK_ENERGY_QUANTUM_THRESHOLD_J
+        self.dark_sector_state = DarkSectorState(
+            quantum_threshold_j=(
+                DARK_ENERGY_QUANTUM_THRESHOLD_J
+            ),
         )
 
         self.events = []
+
+    @property
+    def dark_energy_j(self):
+        return self.dark_sector_state.dark_energy_j
+
+    @dark_energy_j.setter
+    def dark_energy_j(self, value):
+        self.dark_sector_state.dark_energy_j = value
+
+    @property
+    def dark_matter_kg(self):
+        return self.dark_sector_state.dark_matter_kg
+
+    @dark_matter_kg.setter
+    def dark_matter_kg(self, value):
+        self.dark_sector_state.dark_matter_kg = value
+
+    @property
+    def quantum_threshold_j(self):
+        return self.dark_sector_state.quantum_threshold_j
+
+    @quantum_threshold_j.setter
+    def quantum_threshold_j(self, value):
+        self.dark_sector_state.quantum_threshold_j = value
 
     def receive_empty_box_energy(
             self,
@@ -39,6 +64,33 @@ class DarkSector:
                 "Received energy must be positive"
             )
 
+        if self.universe is None:
+            return self._receive_empty_box_energy_unprotected(
+                box_id=box_id,
+                energy_j=energy_j,
+            )
+
+        return (
+            self.universe
+            .quantum_error_boundary.execute(
+                operation=lambda: (
+                    self._receive_empty_box_energy_unprotected(
+                        box_id=box_id,
+                        energy_j=energy_j,
+                    )
+                ),
+                source_component="dark_sector",
+                source_operation=(
+                    "receive_empty_box_energy"
+                ),
+            )
+        )
+
+    def _receive_empty_box_energy_unprotected(
+        self,
+        box_id,
+        energy_j,
+    ):
         self.dark_energy_j += energy_j
 
         event = {
@@ -156,6 +208,9 @@ class DarkSector:
             "type": self.type,
             "dark_energy_j": self.dark_energy_j,
             "dark_matter_kg": self.dark_matter_kg,
+            "dark_sector_state": (
+                self.dark_sector_state.to_dict()
+            ),
             "quantum_box_energy_cost_j": (
                 QUANTUM_BOX_ENERGY_COST_J
             ),
