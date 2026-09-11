@@ -1,16 +1,18 @@
-﻿from universe.logger import UniverseLogger
+from root_universe.root_universe_state import RootUniverseState
+from universe.logger import UniverseLogger
+
 
 class RootUniverse:
 
     def __init__(self, universe):
         self.universe = universe
-        self.events = []
-        self.tick_count = 0
+        self.name = "root_universe"
+        self.type = "independent_root_reality"
 
         registry = getattr(
             self.universe,
             "universe_registry",
-            None
+            None,
         )
 
         if registry is None:
@@ -19,87 +21,128 @@ class RootUniverse:
             )
 
         self.universe_id = registry.register_universe(
-            name="root_universe",
-            universe_type="independent_root_reality"
+            name=self.name,
+            universe_type=self.type,
         )
 
-        self.state = {
-            "name": "root_universe",
-            "type": "independent_root_reality",
-            "state": "created",
-            "creator": "god",
-            "administrator": "god",
-            "part_of_physics": True,
+        self.root_universe_state = RootUniverseState()
+        self.state = self.root_universe_state
 
-            "access": {
-                "god": "write",
-                "serpent": "read",
-                "adam": "read",
-                "eve": "read",
-                "pazuzu": "read",
-                "classical_probe_debug_entity": "read"
-            },
-
-            "permissions": {
-                "can_modify": ["god"],
-                "can_read": [
-                    "god",
-                    "serpent",
-                    "adam",
-                    "eve",
-                    "pazuzu",
-                    "classical_probe_debug_entity"
-                ]
-            },
-
-            "eden": {
-                "role": "sandbox",
-                "history_origin": True,
-                "direct_parent": False
-            },
-
-            "eden_influence": [],
-            "history_started": False,
-            "awaiting_adam_and_eve": True,
-            "history": []
-        }
-
-        self.universe.physics["root_universe"] = self.state
-        self.universe.world["root_universe"] = self.state
+        self.write_to_universe()
 
         UniverseLogger.boot("ROOT UNIVERSE INITIALIZED")
 
+    @property
+    def events(self):
+        return self.root_universe_state.events
+
+    @events.setter
+    def events(self, value):
+        self.root_universe_state.events = value
+
+    @property
+    def tick_count(self):
+        return self.root_universe_state.tick_count
+
+    @tick_count.setter
+    def tick_count(self, value):
+        self.root_universe_state.tick_count = value
+
+    @property
+    def public_state(self):
+        state = self.root_universe_state.to_dict()
+
+        return {
+            "name": self.name,
+            "type": self.type,
+            "state": state["status"],
+            "creator": state["creator"],
+            "administrator": state["administrator"],
+            "part_of_physics": state["part_of_physics"],
+            "access": state["access"],
+            "permissions": state["permissions"],
+            "eden": state["eden"],
+            "eden_influence": state["eden_influence"],
+            "history_started": state["history_started"],
+            "awaiting_adam_and_eve": (
+                state["awaiting_adam_and_eve"]
+            ),
+            "history": state["history"],
+            "root_universe_state": state,
+        }
+
+    def write_to_universe(self):
+        public_state = self.public_state
+
+        self.universe.physics["root_universe"] = public_state
+        self.universe.world["root_universe"] = public_state
+        self.universe.world["root_universe_state"] = (
+            self.root_universe_state
+        )
+
     def can_read(self, entity_name):
-        return entity_name in self.state["permissions"]["can_read"]
+        return (
+            entity_name
+            in self.root_universe_state.permissions["can_read"]
+        )
 
     def can_modify(self, entity_name):
-        return entity_name in self.state["permissions"]["can_modify"]
+        return (
+            entity_name
+            in self.root_universe_state.permissions["can_modify"]
+        )
 
     def apply_eden_influence(self, entity_name, influence):
         if not self.can_modify(entity_name):
-            UniverseLogger.event(f"ROOT UNIVERSE MODIFY DENIED: {entity_name}")
+            UniverseLogger.event(
+                "ROOT UNIVERSE MODIFY DENIED: "
+                f"{entity_name}"
+            )
             return
 
-        self.state["eden_influence"].append(influence)
-        UniverseLogger.event(f"ROOT UNIVERSE EDEN INFLUENCE: {influence}")
+        self.root_universe_state.eden_influence.append(
+            influence
+        )
+        self.write_to_universe()
+
+        UniverseLogger.event(
+            "ROOT UNIVERSE EDEN INFLUENCE: "
+            f"{influence}"
+        )
 
     def start_history(self, entity_name):
         if not self.can_modify(entity_name):
-            UniverseLogger.event(f"ROOT UNIVERSE HISTORY START DENIED: {entity_name}")
+            UniverseLogger.event(
+                "ROOT UNIVERSE HISTORY START DENIED: "
+                f"{entity_name}"
+            )
             return
 
-        self.state["history_started"] = True
-        self.state["awaiting_adam_and_eve"] = False
-        UniverseLogger.event("ROOT UNIVERSE HISTORY STARTED")
+        self.root_universe_state.history_started = True
+        self.root_universe_state.awaiting_adam_and_eve = False
+        self.write_to_universe()
+
+        UniverseLogger.event(
+            "ROOT UNIVERSE HISTORY STARTED"
+        )
 
     def emit_event(self, event):
         self.events.append(event)
-        UniverseLogger.event(f"ROOT UNIVERSE EVENT: {event}")
+        self.write_to_universe()
+
+        UniverseLogger.event(
+            f"ROOT UNIVERSE EVENT: {event}"
+        )
 
     def tick(self):
         self.tick_count += 1
-        UniverseLogger.event(f"ROOT UNIVERSE TICK {self.tick_count}")
+
+        UniverseLogger.event(
+            f"ROOT UNIVERSE TICK {self.tick_count}"
+        )
+
         self._clear_events()
+        self.write_to_universe()
 
     def _clear_events(self):
         self.events = []
