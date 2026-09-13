@@ -1,6 +1,4 @@
-from typing import Self
-
-from universe.universe import Universe
+from eden.eden_state import EdenState
 from universe.logger import UniverseLogger
 
 
@@ -8,42 +6,124 @@ class Eden:
 
     def __init__(self, universe):
         self.universe = universe
-        self.state = {
-            "name": "eden",
-            "type": "sandbox",
-            "state": "initialized",
-            "creator": "god",
-            "created_by": "god",
-            "administrator": "god",
+        self.eden_state = EdenState()
+        self.state = self.eden_state
 
-            "permissions": {
-                "can_administer": ["god"],
-                "can_modify": ["god"]
-            }
-        }
-
-        self.universe.world["eden"] = self.state
+        self.write_to_world()
 
         UniverseLogger.boot("EDEN CREATED BY: god")
         UniverseLogger.boot("EDEN ADMINISTRATOR: god")
 
-        self.entities = []
-
-        self.plants = []
-        self.trees = []
-        self.animals = []
-        self.rules = []
-        self.observer = None
-        self.relations = []
-
-        self.day = 0
-        self.max_day =7
-        self.tick_count = 0
-
         UniverseLogger.boot("EDEN INITIALIZED")
+
+    @property
+    def entities(self):
+        return self.eden_state.entities
+
+    @entities.setter
+    def entities(self, value):
+        self.eden_state.entities = value
+
+    @property
+    def plants(self):
+        return self.eden_state.plants
+
+    @plants.setter
+    def plants(self, value):
+        self.eden_state.plants = value
+
+    @property
+    def trees(self):
+        return self.eden_state.trees
+
+    @trees.setter
+    def trees(self, value):
+        self.eden_state.trees = value
+
+    @property
+    def animals(self):
+        return self.eden_state.animals
+
+    @animals.setter
+    def animals(self, value):
+        self.eden_state.animals = value
+
+    @property
+    def rules(self):
+        return self.eden_state.rules
+
+    @rules.setter
+    def rules(self, value):
+        self.eden_state.rules = value
+
+    @property
+    def observer(self):
+        return self.eden_state.observer
+
+    @observer.setter
+    def observer(self, value):
+        self.eden_state.observer = value
+
+    @property
+    def relations(self):
+        return self.eden_state.relations
+
+    @relations.setter
+    def relations(self, value):
+        self.eden_state.relations = value
+
+    @property
+    def day(self):
+        return self.eden_state.day
+
+    @day.setter
+    def day(self, value):
+        self.eden_state.day = value
+
+    @property
+    def max_day(self):
+        return self.eden_state.max_day
+
+    @max_day.setter
+    def max_day(self, value):
+        self.eden_state.max_day = value
+
+    @property
+    def tick_count(self):
+        return self.eden_state.tick_count
+
+    @tick_count.setter
+    def tick_count(self, value):
+        self.eden_state.tick_count = value
+
+    @property
+    def permissions(self):
+        return self.eden_state.permissions
+
+    @permissions.setter
+    def permissions(self, value):
+        self.eden_state.permissions = value
+
+    @property
+    def public_state(self):
+        return {
+            "name": self.eden_state.name,
+            "type": self.eden_state.layer_type,
+            "state": self.eden_state.status,
+            "creator": self.eden_state.creator,
+            "created_by": self.eden_state.created_by,
+            "administrator": self.eden_state.administrator,
+            "permissions": self.permissions,
+            "eden_state": self.eden_state.to_dict(),
+        }
+
+    def write_to_world(self):
+        self.universe.world["eden"] = self.public_state
+        self.universe.world["eden_state"] = self.eden_state
 
     def add_entity(self, entity):
         self.entities.append(entity)
+        self.write_to_world()
 
     def tick(self):
 
@@ -58,6 +138,8 @@ class Eden:
         self.day += 1
 
         self.universe.tick_time()
+
+        self.write_to_world()
 
         UniverseLogger.event(f"EDEN DAY {self.day} | TIME {self.universe.get_time()} | ENERGY {self.universe.get_energy():.2f}")
 
@@ -234,6 +316,5 @@ class Eden:
 
     def get_time(self):
         return self.universe.physics["time"].tick
-
 
 
