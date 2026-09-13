@@ -216,14 +216,8 @@ class GenesisDay0:
         )
 
         return bool(
-            fire.get(
-                "actualized",
-                False
-            )
-            and fire.get(
-                "state"
-            )
-            == "burning"
+            fire.actualized
+            and fire.state == "burning"
         )
 
     @property

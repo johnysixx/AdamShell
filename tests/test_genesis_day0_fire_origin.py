@@ -99,16 +99,16 @@ class GenesisDay0FireOriginTests(
         )
 
         self.assertFalse(
-            fire["actualized"]
+            fire.actualized
         )
 
         self.assertEqual(
-            fire["state"],
+            fire.state,
             "unignited"
         )
 
         self.assertEqual(
-            fire["type"],
+            fire.type,
             "idea_fire_potential"
         )
 
@@ -189,23 +189,21 @@ class GenesisDay0FireOriginTests(
         )
 
         self.assertTrue(
-            fire["actualized"]
+            fire.actualized
         )
 
         self.assertEqual(
-            fire["state"],
+            fire.state,
             "burning"
         )
 
         self.assertEqual(
-            fire["type"],
+            fire.type,
             "idea_focal_point"
         )
 
         self.assertIsNone(
-            fire[
-                "ignited_at_idea_tick"
-            ]
+            fire.ignited_at_idea_tick
         )
 
 

@@ -18,7 +18,15 @@ class EternalFlame:
             event = {'name': 'eternal_flame_already_burns', 'state': self.state, 'tick': tick}
             self.history.append(event)
             return deepcopy(event)
-        if not isinstance(source_idea, dict):
+        required_attributes = (
+            'name',
+            'type',
+            'state',
+        )
+        if isinstance(source_idea, dict) or not all(
+            hasattr(source_idea, attribute)
+            for attribute in required_attributes
+        ):
             raise TypeError('Eternal Flame requires an idea source.')
         if getattr(source_idea, 'name', None) != 'eternal_fire':
             raise ValueError('Invalid idea source for Eternal Flame.')

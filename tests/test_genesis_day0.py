@@ -100,15 +100,11 @@ class GenesisDay0Tests(
         )
 
         self.assertFalse(
-            fire[
-                "actualized"
-            ]
+            fire.actualized
         )
 
         self.assertEqual(
-            fire[
-                "state"
-            ],
+            fire.state,
             "unignited"
         )
 

@@ -1,5 +1,6 @@
 from copy import deepcopy
 
+from idea_entities.eternal_fire_potential import EternalFirePotential
 from universe.logger import UniverseLogger
 
 
@@ -21,7 +22,7 @@ class PrefysicalFireOrigin:
     ):
         if not isinstance(
             eternal_fire,
-            dict
+            EternalFirePotential
         ):
             raise TypeError(
                 "Prefysical fire requires "
@@ -29,9 +30,7 @@ class PrefysicalFireOrigin:
             )
 
         if (
-            eternal_fire.get(
-                "name"
-            )
+            eternal_fire.name
             != "eternal_fire"
         ):
             raise ValueError(
@@ -157,9 +156,7 @@ class PrefysicalFireOrigin:
         universe_tick=None
     ):
         if (
-            self.eternal_fire.get(
-                "state"
-            )
+            self.eternal_fire.state
             == "burning"
         ):
             return self._event(
@@ -292,15 +289,11 @@ class PrefysicalFireOrigin:
                 "flame_state": "small",
 
                 "fuel": deepcopy(
-                    self.eternal_fire[
-                        "fuel"
-                    ]
+                    self.eternal_fire.fuel
                 ),
 
                 "heat_energy_j": (
-                    self.eternal_fire[
-                        "heat_energy_j"
-                    ]
+                    self.eternal_fire.heat_energy_j
                 )
             }
         )
@@ -331,9 +324,7 @@ class PrefysicalFireOrigin:
         self
     ):
         if (
-            self.eternal_fire.get(
-                "state"
-            )
+            self.eternal_fire.state
             != "burning"
         ):
             raise RuntimeError(
@@ -360,9 +351,7 @@ class PrefysicalFireOrigin:
 
         self.fire_significance_understood = True
 
-        self.eternal_fire[
-            "meaning"
-        ] = {
+        self.eternal_fire.meaning = {
             "warmth": True,
             "must_be_preserved": True,
             "requires_fuel": True,
@@ -391,15 +380,11 @@ class PrefysicalFireOrigin:
             "serpent"
         ]
 
-        self.eternal_fire[
-            "guardian"
-        ] = (
+        self.eternal_fire.guardian = (
             "pazuzu_masculine_principle"
         )
 
-        self.eternal_fire[
-            "fuel_seekers"
-        ] = [
+        self.eternal_fire.fuel_seekers = [
             "lilith",
             "serpent"
         ]
@@ -408,6 +393,8 @@ class PrefysicalFireOrigin:
             "fire_guarded_fuel_search_active"
         )
 
+        self._refresh_eternal_fire_boundary()
+
         return self._event(
             name=(
                 "prefysical_fire_significance_"
@@ -415,9 +402,7 @@ class PrefysicalFireOrigin:
             ),
             details={
                 "meaning": deepcopy(
-                    self.eternal_fire[
-                        "meaning"
-                    ]
+                    self.eternal_fire.meaning
                 ),
 
                 "fire_guardian": (
@@ -444,22 +429,21 @@ class PrefysicalFireOrigin:
         self
     ):
         if (
-            self.eternal_fire.get(
-                "state"
-            )
+            self.eternal_fire.state
             != "burning"
         ):
             raise RuntimeError(
                 "Eternal fire is not burning."
             )
 
-        fuel = self.eternal_fire.setdefault(
-            "fuel",
-            {
+        fuel = self.eternal_fire.fuel
+
+        if not fuel:
+            fuel = {
                 "dry_grass": 0.0,
                 "wood_sticks": 0.0
             }
-        )
+            self.eternal_fire.fuel = fuel
 
         consumed = {
             "dry_grass": 0.0,
@@ -537,9 +521,7 @@ class PrefysicalFireOrigin:
         )
 
         if remaining <= 0.0:
-            self.eternal_fire[
-                "flame_state"
-            ] = "embers"
+            self.eternal_fire.flame_state = "embers"
 
         elif (
             float(
@@ -550,20 +532,16 @@ class PrefysicalFireOrigin:
             )
             < 1.0
         ):
-            self.eternal_fire[
-                "flame_state"
-            ] = "small_weakening"
+            self.eternal_fire.flame_state = "small_weakening"
 
         else:
-            self.eternal_fire[
-                "flame_state"
-            ] = "small"
+            self.eternal_fire.flame_state = "small"
 
-        self.eternal_fire[
-            "fuel_consumed_last_step"
-        ] = deepcopy(
+        self.eternal_fire.fuel_consumed_last_step = deepcopy(
             consumed
         )
+
+        self._refresh_eternal_fire_boundary()
 
         return self._event(
             name=(
@@ -580,9 +558,7 @@ class PrefysicalFireOrigin:
                 ),
 
                 "flame_state": (
-                    self.eternal_fire[
-                        "flame_state"
-                    ]
+                    self.eternal_fire.flame_state
                 )
             }
         )
@@ -662,39 +638,23 @@ class PrefysicalFireOrigin:
         self,
         public_roll
     ):
-        self.eternal_fire[
-            "state"
-        ] = "burning"
+        self.eternal_fire.state = "burning"
 
-        self.eternal_fire[
-            "actualized"
-        ] = True
+        self.eternal_fire.actualized = True
 
-        self.eternal_fire[
-            "type"
-        ] = "idea_focal_point"
+        self.eternal_fire.type = "idea_focal_point"
 
-        self.eternal_fire[
-            "ignited_by"
-        ] = (
+        self.eternal_fire.ignited_by = (
             "pazuzu_masculine_principle"
         )
 
-        self.eternal_fire[
-            "physical_time"
-        ] = None
+        self.eternal_fire.physical_time = None
 
-        self.eternal_fire[
-            "physical_location"
-        ] = None
+        self.eternal_fire.physical_location = None
 
-        self.eternal_fire[
-            "ignited_at_idea_tick"
-        ] = None
+        self.eternal_fire.ignited_at_idea_tick = None
 
-        self.eternal_fire[
-            "ignited_at_logical_step"
-        ] = (
+        self.eternal_fire.ignited_at_logical_step = (
             self.logical_step + 1
         )
 
@@ -705,13 +665,9 @@ class PrefysicalFireOrigin:
         # Pazuzu lays the two sticks onto it.
         # ----------------------------------------------------
 
-        self.eternal_fire[
-            "flame_state"
-        ] = "small"
+        self.eternal_fire.flame_state = "small"
 
-        self.eternal_fire[
-            "fuel"
-        ] = {
+        self.eternal_fire.fuel = {
             "dry_grass": 1.0,
 
             "wood_sticks": float(
@@ -727,22 +683,34 @@ class PrefysicalFireOrigin:
 
         # All friction heat generated by all attempts
         # becomes the initial heat of the fire.
-        self.eternal_fire[
-            "heat_energy_j"
-        ] = (
+        self.eternal_fire.heat_energy_j = (
             self.energy_conversion[
                 "friction_heat_j"
             ]
         )
 
-        self.eternal_fire[
-            "origin_roll_id"
-        ] = public_roll[
+        self.eternal_fire.origin_roll_id = public_roll[
             "roll_id"
         ]
 
         self.friction_active = False
         self.state = "fire_burning"
+        self._refresh_eternal_fire_boundary()
+
+    def _refresh_eternal_fire_boundary(
+        self
+    ):
+        if self.universe is None:
+            return
+
+        idea_entities = self.universe.world.get(
+            "idea_entities"
+        )
+
+        if isinstance(idea_entities, dict):
+            idea_entities["eternal_fire"] = (
+                self.eternal_fire.to_dict()
+            )
 
     def _masculine_principle(
         self

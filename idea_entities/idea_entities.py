@@ -2,6 +2,7 @@ from core.entity.social_entity import SocialEntity
 from universe.pre_cosmic_rules import IDEA_ENTITY_INITIAL_ENERGY_J, IDEA_ENTITY_ARCHETYPE_EXISTENCE_THRESHOLD_PCT
 from universe.logger import UniverseLogger
 from core.entity.serpent_d20 import SerpentD20
+from idea_entities.eternal_fire_potential import EternalFirePotential
 from idea_entities.prefysical_fire_origin import PrefysicalFireOrigin
 
 class IdeaEntities:
@@ -12,11 +13,11 @@ class IdeaEntities:
         self.events = []
         self.event_history = []
         self.tick_count = 0
-        self.eternal_fire = {'name': 'eternal_fire', 'type': 'idea_fire_potential', 'state': 'unignited', 'actualized': False, 'physical_time': None, 'physical_location': None, 'requires_maintenance': True, 'maintainer': 'pazuzu_masculine_principle', 'interactions': []}
+        self.eternal_fire = EternalFirePotential()
         self.serpent_d20 = SerpentD20()
         self.prefysical_fire_origin = PrefysicalFireOrigin(eternal_fire=self.eternal_fire, serpent_d20=self.serpent_d20, universe=self.universe)
         self.permissions = {'can_exist_before_form': True, 'can_influence': True, 'can_become_process': True}
-        self.universe.world['idea_entities'] = {'type': 'entity_layer', 'state': 'created', 'idea_entities': self.idea_entities, 'eternal_fire': self.eternal_fire, 'serpent_d20': self.serpent_d20.public_state, 'prefysical_fire_origin': self.prefysical_fire_origin.public_state, 'events': self.events, 'event_history': self.event_history, 'permissions': self.permissions}
+        self.universe.world['idea_entities'] = {'type': 'entity_layer', 'state': 'created', 'idea_entities': self.idea_entities, 'eternal_fire': self.eternal_fire.to_dict(), 'serpent_d20': self.serpent_d20.public_state, 'prefysical_fire_origin': self.prefysical_fire_origin.public_state, 'events': self.events, 'event_history': self.event_history, 'permissions': self.permissions}
         UniverseLogger.boot('IDEA ENTITIES LAYER CREATED')
 
     def update_archetype_manifestation_state(self, entity):
@@ -57,10 +58,15 @@ class IdeaEntities:
         interaction = {'name': name, 'layer': 'idea_entities', 'place': 'eternal_fire', 'participants': participants, 'observer': observer, 'state': state, 'meaning': meaning, 'known_by': []}
         if observer is not None:
             interaction['known_by'].append(observer)
-        self.eternal_fire['interactions'].append(interaction)
-        self.universe.world['idea_entities']['eternal_fire'] = self.eternal_fire
+        self.eternal_fire.interactions.append(interaction)
+        self._refresh_eternal_fire_boundary()
         self.emit_event(interaction)
         return interaction
+
+    def _refresh_eternal_fire_boundary(self):
+        self.universe.world['idea_entities']['eternal_fire'] = (
+            self.eternal_fire.to_dict()
+        )
 
     def tick(self):
         self.tick_count += 1

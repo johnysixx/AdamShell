@@ -225,40 +225,30 @@ class PrefysicalFireStoryTests(
         )
 
         self.assertTrue(
-            fire[
-                "actualized"
-            ]
+            fire.actualized
         )
 
         self.assertEqual(
-            fire[
-                "flame_state"
-            ],
+            fire.flame_state,
             "small"
         )
 
         self.assertEqual(
-            fire[
-                "fuel"
-            ][
+            fire.fuel[
                 "wood_sticks"
             ],
             2.0
         )
 
         self.assertEqual(
-            fire[
-                "fuel"
-            ][
+            fire.fuel[
                 "wood_added_by"
             ],
             "pazuzu_masculine_principle"
         )
 
         self.assertGreater(
-            fire[
-                "heat_energy_j"
-            ],
+            fire.heat_energy_j,
             heat_before_success
         )
 
@@ -291,9 +281,7 @@ class PrefysicalFireStoryTests(
         # Then wood is eaten only gradually.
         before_wood = (
             self.idea_entities
-            .eternal_fire[
-                "fuel"
-            ][
+            .eternal_fire.fuel[
                 "wood_sticks"
             ]
         )
@@ -302,9 +290,7 @@ class PrefysicalFireStoryTests(
 
         after_wood = (
             self.idea_entities
-            .eternal_fire[
-                "fuel"
-            ][
+            .eternal_fire.fuel[
                 "wood_sticks"
             ]
         )
@@ -347,9 +333,7 @@ class PrefysicalFireStoryTests(
 
         self.assertTrue(
             self.idea_entities
-            .eternal_fire[
-                "meaning"
-            ][
+            .eternal_fire.meaning[
                 "requires_fuel"
             ]
         )
