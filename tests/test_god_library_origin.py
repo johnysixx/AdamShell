@@ -19,7 +19,7 @@ class GodLibraryOriginTests(unittest.TestCase):
 
     def test_god_enters_library_before_bar_history(self):
         self.assertTrue(self.library.god_present)
-        self.assertTrue(self.library.state['god_present'])
+        self.assertTrue(self.library.state.god_present)
 
     def test_god_book_is_created_as_separate_event(self):
         self.assertTrue(self.god.book_created)

@@ -1,62 +1,140 @@
+from library.library_state import LibraryState
 from universe.logger import UniverseLogger
+
 
 class Library:
 
     def __init__(self, universe):
         self.universe = universe
-        self.books = []
-        self.catalog = []
-        self.events = []
-        self.visitors = []
-        self.tick_count = 0
+        self.library_state = LibraryState()
+        self.state = self.library_state
 
-        self.librarian = None
-        self.god_present = False
-        self.is_open = True
-        self.door_sign = "OPEN"
+        self.write_to_world()
+        UniverseLogger.boot("LIBRARY INITIALIZED")
 
-        self.door = {
-            "state": "open",
-            "sign": "OPEN",
-            "god_sign": None
-        }
+    @property
+    def books(self):
+        return self.library_state.books
 
-        self.access = {
-            "from": "quantum_layer",
-            "exit_to": "meeting_place",
-            "eden": False,
-            "universe": False
-        }
+    @books.setter
+    def books(self, value):
+        self.library_state.books = value
 
-        self.permissions = {
-            "god": "write",
-            "serpent": "read",
-            "pazuzu": "read",
-            "classical_probe_debug_entity": "read",
-            "meeting_place": "read"
-        }
+    @property
+    def catalog(self):
+        return self.library_state.catalog
 
-        self.state = {
-            "type": "knowledge_layer",
-            "state": "initialized",
+    @catalog.setter
+    def catalog(self, value):
+        self.library_state.catalog = value
+
+    @property
+    def events(self):
+        return self.library_state.events
+
+    @events.setter
+    def events(self, value):
+        self.library_state.events = value
+
+    @property
+    def visitors(self):
+        return self.library_state.visitors
+
+    @visitors.setter
+    def visitors(self, value):
+        self.library_state.visitors = value
+
+    @property
+    def tick_count(self):
+        return self.library_state.tick_count
+
+    @tick_count.setter
+    def tick_count(self, value):
+        self.library_state.tick_count = value
+
+    @property
+    def librarian(self):
+        return self.library_state.librarian
+
+    @librarian.setter
+    def librarian(self, value):
+        self.library_state.librarian = value
+
+    @property
+    def god_present(self):
+        return self.library_state.god_present
+
+    @god_present.setter
+    def god_present(self, value):
+        self.library_state.god_present = value
+
+    @property
+    def is_open(self):
+        return self.library_state.is_open
+
+    @is_open.setter
+    def is_open(self, value):
+        self.library_state.is_open = value
+
+    @property
+    def door_sign(self):
+        return self.library_state.door_sign
+
+    @door_sign.setter
+    def door_sign(self, value):
+        self.library_state.door_sign = value
+
+    @property
+    def door(self):
+        return self.library_state.door
+
+    @door.setter
+    def door(self, value):
+        self.library_state.door = value
+
+    @property
+    def access(self):
+        return self.library_state.access
+
+    @access.setter
+    def access(self, value):
+        self.library_state.access = value
+
+    @property
+    def permissions(self):
+        return self.library_state.permissions
+
+    @permissions.setter
+    def permissions(self, value):
+        self.library_state.permissions = value
+
+    @property
+    def public_state(self):
+        return {
+            "type": self.library_state.layer_type,
+            "state": self.library_state.status,
             "librarian": self.librarian,
             "access": self.access,
             "permissions": self.permissions,
-            "books": self.books
+            "books": self.books,
+            "catalog": self.catalog,
+            "god_present": self.god_present,
+            "is_open": self.is_open,
+            "door_sign": self.door_sign,
+            "library_state": self.library_state.to_dict(),
         }
 
-        self.universe.world["library"] = self.state
-        UniverseLogger.boot("LIBRARY INITIALIZED")
+    def write_to_world(self):
+        self.universe.world["library"] = self.public_state
+        self.universe.world["library_state"] = (
+            self.library_state
+        )
 
     def assign_librarian(
         self,
         god
     ):
         self.librarian = god
-
-        self.state[
-            "librarian"
-        ] = god
 
         self.update_presence()
 
@@ -69,12 +147,7 @@ class Library:
         self.door["state"] = "open"
         self.door["sign"] = "OPEN"
 
-        self.state["god_present"] = (
-            self.god_present
-        )
-
-        self.state["is_open"] = True
-        self.state["door_sign"] = "OPEN"
+        self.write_to_world()
 
         return {
             "god_present": self.god_present,
@@ -104,6 +177,8 @@ class Library:
                 visitor
             )
 
+        self.write_to_world()
+
         UniverseLogger.event(
             f"LIBRARY ENTRY GRANTED: {name}"
         )
@@ -116,7 +191,6 @@ class Library:
     ):
         if self.librarian is not god:
             self.librarian = god
-            self.state["librarian"] = god
 
         self.god_present = True
 
@@ -124,9 +198,7 @@ class Library:
             "GOD IS: IN"
         )
 
-        self.state[
-            "god_present"
-        ] = True
+        self.write_to_world()
 
         return {
             "event": "god_entered_library",
@@ -170,9 +242,7 @@ class Library:
 
         self.door["god_sign"] = None
 
-        self.state[
-            "god_present"
-        ] = False
+        self.write_to_world()
 
         return {
             "event": "god_left_library",
@@ -195,13 +265,7 @@ class Library:
 
         book.shelve()
 
-        self.state[
-            "books"
-        ] = self.books
-
-        self.state[
-            "catalog"
-        ] = self.catalog
+        self.write_to_world()
 
         UniverseLogger.event(
             "BOOK SHELVED: "
@@ -380,6 +444,7 @@ class Library:
             return
 
         self.books.append(book)
+        self.write_to_world()
         UniverseLogger.event(
             f"BOOK ADDED: {book.title}"
         )
@@ -394,16 +459,16 @@ class Library:
 
     def emit_event(self, event):
         self.events.append(event)
+        self.write_to_world()
         UniverseLogger.event(f"LIBRARY EVENT: {event}")
 
     def tick(self):
         self.tick_count += 1
         UniverseLogger.event(f"LIBRARY TICK {self.tick_count}")
         self._clear_events()
+        self.write_to_world()
 
     def _clear_events(self):
         self.events = []
-
-
 
 
