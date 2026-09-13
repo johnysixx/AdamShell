@@ -93,16 +93,12 @@ class PrefysicalFireStoryTests(
         )
 
         self.assertEqual(
-            materials[
-                "found_by"
-            ],
+            materials.found_by,
             "serpent"
         )
 
         self.assertEqual(
-            materials[
-                "handed_to"
-            ],
+            materials.handed_to,
             "pazuzu_masculine_principle"
         )
 
@@ -172,9 +168,7 @@ class PrefysicalFireStoryTests(
         self.assertAlmostEqual(
             converted,
             self.fire_origin
-            .energy_conversion[
-                "friction_heat_j"
-            ]
+            .energy_conversion.friction_heat_j
         )
 
         self.assertEqual(
@@ -198,9 +192,7 @@ class PrefysicalFireStoryTests(
 
         heat_before_success = (
             self.fire_origin
-            .energy_conversion[
-                "friction_heat_j"
-            ]
+            .energy_conversion.friction_heat_j
         )
 
         result = (
