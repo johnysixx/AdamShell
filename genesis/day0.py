@@ -1,5 +1,7 @@
 from copy import deepcopy
 
+from genesis.day0_state import GenesisDay0State
+
 
 class GenesisDay0:
     """
@@ -30,11 +32,20 @@ class GenesisDay0:
             .prefysical_fire_origin
         )
 
-        self.history = []
+        self.genesis_day0_state = GenesisDay0State()
+        self.state = self.genesis_day0_state
 
-        self.state = (
-            "principles_required"
-        )
+    @property
+    def status(self):
+        return self.genesis_day0_state.status
+
+    @status.setter
+    def status(self, value):
+        self.genesis_day0_state.status = value
+
+    @property
+    def history(self):
+        return self.genesis_day0_state.history
 
     def verify_principles(
         self
@@ -74,7 +85,7 @@ class GenesisDay0:
             event
         )
 
-        self.state = (
+        self.status = (
             "ready_for_fire_origin"
         )
 
@@ -86,7 +97,7 @@ class GenesisDay0:
         self
     ):
         if (
-            self.state
+            self.status
             == "principles_required"
         ):
             self.verify_principles()
@@ -101,7 +112,7 @@ class GenesisDay0:
             )
         )
 
-        self.state = (
+        self.status = (
             "seeking_warmth"
         )
 
@@ -114,7 +125,7 @@ class GenesisDay0:
         rng=None
     ):
         if (
-            self.state
+            self.status
             == "principles_required"
         ):
             self.verify_principles()
@@ -143,12 +154,12 @@ class GenesisDay0:
             result["result"]
             == "prefysical_fire_ignited"
         ):
-            self.state = (
+            self.status = (
                 "eternal_fire_exists"
             )
 
         else:
-            self.state = (
+            self.status = (
                 "seeking_warmth"
             )
 
@@ -175,7 +186,7 @@ class GenesisDay0:
             )
         )
 
-        self.state = (
+        self.status = (
             "fire_guarded_fuel_search_active"
         )
 
@@ -225,11 +236,15 @@ class GenesisDay0:
         self
     ):
         return {
-            "name": "genesis_day0",
-            "state": self.state,
+            "name": self.genesis_day0_state.name,
+            "state": self.status,
 
-            "physical_time_exists": False,
-            "physical_space_exists": False,
+            "physical_time_exists": (
+                self.genesis_day0_state.physical_time_exists
+            ),
+            "physical_space_exists": (
+                self.genesis_day0_state.physical_space_exists
+            ),
 
             "eternal_fire_exists": (
                 self.eternal_fire_exists
@@ -237,5 +252,9 @@ class GenesisDay0:
 
             "history": deepcopy(
                 self.history
+            ),
+
+            "genesis_day0_state": (
+                self.genesis_day0_state.to_dict()
             )
         }
