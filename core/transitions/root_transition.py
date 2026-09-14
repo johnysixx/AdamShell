@@ -1,44 +1,109 @@
+﻿from core.transitions.root_transition_state import (
+    RootTransitionState,
+)
+
+
 class RootTransition:
 
-    def __init__(self, existence_cost_pct=25.0, energy_cost_j=1000.0):
+    def __init__(
+        self,
+        existence_cost_pct=25.0,
+        energy_cost_j=1000.0,
+    ):
         self.existence_cost_pct = existence_cost_pct
         self.energy_cost_j = energy_cost_j
 
     def can_create(self, entity):
-        is_allowed_entity = getattr(entity, 'name', None) == 'serpent'
-        has_enough_existence = getattr(entity, 'existence_pct', 0.0) >= 100.0
-        has_enough_energy = getattr(entity, 'energy_j', 0.0) >= self.energy_cost_j
-        return is_allowed_entity and has_enough_existence and has_enough_energy
+        is_allowed_entity = (
+            getattr(entity, "name", None)
+            == "serpent"
+        )
+        has_enough_existence = (
+            getattr(entity, "existence_pct", 0.0)
+            >= 100.0
+        )
+        has_enough_energy = (
+            getattr(entity, "energy_j", 0.0)
+            >= self.energy_cost_j
+        )
+
+        return (
+            is_allowed_entity
+            and has_enough_existence
+            and has_enough_energy
+        )
 
     def create(self, entity):
         if not self.can_create(entity):
             return False
+
         entity.existence_pct -= self.existence_cost_pct
         entity.energy_j -= self.energy_cost_j
-        entity.root_transition = {'target': 'root_universe', 'state': 'created', 'creator': getattr(entity, 'name', None), 'existence_cost_pct': self.existence_cost_pct, 'energy_cost_j': self.energy_cost_j, 'can_enter': False}
+
+        entity.root_transition = RootTransitionState(
+            target="root_universe",
+            status="created",
+            creator=getattr(entity, "name", None),
+            existence_cost_pct=self.existence_cost_pct,
+            energy_cost_j=self.energy_cost_j,
+            can_enter=False,
+        )
+
         return True
 
     def can_enter(self, entity):
-        transition = getattr(entity, 'root_transition', None)
-        if transition is None:
+        transition = getattr(
+            entity,
+            "root_transition",
+            None,
+        )
+
+        if not isinstance(
+            transition,
+            RootTransitionState,
+        ):
             return False
-        transition_exists = transition.get('state') == 'created'
-        existence_restored = getattr(entity, 'existence_pct', 0.0) >= 100.0
-        return transition_exists and existence_restored
+
+        transition_exists = (
+            transition.status
+            == "created"
+        )
+        existence_restored = (
+            getattr(entity, "existence_pct", 0.0)
+            >= 100.0
+        )
+
+        return (
+            transition_exists
+            and existence_restored
+        )
 
     def update_entry_status(self, entity):
-        transition = getattr(entity, 'root_transition', None)
-        if transition is None:
+        transition = getattr(
+            entity,
+            "root_transition",
+            None,
+        )
+
+        if not isinstance(
+            transition,
+            RootTransitionState,
+        ):
             return False
-        transition['can_enter'] = self.can_enter(entity)
-        return transition['can_enter']
+
+        transition.can_enter = self.can_enter(entity)
+
+        return transition.can_enter
 
     def enter(self, entity):
         if not self.can_enter(entity):
             return False
+
         transition = entity.root_transition
-        transition['can_enter'] = True
-        transition['state'] = 'used'
-        entity.current_layer = 'root_universe'
+        transition.can_enter = True
+        transition.status = "used"
+
+        entity.current_layer = "root_universe"
         entity.root_presence = True
+
         return True
