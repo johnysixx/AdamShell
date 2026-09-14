@@ -5,6 +5,7 @@ from .reproduction import CatReproduction
 from .genotype import CatGenotype
 from .cat_learning import CatLearning
 from .cat import Cat
+from .cats_state import CatsState
 from .cat_personality import CatPersonality
 from .cat_mind import CatMind
 from .cat_intellect import CatIntellect
@@ -19,21 +20,77 @@ class Cats:
     def __init__(self, universe):
         self.universe = universe
         self.universe.cats_layer = self
-        self.cats = []
-        self.events = []
-        self.tick_count = 0
+        self.cats_state = CatsState()
+        self.state = self.cats_state
         self.intention_executor = CatIntentionExecutor(self)
         self.perception = CatPerception(self)
-        self.allowed_colors = ['white', 'black', 'blue', 'gray', 'orange', 'cream', 'chocolate', 'cinnamon', 'lilac', 'fawn', 'tortoiseshell', 'blue_tortoiseshell', 'calico']
-        self.allowed_patterns = ['solid', 'tabby', 'tuxedo', 'bicolor', 'tricolor', 'pointed', 'smoke', 'shaded']
-        self.allowed_eye_colors = ['blue', 'green', 'yellow', 'gold', 'amber', 'orange', 'copper', 'hazel', 'aqua', 'odd_eyed']
-        self.allowed_fur_lengths = ['short', 'long']
-        self.allowed_sexes = ['female', 'male']
-        self.default_idea_energy = 100
-        self.access_rules = {'can_access_anywhere': True, 'access_via': ['boxes', 'cat_doors']}
-        self.universe.world['cats'] = {'type': 'species_layer', 'state': 'created', 'allowed_colors': self.allowed_colors, 'allowed_patterns': self.allowed_patterns, 'allowed_eye_colors': self.allowed_eye_colors, 'allowed_fur_lengths': self.allowed_fur_lengths, 'allowed_sexes': self.allowed_sexes, 'default_idea_energy': self.default_idea_energy, 'access_rules': self.access_rules, 'cats': self.cats}
+        self.write_to_world()
         UniverseLogger.boot('CATS CREATED')
         UniverseLogger.boot('CATS ACCESS: anywhere via boxes and cat doors')
+
+    @property
+    def cats(self):
+        return self.cats_state.cats
+
+    @property
+    def events(self):
+        return self.cats_state.events
+
+    @property
+    def tick_count(self):
+        return self.cats_state.tick_count
+
+    @tick_count.setter
+    def tick_count(self, value):
+        self.cats_state.tick_count = value
+
+    @property
+    def allowed_colors(self):
+        return self.cats_state.allowed_colors
+
+    @property
+    def allowed_patterns(self):
+        return self.cats_state.allowed_patterns
+
+    @property
+    def allowed_eye_colors(self):
+        return self.cats_state.allowed_eye_colors
+
+    @property
+    def allowed_fur_lengths(self):
+        return self.cats_state.allowed_fur_lengths
+
+    @property
+    def allowed_sexes(self):
+        return self.cats_state.allowed_sexes
+
+    @property
+    def default_idea_energy(self):
+        return self.cats_state.default_idea_energy
+
+    @property
+    def access_rules(self):
+        return self.cats_state.access_rules
+
+    @property
+    def public_state(self):
+        return {
+            'type': self.cats_state.layer_type,
+            'state': self.cats_state.status,
+            'allowed_colors': self.allowed_colors,
+            'allowed_patterns': self.allowed_patterns,
+            'allowed_eye_colors': self.allowed_eye_colors,
+            'allowed_fur_lengths': self.allowed_fur_lengths,
+            'allowed_sexes': self.allowed_sexes,
+            'default_idea_energy': self.default_idea_energy,
+            'access_rules': self.access_rules,
+            'cats': self.cats,
+            'cats_state': self.cats_state.to_dict(),
+        }
+
+    def write_to_world(self):
+        self.universe.world['cats'] = self.public_state
+        self.universe.world['cats_state'] = self.cats_state
 
     def create_cat(self, name, color, fur_length, pattern='solid', eye_color='green', sex='female', origin='manual_creation'):
         if color not in self.allowed_colors:
@@ -53,7 +110,7 @@ class Cats:
             return None
         cat = Cat(name=name, color=color, pattern=pattern, eye_color=eye_color, fur_length=fur_length, sex=sex, genotype=CatGenotype.create_founder(sex=sex), reproduction=CatReproduction.create_state(sex=sex, neutered=False), origin=origin, idea_energy=self.default_idea_energy, memory=CatMemory(name), access=self.access_rules, learning=CatLearning.create_complete_state(), personality=CatPersonality.create_state(), mind=CatMind.create_state(), intellect=CatIntellect.create_state(), aroma=AromaProfile.create(identity=f'cat:{name}', components={'cat': 1.0, 'fur': 0.8, f'individual_cat:{name}': 2.0}, intensity=1.0))
         self.cats.append(cat)
-        self.universe.world['cats']['cats'] = self.cats
+        self.write_to_world()
         UniverseLogger.event(f'CAT CREATED: {name}')
         return cat
 
@@ -252,6 +309,7 @@ class Cats:
 
     def emit_event(self, event):
         self.events.append(event)
+        self.write_to_world()
         UniverseLogger.event(f'CATS EVENT: {event}')
 
     def tick(self):
@@ -341,4 +399,4 @@ class Cats:
         return {**context, 'ok': False, 'source_component': source_component, 'source_operation': source_operation, 'error_type': type(error).__name__, 'error_message': str(error), 'cronenberg_id': getattr(cronenberg, 'id', None)}
 
     def _clear_events(self):
-        self.events = []
+        self.events.clear()
