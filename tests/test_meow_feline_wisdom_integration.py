@@ -28,10 +28,13 @@ class MeowFelineWisdomIntegrationTests(unittest.TestCase):
     def complete_required_experiences(self):
         learning = self.kitten.learning
         for skill_name in self.resolver.REQUIRED_EXPERIENCES:
-            skill = learning['skills'][skill_name]
-            skill.update({'learned': True, 'progress': 1.0, 'teacher': 'mother', 'learned_on_day': 80})
-        learning['adult_meowing_learned'] = True
-        learning['human_communication_learned'] = True
+            skill = learning.skills[skill_name]
+            skill.learned = True
+            skill.progress = 1.0
+            skill.teacher = 'mother'
+            skill.learned_on_day = 80
+        learning.adult_meowing_learned = True
+        learning.human_communication_learned = True
 
     def test_mother_transmits_awareness_only(self):
         FelineWisdom.add_awareness(cat=self.mother, knowledge_name='open_human_door', domain='feline', description='Some cats can open human doors.', known_teachers=['pazuzu', 'queen_elisabeth'])
@@ -51,7 +54,7 @@ class MeowFelineWisdomIntegrationTests(unittest.TestCase):
 
     def test_dice_cat_can_teach_orphaned_kitten(self):
         self.kitten.parents['mother'] = None
-        self.kitten.learning['teacher_mother'] = None
+        self.kitten.learning.teacher_mother = None
         teaching_lesson = self.abilities.teach_method(teacher=self.garfield, student=self.dice_cat, ability_name='teach_other_cats', method_name='garfield_teaching_method')
         self.assertTrue(teaching_lesson['learned'])
         FelineWisdom.add_awareness(cat=self.dice_cat, knowledge_name='open_human_door', domain='feline', known_teachers=['pazuzu', 'queen_elisabeth'])
@@ -70,10 +73,10 @@ class MeowFelineWisdomIntegrationTests(unittest.TestCase):
 
     def test_untrained_dice_cat_cannot_teach_orphan(self):
         self.kitten.parents['mother'] = None
-        self.kitten.learning['teacher_mother'] = None
+        self.kitten.learning.teacher_mother = None
         result = self.resolver.transmit(mother=self.dice_cat, kitten=self.kitten, current_day=90)
         self.assertFalse(result['transmitted'])
         self.assertEqual(result['reason'], 'teacher_has_not_learned_to_teach')
-        self.assertFalse(self.kitten.learning['meow_knowledge']['learned'])
+        self.assertFalse(self.kitten.learning.meow_knowledge.learned)
 if __name__ == '__main__':
     unittest.main()

@@ -261,9 +261,7 @@ class CatFamilyBehaviorTests(
         )
 
         self.assertEqual(
-            self.first.learning[
-                "teacher_mother"
-            ],
+            self.first.learning.teacher_mother,
             self.mother.name
         )
 
@@ -287,9 +285,7 @@ class CatFamilyBehaviorTests(
         )
 
         self.assertEqual(
-            self.first.learning[
-                "hunting_teacher_father"
-            ],
+            self.first.learning.hunting_teacher_father,
             self.father.name
         )
 
@@ -309,13 +305,9 @@ class CatFamilyBehaviorTests(
             )
 
         self.assertTrue(
-            self.first.learning[
-                "skills"
-            ][
+            self.first.learning.skills[
                 "litter_box"
-            ][
-                "learned"
-            ]
+            ].learned
         )
 
     def test_stranger_cannot_use_parental_teaching(

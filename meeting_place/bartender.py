@@ -292,16 +292,18 @@ class Bartender(SocialMixin):
             or getattr(cat, 'name', None)
         )
         meow = getattr(
-            cat,
-            'learning',
-            {}
-        ).get(
+            getattr(
+                cat,
+                'learning',
+                None
+            ),
             'meow_knowledge',
-            {}
+            None
         )
         cat_knows_meow = bool(
-            meow.get('learned', False)
-            and meow.get('can_speak', False)
+            meow is not None
+            and meow.learned
+            and meow.can_speak
         )
         cat_event = {'name': 'cat_meowed_at_bartender', 'cat': cat_name, 'sound': 'MEOW', 'understood': cat_knows_meow}
         self.cat_meow_history.append(cat_event)

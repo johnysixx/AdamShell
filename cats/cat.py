@@ -107,10 +107,14 @@ class Cat(SocialMixin):
         return event
 
     def meow_to(self, listener, topic=None):
-        meow_knowledge = self.learning.get('meow_knowledge', {})
-        if not meow_knowledge.get('can_speak', False):
+        meow_knowledge = getattr(
+            self.learning,
+            'meow_knowledge',
+            None,
+        )
+        if meow_knowledge is None or not meow_knowledge.can_speak:
             return {'type': 'cat_meow', 'cat': self.name, 'listener': self._entity_name(listener), 'spoken': False, 'reason': 'meow_not_learned'}
-        known_contents = list(meow_knowledge.get('contains', []))
+        known_contents = list(meow_knowledge.contains)
         if topic is not None and topic not in known_contents:
             return {'type': 'cat_meow', 'cat': self.name, 'listener': self._entity_name(listener), 'spoken': False, 'reason': 'unknown_meow_topic', 'topic': topic}
         self.meow_count += 1

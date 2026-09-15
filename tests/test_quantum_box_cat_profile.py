@@ -13,8 +13,8 @@ class QuantumBoxCatProfileTests(unittest.TestCase):
         self.assertEqual(cat.age_days, 98)
         self.assertEqual(cat.developmental_stage, 'juvenile')
         self.assertTrue(cat.quantum_box_origin['manifested_from_box'])
-        self.assertTrue(cat.learning['meow_knowledge']['learned'])
-        self.assertTrue(cat.learning['meow_knowledge']['can_speak'])
+        self.assertTrue(cat.learning.meow_knowledge.learned)
+        self.assertTrue(cat.learning.meow_knowledge.can_speak)
         self.assertIn('sees_direct_path_to_bar', cat.special_traits)
 
     def test_quantum_box_cat_cannot_teach_yet(self):

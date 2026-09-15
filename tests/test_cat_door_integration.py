@@ -55,13 +55,9 @@ class CatDoorIntegrationTests(
             "outside_front_door"
         )
 
-        cat.learning[
-            "skills"
-        ][
+        cat.learning.skills[
             "cat_door_travel"
-        ][
-            "learned"
-        ] = True
+        ].learned = True
 
         door = (
             self.universe

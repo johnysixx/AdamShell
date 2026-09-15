@@ -155,22 +155,21 @@ class CatDoor:
                 "traveled": False
             }
 
-        skill = (
-            cat.learning
-            .get(
-                "skills",
-                {}
-            )
-            .get(
-                "cat_door_travel",
-                {}
-            )
+        learning = getattr(
+            cat,
+            "learning",
+            None
         )
 
-        if not skill.get(
-            "learned",
-            False
-        ):
+        skill = (
+            learning.skills.get(
+                "cat_door_travel"
+            )
+            if learning is not None
+            else None
+        )
+
+        if skill is None or not skill.learned:
             return {
                 "name": "cat_door_travel_failed",
                 "door": self.name,

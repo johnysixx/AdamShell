@@ -1,3 +1,10 @@
+from cats.cat_learning_state import (
+    CatLearningState,
+    CatMeowKnowledgeState,
+    CatSkillState,
+)
+
+
 class CatLearning:
 
     MATERNAL_TEACHING_DAYS = 90
@@ -41,57 +48,50 @@ class CatLearning:
         cls
     ):
         """
-        Výchozí stav manifestované kočky.
+        Vychozi stav manifestovane kocky.
 
-        Kočky vzniklé kostkami, ruční manifestací
-        nebo jiným nebiologickým způsobem už vědí,
-        jak se chovat jako kočky.
+        Kocky vznikle kostkami, rucni manifestaci
+        nebo jinym nebiologickym zpusobem uz vedi,
+        jak se chovat jako kocky.
         """
-        return {
-            "teaching_required": False,
-            "teaching_deadline_days": None,
-            "teacher_mother": None,
-            "hunting_teacher_father": None,
-            "kitten_meowing_instinctive": True,
-            "adult_meowing_learned": True,
-            "human_communication_learned": True,
-            "meow_knowledge": {
-                "learned": True,
-                "understood": True,
-                "can_speak": True,
-                "teacher": None,
-                "source": "manifestation",
-                "learned_on_day": None,
-                "contains": list(
-                    cls.MEOW_CONTENTS
-                )
-            },
-            "skills": {
-                skill: (
-                    {
-                        "learned": True,
-                        "progress": 1.0,
-                        "teacher": None,
-                        "learned_on_day": None,
-                        "vocalizations": {
+        return CatLearningState(
+            teaching_required=False,
+            teaching_deadline_days=None,
+            teacher_mother=None,
+            hunting_teacher_father=None,
+            kitten_meowing_instinctive=True,
+            adult_meowing_learned=True,
+            human_communication_learned=True,
+            meow_knowledge=CatMeowKnowledgeState(
+                learned=True,
+                understood=True,
+                can_speak=True,
+                teacher=None,
+                source="manifestation",
+                learned_on_day=None,
+                contains=list(cls.MEOW_CONTENTS),
+            ),
+            skills={
+                skill: CatSkillState(
+                    learned=True,
+                    progress=1.0,
+                    teacher=None,
+                    learned_on_day=None,
+                    vocalizations=(
+                        {
                             vocalization: True
                             for vocalization
                             in cls.ADULT_VOCALIZATIONS
                         }
-                    }
-                    if skill == "adult_meowing"
-                    else {
-                        "learned": True,
-                        "progress": 1.0,
-                        "teacher": None,
-                        "learned_on_day": None
-                    }
+                        if skill == "adult_meowing"
+                        else {}
+                    ),
                 )
                 for skill in cls.SKILLS
             },
-            "lessons": [],
-            "complete": True
-        }
+            lessons=[],
+            complete=True,
+        )
 
     @classmethod
     def create_newborn_state(
@@ -99,79 +99,46 @@ class CatLearning:
         mother_name=None
     ):
         """
-        Narozené kotě přirozeně mňouká,
-        ale ostatní chování se musí naučit.
+        Narozene kote prirozene mnouka,
+        ale ostatni chovani se musi naucit.
         """
-        return {
-            "teaching_required": True,
-            "teaching_deadline_days": (
+        return CatLearningState(
+            teaching_required=True,
+            teaching_deadline_days=(
                 cls.MATERNAL_TEACHING_DAYS
             ),
-            "teacher_mother": mother_name,
-            "hunting_teacher_father": None,
-            "kitten_meowing_instinctive": True,
-            "adult_meowing_learned": False,
-            "human_communication_learned": False,
-            "meow_knowledge": {
-                "learned": False,
-                "understood": False,
-                "can_speak": False,
-                "teacher": None,
-                "source": None,
-                "learned_on_day": None,
-                "contains": list(
-                    cls.MEOW_CONTENTS
+            teacher_mother=mother_name,
+            hunting_teacher_father=None,
+            kitten_meowing_instinctive=True,
+            adult_meowing_learned=False,
+            human_communication_learned=False,
+            meow_knowledge=CatMeowKnowledgeState(
+                learned=False,
+                understood=False,
+                can_speak=False,
+                teacher=None,
+                source=None,
+                learned_on_day=None,
+                contains=list(cls.MEOW_CONTENTS),
+            ),
+            skills={
+                skill: CatSkillState(
+                    learned=False,
+                    progress=0.0,
+                    teacher=None,
+                    learned_on_day=None,
+                    vocalizations=(
+                        {
+                            vocalization: False
+                            for vocalization
+                            in cls.ADULT_VOCALIZATIONS
+                        }
+                        if skill == "adult_meowing"
+                        else {}
+                    ),
                 )
+                for skill in cls.SKILLS
             },
-            "skills": {
-                "socialization": {
-                    "learned": False,
-                    "progress": 0.0,
-                    "teacher": None,
-                    "learned_on_day": None
-                },
-                "litter_box": {
-                    "learned": False,
-                    "progress": 0.0,
-                    "teacher": None,
-                    "learned_on_day": None
-                },
-                "box_travel": {
-                    "learned": False,
-                    "progress": 0.0,
-                    "teacher": None,
-                    "learned_on_day": None
-                },
-                "cat_door_travel": {
-                    "learned": False,
-                    "progress": 0.0,
-                    "teacher": None,
-                    "learned_on_day": None
-                },
-                "hunting": {
-                    "learned": False,
-                    "progress": 0.0,
-                    "teacher": None,
-                    "learned_on_day": None
-                },
-                "adult_meowing": {
-                    "learned": False,
-                    "progress": 0.0,
-                    "teacher": None,
-                    "learned_on_day": None,
-                    "vocalizations": {
-                        vocalization: False
-                        for vocalization
-                        in cls.ADULT_VOCALIZATIONS
-                    }
-                },
-                "human_communication": {
-                    "learned": False,
-                    "progress": 0.0,
-                    "teacher": None,
-                    "learned_on_day": None
-                }
-            },
-            "lessons": [],
-            "complete": False
-        }
+            lessons=[],
+            complete=False,
+        )

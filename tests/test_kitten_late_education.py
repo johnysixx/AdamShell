@@ -21,14 +21,25 @@ class KittenLateEducationTests(unittest.TestCase):
         self.kitten.mother_name = 'mother'
         self.development.initialize_newborn(self.kitten, birth_day=0)
         self.complete_early_education()
-        self.mother.learning['meow_knowledge'].update({'learned': True, 'understood': True, 'can_speak': True, 'teacher': 'garfield', 'source': 'bootstrap'})
-        self.dice_teacher.learning['meow_knowledge'].update({'learned': True, 'understood': True, 'can_speak': True, 'teacher': 'garfield', 'source': 'bootstrap'})
+        self.mother.learning.meow_knowledge.learned = True
+        self.mother.learning.meow_knowledge.understood = True
+        self.mother.learning.meow_knowledge.can_speak = True
+        self.mother.learning.meow_knowledge.teacher = 'garfield'
+        self.mother.learning.meow_knowledge.source = 'bootstrap'
+        self.dice_teacher.learning.meow_knowledge.learned = True
+        self.dice_teacher.learning.meow_knowledge.understood = True
+        self.dice_teacher.learning.meow_knowledge.can_speak = True
+        self.dice_teacher.learning.meow_knowledge.teacher = 'garfield'
+        self.dice_teacher.learning.meow_knowledge.source = 'bootstrap'
         self.abilities.register_garfield_teaching_abilities(self.garfield)
 
     def complete_early_education(self):
         learning = self.kitten.learning
         for skill_name in ('socialization', 'litter_box', 'box_travel', 'cat_door_travel', 'hunting'):
-            learning['skills'][skill_name].update({'learned': True, 'progress': 1.0, 'teacher': 'mother', 'learned_on_day': 50})
+            learning.skills[skill_name].learned = True
+            learning.skills[skill_name].progress = 1.0
+            learning.skills[skill_name].teacher = 'mother'
+            learning.skills[skill_name].learned_on_day = 50
 
     def run_at_age(self, age_days):
         self.kitten.age_days = age_days
@@ -42,8 +53,8 @@ class KittenLateEducationTests(unittest.TestCase):
         self.run_at_age(35)
         for age in range(36, 39):
             self.run_at_age(age)
-        hunting = self.kitten.learning['skills']['hunting']
-        self.assertTrue(hunting['learned'])
+        hunting = self.kitten.learning.skills['hunting']
+        self.assertTrue(hunting.learned)
 
     def test_vocalizations_are_taught_one_per_day(self):
         result = self.run_at_age(60)
@@ -53,16 +64,16 @@ class KittenLateEducationTests(unittest.TestCase):
 
     def test_repertoire_is_complete_on_day_sixty_seven(self):
         self.teach_all_vocalizations()
-        skill = self.kitten.learning['skills']['adult_meowing']
-        self.assertTrue(skill['learned'])
-        self.assertTrue(all(skill['vocalizations'].values()))
+        skill = self.kitten.learning.skills['adult_meowing']
+        self.assertTrue(skill.learned)
+        self.assertTrue(all(skill.vocalizations.values()))
 
     def test_human_communication_is_learned_on_day_75(self):
         self.teach_all_vocalizations()
         result = self.run_at_age(75)
         event_names = {event['name'] for event in result['events']}
         self.assertIn('human_feline_communication_learned', event_names)
-        self.assertTrue(self.kitten.learning['human_communication_learned'])
+        self.assertTrue(self.kitten.learning.human_communication_learned)
 
     def test_mother_transmits_meow_on_day_90(self):
         self.complete_hunting_education()
@@ -72,14 +83,14 @@ class KittenLateEducationTests(unittest.TestCase):
         meow_event = next((event for event in result['events'] if event.get('name') == 'meow_knowledge_transmitted'))
         self.assertTrue(meow_event['transmitted'])
         self.assertEqual(meow_event['teacher_role'], 'biological_mother')
-        self.assertTrue(self.kitten.learning['meow_knowledge']['learned'])
+        self.assertTrue(self.kitten.learning.meow_knowledge.learned)
 
     def test_qualified_cat_teaches_orphaned_kitten(self):
         self.complete_hunting_education()
         self.teach_all_vocalizations()
         self.run_at_age(75)
         self.kitten.parents['mother'] = None
-        self.kitten.learning['teacher_mother'] = 'dice_teacher'
+        self.kitten.learning.teacher_mother = 'dice_teacher'
         self.cats.cats.remove(self.mother)
         lesson = self.abilities.teach_method(teacher=self.garfield, student=self.dice_teacher, ability_name='teach_other_cats', method_name='garfield_teaching_method')
         self.assertTrue(lesson['learned'])
@@ -94,12 +105,12 @@ class KittenLateEducationTests(unittest.TestCase):
         self.teach_all_vocalizations()
         self.run_at_age(75)
         self.kitten.parents['mother'] = None
-        self.kitten.learning['teacher_mother'] = None
+        self.kitten.learning.teacher_mother = None
         self.cats.cats.remove(self.mother)
         self.cats.cats.remove(self.garfield)
         result = self.run_at_age(90)
         event_names = {event['name'] for event in result['events']}
         self.assertIn('meow_teacher_unavailable', event_names)
-        self.assertFalse(self.kitten.learning['meow_knowledge']['learned'])
+        self.assertFalse(self.kitten.learning.meow_knowledge.learned)
 if __name__ == '__main__':
     unittest.main()

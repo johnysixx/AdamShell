@@ -15,26 +15,32 @@ class CatLearningStateTests(unittest.TestCase):
         newborn = self.cats.create_cat(name='newborn', color='white', fur_length='short', origin='kitten_birth_resolver')
         newborn.mother_name = 'mother'
         self.development.initialize_newborn(newborn, birth_day=0)
-        self.assertEqual(set(manifested.learning.keys()), set(newborn.learning.keys()))
-        self.assertEqual(set(manifested.learning['skills'].keys()), set(newborn.learning['skills'].keys()))
+        self.assertIs(
+            type(manifested.learning),
+            type(newborn.learning),
+        )
+        self.assertEqual(
+            set(manifested.learning.skills),
+            set(newborn.learning.skills),
+        )
 
     def test_manifested_cat_already_knows_cat_skills(self):
         cat = self.cats.create_cat(name='dice_cat', color='black', fur_length='short', origin='dice_manifestation')
-        self.assertTrue(cat.learning['complete'])
-        self.assertFalse(cat.learning['teaching_required'])
-        self.assertTrue(all((skill['learned'] for skill in cat.learning['skills'].values())))
+        self.assertTrue(cat.learning.complete)
+        self.assertFalse(cat.learning.teaching_required)
+        self.assertTrue(all((skill.learned for skill in cat.learning.skills.values())))
 
     def test_newborn_requires_maternal_teaching(self):
         kitten = self.cats.create_cat(name='kitten', color='white', fur_length='short', origin='kitten_birth_resolver')
         kitten.mother_name = 'mother'
         self.development.initialize_newborn(kitten, birth_day=0)
         learning = kitten.learning
-        self.assertTrue(learning['teaching_required'])
-        self.assertEqual(learning['teaching_deadline_days'], 90)
-        self.assertEqual(learning['teacher_mother'], 'mother')
-        self.assertTrue(learning['kitten_meowing_instinctive'])
-        self.assertFalse(learning['adult_meowing_learned'])
-        self.assertFalse(learning['human_communication_learned'])
-        self.assertFalse(learning['complete'])
+        self.assertTrue(learning.teaching_required)
+        self.assertEqual(learning.teaching_deadline_days, 90)
+        self.assertEqual(learning.teacher_mother, 'mother')
+        self.assertTrue(learning.kitten_meowing_instinctive)
+        self.assertFalse(learning.adult_meowing_learned)
+        self.assertFalse(learning.human_communication_learned)
+        self.assertFalse(learning.complete)
 if __name__ == '__main__':
     unittest.main()

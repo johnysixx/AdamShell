@@ -102,10 +102,18 @@ class Bouncer(SocialMixin):
 
     def _cat_knows_meow(self, cat):
         learning = getattr(cat, 'learning', None)
-        if not isinstance(learning, dict):
+        if learning is None:
             return False
-        meow_knowledge = learning.get('meow_knowledge', {})
-        return bool(meow_knowledge.get('learned', False) and meow_knowledge.get('can_speak', False))
+        meow_knowledge = getattr(
+            learning,
+            'meow_knowledge',
+            None,
+        )
+        return bool(
+            meow_knowledge is not None
+            and meow_knowledge.learned
+            and meow_knowledge.can_speak
+        )
 
     def pet_cat(self, cat, affinity_gain=0.1):
         event = super().pet_cat(cat, affinity_gain=affinity_gain)

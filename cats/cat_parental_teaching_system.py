@@ -1,6 +1,7 @@
 from copy import deepcopy
 from cats.cat import Cat
 from cats.cat_family_system import CatFamilySystem
+from cats.cat_learning_state import CatSkillState
 
 class CatParentalTeachingSystem:
     ALLOWED_SKILLS = {'socialization', 'litter_box', 'box_travel', 'cat_door_travel', 'hunting', 'adult_meowing'}
@@ -18,26 +19,29 @@ class CatParentalTeachingSystem:
         if skill not in self.ALLOWED_SKILLS:
             return {'name': 'parental_teaching_denied', 'parent': parent.name, 'kitten': kitten.name, 'reason': 'unsupported_skill', 'skill': skill, 'taught': False}
         progress = max(0.0, float(progress))
-        skills = kitten.learning.setdefault('skills', {})
-        skill_state = skills.setdefault(skill, {'learned': False, 'progress': 0.0, 'teacher': None, 'learned_on_day': None})
-        old_progress = float(skill_state.get('progress', 0.0))
+        skills = kitten.learning.skills
+        skill_state = skills.get(skill)
+        if skill_state is None:
+            skill_state = CatSkillState()
+            skills[skill] = skill_state
+        old_progress = float(skill_state.progress)
         new_progress = min(1.0, old_progress + progress)
-        skill_state['progress'] = new_progress
-        skill_state['teacher'] = parent.name
-        learned_now = bool(not skill_state.get('learned', False) and new_progress >= 1.0)
+        skill_state.progress = new_progress
+        skill_state.teacher = parent.name
+        learned_now = bool(not skill_state.learned and new_progress >= 1.0)
         if new_progress >= 1.0:
-            skill_state['learned'] = True
-            if skill_state.get('learned_on_day') is None:
-                skill_state['learned_on_day'] = current_day
+            skill_state.learned = True
+            if skill_state.learned_on_day is None:
+                skill_state.learned_on_day = current_day
         if role == 'mother':
-            kitten.learning['teacher_mother'] = parent.name
+            kitten.learning.teacher_mother = parent.name
         if role == 'father' and skill == 'hunting':
-            kitten.learning['hunting_teacher_father'] = parent.name
-        family_knowledge = kitten.learning.setdefault('family_knowledge', {})
-        family_knowledge['parental_lessons'] = int(family_knowledge.get('parental_lessons', 0)) + 1
+            kitten.learning.hunting_teacher_father = parent.name
+        family_knowledge = kitten.learning.family_knowledge
+        family_knowledge.parental_lessons += 1
         self._record(parent, kitten, skill, role, current_day)
         self._strengthen_relationship(kitten, parent)
-        event = {'name': 'cat_parent_taught_kitten', 'parent': parent.name, 'parent_role': role, 'kitten': kitten.name, 'skill': skill, 'progress_before': old_progress, 'progress_after': new_progress, 'learned': bool(skill_state['learned']), 'learned_now': learned_now, 'day': current_day, 'taught': True}
+        event = {'name': 'cat_parent_taught_kitten', 'parent': parent.name, 'parent_role': role, 'kitten': kitten.name, 'skill': skill, 'progress_before': old_progress, 'progress_after': new_progress, 'learned': bool(skill_state.learned), 'learned_now': learned_now, 'day': current_day, 'taught': True}
         parent.social_interactions.append(deepcopy(event))
         kitten.social_interactions.append(deepcopy(event))
         return event

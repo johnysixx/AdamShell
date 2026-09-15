@@ -44,7 +44,7 @@ class KittenBirthResolver:
             kitten.mother_name = mother.name
             kitten.father_name = embryo.father_name
             kitten.parents = {'mother': mother.name, 'father': embryo.father_name}
-            kitten.learning['teacher_mother'] = mother.name
+            kitten.learning.teacher_mother = mother.name
             kitten.embryo_id = embryo.id
             kitten.genetic_status = embryo.genetic_status
             kitten.rare = embryo.rare

@@ -348,14 +348,22 @@ class Universe:
         for trait in ('quantum_box_cat', 'juvenile_quantum_cat', 'sees_direct_path_to_bar'):
             if trait not in traits:
                 traits.append(trait)
-        meow = learning['meow_knowledge']
-        meow.update({'learned': True, 'understood': True, 'can_speak': True, 'teacher': None, 'source': 'quantum_box_cat_wisdom', 'learned_on_day': 0})
-        learning['adult_meowing_learned'] = True
-        learning['human_communication_learned'] = True
-        for skill in learning['skills'].values():
-            skill.update({'learned': True, 'progress': 1.0, 'teacher': None, 'learned_on_day': 0})
-        learning['complete'] = True
-        learning['teaching_required'] = False
+        meow = learning.meow_knowledge
+        meow.learned = True
+        meow.understood = True
+        meow.can_speak = True
+        meow.teacher = None
+        meow.source = 'quantum_box_cat_wisdom'
+        meow.learned_on_day = 0
+        learning.adult_meowing_learned = True
+        learning.human_communication_learned = True
+        for skill in learning.skills.values():
+            skill.learned = True
+            skill.progress = 1.0
+            skill.teacher = None
+            skill.learned_on_day = 0
+        learning.complete = True
+        learning.teaching_required = False
         feline_wisdom = _entity_attr_setdefault(cat, 'feline_wisdom', {'awareness': {}, 'abilities': {}, 'history': []})
         feline_wisdom['abilities'].pop('teach_other_cats', None)
         feline_wisdom['abilities'].pop('teach_teaching', None)

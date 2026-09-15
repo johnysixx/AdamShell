@@ -244,9 +244,7 @@ class CatEmergencyLactationSystemTests(
 
         self.kitten.age_days = 10
 
-        self.kitten.learning[
-            "teaching_required"
-        ] = False
+        self.kitten.learning.teaching_required = False
 
         assessment = (
             self.system

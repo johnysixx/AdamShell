@@ -111,13 +111,9 @@ class KittenUpbringingResolverTests(
         )
 
         self.assertFalse(
-            self.kitten.learning[
-                "skills"
-            ][
+            self.kitten.learning.skills[
                 "socialization"
-            ][
-                "learned"
-            ]
+            ].learned
         )
 
     def test_father_sometimes_brings_dead_cronenberg(self):
@@ -167,59 +163,51 @@ class KittenUpbringingResolverTests(
             event_names
         )
 
-        socialization = self.kitten.learning[
-            "skills"
-        ][
+        socialization = self.kitten.learning.skills[
             "socialization"
         ]
 
         self.assertGreater(
-            socialization["progress"],
+            socialization.progress,
             0.0
         )
 
     def test_day_eighteen_teaches_litter_box(self):
         self.run_at_age(18)
 
-        skill = self.kitten.learning[
-            "skills"
-        ][
+        skill = self.kitten.learning.skills[
             "litter_box"
         ]
 
         self.assertTrue(
-            skill["learned"]
+            skill.learned
         )
 
         self.assertEqual(
-            skill["teacher"],
+            skill.teacher,
             "mother"
         )
 
     def test_day_nineteen_teaches_boxes(self):
         self.run_at_age(19)
 
-        skill = self.kitten.learning[
-            "skills"
-        ][
+        skill = self.kitten.learning.skills[
             "box_travel"
         ]
 
         self.assertTrue(
-            skill["learned"]
+            skill.learned
         )
 
     def test_day_twenty_teaches_cat_doors(self):
         self.run_at_age(20)
 
-        skill = self.kitten.learning[
-            "skills"
-        ][
+        skill = self.kitten.learning.skills[
             "cat_door_travel"
         ]
 
         self.assertTrue(
-            skill["learned"]
+            skill.learned
         )
 
     def test_manifested_cat_skips_upbringing(self):
@@ -296,19 +284,17 @@ class KittenUpbringingResolverTests(
             "tracking_and_chasing"
         )
 
-        hunting = self.kitten.learning[
-            "skills"
-        ][
+        hunting = self.kitten.learning.skills[
             "hunting"
         ]
 
         self.assertGreater(
-            hunting["progress"],
+            hunting.progress,
             0.0
         )
 
         self.assertFalse(
-            hunting["learned"]
+            hunting.learned
         )
 
     def test_later_training_practices_killing_bite(self):
@@ -353,14 +339,12 @@ class KittenUpbringingResolverTests(
             1
         )
 
-        hunting = self.kitten.learning[
-            "skills"
-        ][
+        hunting = self.kitten.learning.skills[
             "hunting"
         ]
 
         self.assertGreaterEqual(
-            hunting["progress"],
+            hunting.progress,
             0.85
         )
 
@@ -413,9 +397,7 @@ class KittenUpbringingResolverTests(
         )
 
         self.assertEqual(
-            self.kitten.learning[
-                "hunting_teacher_father"
-            ],
+            self.kitten.learning.hunting_teacher_father,
             "father"
         )
 
@@ -426,9 +408,7 @@ class KittenUpbringingResolverTests(
         for age in range(36, 40):
             self.run_at_age(age)
 
-        hunting = self.kitten.learning[
-            "skills"
-        ][
+        hunting = self.kitten.learning.skills[
             "hunting"
         ]
 
@@ -447,11 +427,11 @@ class KittenUpbringingResolverTests(
         )
 
         self.assertTrue(
-            hunting["learned"]
+            hunting.learned
         )
 
         self.assertEqual(
-            hunting["progress"],
+            hunting.progress,
             1.0
         )
 

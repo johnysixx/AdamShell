@@ -42,7 +42,7 @@ class CatEmergencyLactationSystem:
         learning = getattr(
             kitten,
             "learning",
-            {}
+            None
         )
 
         age_days = int(
@@ -54,7 +54,8 @@ class CatEmergencyLactationSystem:
         )
 
         needs_teaching = bool(
-            learning.get(
+            getattr(
+                learning,
                 "teaching_required",
                 False
             )
@@ -418,9 +419,9 @@ class CatEmergencyLactationSystem:
                 True
             )
 
-            kitten.learning[
-                "teacher_mother"
-            ] = rescuer.name
+            kitten.learning.teacher_mother = (
+                rescuer.name
+            )
 
             age_days = int(
                 getattr(

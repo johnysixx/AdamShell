@@ -1,4 +1,5 @@
 from cats.feline_wisdom import FelineWisdom
+from cats.cat_learning_state import CatLearningState
 
 class MeowKnowledgeResolver:
     REQUIRED_EXPERIENCES = ('socialization', 'litter_box', 'box_travel', 'cat_door_travel', 'hunting', 'adult_meowing', 'human_communication')
@@ -8,10 +9,18 @@ class MeowKnowledgeResolver:
         self.history = []
 
     def can_receive_meow(self, kitten, mother):
-        kitten_learning = getattr(kitten, 'learning', {})
-        mother_learning = getattr(mother, 'learning', {})
-        kitten_meow = kitten_learning.get('meow_knowledge', {})
-        mother_meow = mother_learning.get('meow_knowledge', {})
+        kitten_learning = getattr(kitten, 'learning', None)
+        mother_learning = getattr(mother, 'learning', None)
+        kitten_meow = getattr(
+            kitten_learning,
+            'meow_knowledge',
+            None,
+        )
+        mother_meow = getattr(
+            mother_learning,
+            'meow_knowledge',
+            None,
+        )
         if getattr(kitten, 'type', None) != 'cat':
             return {'allowed': False, 'reason': 'receiver_is_not_cat'}
         if getattr(mother, 'type', None) != 'cat':
@@ -19,14 +28,29 @@ class MeowKnowledgeResolver:
         teacher_role = self._resolve_teacher_role(teacher=mother, kitten=kitten)
         if not teacher_role['allowed']:
             return teacher_role
-        if kitten_meow.get('learned', False):
-            return {'allowed': False, 'reason': 'meow_already_known'}
-        if not mother_meow.get('learned', False):
+        if kitten_meow is None:
+            return {'allowed': False, 'reason': 'learning_state_unavailable'}
+        if mother_meow is None:
             return {'allowed': False, 'reason': 'mother_does_not_know_meow'}
-        if not mother_meow.get('can_speak', False):
+        if kitten_meow.learned:
+            return {'allowed': False, 'reason': 'meow_already_known'}
+        if not mother_meow.learned:
+            return {'allowed': False, 'reason': 'mother_does_not_know_meow'}
+        if not mother_meow.can_speak:
             return {'allowed': False, 'reason': 'mother_cannot_speak_meow'}
-        skills = kitten_learning.get('skills', {})
-        missing_experiences = [skill_name for skill_name in self.REQUIRED_EXPERIENCES if not skills.get(skill_name, {}).get('learned', False)]
+        skills = (
+            kitten_learning.skills
+            if isinstance(kitten_learning, CatLearningState)
+            else {}
+        )
+        missing_experiences = [
+            skill_name
+            for skill_name in self.REQUIRED_EXPERIENCES
+            if (
+                skills.get(skill_name) is None
+                or not skills[skill_name].learned
+            )
+        ]
         if missing_experiences:
             return {'allowed': False, 'reason': 'required_experiences_missing', 'missing_experiences': missing_experiences}
         return {'allowed': True, 'reason': 'ready_for_meow', 'missing_experiences': []}
@@ -38,7 +62,7 @@ class MeowKnowledgeResolver:
             self.history.append(event)
             return event
         learning = kitten.learning
-        meow = learning['meow_knowledge']
+        meow = learning.meow_knowledge
         teacher_role = self._resolve_teacher_role(teacher=mother, kitten=kitten)
         if teacher_role['role'] == 'biological_mother':
             transmission_source = 'maternal_transmission'
@@ -46,13 +70,21 @@ class MeowKnowledgeResolver:
             transmission_source = 'qualified_dice_cat_transmission'
         else:
             transmission_source = 'qualified_cat_transmission'
-        meow.update({'learned': True, 'understood': True, 'can_speak': True, 'teacher': mother.name, 'source': transmission_source, 'learned_on_day': current_day})
+        meow.learned = True
+        meow.understood = True
+        meow.can_speak = True
+        meow.teacher = mother.name
+        meow.source = transmission_source
+        meow.learned_on_day = current_day
         wisdom_result = self._transmit_feline_awareness(teacher=mother, kitten=kitten, current_day=current_day)
-        learning['lessons'].append({'name': 'mother_spoke_meow' if teacher_role['role'] == 'biological_mother' else 'dice_cat_spoke_meow', 'teacher': mother.name, 'student': kitten.name, 'day': current_day, 'knowledge': list(meow['contains'])})
-        learning['complete'] = all((skill.get('learned', False) for skill in learning['skills'].values()))
-        if learning['complete']:
-            learning['teaching_required'] = False
-        event = {'name': 'meow_knowledge_transmitted', 'mother': mother.name, 'kitten': kitten.name, 'day': current_day, 'knowledge': list(meow['contains']), 'adult_meowing_learned': learning['adult_meowing_learned'], 'human_communication_learned': learning['human_communication_learned'], 'learning_complete': learning['complete'], 'teacher_role': teacher_role['role'], 'transmission_source': transmission_source, 'awareness_transferred': wisdom_result['transferred_count'], 'ability_methods_transferred': 0, 'transmitted': True}
+        learning.lessons.append({'name': 'mother_spoke_meow' if teacher_role['role'] == 'biological_mother' else 'dice_cat_spoke_meow', 'teacher': mother.name, 'student': kitten.name, 'day': current_day, 'knowledge': list(meow.contains)})
+        learning.complete = all(
+            skill.learned
+            for skill in learning.skills.values()
+        )
+        if learning.complete:
+            learning.teaching_required = False
+        event = {'name': 'meow_knowledge_transmitted', 'mother': mother.name, 'kitten': kitten.name, 'day': current_day, 'knowledge': list(meow.contains), 'adult_meowing_learned': learning.adult_meowing_learned, 'human_communication_learned': learning.human_communication_learned, 'learning_complete': learning.complete, 'teacher_role': teacher_role['role'], 'transmission_source': transmission_source, 'awareness_transferred': wisdom_result['transferred_count'], 'ability_methods_transferred': 0, 'transmitted': True}
         self.history.append(event)
         quantum_events = getattr(self.universe, 'quantum_events', None)
         if quantum_events is not None:
@@ -65,7 +97,11 @@ class MeowKnowledgeResolver:
         if parents is not None:
             mother_name = parents.get('mother')
         else:
-            mother_name = getattr(kitten, 'learning', {}).get('teacher_mother')
+            mother_name = getattr(
+                getattr(kitten, 'learning', None),
+                'teacher_mother',
+                None,
+            )
         if mother_name is not None and teacher_name == mother_name:
             return {'allowed': True, 'reason': 'biological_mother_available', 'role': 'biological_mother'}
         teacher_wisdom = FelineWisdom.ensure_state(teacher)
@@ -92,5 +128,8 @@ class MeowKnowledgeResolver:
         return event
 
     def _complete_skill(self, kitten, skill_name, teacher_name, current_day):
-        skill = kitten.learning['skills'][skill_name]
-        skill.update({'learned': True, 'progress': 1.0, 'teacher': teacher_name, 'learned_on_day': current_day})
+        skill = kitten.learning.skills[skill_name]
+        skill.learned = True
+        skill.progress = 1.0
+        skill.teacher = teacher_name
+        skill.learned_on_day = current_day
