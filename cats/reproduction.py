@@ -1,4 +1,6 @@
-from cats.cat import Cat
+﻿from cats.cat import Cat
+from cats.cat_reproduction_state import CatReproductionState
+
 
 class CatReproduction:
 
@@ -12,49 +14,10 @@ class CatReproduction:
         sex,
         neutered=False
     ):
-        if sex not in {
-            "female",
-            "male"
-        }:
-            raise ValueError(
-                "Cat reproductive sex must be "
-                "female or male."
-            )
-
-        neutered = bool(
-            neutered
+        return CatReproductionState(
+            sex=sex,
+            neutered=neutered,
         )
-
-        return {
-            "sex": sex,
-            "neutered": neutered,
-            "fertile": not neutered,
-            "estrous_phase": "inactive",
-            "estrus_active": False,
-            "estrous_cycle_day": 0,
-            "estrus_duration_days": 7,
-            "interestrus_duration_days": 8,
-            "estrous_cycles_completed": 0,
-            "mating_window_open": False,
-            "mating_window_started_day": None,
-            "mating_contacts": [],
-            "potential_fathers": [],
-            "ovulation_stimulation": 0,
-            "ovulation_threshold": 4,
-            "ovulation_induced": False,
-            "last_ovulation_day": None,
-            "pregnant": False,
-            "pregnancy_day": None,
-            "gestation_days": None,
-            "expected_birth_day": None,
-            "mother_name": None,
-            "father_name": None,
-            "mating_contact": None,
-            "embryos": [],
-            "litters": [],
-            "last_litter": None,
-            "litters_born": 0
-        }
 
     @classmethod
     def can_mate(
@@ -69,19 +32,11 @@ class CatReproduction:
                 "CatReproduction requires Cat."
             )
 
-        reproduction = (
-            cat.reproduction
-        )
+        reproduction = cat.reproduction
 
         return (
-            reproduction.get(
-                "fertile",
-                False
-            )
-            and not reproduction.get(
-                "neutered",
-                True
-            )
+            reproduction.fertile
+            and not reproduction.neutered
         )
 
     @classmethod
@@ -97,17 +52,10 @@ class CatReproduction:
                 "CatReproduction requires Cat."
             )
 
-        reproduction = (
-            cat.reproduction
-        )
-
         return (
             cat.sex == "female"
             and cls.can_mate(cat)
-            and not reproduction.get(
-                "pregnant",
-                False
-            )
+            and not cat.reproduction.pregnant
         )
 
     @classmethod

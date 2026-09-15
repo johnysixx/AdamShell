@@ -16,17 +16,17 @@ class KittenBirthResolver:
         biology = self.biology_gate.require_physical_world(operation='kitten_birth', cat=mother)
         if not biology['allowed']:
             return biology
-        reproduction = getattr(mother, 'reproduction', {})
+        reproduction = mother.reproduction
         if getattr(mother, 'sex', None) != 'female':
             raise ValueError('Only a female cat can give birth.')
-        if not reproduction.get('pregnant', False):
+        if not reproduction.pregnant:
             raise ValueError('Cat is not pregnant.')
-        pregnancy_day = int(reproduction.get('pregnancy_day', 0))
-        gestation_days = int(reproduction.get('gestation_days', 0))
+        pregnancy_day = int(reproduction.pregnancy_day)
+        gestation_days = int(reproduction.gestation_days)
         if pregnancy_day < gestation_days:
             return {'name': 'kitten_birth_denied', 'reason': 'gestation_not_complete', 'mother': mother.name, 'pregnancy_day': pregnancy_day, 'gestation_days': gestation_days, 'born': False}
-        embryos = list(reproduction.get('embryos', []))
-        litter_number = int(reproduction.get('litters_born', 0)) + 1
+        embryos = list(reproduction.embryos)
+        litter_number = int(reproduction.litters_born) + 1
         kittens = []
         birth_results = []
         for embryo in embryos:
@@ -60,20 +60,20 @@ class KittenBirthResolver:
             if father_name not in father_names:
                 father_names.append(father_name)
         litter = CatLitter(**{'name': 'cat_litter_born', 'litter_number': litter_number, 'mother': mother.name, 'father_names': father_names, 'multiple_sires': len(father_names) > 1, 'embryos_present': len(embryos), 'kittens_born': len(kittens), 'kitten_names': [kitten.name for kitten in kittens], 'birth_results': birth_results, 'pregnancy_day': pregnancy_day, 'gestation_days': gestation_days, 'birth_day': current_day, 'born': True})
-        reproduction['pregnant'] = False
-        reproduction['pregnancy_day'] = None
-        reproduction['gestation_days'] = None
-        reproduction['expected_birth_day'] = None
-        reproduction['mating_window_open'] = False
-        reproduction['estrus_active'] = False
-        reproduction['mating_contacts'] = []
-        reproduction['potential_fathers'] = []
-        reproduction['father_name'] = None
-        reproduction['father_names'] = []
-        reproduction['embryos'] = []
-        reproduction['litters_born'] = litter_number
-        reproduction['last_litter'] = litter
-        reproduction.setdefault('litters', []).append(litter)
+        reproduction.pregnant = False
+        reproduction.pregnancy_day = None
+        reproduction.gestation_days = None
+        reproduction.expected_birth_day = None
+        reproduction.mating_window_open = False
+        reproduction.estrus_active = False
+        reproduction.mating_contacts = []
+        reproduction.potential_fathers = []
+        reproduction.father_name = None
+        reproduction.father_names = []
+        reproduction.embryos = []
+        reproduction.litters_born = litter_number
+        reproduction.last_litter = litter
+        reproduction.litters.append(litter)
         self.history.append(litter)
         self.universe.quantum_events.append(litter)
         return {**litter.to_dict(), 'kittens': kittens}

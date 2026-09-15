@@ -59,16 +59,12 @@ class CatEstrousCycleTests(
         )
 
         self.assertEqual(
-            reproduction[
-                "estrous_phase"
-            ],
+            reproduction.estrous_phase,
             "estrus"
         )
 
         self.assertTrue(
-            reproduction[
-                "estrus_active"
-            ]
+            reproduction.estrus_active
         )
 
     def test_estrus_changes_to_interestrus(self):
@@ -91,23 +87,15 @@ class CatEstrousCycleTests(
         )
 
         self.assertFalse(
-            self.female.reproduction[
-                "estrus_active"
-            ]
+            self.female.reproduction.estrus_active
         )
 
     def test_interestrus_returns_to_estrus(self):
         reproduction = self.female.reproduction
 
-        reproduction[
-            "estrous_phase"
-        ] = "interestrus"
-        reproduction[
-            "estrus_active"
-        ] = False
-        reproduction[
-            "estrous_cycle_day"
-        ] = 0
+        reproduction.estrous_phase = "interestrus"
+        reproduction.estrus_active = False
+        reproduction.estrous_cycle_day = 0
 
         for day in range(
             1,
@@ -124,19 +112,15 @@ class CatEstrousCycleTests(
         )
 
         self.assertTrue(
-            reproduction["estrus_active"]
+            reproduction.estrus_active
         )
 
     def test_mating_is_denied_outside_estrus(self):
         reproduction = self.female.reproduction
 
-        reproduction[
-            "estrus_active"
-        ] = False
+        reproduction.estrus_active = False
 
-        reproduction[
-            "estrous_phase"
-        ] = "interestrus"
+        reproduction.estrous_phase = "interestrus"
 
         mating = CatMatingResolver(
             self.universe
@@ -193,21 +177,15 @@ class CatEstrousCycleTests(
         )
 
         self.assertFalse(
-            self.female.reproduction[
-                "estrus_active"
-            ]
+            self.female.reproduction.estrus_active
         )
 
     def test_pregnant_female_does_not_cycle(self):
         reproduction = self.female.reproduction
 
-        reproduction["pregnant"] = True
-        reproduction[
-            "estrous_phase"
-        ] = "diestrus"
-        reproduction[
-            "estrus_active"
-        ] = False
+        reproduction.pregnant = True
+        reproduction.estrous_phase = "diestrus"
+        reproduction.estrus_active = False
 
         result = self.cycle.tick_day(
             self.female
@@ -219,7 +197,7 @@ class CatEstrousCycleTests(
         )
 
         self.assertFalse(
-            reproduction["estrus_active"]
+            reproduction.estrus_active
         )
 
 

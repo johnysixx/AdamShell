@@ -31,10 +31,7 @@ class CatEstrousCycleResolver:
                 day=day
             )
 
-        phase = reproduction.get(
-            "estrous_phase",
-            "inactive"
-        )
+        phase = reproduction.estrous_phase
 
         if phase == "inactive":
             return self._start_estrus(
@@ -42,27 +39,17 @@ class CatEstrousCycleResolver:
                 day=day
             )
 
-        reproduction[
-            "estrous_cycle_day"
-        ] = int(
-            reproduction.get(
-                "estrous_cycle_day",
-                0
-            )
+        reproduction.estrous_cycle_day = int(
+            reproduction.estrous_cycle_day
         ) + 1
 
         if phase == "estrus":
             duration = int(
-                reproduction.get(
-                    "estrus_duration_days",
-                    self.DEFAULT_ESTRUS_DAYS
-                )
+                reproduction.estrus_duration_days
             )
 
             if (
-                reproduction[
-                    "estrous_cycle_day"
-                ]
+                reproduction.estrous_cycle_day
                 >= duration
             ):
                 return self._start_interestrus(
@@ -72,16 +59,11 @@ class CatEstrousCycleResolver:
 
         elif phase == "interestrus":
             duration = int(
-                reproduction.get(
-                    "interestrus_duration_days",
-                    self.DEFAULT_INTERESTRUS_DAYS
-                )
+                reproduction.interestrus_duration_days
             )
 
             if (
-                reproduction[
-                    "estrous_cycle_day"
-                ]
+                reproduction.estrous_cycle_day
                 >= duration
             ):
                 return self._start_estrus(
@@ -96,12 +78,8 @@ class CatEstrousCycleResolver:
             "cat": cat.name,
             "day": day,
             "phase": phase,
-            "cycle_day": reproduction[
-                "estrous_cycle_day"
-            ],
-            "estrus_active": reproduction[
-                "estrus_active"
-            ],
+            "cycle_day": reproduction.estrous_cycle_day,
+            "estrus_active": reproduction.estrus_active,
             "phase_changed": False
         }
 
@@ -139,17 +117,11 @@ class CatEstrousCycleResolver:
     ):
         reproduction = cat.reproduction
 
-        reproduction[
-            "estrous_phase"
-        ] = "diestrus"
+        reproduction.estrous_phase = "diestrus"
 
-        reproduction[
-            "estrus_active"
-        ] = False
+        reproduction.estrus_active = False
 
-        reproduction[
-            "estrous_cycle_day"
-        ] = 0
+        reproduction.estrous_cycle_day = 0
 
         event = {
             "name": (
@@ -175,17 +147,11 @@ class CatEstrousCycleResolver:
     ):
         reproduction = cat.reproduction
 
-        reproduction[
-            "estrous_phase"
-        ] = "estrus"
+        reproduction.estrous_phase = "estrus"
 
-        reproduction[
-            "estrus_active"
-        ] = True
+        reproduction.estrus_active = True
 
-        reproduction[
-            "estrous_cycle_day"
-        ] = 0
+        reproduction.estrous_cycle_day = 0
 
         event = {
             "name": "cat_estrus_started",
@@ -214,37 +180,20 @@ class CatEstrousCycleResolver:
     ):
         reproduction = cat.reproduction
 
-        reproduction[
-            "estrous_phase"
-        ] = "interestrus"
+        reproduction.estrous_phase = "interestrus"
 
-        reproduction[
-            "estrus_active"
-        ] = False
+        reproduction.estrus_active = False
 
-        reproduction[
-            "estrous_cycle_day"
-        ] = 0
+        reproduction.estrous_cycle_day = 0
 
-        reproduction[
-            "mating_window_open"
-        ] = False
+        reproduction.mating_window_open = False
 
-        reproduction[
-            "mating_contacts"
-        ] = []
+        reproduction.mating_contacts = []
 
-        reproduction[
-            "potential_fathers"
-        ] = []
+        reproduction.potential_fathers = []
 
-        reproduction[
-            "estrous_cycles_completed"
-        ] = int(
-            reproduction.get(
-                "estrous_cycles_completed",
-                0
-            )
+        reproduction.estrous_cycles_completed = int(
+            reproduction.estrous_cycles_completed
         ) + 1
 
         event = {
@@ -273,17 +222,11 @@ class CatEstrousCycleResolver:
     ):
         reproduction = cat.reproduction
 
-        reproduction[
-            "estrous_phase"
-        ] = "inactive"
+        reproduction.estrous_phase = "inactive"
 
-        reproduction[
-            "estrus_active"
-        ] = False
+        reproduction.estrus_active = False
 
-        reproduction[
-            "estrous_cycle_day"
-        ] = 0
+        reproduction.estrous_cycle_day = 0
 
         event = {
             "name": (
@@ -311,18 +254,9 @@ class CatEstrousCycleResolver:
 
         return (
             cat.sex == "female"
-            and not reproduction.get(
-                "neutered",
-                True
-            )
-            and reproduction.get(
-                "fertile",
-                False
-            )
-            and not reproduction.get(
-                "pregnant",
-                False
-            )
+            and not reproduction.neutered
+            and reproduction.fertile
+            and not reproduction.pregnant
         )
 
     @staticmethod
@@ -334,22 +268,13 @@ class CatEstrousCycleResolver:
         if cat.sex != "female":
             return "not_female"
 
-        if reproduction.get(
-            "neutered",
-            True
-        ):
+        if reproduction.neutered:
             return "neutered"
 
-        if reproduction.get(
-            "pregnant",
-            False
-        ):
+        if reproduction.pregnant:
             return "pregnant"
 
-        if not reproduction.get(
-            "fertile",
-            False
-        ):
+        if not reproduction.fertile:
             return "not_reproductively_mature"
 
         return "cycle_unavailable"

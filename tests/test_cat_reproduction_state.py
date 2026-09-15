@@ -15,9 +15,9 @@ class CatReproductionStateTests(unittest.TestCase):
     def test_female_cat_can_become_pregnant(self):
         cat = self.cats.create_cat(name='female_cat', color='black', fur_length='short', sex='female')
         reproduction = cat.reproduction
-        self.assertFalse(reproduction['neutered'])
-        self.assertTrue(reproduction['fertile'])
-        self.assertFalse(reproduction['pregnant'])
+        self.assertFalse(reproduction.neutered)
+        self.assertTrue(reproduction.fertile)
+        self.assertFalse(reproduction.pregnant)
         self.assertTrue(CatReproduction.can_become_pregnant(cat))
 
     def test_male_cat_can_father_kittens(self):

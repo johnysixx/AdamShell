@@ -63,15 +63,11 @@ class CatDevelopmentResolver:
             )
         )
 
-        reproduction[
-            "developmental_stage"
-        ] = "newborn"
+        reproduction.developmental_stage = "newborn"
 
-        reproduction[
-            "reproductive_maturity"
-        ] = False
+        reproduction.reproductive_maturity = False
 
-        reproduction["fertile"] = False
+        reproduction.fertile = False
 
         event = {
             "name": (
@@ -147,27 +143,20 @@ class CatDevelopmentResolver:
             cat.reproduction
         )
 
-        reproduction[
-            "developmental_stage"
-        ] = new_stage
+        reproduction.developmental_stage = new_stage
 
         sexually_mature = (
             new_age
             >= self.SEXUAL_MATURITY_DAY
         )
 
-        reproduction[
-            "reproductive_maturity"
-        ] = sexually_mature
+        reproduction.reproductive_maturity = sexually_mature
 
-        if reproduction.get(
-            "neutered",
-            False
-        ):
-            reproduction["fertile"] = False
+        if reproduction.neutered:
+            reproduction.fertile = False
 
         else:
-            reproduction["fertile"] = (
+            reproduction.fertile = (
                 sexually_mature
             )
 
@@ -195,9 +184,7 @@ class CatDevelopmentResolver:
             "reproductive_maturity": (
                 sexually_mature
             ),
-            "fertile": reproduction[
-                "fertile"
-            ]
+            "fertile": reproduction.fertile
         }
 
         self.history.append(

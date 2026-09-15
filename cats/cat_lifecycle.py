@@ -143,10 +143,7 @@ class CatLifeCycleHandler:
                 estrous_result
             )
 
-            if not reproduction.get(
-                "pregnant",
-                False
-            ):
+            if not reproduction.pregnant:
                 continue
 
             pregnancy_result = (

@@ -42,37 +42,37 @@ class LifeCycleSystemTests(unittest.TestCase):
         cat = self.cats.create_cat(name='quantum_cat', color='black', fur_length='short', sex='female', origin='quantum_manifestation')
         self.universe.tick_universe()
         self.assertFalse(hasattr(cat, 'age_days'))
-        self.assertTrue(cat.reproduction['fertile'])
+        self.assertTrue(cat.reproduction.fertile)
 
     def test_universe_tick_advances_pregnancy(self):
         self.universe.start_big_bang()
         mother = self.cats.create_cat(name='mother', color='black', fur_length='short', sex='female')
         father = self.cats.create_cat(name='father', color='black', fur_length='short', sex='male')
         mating = CatMatingResolver(self.universe)
-        mother.reproduction['ovulation_threshold'] = 1
-        mother.reproduction['estrus_active'] = True
-        mother.reproduction['estrous_phase'] = 'estrus'
+        mother.reproduction.ovulation_threshold = 1
+        mother.reproduction.estrus_active = True
+        mother.reproduction.estrous_phase = 'estrus'
         mating.mate(mother, father)
         mating.close_mating_window(mother, embryo_count=1, rng=FirstChoiceRng())
         self.universe.tick_universe()
-        self.assertEqual(mother.reproduction['pregnancy_day'], 1)
+        self.assertEqual(mother.reproduction.pregnancy_day, 1)
 
     def test_due_pregnancy_gives_birth_automatically(self):
         self.universe.start_big_bang()
         mother = self.cats.create_cat(name='mother', color='black', fur_length='short', sex='female')
         father = self.cats.create_cat(name='father', color='black', fur_length='short', sex='male')
         mating = CatMatingResolver(self.universe)
-        mother.reproduction['ovulation_threshold'] = 1
-        mother.reproduction['estrus_active'] = True
-        mother.reproduction['estrous_phase'] = 'estrus'
+        mother.reproduction.ovulation_threshold = 1
+        mother.reproduction.estrus_active = True
+        mother.reproduction.estrous_phase = 'estrus'
         mating.mate(mother, father)
         mating.close_mating_window(mother, embryo_count=2, rng=FirstChoiceRng())
-        mother.reproduction['pregnancy_day'] = 64
+        mother.reproduction.pregnancy_day = 64
         self.universe.tick_universe()
         kittens = [cat for cat in self.cats.cats if cat.name.startswith('kitten_')]
-        self.assertFalse(mother.reproduction['pregnant'])
+        self.assertFalse(mother.reproduction.pregnant)
         self.assertEqual(len(kittens), 2)
         self.assertEqual({kitten.mother_name for kitten in kittens}, {'mother'})
-        self.assertEqual(mother.reproduction['litters_born'], 1)
+        self.assertEqual(mother.reproduction.litters_born, 1)
 if __name__ == '__main__':
     unittest.main()

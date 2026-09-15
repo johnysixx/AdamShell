@@ -19,8 +19,8 @@ class CatInducedOvulationTests(unittest.TestCase):
         self.cats = Cats(self.universe)
         self.female = self.cats.create_cat(name='female', color='black', fur_length='short', sex='female')
         self.male = self.cats.create_cat(name='male', color='black', fur_length='short', sex='male')
-        self.female.reproduction['estrus_active'] = True
-        self.female.reproduction['estrous_phase'] = 'estrus'
+        self.female.reproduction.estrus_active = True
+        self.female.reproduction.estrous_phase = 'estrus'
         self.mating = CatMatingResolver(self.universe)
 
     def test_one_contact_does_not_induce_ovulation(self):
@@ -40,9 +40,9 @@ class CatInducedOvulationTests(unittest.TestCase):
         self.assertFalse(result['started'])
         self.assertFalse(result['ovulation_induced'])
         self.assertEqual(result['ovulation']['reason'], 'insufficient_stimulation')
-        self.assertFalse(reproduction['pregnant'])
-        self.assertEqual(reproduction['estrous_phase'], 'interestrus')
-        self.assertEqual(reproduction['embryos'], [])
+        self.assertFalse(reproduction.pregnant)
+        self.assertEqual(reproduction.estrous_phase, 'interestrus')
+        self.assertEqual(reproduction.embryos, [])
 
     def test_threshold_stimulation_starts_pregnancy(self):
         for _ in range(4):
@@ -50,8 +50,8 @@ class CatInducedOvulationTests(unittest.TestCase):
         result = self.mating.close_mating_window(self.female, embryo_count=2, rng=FirstChoiceRng())
         self.assertTrue(result['started'])
         self.assertTrue(result['ovulation_induced'])
-        self.assertTrue(self.female.reproduction['pregnant'])
-        self.assertEqual(len(self.female.reproduction['embryos']), 2)
+        self.assertTrue(self.female.reproduction.pregnant)
+        self.assertEqual(len(self.female.reproduction.embryos), 2)
 
     def test_multiple_males_jointly_contribute_to_ovulation(self):
         second_male = self.cats.create_cat(name='second_male', color='orange', fur_length='short', sex='male')
@@ -60,6 +60,6 @@ class CatInducedOvulationTests(unittest.TestCase):
         self.mating.mate(self.female, self.male)
         final_contact = self.mating.mate(self.female, second_male)
         self.assertEqual(final_contact['ovulation_stimulation'], 4)
-        self.assertEqual(self.female.reproduction['potential_fathers'], ['male', 'second_male'])
+        self.assertEqual(self.female.reproduction.potential_fathers, ['male', 'second_male'])
 if __name__ == '__main__':
     unittest.main()

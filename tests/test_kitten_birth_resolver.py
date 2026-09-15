@@ -29,14 +29,14 @@ class KittenBirthResolverTests(unittest.TestCase):
         self.mother = self.cats.create_cat(name='mother', color='black', fur_length='short', sex='female')
         self.father_one = self.cats.create_cat(name='father_one', color='black', fur_length='short', sex='male')
         self.father_two = self.cats.create_cat(name='father_two', color='orange', fur_length='long', sex='male')
-        self.mother.reproduction['ovulation_threshold'] = 1
+        self.mother.reproduction.ovulation_threshold = 1
         self.mating = CatMatingResolver(self.universe)
         self.birth = KittenBirthResolver(self.universe)
 
     def _start_pregnancy(self, embryo_count=4):
         rng = AlternatingFatherRng()
-        self.mother.reproduction['estrus_active'] = True
-        self.mother.reproduction['estrous_phase'] = 'estrus'
+        self.mother.reproduction.estrus_active = True
+        self.mother.reproduction.estrous_phase = 'estrus'
         self.mating.mate(self.mother, self.father_one)
         self.mating.mate(self.mother, self.father_two)
         return self.mating.close_mating_window(self.mother, current_day=10, embryo_count=embryo_count, rng=rng)
@@ -47,7 +47,7 @@ class KittenBirthResolverTests(unittest.TestCase):
         result = self.birth.give_birth(self.mother, current_day=74)
         self.assertFalse(result['born'])
         self.assertEqual(result['reason'], 'gestation_not_complete')
-        self.assertTrue(self.mother.reproduction['pregnant'])
+        self.assertTrue(self.mother.reproduction.pregnant)
 
     def test_completed_pregnancy_creates_kittens(self):
         self._start_pregnancy(embryo_count=3)
@@ -61,7 +61,7 @@ class KittenBirthResolverTests(unittest.TestCase):
         self.assertTrue(all((kitten.mother_name == 'mother' for kitten in kittens)))
         self.assertTrue(all((hasattr(kitten, 'genotype') for kitten in kittens)))
         self.assertTrue(all((hasattr(kitten, 'phenotype') for kitten in kittens)))
-        self.assertTrue(all((kitten.reproduction['reproductive_maturity'] is False for kitten in kittens)))
+        self.assertTrue(all((kitten.reproduction.reproductive_maturity is False for kitten in kittens)))
 
     def test_newborn_kittens_enter_development_system(self):
         self._start_pregnancy(embryo_count=1)
@@ -72,8 +72,8 @@ class KittenBirthResolverTests(unittest.TestCase):
         self.assertEqual(kitten.age_days, 0)
         self.assertEqual(kitten.birth_day, 75)
         self.assertEqual(kitten.developmental_stage, 'newborn')
-        self.assertFalse(reproduction['fertile'])
-        self.assertFalse(reproduction['reproductive_maturity'])
+        self.assertFalse(reproduction.fertile)
+        self.assertFalse(reproduction.reproductive_maturity)
 
     def test_multiple_fathers_are_preserved(self):
         self._start_pregnancy(embryo_count=4)
@@ -85,7 +85,7 @@ class KittenBirthResolverTests(unittest.TestCase):
 
     def test_rare_traits_are_copied_from_embryo(self):
         self._start_pregnancy(embryo_count=1)
-        embryo = self.mother.reproduction['embryos'][0]
+        embryo = self.mother.reproduction.embryos[0]
         embryo.genetic_status = 'rare_valid'
         embryo.rare = True
         embryo.special_traits = ['xxy_male', 'rare_valid_genotype']
@@ -101,11 +101,11 @@ class KittenBirthResolverTests(unittest.TestCase):
         self.mating.advance_pregnancy(self.mother, days=65)
         result = self.birth.give_birth(self.mother)
         reproduction = self.mother.reproduction
-        self.assertFalse(reproduction['pregnant'])
-        self.assertIsNone(reproduction['pregnancy_day'])
-        self.assertEqual(reproduction['embryos'], [])
-        self.assertEqual(reproduction['litters_born'], 1)
-        self.assertEqual(reproduction['last_litter'].kitten_names, result['kitten_names'])
-        self.assertEqual(len(reproduction['litters']), 1)
+        self.assertFalse(reproduction.pregnant)
+        self.assertIsNone(reproduction.pregnancy_day)
+        self.assertEqual(reproduction.embryos, [])
+        self.assertEqual(reproduction.litters_born, 1)
+        self.assertEqual(reproduction.last_litter.kitten_names, result['kitten_names'])
+        self.assertEqual(len(reproduction.litters), 1)
 if __name__ == '__main__':
     unittest.main()

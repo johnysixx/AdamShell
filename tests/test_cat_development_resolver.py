@@ -18,8 +18,8 @@ class CatDevelopmentResolverTests(unittest.TestCase):
         reproduction = self.kitten.reproduction
         self.assertEqual(self.kitten.age_days, 0)
         self.assertEqual(self.kitten.developmental_stage, 'newborn')
-        self.assertFalse(reproduction['fertile'])
-        self.assertFalse(reproduction['reproductive_maturity'])
+        self.assertFalse(reproduction.fertile)
+        self.assertFalse(reproduction.reproductive_maturity)
 
     def test_developmental_stages_follow_age(self):
         expected = {0: 'newborn', 13: 'newborn', 14: 'socializing_kitten', 48: 'socializing_kitten', 49: 'playful_kitten', 97: 'playful_kitten', 98: 'juvenile', 179: 'juvenile', 180: 'adolescent', 364: 'adolescent', 365: 'adult'}
@@ -43,8 +43,8 @@ class CatDevelopmentResolverTests(unittest.TestCase):
         result = self.resolver.advance_age(self.kitten, days=365)
         reproduction = self.kitten.reproduction
         self.assertEqual(result['stage'], 'adult')
-        self.assertTrue(reproduction['reproductive_maturity'])
-        self.assertFalse(reproduction['fertile'])
+        self.assertTrue(reproduction.reproductive_maturity)
+        self.assertFalse(reproduction.fertile)
 
     def test_large_age_jump_records_all_transitions(self):
         result = self.resolver.advance_age(self.kitten, days=365)
