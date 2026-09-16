@@ -6,6 +6,7 @@ from cats.cat_group_bonding_system import CatGroupBondingSystem
 from cats.cat_group_lifecycle_system import CatGroupLifecycleSystem
 from cats.cat_group_migration_system import CatGroupMigrationSystem
 from cats.cat_group_conflict_system import CatGroupConflictSystem
+from cats.cat_social_objects import CatRelationship
 from cats.cat_group_split_system import CatGroupSplitSystem
 
 class CatGroupWorldBehaviorTests(unittest.TestCase):
@@ -57,10 +58,57 @@ class CatGroupWorldBehaviorTests(unittest.TestCase):
     def test_group_conflict_increments_history(self):
         first = self._group(self.members[:3], 'first')
         second = self._group(self.members[3:], 'second')
+        for cat in self.members:
+            cat.relationships.clear()
         conflict = CatGroupConflictSystem(self.groups)
         conflict.resolve(first, second, self.cats.cats, resource='milk')
         self.assertEqual(self.groups.groups[first].conflict_count, 1)
         self.assertEqual(self.groups.groups[second].conflict_count, 1)
+
+        for members in (self.members[:3], self.members[3:]):
+            for cat in members:
+                self.assertEqual(
+                    set(cat.relationships),
+                    {other.name for other in members if other is not cat},
+                )
+                for relation in cat.relationships.values():
+                    self.assertIsInstance(relation, CatRelationship)
+                    self.assertAlmostEqual(relation.tension, 0.08)
+                    self.assertEqual(relation.trust, 0.5)
+                    self.assertEqual(relation.affiliation, 0.0)
+
+    def test_group_conflict_preserves_existing_relationship_records(self):
+        first = self._group(self.members[:3], 'first')
+        second = self._group(self.members[3:], 'second')
+        records = []
+        for members in (self.members[:3], self.members[3:]):
+            object_relation = CatRelationship.create()
+            object_relation.tension = 0.9
+            for cat, other, relation, expected in (
+                (members[0], members[1], object_relation, (0.98, 1.0)),
+                (members[1], members[0], {}, (0.08, 0.16)),
+            ):
+                history = [{'kind': 'shared_rest'}]
+                relation.update({
+                    'trust': 0.75,
+                    'affiliation': 0.4,
+                    'trust_history': history,
+                    'meet_count': 3,
+                })
+                cat.relationships[other.name] = relation
+                records.append((cat, other, relation, history, expected))
+
+        conflict = CatGroupConflictSystem(self.groups)
+        for index in range(2):
+            conflict.resolve(first, second, self.cats.cats, resource='milk')
+            for cat, other, relation, history, expected in records:
+                self.assertIs(cat.relationships[other.name], relation)
+                self.assertAlmostEqual(relation['tension'], expected[index])
+                self.assertEqual(relation['trust'], 0.75)
+                self.assertEqual(relation['affiliation'], 0.4)
+                self.assertIs(relation['trust_history'], history)
+                self.assertEqual(history, [{'kind': 'shared_rest'}])
+                self.assertEqual(relation['meet_count'], 3)
 
     def test_group_can_split_into_daughter_group(self):
         group_id = self._group(self.members[:4], 'parent')

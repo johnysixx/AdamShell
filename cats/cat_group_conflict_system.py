@@ -9,6 +9,9 @@ from cats.cat_group_hierarchy_system import (
 from cats.cat_group_memory_system import (
     CatGroupMemorySystem
 )
+from cats.cat_social_objects import (
+    CatRelationship
+)
 
 
 class CatGroupConflictSystem:
@@ -325,7 +328,7 @@ class CatGroupConflictSystem:
                 relation = (
                     first.relationships.setdefault(
                         second.name,
-                        {}
+                        CatRelationship.create()
                     )
                 )
 
