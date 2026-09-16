@@ -1,7 +1,10 @@
 from copy import deepcopy
 
 from cats.cat import Cat
-from cats.cat_social_objects import CatSocialMemory
+from cats.cat_social_objects import (
+    CatRelationship,
+    CatSocialMemory,
+)
 from cats.cat_territory_system import (
     CatTerritorySystem
 )
@@ -1096,7 +1099,7 @@ class CatSocialSystem:
     ):
         relation = cat.relationships.setdefault(
             other_cat.name,
-            {}
+            CatRelationship.create()
         )
 
         relation.setdefault(

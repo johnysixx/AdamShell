@@ -1,6 +1,6 @@
 from cats.cat import Cat
 from copy import deepcopy
-from cats.cat_social_objects import CatLegend
+from cats.cat_social_objects import CatLegend, CatRelationship
 
 class CatKnowledge:
 
@@ -338,7 +338,7 @@ class CatKnowledge:
         relationships = listener.relationships
         if isinstance(relationships, dict):
             relation = relationships.get(storyteller_name)
-            if isinstance(relation, dict):
+            if isinstance(relation, (dict, CatRelationship)):
                 return max(0.0, min(1.0, float(relation.get('trust', 0.5))))
         return 0.5
 
