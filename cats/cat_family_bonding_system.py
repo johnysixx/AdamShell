@@ -50,7 +50,7 @@ class CatFamilyBondingSystem:
         relation,
         strength
     ):
-        existing = cat.bonds.get(
+        existing = cat.bonds.records.get(
             other_cat.name
         )
 
@@ -77,7 +77,7 @@ class CatFamilyBondingSystem:
         existing.source = "family"
         existing.family_relation = relation
 
-        cat.bonds[
+        cat.bonds.records[
             other_cat.name
         ] = existing
 

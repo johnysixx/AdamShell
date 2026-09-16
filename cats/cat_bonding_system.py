@@ -368,7 +368,7 @@ class CatBondingSystem:
         cat,
         other_cat
     ):
-        bond = cat.bonds.get(
+        bond = cat.bonds.records.get(
             other_cat.name
         )
 
@@ -386,7 +386,7 @@ class CatBondingSystem:
         other_cat,
         strength
     ):
-        cat.bonds[
+        cat.bonds.records[
             other_cat.name
         ] = CatBond(
             other_cat=other_cat.name,
@@ -407,7 +407,7 @@ class CatBondingSystem:
         other_cat,
         amount
     ):
-        bond = cat.bonds.get(
+        bond = cat.bonds.records.get(
             other_cat.name
         )
 

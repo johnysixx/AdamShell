@@ -41,7 +41,7 @@ class CatGroupDynamicsTests(unittest.TestCase):
     def test_group_bond_does_not_create_personal_bond(self):
         bonding = CatGroupBondingSystem(self.groups)
         bonding.reinforce(self.group_id, self.cats.cats, amount=0.2)
-        self.assertNotIn(self.second.name, self.first.bonds)
+        self.assertNotIn(self.second.name, self.first.bonds.records)
 
     def test_group_can_vote_candidate_in(self):
         recruitment = CatGroupRecruitmentSystem(self.groups)

@@ -31,7 +31,7 @@ class CatBondObjectStateTests(unittest.TestCase):
             self.second,
             strength=0.8,
         )
-        return self.first.bonds[
+        return self.first.bonds.records[
             self.second.name
         ]
 

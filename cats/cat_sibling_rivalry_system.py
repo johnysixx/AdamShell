@@ -17,7 +17,7 @@ class CatSiblingRivalrySystem:
         intensity = self._clamp(intensity)
         first_relation = self._relationship(first, second)
         second_relation = self._relationship(second, first)
-        bond = first.bonds.get(
+        bond = first.bonds.records.get(
             second.name
         )
         bonded = bool(
