@@ -5,7 +5,10 @@ from cats.cats import Cats
 from cats.cat import Cat
 from cats.cat_social_system import CatSocialSystem
 from cats.cat_territory_system import CatTerritorySystem
-from cats.cat_social_objects import CatSocialMemory
+from cats.cat_social_objects import (
+    CatRelationship,
+    CatSocialMemory,
+)
 from cats.cat_bonding_system import CatBondingSystem
 from cats.cat_family_system import CatFamilySystem
 from cats.development_resolver import CatDevelopmentResolver
@@ -62,6 +65,12 @@ class CatSocialInteractionTests(unittest.TestCase):
         self.assertFalse(result['spoken'])
         self.assertEqual(result['reason'], 'meow_not_learned')
 
+    def _relationship(self, **values):
+        relationship = CatRelationship.create()
+        for name, value in values.items():
+            setattr(relationship, name, value)
+        return relationship
+
     def _social_pair(self):
         first = self.cats.create_cat(name='first_cat', color='black', fur_length='short')
         second = self.cats.create_cat(name='second_cat', color='white', fur_length='short')
@@ -86,8 +95,8 @@ class CatSocialInteractionTests(unittest.TestCase):
 
     def test_friendly_cats_use_affiliative_greeting(self):
         first, second = self._social_pair()
-        first.relationships[second.name] = {'familiarity': 0.8, 'trust': 0.9, 'affiliation': 0.8, 'tension': 0.0}
-        second.relationships[first.name] = {'familiarity': 0.8, 'trust': 0.9, 'affiliation': 0.8, 'tension': 0.0}
+        first.relationships[second.name] = self._relationship(familiarity=0.8, trust=0.9, affiliation=0.8, tension=0.0)
+        second.relationships[first.name] = self._relationship(familiarity=0.8, trust=0.9, affiliation=0.8, tension=0.0)
         social = CatSocialSystem(self.cats)
         result = social.meet(first, second)
         self.assertEqual(result['attitude'], 'friendly')
@@ -96,12 +105,12 @@ class CatSocialInteractionTests(unittest.TestCase):
         self.assertIn('cat_slow_blink', names)
         self.assertIn('cat_head_bunt', names)
         self.assertIn('cat_body_rub', names)
-        self.assertGreater(first.relationships[second.name]['shared_scent'], 0.0)
+        self.assertGreater(first.relationships[second.name].shared_scent, 0.0)
 
     def test_hostile_cats_hiss_before_physical_escalation(self):
         first, second = self._social_pair()
-        first.relationships[second.name] = {'familiarity': 0.5, 'trust': 0.1, 'affiliation': 0.0, 'tension': 0.8}
-        second.relationships[first.name] = {'familiarity': 0.5, 'trust': 0.1, 'affiliation': 0.0, 'tension': 0.8}
+        first.relationships[second.name] = self._relationship(familiarity=0.5, trust=0.1, affiliation=0.0, tension=0.8)
+        second.relationships[first.name] = self._relationship(familiarity=0.5, trust=0.1, affiliation=0.0, tension=0.8)
         social = CatSocialSystem(self.cats)
         result = social.meet(first, second)
         self.assertEqual(result['attitude'], 'hostile')
@@ -109,12 +118,12 @@ class CatSocialInteractionTests(unittest.TestCase):
         self.assertIn('cat_hissed_at_cat', names)
         self.assertIn('cat_warning_swat', names)
         self.assertNotIn('cat_fight_started', names)
-        self.assertGreater(first.relationships[second.name]['tension'], 0.8)
+        self.assertGreater(first.relationships[second.name].tension, 0.8)
 
     def test_extreme_hostility_can_escalate_to_fight(self):
         first, second = self._social_pair()
-        first.relationships[second.name] = {'familiarity': 1.0, 'trust': 0.0, 'affiliation': 0.0, 'tension': 1.0}
-        second.relationships[first.name] = {'familiarity': 1.0, 'trust': 0.0, 'affiliation': 0.0, 'tension': 1.0}
+        first.relationships[second.name] = self._relationship(familiarity=1.0, trust=0.0, affiliation=0.0, tension=1.0)
+        second.relationships[first.name] = self._relationship(familiarity=1.0, trust=0.0, affiliation=0.0, tension=1.0)
         first.personality.traits.aggression = 1.0
         second.personality.traits.aggression = 1.0
         social = CatSocialSystem(self.cats)
@@ -167,7 +176,7 @@ class CatSocialInteractionTests(unittest.TestCase):
 
     def test_friendly_memory_biases_future_assessment(self):
         first, second = self._social_pair()
-        first.relationships[second.name] = {'familiarity': 0.6, 'trust': 0.65, 'affiliation': 0.5, 'tension': 0.0}
+        first.relationships[second.name] = self._relationship(familiarity=0.6, trust=0.65, affiliation=0.5, tension=0.0)
         first.social_memory.records[second.name] = CatSocialMemory(**{'meet_count': 4, 'friendly_count': 4, 'uncertain_count': 0, 'hostile_count': 0, 'last_attitude': 'friendly', 'last_outcome': 'head_bunt', 'last_steps': ['cat_head_bunt'], 'recent_outcomes': ['nose_touch', 'head_bunt']})
         social = CatSocialSystem(self.cats)
         assessment = social.assess(first, second)
@@ -177,7 +186,7 @@ class CatSocialInteractionTests(unittest.TestCase):
 
     def test_repeated_hostile_memory_can_make_cat_hostile(self):
         first, second = self._social_pair()
-        first.relationships[second.name] = {'familiarity': 0.5, 'trust': 0.5, 'affiliation': 0.0, 'tension': 0.2}
+        first.relationships[second.name] = self._relationship(familiarity=0.5, trust=0.5, affiliation=0.0, tension=0.2)
         first.social_memory.records[second.name] = CatSocialMemory(**{'meet_count': 4, 'friendly_count': 0, 'uncertain_count': 0, 'hostile_count': 4, 'last_attitude': 'hostile', 'last_outcome': 'hiss', 'last_steps': ['cat_hissed_at_cat'], 'recent_outcomes': ['hiss', 'warning_swat', 'hiss', 'hiss']})
         social = CatSocialSystem(self.cats)
         assessment = social.assess(first, second)
@@ -220,7 +229,7 @@ class CatSocialInteractionTests(unittest.TestCase):
         first, second = self._social_pair()
         first.location = 'window'
         second.location = 'window'
-        first.relationships[second.name] = {'familiarity': 0.9, 'trust': 0.9, 'affiliation': 0.8, 'shared_scent': 0.7, 'tension': 0.0}
+        first.relationships[second.name] = self._relationship(familiarity=0.9, trust=0.9, affiliation=0.8, shared_scent=0.7, tension=0.0)
         territory = CatTerritorySystem(self.cats)
         territory.claim(first, strength=1.0)
         context = territory.context(first, second)
@@ -253,8 +262,8 @@ class CatSocialInteractionTests(unittest.TestCase):
 
     def _prepare_bonded_pair(self):
         first, second = self._social_pair()
-        first.relationships[second.name] = {'familiarity': 0.9, 'trust': 0.9, 'affiliation': 0.85, 'shared_scent': 0.7, 'tension': 0.0}
-        second.relationships[first.name] = {'familiarity': 0.9, 'trust': 0.9, 'affiliation': 0.85, 'shared_scent': 0.7, 'tension': 0.0}
+        first.relationships[second.name] = self._relationship(familiarity=0.9, trust=0.9, affiliation=0.85, shared_scent=0.7, tension=0.0)
+        second.relationships[first.name] = self._relationship(familiarity=0.9, trust=0.9, affiliation=0.85, shared_scent=0.7, tension=0.0)
         first.social_memory.records[second.name] = CatSocialMemory(**{'meet_count': 3, 'friendly_count': 3, 'uncertain_count': 0, 'hostile_count': 0, 'last_attitude': 'friendly', 'last_outcome': 'head_bunt', 'last_steps': [], 'recent_outcomes': ['nose_touch', 'head_bunt']})
         second.social_memory.records[first.name] = CatSocialMemory(**{'meet_count': 3, 'friendly_count': 3, 'uncertain_count': 0, 'hostile_count': 0, 'last_attitude': 'friendly', 'last_outcome': 'head_bunt', 'last_steps': [], 'recent_outcomes': ['nose_touch', 'head_bunt']})
         return (first, second)
@@ -353,7 +362,7 @@ class CatSocialInteractionTests(unittest.TestCase):
         first, second = self._social_pair()
         first.family.littermates.append(second.name)
         first.family.siblings.append(second.name)
-        first.relationships[second.name] = {'familiarity': 0.8, 'trust': 0.1, 'affiliation': 0.0, 'shared_scent': 0.3, 'tension': 0.9}
+        first.relationships[second.name] = self._relationship(familiarity=0.8, trust=0.1, affiliation=0.0, shared_scent=0.3, tension=0.9)
         first.social_memory.records[second.name] = CatSocialMemory(**{'meet_count': 5, 'friendly_count': 0, 'uncertain_count': 0, 'hostile_count': 5, 'last_attitude': 'hostile', 'last_outcome': 'hiss', 'last_steps': [], 'recent_outcomes': ['hiss', 'hiss', 'warning_swat']})
         social = CatSocialSystem(self.cats)
         assessment = social.assess(first, second)
