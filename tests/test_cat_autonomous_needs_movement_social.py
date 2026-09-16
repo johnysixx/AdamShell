@@ -128,11 +128,7 @@ class CatAutonomousNeedsMovementSocialTests(
 
         first.needs.social = 1.0
 
-        first.personality[
-            "traits"
-        ][
-            "empathy"
-        ] = 1.0
+        first.personality.traits.empathy = 1.0
 
         self.cats.tick()
 

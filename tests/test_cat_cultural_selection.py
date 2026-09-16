@@ -26,7 +26,7 @@ class CatCulturalSelectionTests(unittest.TestCase):
     def test_cat_can_adopt_group_tradition(self):
         culture = CatGroupCultureSystem(self.groups)
         culture.practice(self.first_group, 'night_patrol', 'exploration', weight=0.8)
-        self.second.personality.setdefault('traits', {})['curiosity'] = 1.0
+        self.second.personality.traits.curiosity = 1.0
         adoption = CatCulturalAdoptionSystem(self.groups)
         result = adoption.expose_to_tradition(self.second, self.first_group, 'night_patrol')
         self.assertTrue(result['adopted'])
@@ -35,7 +35,7 @@ class CatCulturalSelectionTests(unittest.TestCase):
     def test_cat_can_reject_weak_tradition(self):
         culture = CatGroupCultureSystem(self.groups)
         culture.practice(self.first_group, 'dangerous_box_jump', 'exploration', weight=0.01)
-        self.second.personality.setdefault('traits', {})['curiosity'] = 0.0
+        self.second.personality.traits.curiosity = 0.0
         adoption = CatCulturalAdoptionSystem(self.groups)
         result = adoption.expose_to_tradition(self.second, self.first_group, 'dangerous_box_jump')
         self.assertFalse(result['adopted'])

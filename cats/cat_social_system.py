@@ -346,17 +346,7 @@ class CatSocialSystem:
             )
         )
 
-        traits = (
-            cat.personality.get(
-                "traits",
-                {}
-            )
-            if isinstance(
-                cat.personality,
-                dict
-            )
-            else {}
-        )
+        traits = cat.personality.traits
 
         empathy = self._trait(
             traits,
@@ -1268,10 +1258,7 @@ class CatSocialSystem:
     ):
         return self._clamp(
             self._number(
-                traits.get(
-                    name,
-                    default
-                )
+                getattr(traits, name, default)
             )
         )
 

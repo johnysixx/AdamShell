@@ -12,10 +12,10 @@ class CatCulturalAdoptionSystem:
         tradition = group.culture.traditions.get(tradition_name)
         if tradition is None:
             return {'tradition': tradition_name, 'known': False, 'adopt': False}
-        traits = cat.personality.get('traits', {})
-        curiosity = self._number(traits.get('curiosity', 0.5))
-        sociability = self._number(traits.get('sociability', traits.get('social', 0.5)))
-        courage = self._number(traits.get('courage', 0.5))
+        traits = cat.personality.traits
+        curiosity = self._number(traits.curiosity)
+        sociability = self._number(traits.sociability)
+        courage = self._number(traits.courage)
         category = tradition.get('category')
         category_affinity = {'exploration': curiosity, 'social': sociability, 'defense': courage, 'knowledge': self._number(cat.intellect.get('normalized', 0.5)), 'navigation': curiosity, 'ritual': sociability, 'hunting': courage * 0.6 + curiosity * 0.4}.get(category, 0.5)
         strength = self._number(tradition.get('strength', 0.0))

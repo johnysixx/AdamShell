@@ -33,8 +33,8 @@ class CatGroupHierarchySystem:
         return ranking[0]
 
     def _influence(self, cat, members):
-        traits = cat.personality.get('traits', {})
-        courage = self._number(traits.get('courage', 0.5))
+        traits = cat.personality.traits
+        courage = self._number(traits.courage)
         intellect = self._number(cat.intellect.get('normalized', 0.5))
         relationship_scores = []
         for other in members:

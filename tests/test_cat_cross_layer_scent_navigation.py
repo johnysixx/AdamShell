@@ -34,9 +34,9 @@ class CatCrossLayerScentNavigationTests(unittest.TestCase):
     def test_mind_can_choose_to_follow_scent_through_box(self):
         perception = CatPerception(self.cats)
         observations = perception.observe(self.tracker)
-        traits = self.tracker.personality['traits']
-        traits['curiosity'] = 1.0
-        traits['courage'] = 1.0
+        traits = self.tracker.personality.traits
+        traits.curiosity = 1.0
+        traits.courage = 1.0
         candidates = CatMind.consider(cat=self.tracker, observations=observations)
         scent_candidates = [candidate for candidate in candidates if candidate['type'] == 'follow_scent_through_box']
         self.assertEqual(len(scent_candidates), 1)

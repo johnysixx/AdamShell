@@ -13,10 +13,10 @@ class CatGroupRoleSystem:
         profile = self.ROLE_PROFILES.get(role)
         if profile is None:
             return {'role': role, 'eligible': False, 'score': 0.0, 'reason': 'unknown_role'}
-        traits = cat.personality.get('traits', {})
+        traits = cat.personality.traits
         score = 0.0
         for trait, weight in profile.get('traits', {}).items():
-            score += self._number(traits.get(trait, 0.5)) * weight
+            score += self._number(getattr(traits, trait, 0.5)) * weight
         score += self._number(cat.group.influence) * profile.get('influence_weight', 0.0)
         score += min(1.0, len(cat.knowledge) / 10.0) * profile.get('knowledge_weight', 0.0)
         score += self._number(cat.group.shared_scent) * profile.get('group_scent_weight', 0.0)

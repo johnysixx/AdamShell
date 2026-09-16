@@ -34,8 +34,8 @@ class CatLegendSharingTests(unittest.TestCase):
     def test_low_relationship_can_prevent_sharing(self):
         stranger = self.cats.create_cat(name='stranger', color='gray', fur_length='short')
         self.storyteller.relationships['stranger'] = {'trust': 0.0}
-        self.storyteller.personality['traits']['curiosity'] = 0.0
-        self.storyteller.personality['traits']['patience'] = 0.0
+        self.storyteller.personality.traits.curiosity = 0.0
+        self.storyteller.personality.traits.patience = 0.0
         result = CatKnowledge.share_legend(self.storyteller, stranger, self.universe)
         self.assertFalse(result['shared'])
 if __name__ == '__main__':

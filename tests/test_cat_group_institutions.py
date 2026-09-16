@@ -18,7 +18,7 @@ class CatGroupInstitutionTests(unittest.TestCase):
         self.groups.add_member(self.group_id, self.second, self.cats.cats)
 
     def test_cat_can_gain_dynamic_role(self):
-        self.first.personality.setdefault('traits', {})['courage'] = 1.0
+        self.first.personality.traits.courage = 1.0
         self.first.group.influence = 0.8
         roles = CatGroupRoleSystem(self.groups)
         result = roles.assign(self.group_id, self.first, 'guardian')
@@ -26,7 +26,7 @@ class CatGroupInstitutionTests(unittest.TestCase):
         self.assertIn('guardian', self.first.group_roles.active)
 
     def test_role_can_be_released(self):
-        self.first.personality.setdefault('traits', {})['courage'] = 1.0
+        self.first.personality.traits.courage = 1.0
         self.first.group.influence = 1.0
         roles = CatGroupRoleSystem(self.groups)
         roles.assign(self.group_id, self.first, 'guardian')
@@ -53,7 +53,7 @@ class CatGroupInstitutionTests(unittest.TestCase):
         self.assertIn('night_watch', self.groups.groups[self.group_id].institutions)
 
     def test_institution_strengthens_when_role_and_ritual_exist(self):
-        self.first.personality.setdefault('traits', {})['courage'] = 1.0
+        self.first.personality.traits.courage = 1.0
         self.first.group.influence = 1.0
         roles = CatGroupRoleSystem(self.groups)
         roles.assign(self.group_id, self.first, 'guardian')

@@ -22,7 +22,7 @@ class CatGroupDynamicsTests(unittest.TestCase):
         self.groups.add_member(self.group_id, self.third, self.cats.cats)
 
     def test_group_has_dynamic_influence_ranking(self):
-        self.first.personality.setdefault('traits', {})['courage'] = 1.0
+        self.first.personality.traits.courage = 1.0
         self.first.group.defense_events = 5
         hierarchy = CatGroupHierarchySystem(self.groups)
         ranking = hierarchy.rank(self.group_id, self.cats.cats)
@@ -57,7 +57,7 @@ class CatGroupDynamicsTests(unittest.TestCase):
         self.assertIn(self.second.name, vote['vetoes'])
 
     def test_defending_group_increases_future_influence(self):
-        self.first.personality.setdefault('traits', {})['courage'] = 1.0
+        self.first.personality.traits.courage = 1.0
         hierarchy = CatGroupHierarchySystem(self.groups)
         before = {item['cat']: item['influence'] for item in hierarchy.rank(self.group_id, self.cats.cats)}[self.first.name]
         self.groups.respond_to_threat(self.group_id, self.cats.cats, threat={'name': 'cronenberg'})

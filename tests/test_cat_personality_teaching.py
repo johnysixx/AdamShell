@@ -14,7 +14,7 @@ class CatPersonalityTeachingTests(unittest.TestCase):
         self.resolver.register_garfield_teaching_abilities(self.garfield)
 
     def traits(self, cat):
-        return cat.personality['traits']
+        return cat.personality.traits
 
     def test_successful_lesson_shapes_teacher(self):
         result = self.resolver.teach_method(teacher=self.garfield, student=self.student, ability_name='teach_other_cats', method_name='garfield_teaching_method')

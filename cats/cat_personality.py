@@ -1,3 +1,6 @@
+﻿from cats.cat_personality_state import CatPersonalityState
+
+
 class CatPersonality:
 
     TRAITS = (
@@ -5,21 +8,14 @@ class CatPersonality:
         "courage",
         "aggression",
         "empathy",
-        "patience"
+        "patience",
     )
 
     DEFAULT_VALUE = 0.5
 
     @classmethod
     def create_state(cls):
-        return {
-            "traits": {
-                trait: cls.DEFAULT_VALUE
-                for trait in cls.TRAITS
-            },
-            "experiences_processed": 0,
-            "history": []
-        }
+        return CatPersonalityState()
 
     @classmethod
     def ensure_state(
@@ -29,33 +25,21 @@ class CatPersonality:
         personality = getattr(
             cat,
             "personality",
-            None
+            None,
         )
 
         if personality is None:
             personality = cls.create_state()
             cat.personality = personality
 
-        traits = personality.setdefault(
-            "traits",
-            {}
-        )
-
-        for trait in cls.TRAITS:
-            traits.setdefault(
-                trait,
-                cls.DEFAULT_VALUE
+        if not isinstance(
+            personality,
+            CatPersonalityState,
+        ):
+            raise TypeError(
+                "Cat personality must be "
+                "CatPersonalityState."
             )
-
-        personality.setdefault(
-            "experiences_processed",
-            0
-        )
-
-        personality.setdefault(
-            "history",
-            []
-        )
 
         return personality
 
@@ -79,12 +63,13 @@ class CatPersonality:
             cat
         )
 
-        traits = personality[
-            "traits"
-        ]
+        traits = personality.traits
 
         previous = float(
-            traits[trait]
+            getattr(
+                traits,
+                trait,
+            )
         )
 
         amount = float(
@@ -101,7 +86,11 @@ class CatPersonality:
 
         applied = current - previous
 
-        traits[trait] = current
+        setattr(
+            traits,
+            trait,
+            current,
+        )
 
         event = {
             "name": (
@@ -117,18 +106,11 @@ class CatPersonality:
             "value": current,
             "metadata": dict(
                 metadata or {}
-            )
+            ),
         }
 
-        personality[
-            "experiences_processed"
-        ] += 1
-
-        personality[
-            "history"
-        ].append(
-            event
-        )
+        personality.experiences_processed += 1
+        personality.history.append(event)
 
         return event
 
@@ -151,7 +133,7 @@ class CatPersonality:
                     amount=amount,
                     source=source,
                     day=day,
-                    metadata=metadata
+                    metadata=metadata,
                 )
             )
 
@@ -164,7 +146,7 @@ class CatPersonality:
             "day": day,
             "changes": dict(changes),
             "events": events,
-            "applied": True
+            "applied": True,
         }
 
     @classmethod
@@ -177,6 +159,9 @@ class CatPersonality:
         )
 
         return max(
-            personality["traits"],
-            key=personality["traits"].get
+            cls.TRAITS,
+            key=lambda trait: getattr(
+                personality.traits,
+                trait,
+            ),
         )

@@ -35,7 +35,7 @@ class CatMemeticSelectionSystem:
         rejected = []
         for cat in self.group_system._member_objects(group, cats):
             intellect = self._number(cat.intellect.get('normalized', 0.5))
-            curiosity = self._number(cat.personality.get('traits', {}).get('curiosity', 0.5))
+            curiosity = self._number(cat.personality.traits.curiosity)
             confidence = self._number(getattr(innovation, 'confidence', 0.0))
             verified_bonus = 0.15 if getattr(innovation, 'verified', False) else 0.0
             score = intellect * 0.35 + curiosity * 0.25 + confidence * 0.3 + verified_bonus + 0.1
@@ -75,8 +75,8 @@ class CatMemeticSelectionSystem:
         return {'group_id': group_id, 'surviving': surviving, 'fading': fading}
 
     def _myth_score(self, cat, myth):
-        curiosity = self._number(cat.personality.get('traits', {}).get('curiosity', 0.5))
-        sociability = self._number(cat.personality.get('traits', {}).get('sociability', 0.5))
+        curiosity = self._number(cat.personality.traits.curiosity)
+        sociability = self._number(cat.personality.traits.sociability)
         credibility = self._number(getattr(myth, 'credibility', 0.0))
         return curiosity * 0.25 + sociability * 0.2 + credibility * 0.45 + 0.1
 

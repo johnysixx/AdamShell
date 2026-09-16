@@ -43,7 +43,7 @@ class CatGroupRitualSpecializationTests(unittest.TestCase):
 
     def test_guardian_can_specialize(self):
         cat = self.members[0]
-        cat.personality.setdefault('traits', {})['courage'] = 1.0
+        cat.personality.traits.courage = 1.0
         roles = CatGroupRoleSystem(self.groups)
         assigned = roles.assign(self.group_id, cat, 'guardian')
         self.assertTrue(assigned['assigned'])

@@ -14,7 +14,7 @@ class CatQuantumExplorationMovementTests(unittest.TestCase):
         self.cat.position = {'x': 0.0, 'y': 0.0, 'z': 0.0}
         self.cat.idea_energy = QUANTUM_BOX_ENERGY_COST_J * 10.0
         self.cat.exploration_goal = {'layer': 'quantum_layer', 'position': {'x': 6.0, 'y': 0.0, 'z': 0.0}}
-        self.cat.personality['traits']['curiosity'] = 1.0
+        self.cat.personality.traits.curiosity = 1.0
 
     def test_pair_entry_is_not_final_destination(self):
         result = self.cats.think_and_act(cat=self.cat)

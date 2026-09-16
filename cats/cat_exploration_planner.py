@@ -256,30 +256,18 @@ class CatExplorationPlanner:
         Cat D20 pouze rozli?? mezi nejlep??mi
         rozumn?mi mo?nostmi.
         """
-        traits = cat.personality.get(
-            "traits",
-            {}
-        )
+        traits = cat.personality.traits
 
         curiosity = float(
-            traits.get(
-                "curiosity",
-                0.5
-            )
+            traits.curiosity
         )
 
         courage = float(
-            traits.get(
-                "courage",
-                0.5
-            )
+            traits.courage
         )
 
         patience = float(
-            traits.get(
-                "patience",
-                0.5
-            )
+            traits.patience
         )
 
         intellect = float(
@@ -420,23 +408,14 @@ class CatExplorationPlanner:
             )
         )
 
-        traits = cat.personality.get(
-            "traits",
-            {}
-        )
+        traits = cat.personality.traits
 
         curiosity = float(
-            traits.get(
-                "curiosity",
-                0.5
-            )
+            traits.curiosity
         )
 
         courage = float(
-            traits.get(
-                "courage",
-                0.5
-            )
+            traits.courage
         )
 
         intellect = float(
@@ -849,30 +828,18 @@ class CatExplorationPlanner:
         cat,
         candidate
     ):
-        traits = cat.personality.get(
-            "traits",
-            {}
-        )
+        traits = cat.personality.traits
 
         curiosity = float(
-            traits.get(
-                "curiosity",
-                0.5
-            )
+            traits.curiosity
         )
 
         courage = float(
-            traits.get(
-                "courage",
-                0.5
-            )
+            traits.courage
         )
 
         patience = float(
-            traits.get(
-                "patience",
-                0.5
-            )
+            traits.patience
         )
 
         intellect = float(

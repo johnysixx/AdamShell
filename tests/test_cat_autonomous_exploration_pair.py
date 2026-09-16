@@ -13,7 +13,7 @@ class CatAutonomousExplorationPairTests(unittest.TestCase):
         self.cat.current_layer = 'meeting_place'
         self.cat.position = {'x': 3.0, 'y': 1.0, 'z': 0.0}
         self.cat.idea_energy = QUANTUM_BOX_ENERGY_COST_J * 10.0
-        self.cat.personality['traits']['curiosity'] = 1.0
+        self.cat.personality.traits.curiosity = 1.0
 
     def test_perception_offers_pair_creation_without_box(self):
         observations = self.cats.observe_cat(self.cat)

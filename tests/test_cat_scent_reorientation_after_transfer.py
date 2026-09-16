@@ -69,10 +69,10 @@ class CatScentReorientationAfterTransferTests(unittest.TestCase):
         observations['huntable_cronenbergs'] = []
         observations['visible_cronenbergs'] = []
         observations['cronenberg_scent_recognized'] = False
-        traits = self.tracker.personality['traits']
-        traits['curiosity'] = 1.0
-        traits['courage'] = 1.0
-        traits['patience'] = 0.0
+        traits = self.tracker.personality.traits
+        traits.curiosity = 1.0
+        traits.courage = 1.0
+        traits.patience = 0.0
         decision = CatMind.decide(cat=self.tracker, observations=observations)
         self.assertTrue(decision['selected'])
         self.assertEqual(decision['intention'], 'follow_known_scent')

@@ -13,9 +13,9 @@ class CatScentSearchTests(unittest.TestCase):
         self.cat = self.cats.create_cat(name='tracker', color='black', fur_length='short')
         self.cat.current_layer = 'quantum_layer'
         self.cat.position = {'x': 3.0, 'y': 0.0, 'z': 0.0}
-        traits = self.cat.personality['traits']
-        traits['curiosity'] = 1.0
-        traits['courage'] = 1.0
+        traits = self.cat.personality.traits
+        traits.curiosity = 1.0
+        traits.courage = 1.0
         self.cat.known_scent_follow = {'active': False, 'arrived': True, 'identity': 'cat:pazuzu', 'source_id': 'latest_trace', 'destination': {'x': 3.0, 'y': 0.0, 'z': 0.0}, 'trail_direction': {'inferred': True, 'unit_vector': {'x': 1.0, 'y': 0.0, 'z': 0.0}, 'confidence': 0.8}}
 
     def observations(self):

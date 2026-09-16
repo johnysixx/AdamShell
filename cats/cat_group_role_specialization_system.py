@@ -13,9 +13,9 @@ class CatGroupRoleSpecializationSystem:
         profile = self.SPECIALIZATIONS.get(base_role, {}).get(specialization)
         if profile is None:
             return {'name': 'cat_role_specialization_denied', 'reason': 'unknown_specialization', 'specialized': False}
-        traits = cat.personality.get('traits', {})
+        traits = cat.personality.traits
         for trait, minimum in profile['required_traits'].items():
-            value = self._number(traits.get(trait, 0.5))
+            value = self._number(getattr(traits, trait, 0.5))
             if value < minimum:
                 return {'name': 'cat_role_specialization_denied', 'reason': 'insufficient_trait', 'trait': trait, 'required': minimum, 'actual': value, 'specialized': False}
         group.role_specializations.setdefault(base_role, {})

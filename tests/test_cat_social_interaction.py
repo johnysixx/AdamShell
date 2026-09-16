@@ -114,8 +114,8 @@ class CatSocialInteractionTests(unittest.TestCase):
         first, second = self._social_pair()
         first.relationships[second.name] = {'familiarity': 1.0, 'trust': 0.0, 'affiliation': 0.0, 'tension': 1.0}
         second.relationships[first.name] = {'familiarity': 1.0, 'trust': 0.0, 'affiliation': 0.0, 'tension': 1.0}
-        first.personality.setdefault('traits', {})['aggression'] = 1.0
-        second.personality.setdefault('traits', {})['aggression'] = 1.0
+        first.personality.traits.aggression = 1.0
+        second.personality.traits.aggression = 1.0
         social = CatSocialSystem(self.cats)
         result = social.meet(first, second)
         names = [step['name'] for step in result['steps']]

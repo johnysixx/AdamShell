@@ -42,8 +42,8 @@ class CatHumanBondSystem:
         return {'cat': cat.name, 'human': human_name, 'score': score, 'right_human': right_human, 'trust': bond['trust'], 'affection': bond['affection'], 'familiarity': bond['familiarity']}
 
     def _score(self, cat, bond):
-        personality = cat.personality.get('traits', {})
-        sociability = self._number(personality.get('sociability', personality.get('social', 0.5)))
+        personality = cat.personality.traits
+        sociability = self._number(personality.sociability)
         score = bond['trust'] * 0.4 + bond['affection'] * 0.35 + bond['familiarity'] * 0.2 + sociability * 0.05
         return round(self._clamp(score), 4)
 

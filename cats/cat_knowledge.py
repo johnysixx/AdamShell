@@ -273,9 +273,9 @@ class CatKnowledge:
         poslucha?i v?bec ?ekne.
         """
         listener_name = listener.name
-        traits = storyteller.personality.get('traits', {})
-        curiosity = float(traits.get('curiosity', 0.5))
-        patience = float(traits.get('patience', 0.5))
+        traits = storyteller.personality.traits
+        curiosity = float(traits.curiosity)
+        patience = float(traits.patience)
         intellect = float(storyteller.intellect.get('normalized', 0.5))
         trust = cls._trust_in_cat(storyteller, listener_name)
         confidence = float(getattr(legend, 'confidence', 0.5))

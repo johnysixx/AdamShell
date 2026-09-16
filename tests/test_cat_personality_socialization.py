@@ -22,7 +22,7 @@ class CatPersonalitySocializationTests(unittest.TestCase):
         return self.upbringing.tick_day(kitten=self.kitten, cats=self.cats.cats, current_day=day)
 
     def traits(self):
-        return self.kitten.personality['traits']
+        return self.kitten.personality.traits
 
     def test_first_socialization_lesson_builds_empathy(self):
         result = self.run_day(14)

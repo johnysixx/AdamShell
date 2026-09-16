@@ -12,7 +12,7 @@ class CatMindTests(unittest.TestCase):
         self.cat = self.cats.create_cat(name='thinking_cat', color='black', fur_length='short')
 
     def traits(self):
-        return self.cat.personality['traits']
+        return self.cat.personality.traits
 
     def test_new_cat_has_empty_mind(self):
         mind = self.cat.mind
@@ -75,7 +75,11 @@ class CatMindTests(unittest.TestCase):
     def test_assigned_cat_considers_visiting_recipient(self):
         cat = self.cats.create_cat(name='thinking_cat', color='black', fur_length='short')
         cat.recipient = 'wizard'
-        cat.personality['traits'].update({'curiosity': 0.5, 'courage': 0.5, 'aggression': 0.5, 'empathy': 0.8, 'patience': 0.5})
+        cat.personality.traits.curiosity = 0.5
+        cat.personality.traits.courage = 0.5
+        cat.personality.traits.aggression = 0.5
+        cat.personality.traits.empathy = 0.8
+        cat.personality.traits.patience = 0.5
         observations = {'bar_known': False}
         candidates = CatMind.consider(cat, observations)
         visit_recipient = next((candidate for candidate in candidates if candidate['type'] == 'visit_recipient'), None)

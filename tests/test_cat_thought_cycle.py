@@ -19,7 +19,7 @@ class CatThoughtCycleTests(unittest.TestCase):
         self.assertEqual(self.cat.intent, 'return_to_bar')
 
     def test_curious_cat_notices_new_box(self):
-        self.cat.personality['traits']['curiosity'] = 1.0
+        self.cat.personality.traits.curiosity = 1.0
         box = self.universe.create_quantum_box()
         box.position = {'x': 1.5, 'y': 0.0, 'z': 0.0}
         result = self.cats.think_and_act(cat=self.cat)
@@ -35,8 +35,8 @@ class CatThoughtCycleTests(unittest.TestCase):
         self.assertEqual(result['observation']['reason'], 'cat_has_no_position')
 
     def test_cat_autonomously_senses_and_uses_quantum_box(self):
-        self.cat.personality['traits']['curiosity'] = 1.0
-        self.cat.personality['traits']['courage'] = 1.0
+        self.cat.personality.traits.curiosity = 1.0
+        self.cat.personality.traits.courage = 1.0
         self.cat.current_layer = 'quantum_layer'
         source = self.universe.create_quantum_box()
         target = self.universe.create_quantum_box()

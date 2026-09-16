@@ -15,20 +15,20 @@ class CatCronenbergScentBehaviorTests(unittest.TestCase):
         return {'bar_known': True, 'bar_visible': False, 'visible_cronenbergs': [], 'huntable_cronenbergs': [], 'cronenberg_danger': 0.0, 'unexplored_boxes': [], 'can_create_exploration_pair': False, 'nearby_cats': [], 'shareable_legend_count': 0, 'cronenberg_scent_recognized': True, 'smelled_cronenbergs': [{'entity_id': 'cronenberg_test', 'recognition': {'recognized': True, 'identity': 'cronenberg'}}]}
 
     def test_brave_cat_tracks_cronenberg_scent(self):
-        traits = self.cat.personality['traits']
-        traits['courage'] = 1.0
-        traits['aggression'] = 1.0
-        traits['curiosity'] = 1.0
-        traits['patience'] = 0.0
+        traits = self.cat.personality.traits
+        traits.courage = 1.0
+        traits.aggression = 1.0
+        traits.curiosity = 1.0
+        traits.patience = 0.0
         result = CatMind.decide(cat=self.cat, observations=self.observations())
         self.assertEqual(result['intention'], 'track_cronenberg_scent')
 
     def test_cautious_cat_avoids_cronenberg_scent(self):
-        traits = self.cat.personality['traits']
-        traits['courage'] = 0.0
-        traits['aggression'] = 0.0
-        traits['curiosity'] = 0.0
-        traits['patience'] = 1.0
+        traits = self.cat.personality.traits
+        traits.courage = 0.0
+        traits.aggression = 0.0
+        traits.curiosity = 0.0
+        traits.patience = 1.0
         result = CatMind.decide(cat=self.cat, observations=self.observations())
         self.assertEqual(result['intention'], 'avoid_cronenberg_scent')
 

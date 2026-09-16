@@ -21,7 +21,7 @@ class CatGroupSuccessionConflictTests(unittest.TestCase):
         self.groups.add_member(self.group_id, self.second, self.cats.cats)
         self.groups.add_member(self.group_id, self.third, self.cats.cats)
         for cat in (self.first, self.second):
-            cat.personality.setdefault('traits', {})['courage'] = 1.0
+            cat.personality.traits.courage = 1.0
             cat.group.influence = 0.8
 
     def test_role_can_pass_to_successor(self):
@@ -48,7 +48,7 @@ class CatGroupSuccessionConflictTests(unittest.TestCase):
         institutions = CatGroupInstitutionSystem(self.groups)
         institutions.establish(self.group_id, 'night_watch', 'protect_group', roles=['guardian'], rituals=[])
         for cat in (self.second, self.third):
-            cat.personality.setdefault('traits', {})['courage'] = 0.0
+            cat.personality.traits.courage = 0.0
             cat.group.influence = 0.0
         succession = CatGroupSuccessionSystem(self.groups)
         before = self.groups.groups[self.group_id].institutions['night_watch'].continuity
@@ -80,7 +80,7 @@ class CatGroupSuccessionConflictTests(unittest.TestCase):
 
     def test_mediator_can_resolve_conflict(self):
         self._institutions()
-        self.third.personality.setdefault('traits', {})['sociability'] = 1.0
+        self.third.personality.traits.sociability = 1.0
         self.third.group.influence = 1.0
         roles = CatGroupRoleSystem(self.groups)
         assigned = roles.assign(self.group_id, self.third, 'mediator')

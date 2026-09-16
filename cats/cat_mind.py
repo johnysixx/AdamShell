@@ -32,12 +32,12 @@ class CatMind:
 
         Nic nevykonĂˇvĂˇ a nevybĂ\xadrĂˇ vĂ\xadtÄ›ze.
         """
-        traits = cat.personality.get('traits', {})
-        curiosity = float(traits.get('curiosity', 0.5))
-        courage = float(traits.get('courage', 0.5))
-        aggression = float(traits.get('aggression', 0.5))
-        empathy = float(traits.get('empathy', 0.5))
-        patience = float(traits.get('patience', 0.5))
+        traits = cat.personality.traits
+        curiosity = float(traits.curiosity)
+        courage = float(traits.courage)
+        aggression = float(traits.aggression)
+        empathy = float(traits.empathy)
+        patience = float(traits.patience)
         candidates = []
         if observations.get('bar_known', False):
             bar_score = 0.45
@@ -166,9 +166,9 @@ class CatMind:
             direction = reached_scent.get('trail_direction', {})
             target_smelt_now = any((item.get('recognition', {}).get('recognized', False) and item.get('recognition', {}).get('identity') == identity for item in observations.get('olfaction', {}).get('detected_aromas', [])))
             if identity is not None and (not target_smelt_now) and isinstance(direction, dict) and direction.get('inferred', False):
-                traits = cat.personality.get('traits', {})
-                curiosity = float(traits.get('curiosity', 0.5))
-                courage = float(traits.get('courage', 0.5))
+                traits = cat.personality.traits
+                curiosity = float(traits.curiosity)
+                courage = float(traits.courage)
                 previous_search = cat.scent_search or {}
                 if isinstance(previous_search, dict) and previous_search.get('identity') == identity and (previous_search.get('layer') == cat.current_layer):
                     attempts = int(previous_search.get('attempts', 0))

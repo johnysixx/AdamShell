@@ -28,7 +28,7 @@ class CatPersonalityCronenbergEncounterTests(unittest.TestCase):
         return result['route']
 
     def traits(self):
-        return self.cat.personality['traits']
+        return self.cat.personality.traits
 
     def test_successful_hunt_builds_courage(self):
         cronenberg = self.create_cronenberg(size=0.5)

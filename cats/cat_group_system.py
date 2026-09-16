@@ -116,9 +116,9 @@ class CatGroupSystem:
         defenders = []
         withdrawers = []
         for member in members:
-            traits = member.personality.get('traits', {})
-            courage = self._number(traits.get('courage', 0.5))
-            aggression = self._number(traits.get('aggression', 0.0))
+            traits = member.personality.traits
+            courage = self._number(traits.courage)
+            aggression = self._number(traits.aggression)
             group_support = min(0.3, max(0, len(members) - 1) * 0.08)
             defense_score = courage + aggression * 0.35 + group_support
             if defense_score >= 0.55:
