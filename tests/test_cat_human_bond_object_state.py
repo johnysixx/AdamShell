@@ -35,7 +35,7 @@ class CatHumanBondObjectStateTests(unittest.TestCase):
             significance=0.1,
         )
 
-        bond = self.cat.human_bonds[
+        bond = self.cat.human_bonds.records[
             self.human.name
         ]
 
@@ -60,7 +60,7 @@ class CatHumanBondObjectStateTests(unittest.TestCase):
             significance=0.2,
         )
 
-        bond = self.cat.human_bonds[
+        bond = self.cat.human_bonds.records[
             self.human.name
         ]
 
@@ -90,7 +90,7 @@ class CatHumanBondObjectStateTests(unittest.TestCase):
             self.cat,
             self.human,
         )
-        bond = self.cat.human_bonds[
+        bond = self.cat.human_bonds.records[
             self.human.name
         ]
 

@@ -13,7 +13,7 @@ class CatHumanBondSystem:
         human_name = self._name(human)
         if human_name is None:
             raise ValueError('Human must have a name.')
-        bond = cat.human_bonds.setdefault(human_name, self._new_bond(human_name))
+        bond = cat.human_bonds.records.setdefault(human_name, self._new_bond(human_name))
         significance = self._clamp(significance)
         bond.encounters += 1
         bond.familiarity = self._clamp(bond.familiarity + significance * 0.7)
@@ -33,7 +33,7 @@ class CatHumanBondSystem:
     def evaluate(self, cat, human):
         self._require_cat(cat)
         human_name = self._name(human)
-        bond = cat.human_bonds.get(human_name)
+        bond = cat.human_bonds.records.get(human_name)
         if bond is None:
             return {'cat': cat.name, 'human': human_name, 'score': 0.0, 'right_human': False, 'reason': 'human_not_known'}
         score = self._score(cat, bond)
