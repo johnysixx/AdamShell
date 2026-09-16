@@ -2,6 +2,7 @@ from copy import deepcopy
 from uuid import uuid4
 from cats.cat import Cat
 from cats.cat_group import CatGroup
+from cats.cat_social_objects import CatRelationship
 from cats.cat_territory_system import CatTerritorySystem
 
 class CatGroupSystem:
@@ -164,7 +165,10 @@ class CatGroupSystem:
         return [by_name[name] for name in group.members if name in by_name]
 
     def _ensure_relationship(self, cat, other_cat):
-        relation = cat.relationships.setdefault(other_cat.name, {})
+        relation = cat.relationships.setdefault(
+            other_cat.name,
+            CatRelationship.create(),
+        )
         relation.setdefault('familiarity', 0.0)
         relation.setdefault('trust', 0.5)
         relation.setdefault('affiliation', 0.0)
