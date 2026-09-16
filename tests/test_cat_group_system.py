@@ -36,7 +36,12 @@ class CatGroupSystemTests(unittest.TestCase):
 
     def test_hostile_cat_is_rejected(self):
         group_id = self._create_group()
-        self.first.relationships[self.second.name] = {'familiarity': 0.5, 'trust': 0.1, 'affiliation': 0.0, 'tension': 0.9}
+        relationship = CatRelationship.create()
+        relationship.familiarity = 0.5
+        relationship.trust = 0.1
+        relationship.affiliation = 0.0
+        relationship.tension = 0.9
+        self.first.relationships[self.second.name] = relationship
         result = self.group_system.add_member(group_id, self.second, self.cats.cats)
         self.assertFalse(result['joined'])
         self.assertEqual(result['reason'], 'group_social_rejection')

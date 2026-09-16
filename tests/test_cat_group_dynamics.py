@@ -2,6 +2,7 @@ import unittest
 from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat_group_system import CatGroupSystem
+from cats.cat_social_objects import CatRelationship
 from cats.cat_group_hierarchy_system import CatGroupHierarchySystem
 from cats.cat_group_bonding_system import CatGroupBondingSystem
 from cats.cat_group_recruitment_system import CatGroupRecruitmentSystem
@@ -50,7 +51,13 @@ class CatGroupDynamicsTests(unittest.TestCase):
         self.assertTrue(self.candidate.group.member)
 
     def test_severe_hostility_can_veto_candidate(self):
-        self.second.relationships[self.candidate.name] = {'trust': 0.0, 'affiliation': 0.0, 'familiarity': 0.8, 'tension': 1.0, 'shared_scent': 0.0}
+        relationship = CatRelationship.create()
+        relationship.trust = 0.0
+        relationship.affiliation = 0.0
+        relationship.familiarity = 0.8
+        relationship.tension = 1.0
+        relationship.shared_scent = 0.0
+        self.second.relationships[self.candidate.name] = relationship
         recruitment = CatGroupRecruitmentSystem(self.groups)
         vote = recruitment.vote(self.group_id, self.candidate, self.cats.cats)
         self.assertFalse(vote['accepted'])
