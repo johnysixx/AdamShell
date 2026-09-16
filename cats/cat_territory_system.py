@@ -12,10 +12,10 @@ class CatTerritorySystem:
         layer = layer if layer is not None else cat.current_layer
         location = location if location is not None else cat.location
         key = self._territory_key(layer, location)
-        previous = cat.territories.get(key)
+        previous = cat.territories.claims.get(key)
         if previous is None:
             claim = CatTerritoryClaim(**{'owner': cat.name, 'layer': layer, 'location': location, 'strength': self._clamp(strength), 'scent_marks': 1})
-            cat.territories[key] = claim
+            cat.territories.claims[key] = claim
         else:
             claim = previous
             claim.strength = self._clamp(max(float(getattr(claim, 'strength', 0.0)), float(strength)))
@@ -29,9 +29,9 @@ class CatTerritorySystem:
         layer = layer if layer is not None else cat.current_layer
         location = location if location is not None else cat.location
         key = self._territory_key(layer, location)
-        if key not in cat.territories:
+        if key not in cat.territories.claims:
             return self.claim(cat=cat, layer=layer, location=location, strength=0.5)
-        claim = cat.territories[key]
+        claim = cat.territories.claims[key]
         claim.scent_marks = int(getattr(claim, 'scent_marks', 0)) + 1
         claim.strength = self._clamp(float(getattr(claim, 'strength', 0.0)) + 0.05)
         event = {'name': 'cat_scent_marked_territory', 'cat': cat.name, 'territory': key, 'strength': claim.strength, 'scent_marks': claim.scent_marks}
@@ -55,11 +55,11 @@ class CatTerritorySystem:
     def claim_at(self, cat, layer, location):
         self._require_cat(cat)
         exact_key = self._territory_key(layer, location)
-        claim = cat.territories.get(exact_key)
+        claim = cat.territories.claims.get(exact_key)
         if claim is not None:
             return claim
         layer_key = self._territory_key(layer, None)
-        return cat.territories.get(layer_key)
+        return cat.territories.claims.get(layer_key)
 
     def _territory_key(self, layer, location):
         return f"{layer}::{(location if location is not None else '*')}"

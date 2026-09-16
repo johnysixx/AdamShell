@@ -47,6 +47,10 @@ class CatHumanBond(ComponentObject):
     pass
 
 
+class CatTerritories(ComponentObject):
+    pass
+
+
 
 class CatEmergencyNursing(ComponentObject):
     DEFAULT_CAPABILITY_PERCENT = 12

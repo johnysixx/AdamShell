@@ -1,4 +1,4 @@
-from cats.cat_components import CatFamily, MaternalCare, MaternalCareReceived, SiblingPlay, SiblingRivalry, ParentalTeaching, FamilyBonding, CatGroupMembership, CatCulture, CatGroupRoles, CatMeowInvitations, CatNorms, CatNeeds, CatEmergencyNursing
+from cats.cat_components import CatFamily, MaternalCare, MaternalCareReceived, SiblingPlay, SiblingRivalry, ParentalTeaching, FamilyBonding, CatGroupMembership, CatCulture, CatGroupRoles, CatMeowInvitations, CatNorms, CatNeeds, CatEmergencyNursing, CatTerritories
 from core.entity.social_entity import SocialMixin
 
 class Cat(SocialMixin):
@@ -37,7 +37,7 @@ class Cat(SocialMixin):
         self.knowledge = {}
         self.relationships = {}
         self.social_memory = {}
-        self.territories = {}
+        self.territories = CatTerritories(claims={})
         self.bonds = {}
         self.family = CatFamily(parents={'mother': None, 'father': None}, children=[], siblings=[], littermates=[], half_siblings=[])
         self.maternal_care = MaternalCare(active=False, kittens={}, care_events=0)
