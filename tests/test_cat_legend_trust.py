@@ -2,6 +2,7 @@ import unittest
 from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat_knowledge import CatKnowledge
+from cats.cat_social_objects import CatRelationship
 from cats.cat_exploration_planner import CatExplorationPlanner
 
 class CatLegendTrustTests(unittest.TestCase):
@@ -21,15 +22,21 @@ class CatLegendTrustTests(unittest.TestCase):
         self.assertEqual(len(self.listener.knowledge['heard_legends']), 1)
 
     def test_trust_changes_credibility(self):
-        self.listener.relationships = {'pazuzu': {'trust': 1.0}}
+        relationship = CatRelationship.create()
+        relationship.trust = 1.0
+        self.listener.relationships[self.storyteller.name] = relationship
         trusted = CatKnowledge.hear_legend(self.listener, self.storyteller, self.legend)
         other = self.cats.create_cat(name='skeptic', color='gray', fur_length='short')
-        other.relationships = {'pazuzu': {'trust': 0.0}}
+        relationship = CatRelationship.create()
+        relationship.trust = 0.0
+        other.relationships[self.storyteller.name] = relationship
         skeptical = CatKnowledge.hear_legend(other, self.storyteller, self.legend)
         self.assertGreater(trusted['credibility'], skeptical['credibility'])
 
     def test_planner_can_use_credible_legend(self):
-        self.listener.relationships = {'pazuzu': {'trust': 1.0}}
+        relationship = CatRelationship.create()
+        relationship.trust = 1.0
+        self.listener.relationships[self.storyteller.name] = relationship
         CatKnowledge.hear_legend(self.listener, self.storyteller, self.legend)
         self.listener.current_layer = 'meeting_place'
         result = CatExplorationPlanner.choose_destination(cat=self.listener, universe=self.universe)
