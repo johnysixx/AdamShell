@@ -341,8 +341,16 @@ class CatKnowledge:
         relationships = listener.relationships
         if isinstance(relationships, dict):
             relation = relationships.get(storyteller_name)
-            if isinstance(relation, (dict, CatRelationship)):
-                return max(0.0, min(1.0, float(relation.get('trust', 0.5))))
+            if isinstance(relation, CatRelationship):
+                try:
+                    trust = relation.trust
+                except AttributeError:
+                    trust = 0.5
+            elif isinstance(relation, dict):
+                trust = relation.get('trust', 0.5)
+            else:
+                return 0.5
+            return max(0.0, min(1.0, float(trust)))
         return 0.5
 
     @classmethod
