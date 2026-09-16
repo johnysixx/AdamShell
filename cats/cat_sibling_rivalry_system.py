@@ -1,6 +1,7 @@
 from copy import deepcopy
 from cats.cat import Cat
 from cats.cat_family_system import CatFamilySystem
+from cats.cat_social_objects import CatRelationship
 
 class CatSiblingRivalrySystem:
 
@@ -60,7 +61,10 @@ class CatSiblingRivalrySystem:
         return event
 
     def _relationship(self, cat, other_cat):
-        relation = cat.relationships.setdefault(other_cat.name, {})
+        relation = cat.relationships.setdefault(
+            other_cat.name,
+            CatRelationship.create(),
+        )
         relation.setdefault('familiarity', 0.0)
         relation.setdefault('trust', 0.5)
         relation.setdefault('affiliation', 0.0)

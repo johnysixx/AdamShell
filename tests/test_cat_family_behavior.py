@@ -2,6 +2,7 @@ import unittest
 
 from universe.universe import Universe
 from cats.cats import Cats
+from cats.cat_social_objects import CatRelationship
 from cats.cat_family_system import (
     CatFamilySystem
 )
@@ -137,12 +138,13 @@ class CatFamilyBehaviorTests(
             result["competed"]
         )
 
-        self.assertGreater(
-            self.first.relationships[
-                self.second.name
-            ]["tension"],
-            0.0
-        )
+        first_relation = self.first.relationships[self.second.name]
+        second_relation = self.second.relationships[self.first.name]
+        self.assertIsInstance(first_relation, CatRelationship)
+        self.assertIsInstance(second_relation, CatRelationship)
+        self.assertIsNot(first_relation, second_relation)
+        self.assertAlmostEqual(first_relation.tension, 0.096)
+        self.assertAlmostEqual(second_relation.tension, 0.096)
 
     def test_bond_reduces_rivalry_tension_gain(
         self
@@ -333,6 +335,41 @@ class CatFamilyBehaviorTests(
             result["reason"],
             "not_parent"
         )
+
+
+    def test_rivalry_and_reconciliation_preserve_existing_relationships(self):
+        relation = CatRelationship.create()
+        relation.trust = 0.8
+        relation.tension = 0.4
+        relation.affiliation = 0.6
+        relation.meet_count = 4
+        history = [{'reason': 'past_meeting'}]
+        relation.trust_history = history
+        legacy = {'trust': 0.7, 'custom_note': 'known_before_rivalry'}
+        self.first.relationships[self.second.name] = relation
+        self.second.relationships[self.first.name] = legacy
+
+        rivalry = CatSiblingRivalrySystem(self.cats)
+        competed = rivalry.compete(
+            self.first, self.second, resource='food', intensity=0.5,
+        )
+        self.assertTrue(competed['competed'])
+        self.assertAlmostEqual(relation.tension, 0.46)
+        self.assertAlmostEqual(legacy['tension'], 0.06)
+
+        reconciled = rivalry.reconcile(self.first, self.second)
+        self.assertTrue(reconciled['reconciled'])
+        self.assertIs(self.first.relationships[self.second.name], relation)
+        self.assertIs(self.second.relationships[self.first.name], legacy)
+        self.assertAlmostEqual(relation.trust, 0.8)
+        self.assertAlmostEqual(relation.tension, 0.31)
+        self.assertAlmostEqual(relation.affiliation, 0.63)
+        self.assertEqual(relation.meet_count, 4)
+        self.assertIs(relation.trust_history, history)
+        self.assertAlmostEqual(legacy['trust'], 0.7)
+        self.assertAlmostEqual(legacy['tension'], 0.0)
+        self.assertAlmostEqual(legacy['affiliation'], 0.05)
+        self.assertEqual(legacy['custom_note'], 'known_before_rivalry')
 
 
 if __name__ == "__main__":
