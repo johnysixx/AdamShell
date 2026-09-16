@@ -176,7 +176,7 @@ class CatFamilyBehaviorTests(
         before = (
             self.first.relationships[
                 self.second.name
-            ]["tension"]
+            ].tension
         )
 
         rivalry.compete(
@@ -189,7 +189,7 @@ class CatFamilyBehaviorTests(
         increase = (
             self.first.relationships[
                 self.second.name
-            ]["tension"]
+            ].tension
             - before
         )
 
@@ -215,7 +215,7 @@ class CatFamilyBehaviorTests(
         before = (
             self.first.relationships[
                 self.second.name
-            ]["tension"]
+            ].tension
         )
 
         result = rivalry.reconcile(
@@ -230,7 +230,7 @@ class CatFamilyBehaviorTests(
         self.assertLess(
             self.first.relationships[
                 self.second.name
-            ]["tension"],
+            ].tension,
             before
         )
 
