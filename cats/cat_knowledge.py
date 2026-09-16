@@ -311,10 +311,25 @@ class CatKnowledge:
             storyteller_name,
             CatRelationship.create(),
         )
-        previous = float(relation.get('trust', 0.5))
+        if isinstance(relation, CatRelationship):
+            try:
+                trust = relation.trust
+            except AttributeError:
+                trust = 0.5
+        else:
+            trust = relation.get('trust', 0.5)
+        previous = float(trust)
         current = max(0.0, min(1.0, previous + float(delta)))
-        relation['trust'] = current
-        history = relation.setdefault('trust_history', [])
+        if isinstance(relation, CatRelationship):
+            relation.trust = current
+            try:
+                history = relation.trust_history
+            except AttributeError:
+                history = []
+                relation.trust_history = history
+        else:
+            relation['trust'] = current
+            history = relation.setdefault('trust_history', [])
         event = {'previous': previous, 'current': current, 'delta': current - previous, 'reason': reason, 'legend_id': legend_id}
         history.append(deepcopy(event))
         return deepcopy(event)

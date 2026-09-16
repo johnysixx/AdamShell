@@ -65,5 +65,67 @@ class CatKnowledgeRelationshipTrustTests(unittest.TestCase):
         self.assertFalse(hasattr(incomplete, 'trust'))
 
 
+    def test_adjustment_initializes_missing_fields_on_existing_records(self):
+        relationship = CatRelationship()
+        legacy = {}
+        for name, record in (('object', relationship), ('legacy', legacy)):
+            self.listener.relationships[name] = record
+            event = CatKnowledge.adjust_storyteller_trust(
+                self.listener, name, 0.1, 'confirmed', legend_id='legend_1',
+            )
+            self.assertIs(self.listener.relationships[name], record)
+            self.assertAlmostEqual(event['previous'], 0.5)
+            self.assertAlmostEqual(event['current'], 0.6)
+            self.assertAlmostEqual(event['delta'], 0.1)
+            self.assertEqual(event['reason'], 'confirmed')
+            self.assertEqual(event['legend_id'], 'legend_1')
+
+        self.assertAlmostEqual(relationship.trust, 0.6)
+        self.assertAlmostEqual(legacy['trust'], 0.6)
+        self.assertEqual(len(relationship.trust_history), 1)
+        self.assertEqual(relationship.trust_history, legacy['trust_history'])
+        self.assertIsNot(relationship.trust_history, legacy['trust_history'])
+
+    def test_adjustments_preserve_history_and_record_effective_delta(self):
+        relationship = CatRelationship.create()
+        relationship.trust = '1.2'
+        object_history = [{'reason': 'past_meeting'}]
+        relationship.trust_history = object_history
+        legacy_history = [{'reason': 'past_meeting'}]
+        legacy = {'trust': '1.2', 'trust_history': legacy_history}
+
+        for name, record, history in (
+            ('object', relationship, object_history),
+            ('legacy', legacy, legacy_history),
+        ):
+            self.listener.relationships[name] = record
+            previous_entry = history[0]
+            for index, (delta, previous, current) in enumerate((
+                (-0.1, 1.2, 1.0), (-2.0, 1.0, 0.0), (2.0, 0.0, 1.0),
+            )):
+                event = CatKnowledge.adjust_storyteller_trust(
+                    self.listener, name, delta, 'updated', legend_id='legend_1',
+                )
+                self.assertAlmostEqual(event['previous'], previous)
+                self.assertAlmostEqual(event['current'], current)
+                self.assertAlmostEqual(event['delta'], current - previous)
+                self.assertEqual(event['reason'], 'updated')
+                self.assertEqual(event['legend_id'], 'legend_1')
+                self.assertEqual(len(history), index + 2)
+                self.assertEqual(history[-1], event)
+                self.assertIsNot(history[-1], event)
+                event['current'] = -1.0
+                self.assertAlmostEqual(history[-1]['current'], current)
+
+            self.assertIs(self.listener.relationships[name], record)
+            self.assertIs(history[0], previous_entry)
+            self.assertEqual(previous_entry, {'reason': 'past_meeting'})
+
+        self.assertEqual(relationship.trust, 1.0)
+        self.assertEqual(legacy['trust'], 1.0)
+        self.assertIs(relationship.trust_history, object_history)
+        self.assertIs(legacy['trust_history'], legacy_history)
+
+
 if __name__ == '__main__':
     unittest.main()
