@@ -1,4 +1,5 @@
 from cats.cat_culture_objects import CatViolation
+from cats.cat_social_objects import CatRelationship
 from copy import deepcopy
 
 class CatGroupSanctionSystem:
@@ -36,7 +37,10 @@ class CatGroupSanctionSystem:
             for member_name in group.members:
                 if member_name == cat.name:
                     continue
-                relation = cat.relationships.setdefault(member_name, {})
+                relation = cat.relationships.setdefault(
+                    member_name,
+                    CatRelationship.create(),
+                )
                 relation['affiliation'] = max(0.0, float(relation.get('affiliation', 0.0)) - 0.05)
         elif sanction_type == 'trust_loss':
             penalty = 0.15 + severity * 0.15
@@ -44,7 +48,10 @@ class CatGroupSanctionSystem:
             for member_name in group.members:
                 if member_name == cat.name:
                     continue
-                relation = cat.relationships.setdefault(member_name, {})
+                relation = cat.relationships.setdefault(
+                    member_name,
+                    CatRelationship.create(),
+                )
                 relation['trust'] = max(0.0, float(relation.get('trust', 0.5)) - penalty)
         elif sanction_type == 'role_suspension':
             for role in list(cat.group_roles.active):
