@@ -266,7 +266,7 @@ class CatSocialInteractionTests(unittest.TestCase):
         self.assertTrue(result['formed'])
         self.assertIn(second.name, first.bonds)
         self.assertIn(first.name, second.bonds)
-        self.assertTrue(first.bonds[second.name]['active'])
+        self.assertTrue(first.bonds[second.name].active)
 
     def test_weak_relationship_does_not_form_bond(self):
         first, second = self._social_pair()
@@ -279,10 +279,10 @@ class CatSocialInteractionTests(unittest.TestCase):
         first, second = self._prepare_bonded_pair()
         bonding = CatBondingSystem(self.cats)
         bonding.form_bond(first, second)
-        before = first.bonds[second.name]['strength']
+        before = first.bonds[second.name].strength
         result = bonding.mutual_groom(first, second)
         self.assertEqual(result['name'], 'cats_mutually_groomed')
-        self.assertGreater(first.bonds[second.name]['strength'], before)
+        self.assertGreater(first.bonds[second.name].strength, before)
 
     def test_bonded_cats_can_sleep_together(self):
         first, second = self._prepare_bonded_pair()
@@ -310,7 +310,7 @@ class CatSocialInteractionTests(unittest.TestCase):
         result = social.meet(first, second)
         self.assertEqual(result['attitude'], 'friendly')
         self.assertIsNotNone(result['bond'])
-        self.assertTrue(first.bonds[second.name]['active'])
+        self.assertTrue(first.bonds[second.name].active)
 
     def test_mother_and_kitten_get_family_social_bonus(self):
         mother, kitten = self._social_pair()

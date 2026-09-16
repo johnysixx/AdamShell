@@ -1,6 +1,7 @@
 from copy import deepcopy
 
 from cats.cat import Cat
+from cats.cat_social_objects import CatBond
 
 
 class CatBondingSystem:
@@ -374,12 +375,9 @@ class CatBondingSystem:
         return bool(
             isinstance(
                 bond,
-                dict
+                CatBond
             )
-            and bond.get(
-                "active",
-                False
-            )
+            and bond.active
         )
 
     def _store_bond(
@@ -390,16 +388,18 @@ class CatBondingSystem:
     ):
         cat.bonds[
             other_cat.name
-        ] = {
-            "other_cat": other_cat.name,
-            "active": True,
-            "strength": self._clamp(
+        ] = CatBond(
+            other_cat=other_cat.name,
+            active=True,
+            strength=self._clamp(
                 strength
             ),
-            "groom_count": 0,
-            "sleep_count": 0,
-            "follow_count": 0
-        }
+            groom_count=0,
+            sleep_count=0,
+            follow_count=0,
+            source="social",
+            family_relation=None,
+        )
 
     def _strengthen(
         self,
@@ -414,14 +414,9 @@ class CatBondingSystem:
         if bond is None:
             return
 
-        bond[
-            "strength"
-        ] = self._clamp(
+        bond.strength = self._clamp(
             self._number(
-                bond.get(
-                    "strength",
-                    0.0
-                )
+                bond.strength
             )
             + amount
         )

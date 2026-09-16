@@ -1,5 +1,6 @@
 from copy import deepcopy
 from cats.cat import Cat
+from cats.cat_social_objects import CatBond
 from cats.cat_family_system import CatFamilySystem
 
 class CatFamilyBondingSystem:
@@ -42,16 +43,53 @@ class CatFamilyBondingSystem:
         self._record_both(first, second, event)
         return event
 
-    def _store(self, cat, other_cat, relation, strength):
-        existing = cat.bonds.get(other_cat.name, {})
-        existing.update({'other_cat': other_cat.name, 'active': True, 'strength': max(self._number(existing.get('strength', 0.0)), strength), 'source': 'family', 'family_relation': relation})
-        existing.setdefault('groom_count', 0)
-        existing.setdefault('sleep_count', 0)
-        existing.setdefault('follow_count', 0)
-        cat.bonds[other_cat.name] = existing
+    def _store(
+        self,
+        cat,
+        other_cat,
+        relation,
+        strength
+    ):
+        existing = cat.bonds.get(
+            other_cat.name
+        )
+
+        if existing is None:
+            existing = CatBond(
+                other_cat=other_cat.name,
+                active=True,
+                strength=0.0,
+                groom_count=0,
+                sleep_count=0,
+                follow_count=0,
+                source="family",
+                family_relation=relation,
+            )
+
+        existing.other_cat = other_cat.name
+        existing.active = True
+        existing.strength = max(
+            self._number(
+                existing.strength
+            ),
+            strength
+        )
+        existing.source = "family"
+        existing.family_relation = relation
+
+        cat.bonds[
+            other_cat.name
+        ] = existing
+
         cat.family_bonding.events += 1
-        if other_cat.name not in cat.family_bonding.family_bonds:
-            cat.family_bonding.family_bonds.append(other_cat.name)
+
+        if (
+            other_cat.name
+            not in cat.family_bonding.family_bonds
+        ):
+            cat.family_bonding.family_bonds.append(
+                other_cat.name
+            )
 
     def _record_both(self, first, second, event):
         first.social_interactions.append(deepcopy(event))

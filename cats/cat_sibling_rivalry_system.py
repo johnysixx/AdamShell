@@ -17,7 +17,16 @@ class CatSiblingRivalrySystem:
         intensity = self._clamp(intensity)
         first_relation = self._relationship(first, second)
         second_relation = self._relationship(second, first)
-        bonded = bool(first.bonds.get(second.name, {}).get('active', False))
+        bond = first.bonds.get(
+            second.name
+        )
+        bonded = bool(
+            getattr(
+                bond,
+                "active",
+                False
+            )
+        )
         tension_gain = 0.12 * intensity * (0.5 if bonded else 1.0)
         for relationship in (first_relation, second_relation):
             relationship['familiarity'] = self._clamp(relationship['familiarity'] + 0.02)

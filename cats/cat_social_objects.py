@@ -27,5 +27,9 @@ class CatSocialMemory(ComponentObject):
     pass
 
 
+class CatBond(ComponentObject):
+    pass
+
+
 class CatGroupKnowledgeRecord(ComponentObject):
     pass

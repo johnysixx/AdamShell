@@ -111,15 +111,11 @@ class CatFamilyBehaviorTests(
         )
 
         self.assertTrue(
-            self.first.bonds[
-                self.second.name
-            ]["active"]
+            self.first.bonds[self.second.name].active
         )
 
         self.assertEqual(
-            self.first.bonds[
-                self.second.name
-            ]["source"],
+            self.first.bonds[self.second.name].source,
             "family"
         )
 
