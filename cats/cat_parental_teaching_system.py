@@ -2,6 +2,7 @@ from copy import deepcopy
 from cats.cat import Cat
 from cats.cat_family_system import CatFamilySystem
 from cats.cat_learning_state import CatSkillState
+from cats.cat_social_objects import CatRelationship
 
 class CatParentalTeachingSystem:
     ALLOWED_SKILLS = {'socialization', 'litter_box', 'box_travel', 'cat_door_travel', 'hunting', 'adult_meowing'}
@@ -65,7 +66,10 @@ class CatParentalTeachingSystem:
         skills[skill] = int(skills.get(skill, 0)) + 1
 
     def _strengthen_relationship(self, kitten, parent):
-        relation = kitten.relationships.setdefault(parent.name, {})
+        relation = kitten.relationships.setdefault(
+            parent.name,
+            CatRelationship.create(),
+        )
         relation.setdefault('familiarity', 0.0)
         relation.setdefault('trust', 0.5)
         relation.setdefault('affiliation', 0.0)

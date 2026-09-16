@@ -262,6 +262,12 @@ class CatFamilyBehaviorTests(
             self.first.learning.teacher_mother,
             self.mother.name
         )
+        relation = self.first.relationships[self.mother.name]
+        self.assertIsInstance(relation, CatRelationship)
+        self.assertAlmostEqual(relation.trust, 0.54)
+        self.assertAlmostEqual(relation.familiarity, 0.03)
+        self.assertAlmostEqual(relation.affiliation, 0.02)
+        self.assertEqual(relation.last_interaction, 'parental_teaching')
 
     def test_father_can_teach_hunting(
         self
@@ -286,6 +292,10 @@ class CatFamilyBehaviorTests(
             self.first.learning.hunting_teacher_father,
             self.father.name
         )
+        relation = self.first.relationships[self.father.name]
+        self.assertIsInstance(relation, CatRelationship)
+        self.assertAlmostEqual(relation.trust, 0.54)
+        self.assertEqual(relation.last_interaction, 'parental_teaching')
 
     def test_repeated_lessons_can_complete_skill(
         self
@@ -370,6 +380,45 @@ class CatFamilyBehaviorTests(
         self.assertAlmostEqual(legacy['tension'], 0.0)
         self.assertAlmostEqual(legacy['affiliation'], 0.05)
         self.assertEqual(legacy['custom_note'], 'known_before_rivalry')
+
+
+    def test_parental_lessons_preserve_existing_relationship_records(self):
+        relation = CatRelationship.create()
+        relation.trust = 0.8
+        relation.familiarity = 0.2
+        relation.affiliation = 0.3
+        relation.tension = 0.1
+        relation.meet_count = 4
+        history = [{'reason': 'past_meeting'}]
+        relation.trust_history = history
+        legacy = {'trust': 0.7, 'custom_note': 'known_before_lessons'}
+        self.first.relationships[self.mother.name] = relation
+        self.first.relationships[self.father.name] = legacy
+
+        teaching = CatParentalTeachingSystem(self.cats)
+        for _ in range(2):
+            mother_result = teaching.teach(
+                self.mother, self.first, skill='socialization',
+            )
+            father_result = teaching.teach(
+                self.father, self.first, skill='hunting',
+            )
+            self.assertTrue(mother_result['taught'])
+            self.assertTrue(father_result['taught'])
+
+        self.assertIs(self.first.relationships[self.mother.name], relation)
+        self.assertIs(self.first.relationships[self.father.name], legacy)
+        self.assertAlmostEqual(relation.trust, 0.88)
+        self.assertAlmostEqual(relation.familiarity, 0.26)
+        self.assertAlmostEqual(relation.affiliation, 0.34)
+        self.assertAlmostEqual(relation.tension, 0.1)
+        self.assertEqual(relation.meet_count, 4)
+        self.assertIs(relation.trust_history, history)
+        self.assertEqual(relation.last_interaction, 'parental_teaching')
+        self.assertAlmostEqual(legacy['trust'], 0.78)
+        self.assertAlmostEqual(legacy['familiarity'], 0.06)
+        self.assertAlmostEqual(legacy['affiliation'], 0.04)
+        self.assertEqual(legacy['custom_note'], 'known_before_lessons')
 
 
 if __name__ == "__main__":
