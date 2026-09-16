@@ -1,5 +1,6 @@
 from copy import deepcopy
 from cats.cat import Cat
+from cats.cat_components import CatHumanBond
 
 class CatHumanBondSystem:
     RIGHT_HUMAN_THRESHOLD = 0.72
@@ -14,18 +15,18 @@ class CatHumanBondSystem:
             raise ValueError('Human must have a name.')
         bond = cat.human_bonds.setdefault(human_name, self._new_bond(human_name))
         significance = self._clamp(significance)
-        bond['encounters'] += 1
-        bond['familiarity'] = self._clamp(bond['familiarity'] + significance * 0.7)
+        bond.encounters += 1
+        bond.familiarity = self._clamp(bond.familiarity + significance * 0.7)
         if positive:
-            bond['positive_interactions'] += 1
-            bond['trust'] = self._clamp(bond['trust'] + significance)
-            bond['affection'] = self._clamp(bond['affection'] + significance * 0.8)
+            bond.positive_interactions += 1
+            bond.trust = self._clamp(bond.trust + significance)
+            bond.affection = self._clamp(bond.affection + significance * 0.8)
         else:
-            bond['negative_interactions'] += 1
-            bond['trust'] = self._clamp(bond['trust'] - significance * 1.3)
-            bond['affection'] = self._clamp(bond['affection'] - significance)
-        bond['right_human_score'] = self._score(cat, bond)
-        event = {'name': 'cat_human_interaction_remembered', 'cat': cat.name, 'human': human_name, 'positive': bool(positive), 'right_human_score': bond['right_human_score']}
+            bond.negative_interactions += 1
+            bond.trust = self._clamp(bond.trust - significance * 1.3)
+            bond.affection = self._clamp(bond.affection - significance)
+        bond.right_human_score = self._score(cat, bond)
+        event = {'name': 'cat_human_interaction_remembered', 'cat': cat.name, 'human': human_name, 'positive': bool(positive), 'right_human_score': bond.right_human_score}
         cat.social_interactions.append(deepcopy(event))
         return event
 
@@ -36,19 +37,29 @@ class CatHumanBondSystem:
         if bond is None:
             return {'cat': cat.name, 'human': human_name, 'score': 0.0, 'right_human': False, 'reason': 'human_not_known'}
         score = self._score(cat, bond)
-        bond['right_human_score'] = score
-        right_human = bool(score >= self.RIGHT_HUMAN_THRESHOLD and bond['negative_interactions'] <= bond['positive_interactions'])
-        bond['recognized_as_right_human'] = right_human
-        return {'cat': cat.name, 'human': human_name, 'score': score, 'right_human': right_human, 'trust': bond['trust'], 'affection': bond['affection'], 'familiarity': bond['familiarity']}
+        bond.right_human_score = score
+        right_human = bool(score >= self.RIGHT_HUMAN_THRESHOLD and bond.negative_interactions <= bond.positive_interactions)
+        bond.recognized_as_right_human = right_human
+        return {'cat': cat.name, 'human': human_name, 'score': score, 'right_human': right_human, 'trust': bond.trust, 'affection': bond.affection, 'familiarity': bond.familiarity}
 
     def _score(self, cat, bond):
         personality = cat.personality.traits
         sociability = self._number(personality.sociability)
-        score = bond['trust'] * 0.4 + bond['affection'] * 0.35 + bond['familiarity'] * 0.2 + sociability * 0.05
+        score = bond.trust * 0.4 + bond.affection * 0.35 + bond.familiarity * 0.2 + sociability * 0.05
         return round(self._clamp(score), 4)
 
     def _new_bond(self, human_name):
-        return {'human': human_name, 'encounters': 0, 'positive_interactions': 0, 'negative_interactions': 0, 'trust': 0.5, 'affection': 0.0, 'familiarity': 0.0, 'right_human_score': 0.0, 'recognized_as_right_human': False}
+        return CatHumanBond(
+            human=human_name,
+            encounters=0,
+            positive_interactions=0,
+            negative_interactions=0,
+            trust=0.5,
+            affection=0.0,
+            familiarity=0.0,
+            right_human_score=0.0,
+            recognized_as_right_human=False,
+        )
 
     def _name(self, entity):
         return getattr(entity, 'name', None)
