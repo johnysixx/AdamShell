@@ -1,6 +1,7 @@
 from copy import deepcopy
 from cats.cat import Cat
 from cats.cat_family_system import CatFamilySystem
+from cats.cat_social_objects import CatRelationship
 
 class CatSiblingPlaySystem:
     MIN_PLAY_AGE_DAYS = 21
@@ -41,7 +42,10 @@ class CatSiblingPlaySystem:
             emit_event(deepcopy(event))
 
     def _strengthen_relationship(self, cat, other_cat):
-        relation = cat.relationships.setdefault(other_cat.name, {'familiarity': 0.0, 'trust': 0.5, 'affiliation': 0.0, 'tension': 0.0, 'shared_scent': 0.0})
+        relation = cat.relationships.setdefault(
+            other_cat.name,
+            CatRelationship.create(),
+        )
         relation['familiarity'] = self._clamp(float(relation.get('familiarity', 0.0)) + 0.04)
         relation['trust'] = self._clamp(float(relation.get('trust', 0.5)) + 0.02)
         relation['affiliation'] = self._clamp(float(relation.get('affiliation', 0.0)) + 0.03)

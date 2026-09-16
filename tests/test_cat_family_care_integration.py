@@ -4,6 +4,7 @@ from cats.cats import Cats
 from cats.cat_family_system import CatFamilySystem
 from cats.cat_maternal_care_system import CatMaternalCareSystem
 from cats.cat_sibling_play_system import CatSiblingPlaySystem
+from cats.cat_social_objects import CatRelationship
 
 class CatFamilyCareIntegrationTests(unittest.TestCase):
 
@@ -57,14 +58,51 @@ class CatFamilyCareIntegrationTests(unittest.TestCase):
         play = CatSiblingPlaySystem(self.cats)
         play.play(self.first, self.second, age_days=30)
         relation = self.first.relationships[self.second.name]
-        self.assertGreater(relation['familiarity'], 0.0)
-        self.assertGreater(relation['affiliation'], 0.0)
-        self.assertEqual(relation['last_interaction'], 'sibling_play')
+        reverse = self.second.relationships[self.first.name]
+        self.assertIsInstance(relation, CatRelationship)
+        self.assertIsInstance(reverse, CatRelationship)
+        self.assertIsNot(relation, reverse)
+        for record in (relation, reverse):
+            self.assertAlmostEqual(record.familiarity, 0.04)
+            self.assertAlmostEqual(record.trust, 0.52)
+            self.assertAlmostEqual(record.affiliation, 0.03)
+            self.assertEqual(record.last_interaction, 'sibling_play')
 
     def test_non_littermates_cannot_use_sibling_play(self):
         stranger = self.cats.create_cat(name='stranger', color='gray', fur_length='short')
         play = CatSiblingPlaySystem(self.cats)
         result = play.play(self.first, stranger, age_days=30)
         self.assertFalse(result['played'])
+
+    def test_repeated_play_preserves_existing_relationship_records(self):
+        relation = CatRelationship.create()
+        relation.trust = 0.8
+        relation.familiarity = 0.2
+        relation.shared_scent = 0.3
+        relation.meet_count = 4
+        history = [{'reason': 'past_meeting'}]
+        relation.trust_history = history
+        legacy = {'trust': 0.7, 'custom_note': 'known_before_play'}
+        self.first.relationships[self.second.name] = relation
+        self.second.relationships[self.first.name] = legacy
+
+        play = CatSiblingPlaySystem(self.cats)
+        for _ in range(2):
+            result = play.play(self.first, self.second, age_days=30)
+            self.assertTrue(result['played'])
+
+        self.assertIs(self.first.relationships[self.second.name], relation)
+        self.assertIs(self.second.relationships[self.first.name], legacy)
+        self.assertAlmostEqual(relation.trust, 0.84)
+        self.assertAlmostEqual(relation.familiarity, 0.28)
+        self.assertAlmostEqual(relation.shared_scent, 0.3)
+        self.assertEqual(relation.meet_count, 4)
+        self.assertIs(relation.trust_history, history)
+        self.assertEqual(relation.last_interaction, 'sibling_play')
+        self.assertAlmostEqual(legacy['trust'], 0.74)
+        self.assertAlmostEqual(legacy['familiarity'], 0.08)
+        self.assertEqual(legacy['custom_note'], 'known_before_play')
+
+
 if __name__ == '__main__':
     unittest.main()
