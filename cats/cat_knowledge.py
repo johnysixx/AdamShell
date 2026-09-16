@@ -307,7 +307,10 @@ class CatKnowledge:
         if not isinstance(listener, Cat):
             raise TypeError('Trust listener must be Cat.')
         relationships = listener.relationships
-        relation = relationships.setdefault(storyteller_name, {})
+        relation = relationships.setdefault(
+            storyteller_name,
+            CatRelationship.create(),
+        )
         previous = float(relation.get('trust', 0.5))
         current = max(0.0, min(1.0, previous + float(delta)))
         relation['trust'] = current
