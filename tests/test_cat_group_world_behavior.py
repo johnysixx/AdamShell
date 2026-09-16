@@ -110,6 +110,46 @@ class CatGroupWorldBehaviorTests(unittest.TestCase):
                 self.assertEqual(history, [{'kind': 'shared_rest'}])
                 self.assertEqual(relation['meet_count'], 3)
 
+    def _assert_decisive_conflict(self, first_wins):
+        first = self._group(self.members[:3], 'first')
+        second = self._group(self.members[3:], 'second')
+        for cat in self.members[:3]:
+            cat.strength = 3.0 if first_wins else 0.3
+        for cat in self.members[3:]:
+            cat.strength = 0.3 if first_wins else 3.0
+
+        winner_id = first if first_wins else second
+        loser_id = second if first_wins else first
+        winner = self.groups.groups[winner_id]
+        loser = self.groups.groups[loser_id]
+        winner_state = winner.state
+        conflict = CatGroupConflictSystem(self.groups)
+
+        result = conflict.resolve(
+            first, second, self.cats.cats, resource='milk'
+        )
+
+        self.assertTrue(result['conflict'])
+        self.assertEqual(result['winner'], winner_id)
+        self.assertEqual(result['loser'], loser_id)
+        self.assertEqual(
+            result['outcome'],
+            'first_group_prevailed' if first_wins else 'second_group_prevailed',
+        )
+        self.assertEqual(loser.state, 'strained')
+        self.assertEqual(winner.state, winner_state)
+        for group in (winner, loser):
+            self.assertEqual(group.conflict_count, 1)
+            self.assertIn(result, group.history)
+        for cat in self.members:
+            self.assertIn(result, cat.social_interactions)
+
+    def test_first_group_victory_marks_second_group_strained(self):
+        self._assert_decisive_conflict(first_wins=True)
+
+    def test_second_group_victory_marks_first_group_strained(self):
+        self._assert_decisive_conflict(first_wins=False)
+
     def test_group_can_split_into_daughter_group(self):
         group_id = self._group(self.members[:4], 'parent')
         split = CatGroupSplitSystem(self.groups)

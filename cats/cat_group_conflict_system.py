@@ -180,9 +180,7 @@ class CatGroupConflictSystem:
                 else second
             )
 
-            loser_group[
-                "state"
-            ] = "strained"
+            loser_group.state = "strained"
 
         event = {
             "name": "cat_inter_group_conflict",
