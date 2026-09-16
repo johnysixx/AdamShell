@@ -1011,7 +1011,7 @@ class CatSocialSystem:
         cat,
         other_cat
     ):
-        return cat.social_memory.get(
+        return cat.social_memory.records.get(
             other_cat.name,
             CatSocialMemory(
                 meet_count=0,
@@ -1033,7 +1033,7 @@ class CatSocialSystem:
         outcome,
         steps
     ):
-        memory = cat.social_memory.setdefault(
+        memory = cat.social_memory.records.setdefault(
             other_cat.name,
             CatSocialMemory(
                 meet_count=0,

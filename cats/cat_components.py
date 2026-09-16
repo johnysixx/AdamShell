@@ -51,6 +51,10 @@ class CatTerritories(ComponentObject):
     pass
 
 
+class CatSocialMemories(ComponentObject):
+    pass
+
+
 
 class CatEmergencyNursing(ComponentObject):
     DEFAULT_CAPABILITY_PERCENT = 12

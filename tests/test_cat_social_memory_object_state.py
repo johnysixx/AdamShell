@@ -39,7 +39,7 @@ class CatSocialMemoryObjectStateTests(unittest.TestCase):
             self.second,
         )
 
-        memory = self.first.social_memory[
+        memory = self.first.social_memory.records[
             self.second.name
         ]
 
@@ -57,7 +57,7 @@ class CatSocialMemoryObjectStateTests(unittest.TestCase):
             self.first,
             self.second,
         )
-        memory = self.first.social_memory[
+        memory = self.first.social_memory.records[
             self.second.name
         ]
 
@@ -80,7 +80,7 @@ class CatSocialMemoryObjectStateTests(unittest.TestCase):
                 steps=[],
             )
 
-        memory = self.first.social_memory[
+        memory = self.first.social_memory.records[
             self.second.name
         ]
 

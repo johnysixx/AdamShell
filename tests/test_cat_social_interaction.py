@@ -158,9 +158,9 @@ class CatSocialInteractionTests(unittest.TestCase):
         social = CatSocialSystem(self.cats)
         result = social.meet(first, second)
         self.assertTrue(result['socialized'])
-        self.assertIn(second.name, first.social_memory)
-        self.assertIn(first.name, second.social_memory)
-        first_memory = first.social_memory[second.name]
+        self.assertIn(second.name, first.social_memory.records)
+        self.assertIn(first.name, second.social_memory.records)
+        first_memory = first.social_memory.records[second.name]
         self.assertEqual(first_memory.meet_count, 1)
         self.assertEqual(first_memory.uncertain_count, 1)
         self.assertEqual(first_memory.last_outcome, 'kept_distance')
@@ -168,7 +168,7 @@ class CatSocialInteractionTests(unittest.TestCase):
     def test_friendly_memory_biases_future_assessment(self):
         first, second = self._social_pair()
         first.relationships[second.name] = {'familiarity': 0.6, 'trust': 0.65, 'affiliation': 0.5, 'tension': 0.0}
-        first.social_memory[second.name] = CatSocialMemory(**{'meet_count': 4, 'friendly_count': 4, 'uncertain_count': 0, 'hostile_count': 0, 'last_attitude': 'friendly', 'last_outcome': 'head_bunt', 'last_steps': ['cat_head_bunt'], 'recent_outcomes': ['nose_touch', 'head_bunt']})
+        first.social_memory.records[second.name] = CatSocialMemory(**{'meet_count': 4, 'friendly_count': 4, 'uncertain_count': 0, 'hostile_count': 0, 'last_attitude': 'friendly', 'last_outcome': 'head_bunt', 'last_steps': ['cat_head_bunt'], 'recent_outcomes': ['nose_touch', 'head_bunt']})
         social = CatSocialSystem(self.cats)
         assessment = social.assess(first, second)
         self.assertGreater(assessment['memory_bias'], 0.0)
@@ -178,7 +178,7 @@ class CatSocialInteractionTests(unittest.TestCase):
     def test_repeated_hostile_memory_can_make_cat_hostile(self):
         first, second = self._social_pair()
         first.relationships[second.name] = {'familiarity': 0.5, 'trust': 0.5, 'affiliation': 0.0, 'tension': 0.2}
-        first.social_memory[second.name] = CatSocialMemory(**{'meet_count': 4, 'friendly_count': 0, 'uncertain_count': 0, 'hostile_count': 4, 'last_attitude': 'hostile', 'last_outcome': 'hiss', 'last_steps': ['cat_hissed_at_cat'], 'recent_outcomes': ['hiss', 'warning_swat', 'hiss', 'hiss']})
+        first.social_memory.records[second.name] = CatSocialMemory(**{'meet_count': 4, 'friendly_count': 0, 'uncertain_count': 0, 'hostile_count': 4, 'last_attitude': 'hostile', 'last_outcome': 'hiss', 'last_steps': ['cat_hissed_at_cat'], 'recent_outcomes': ['hiss', 'warning_swat', 'hiss', 'hiss']})
         social = CatSocialSystem(self.cats)
         assessment = social.assess(first, second)
         self.assertEqual(assessment['attitude'], 'hostile')
@@ -190,7 +190,7 @@ class CatSocialInteractionTests(unittest.TestCase):
         social = CatSocialSystem(self.cats)
         for index in range(7):
             social._remember_meeting(first, second, attitude='uncertain', outcome=f'outcome_{index}', steps=[])
-        memory = first.social_memory[second.name]
+        memory = first.social_memory.records[second.name]
         self.assertEqual(len(memory.recent_outcomes), 5)
         self.assertEqual(memory.recent_outcomes, ['outcome_2', 'outcome_3', 'outcome_4', 'outcome_5', 'outcome_6'])
 
@@ -255,8 +255,8 @@ class CatSocialInteractionTests(unittest.TestCase):
         first, second = self._social_pair()
         first.relationships[second.name] = {'familiarity': 0.9, 'trust': 0.9, 'affiliation': 0.85, 'shared_scent': 0.7, 'tension': 0.0}
         second.relationships[first.name] = {'familiarity': 0.9, 'trust': 0.9, 'affiliation': 0.85, 'shared_scent': 0.7, 'tension': 0.0}
-        first.social_memory[second.name] = CatSocialMemory(**{'meet_count': 3, 'friendly_count': 3, 'uncertain_count': 0, 'hostile_count': 0, 'last_attitude': 'friendly', 'last_outcome': 'head_bunt', 'last_steps': [], 'recent_outcomes': ['nose_touch', 'head_bunt']})
-        second.social_memory[first.name] = CatSocialMemory(**{'meet_count': 3, 'friendly_count': 3, 'uncertain_count': 0, 'hostile_count': 0, 'last_attitude': 'friendly', 'last_outcome': 'head_bunt', 'last_steps': [], 'recent_outcomes': ['nose_touch', 'head_bunt']})
+        first.social_memory.records[second.name] = CatSocialMemory(**{'meet_count': 3, 'friendly_count': 3, 'uncertain_count': 0, 'hostile_count': 0, 'last_attitude': 'friendly', 'last_outcome': 'head_bunt', 'last_steps': [], 'recent_outcomes': ['nose_touch', 'head_bunt']})
+        second.social_memory.records[first.name] = CatSocialMemory(**{'meet_count': 3, 'friendly_count': 3, 'uncertain_count': 0, 'hostile_count': 0, 'last_attitude': 'friendly', 'last_outcome': 'head_bunt', 'last_steps': [], 'recent_outcomes': ['nose_touch', 'head_bunt']})
         return (first, second)
 
     def test_close_cats_can_form_mutual_bond(self):
@@ -354,7 +354,7 @@ class CatSocialInteractionTests(unittest.TestCase):
         first.family.littermates.append(second.name)
         first.family.siblings.append(second.name)
         first.relationships[second.name] = {'familiarity': 0.8, 'trust': 0.1, 'affiliation': 0.0, 'shared_scent': 0.3, 'tension': 0.9}
-        first.social_memory[second.name] = CatSocialMemory(**{'meet_count': 5, 'friendly_count': 0, 'uncertain_count': 0, 'hostile_count': 5, 'last_attitude': 'hostile', 'last_outcome': 'hiss', 'last_steps': [], 'recent_outcomes': ['hiss', 'hiss', 'warning_swat']})
+        first.social_memory.records[second.name] = CatSocialMemory(**{'meet_count': 5, 'friendly_count': 0, 'uncertain_count': 0, 'hostile_count': 5, 'last_attitude': 'hostile', 'last_outcome': 'hiss', 'last_steps': [], 'recent_outcomes': ['hiss', 'hiss', 'warning_swat']})
         social = CatSocialSystem(self.cats)
         assessment = social.assess(first, second)
         self.assertEqual(assessment['attitude'], 'hostile')
