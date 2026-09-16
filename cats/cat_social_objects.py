@@ -23,5 +23,9 @@ class CatTerritoryClaim(ComponentObject):
     pass
 
 
+class CatSocialMemory(ComponentObject):
+    pass
+
+
 class CatGroupKnowledgeRecord(ComponentObject):
     pass

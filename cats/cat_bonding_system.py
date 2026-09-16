@@ -70,14 +70,14 @@ class CatBondingSystem:
         )
 
         friendly_count = int(
-            memory.get(
+            getattr(memory,
                 "friendly_count",
                 0
             )
         )
 
         hostile_count = int(
-            memory.get(
+            getattr(memory,
                 "hostile_count",
                 0
             )

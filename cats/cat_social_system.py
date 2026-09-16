@@ -1,6 +1,7 @@
 from copy import deepcopy
 
 from cats.cat import Cat
+from cats.cat_social_objects import CatSocialMemory
 from cats.cat_territory_system import (
     CatTerritorySystem
 )
@@ -266,14 +267,14 @@ class CatSocialSystem:
         )
 
         positive_memory = int(
-            memory.get(
+            getattr(memory,
                 "friendly_count",
                 0
             )
         )
 
         negative_memory = int(
-            memory.get(
+            getattr(memory,
                 "hostile_count",
                 0
             )
@@ -456,7 +457,7 @@ class CatSocialSystem:
                 4
             ),
             "last_social_outcome": (
-                memory.get(
+                getattr(memory,
                     "last_outcome"
                 )
             ),
@@ -1012,7 +1013,16 @@ class CatSocialSystem:
     ):
         return cat.social_memory.get(
             other_cat.name,
-            {}
+            CatSocialMemory(
+                meet_count=0,
+                friendly_count=0,
+                uncertain_count=0,
+                hostile_count=0,
+                last_attitude=None,
+                last_outcome=None,
+                last_steps=[],
+                recent_outcomes=[],
+            )
         )
 
     def _remember_meeting(
@@ -1025,51 +1035,42 @@ class CatSocialSystem:
     ):
         memory = cat.social_memory.setdefault(
             other_cat.name,
-            {
-                "meet_count": 0,
-                "friendly_count": 0,
-                "uncertain_count": 0,
-                "hostile_count": 0,
-                "last_attitude": None,
-                "last_outcome": None,
-                "last_steps": [],
-                "recent_outcomes": []
-            }
+            CatSocialMemory(
+                meet_count=0,
+                friendly_count=0,
+                uncertain_count=0,
+                hostile_count=0,
+                last_attitude=None,
+                last_outcome=None,
+                last_steps=[],
+                recent_outcomes=[],
+            )
         )
 
-        memory[
-            "meet_count"
-        ] = int(
-            memory.get(
-                "meet_count",
-                0
-            )
+        memory.meet_count = int(
+            memory.meet_count
         ) + 1
 
         counter = (
             f"{attitude}_count"
         )
 
-        memory[
-            counter
-        ] = int(
-            memory.get(
-                counter,
-                0
-            )
-        ) + 1
+        setattr(
+            memory,
+            counter,
+            int(
+                getattr(
+                    memory,
+                    counter,
+                    0
+                )
+            ) + 1
+        )
 
-        memory[
-            "last_attitude"
-        ] = attitude
+        memory.last_attitude = attitude
+        memory.last_outcome = outcome
 
-        memory[
-            "last_outcome"
-        ] = outcome
-
-        memory[
-            "last_steps"
-        ] = [
+        memory.last_steps = [
             step.get(
                 "name"
             )
@@ -1077,19 +1078,14 @@ class CatSocialSystem:
         ]
 
         recent = list(
-            memory.get(
-                "recent_outcomes",
-                []
-            )
+            memory.recent_outcomes
         )
 
         recent.append(
             outcome
         )
 
-        memory[
-            "recent_outcomes"
-        ] = recent[-5:]
+        memory.recent_outcomes = recent[-5:]
 
         return memory
 
