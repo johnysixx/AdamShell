@@ -172,7 +172,7 @@ class CatMind:
             candidates.append(cls._candidate(intention_type='explore_box', score=explore_score, reasons=['unexplored_box_visible', 'curiosity'], target=boxes[0]))
         if not boxes and observations.can_create_exploration_pair:
             exploration_plan = observations.exploration_plan
-            exploration_reasons = set(exploration_plan.get('reasons', []))
+            exploration_reasons = set(exploration_plan.reasons)
             explicit_goal_bonus = 0.5 if 'explicit_exploration_goal' in exploration_reasons else 0.0
             pair_score = 0.2 + curiosity * 0.55 + courage * 0.1 + patience * 0.05 + explicit_goal_bonus
             reasons = ['no_usable_box_visible', 'sufficient_energy', 'curiosity', 'quantum_pair_creation_possible']

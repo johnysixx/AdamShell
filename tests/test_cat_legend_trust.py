@@ -40,7 +40,7 @@ class CatLegendTrustTests(unittest.TestCase):
         CatKnowledge.hear_legend(self.listener, self.storyteller, self.legend)
         self.listener.current_layer = 'meeting_place'
         result = CatExplorationPlanner.choose_destination(cat=self.listener, universe=self.universe)
-        heard = [candidate for candidate in result['candidates'] if candidate.get('source') == 'heard_legend']
+        heard = [candidate for candidate in result.candidates if candidate.source == 'heard_legend']
         self.assertGreaterEqual(len(heard), 1)
 
     def test_personal_visit_verifies_legend(self):

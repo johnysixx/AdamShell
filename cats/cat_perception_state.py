@@ -1,5 +1,9 @@
 from dataclasses import dataclass, field
 
+from .cat_exploration_state import (
+    CatExplorationPlan
+)
+
 
 @dataclass(slots=True)
 class CatPerceptionFailure:
@@ -106,8 +110,8 @@ class CatPerceptionState:
     exploration_pair_energy_cost: float = 0.0
     exploration_destination_layer: str | None = None
     exploration_destination_position: object = None
-    exploration_plan: dict = field(
-        default_factory=dict
+    exploration_plan: CatExplorationPlan = field(
+        default_factory=CatExplorationPlan
     )
 
     shareable_legend_count: int = 0

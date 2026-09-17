@@ -1,5 +1,10 @@
 from copy import deepcopy
 
+from .cat_exploration_state import (
+    CatExplorationCandidate,
+    CatExplorationPlan,
+)
+
 
 class CatExplorationPlanner:
 
@@ -53,16 +58,16 @@ class CatExplorationPlanner:
         candidates = [
             candidate
             for candidate in candidates
-            if candidate["layer"] != current_layer
+            if candidate.layer
+            != current_layer
         ]
 
         if not candidates:
-            return {
-                "selected": False,
-                "reason": "no_other_layer_known",
-                "current_layer": current_layer,
-                "candidates": []
-            }
+            return CatExplorationPlan(
+                selected=False,
+                reason="no_other_layer_known",
+                current_layer=current_layer,
+            )
 
         scored = [
             cls._score_candidate(
@@ -74,34 +79,34 @@ class CatExplorationPlanner:
 
         scored.sort(
             key=lambda item: (
-                item["score"],
-                item["layer"],
-                repr(item["position"])
+                item.score,
+                item.layer,
+                repr(
+                    item.position
+                )
             ),
             reverse=True
         )
 
-        winner = deepcopy(
-            scored[0]
-        )
+        winner = scored[0]
 
-        return {
-            "selected": True,
-            "layer": winner["layer"],
-            "position": deepcopy(
-                winner["position"]
+        return CatExplorationPlan(
+            selected=True,
+            layer=winner.layer,
+            position=deepcopy(
+                winner.position
             ),
-            "score": winner["score"],
-            "reasons": list(
-                winner["reasons"]
+            score=winner.score,
+            reasons=list(
+                winner.reasons
             ),
-            "candidate_count": len(
+            candidate_count=len(
                 scored
             ),
-            "candidates": deepcopy(
+            candidates=deepcopy(
                 scored
-            )
-        }
+            ),
+        )
 
     @classmethod
     def choose_scent_destination(
@@ -596,30 +601,30 @@ class CatExplorationPlanner:
             )
 
             if layer is not None:
-                candidates.append({
-                    "layer": str(layer),
-                    "position": cls._position(
-                        position
-                    ),
-                    "source": "explicit_goal",
-                    "known_visits": 0,
-                    "positive_memories": 0,
-                    "negative_memories": 0
-                })
+                candidates.append(
+                    CatExplorationCandidate(
+                        layer=str(
+                            layer
+                        ),
+                        position=cls._position(
+                            position
+                        ),
+                        source="explicit_goal",
+                    )
+                )
 
         for layer, position in (
             cls.DEFAULT_LAYER_POSITIONS.items()
         ):
-            candidates.append({
-                "layer": layer,
-                "position": deepcopy(
-                    position
-                ),
-                "source": "default_layer",
-                "known_visits": 0,
-                "positive_memories": 0,
-                "negative_memories": 0
-            })
+            candidates.append(
+                CatExplorationCandidate(
+                    layer=layer,
+                    position=deepcopy(
+                        position
+                    ),
+                    source="default_layer",
+                )
+            )
 
         for box in getattr(
             universe,
@@ -635,25 +640,26 @@ class CatExplorationPlanner:
             if layer is None:
                 continue
 
-            candidates.append({
-                "layer": str(layer),
-                "position": cls._position(
-                    getattr(
+            candidates.append(
+                CatExplorationCandidate(
+                    layer=str(
+                        layer
+                    ),
+                    position=cls._position(
+                        getattr(
+                            box,
+                            "position",
+                            None
+                        )
+                    ),
+                    source="known_quantum_box",
+                    box_id=getattr(
                         box,
-                        "position",
+                        "id",
                         None
-                    )
-                ),
-                "source": "known_quantum_box",
-                "box_id": getattr(
-                    box,
-                    "id",
-                    None
-                ),
-                "known_visits": 0,
-                "positive_memories": 0,
-                "negative_memories": 0
-            })
+                    ),
+                )
+            )
 
         memory = cat.memory
 
@@ -685,7 +691,9 @@ class CatExplorationPlanner:
 
                 if value is not None:
                     layers.append(
-                        str(value)
+                        str(
+                            value
+                        )
                     )
 
             location = event.get(
@@ -711,27 +719,29 @@ class CatExplorationPlanner:
             )
 
             for layer in layers:
-                candidates.append({
-                    "layer": layer,
-                    "position": deepcopy(
-                        position
-                    ),
-                    "source": "memory",
-                    "memory_type": event_type,
-                    "known_visits": 1,
-                    "positive_memories": (
-                        1
-                        if event_type
-                        in cls.POSITIVE_MEMORY_TYPES
-                        else 0
-                    ),
-                    "negative_memories": (
-                        1
-                        if event_type
-                        in cls.NEGATIVE_MEMORY_TYPES
-                        else 0
+                candidates.append(
+                    CatExplorationCandidate(
+                        layer=layer,
+                        position=deepcopy(
+                            position
+                        ),
+                        source="memory",
+                        memory_type=event_type,
+                        known_visits=1,
+                        positive_memories=(
+                            1
+                            if event_type
+                            in cls.POSITIVE_MEMORY_TYPES
+                            else 0
+                        ),
+                        negative_memories=(
+                            1
+                            if event_type
+                            in cls.NEGATIVE_MEMORY_TYPES
+                            else 0
+                        ),
                     )
-                })
+                )
 
         knowledge = cat.knowledge
 
@@ -761,29 +771,26 @@ class CatExplorationPlanner:
             ):
                 continue
 
-            candidates.append({
-                "layer": str(layer),
-                "position": (
-                    cls._position(
+            candidates.append(
+                CatExplorationCandidate(
+                    layer=str(
+                        layer
+                    ),
+                    position=cls._position(
                         position
-                    )
-                ),
-                "source": (
-                    "heard_legend"
-                ),
-                "legend_id": (
-                    heard.legend_id
-                ),
-                "storyteller": (
-                    heard.storyteller
-                ),
-                "legend_credibility": (
-                    credibility
-                ),
-                "known_visits": 0,
-                "positive_memories": 0,
-                "negative_memories": 0
-            })
+                    ),
+                    source="heard_legend",
+                    legend_id=(
+                        heard.legend_id
+                    ),
+                    storyteller=(
+                        heard.storyteller
+                    ),
+                    legend_credibility=(
+                        credibility
+                    ),
+                )
+            )
 
         return cls._merge_candidates(
             candidates
@@ -795,6 +802,15 @@ class CatExplorationPlanner:
         cat,
         candidate
     ):
+        if not isinstance(
+            candidate,
+            CatExplorationCandidate,
+        ):
+            raise TypeError(
+                "Exploration candidate must be "
+                "CatExplorationCandidate."
+            )
+
         traits = cat.personality.traits
 
         curiosity = float(
@@ -814,24 +830,15 @@ class CatExplorationPlanner:
         )
 
         visits = int(
-            candidate.get(
-                "known_visits",
-                0
-            )
+            candidate.known_visits
         )
 
         positive = int(
-            candidate.get(
-                "positive_memories",
-                0
-            )
+            candidate.positive_memories
         )
 
         negative = int(
-            candidate.get(
-                "negative_memories",
-                0
-            )
+            candidate.negative_memories
         )
 
         novelty = 1.0 / (
@@ -840,7 +847,9 @@ class CatExplorationPlanner:
 
         score = (
             0.20
-            + curiosity * novelty * 0.35
+            + curiosity
+            * novelty
+            * 0.35
             + courage * 0.15
             + patience * 0.05
             + intellect * 0.10
@@ -878,14 +887,12 @@ class CatExplorationPlanner:
             )
 
         if (
-            candidate.get("source")
+            candidate.source
             == "heard_legend"
         ):
             credibility = float(
-                candidate.get(
-                    "legend_credibility",
-                    0.0
-                )
+                candidate.legend_credibility
+                or 0.0
             )
 
             score += (
@@ -901,7 +908,7 @@ class CatExplorationPlanner:
             )
 
         if (
-            candidate.get("source")
+            candidate.source
             == "explicit_goal"
         ):
             score += 0.35
@@ -910,17 +917,21 @@ class CatExplorationPlanner:
                 "explicit_exploration_goal"
             )
 
-        return {
-            **deepcopy(candidate),
-            "score": max(
-                0.0,
-                min(
-                    1.0,
-                    score
-                )
-            ),
-            "reasons": reasons
-        }
+        scored = deepcopy(
+            candidate
+        )
+
+        scored.score = max(
+            0.0,
+            min(
+                1.0,
+                score
+            )
+        )
+
+        scored.reasons = reasons
+
+        return scored
 
     @classmethod
     def _merge_candidates(
@@ -930,13 +941,22 @@ class CatExplorationPlanner:
         merged = {}
 
         for candidate in candidates:
+            if not isinstance(
+                candidate,
+                CatExplorationCandidate,
+            ):
+                raise TypeError(
+                    "Exploration candidates must be "
+                    "CatExplorationCandidate objects."
+                )
+
             key = (
-                candidate["layer"],
+                candidate.layer,
                 tuple(
                     sorted(
-                        candidate[
-                            "position"
-                        ].items()
+                        candidate
+                        .position
+                        .items()
                     )
                 )
             )
@@ -950,36 +970,23 @@ class CatExplorationPlanner:
 
             existing = merged[key]
 
-            existing["known_visits"] += int(
-                candidate.get(
-                    "known_visits",
-                    0
-                )
+            existing.known_visits += int(
+                candidate.known_visits
             )
 
-            existing[
-                "positive_memories"
-            ] += int(
-                candidate.get(
-                    "positive_memories",
-                    0
-                )
+            existing.positive_memories += int(
+                candidate.positive_memories
             )
 
-            existing[
-                "negative_memories"
-            ] += int(
-                candidate.get(
-                    "negative_memories",
-                    0
-                )
+            existing.negative_memories += int(
+                candidate.negative_memories
             )
 
             if (
-                candidate.get("source")
+                candidate.source
                 == "explicit_goal"
             ):
-                existing["source"] = (
+                existing.source = (
                     "explicit_goal"
                 )
 

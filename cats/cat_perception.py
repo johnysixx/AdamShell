@@ -60,11 +60,11 @@ class CatPerception:
         danger = self._cronenberg_danger(cat=cat, cronenbergs=visible_cronenbergs)
         current_layer = cat.current_layer or 'quantum_layer'
         exploration_plan = CatExplorationPlanner.choose_destination(cat=cat, universe=self.universe)
-        exploration_destination_layer = exploration_plan.get('layer')
-        exploration_destination_position = exploration_plan.get('position')
+        exploration_destination_layer = exploration_plan.layer
+        exploration_destination_position = exploration_plan.position
         exploration_pair_energy_cost = QUANTUM_BOX_ENERGY_COST_J * 2.0
         available_cat_energy = float(cat.idea_energy)
-        can_create_exploration_pair = bool(not unexplored_boxes and available_cat_energy >= exploration_pair_energy_cost and exploration_plan.get('selected', False) and (exploration_destination_layer != current_layer))
+        can_create_exploration_pair = bool(not unexplored_boxes and available_cat_energy >= exploration_pair_energy_cost and exploration_plan.selected and (exploration_destination_layer != current_layer))
         active_cat_legends = [legend for legend in getattr(self.universe, 'cat_legends', []) if getattr(legend, 'active', True)]
         shareable_legend_count = len(active_cat_legends)
         olfaction = CatOlfaction.sniff(cat=cat, universe=self.universe)

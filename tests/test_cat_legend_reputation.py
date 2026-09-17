@@ -46,7 +46,7 @@ class CatLegendReputationTests(unittest.TestCase):
         CatKnowledge.contradict_heard_legend(self.listener, self.legend.legend_id)
         self.listener.current_layer = 'meeting_place'
         result = CatExplorationPlanner.choose_destination(cat=self.listener, universe=self.universe)
-        heard_candidates = [candidate for candidate in result['candidates'] if candidate.get('source') == 'heard_legend']
+        heard_candidates = [candidate for candidate in result.candidates if candidate.source == 'heard_legend']
         self.assertEqual(heard_candidates, [])
 
     def test_trust_updates_preserve_existing_records_and_history(self):

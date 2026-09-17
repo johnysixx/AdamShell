@@ -47,11 +47,11 @@ class CatExplorationPlannerTests(
         )
 
         self.assertTrue(
-            result["selected"]
+            result.selected
         )
 
         self.assertEqual(
-            result["layer"],
+            result.layer,
             "quantum_layer"
         )
 
@@ -76,12 +76,12 @@ class CatExplorationPlannerTests(
         )
 
         self.assertEqual(
-            result["layer"],
+            result.layer,
             "eden"
         )
 
         self.assertEqual(
-            result["position"],
+            result.position,
             {
                 "x": 9.0,
                 "y": 8.0,
@@ -114,16 +114,14 @@ class CatExplorationPlannerTests(
 
         history = next(
             candidate
-            for candidate in result[
-                "candidates"
-            ]
-            if candidate["layer"]
+            for candidate in result.candidates
+            if candidate.layer
             == "history"
         )
 
         self.assertIn(
             "positive_memory",
-            history["reasons"]
+            history.reasons
         )
 
     def test_dangerous_memory_reduces_score(
@@ -151,16 +149,14 @@ class CatExplorationPlannerTests(
 
         history = next(
             candidate
-            for candidate in result[
-                "candidates"
-            ]
-            if candidate["layer"]
+            for candidate in result.candidates
+            if candidate.layer
             == "history"
         )
 
         self.assertIn(
             "dangerous_memory",
-            history["reasons"]
+            history.reasons
         )
 
     def test_quantum_cat_can_choose_meeting_place(
@@ -179,11 +175,11 @@ class CatExplorationPlannerTests(
         )
 
         self.assertTrue(
-            result["selected"]
+            result.selected
         )
 
         self.assertNotEqual(
-            result["layer"],
+            result.layer,
             "quantum_layer"
         )
 
