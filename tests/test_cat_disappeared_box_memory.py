@@ -30,8 +30,8 @@ class CatDisappearedBoxMemoryTests(unittest.TestCase):
         self.assertTrue(any((box_id in memory.get('participants', []) for memory in memories)))
         self.universe.quantum_boxes.remove(self.box)
         observations = CatPerception(self.cats).observe(self.cat)
-        self.assertNotIn(box_id, observations['visible_boxes'])
-        self.assertNotIn(box_id, observations['unexplored_boxes'])
+        self.assertNotIn(box_id, observations.visible_boxes)
+        self.assertNotIn(box_id, observations.unexplored_boxes)
         candidates = CatMind.consider(cat=self.cat, observations=observations)
         stale_box_targets = [candidate for candidate in candidates if candidate.get('type') == 'explore_box' and (candidate.get('target') == box_id or (isinstance(candidate.get('target'), dict) and (candidate['target'].get('id') == box_id or candidate['target'].get('box_id') == box_id)))]
         self.assertEqual(stale_box_targets, [])

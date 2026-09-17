@@ -3,6 +3,7 @@ from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat_intellect import CatIntellect
 from cats.cat_mind import CatMind
+from cats.cat_perception_state import CatPerceptionState
 
 class FixedGaussianRng:
 
@@ -48,7 +49,7 @@ class CatIntellectTests(unittest.TestCase):
 
     def test_intellect_is_recorded_in_decision(self):
         self.cat.intellect.score = 135
-        result = CatMind.decide(cat=self.cat, observations={'bar_known': True, 'bar_visible': True, 'unexplored_boxes': ['box_alpha'], 'nearby_cats': ['other_cat'], 'interesting_unknown': True}, quantum_roll=20)
+        result = CatMind.decide(cat=self.cat, observations=CatPerceptionState(bar_known=True, bar_visible=True, unexplored_boxes=['box_alpha'], nearby_cats=['other_cat'], interesting_unknown=True), quantum_roll=20)
         self.assertEqual(result['intellect_score'], 135)
         self.assertEqual(result['intellect_category'], 'exceptional')
         self.assertEqual(result['finalist_count'], 2)

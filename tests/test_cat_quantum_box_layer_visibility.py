@@ -27,8 +27,8 @@ class CatQuantumBoxLayerVisibilityTests(unittest.TestCase):
     def test_cat_only_sees_box_in_current_layer(self):
         perception = CatPerception(self.cats)
         observations = perception.observe(self.observer)
-        self.assertIn(self.source.id, observations['visible_boxes'])
-        self.assertNotIn(self.target.id, observations['visible_boxes'])
+        self.assertIn(self.source.id, observations.visible_boxes)
+        self.assertNotIn(self.target.id, observations.visible_boxes)
 
     def test_cat_only_smells_box_in_current_layer(self):
         result = CatOlfaction.sniff(self.observer, self.universe)

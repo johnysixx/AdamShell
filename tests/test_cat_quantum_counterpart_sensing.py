@@ -52,10 +52,10 @@ class CatQuantumCounterpartSensingTests(unittest.TestCase):
         result = self.cats.execute_cat_intention(self.cat)
         self.assertTrue(result['observation']['pair_currently_valid'])
         before = self.observations()
-        self.assertIsNotNone(before['quantum_counterpart_observation'])
+        self.assertIsNotNone(before.quantum_counterpart_observation)
         self.universe.quantum_boxes.remove(self.target)
         after = self.observations()
-        self.assertIsNone(after['quantum_counterpart_observation'])
+        self.assertIsNone(after.quantum_counterpart_observation)
         self.assertFalse(hasattr(self.cat, 'current_quantum_counterpart_observation'))
 
     def test_previous_quantum_travel_increases_sensing_score(self):

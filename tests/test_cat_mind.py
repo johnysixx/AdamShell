@@ -2,6 +2,7 @@ import unittest
 from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat_mind import CatMind
+from cats.cat_perception_state import CatPerceptionState
 from cats.cat_personality import CatPersonality
 
 class CatMindTests(unittest.TestCase):
@@ -23,7 +24,7 @@ class CatMindTests(unittest.TestCase):
     def test_curious_cat_prefers_new_box(self):
         self.traits().curiosity = 1.0
         self.traits().courage = 0.7
-        result = CatMind.decide(cat=self.cat, observations={'unexplored_boxes': ['box_alpha']})
+        result = CatMind.decide(cat=self.cat, observations=CatPerceptionState(unexplored_boxes=['box_alpha']))
         self.assertEqual(result['intention'], 'explore_box')
         self.assertEqual(result['target'], 'box_alpha')
 
@@ -31,32 +32,32 @@ class CatMindTests(unittest.TestCase):
         self.traits().courage = 1.0
         self.traits().aggression = 1.0
         self.traits().curiosity = 0.7
-        candidates = CatMind.consider(cat=self.cat, observations={'huntable_cronenbergs': ['cronenberg_small'], 'cronenberg_danger': 0.2})
+        candidates = CatMind.consider(cat=self.cat, observations=CatPerceptionState(huntable_cronenbergs=['cronenberg_small'], cronenberg_danger=0.2))
         self.assertEqual(candidates[0]['type'], 'hunt_cronenberg')
 
     def test_positive_bar_memory_raises_bar_score(self):
-        before = CatMind.consider(cat=self.cat, observations={'bar_known': True})
+        before = CatMind.consider(cat=self.cat, observations=CatPerceptionState(bar_known=True))
         before_score = next((candidate['score'] for candidate in before if candidate['type'] == 'visit_bar'))
         self.cat.memory.remember(event_type='cat_drank_milk_at_bar', location='meeting_place')
-        after = CatMind.consider(cat=self.cat, observations={'bar_known': True})
+        after = CatMind.consider(cat=self.cat, observations=CatPerceptionState(bar_known=True))
         after_score = next((candidate['score'] for candidate in after if candidate['type'] == 'visit_bar'))
         self.assertGreater(after_score, before_score)
 
     def test_quantum_roll_only_selects_among_finalists(self):
-        result = CatMind.decide(cat=self.cat, observations={'bar_known': True, 'bar_visible': True, 'unexplored_boxes': ['box_alpha'], 'nearby_cats': ['other_cat']}, quantum_roll=20, top_count=3)
+        result = CatMind.decide(cat=self.cat, observations=CatPerceptionState(bar_known=True, bar_visible=True, unexplored_boxes=['box_alpha'], nearby_cats=['other_cat']), quantum_roll=20, top_count=3)
         finalist_types = {candidate['type'] for candidate in result['finalists']}
         self.assertIn(result['intention'], finalist_types)
         self.assertEqual(len(result['finalists']), 3)
 
     def test_decision_is_preserved_in_history(self):
-        result = CatMind.decide(cat=self.cat, observations={'bar_known': True})
+        result = CatMind.decide(cat=self.cat, observations=CatPerceptionState(bar_known=True))
         mind = self.cat.mind
         self.assertEqual(mind.decision_count, 1)
         self.assertEqual(len(mind.history), 1)
         self.assertEqual(mind.current_intention['type'], result['intention'])
 
     def test_personality_changes_future_decision(self):
-        observations = {'huntable_cronenbergs': ['cronenberg_small'], 'cronenberg_danger': 0.5, 'unexplored_boxes': ['box_alpha']}
+        observations = CatPerceptionState(huntable_cronenbergs=['cronenberg_small'], cronenberg_danger=0.5, unexplored_boxes=['box_alpha'])
         first = CatMind.decide(cat=self.cat, observations=observations)
         CatPersonality.adjust(cat=self.cat, trait='curiosity', amount=0.5, source='many_explorations')
         CatPersonality.adjust(cat=self.cat, trait='courage', amount=-0.4, source='dangerous_encounter')
@@ -64,10 +65,10 @@ class CatMindTests(unittest.TestCase):
         self.assertNotEqual(first['score'], second['score'])
 
     def test_failed_quantum_travel_increases_bar_score(self):
-        before = CatMind.consider(cat=self.cat, observations={'bar_known': True, 'bar_visible': False})
+        before = CatMind.consider(cat=self.cat, observations=CatPerceptionState(bar_known=True, bar_visible=False))
         before_bar = next((candidate for candidate in before if candidate['type'] == 'visit_bar'))
         self.cat.memory.remember(event_type='quantum_box_layer_transfer_failed', universe_tick=1, location={'x': 0.0, 'y': 0.0, 'z': 0.0}, participants=['source_box', 'target_box'], details={'reason': 'test_failure'})
-        after = CatMind.consider(cat=self.cat, observations={'bar_known': True, 'bar_visible': False})
+        after = CatMind.consider(cat=self.cat, observations=CatPerceptionState(bar_known=True, bar_visible=False))
         after_bar = next((candidate for candidate in after if candidate['type'] == 'visit_bar'))
         self.assertGreater(after_bar['score'], before_bar['score'])
         self.assertIn('seeking_safety_after_quantum_failure', after_bar['reasons'])
@@ -80,7 +81,7 @@ class CatMindTests(unittest.TestCase):
         cat.personality.traits.aggression = 0.5
         cat.personality.traits.empathy = 0.8
         cat.personality.traits.patience = 0.5
-        observations = {'bar_known': False}
+        observations = CatPerceptionState(bar_known=False)
         candidates = CatMind.consider(cat, observations)
         visit_recipient = next((candidate for candidate in candidates if candidate['type'] == 'visit_recipient'), None)
         self.assertIsNotNone(visit_recipient)

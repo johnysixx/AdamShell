@@ -17,9 +17,9 @@ class CatAutonomousExplorationPairTests(unittest.TestCase):
 
     def test_perception_offers_pair_creation_without_box(self):
         observations = self.cats.observe_cat(self.cat)
-        self.assertEqual(observations['unexplored_boxes'], [])
-        self.assertTrue(observations['can_create_exploration_pair'])
-        self.assertEqual(observations['exploration_destination_layer'], 'quantum_layer')
+        self.assertEqual(observations.unexplored_boxes, [])
+        self.assertTrue(observations.can_create_exploration_pair)
+        self.assertEqual(observations.exploration_destination_layer, 'quantum_layer')
 
     def test_cat_mind_selects_pair_creation(self):
         observations = self.cats.observe_cat(self.cat)
@@ -50,7 +50,7 @@ class CatAutonomousExplorationPairTests(unittest.TestCase):
         box = self.universe.create_quantum_box(layer='meeting_place')
         box.position = {'x': 3.5, 'y': 1.0, 'z': 0.0}
         observations = self.cats.observe_cat(self.cat)
-        self.assertFalse(observations['can_create_exploration_pair'])
+        self.assertFalse(observations.can_create_exploration_pair)
         from cats.cat_mind import CatMind
         decision = CatMind.decide(cat=self.cat, observations=observations)
         self.assertEqual(decision['intention'], 'explore_box')

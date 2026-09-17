@@ -3,6 +3,7 @@ from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat_knowledge import CatKnowledge
 from cats.cat_mind import CatMind
+from cats.cat_perception_state import CatPerceptionState
 
 class CatScentNavigationTests(unittest.TestCase):
 
@@ -16,7 +17,7 @@ class CatScentNavigationTests(unittest.TestCase):
         CatKnowledge.remember_scent_place(cat=self.cat, layer='quantum_layer', position={'x': 5.0, 'y': 0.0, 'z': 0.0}, source_id='box_pazuzu', recognized_identity='cat:pazuzu', components={'cat': 1.0, 'fur': 0.8}, perceived_intensity=0.8, universe_tick=10)
 
     def observations(self):
-        return {'bar_known': True, 'bar_visible': False, 'visible_cronenbergs': [], 'huntable_cronenbergs': [], 'cronenberg_danger': 0.0, 'unexplored_boxes': [], 'can_create_exploration_pair': False, 'nearby_cats': [], 'shareable_legend_count': 0, 'cronenberg_scent_recognized': False}
+        return CatPerceptionState(bar_known=True, bar_visible=False, visible_cronenbergs=[], huntable_cronenbergs=[], cronenberg_danger=0.0, unexplored_boxes=[], can_create_exploration_pair=False, nearby_cats=[], shareable_legend_count=0, cronenberg_scent_recognized=False)
 
     def test_cat_mind_can_choose_known_scent(self):
         traits = self.cat.personality.traits

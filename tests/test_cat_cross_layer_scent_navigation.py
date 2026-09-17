@@ -26,7 +26,7 @@ class CatCrossLayerScentNavigationTests(unittest.TestCase):
     def test_perception_detects_cross_layer_scent(self):
         perception = CatPerception(self.cats)
         result = perception.observe(self.tracker)
-        candidates = result['scent_transfer_candidates']
+        candidates = result.scent_transfer_candidates
         self.assertEqual(len(candidates), 1)
         self.assertEqual(candidates[0]['identity'], 'cat:pazuzu')
         self.assertEqual(candidates[0]['counterpart_box_id'], self.target.id)

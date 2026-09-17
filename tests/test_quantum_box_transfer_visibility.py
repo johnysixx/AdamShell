@@ -36,7 +36,7 @@ class QuantumBoxTransferVisibilityTests(unittest.TestCase):
 
     def test_cat_perception_lists_occupied_box(self):
         result = self.cats.observe_cat(self.observer_cat, vision_radius=5.0)
-        self.assertIn(self.source.id, result['occupied_transfer_boxes'])
-        self.assertNotIn(self.source.id, result['unexplored_boxes'])
+        self.assertIn(self.source.id, result.occupied_transfer_boxes)
+        self.assertNotIn(self.source.id, result.unexplored_boxes)
 if __name__ == '__main__':
     unittest.main()

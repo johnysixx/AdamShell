@@ -18,7 +18,7 @@ class CatBoxKnowledgeLayerTests(unittest.TestCase):
 
     def _box_detail(self):
         observed = CatPerception(self.cats).observe(self.cat)
-        return next((item for item in observed['visible_box_details'] if item['id'] == self.box.id))
+        return next((item for item in observed.visible_box_details if item['id'] == self.box.id))
 
     def test_distant_box_hides_quantum_internal_state(self):
         detail = self._box_detail()

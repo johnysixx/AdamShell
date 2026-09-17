@@ -1,6 +1,9 @@
 from cats.cat_components import CatMindState
 from cats.cat_intellect import CatIntellect
 from cats.cat_knowledge import CatKnowledge
+from cats.cat_perception_state import (
+    CatPerceptionState
+)
 from copy import deepcopy
 
 class CatMind:
@@ -27,6 +30,15 @@ class CatMind:
 
     @classmethod
     def consider(cls, cat, observations):
+        if not isinstance(
+            observations,
+            CatPerceptionState,
+        ):
+            raise TypeError(
+                "CatMind observations must be "
+                "CatPerceptionState."
+            )
+
         """
         VytvoĹ™Ă\xad moĹľnĂ© Ăşmysly.
 
@@ -39,28 +51,28 @@ class CatMind:
         empathy = float(traits.empathy)
         patience = float(traits.patience)
         candidates = []
-        if observations.get('bar_known', False):
+        if observations.bar_known:
             bar_score = 0.45
-            if observations.get('bar_visible', False):
+            if observations.bar_visible:
                 bar_score += 0.1
             bar_score += cls._bar_memory_score(cat)
             quantum_failure_bar_score = cls._quantum_failure_bar_score(cat)
             bar_score += quantum_failure_bar_score
-            candidates.append(cls._candidate(intention_type='visit_bar', score=bar_score, reasons=['bar_known', *(['bar_visible'] if observations.get('bar_visible', False) else []), *(['positive_bar_memory'] if cls._bar_memory_score(cat) > 0 else []), *(['seeking_safety_after_quantum_failure'] if quantum_failure_bar_score > 0 else [])]))
+            candidates.append(cls._candidate(intention_type='visit_bar', score=bar_score, reasons=['bar_known', *(['bar_visible'] if observations.bar_visible else []), *(['positive_bar_memory'] if cls._bar_memory_score(cat) > 0 else []), *(['seeking_safety_after_quantum_failure'] if quantum_failure_bar_score > 0 else [])]))
         recipient = cat.recipient
         if recipient is not None:
             recipient_score = 0.25 + empathy * 0.3 + curiosity * 0.1 + patience * 0.05
             candidates.append(cls._candidate(intention_type='visit_recipient', score=recipient_score, reasons=['assigned_recipient', 'empathy', 'curiosity'], target={'recipient': recipient}))
-        huntable = observations.get('huntable_cronenbergs', [])
+        huntable = observations.huntable_cronenbergs
         if huntable:
-            danger = float(observations.get('cronenberg_danger', 0.5))
+            danger = float(observations.cronenberg_danger)
             hunt_score = 0.25 + courage * 0.3 + aggression * 0.25 + curiosity * 0.1 - danger * 0.2
             candidates.append(cls._candidate(intention_type='hunt_cronenberg', score=hunt_score, reasons=['huntable_cronenberg_visible', 'courage', 'aggression'], target=huntable[0]))
-        if observations.get('cronenberg_scent_recognized', False) and (not observations.get('visible_cronenbergs', [])):
+        if observations.cronenberg_scent_recognized and (not observations.visible_cronenbergs):
             scent_track_score = 0.15 + courage * 0.35 + aggression * 0.3 + curiosity * 0.2
             scent_avoid_score = 0.15 + (1.0 - courage) * 0.45 + patience * 0.25 + (1.0 - aggression) * 0.15
             candidates.append(cls._candidate(intention_type='track_cronenberg_scent', score=scent_track_score, reasons=['recognized_cronenberg_scent', 'cronenberg_not_visible', 'courage', 'aggression', 'curiosity']))
-            if observations.get('bar_known', False):
+            if observations.bar_known:
                 candidates.append(cls._candidate(intention_type='avoid_cronenberg_scent', score=scent_avoid_score, reasons=['recognized_cronenberg_scent', 'cronenberg_not_visible', 'low_courage', 'patience', 'known_safe_bar']))
         scent_places = cat.knowledge.known_scent_places
         current_layer = cat.current_layer
@@ -84,7 +96,7 @@ class CatMind:
                 'freshness': freshness,
             })
         reached_scent = cat.known_scent_follow or {}
-        currently_smelt_identities = {item.get('recognition', {}).get('identity') for item in observations.get('olfaction', {}).get('detected_aromas', []) if item.get('recognition', {}).get('recognized', False)}
+        currently_smelt_identities = {item.get('recognition', {}).get('identity') for item in observations.olfaction.get('detected_aromas', []) if item.get('recognition', {}).get('recognized', False)}
         if isinstance(reached_scent, dict) and reached_scent.get('arrived', False) and (reached_scent.get('identity') not in currently_smelt_identities):
             local_scent_places = []
         if local_scent_places:
@@ -118,7 +130,7 @@ class CatMind:
             if identity not in (None, 'unknown_aroma', 'cronenberg'):
                 scent_direction = CatKnowledge.infer_scent_direction(cat=cat, identity=identity, layer=current_layer)
                 candidates.append(cls._candidate(intention_type='follow_known_scent', score=0.15 + curiosity * 0.25 + courage * 0.1 + float(memory.confidence) * 0.25, reasons=['known_scent_place', 'recognized_identity', 'curiosity'], target={'identity': identity, 'layer': memory.layer, 'position': deepcopy(memory.position), 'source_id': memory.source_id, 'age_ticks': strongest['age_ticks'], 'freshness': strongest['freshness'], 'trail_direction': deepcopy(scent_direction)}))
-        scent_transfers = observations.get('scent_transfer_candidates', [])
+        scent_transfers = observations.scent_transfer_candidates
         if scent_transfers:
             best_scent_transfer = max(scent_transfers, key=lambda item: float(item.get('similarity', 0.0)))
             identity = best_scent_transfer.get('identity')
@@ -137,7 +149,7 @@ class CatMind:
                 negative_quantum_memories = cat.memory.recall(event_type='quantum_box_layer_transfer_failed')
                 travel_score = 0.3 + curiosity * 0.35 + courage * 0.2 + intellect_normalized * 0.15 + quantum_memory_score
                 candidates.append(cls._candidate(intention_type='travel_through_known_quantum_box', score=travel_score, reasons=['quantum_counterpart_sensed', 'quantum_pair_currently_valid', 'curiosity', 'courage', *(['negative_quantum_travel_memory'] if negative_quantum_memories else [])], target={'source_box_id': source_box_id, 'counterpart_box_id': counterpart_box_id, 'source_layer': counterpart_observation.get('source_layer'), 'target_layer': counterpart_observation.get('counterpart_layer'), 'target_position': deepcopy(counterpart_observation.get('counterpart_position', {}))}))
-        for box_detail in observations.get('visible_box_details', []):
+        for box_detail in observations.visible_box_details:
             if not box_detail.get('explored', False):
                 continue
             if not box_detail.get('recognized_as_quantum_box', False):
@@ -154,28 +166,28 @@ class CatMind:
             quantum_experience_bonus = min(0.2, quantum_travel_count * 0.075)
             resonance_score = 0.3 + curiosity * 0.35 + intellect_normalized * 0.3 + quantum_experience_bonus
             candidates.append(cls._candidate(intention_type='sense_quantum_counterpart', score=resonance_score, reasons=['quantum_box_explored', 'quantum_pair_resonance_possible', 'curiosity', 'intellect', *(['experienced_quantum_traveler'] if experienced_quantum_traveler else [])], target={'box_id': box_detail['id']}))
-        boxes = observations.get('unexplored_boxes', [])
+        boxes = observations.unexplored_boxes
         if boxes:
             explore_score = 0.25 + curiosity * 0.55 + courage * 0.1
             candidates.append(cls._candidate(intention_type='explore_box', score=explore_score, reasons=['unexplored_box_visible', 'curiosity'], target=boxes[0]))
-        if not boxes and observations.get('can_create_exploration_pair', False):
-            exploration_plan = observations.get('exploration_plan', {})
+        if not boxes and observations.can_create_exploration_pair:
+            exploration_plan = observations.exploration_plan
             exploration_reasons = set(exploration_plan.get('reasons', []))
             explicit_goal_bonus = 0.5 if 'explicit_exploration_goal' in exploration_reasons else 0.0
             pair_score = 0.2 + curiosity * 0.55 + courage * 0.1 + patience * 0.05 + explicit_goal_bonus
             reasons = ['no_usable_box_visible', 'sufficient_energy', 'curiosity', 'quantum_pair_creation_possible']
             if explicit_goal_bonus > 0.0:
                 reasons.append('explicit_exploration_goal')
-            candidates.append(cls._candidate(intention_type='create_exploration_pair', score=pair_score, reasons=reasons, target={'layer': observations.get('exploration_destination_layer'), 'position': observations.get('exploration_destination_position'), 'energy_cost': observations.get('exploration_pair_energy_cost')}))
-        nearby_cats = observations.get('nearby_cats', [])
+            candidates.append(cls._candidate(intention_type='create_exploration_pair', score=pair_score, reasons=reasons, target={'layer': observations.exploration_destination_layer, 'position': observations.exploration_destination_position, 'energy_cost': observations.exploration_pair_energy_cost}))
+        nearby_cats = observations.nearby_cats
         if nearby_cats:
-            legend_count = int(observations.get('shareable_legend_count', 0))
+            legend_count = int(observations.shareable_legend_count)
             if legend_count > 0:
                 candidates.append(cls._candidate(intention_type='share_legend', score=0.25 + patience * 0.15 + curiosity * 0.15, reasons=['another_cat_nearby', 'shareable_knowledge_exists'], target=nearby_cats[0]))
         if nearby_cats:
             social_score = 0.2 + empathy * 0.5 + curiosity * 0.1
             candidates.append(cls._candidate(intention_type='approach_cat', score=social_score, reasons=['nearby_cat', 'empathy'], target=nearby_cats[0]))
-        if observations.get('interesting_unknown', False):
+        if observations.interesting_unknown:
             candidates.append(cls._candidate(intention_type='observe', score=0.2 + curiosity * 0.4 + patience * 0.2, reasons=['interesting_unknown', 'curiosity', 'patience']))
         needs = getattr(cat, 'needs', {})
         fatigue_need = float(getattr(needs, 'fatigue', 0.0))
@@ -190,7 +202,7 @@ class CatMind:
         if isinstance(reached_scent, dict) and reached_scent.get('arrived', False):
             identity = reached_scent.get('identity')
             direction = reached_scent.get('trail_direction', {})
-            target_smelt_now = any((item.get('recognition', {}).get('recognized', False) and item.get('recognition', {}).get('identity') == identity for item in observations.get('olfaction', {}).get('detected_aromas', [])))
+            target_smelt_now = any((item.get('recognition', {}).get('recognized', False) and item.get('recognition', {}).get('identity') == identity for item in observations.olfaction.get('detected_aromas', [])))
             if identity is not None and (not target_smelt_now) and isinstance(direction, dict) and direction.get('inferred', False):
                 traits = cat.personality.traits
                 curiosity = float(traits.curiosity)

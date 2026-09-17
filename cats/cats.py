@@ -274,7 +274,7 @@ class Cats:
     def think_and_act(self, cat, quantum_roll=None, vision_radius=None, cronenbergs=None, step_size=None):
         from .cat_mind import CatMind
         observations = self.observe_cat(cat=cat, vision_radius=vision_radius)
-        if not observations.get('observed', False):
+        if not observations.observed:
             return {'name': 'cat_thought_cycle_failed', 'cat': getattr(cat, 'name', None), 'observation': observations, 'completed': False}
         decision = CatMind.decide(cat=cat, observations=observations, quantum_roll=quantum_roll)
         if not decision.get('selected', False):

@@ -32,7 +32,7 @@ class CatThoughtCycleTests(unittest.TestCase):
         delattr(self.cat, 'position')
         result = self.cats.think_and_act(cat=self.cat)
         self.assertFalse(result['completed'])
-        self.assertEqual(result['observation']['reason'], 'cat_has_no_position')
+        self.assertEqual(result['observation'].reason, 'cat_has_no_position')
 
     def test_cat_autonomously_senses_and_uses_quantum_box(self):
         self.cat.personality.traits.curiosity = 1.0

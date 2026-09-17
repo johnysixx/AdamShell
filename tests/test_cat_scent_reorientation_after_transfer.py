@@ -43,13 +43,13 @@ class CatScentReorientationAfterTransferTests(unittest.TestCase):
         self.assertIsNone(self.tracker.mind.current_intention)
         perception = CatPerception(self.cats)
         observations = perception.observe(self.tracker)
-        self.assertEqual(observations['current_layer'], 'quantum_layer')
-        smelled = {item['entity_id']: item for item in observations['olfaction']['detected_aromas']}
+        self.assertEqual(observations.current_layer, 'quantum_layer')
+        smelled = {item['entity_id']: item for item in observations.olfaction['detected_aromas']}
         self.assertIn(self.trail_box.id, smelled)
         trail_smell = smelled[self.trail_box.id]
         self.assertTrue(trail_smell['recognition']['recognized'])
         self.assertEqual(trail_smell['recognition']['identity'], 'cat:creator')
-        memories = observations['scent_memories']
+        memories = observations.scent_memories
         trail_memories = [memory for memory in memories if memory.source_id == self.trail_box.id]
         self.assertEqual(len(trail_memories), 1)
         self.assertEqual(trail_memories[0].layer, 'quantum_layer')
@@ -59,16 +59,16 @@ class CatScentReorientationAfterTransferTests(unittest.TestCase):
         self.assertIsNone(self.tracker.mind.current_intention)
         perception = CatPerception(self.cats)
         observations = perception.observe(self.tracker)
-        observations['bar_known'] = False
-        observations['bar_visible'] = False
-        observations['unexplored_boxes'] = []
-        observations['can_create_exploration_pair'] = False
-        observations['nearby_cats'] = []
-        observations['shareable_legend_count'] = 0
-        observations['interesting_unknown'] = False
-        observations['huntable_cronenbergs'] = []
-        observations['visible_cronenbergs'] = []
-        observations['cronenberg_scent_recognized'] = False
+        observations.bar_known = False
+        observations.bar_visible = False
+        observations.unexplored_boxes = []
+        observations.can_create_exploration_pair = False
+        observations.nearby_cats = []
+        observations.shareable_legend_count = 0
+        observations.interesting_unknown = False
+        observations.huntable_cronenbergs = []
+        observations.visible_cronenbergs = []
+        observations.cronenberg_scent_recognized = False
         traits = self.tracker.personality.traits
         traits.curiosity = 1.0
         traits.courage = 1.0

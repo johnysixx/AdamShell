@@ -3,6 +3,7 @@ import unittest
 from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat_mind import CatMind
+from cats.cat_perception_state import CatPerceptionState
 
 class CatIntentionExecutorTests(unittest.TestCase):
 
@@ -55,7 +56,7 @@ class CatIntentionExecutorTests(unittest.TestCase):
         self.assertEqual(self.cat.mind.current_intention['type'], 'observe')
 
     def test_executor_does_not_make_new_decision(self):
-        decision = CatMind.decide(cat=self.cat, observations={'bar_known': True, 'bar_visible': True})
+        decision = CatMind.decide(cat=self.cat, observations=CatPerceptionState(bar_known=True, bar_visible=True))
         decision_count = self.cat.mind.decision_count
         result = self.cats.execute_cat_intention(self.cat)
         self.assertTrue(result['executed'])

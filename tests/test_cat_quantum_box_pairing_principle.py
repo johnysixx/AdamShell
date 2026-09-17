@@ -22,7 +22,7 @@ class CatQuantumBoxPairingPrincipleTests(unittest.TestCase):
 
     def box_detail(self):
         observed = self.observe()
-        return next((item for item in observed['visible_box_details'] if item['id'] == self.box.id))
+        return next((item for item in observed.visible_box_details if item['id'] == self.box.id))
 
     def explore_box(self):
         self.cat.mind.current_intention = {'type': 'explore_box', 'target': self.box.id, 'score': 1.0, 'reasons': ['test']}
@@ -56,8 +56,8 @@ class CatQuantumBoxPairingPrincipleTests(unittest.TestCase):
         self.assertTrue(any((self.box.id in memory.get('participants', []) for memory in memories)))
         self.universe.quantum_boxes.remove(self.box)
         observed = self.observe()
-        self.assertNotIn(self.box.id, observed['visible_boxes'])
-        self.assertFalse(any((item.get('id') == self.box.id for item in observed['visible_box_details'])))
+        self.assertNotIn(self.box.id, observed.visible_boxes)
+        self.assertFalse(any((item.get('id') == self.box.id for item in observed.visible_box_details)))
         memories_after = self.cat.memory.recall(event_type='quantum_box_observed')
         self.assertTrue(any((self.box.id in memory.get('participants', []) for memory in memories_after)))
         knowledge = CatKnowledge.ensure_cat_knowledge(self.cat)
