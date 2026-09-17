@@ -3,6 +3,7 @@ from copy import deepcopy
 from cats.cat_social_objects import CatLegend, CatRelationship
 from cats.cat_knowledge_objects import (
     CatHeardLegend,
+    CatKnownAroma,
     CatKnownPlace,
     CatScentPlaceMemory,
     CatVerifiedLegendRecord,
@@ -434,50 +435,127 @@ class CatKnowledge:
         return verified
 
     @classmethod
-    def learn_aroma(cls, cat, identity, components, source='direct_experience'):
-        knowledge = cls.ensure_cat_knowledge(cat)
-        normalized = {str(key): float(value) for key, value in dict(components).items() if float(value) > 0.0}
-        known = next((item for item in knowledge['known_aromas'] if item.get('identity') == identity), None)
+    def learn_aroma(
+        cls,
+        cat,
+        identity,
+        components,
+        source='direct_experience',
+    ):
+        knowledge = (
+            cls.ensure_cat_knowledge(
+                cat
+            )
+        )
+
+        known = next(
+            (
+                item
+                for item in knowledge[
+                    'known_aromas'
+                ]
+                if item.identity
+                == identity
+            ),
+            None,
+        )
+
         if known is None:
-            known = {'identity': identity, 'components': normalized, 'source': source, 'encounters': 1, 'confidence': 0.55}
-            knowledge['known_aromas'].append(known)
+            known = CatKnownAroma.create(
+                identity=identity,
+                components=components,
+                source=source,
+            )
+
+            knowledge[
+                'known_aromas'
+            ].append(
+                known
+            )
+
         else:
-            known['encounters'] += 1
-            known['source'] = source
-            previous = known.setdefault('components', {})
-            all_keys = set(previous) | set(normalized)
-            for key in all_keys:
-                previous[key] = (float(previous.get(key, 0.0)) + float(normalized.get(key, 0.0))) / 2.0
-            known['confidence'] = min(1.0, float(known.get('confidence', 0.55)) + 0.1)
-        return deepcopy(known)
+            known.record_encounter(
+                components=components,
+                source=source,
+            )
+
+        return deepcopy(
+            known
+        )
 
     @classmethod
-    def recognize_aroma(cls, cat, components, minimum_similarity=0.55):
-        knowledge = cls.ensure_cat_knowledge(cat)
-        observed = {str(key): float(value) for key, value in dict(components).items() if float(value) > 0.0}
-        matches = []
-        for known in knowledge['known_aromas']:
-            similarity = cls._aroma_similarity(observed, known.get('components', {}))
-            if similarity < minimum_similarity:
-                continue
-            matches.append({'identity': known['identity'], 'similarity': similarity, 'confidence': known.get('confidence', 0.5), 'encounters': known.get('encounters', 1)})
-        matches.sort(key=lambda item: (item['similarity'], item['confidence']), reverse=True)
-        if not matches:
-            return {'recognized': False, 'identity': None, 'similarity': 0.0, 'matches': []}
-        winner = matches[0]
-        return {'recognized': True, 'identity': winner['identity'], 'similarity': winner['similarity'], 'matches': matches}
+    def recognize_aroma(
+        cls,
+        cat,
+        components,
+        minimum_similarity=0.55,
+    ):
+        knowledge = (
+            cls.ensure_cat_knowledge(
+                cat
+            )
+        )
 
-    @staticmethod
-    def _aroma_similarity(first, second):
-        keys = set(first) | set(second)
-        if not keys:
-            return 0.0
-        dot = sum((float(first.get(key, 0.0)) * float(second.get(key, 0.0)) for key in keys))
-        first_length = sum((float(first.get(key, 0.0)) ** 2 for key in keys)) ** 0.5
-        second_length = sum((float(second.get(key, 0.0)) ** 2 for key in keys)) ** 0.5
-        if first_length == 0.0 or second_length == 0.0:
-            return 0.0
-        return max(0.0, min(1.0, dot / (first_length * second_length)))
+        matches = []
+
+        for known in knowledge[
+            'known_aromas'
+        ]:
+            similarity = (
+                known.similarity_to(
+                    components
+                )
+            )
+
+            if (
+                similarity
+                < minimum_similarity
+            ):
+                continue
+
+            matches.append({
+                'identity': (
+                    known.identity
+                ),
+                'similarity': (
+                    similarity
+                ),
+                'confidence': (
+                    known.confidence
+                ),
+                'encounters': (
+                    known.encounters
+                ),
+            })
+
+        matches.sort(
+            key=lambda item: (
+                item['similarity'],
+                item['confidence'],
+            ),
+            reverse=True,
+        )
+
+        if not matches:
+            return {
+                'recognized': False,
+                'identity': None,
+                'similarity': 0.0,
+                'matches': [],
+            }
+
+        winner = matches[0]
+
+        return {
+            'recognized': True,
+            'identity': (
+                winner['identity']
+            ),
+            'similarity': (
+                winner['similarity']
+            ),
+            'matches': matches,
+        }
 
     @classmethod
     def remember_scent_place(

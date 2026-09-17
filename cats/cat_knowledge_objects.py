@@ -234,3 +234,159 @@ class CatVerifiedLegendRecord:
 
     credibility_before: float
     trust_change: dict
+
+
+
+@dataclass(slots=True)
+class CatKnownAroma:
+
+    identity: str
+    components: dict
+    source: str
+
+    encounters: int = 1
+    confidence: float = 0.55
+
+    @staticmethod
+    def normalize_components(
+        components
+    ):
+        return {
+            str(key): float(value)
+            for key, value
+            in dict(components).items()
+            if float(value) > 0.0
+        }
+
+    @classmethod
+    def create(
+        cls,
+        identity,
+        components,
+        source='direct_experience',
+    ):
+        return cls(
+            identity=identity,
+            components=(
+                cls.normalize_components(
+                    components
+                )
+            ),
+            source=source,
+        )
+
+    def record_encounter(
+        self,
+        components,
+        source,
+    ):
+        normalized = (
+            self.normalize_components(
+                components
+            )
+        )
+
+        self.encounters += 1
+        self.source = source
+
+        all_keys = (
+            set(self.components)
+            | set(normalized)
+        )
+
+        self.components = {
+            key: (
+                float(
+                    self.components.get(
+                        key,
+                        0.0,
+                    )
+                )
+                + float(
+                    normalized.get(
+                        key,
+                        0.0,
+                    )
+                )
+            )
+            / 2.0
+            for key in all_keys
+        }
+
+        self.confidence = min(
+            1.0,
+            float(self.confidence)
+            + 0.1,
+        )
+
+    def similarity_to(
+        self,
+        components,
+    ):
+        observed = (
+            self.normalize_components(
+                components
+            )
+        )
+
+        keys = (
+            set(observed)
+            | set(self.components)
+        )
+
+        if not keys:
+            return 0.0
+
+        dot = sum(
+            float(
+                observed.get(
+                    key,
+                    0.0,
+                )
+            )
+            * float(
+                self.components.get(
+                    key,
+                    0.0,
+                )
+            )
+            for key in keys
+        )
+
+        observed_length = sum(
+            float(
+                observed.get(
+                    key,
+                    0.0,
+                )
+            ) ** 2
+            for key in keys
+        ) ** 0.5
+
+        known_length = sum(
+            float(
+                self.components.get(
+                    key,
+                    0.0,
+                )
+            ) ** 2
+            for key in keys
+        ) ** 0.5
+
+        if (
+            observed_length == 0.0
+            or known_length == 0.0
+        ):
+            return 0.0
+
+        return max(
+            0.0,
+            min(
+                1.0,
+                dot
+                / (
+                    observed_length
+                    * known_length
+                ),
+            ),
+        )
