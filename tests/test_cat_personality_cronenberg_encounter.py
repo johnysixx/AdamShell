@@ -35,24 +35,24 @@ class CatPersonalityCronenbergEncounterTests(unittest.TestCase):
         route = self.create_route(cronenberg)
         result = self.universe.cat_cronenberg_encounter.resolve(cat=self.cat, cronenberg=cronenberg, route=route, universe=self.universe, rng=FixedRng(1.0))
         self.assertEqual(result['result'], 'cronenberg_hunted')
-        self.assertAlmostEqual(self.traits()['courage'], 0.54)
-        self.assertAlmostEqual(self.traits()['aggression'], 0.525)
-        self.assertAlmostEqual(self.traits()['curiosity'], 0.51)
+        self.assertAlmostEqual(self.traits().courage, 0.54)
+        self.assertAlmostEqual(self.traits().aggression, 0.525)
+        self.assertAlmostEqual(self.traits().curiosity, 0.51)
 
     def test_large_cronenberg_builds_patience(self):
         cronenberg = self.create_cronenberg(size=2.0)
         route = self.create_route(cronenberg)
         result = self.universe.cat_cronenberg_encounter.resolve(cat=self.cat, cronenberg=cronenberg, route=route, universe=self.universe, rng=FixedRng(1.0))
         self.assertEqual(result['result'], 'cat_avoids_cronenberg')
-        self.assertAlmostEqual(self.traits()['patience'], 0.53)
-        self.assertAlmostEqual(self.traits()['courage'], 0.51)
+        self.assertAlmostEqual(self.traits().patience, 0.53)
+        self.assertAlmostEqual(self.traits().courage, 0.51)
 
     def test_escaped_prey_builds_patience(self):
         cronenberg = self.create_cronenberg(size=0.8)
         route = self.create_route(cronenberg)
         result = self.universe.cat_cronenberg_encounter.resolve(cat=self.cat, cronenberg=cronenberg, route=route, universe=self.universe, rng=FixedRng(0.0))
         self.assertEqual(result['result'], 'cronenberg_escaped')
-        self.assertAlmostEqual(self.traits()['patience'], 0.52)
-        self.assertAlmostEqual(self.traits()['curiosity'], 0.51)
+        self.assertAlmostEqual(self.traits().patience, 0.52)
+        self.assertAlmostEqual(self.traits().curiosity, 0.51)
 if __name__ == '__main__':
     unittest.main()

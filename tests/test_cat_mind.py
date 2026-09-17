@@ -21,16 +21,16 @@ class CatMindTests(unittest.TestCase):
         self.assertEqual(mind.history, [])
 
     def test_curious_cat_prefers_new_box(self):
-        self.traits()['curiosity'] = 1.0
-        self.traits()['courage'] = 0.7
+        self.traits().curiosity = 1.0
+        self.traits().courage = 0.7
         result = CatMind.decide(cat=self.cat, observations={'unexplored_boxes': ['box_alpha']})
         self.assertEqual(result['intention'], 'explore_box')
         self.assertEqual(result['target'], 'box_alpha')
 
     def test_brave_aggressive_cat_considers_hunt(self):
-        self.traits()['courage'] = 1.0
-        self.traits()['aggression'] = 1.0
-        self.traits()['curiosity'] = 0.7
+        self.traits().courage = 1.0
+        self.traits().aggression = 1.0
+        self.traits().curiosity = 0.7
         candidates = CatMind.consider(cat=self.cat, observations={'huntable_cronenbergs': ['cronenberg_small'], 'cronenberg_danger': 0.2})
         self.assertEqual(candidates[0]['type'], 'hunt_cronenberg')
 

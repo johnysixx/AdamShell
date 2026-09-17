@@ -13,7 +13,24 @@ class CatPersonalityTests(unittest.TestCase):
     def test_new_cat_has_neutral_personality(self):
         traits = self.cat.personality.traits
         self.assertTrue(all(hasattr(traits, trait) for trait in CatPersonality.TRAITS))
-        self.assertTrue(all((value == 0.5 for value in traits.values())))
+        self.assertEqual(
+            (
+                traits.curiosity,
+                traits.courage,
+                traits.aggression,
+                traits.empathy,
+                traits.patience,
+                traits.sociability,
+            ),
+            (
+                0.5,
+                0.5,
+                0.5,
+                0.5,
+                0.5,
+                0.5,
+            ),
+        )
 
     def test_trait_can_increase(self):
         event = CatPersonality.adjust(cat=self.cat, trait='courage', amount=0.2, source='successful_hunt', day=10)

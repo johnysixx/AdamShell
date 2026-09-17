@@ -27,19 +27,19 @@ class CatPersonalitySocializationTests(unittest.TestCase):
     def test_first_socialization_lesson_builds_empathy(self):
         result = self.run_day(14)
         lesson = next((event for event in result['events'] if event.get('name') == 'kitten_socialization_lesson'))
-        self.assertAlmostEqual(self.traits()['empathy'], 0.51)
-        self.assertAlmostEqual(self.traits()['patience'], 0.505)
+        self.assertAlmostEqual(self.traits().empathy, 0.51)
+        self.assertAlmostEqual(self.traits().patience, 0.505)
         self.assertTrue(lesson['personality']['applied'])
 
     def test_socialization_changes_accumulate(self):
         for day in range(14, 21):
             self.run_day(day)
-        self.assertAlmostEqual(self.traits()['empathy'], 0.57)
-        self.assertAlmostEqual(self.traits()['patience'], 0.535)
+        self.assertAlmostEqual(self.traits().empathy, 0.57)
+        self.assertAlmostEqual(self.traits().patience, 0.535)
 
     def test_pre_socialization_care_does_not_change_traits(self):
         self.run_day(10)
-        self.assertEqual(self.traits()['empathy'], 0.5)
-        self.assertEqual(self.traits()['patience'], 0.5)
+        self.assertEqual(self.traits().empathy, 0.5)
+        self.assertEqual(self.traits().patience, 0.5)
 if __name__ == '__main__':
     unittest.main()

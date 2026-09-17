@@ -22,22 +22,6 @@ class CatPersonalityTraits:
             "sociability": self.sociability,
         }
 
-    def __getitem__(self, name):
-        return self.to_dict()[name]
-
-    def __setitem__(self, name, value):
-        if name not in self.to_dict():
-            raise KeyError(name)
-
-        setattr(
-            self,
-            name,
-            value
-        )
-
-    def values(self):
-        return self.to_dict().values()
-
 
 @dataclass(slots=True)
 class CatPersonalityState:
