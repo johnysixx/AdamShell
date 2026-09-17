@@ -748,35 +748,21 @@ class CatExplorationPlanner:
             "heard_legends",
             []
         ):
-            if heard.get(
-                "verified",
-                False
-            ):
+            if heard.verified:
                 continue
 
-            if heard.get(
-                "contradicted",
-                False
-            ):
+            if heard.contradicted:
                 continue
 
             credibility = float(
-                heard.get(
-                    "credibility",
-                    0.0
-                )
+                heard.credibility
             )
 
             if credibility < 0.35:
                 continue
 
-            layer = heard.get(
-                "layer"
-            )
-
-            position = heard.get(
-                "position"
-            )
+            layer = heard.layer
+            position = heard.position
 
             if (
                 layer is None
@@ -789,15 +775,19 @@ class CatExplorationPlanner:
 
             candidates.append({
                 "layer": str(layer),
-                "position": cls._position(
-                    position
+                "position": (
+                    cls._position(
+                        position
+                    )
                 ),
-                "source": "heard_legend",
-                "legend_id": heard.get(
-                    "legend_id"
+                "source": (
+                    "heard_legend"
                 ),
-                "storyteller": heard.get(
-                    "storyteller"
+                "legend_id": (
+                    heard.legend_id
+                ),
+                "storyteller": (
+                    heard.storyteller
                 ),
                 "legend_credibility": (
                     credibility

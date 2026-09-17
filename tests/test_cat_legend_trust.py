@@ -17,7 +17,7 @@ class CatLegendTrustTests(unittest.TestCase):
 
     def test_heard_legend_is_not_fact(self):
         heard = CatKnowledge.hear_legend(listener=self.listener, storyteller=self.storyteller, legend=self.legend)
-        self.assertFalse(heard['verified'])
+        self.assertFalse(heard.verified)
         self.assertEqual(len(self.listener.knowledge['known_places']), 0)
         self.assertEqual(len(self.listener.knowledge['heard_legends']), 1)
 
@@ -31,7 +31,7 @@ class CatLegendTrustTests(unittest.TestCase):
         relationship.trust = 0.0
         other.relationships[self.storyteller.name] = relationship
         skeptical = CatKnowledge.hear_legend(other, self.storyteller, self.legend)
-        self.assertGreater(trusted['credibility'], skeptical['credibility'])
+        self.assertGreater(trusted.credibility, skeptical.credibility)
 
     def test_planner_can_use_credible_legend(self):
         relationship = CatRelationship.create()
@@ -48,6 +48,6 @@ class CatLegendTrustTests(unittest.TestCase):
         place = CatKnowledge.remember_place(self.listener, 'quantum_layer', {'x': 12.0, 'y': 3.0, 'z': 0.0})
         verified = CatKnowledge.verify_heard_legend(self.listener, place)
         self.assertEqual(len(verified), 1)
-        self.assertTrue(self.listener.knowledge['heard_legends'][0]['verified'])
+        self.assertTrue(self.listener.knowledge['heard_legends'][0].verified)
 if __name__ == '__main__':
     unittest.main()

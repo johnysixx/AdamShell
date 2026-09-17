@@ -133,3 +133,104 @@ class CatScentPlaceMemory:
             self.components = deepcopy(
                 components
             )
+
+
+
+@dataclass(slots=True)
+class CatHeardLegend:
+
+    legend_id: str | None
+    claim_type: str | None
+    place_id: str | None
+    layer: str | None
+    position: dict | None
+
+    storyteller: str
+
+    trust_in_storyteller: float
+    source_confidence: float
+    credibility: float
+
+    heard_count: int = 1
+
+    verified: bool = False
+    contradicted: bool = False
+
+    trust_after_verification: (
+        float | None
+    ) = None
+
+    trust_after_contradiction: (
+        float | None
+    ) = None
+
+    def record_hearing(
+        self,
+        trust_in_storyteller,
+        source_confidence,
+        credibility,
+    ):
+        self.heard_count += 1
+
+        self.trust_in_storyteller = (
+            float(
+                trust_in_storyteller
+            )
+        )
+
+        self.source_confidence = float(
+            source_confidence
+        )
+
+        self.credibility = min(
+            1.0,
+            (
+                float(
+                    self.credibility
+                )
+                + float(
+                    credibility
+                )
+            )
+            / 2.0
+            + 0.03,
+        )
+
+    def verify(
+        self,
+        trust_after,
+    ):
+        self.verified = True
+        self.contradicted = False
+
+        self.trust_after_verification = (
+            float(
+                trust_after
+            )
+        )
+
+    def contradict(
+        self,
+        trust_after,
+    ):
+        self.contradicted = True
+        self.verified = False
+
+        self.trust_after_contradiction = (
+            float(
+                trust_after
+            )
+        )
+
+
+@dataclass(slots=True)
+class CatVerifiedLegendRecord:
+
+    legend_id: str | None
+    place_id: str | None
+
+    storyteller: str
+    verified_by: str
+
+    credibility_before: float
+    trust_change: dict

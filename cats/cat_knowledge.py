@@ -1,7 +1,12 @@
 from cats.cat import Cat
 from copy import deepcopy
 from cats.cat_social_objects import CatLegend, CatRelationship
-from cats.cat_knowledge_objects import CatKnownPlace, CatScentPlaceMemory
+from cats.cat_knowledge_objects import (
+    CatHeardLegend,
+    CatKnownPlace,
+    CatScentPlaceMemory,
+    CatVerifiedLegendRecord,
+)
 
 class CatKnowledge:
 
@@ -198,48 +203,234 @@ class CatKnowledge:
         return deepcopy(legend)
 
     @classmethod
-    def hear_legend(cls, listener, storyteller, legend):
-        """
-        Poslucha? si ciz? legendu neulo??
-        jako fakt, ale jako sly?en? tvrzen?.
-        """
-        knowledge = cls.ensure_cat_knowledge(listener)
-        if not isinstance(storyteller, Cat):
-            raise TypeError('Legend storyteller must be Cat.')
-        if not isinstance(listener, Cat):
-            raise TypeError('Legend listener must be Cat.')
-        storyteller_name = storyteller.name
-        trust = cls._trust_in_cat(listener, storyteller_name)
-        intellect = float(listener.intellect.get('normalized', 0.5))
-        source_confidence = float(getattr(legend, 'confidence', 0.5))
-        credibility = source_confidence * 0.45 + trust * 0.4 + intellect * 0.15
-        heard = next((item for item in knowledge['heard_legends'] if item.get('legend_id') == getattr(legend, 'legend_id', None) and item.get('storyteller') == storyteller_name), None)
+    def hear_legend(
+        cls,
+        listener,
+        storyteller,
+        legend,
+    ):
+        knowledge = (
+            cls.ensure_cat_knowledge(
+                listener
+            )
+        )
+
+        if not isinstance(
+            storyteller,
+            Cat,
+        ):
+            raise TypeError(
+                'Legend storyteller must be Cat.'
+            )
+
+        if not isinstance(
+            listener,
+            Cat,
+        ):
+            raise TypeError(
+                'Legend listener must be Cat.'
+            )
+
+        storyteller_name = (
+            storyteller.name
+        )
+
+        trust = cls._trust_in_cat(
+            listener,
+            storyteller_name,
+        )
+
+        intellect = float(
+            listener.intellect.get(
+                'normalized',
+                0.5,
+            )
+        )
+
+        source_confidence = float(
+            getattr(
+                legend,
+                'confidence',
+                0.5,
+            )
+        )
+
+        credibility = (
+            source_confidence
+            * 0.45
+            + trust
+            * 0.4
+            + intellect
+            * 0.15
+        )
+
+        legend_id = getattr(
+            legend,
+            'legend_id',
+            None,
+        )
+
+        heard = next(
+            (
+                item
+                for item
+                in knowledge[
+                    'heard_legends'
+                ]
+                if item.legend_id
+                == legend_id
+                and item.storyteller
+                == storyteller_name
+            ),
+            None,
+        )
+
         if heard is None:
-            heard = {'legend_id': getattr(legend, 'legend_id', None), 'claim_type': getattr(legend, 'claim_type', None), 'place_id': getattr(legend, 'place_id', None), 'layer': getattr(legend, 'layer', None), 'position': deepcopy(getattr(legend, 'position', None)), 'storyteller': storyteller_name, 'trust_in_storyteller': trust, 'source_confidence': source_confidence, 'credibility': credibility, 'heard_count': 1, 'verified': False, 'contradicted': False}
-            knowledge['heard_legends'].append(heard)
+            heard = CatHeardLegend(
+                legend_id=legend_id,
+                claim_type=getattr(
+                    legend,
+                    'claim_type',
+                    None,
+                ),
+                place_id=getattr(
+                    legend,
+                    'place_id',
+                    None,
+                ),
+                layer=getattr(
+                    legend,
+                    'layer',
+                    None,
+                ),
+                position=deepcopy(
+                    getattr(
+                        legend,
+                        'position',
+                        None,
+                    )
+                ),
+                storyteller=(
+                    storyteller_name
+                ),
+                trust_in_storyteller=(
+                    trust
+                ),
+                source_confidence=(
+                    source_confidence
+                ),
+                credibility=credibility,
+            )
+
+            knowledge[
+                'heard_legends'
+            ].append(
+                heard
+            )
+
         else:
-            heard['heard_count'] += 1
-            heard['trust_in_storyteller'] = trust
-            heard['source_confidence'] = source_confidence
-            heard['credibility'] = min(1.0, (heard['credibility'] + credibility) / 2.0 + 0.03)
-        return deepcopy(heard)
+            heard.record_hearing(
+                trust_in_storyteller=(
+                    trust
+                ),
+                source_confidence=(
+                    source_confidence
+                ),
+                credibility=credibility,
+            )
+
+        return deepcopy(
+            heard
+        )
 
     @classmethod
-    def verify_heard_legend(cls, cat, place):
-        knowledge = cls.ensure_cat_knowledge(cat)
+    def verify_heard_legend(
+        cls,
+        cat,
+        place,
+    ):
+        knowledge = (
+            cls.ensure_cat_knowledge(
+                cat
+            )
+        )
+
         verified = []
-        for heard in knowledge['heard_legends']:
-            if heard.get('place_id') != place.place_id:
+
+        for heard in knowledge[
+            'heard_legends'
+        ]:
+            if (
+                heard.place_id
+                != place.place_id
+            ):
                 continue
-            if heard.get('verified', False):
+
+            if heard.verified:
                 continue
-            heard['verified'] = True
-            heard['contradicted'] = False
-            trust_change = cls.adjust_storyteller_trust(listener=cat, storyteller_name=heard['storyteller'], delta=0.1, reason='legend_confirmed_by_personal_observation', legend_id=heard['legend_id'])
-            heard['trust_after_verification'] = trust_change['current']
-            record = {'legend_id': heard['legend_id'], 'place_id': heard['place_id'], 'storyteller': heard['storyteller'], 'verified_by': cat.name, 'credibility_before': heard['credibility'], 'trust_change': trust_change}
-            knowledge['verified_legends'].append(record)
-            verified.append(deepcopy(record))
+
+            credibility_before = (
+                heard.credibility
+            )
+
+            trust_change = (
+                cls.adjust_storyteller_trust(
+                    listener=cat,
+                    storyteller_name=(
+                        heard.storyteller
+                    ),
+                    delta=0.1,
+                    reason=(
+                        'legend_confirmed_by_'
+                        'personal_observation'
+                    ),
+                    legend_id=(
+                        heard.legend_id
+                    ),
+                )
+            )
+
+            heard.verify(
+                trust_after=(
+                    trust_change[
+                        'current'
+                    ]
+                )
+            )
+
+            record = (
+                CatVerifiedLegendRecord(
+                    legend_id=(
+                        heard.legend_id
+                    ),
+                    place_id=(
+                        heard.place_id
+                    ),
+                    storyteller=(
+                        heard.storyteller
+                    ),
+                    verified_by=cat.name,
+                    credibility_before=(
+                        credibility_before
+                    ),
+                    trust_change=deepcopy(
+                        trust_change
+                    ),
+                )
+            )
+
+            knowledge[
+                'verified_legends'
+            ].append(
+                record
+            )
+
+            verified.append(
+                deepcopy(
+                    record
+                )
+            )
+
         return verified
 
     @classmethod
@@ -599,7 +790,7 @@ class CatKnowledge:
         storyteller_name = storyteller.name
         listener_name = listener.name
         knowledge = cls.ensure_cat_knowledge(listener)
-        already_heard = {(item.get('legend_id'), item.get('storyteller')) for item in knowledge['heard_legends']}
+        already_heard = {(item.legend_id, item.storyteller) for item in knowledge['heard_legends']}
         candidates = []
         for legend in legends:
             if not getattr(legend, 'active', True):
@@ -716,19 +907,82 @@ class CatKnowledge:
         return deepcopy(event)
 
     @classmethod
-    def contradict_heard_legend(cls, cat, legend_id, reason='personal_observation_contradicted'):
-        knowledge = cls.ensure_cat_knowledge(cat)
-        heard = next((item for item in knowledge['heard_legends'] if item.get('legend_id') == legend_id), None)
+    def contradict_heard_legend(
+        cls,
+        cat,
+        legend_id,
+        reason=(
+            'personal_observation_'
+            'contradicted'
+        ),
+    ):
+        knowledge = (
+            cls.ensure_cat_knowledge(
+                cat
+            )
+        )
+
+        heard = next(
+            (
+                item
+                for item
+                in knowledge[
+                    'heard_legends'
+                ]
+                if item.legend_id
+                == legend_id
+            ),
+            None,
+        )
+
         if heard is None:
-            return {'contradicted': False, 'reason': 'legend_not_heard', 'legend_id': legend_id}
-        if heard.get('verified', False):
-            return {'contradicted': False, 'reason': 'legend_already_verified', 'legend_id': legend_id}
-        heard['contradicted'] = True
-        heard['verified'] = False
-        storyteller = heard.get('storyteller')
-        trust_change = cls.adjust_storyteller_trust(listener=cat, storyteller_name=storyteller, delta=-0.15, reason=reason, legend_id=legend_id)
-        heard['trust_after_contradiction'] = trust_change['current']
-        return {'contradicted': True, 'legend_id': legend_id, 'storyteller': storyteller, 'trust_change': trust_change}
+            return {
+                'contradicted': False,
+                'reason': (
+                    'legend_not_heard'
+                ),
+                'legend_id': legend_id,
+            }
+
+        if heard.verified:
+            return {
+                'contradicted': False,
+                'reason': (
+                    'legend_already_verified'
+                ),
+                'legend_id': legend_id,
+            }
+
+        storyteller = (
+            heard.storyteller
+        )
+
+        trust_change = (
+            cls.adjust_storyteller_trust(
+                listener=cat,
+                storyteller_name=(
+                    storyteller
+                ),
+                delta=-0.15,
+                reason=reason,
+                legend_id=legend_id,
+            )
+        )
+
+        heard.contradict(
+            trust_after=(
+                trust_change[
+                    'current'
+                ]
+            )
+        )
+
+        return {
+            'contradicted': True,
+            'legend_id': legend_id,
+            'storyteller': storyteller,
+            'trust_change': trust_change,
+        }
 
     @staticmethod
     def _trust_in_cat(
