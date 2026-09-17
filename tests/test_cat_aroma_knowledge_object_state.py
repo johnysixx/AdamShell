@@ -47,9 +47,7 @@ class CatAromaKnowledgeObjectStateTests(
         )
 
         stored = (
-            self.cat.knowledge[
-                'known_aromas'
-            ][0]
+            self.cat.knowledge.known_aromas[0]
         )
 
         self.assertIsInstance(
@@ -87,9 +85,7 @@ class CatAromaKnowledgeObjectStateTests(
         )
 
         aromas = (
-            self.cat.knowledge[
-                'known_aromas'
-            ]
+            self.cat.knowledge.known_aromas
         )
 
         self.assertEqual(

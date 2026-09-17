@@ -49,9 +49,7 @@ class CatKnowledgePlaceObjectStateTests(
         )
 
         self.assertIsInstance(
-            self.cat.knowledge[
-                'known_places'
-            ][0],
+            self.cat.knowledge.known_places[0],
             CatKnownPlace,
         )
 
@@ -83,9 +81,7 @@ class CatKnowledgePlaceObjectStateTests(
         )
 
         self.assertIsInstance(
-            self.cat.knowledge[
-                'known_scent_places'
-            ][0],
+            self.cat.knowledge.known_scent_places[0],
             CatScentPlaceMemory,
         )
 

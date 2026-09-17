@@ -18,7 +18,7 @@ class CatGroupRoleSystem:
         for trait, weight in profile.get('traits', {}).items():
             score += self._number(getattr(traits, trait, 0.5)) * weight
         score += self._number(cat.group.influence) * profile.get('influence_weight', 0.0)
-        score += min(1.0, len(cat.knowledge) / 10.0) * profile.get('knowledge_weight', 0.0)
+        score += cat.knowledge.role_knowledge_score() * profile.get('knowledge_weight', 0.0)
         score += self._number(cat.group.shared_scent) * profile.get('group_scent_weight', 0.0)
         score = min(1.0, score)
         return {'role': role, 'eligible': score >= 0.35, 'score': round(score, 4)}

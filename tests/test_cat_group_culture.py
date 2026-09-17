@@ -298,9 +298,7 @@ class CatGroupCultureTests(
             created[
                 "myth_id"
             ],
-            self.other.knowledge[
-                "heard_group_myths"
-            ]
+            self.other.knowledge.heard_group_myths
         )
 
     def test_two_knowledge_sources_can_create_innovation(

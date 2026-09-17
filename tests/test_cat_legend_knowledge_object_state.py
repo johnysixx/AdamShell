@@ -73,9 +73,7 @@ class CatLegendKnowledgeObjectStateTests(
         )
 
         stored = (
-            self.listener.knowledge[
-                'heard_legends'
-            ][0]
+            self.listener.knowledge.heard_legends[0]
         )
 
         self.assertIsInstance(
@@ -125,9 +123,7 @@ class CatLegendKnowledgeObjectStateTests(
         )
 
         stored = (
-            self.listener.knowledge[
-                'verified_legends'
-            ][0]
+            self.listener.knowledge.verified_legends[0]
         )
 
         self.assertIsInstance(

@@ -81,7 +81,7 @@ class CatGroupKnowledgeSystem:
             if record.confidence < 0.35:
                 record.verified = False
             outcome = 'contradicted'
-        member_knowledge = cat.knowledge.setdefault('group_received_knowledge', {})
+        member_knowledge = cat.knowledge.group_received_knowledge
         personal = member_knowledge.get(knowledge_id)
         if personal is not None:
             personal.confidence = record.confidence
@@ -92,7 +92,7 @@ class CatGroupKnowledgeSystem:
         return event
 
     def _offer_to_member(self, cat, record, transmission):
-        received = cat.knowledge.setdefault('group_received_knowledge', {})
+        received = cat.knowledge.group_received_knowledge
         copy = deepcopy(record)
         if transmission != 'personal_experience':
             copy.verified = False

@@ -1,4 +1,5 @@
 from cats.cat_components import CatFamily, MaternalCare, MaternalCareReceived, SiblingPlay, SiblingRivalry, ParentalTeaching, FamilyBonding, CatGroupMembership, CatCulture, CatGroupRoles, CatMeowInvitations, CatNorms, CatNeeds, CatEmergencyNursing, CatTerritories, CatSocialMemories, CatBonds, CatHumanBonds
+from cats.cat_knowledge_objects import CatKnowledgeState
 from core.entity.social_entity import SocialMixin
 
 class Cat(SocialMixin):
@@ -34,7 +35,7 @@ class Cat(SocialMixin):
         self.personality = personality
         self.mind = mind
         self.intellect = intellect
-        self.knowledge = {}
+        self.knowledge = CatKnowledgeState()
         self.relationships = {}
         self.social_memory = CatSocialMemories(records={})
         self.territories = CatTerritories(claims={})

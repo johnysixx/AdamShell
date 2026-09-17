@@ -113,10 +113,7 @@ class CatExplorationPlanner:
         knowledge = cat.knowledge
 
         scent_places = list(
-            knowledge.get(
-                "known_scent_places",
-                []
-            )
+            knowledge.known_scent_places
         )
 
         if not scent_places:
@@ -744,10 +741,7 @@ class CatExplorationPlanner:
 
         knowledge = cat.knowledge
 
-        for heard in knowledge.get(
-            "heard_legends",
-            []
-        ):
+        for heard in knowledge.heard_legends:
             if heard.verified:
                 continue
 

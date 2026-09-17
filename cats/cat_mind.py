@@ -62,10 +62,10 @@ class CatMind:
             candidates.append(cls._candidate(intention_type='track_cronenberg_scent', score=scent_track_score, reasons=['recognized_cronenberg_scent', 'cronenberg_not_visible', 'courage', 'aggression', 'curiosity']))
             if observations.get('bar_known', False):
                 candidates.append(cls._candidate(intention_type='avoid_cronenberg_scent', score=scent_avoid_score, reasons=['recognized_cronenberg_scent', 'cronenberg_not_visible', 'low_courage', 'patience', 'known_safe_bar']))
-        scent_places = (cat.knowledge or {}).get('known_scent_places', [])
+        scent_places = cat.knowledge.known_scent_places
         current_layer = cat.current_layer
-        knowledge = cat.knowledge or {}
-        current_tick = knowledge.get('scent_clock_tick')
+        knowledge = cat.knowledge
+        current_tick = knowledge.scent_clock_tick
         local_scent_places = []
         for place in scent_places:
             if place.layer != current_layer:

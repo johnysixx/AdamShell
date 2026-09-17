@@ -397,3 +397,71 @@ class CatKnownAroma:
 class CatKnownPrinciples:
 
     quantum_boxes_are_paired: bool = True
+
+
+
+@dataclass(slots=True)
+class CatKnowledgeState:
+
+    known_places: list = field(
+        default_factory=list
+    )
+
+    heard_legends: list = field(
+        default_factory=list
+    )
+
+    verified_legends: list = field(
+        default_factory=list
+    )
+
+    known_aromas: list = field(
+        default_factory=list
+    )
+
+    known_scent_places: list = field(
+        default_factory=list
+    )
+
+    known_principles: CatKnownPrinciples = field(
+        default_factory=CatKnownPrinciples
+    )
+
+    current_quantum_layer_map: object | None = None
+
+    scent_clock_tick: int | None = None
+
+    heard_group_myths: dict = field(
+        default_factory=dict
+    )
+
+    group_received_knowledge: dict = field(
+        default_factory=dict
+    )
+
+    def role_knowledge_score(self):
+        evidence_count = (
+            len(self.known_places)
+            + len(self.heard_legends)
+            + len(self.verified_legends)
+            + len(self.known_aromas)
+            + len(self.known_scent_places)
+            + len(self.heard_group_myths)
+            + len(
+                self.group_received_knowledge
+            )
+        )
+
+        principle_count = int(
+            self.known_principles
+            .quantum_boxes_are_paired
+        )
+
+        return min(
+            1.0,
+            (
+                evidence_count
+                + principle_count
+            )
+            / 10.0,
+        )

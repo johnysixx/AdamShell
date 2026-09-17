@@ -34,9 +34,7 @@ class CatKnownPrinciplesObjectStateTests(
             )
         )
 
-        principles = knowledge[
-            'known_principles'
-        ]
+        principles = knowledge.known_principles
 
         self.assertIsInstance(
             principles,
@@ -63,9 +61,7 @@ class CatKnownPrinciplesObjectStateTests(
             )
         )
 
-        principles = knowledge[
-            'known_principles'
-        ]
+        principles = knowledge.known_principles
 
         principles.quantum_boxes_are_paired = (
             False
@@ -78,9 +74,7 @@ class CatKnownPrinciplesObjectStateTests(
         )
 
         self.assertIs(
-            same_knowledge[
-                'known_principles'
-            ],
+            same_knowledge.known_principles,
             principles,
         )
 

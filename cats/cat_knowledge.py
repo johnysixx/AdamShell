@@ -6,6 +6,7 @@ from cats.cat_knowledge_objects import (
     CatKnownAroma,
     CatKnownPlace,
     CatKnownPrinciples,
+    CatKnowledgeState,
     CatScentPlaceMemory,
     CatVerifiedLegendRecord,
 )
@@ -13,35 +14,28 @@ from cats.cat_knowledge_objects import (
 class CatKnowledge:
 
     @classmethod
-    def ensure_cat_knowledge(cls, cat):
-        if not isinstance(cat, Cat):
-            raise TypeError('CatKnowledge requires Cat.')
-        knowledge = cat.knowledge
-        knowledge.setdefault('known_places', [])
-        knowledge.setdefault('heard_legends', [])
-        knowledge.setdefault('verified_legends', [])
-        knowledge.setdefault('known_aromas', [])
-        knowledge.setdefault('known_scent_places', [])
-
-        principles = knowledge.setdefault(
-            'known_principles',
-            CatKnownPrinciples(),
-        )
-
+    def ensure_cat_knowledge(
+        cls,
+        cat,
+    ):
         if not isinstance(
-            principles,
-            CatKnownPrinciples,
+            cat,
+            Cat,
         ):
             raise TypeError(
-                'known_principles must be '
-                'CatKnownPrinciples.'
+                'CatKnowledge requires Cat.'
             )
 
-        knowledge.setdefault(
-            'current_quantum_layer_map',
-            None,
-        )
-        return knowledge
+        if not isinstance(
+            cat.knowledge,
+            CatKnowledgeState,
+        ):
+            raise TypeError(
+                'Cat knowledge must be '
+                'CatKnowledgeState.'
+            )
+
+        return cat.knowledge
 
     @classmethod
     def ensure_universe_legends(cls, universe):
@@ -65,7 +59,7 @@ class CatKnowledge:
         normalized_position = cls._position(position)
 
         place = cls._find_place(
-            knowledge['known_places'],
+            knowledge.known_places,
             layer=layer,
             position=normalized_position,
         )
@@ -90,9 +84,7 @@ class CatKnowledge:
                 ),
             )
 
-            knowledge[
-                'known_places'
-            ].append(place)
+            knowledge.known_places.append(place)
 
         else:
             place.record_visit(
@@ -292,9 +284,7 @@ class CatKnowledge:
             (
                 item
                 for item
-                in knowledge[
-                    'heard_legends'
-                ]
+                in knowledge.heard_legends
                 if item.legend_id
                 == legend_id
                 and item.storyteller
@@ -340,9 +330,7 @@ class CatKnowledge:
                 credibility=credibility,
             )
 
-            knowledge[
-                'heard_legends'
-            ].append(
+            knowledge.heard_legends.append(
                 heard
             )
 
@@ -375,9 +363,7 @@ class CatKnowledge:
 
         verified = []
 
-        for heard in knowledge[
-            'heard_legends'
-        ]:
+        for heard in knowledge.heard_legends:
             if (
                 heard.place_id
                 != place.place_id
@@ -437,9 +423,7 @@ class CatKnowledge:
                 )
             )
 
-            knowledge[
-                'verified_legends'
-            ].append(
+            knowledge.verified_legends.append(
                 record
             )
 
@@ -468,9 +452,7 @@ class CatKnowledge:
         known = next(
             (
                 item
-                for item in knowledge[
-                    'known_aromas'
-                ]
+                for item in knowledge.known_aromas
                 if item.identity
                 == identity
             ),
@@ -484,9 +466,7 @@ class CatKnowledge:
                 source=source,
             )
 
-            knowledge[
-                'known_aromas'
-            ].append(
+            knowledge.known_aromas.append(
                 known
             )
 
@@ -515,9 +495,7 @@ class CatKnowledge:
 
         matches = []
 
-        for known in knowledge[
-            'known_aromas'
-        ]:
+        for known in knowledge.known_aromas:
             similarity = (
                 known.similarity_to(
                     components
@@ -607,9 +585,7 @@ class CatKnowledge:
         memory = next(
             (
                 item
-                for item in knowledge[
-                    'known_scent_places'
-                ]
+                for item in knowledge.known_scent_places
                 if item.place_id == place_id
                 and item.identity == identity
                 and item.source_id == source_id
@@ -644,9 +620,7 @@ class CatKnowledge:
                 last_seen_tick=universe_tick,
             )
 
-            knowledge[
-                'known_scent_places'
-            ].append(memory)
+            knowledge.known_scent_places.append(memory)
 
         else:
             memory.record_observation(
@@ -667,7 +641,7 @@ class CatKnowledge:
         remembered = []
         knowledge = cls.ensure_cat_knowledge(cat)
         if universe_tick is not None:
-            knowledge['scent_clock_tick'] = universe_tick
+            knowledge.scent_clock_tick = universe_tick
         for item in olfaction.get('detected_aromas', []):
             recognition = item.get('recognition', {})
             identity = recognition.get('identity') if recognition.get('recognized', False) else None
@@ -695,10 +669,7 @@ class CatKnowledge:
 
         memories = [
             memory
-            for memory in knowledge.get(
-                'known_scent_places',
-                [],
-            )
+            for memory in knowledge.known_scent_places
             if memory.identity == identity
             and memory.layer == layer
             and isinstance(
@@ -813,9 +784,7 @@ class CatKnowledge:
             )
         }
 
-        current_tick = knowledge.get(
-            'scent_clock_tick'
-        )
+        current_tick = knowledge.scent_clock_tick
 
         if current_tick is None:
             newest_age = 0
@@ -885,7 +854,7 @@ class CatKnowledge:
         storyteller_name = storyteller.name
         listener_name = listener.name
         knowledge = cls.ensure_cat_knowledge(listener)
-        already_heard = {(item.legend_id, item.storyteller) for item in knowledge['heard_legends']}
+        already_heard = {(item.legend_id, item.storyteller) for item in knowledge.heard_legends}
         candidates = []
         for legend in legends:
             if not getattr(legend, 'active', True):
@@ -1021,9 +990,7 @@ class CatKnowledge:
             (
                 item
                 for item
-                in knowledge[
-                    'heard_legends'
-                ]
+                in knowledge.heard_legends
                 if item.legend_id
                 == legend_id
             ),

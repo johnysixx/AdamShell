@@ -61,7 +61,7 @@ class CatGroupMythSystem:
             return {'name': 'cat_group_myth_telling_denied', 'reason': 'unknown_myth', 'told': False}
         listeners = []
         for cat in self.group_system._member_objects(group, cats):
-            heard = cat.knowledge.setdefault('heard_group_myths', {})
+            heard = cat.knowledge.heard_group_myths
             personal = deepcopy(myth)
             personal.heard_from_group = group_id
             personal.personally_verified = False

@@ -25,7 +25,7 @@ class CatLegendSharingTests(unittest.TestCase):
     def test_trusted_cat_shares_valuable_legend(self):
         result = CatKnowledge.share_legend(storyteller=self.storyteller, listener=self.listener, universe=self.universe)
         self.assertTrue(result['shared'])
-        self.assertEqual(len(self.listener.knowledge['heard_legends']), 1)
+        self.assertEqual(len(self.listener.knowledge.heard_legends), 1)
 
     def test_same_story_is_not_repeated_forever(self):
         first = CatKnowledge.share_legend(self.storyteller, self.listener, self.universe)

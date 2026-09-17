@@ -160,9 +160,7 @@ class CatGroupFederationKnowledgeTests(
 
         received = (
             listener
-            .knowledge[
-                "group_received_knowledge"
-            ][
+            .knowledge.group_received_knowledge[
                 "box_warning"
             ]
         )

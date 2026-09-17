@@ -150,7 +150,7 @@ class CatPerception:
             detail = {'id': box.id, 'explored': explored, 'occupied': occupancy.get('occupied', False), 'occupancy_state': occupancy.get('occupancy_state', 'unknown'), 'occupant_identity_visible': occupancy.get('occupant_identity_visible', False), 'distance': distance, 'position': deepcopy(box_position)}
             if explored:
                 knowledge = CatKnowledge.ensure_cat_knowledge(cat)
-                pairing_principle_known = bool(knowledge['known_principles'].quantum_boxes_are_paired)
+                pairing_principle_known = bool(knowledge.known_principles.quantum_boxes_are_paired)
                 recognized_as_quantum_box = occupancy.get('recognized_as_quantum_box', True)
                 detail.update({'state': getattr(box, 'state', None), 'collapsed': bool(box.collapse.collapsed), 'recognized_as_quantum_box': recognized_as_quantum_box, 'paired': bool(recognized_as_quantum_box and pairing_principle_known), 'counterpart_known': False})
             observed.append(detail)
