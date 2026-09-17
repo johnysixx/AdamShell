@@ -1,6 +1,10 @@
 from cats.cat import Cat
 from copy import deepcopy
 from cats.cat_social_objects import CatLegend, CatRelationship
+from cats.cat_olfaction_state import (
+    CatAromaMatch,
+    CatAromaRecognition,
+)
 from cats.cat_knowledge_objects import (
     CatHeardLegend,
     CatKnownAroma,
@@ -505,49 +509,34 @@ class CatKnowledge:
             ):
                 continue
 
-            matches.append({
-                'identity': (
-                    known.identity
-                ),
-                'similarity': (
-                    similarity
-                ),
-                'confidence': (
-                    known.confidence
-                ),
-                'encounters': (
-                    known.encounters
-                ),
-            })
+            matches.append(
+                CatAromaMatch(
+                    identity=known.identity,
+                    similarity=similarity,
+                    confidence=known.confidence,
+                    encounters=known.encounters,
+                )
+            )
 
         matches.sort(
             key=lambda item: (
-                item['similarity'],
-                item['confidence'],
+                item.similarity,
+                item.confidence,
             ),
             reverse=True,
         )
 
         if not matches:
-            return {
-                'recognized': False,
-                'identity': None,
-                'similarity': 0.0,
-                'matches': [],
-            }
+            return CatAromaRecognition()
 
         winner = matches[0]
 
-        return {
-            'recognized': True,
-            'identity': (
-                winner['identity']
-            ),
-            'similarity': (
-                winner['similarity']
-            ),
-            'matches': matches,
-        }
+        return CatAromaRecognition(
+            recognized=True,
+            identity=winner.identity,
+            similarity=winner.similarity,
+            matches=matches,
+        )
 
     @classmethod
     def remember_scent_place(
@@ -640,16 +629,24 @@ class CatKnowledge:
         if universe_tick is not None:
             knowledge.scent_clock_tick = universe_tick
         for item in olfaction.get('detected_aromas', []):
-            recognition = item.get('recognition', {})
-            identity = recognition.get('identity') if recognition.get('recognized', False) else None
+            recognition = item['recognition']
+            identity = (
+                recognition.identity
+                if recognition.recognized
+                else None
+            )
             position = item.get('position')
             if not isinstance(position, dict):
                 continue
             remembered.append(cls.remember_scent_place(cat=cat, layer=current_layer, position=position, source_id=item.get('entity_id'), recognized_identity=identity, components=item.get('raw_components', {}), perceived_intensity=item.get('perceived_intensity', 0.0), universe_tick=universe_tick))
         ambient = olfaction.get('ambient_aroma')
         if isinstance(ambient, dict):
-            recognition = ambient.get('recognition', {})
-            identity = recognition.get('identity') if recognition.get('recognized', False) else ambient.get('source')
+            recognition = ambient['recognition']
+            identity = (
+                recognition.identity
+                if recognition.recognized
+                else ambient.get('source')
+            )
             remembered.append(cls.remember_scent_place(cat=cat, layer=current_layer, position=cat.position or {}, source_id='ambient', recognized_identity=identity, components=ambient.get('components', {}), perceived_intensity=sum((float(value) for value in ambient.get('components', {}).values())), universe_tick=universe_tick))
         return remembered
 

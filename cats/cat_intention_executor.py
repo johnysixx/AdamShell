@@ -329,7 +329,19 @@ class CatIntentionExecutor:
         if position is not None:
             cat.position = dict(position)
         olfaction = CatOlfaction.sniff(cat=cat, universe=self.universe)
-        reacquired = next((item for item in olfaction.get('detected_aromas', []) if item.get('recognition', {}).get('recognized', False) and item.get('recognition', {}).get('identity') == search.get('identity')), None)
+        reacquired = next(
+            (
+                item
+                for item in olfaction.get(
+                    'detected_aromas',
+                    [],
+                )
+                if item['recognition'].recognized
+                and item['recognition'].identity
+                == search.get('identity')
+            ),
+            None,
+        )
         if reacquired is not None:
             CatKnowledge.remember_olfaction(cat=cat, olfaction=olfaction, current_layer=cat.current_layer or 'unknown', universe_tick=getattr(self.universe, 'universe_tick', None))
             route = self.universe.quantum_space.find_cat_route(cat.name)

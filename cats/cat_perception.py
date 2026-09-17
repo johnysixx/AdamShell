@@ -69,7 +69,12 @@ class CatPerception:
         shareable_legend_count = len(active_cat_legends)
         olfaction = CatOlfaction.sniff(cat=cat, universe=self.universe)
         scent_memories = CatKnowledge.remember_olfaction(cat=cat, olfaction=olfaction, current_layer=cat.current_layer or 'unknown', universe_tick=getattr(self.universe, 'universe_tick', None))
-        smelled_cronenbergs = [item for item in olfaction['detected_aromas'] if item.get('recognition', {}).get('recognized', False) and item.get('recognition', {}).get('identity') == 'cronenberg']
+        smelled_cronenbergs = [
+            item
+            for item in olfaction['detected_aromas']
+            if item['recognition'].recognized
+            and item['recognition'].identity == 'cronenberg'
+        ]
         cronenberg_scent_recognized = bool(smelled_cronenbergs)
         scent_transfer_candidates = []
         smelled_by_id = {item.get('entity_id'): item for item in olfaction.get('detected_aromas', [])}
@@ -82,8 +87,8 @@ class CatPerception:
             smelled = smelled_by_id.get(box_id)
             if box is None or smelled is None:
                 continue
-            recognition = smelled.get('recognition', {})
-            if not recognition.get('recognized', False):
+            recognition = smelled['recognition']
+            if not recognition.recognized:
                 continue
             counterpart = getattr(box, 'quantum_counterpart', None)
             if counterpart is None:
@@ -94,7 +99,7 @@ class CatPerception:
             counterpart_box = boxes_by_id.get(counterpart_id)
             if counterpart_box is None:
                 continue
-            scent_transfer_candidates.append({'box_id': box_id, 'counterpart_box_id': counterpart_id, 'identity': recognition.get('identity'), 'similarity': recognition.get('similarity', 0.0), 'source_layer': getattr(box, 'current_layer', cat.current_layer), 'target_layer': getattr(counterpart_box, 'current_layer', None), 'box_position': deepcopy(getattr(box, 'position', {})), 'counterpart_position': deepcopy(getattr(counterpart_box, 'position', {}))})
+            scent_transfer_candidates.append({'box_id': box_id, 'counterpart_box_id': counterpart_id, 'identity': recognition.identity, 'similarity': recognition.similarity, 'source_layer': getattr(box, 'current_layer', cat.current_layer), 'target_layer': getattr(counterpart_box, 'current_layer', None), 'box_position': deepcopy(getattr(box, 'position', {})), 'counterpart_position': deepcopy(getattr(counterpart_box, 'position', {}))})
         counterpart_observation = deepcopy(getattr(cat, 'current_quantum_counterpart_observation', None))
         if isinstance(counterpart_observation, dict):
             source_id = counterpart_observation.get('source_box_id')

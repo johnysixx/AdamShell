@@ -47,8 +47,8 @@ class CatScentReorientationAfterTransferTests(unittest.TestCase):
         smelled = {item['entity_id']: item for item in observations.olfaction['detected_aromas']}
         self.assertIn(self.trail_box.id, smelled)
         trail_smell = smelled[self.trail_box.id]
-        self.assertTrue(trail_smell['recognition']['recognized'])
-        self.assertEqual(trail_smell['recognition']['identity'], 'cat:creator')
+        self.assertTrue(trail_smell['recognition'].recognized)
+        self.assertEqual(trail_smell['recognition'].identity, 'cat:creator')
         memories = observations.scent_memories
         trail_memories = [memory for memory in memories if memory.source_id == self.trail_box.id]
         self.assertEqual(len(trail_memories), 1)
