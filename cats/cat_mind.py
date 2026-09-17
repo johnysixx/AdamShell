@@ -68,9 +68,9 @@ class CatMind:
         current_tick = knowledge.get('scent_clock_tick')
         local_scent_places = []
         for place in scent_places:
-            if place.get('layer') != current_layer:
+            if place.layer != current_layer:
                 continue
-            last_seen_tick = place.get('last_seen_tick')
+            last_seen_tick = place.last_seen_tick
             if current_tick is None or last_seen_tick is None:
                 age_ticks = 0
             else:
@@ -78,20 +78,46 @@ class CatMind:
             freshness = 0.5 ** (age_ticks / 50.0)
             if freshness < 0.05:
                 continue
-            scored_place = deepcopy(place)
-            scored_place['age_ticks'] = age_ticks
-            scored_place['freshness'] = freshness
-            local_scent_places.append(scored_place)
+            local_scent_places.append({
+                'memory': place,
+                'age_ticks': age_ticks,
+                'freshness': freshness,
+            })
         reached_scent = cat.known_scent_follow or {}
         currently_smelt_identities = {item.get('recognition', {}).get('identity') for item in observations.get('olfaction', {}).get('detected_aromas', []) if item.get('recognition', {}).get('recognized', False)}
         if isinstance(reached_scent, dict) and reached_scent.get('arrived', False) and (reached_scent.get('identity') not in currently_smelt_identities):
             local_scent_places = []
         if local_scent_places:
-            strongest = max(local_scent_places, key=lambda item: (float(item.get('confidence', 0.0)) + min(1.0, float(item.get('last_intensity', 0.0)))) * float(item.get('freshness', 1.0)))
-            identity = strongest.get('identity')
+            strongest = max(
+                local_scent_places,
+                key=lambda item: (
+                    float(
+                        item[
+                            'memory'
+                        ].confidence
+                    )
+                    + min(
+                        1.0,
+                        float(
+                            item[
+                                'memory'
+                            ].last_intensity
+                        ),
+                    )
+                )
+                * float(
+                    item[
+                        'freshness'
+                    ]
+                ),
+            )
+            memory = strongest[
+                'memory'
+            ]
+            identity = memory.identity
             if identity not in (None, 'unknown_aroma', 'cronenberg'):
                 scent_direction = CatKnowledge.infer_scent_direction(cat=cat, identity=identity, layer=current_layer)
-                candidates.append(cls._candidate(intention_type='follow_known_scent', score=0.15 + curiosity * 0.25 + courage * 0.1 + float(strongest.get('confidence', 0.0)) * 0.25, reasons=['known_scent_place', 'recognized_identity', 'curiosity'], target={'identity': identity, 'layer': strongest.get('layer'), 'position': strongest.get('position'), 'source_id': strongest.get('source_id'), 'age_ticks': strongest.get('age_ticks', 0), 'freshness': strongest.get('freshness', 1.0), 'trail_direction': deepcopy(scent_direction)}))
+                candidates.append(cls._candidate(intention_type='follow_known_scent', score=0.15 + curiosity * 0.25 + courage * 0.1 + float(memory.confidence) * 0.25, reasons=['known_scent_place', 'recognized_identity', 'curiosity'], target={'identity': identity, 'layer': memory.layer, 'position': deepcopy(memory.position), 'source_id': memory.source_id, 'age_ticks': strongest['age_ticks'], 'freshness': strongest['freshness'], 'trail_direction': deepcopy(scent_direction)}))
         scent_transfers = observations.get('scent_transfer_candidates', [])
         if scent_transfers:
             best_scent_transfer = max(scent_transfers, key=lambda item: float(item.get('similarity', 0.0)))

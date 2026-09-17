@@ -1,6 +1,7 @@
 from cats.cat import Cat
 from copy import deepcopy
 from cats.cat_social_objects import CatLegend, CatRelationship
+from cats.cat_knowledge_objects import CatKnownPlace, CatScentPlaceMemory
 
 class CatKnowledge:
 
@@ -26,57 +27,174 @@ class CatKnowledge:
         return universe.cat_legends
 
     @classmethod
-    def remember_place(cls, cat, layer, position, source='direct_exploration', safe=None, danger=None, universe_tick=None, details=None):
+    def remember_place(
+        cls,
+        cat,
+        layer,
+        position,
+        source='direct_exploration',
+        safe=None,
+        danger=None,
+        universe_tick=None,
+        details=None,
+    ):
         knowledge = cls.ensure_cat_knowledge(cat)
         normalized_position = cls._position(position)
-        place = cls._find_place(knowledge['known_places'], layer=layer, position=normalized_position)
+
+        place = cls._find_place(
+            knowledge['known_places'],
+            layer=layer,
+            position=normalized_position,
+        )
+
         if place is None:
-            place = {'place_id': cls._place_id(layer, normalized_position), 'layer': str(layer), 'position': deepcopy(normalized_position), 'discovered_by': cat.name, 'first_source': source, 'last_source': source, 'visit_count': 1, 'confidence': 0.55, 'safe_observations': 0, 'danger_observations': 0, 'first_seen_tick': universe_tick, 'last_seen_tick': universe_tick, 'details': deepcopy(details or {})}
-            knowledge['known_places'].append(place)
+            place = CatKnownPlace(
+                place_id=cls._place_id(
+                    layer,
+                    normalized_position,
+                ),
+                layer=str(layer),
+                position=deepcopy(
+                    normalized_position
+                ),
+                discovered_by=cat.name,
+                first_source=source,
+                last_source=source,
+                first_seen_tick=universe_tick,
+                last_seen_tick=universe_tick,
+                details=deepcopy(
+                    details or {}
+                ),
+            )
+
+            knowledge[
+                'known_places'
+            ].append(place)
+
         else:
-            place['visit_count'] += 1
-            place['last_source'] = source
-            place['last_seen_tick'] = universe_tick
-            place['confidence'] = min(1.0, float(place.get('confidence', 0.55)) + 0.1)
-            if details:
-                place.setdefault('details', {}).update(deepcopy(details))
-        if safe is True:
-            place['safe_observations'] += 1
-        if danger is True:
-            place['danger_observations'] += 1
-        observations = place['safe_observations'] + place['danger_observations']
-        if observations:
-            place['safety'] = place['safe_observations'] / observations
-        else:
-            place['safety'] = None
+            place.record_visit(
+                source=source,
+                universe_tick=universe_tick,
+                details=details,
+            )
+
+        place.record_safety(
+            safe=safe,
+            danger=danger,
+        )
+
         return deepcopy(place)
 
     @classmethod
-    def publish_legend(cls, universe, cat, place, claim_type='place_discovered'):
-        legends = cls.ensure_universe_legends(universe)
-        place_id = place['place_id']
-        legend = next((item for item in legends if getattr(item, 'place_id', None) == place_id and getattr(item, 'claim_type', None) == claim_type), None)
+    def publish_legend(
+        cls,
+        universe,
+        cat,
+        place,
+        claim_type='place_discovered',
+    ):
+        legends = cls.ensure_universe_legends(
+            universe
+        )
+
+        place_id = place.place_id
+
+        legend = next(
+            (
+                item
+                for item in legends
+                if getattr(
+                    item,
+                    'place_id',
+                    None,
+                ) == place_id
+                and getattr(
+                    item,
+                    'claim_type',
+                    None,
+                ) == claim_type
+            ),
+            None,
+        )
+
         cat_name = cat.name
+
         if legend is None:
-            legend = CatLegend(**{'legend_id': f'cat_legend_{len(legends) + 1:04d}', 'claim_type': claim_type, 'place_id': place_id, 'layer': place['layer'], 'position': deepcopy(place['position']), 'discoverer': cat_name, 'reported_by': [cat_name], 'verification_count': 1, 'confidence': min(1.0, float(place.get('confidence', 0.55))), 'safety': place.get('safety'), 'active': True})
-            legends.append(legend)
+            legend = CatLegend(
+                legend_id=(
+                    f'cat_legend_'
+                    f'{len(legends) + 1:04d}'
+                ),
+                claim_type=claim_type,
+                place_id=place_id,
+                layer=place.layer,
+                position=deepcopy(
+                    place.position
+                ),
+                discoverer=cat_name,
+                reported_by=[
+                    cat_name
+                ],
+                verification_count=1,
+                confidence=min(
+                    1.0,
+                    float(
+                        place.confidence
+                    ),
+                ),
+                safety=place.safety,
+                active=True,
+            )
+
+            legends.append(
+                legend
+            )
+
         else:
             if not hasattr(
                 legend,
-                'reported_by'
+                'reported_by',
             ):
                 legend.reported_by = []
+
             reporters = legend.reported_by
+
             if cat_name not in reporters:
-                reporters.append(cat_name)
+                reporters.append(
+                    cat_name
+                )
+
             legend.verification_count += 1
-            legend.confidence = min(1.0, float(getattr(legend, 'confidence', 0.5)) + 0.08)
-            if place.get('safety') is not None:
-                previous_safety = getattr(legend, 'safety', None)
+
+            legend.confidence = min(
+                1.0,
+                float(
+                    getattr(
+                        legend,
+                        'confidence',
+                        0.5,
+                    )
+                )
+                + 0.08,
+            )
+
+            if place.safety is not None:
+                previous_safety = getattr(
+                    legend,
+                    'safety',
+                    None,
+                )
+
                 if previous_safety is None:
-                    legend.safety = place['safety']
+                    legend.safety = (
+                        place.safety
+                    )
                 else:
-                    legend.safety = (previous_safety + place['safety']) / 2.0
+                    legend.safety = (
+                        previous_safety
+                        + place.safety
+                    ) / 2.0
+
         return deepcopy(legend)
 
     @classmethod
@@ -111,7 +229,7 @@ class CatKnowledge:
         knowledge = cls.ensure_cat_knowledge(cat)
         verified = []
         for heard in knowledge['heard_legends']:
-            if heard.get('place_id') != place.get('place_id'):
+            if heard.get('place_id') != place.place_id:
                 continue
             if heard.get('verified', False):
                 continue
@@ -171,23 +289,91 @@ class CatKnowledge:
         return max(0.0, min(1.0, dot / (first_length * second_length)))
 
     @classmethod
-    def remember_scent_place(cls, cat, layer, position, source_id, recognized_identity=None, components=None, perceived_intensity=0.0, universe_tick=None):
-        knowledge = cls.ensure_cat_knowledge(cat)
-        position = cls._position(position)
-        place_id = cls._place_id(layer, position)
-        identity = recognized_identity or 'unknown_aroma'
-        memory = next((item for item in knowledge['known_scent_places'] if item.get('place_id') == place_id and item.get('identity') == identity and (item.get('source_id') == source_id)), None)
+    def remember_scent_place(
+        cls,
+        cat,
+        layer,
+        position,
+        source_id,
+        recognized_identity=None,
+        components=None,
+        perceived_intensity=0.0,
+        universe_tick=None,
+    ):
+        knowledge = cls.ensure_cat_knowledge(
+            cat
+        )
+
+        position = cls._position(
+            position
+        )
+
+        place_id = cls._place_id(
+            layer,
+            position,
+        )
+
+        identity = (
+            recognized_identity
+            or 'unknown_aroma'
+        )
+
+        memory = next(
+            (
+                item
+                for item in knowledge[
+                    'known_scent_places'
+                ]
+                if item.place_id == place_id
+                and item.identity == identity
+                and item.source_id == source_id
+            ),
+            None,
+        )
+
         if memory is None:
-            memory = {'place_id': place_id, 'layer': layer, 'position': deepcopy(position), 'source_id': source_id, 'identity': identity, 'observations': 1, 'confidence': 0.6 if recognized_identity else 0.3, 'last_intensity': float(perceived_intensity), 'strongest_intensity': float(perceived_intensity), 'components': deepcopy(components or {}), 'first_seen_tick': universe_tick, 'last_seen_tick': universe_tick}
-            knowledge['known_scent_places'].append(memory)
+            intensity = float(
+                perceived_intensity
+            )
+
+            memory = CatScentPlaceMemory(
+                place_id=place_id,
+                layer=layer,
+                position=deepcopy(
+                    position
+                ),
+                source_id=source_id,
+                identity=identity,
+                confidence=(
+                    0.6
+                    if recognized_identity
+                    else 0.3
+                ),
+                last_intensity=intensity,
+                strongest_intensity=intensity,
+                components=deepcopy(
+                    components or {}
+                ),
+                first_seen_tick=universe_tick,
+                last_seen_tick=universe_tick,
+            )
+
+            knowledge[
+                'known_scent_places'
+            ].append(memory)
+
         else:
-            memory['observations'] += 1
-            memory['last_intensity'] = float(perceived_intensity)
-            memory['strongest_intensity'] = max(float(memory.get('strongest_intensity', 0.0)), float(perceived_intensity))
-            memory['last_seen_tick'] = universe_tick
-            memory['confidence'] = min(1.0, float(memory.get('confidence', 0.3)) + (0.1 if recognized_identity else 0.03))
-            if components:
-                memory['components'] = deepcopy(components)
+            memory.record_observation(
+                recognized_identity=(
+                    recognized_identity
+                ),
+                components=components,
+                perceived_intensity=(
+                    perceived_intensity
+                ),
+                universe_tick=universe_tick,
+            )
+
         return deepcopy(memory)
 
     @classmethod
@@ -211,34 +397,197 @@ class CatKnowledge:
         return remembered
 
     @classmethod
-    def infer_scent_direction(cls, cat, identity, layer):
-        knowledge = cls.ensure_cat_knowledge(cat)
-        memories = [memory for memory in knowledge.get('known_scent_places', []) if memory.get('identity') == identity and memory.get('layer') == layer and isinstance(memory.get('position'), dict) and (memory.get('last_seen_tick') is not None)]
+    def infer_scent_direction(
+        cls,
+        cat,
+        identity,
+        layer,
+    ):
+        knowledge = cls.ensure_cat_knowledge(
+            cat
+        )
+
+        memories = [
+            memory
+            for memory in knowledge.get(
+                'known_scent_places',
+                [],
+            )
+            if memory.identity == identity
+            and memory.layer == layer
+            and isinstance(
+                memory.position,
+                dict,
+            )
+            and memory.last_seen_tick
+            is not None
+        ]
+
         if len(memories) < 2:
-            return {'inferred': False, 'reason': 'not_enough_scent_points'}
-        memories.sort(key=lambda memory: int(memory['last_seen_tick']))
+            return {
+                'inferred': False,
+                'reason': (
+                    'not_enough_scent_points'
+                ),
+            }
+
+        memories.sort(
+            key=lambda memory: int(
+                memory.last_seen_tick
+            )
+        )
+
         newest = memories[-1]
-        older = next((memory for memory in reversed(memories[:-1]) if memory.get('position') != newest.get('position')), None)
+
+        older = next(
+            (
+                memory
+                for memory in reversed(
+                    memories[:-1]
+                )
+                if memory.position
+                != newest.position
+            ),
+            None,
+        )
+
         if older is None:
-            return {'inferred': False, 'reason': 'no_distinct_scent_positions'}
-        start = older['position']
-        end = newest['position']
-        vector = {axis: float(end.get(axis, 0.0)) - float(start.get(axis, 0.0)) for axis in ('x', 'y', 'z')}
-        distance = (vector['x'] ** 2 + vector['y'] ** 2 + vector['z'] ** 2) ** 0.5
+            return {
+                'inferred': False,
+                'reason': (
+                    'no_distinct_scent_positions'
+                ),
+            }
+
+        start = older.position
+        end = newest.position
+
+        vector = {
+            axis: (
+                float(
+                    end.get(
+                        axis,
+                        0.0,
+                    )
+                )
+                - float(
+                    start.get(
+                        axis,
+                        0.0,
+                    )
+                )
+            )
+            for axis in (
+                'x',
+                'y',
+                'z',
+            )
+        }
+
+        distance = (
+            vector['x'] ** 2
+            + vector['y'] ** 2
+            + vector['z'] ** 2
+        ) ** 0.5
+
         if distance <= 0.0:
-            return {'inferred': False, 'reason': 'zero_length_scent_direction'}
-        tick_delta = int(newest['last_seen_tick']) - int(older['last_seen_tick'])
+            return {
+                'inferred': False,
+                'reason': (
+                    'zero_length_scent_direction'
+                ),
+            }
+
+        tick_delta = (
+            int(
+                newest.last_seen_tick
+            )
+            - int(
+                older.last_seen_tick
+            )
+        )
+
         if tick_delta <= 0:
-            return {'inferred': False, 'reason': 'scent_order_not_temporal'}
-        unit_vector = {axis: vector[axis] / distance for axis in ('x', 'y', 'z')}
-        current_tick = knowledge.get('scent_clock_tick')
+            return {
+                'inferred': False,
+                'reason': (
+                    'scent_order_not_temporal'
+                ),
+            }
+
+        unit_vector = {
+            axis: (
+                vector[axis]
+                / distance
+            )
+            for axis in (
+                'x',
+                'y',
+                'z',
+            )
+        }
+
+        current_tick = knowledge.get(
+            'scent_clock_tick'
+        )
+
         if current_tick is None:
             newest_age = 0
         else:
-            newest_age = max(0, int(current_tick) - int(newest['last_seen_tick']))
-        freshness = 0.5 ** (newest_age / 50.0)
-        confidence = min(1.0, (float(older.get('confidence', 0.0)) + float(newest.get('confidence', 0.0))) / 2.0 * freshness)
-        return {'inferred': True, 'identity': identity, 'layer': layer, 'from_position': deepcopy(start), 'to_position': deepcopy(end), 'vector': vector, 'unit_vector': unit_vector, 'distance': distance, 'tick_delta': tick_delta, 'newest_age_ticks': newest_age, 'freshness': freshness, 'confidence': confidence, 'from_source_id': older.get('source_id'), 'to_source_id': newest.get('source_id')}
+            newest_age = max(
+                0,
+                int(current_tick)
+                - int(
+                    newest.last_seen_tick
+                ),
+            )
+
+        freshness = (
+            0.5
+            ** (
+                newest_age
+                / 50.0
+            )
+        )
+
+        confidence = min(
+            1.0,
+            (
+                float(
+                    older.confidence
+                )
+                + float(
+                    newest.confidence
+                )
+            )
+            / 2.0
+            * freshness,
+        )
+
+        return {
+            'inferred': True,
+            'identity': identity,
+            'layer': layer,
+            'from_position': deepcopy(
+                start
+            ),
+            'to_position': deepcopy(
+                end
+            ),
+            'vector': vector,
+            'unit_vector': unit_vector,
+            'distance': distance,
+            'tick_delta': tick_delta,
+            'newest_age_ticks': newest_age,
+            'freshness': freshness,
+            'confidence': confidence,
+            'from_source_id': (
+                older.source_id
+            ),
+            'to_source_id': (
+                newest.source_id
+            ),
+        }
 
     @classmethod
     def choose_legend_to_share(cls, storyteller, listener, universe):
@@ -427,7 +776,7 @@ class CatKnowledge:
     @classmethod
     def _find_place(cls, places, layer, position):
         place_id = cls._place_id(layer, position)
-        return next((place for place in places if place.get('place_id') == place_id), None)
+        return next((place for place in places if place.place_id == place_id), None)
 
     @staticmethod
     def _position(position):

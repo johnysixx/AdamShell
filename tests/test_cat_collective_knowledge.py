@@ -13,14 +13,14 @@ class CatCollectiveKnowledgeTests(unittest.TestCase):
     def test_cat_remembers_discovered_place(self):
         place = CatKnowledge.remember_place(cat=self.cat, layer='quantum_layer', position={'x': 10.0, 'y': 2.0, 'z': -1.0}, safe=True, universe_tick=10)
         self.assertEqual(len(self.cat.knowledge['known_places']), 1)
-        self.assertEqual(place['visit_count'], 1)
-        self.assertEqual(place['safety'], 1.0)
+        self.assertEqual(place.visit_count, 1)
+        self.assertEqual(place.safety, 1.0)
 
     def test_second_visit_increases_confidence(self):
         first = CatKnowledge.remember_place(self.cat, 'quantum_layer', {'x': 10.0, 'y': 2.0, 'z': -1.0})
         second = CatKnowledge.remember_place(self.cat, 'quantum_layer', {'x': 10.0, 'y': 2.0, 'z': -1.0})
-        self.assertEqual(second['visit_count'], 2)
-        self.assertGreater(second['confidence'], first['confidence'])
+        self.assertEqual(second.visit_count, 2)
+        self.assertGreater(second.confidence, first.confidence)
         self.assertEqual(len(self.cat.knowledge['known_places']), 1)
 
     def test_cat_can_publish_legend(self):

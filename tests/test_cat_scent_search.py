@@ -67,7 +67,7 @@ class CatScentSearchTests(unittest.TestCase):
         route = self.universe.quantum_space.find_cat_route(self.cat.name)
         self.assertIsNone(route)
         memories = self.cat.knowledge['known_scent_places']
-        self.assertTrue(any((memory.get('identity') == 'cat:pazuzu' for memory in memories)))
+        self.assertTrue(any((memory.identity == 'cat:pazuzu' for memory in memories)))
 
     def test_search_stops_after_max_attempts(self):
         self.cat.scent_search = {'active': False, 'identity': 'cat:pazuzu', 'layer': 'quantum_layer', 'attempts': 3, 'max_attempts': 3, 'arrived': True}

@@ -50,9 +50,9 @@ class CatScentReorientationAfterTransferTests(unittest.TestCase):
         self.assertTrue(trail_smell['recognition']['recognized'])
         self.assertEqual(trail_smell['recognition']['identity'], 'cat:creator')
         memories = observations['scent_memories']
-        trail_memories = [memory for memory in memories if memory.get('source_id') == self.trail_box.id]
+        trail_memories = [memory for memory in memories if memory.source_id == self.trail_box.id]
         self.assertEqual(len(trail_memories), 1)
-        self.assertEqual(trail_memories[0]['layer'], 'quantum_layer')
+        self.assertEqual(trail_memories[0].layer, 'quantum_layer')
 
     def test_cat_makes_fresh_decision_from_local_scent(self):
         self.transfer_tracker()

@@ -122,7 +122,9 @@ class CatExplorationPlanner:
         if not scent_places:
             return {
                 "selected": False,
-                "reason": "no_known_scent_places"
+                "reason": (
+                    "no_known_scent_places"
+                )
             }
 
         current_layer = getattr(
@@ -134,12 +136,11 @@ class CatExplorationPlanner:
         candidates = []
 
         for place in scent_places:
-            identity = place.get(
-                "identity"
-            )
+            identity = place.identity
 
             if (
-                preferred_identity is not None
+                preferred_identity
+                is not None
                 and identity
                 != preferred_identity
             ):
@@ -147,30 +148,25 @@ class CatExplorationPlanner:
 
             score = (
                 float(
-                    place.get(
-                        "confidence",
-                        0.0
-                    )
+                    place.confidence
                 ) * 0.45
                 + min(
                     1.0,
                     float(
-                        place.get(
-                            "last_intensity",
-                            0.0
-                        )
+                        place.last_intensity
                     )
                 ) * 0.35
             )
 
             if (
-                place.get("layer")
+                place.layer
                 == current_layer
             ):
                 score += 0.20
 
             if (
-                avoid_identity is not None
+                avoid_identity
+                is not None
                 and identity
                 == avoid_identity
             ):
@@ -178,27 +174,20 @@ class CatExplorationPlanner:
 
             candidates.append({
                 "identity": identity,
-                "layer": place.get(
-                    "layer"
-                ),
-                "position": cls._position(
-                    place.get(
-                        "position",
-                        {}
+                "layer": place.layer,
+                "position": (
+                    cls._position(
+                        place.position
                     )
                 ),
-                "source_id": place.get(
-                    "source_id"
+                "source_id": (
+                    place.source_id
                 ),
-                "confidence": place.get(
-                    "confidence",
-                    0.0
+                "confidence": (
+                    place.confidence
                 ),
                 "last_intensity": (
-                    place.get(
-                        "last_intensity",
-                        0.0
-                    )
+                    place.last_intensity
                 ),
                 "score": score
             })
