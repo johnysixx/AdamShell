@@ -2,6 +2,29 @@ from dataclasses import dataclass, field
 
 
 @dataclass(slots=True)
+class CatContinuationCandidate:
+    layer: str
+    position: object
+    score: float
+    direction_index: int
+    revisit_penalty: float
+
+
+@dataclass(slots=True)
+class CatContinuationPlan:
+    selected: bool = False
+
+    layer: str | None = None
+    position: object = None
+    score: float | None = None
+    reason: str | None = None
+
+    candidates: list = field(
+        default_factory=list
+    )
+
+
+@dataclass(slots=True)
 class CatAfterArrivalCandidate:
     action: str
     score: float

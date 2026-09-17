@@ -3,6 +3,8 @@ from copy import deepcopy
 from .cat_exploration_state import (
     CatAfterArrivalCandidate,
     CatAfterArrivalDecision,
+    CatContinuationCandidate,
+    CatContinuationPlan,
     CatExplorationCandidate,
     CatExplorationPlan,
     CatScentDestinationCandidate,
@@ -515,46 +517,48 @@ class CatExplorationPlanner:
                 - revisit_penalty
             )
 
-            candidates.append({
-                "layer": "quantum_layer",
-                "position": position,
-                "score": max(
-                    0.0,
-                    min(
-                        1.0,
-                        score
-                    )
-                ),
-                "direction_index": index,
-                "revisit_penalty": (
-                    revisit_penalty
+            candidates.append(
+                CatContinuationCandidate(
+                    layer="quantum_layer",
+                    position=position,
+                    score=max(
+                        0.0,
+                        min(
+                            1.0,
+                            score
+                        )
+                    ),
+                    direction_index=index,
+                    revisit_penalty=(
+                        revisit_penalty
+                    ),
                 )
-            })
+            )
 
         candidates.sort(
             key=lambda item: (
-                item["score"],
-                -item["direction_index"]
+                item.score,
+                -item.direction_index
             ),
             reverse=True
         )
 
         winner = candidates[0]
 
-        return {
-            "selected": True,
-            "layer": "quantum_layer",
-            "position": deepcopy(
-                winner["position"]
+        return CatContinuationPlan(
+            selected=True,
+            layer="quantum_layer",
+            position=deepcopy(
+                winner.position
             ),
-            "score": winner["score"],
-            "reason": (
+            score=winner.score,
+            reason=(
                 "continue_quantum_exploration"
             ),
-            "candidates": deepcopy(
+            candidates=deepcopy(
                 candidates
-            )
-        }
+            ),
+        )
 
     @classmethod
     def collect_candidates(

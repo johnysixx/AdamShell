@@ -1704,10 +1704,7 @@ class CatQuantumBoxTransfer:
             )
         )
 
-        if not plan.get(
-            "selected",
-            False
-        ):
+        if not plan.selected:
             return {
                 "name": (
                     "cat_quantum_exploration_"
@@ -1721,7 +1718,7 @@ class CatQuantumBoxTransfer:
             }
 
         destination = dict(
-            plan["position"]
+            plan.position
         )
 
         stabilized = self.stabilize_direct_trail(
