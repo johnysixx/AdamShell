@@ -10,6 +10,13 @@ class CatPerceptionFailure:
 
 
 @dataclass(slots=True)
+class CatNearbyCatObservation:
+    name: str
+    distance: float
+    position: object
+
+
+@dataclass(slots=True)
 class CatVisibleBoxObservation:
     id: str
     explored: bool

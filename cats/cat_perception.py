@@ -6,6 +6,7 @@ from .cat_exploration_planner import CatExplorationPlanner
 from .cat_olfaction import CatOlfaction
 from .cat_knowledge import CatKnowledge
 from .cat_perception_state import (
+    CatNearbyCatObservation,
     CatPerceptionFailure,
     CatPerceptionState,
     CatVisibleBoxObservation,
@@ -111,7 +112,7 @@ class CatPerception:
             bar_visible=bar_observation['visible'],
             bar_distance=bar_observation['distance'],
             nearby_cats=[
-                item['name']
+                item.name
                 for item in nearby_cats
             ],
             nearby_cat_details=nearby_cats,
@@ -208,8 +209,19 @@ class CatPerception:
             distance = self._distance(position, candidate_position)
             if distance > radius:
                 continue
-            observed.append({'name': candidate.name, 'distance': distance, 'position': deepcopy(candidate_position)})
-        observed.sort(key=lambda item: item['distance'])
+            observed.append(
+                CatNearbyCatObservation(
+                    name=candidate.name,
+                    distance=distance,
+                    position=deepcopy(
+                        candidate_position
+                    ),
+                )
+            )
+
+        observed.sort(
+            key=lambda item: item.distance
+        )
         return observed
 
     def _observe_cronenbergs(self, position, radius):
