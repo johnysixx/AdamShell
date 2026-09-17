@@ -3,6 +3,9 @@ from dataclasses import dataclass, field
 from .cat_exploration_state import (
     CatExplorationPlan
 )
+from .cat_olfaction_state import (
+    CatOlfactionState
+)
 
 
 @dataclass(slots=True)
@@ -116,8 +119,8 @@ class CatPerceptionState:
 
     shareable_legend_count: int = 0
 
-    olfaction: dict = field(
-        default_factory=dict
+    olfaction: CatOlfactionState = field(
+        default_factory=CatOlfactionState
     )
     scent_memories: list = field(
         default_factory=list

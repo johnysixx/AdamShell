@@ -71,13 +71,13 @@ class CatPerception:
         scent_memories = CatKnowledge.remember_olfaction(cat=cat, olfaction=olfaction, current_layer=cat.current_layer or 'unknown', universe_tick=getattr(self.universe, 'universe_tick', None))
         smelled_cronenbergs = [
             item
-            for item in olfaction['detected_aromas']
+            for item in olfaction.detected_aromas
             if item.recognition.recognized
             and item.recognition.identity == 'cronenberg'
         ]
         cronenberg_scent_recognized = bool(smelled_cronenbergs)
         scent_transfer_candidates = []
-        smelled_by_id = {item.entity_id: item for item in olfaction.get('detected_aromas', [])}
+        smelled_by_id = {item.entity_id: item for item in olfaction.detected_aromas}
         boxes_by_id = {getattr(box, 'id', None): box for box in getattr(self.universe, 'quantum_boxes', [])}
         for visible_box in visible_boxes:
             box_id = visible_box.id
@@ -186,10 +186,10 @@ class CatPerception:
             smelled_entities=[
                 item.entity_id
                 for item
-                in olfaction['detected_aromas']
+                in olfaction.detected_aromas
             ],
             ozone_detected=(
-                olfaction['ozone_detected']
+                olfaction.ozone_detected
             ),
             cronenberg_scent_recognized=(
                 cronenberg_scent_recognized

@@ -67,9 +67,7 @@ class CatAmbientAromaObjectTests(
             self.universe,
         )
 
-        return result[
-            "ambient_aroma"
-        ]
+        return result.ambient_aroma
 
     def test_ambient_aroma_is_object(
         self

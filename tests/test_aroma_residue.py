@@ -37,7 +37,7 @@ class AromaResidueTests(unittest.TestCase):
         self.cats.learn_cat_aroma(observer=self.observer, observed_cat=self.pazuzu)
         AromaResidue.transfer(self.pazuzu.aroma, box, 'pazuzu', fraction=0.3)
         result = CatOlfaction.sniff(self.observer, self.universe)
-        box_smell = next((item for item in result['detected_aromas'] if item.entity_id == box.id))
+        box_smell = next((item for item in result.detected_aromas if item.entity_id == box.id))
         self.assertTrue(box_smell.recognition.recognized)
         self.assertEqual(box_smell.recognition.identity, 'cat:pazuzu')
 if __name__ == '__main__':

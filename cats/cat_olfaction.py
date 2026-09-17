@@ -5,6 +5,7 @@ from cats.cat_knowledge import CatKnowledge
 from cats.cat_olfaction_state import (
     CatAmbientAroma,
     CatDetectedAroma,
+    CatOlfactionState,
 )
 
 class CatOlfaction:
@@ -63,7 +64,14 @@ class CatOlfaction:
             ) > 0.15
             for item in detected
         )
-        return {'cat': cat.name, 'radius': radius, 'detected_aromas': detected, 'ambient_aroma': ambient, 'ozone_detected': ozone_detected, 'detected_count': len(detected), 'sniffed': True}
+        return CatOlfactionState(
+            cat=cat.name,
+            radius=radius,
+            detected_aromas=detected,
+            ambient_aroma=ambient,
+            ozone_detected=ozone_detected,
+            sniffed=True,
+        )
 
     @classmethod
     def _sniff_entity(cls, cat, entity, cat_position, radius):

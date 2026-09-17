@@ -628,7 +628,7 @@ class CatKnowledge:
         knowledge = cls.ensure_cat_knowledge(cat)
         if universe_tick is not None:
             knowledge.scent_clock_tick = universe_tick
-        for item in olfaction.get('detected_aromas', []):
+        for item in olfaction.detected_aromas:
             recognition = item.recognition
             identity = (
                 recognition.identity
@@ -639,9 +639,7 @@ class CatKnowledge:
             if not isinstance(position, dict):
                 continue
             remembered.append(cls.remember_scent_place(cat=cat, layer=current_layer, position=position, source_id=item.entity_id, recognized_identity=identity, components=item.raw_components, perceived_intensity=item.perceived_intensity, universe_tick=universe_tick))
-        ambient = olfaction.get(
-            'ambient_aroma'
-        )
+        ambient = olfaction.ambient_aroma
 
         if ambient is not None:
             recognition = (

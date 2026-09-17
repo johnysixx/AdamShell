@@ -39,3 +39,24 @@ class CatAmbientAroma:
     source: str | None
     components: dict
     recognition: CatAromaRecognition
+
+
+
+@dataclass(slots=True)
+class CatOlfactionState:
+    cat: str | None = None
+    radius: float = 0.0
+
+    detected_aromas: list[CatDetectedAroma] = field(
+        default_factory=list
+    )
+
+    ambient_aroma: CatAmbientAroma | None = None
+    ozone_detected: bool = False
+    sniffed: bool = False
+
+    @property
+    def detected_count(self):
+        return len(
+            self.detected_aromas
+        )

@@ -56,9 +56,7 @@ class CatDetectedAromaObjectTests(
 
         return next(
             item
-            for item in result[
-                "detected_aromas"
-            ]
+            for item in result.detected_aromas
             if item.actual_identity
             == "cat:pazuzu"
         )

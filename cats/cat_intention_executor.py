@@ -332,10 +332,7 @@ class CatIntentionExecutor:
         reacquired = next(
             (
                 item
-                for item in olfaction.get(
-                    'detected_aromas',
-                    [],
-                )
+                for item in olfaction.detected_aromas
                 if item.recognition.recognized
                 and item.recognition.identity
                 == search.get('identity')

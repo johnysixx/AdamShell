@@ -98,10 +98,7 @@ class CatMind:
         reached_scent = cat.known_scent_follow or {}
         currently_smelt_identities = {
             item.recognition.identity
-            for item in observations.olfaction.get(
-                'detected_aromas',
-                [],
-            )
+            for item in observations.olfaction.detected_aromas
             if item.recognition.recognized
         }
         if isinstance(reached_scent, dict) and reached_scent.get('arrived', False) and (reached_scent.get('identity') not in currently_smelt_identities):
@@ -212,10 +209,7 @@ class CatMind:
             target_smelt_now = any(
                 item.recognition.recognized
                 and item.recognition.identity == identity
-                for item in observations.olfaction.get(
-                    'detected_aromas',
-                    [],
-                )
+                for item in observations.olfaction.detected_aromas
             )
             if identity is not None and (not target_smelt_now) and isinstance(direction, dict) and direction.get('inferred', False):
                 traits = cat.personality.traits
