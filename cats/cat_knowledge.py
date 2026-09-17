@@ -639,15 +639,44 @@ class CatKnowledge:
             if not isinstance(position, dict):
                 continue
             remembered.append(cls.remember_scent_place(cat=cat, layer=current_layer, position=position, source_id=item.entity_id, recognized_identity=identity, components=item.raw_components, perceived_intensity=item.perceived_intensity, universe_tick=universe_tick))
-        ambient = olfaction.get('ambient_aroma')
-        if isinstance(ambient, dict):
-            recognition = ambient['recognition']
+        ambient = olfaction.get(
+            'ambient_aroma'
+        )
+
+        if ambient is not None:
+            recognition = (
+                ambient.recognition
+            )
+
             identity = (
                 recognition.identity
                 if recognition.recognized
-                else ambient.get('source')
+                else ambient.source
             )
-            remembered.append(cls.remember_scent_place(cat=cat, layer=current_layer, position=cat.position or {}, source_id='ambient', recognized_identity=identity, components=ambient.get('components', {}), perceived_intensity=sum((float(value) for value in ambient.get('components', {}).values())), universe_tick=universe_tick))
+
+            remembered.append(
+                cls.remember_scent_place(
+                    cat=cat,
+                    layer=current_layer,
+                    position=(
+                        cat.position
+                        or {}
+                    ),
+                    source_id='ambient',
+                    recognized_identity=identity,
+                    components=(
+                        ambient.components
+                    ),
+                    perceived_intensity=sum(
+                        float(value)
+                        for value
+                        in ambient.components.values()
+                    ),
+                    universe_tick=(
+                        universe_tick
+                    ),
+                )
+            )
         return remembered
 
     @classmethod

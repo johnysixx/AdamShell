@@ -30,4 +30,12 @@ class CatDetectedAroma:
     raw_components: dict
 
     perceived_intensity: float
-    recognition: CatAromaRecognition`n
+    recognition: CatAromaRecognition
+
+
+
+@dataclass(slots=True)
+class CatAmbientAroma:
+    source: str | None
+    components: dict
+    recognition: CatAromaRecognition

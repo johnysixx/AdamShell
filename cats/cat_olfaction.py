@@ -2,7 +2,10 @@ from copy import deepcopy
 import math
 from universe.aroma_profile import AromaProfile
 from cats.cat_knowledge import CatKnowledge
-from cats.cat_olfaction_state import CatDetectedAroma
+from cats.cat_olfaction_state import (
+    CatAmbientAroma,
+    CatDetectedAroma,
+)
 
 class CatOlfaction:
     DEFAULT_RADIUS = 14.0
@@ -102,12 +105,31 @@ class CatOlfaction:
         meeting_place = getattr(universe, 'meeting_place', None)
         if meeting_place is None:
             return None
-        ambient = getattr(meeting_place, 'ambient_aroma', None)
-        if not isinstance(ambient, dict):
+        ambient = getattr(
+            meeting_place,
+            'ambient_aroma',
+            None,
+        )
+
+        if ambient is None:
             return None
-        profile = dict(ambient.get('profile', {}))
-        recognition = CatKnowledge.recognize_aroma(cat, profile)
-        return {'source': ambient.get('dominant_source'), 'components': profile, 'recognition': recognition}
+
+        profile = dict(
+            ambient.profile or {}
+        )
+
+        recognition = (
+            CatKnowledge.recognize_aroma(
+                cat,
+                profile,
+            )
+        )
+
+        return CatAmbientAroma(
+            source=ambient.dominant_source,
+            components=profile,
+            recognition=recognition,
+        )
 
     @staticmethod
     def _get(entity, key):
