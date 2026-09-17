@@ -31,8 +31,11 @@ class CatScentNavigationTests(unittest.TestCase):
     def test_planner_remembers_strongest_scent_place(self):
         from cats.cat_exploration_planner import CatExplorationPlanner
         result = CatExplorationPlanner.choose_scent_destination(cat=self.cat, preferred_identity='cat:pazuzu')
-        self.assertTrue(result['selected'])
-        self.assertEqual(result['position'], {'x': 5.0, 'y': 0.0, 'z': 0.0})
+        self.assertTrue(result.selected)
+        self.assertEqual(
+            result.position,
+            {'x': 5.0, 'y': 0.0, 'z': 0.0}
+        )
 
     def test_known_scent_navigation_prefers_current_layer(self):
         from cats.cat_knowledge import CatKnowledge

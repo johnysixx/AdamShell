@@ -3,6 +3,8 @@ from copy import deepcopy
 from .cat_exploration_state import (
     CatExplorationCandidate,
     CatExplorationPlan,
+    CatScentDestinationCandidate,
+    CatScentDestinationPlan,
 )
 
 
@@ -122,12 +124,10 @@ class CatExplorationPlanner:
         )
 
         if not scent_places:
-            return {
-                "selected": False,
-                "reason": (
-                    "no_known_scent_places"
-                )
-            }
+            return CatScentDestinationPlan(
+                selected=False,
+                reason="no_known_scent_places",
+            )
 
         current_layer = getattr(
             cat,
@@ -174,64 +174,48 @@ class CatExplorationPlanner:
             ):
                 score *= -1.0
 
-            candidates.append({
-                "identity": identity,
-                "layer": place.layer,
-                "position": (
-                    cls._position(
+            candidates.append(
+                CatScentDestinationCandidate(
+                    identity=identity,
+                    layer=place.layer,
+                    position=cls._position(
                         place.position
-                    )
-                ),
-                "source_id": (
-                    place.source_id
-                ),
-                "confidence": (
-                    place.confidence
-                ),
-                "last_intensity": (
-                    place.last_intensity
-                ),
-                "score": score
-            })
+                    ),
+                    source_id=place.source_id,
+                    confidence=place.confidence,
+                    last_intensity=(
+                        place.last_intensity
+                    ),
+                    score=score,
+                )
+            )
 
         if not candidates:
-            return {
-                "selected": False,
-                "reason": (
-                    "no_matching_scent_place"
-                )
-            }
+            return CatScentDestinationPlan(
+                selected=False,
+                reason="no_matching_scent_place",
+            )
 
         candidates.sort(
-            key=lambda item: item[
-                "score"
-            ],
+            key=lambda item: item.score,
             reverse=True
         )
 
         winner = candidates[0]
 
-        return {
-            "selected": True,
-            "identity": winner[
-                "identity"
-            ],
-            "layer": winner[
-                "layer"
-            ],
-            "position": deepcopy(
-                winner["position"]
+        return CatScentDestinationPlan(
+            selected=True,
+            identity=winner.identity,
+            layer=winner.layer,
+            position=deepcopy(
+                winner.position
             ),
-            "source_id": winner[
-                "source_id"
-            ],
-            "score": winner[
-                "score"
-            ],
-            "candidates": deepcopy(
+            source_id=winner.source_id,
+            score=winner.score,
+            candidates=deepcopy(
                 candidates
-            )
-        }
+            ),
+        )
 
     @classmethod
     def choose_after_arrival(

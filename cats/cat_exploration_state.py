@@ -2,6 +2,35 @@ from dataclasses import dataclass, field
 
 
 @dataclass(slots=True)
+class CatScentDestinationCandidate:
+    identity: str | None
+    layer: str | None
+    position: object
+    source_id: object
+
+    confidence: float
+    last_intensity: float
+    score: float
+
+
+@dataclass(slots=True)
+class CatScentDestinationPlan:
+    selected: bool = False
+
+    reason: str | None = None
+
+    identity: str | None = None
+    layer: str | None = None
+    position: object = None
+    source_id: object = None
+    score: float | None = None
+
+    candidates: list = field(
+        default_factory=list
+    )
+
+
+@dataclass(slots=True)
 class CatExplorationCandidate:
     layer: str
     position: object
