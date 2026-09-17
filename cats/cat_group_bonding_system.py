@@ -1,4 +1,5 @@
 from copy import deepcopy
+from cats.cat_social_objects import CatRelationship
 
 class CatGroupBondingSystem:
 
@@ -19,10 +20,10 @@ class CatGroupBondingSystem:
             for second in members:
                 if first is second:
                     continue
-                relation = first.relationships.get(second.name, {})
-                trust_values.append(float(relation.get('trust', 0.5)))
-                affiliation_values.append(float(relation.get('affiliation', 0.0)))
-                tension_values.append(float(relation.get('tension', 0.0)))
+                relation = first.relationships.get(second.name, CatRelationship.create())
+                trust_values.append(float(relation.trust))
+                affiliation_values.append(float(relation.affiliation))
+                tension_values.append(float(relation.tension))
         trust = self._average(trust_values)
         affiliation = self._average(affiliation_values)
         tension = self._average(tension_values)
@@ -44,10 +45,10 @@ class CatGroupBondingSystem:
                 if first is second:
                     continue
                 relation = self.group_system._ensure_relationship(first, second)
-                relation['familiarity'] = self._clamp(float(relation['familiarity']) + amount * 0.5)
-                relation['trust'] = self._clamp(float(relation['trust']) + amount * 0.35)
-                relation['affiliation'] = self._clamp(float(relation['affiliation']) + amount)
-                relation['tension'] = self._clamp(float(relation['tension']) - amount * 0.5)
+                relation.familiarity = self._clamp(float(relation.familiarity) + amount * 0.5)
+                relation.trust = self._clamp(float(relation.trust) + amount * 0.35)
+                relation.affiliation = self._clamp(float(relation.affiliation) + amount)
+                relation.tension = self._clamp(float(relation.tension) - amount * 0.5)
         event = {'name': 'cat_group_bond_reinforced', 'group_id': group_id, 'members': [cat.name for cat in members], 'amount': amount}
         group.history.append(deepcopy(event))
         for cat in members:

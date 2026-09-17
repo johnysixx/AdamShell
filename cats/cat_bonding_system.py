@@ -1,7 +1,7 @@
 from copy import deepcopy
 
 from cats.cat import Cat
-from cats.cat_social_objects import CatBond
+from cats.cat_social_objects import CatBond, CatRelationship
 
 
 class CatBondingSystem:
@@ -27,7 +27,7 @@ class CatBondingSystem:
 
         relation = cat.relationships.get(
             other_cat.name,
-            {}
+            CatRelationship.create()
         )
 
         memory = cat.social_memory.records.get(
@@ -36,38 +36,23 @@ class CatBondingSystem:
         )
 
         familiarity = self._number(
-            relation.get(
-                "familiarity",
-                0.0
-            )
+            relation.familiarity
         )
 
         trust = self._number(
-            relation.get(
-                "trust",
-                0.5
-            )
+            relation.trust
         )
 
         affiliation = self._number(
-            relation.get(
-                "affiliation",
-                0.0
-            )
+            relation.affiliation
         )
 
         shared_scent = self._number(
-            relation.get(
-                "shared_scent",
-                0.0
-            )
+            relation.shared_scent
         )
 
         tension = self._number(
-            relation.get(
-                "tension",
-                0.0
-            )
+            relation.tension
         )
 
         friendly_count = int(

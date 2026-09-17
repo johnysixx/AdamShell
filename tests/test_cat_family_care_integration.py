@@ -82,7 +82,9 @@ class CatFamilyCareIntegrationTests(unittest.TestCase):
         relation.meet_count = 4
         history = [{'reason': 'past_meeting'}]
         relation.trust_history = history
-        legacy = {'trust': 0.7, 'custom_note': 'known_before_play'}
+        legacy = CatRelationship.create()
+        legacy.trust = 0.7
+        legacy.custom_note = 'known_before_play'
         self.first.relationships[self.second.name] = relation
         self.second.relationships[self.first.name] = legacy
 
@@ -99,9 +101,9 @@ class CatFamilyCareIntegrationTests(unittest.TestCase):
         self.assertEqual(relation.meet_count, 4)
         self.assertIs(relation.trust_history, history)
         self.assertEqual(relation.last_interaction, 'sibling_play')
-        self.assertAlmostEqual(legacy['trust'], 0.74)
-        self.assertAlmostEqual(legacy['familiarity'], 0.08)
-        self.assertEqual(legacy['custom_note'], 'known_before_play')
+        self.assertAlmostEqual(legacy.trust, 0.74)
+        self.assertAlmostEqual(legacy.familiarity, 0.08)
+        self.assertEqual(legacy.custom_note, 'known_before_play')
 
 
 if __name__ == '__main__':

@@ -1,4 +1,5 @@
 from copy import deepcopy
+from cats.cat_social_objects import CatRelationship
 from cats.cat_group_hierarchy_system import CatGroupHierarchySystem
 
 class CatGroupRecruitmentSystem:
@@ -16,12 +17,12 @@ class CatGroupRecruitmentSystem:
         weighted_no = 0.0
         vetoes = []
         for member in members:
-            relation = member.relationships.get(candidate.name, {})
-            trust = float(relation.get('trust', 0.5))
-            affiliation = float(relation.get('affiliation', 0.0))
-            familiarity = float(relation.get('familiarity', 0.0))
-            tension = float(relation.get('tension', 0.0))
-            shared_scent = float(relation.get('shared_scent', 0.0))
+            relation = member.relationships.get(candidate.name, CatRelationship.create())
+            trust = float(relation.trust)
+            affiliation = float(relation.affiliation)
+            familiarity = float(relation.familiarity)
+            tension = float(relation.tension)
+            shared_scent = float(relation.shared_scent)
             score = trust * 0.4 + affiliation * 0.25 + familiarity * 0.15 + shared_scent * 0.1 + 0.2 - tension * 0.55
             if sponsor is not None and sponsor.name == member.name:
                 score += 0.15

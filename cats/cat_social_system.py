@@ -1,4 +1,5 @@
 from copy import deepcopy
+from cats.cat_social_objects import CatRelationship
 
 from cats.cat import Cat
 from cats.cat_social_objects import (
@@ -323,31 +324,19 @@ class CatSocialSystem:
         )
 
         familiarity = self._number(
-            relation.get(
-                "familiarity",
-                0.0
-            )
+            relation.familiarity
         )
 
         trust = self._number(
-            relation.get(
-                "trust",
-                0.5
-            )
+            relation.trust
         )
 
         affiliation = self._number(
-            relation.get(
-                "affiliation",
-                0.0
-            )
+            relation.affiliation
         )
 
         tension = self._number(
-            relation.get(
-                "tension",
-                0.0
-            )
+            relation.tension
         )
 
         traits = cat.personality.traits
@@ -518,31 +507,19 @@ class CatSocialSystem:
 
         familiarity = (
             self._number(
-                relation_a.get(
-                    "familiarity",
-                    0.0
-                )
+                relation_a.familiarity
             )
             + self._number(
-                relation_b.get(
-                    "familiarity",
-                    0.0
-                )
+                relation_b.familiarity
             )
         ) / 2.0
 
         affiliation = (
             self._number(
-                relation_a.get(
-                    "affiliation",
-                    0.0
-                )
+                relation_a.affiliation
             )
             + self._number(
-                relation_b.get(
-                    "affiliation",
-                    0.0
-                )
+                relation_b.affiliation
             )
         ) / 2.0
 
@@ -766,60 +743,35 @@ class CatSocialSystem:
             relation_a,
             relation_b
         ):
-            relation[
-                "meet_count"
-            ] = int(
-                relation.get(
-                    "meet_count",
-                    0
-                )
+            relation.meet_count = int(
+                relation.meet_count
             ) + 1
 
-            relation[
-                "familiarity"
-            ] = self._clamp(
+            relation.familiarity = self._clamp(
                 self._number(
-                    relation.get(
-                        "familiarity",
-                        0.0
-                    )
+                    relation.familiarity
                 )
                 + 0.10
             )
 
             if attitude == "friendly":
-                relation[
-                    "trust"
-                ] = self._clamp(
+                relation.trust = self._clamp(
                     self._number(
-                        relation.get(
-                            "trust",
-                            0.5
-                        )
+                        relation.trust
                     )
                     + 0.08
                 )
 
-                relation[
-                    "affiliation"
-                ] = self._clamp(
+                relation.affiliation = self._clamp(
                     self._number(
-                        relation.get(
-                            "affiliation",
-                            0.0
-                        )
+                        relation.affiliation
                     )
                     + 0.10
                 )
 
-                relation[
-                    "tension"
-                ] = self._clamp(
+                relation.tension = self._clamp(
                     self._number(
-                        relation.get(
-                            "tension",
-                            0.0
-                        )
+                        relation.tension
                     )
                     - 0.10
                 )
@@ -828,14 +780,9 @@ class CatSocialSystem:
                     "head_bunt",
                     "body_rub"
                 ):
-                    relation[
-                        "shared_scent"
-                    ] = self._clamp(
+                    relation.shared_scent = self._clamp(
                         self._number(
-                            relation.get(
-                                "shared_scent",
-                                0.0
-                            )
+                            relation.shared_scent
                         )
                         + (
                             0.20
@@ -846,58 +793,36 @@ class CatSocialSystem:
                     )
 
             elif attitude == "hostile":
-                relation[
-                    "trust"
-                ] = self._clamp(
+                relation.trust = self._clamp(
                     self._number(
-                        relation.get(
-                            "trust",
-                            0.5
-                        )
+                        relation.trust
                     )
                     - 0.15
                 )
 
-                relation[
-                    "affiliation"
-                ] = self._clamp(
+                relation.affiliation = self._clamp(
                     self._number(
-                        relation.get(
-                            "affiliation",
-                            0.0
-                        )
+                        relation.affiliation
                     )
                     - 0.08
                 )
 
-                relation[
-                    "tension"
-                ] = self._clamp(
+                relation.tension = self._clamp(
                     self._number(
-                        relation.get(
-                            "tension",
-                            0.0
-                        )
+                        relation.tension
                     )
                     + 0.20
                 )
 
             else:
-                relation[
-                    "trust"
-                ] = self._clamp(
+                relation.trust = self._clamp(
                     self._number(
-                        relation.get(
-                            "trust",
-                            0.5
-                        )
+                        relation.trust
                     )
                     + 0.01
                 )
 
-            relation[
-                "last_interaction"
-            ] = outcome
+            relation.last_interaction = outcome
 
     def _combined_attitude(
         self,
@@ -1102,40 +1027,12 @@ class CatSocialSystem:
             CatRelationship.create()
         )
 
-        relation.setdefault(
-            "familiarity",
-            0.0
-        )
 
-        relation.setdefault(
-            "trust",
-            0.5
-        )
 
-        relation.setdefault(
-            "affiliation",
-            0.0
-        )
 
-        relation.setdefault(
-            "tension",
-            0.0
-        )
 
-        relation.setdefault(
-            "shared_scent",
-            0.0
-        )
 
-        relation.setdefault(
-            "meet_count",
-            0
-        )
 
-        relation.setdefault(
-            "last_interaction",
-            None
-        )
 
         return relation
 

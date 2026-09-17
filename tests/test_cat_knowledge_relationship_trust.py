@@ -15,17 +15,17 @@ class CatKnowledgeRelationshipTrustTests(unittest.TestCase):
         )
         self.storyteller_name = 'storyteller'
 
-    def test_reads_and_clamps_object_and_legacy_trust(self):
+    def test_reads_and_clamps_object_and_second_relationship_trust(self):
         relationship = CatRelationship.create()
         history = [{'reason': 'past_meeting'}]
-        legacy = {'trust_history': history}
+        second_relationship = CatRelationship(trust_history=history)
 
         for value, expected in (
             (0.9, 0.9), ('0.8', 0.8), (-0.2, 0.0), (1.2, 1.0),
         ):
             relationship.trust = value
-            legacy['trust'] = value
-            for record in (relationship, legacy):
+            second_relationship.trust = value
+            for record in (relationship, second_relationship):
                 self.listener.relationships[self.storyteller_name] = record
                 self.assertAlmostEqual(
                     CatKnowledge._trust_in_cat(
@@ -37,9 +37,9 @@ class CatKnowledgeRelationshipTrustTests(unittest.TestCase):
                     self.listener.relationships[self.storyteller_name], record,
                 )
             self.assertEqual(relationship.trust, value)
-            self.assertEqual(legacy['trust'], value)
+            self.assertEqual(second_relationship.trust, value)
 
-        self.assertIs(legacy['trust_history'], history)
+        self.assertIs(second_relationship.trust_history, history)
         self.assertEqual(history, [{'reason': 'past_meeting'}])
 
     def test_missing_trust_defaults_without_mutating_records(self):
@@ -49,9 +49,9 @@ class CatKnowledgeRelationshipTrustTests(unittest.TestCase):
         )
         self.assertNotIn(self.storyteller_name, self.listener.relationships)
 
-        legacy = {}
+        second_relationship = CatRelationship()
         incomplete = CatRelationship()
-        for record in (legacy, incomplete, None):
+        for record in (second_relationship, incomplete, None):
             self.listener.relationships[self.storyteller_name] = record
             self.assertEqual(
                 CatKnowledge._trust_in_cat(self.listener, self.storyteller_name),
@@ -61,14 +61,14 @@ class CatKnowledgeRelationshipTrustTests(unittest.TestCase):
                 self.listener.relationships[self.storyteller_name], record,
             )
 
-        self.assertEqual(legacy, {})
-        self.assertFalse(hasattr(incomplete, 'trust'))
+        self.assertEqual(second_relationship.trust, 0.5)
+        self.assertEqual(incomplete.trust, 0.5)
 
 
     def test_adjustment_initializes_missing_fields_on_existing_records(self):
         relationship = CatRelationship()
-        legacy = {}
-        for name, record in (('object', relationship), ('legacy', legacy)):
+        second_relationship = CatRelationship()
+        for name, record in (('object', relationship), ('second_relationship', second_relationship)):
             self.listener.relationships[name] = record
             event = CatKnowledge.adjust_storyteller_trust(
                 self.listener, name, 0.1, 'confirmed', legend_id='legend_1',
@@ -81,22 +81,22 @@ class CatKnowledgeRelationshipTrustTests(unittest.TestCase):
             self.assertEqual(event['legend_id'], 'legend_1')
 
         self.assertAlmostEqual(relationship.trust, 0.6)
-        self.assertAlmostEqual(legacy['trust'], 0.6)
+        self.assertAlmostEqual(second_relationship.trust, 0.6)
         self.assertEqual(len(relationship.trust_history), 1)
-        self.assertEqual(relationship.trust_history, legacy['trust_history'])
-        self.assertIsNot(relationship.trust_history, legacy['trust_history'])
+        self.assertEqual(relationship.trust_history, second_relationship.trust_history)
+        self.assertIsNot(relationship.trust_history, second_relationship.trust_history)
 
     def test_adjustments_preserve_history_and_record_effective_delta(self):
         relationship = CatRelationship.create()
         relationship.trust = '1.2'
         object_history = [{'reason': 'past_meeting'}]
         relationship.trust_history = object_history
-        legacy_history = [{'reason': 'past_meeting'}]
-        legacy = {'trust': '1.2', 'trust_history': legacy_history}
+        second_relationship_history = [{'reason': 'past_meeting'}]
+        second_relationship = CatRelationship(trust='1.2', trust_history=second_relationship_history)
 
         for name, record, history in (
             ('object', relationship, object_history),
-            ('legacy', legacy, legacy_history),
+            ('second_relationship', second_relationship, second_relationship_history),
         ):
             self.listener.relationships[name] = record
             previous_entry = history[0]
@@ -122,9 +122,9 @@ class CatKnowledgeRelationshipTrustTests(unittest.TestCase):
             self.assertEqual(previous_entry, {'reason': 'past_meeting'})
 
         self.assertEqual(relationship.trust, 1.0)
-        self.assertEqual(legacy['trust'], 1.0)
+        self.assertEqual(second_relationship.trust, 1.0)
         self.assertIs(relationship.trust_history, object_history)
-        self.assertIs(legacy['trust_history'], legacy_history)
+        self.assertIs(second_relationship.trust_history, second_relationship_history)
 
 
 if __name__ == '__main__':

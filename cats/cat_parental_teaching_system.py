@@ -70,14 +70,10 @@ class CatParentalTeachingSystem:
             parent.name,
             CatRelationship.create(),
         )
-        relation.setdefault('familiarity', 0.0)
-        relation.setdefault('trust', 0.5)
-        relation.setdefault('affiliation', 0.0)
-        relation.setdefault('tension', 0.0)
-        relation['familiarity'] = min(1.0, float(relation['familiarity']) + 0.03)
-        relation['trust'] = min(1.0, float(relation['trust']) + 0.04)
-        relation['affiliation'] = min(1.0, float(relation['affiliation']) + 0.02)
-        relation['last_interaction'] = 'parental_teaching'
+        relation.familiarity = min(1.0, float(relation.familiarity) + 0.03)
+        relation.trust = min(1.0, float(relation.trust) + 0.04)
+        relation.affiliation = min(1.0, float(relation.affiliation) + 0.02)
+        relation.last_interaction = 'parental_teaching'
 
     def _require_cat(self, cat):
         if not isinstance(cat, Cat):

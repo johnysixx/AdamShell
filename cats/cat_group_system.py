@@ -39,11 +39,11 @@ class CatGroupSystem:
         total = 0.0
         hostile = 0
         for member in members:
-            relation = member.relationships.get(candidate.name, {})
-            trust = self._number(relation.get('trust', 0.5))
-            affiliation = self._number(relation.get('affiliation', 0.0))
-            tension = self._number(relation.get('tension', 0.0))
-            familiarity = self._number(relation.get('familiarity', 0.0))
+            relation = member.relationships.get(candidate.name, CatRelationship.create())
+            trust = self._number(relation.trust)
+            affiliation = self._number(relation.affiliation)
+            tension = self._number(relation.tension)
+            familiarity = self._number(relation.familiarity)
             score = trust * 0.4 + affiliation * 0.25 + familiarity * 0.15 + 0.2 - tension * 0.55
             total += score
             if tension >= 0.7 or trust <= 0.15:
@@ -88,8 +88,8 @@ class CatGroupSystem:
                 if first is second:
                     continue
                 relation = self._ensure_relationship(first, second)
-                relation['shared_scent'] = self._clamp(self._number(relation.get('shared_scent', 0.0)) + amount)
-                relation['familiarity'] = self._clamp(self._number(relation.get('familiarity', 0.0)) + amount * 0.5)
+                relation.shared_scent = self._clamp(self._number(relation.shared_scent) + amount)
+                relation.familiarity = self._clamp(self._number(relation.familiarity) + amount * 0.5)
         event = {'name': 'cat_group_scent_mixed', 'group_id': group_id, 'members': [cat.name for cat in members], 'shared_scent_strength': group.shared_scent_strength, 'mixed': True}
         self._record(group, event, cats=members)
         return event
@@ -169,12 +169,6 @@ class CatGroupSystem:
             other_cat.name,
             CatRelationship.create(),
         )
-        relation.setdefault('familiarity', 0.0)
-        relation.setdefault('trust', 0.5)
-        relation.setdefault('affiliation', 0.0)
-        relation.setdefault('tension', 0.0)
-        relation.setdefault('shared_scent', 0.0)
-        relation.setdefault('last_interaction', None)
         return relation
 
     def _group(self, group_id):

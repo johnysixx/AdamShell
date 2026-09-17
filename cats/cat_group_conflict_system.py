@@ -1,4 +1,5 @@
 from copy import deepcopy
+from cats.cat_social_objects import CatRelationship
 
 from cats.cat_group_bonding_system import (
     CatGroupBondingSystem
@@ -330,19 +331,11 @@ class CatGroupConflictSystem:
                     )
                 )
 
-                relation.setdefault(
-                    "tension",
-                    0.0
-                )
 
-                relation[
-                    "tension"
-                ] = min(
+                relation.tension = min(
                     1.0,
                     float(
-                        relation[
-                            "tension"
-                        ]
+                        relation.tension
                     )
                     + amount
                 )

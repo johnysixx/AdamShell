@@ -1,6 +1,6 @@
 from copy import deepcopy
 from cats.cat import Cat
-from cats.cat_social_objects import CatTerritoryClaim
+from cats.cat_social_objects import CatRelationship, CatTerritoryClaim
 
 class CatTerritorySystem:
 
@@ -44,11 +44,11 @@ class CatTerritorySystem:
         claim = self.claim_at(cat=cat, layer=cat.current_layer, location=cat.location)
         if claim is None:
             return {'owns_here': False, 'intrusion': False, 'accepted': False, 'claim_strength': 0.0, 'territory': None}
-        relation = cat.relationships.get(other_cat.name, {})
-        familiarity = self._number(relation.get('familiarity', 0.0))
-        trust = self._number(relation.get('trust', 0.5))
-        affiliation = self._number(relation.get('affiliation', 0.0))
-        shared_scent = self._number(relation.get('shared_scent', 0.0))
+        relation = cat.relationships.get(other_cat.name, CatRelationship.create())
+        familiarity = self._number(relation.familiarity)
+        trust = self._number(relation.trust)
+        affiliation = self._number(relation.affiliation)
+        shared_scent = self._number(relation.shared_scent)
         accepted = bool(affiliation >= 0.65 or shared_scent >= 0.5 or (familiarity >= 0.7 and trust >= 0.8))
         return {'owns_here': True, 'intrusion': not accepted, 'accepted': accepted, 'claim_strength': self._number(getattr(claim, 'strength', 0.0)), 'territory': self._territory_key(getattr(claim, 'layer', None), getattr(claim, 'location', None))}
 

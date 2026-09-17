@@ -303,35 +303,67 @@ class CatKnowledge:
         return {'name': 'cat_shared_legend', 'storyteller': storyteller.name, 'listener': listener.name, 'legend_id': getattr(legend, 'legend_id', None), 'layer': getattr(legend, 'layer', None), 'position': deepcopy(getattr(legend, 'position', None)), 'evaluation': evaluation, 'heard_legend': heard, 'shared': True}
 
     @classmethod
-    def adjust_storyteller_trust(cls, listener, storyteller_name, delta, reason, legend_id=None):
-        if not isinstance(listener, Cat):
-            raise TypeError('Trust listener must be Cat.')
-        relationships = listener.relationships
-        relation = relationships.setdefault(
-            storyteller_name,
-            CatRelationship.create(),
+    def adjust_storyteller_trust(
+        cls,
+        listener,
+        storyteller_name,
+        delta,
+        reason,
+        legend_id=None,
+    ):
+        if not isinstance(
+            listener,
+            Cat,
+        ):
+            raise TypeError(
+                'Trust listener must be Cat.'
+            )
+
+        relation = (
+            listener
+            .relationships
+            .setdefault(
+                storyteller_name,
+                CatRelationship.create(),
+            )
         )
-        if isinstance(relation, CatRelationship):
-            try:
-                trust = relation.trust
-            except AttributeError:
-                trust = 0.5
-        else:
-            trust = relation.get('trust', 0.5)
-        previous = float(trust)
-        current = max(0.0, min(1.0, previous + float(delta)))
-        if isinstance(relation, CatRelationship):
-            relation.trust = current
-            try:
-                history = relation.trust_history
-            except AttributeError:
-                history = []
-                relation.trust_history = history
-        else:
-            relation['trust'] = current
-            history = relation.setdefault('trust_history', [])
-        event = {'previous': previous, 'current': current, 'delta': current - previous, 'reason': reason, 'legend_id': legend_id}
-        history.append(deepcopy(event))
+
+        if not isinstance(
+            relation,
+            CatRelationship,
+        ):
+            raise TypeError(
+                'Cat relationships must contain '
+                'CatRelationship objects.'
+            )
+
+        previous = float(
+            relation.trust
+        )
+
+        current = max(
+            0.0,
+            min(
+                1.0,
+                previous
+                + float(delta),
+            ),
+        )
+
+        relation.trust = current
+
+        event = {
+            'previous': previous,
+            'current': current,
+            'delta': current - previous,
+            'reason': reason,
+            'legend_id': legend_id,
+        }
+
+        relation.trust_history.append(
+            deepcopy(event)
+        )
+
         return deepcopy(event)
 
     @classmethod
@@ -350,23 +382,47 @@ class CatKnowledge:
         return {'contradicted': True, 'legend_id': legend_id, 'storyteller': storyteller, 'trust_change': trust_change}
 
     @staticmethod
-    def _trust_in_cat(listener, storyteller_name):
-        if not isinstance(listener, Cat):
-            raise TypeError('Trust listener must be Cat.')
-        relationships = listener.relationships
-        if isinstance(relationships, dict):
-            relation = relationships.get(storyteller_name)
-            if isinstance(relation, CatRelationship):
-                try:
-                    trust = relation.trust
-                except AttributeError:
-                    trust = 0.5
-            elif isinstance(relation, dict):
-                trust = relation.get('trust', 0.5)
-            else:
-                return 0.5
-            return max(0.0, min(1.0, float(trust)))
-        return 0.5
+    def _trust_in_cat(
+        listener,
+        storyteller_name,
+    ):
+        if not isinstance(
+            listener,
+            Cat,
+        ):
+            raise TypeError(
+                'Trust listener must be Cat.'
+            )
+
+        relation = (
+            listener
+            .relationships
+            .get(
+                storyteller_name
+            )
+        )
+
+        if relation is None:
+            return 0.5
+
+        if not isinstance(
+            relation,
+            CatRelationship,
+        ):
+            raise TypeError(
+                'Cat relationships must contain '
+                'CatRelationship objects.'
+            )
+
+        return max(
+            0.0,
+            min(
+                1.0,
+                float(
+                    relation.trust
+                ),
+            ),
+        )
 
     @classmethod
     def _find_place(cls, places, layer, position):

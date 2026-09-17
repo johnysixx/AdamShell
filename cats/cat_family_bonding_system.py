@@ -1,6 +1,6 @@
 from copy import deepcopy
 from cats.cat import Cat
-from cats.cat_social_objects import CatBond
+from cats.cat_social_objects import CatBond, CatRelationship
 from cats.cat_family_system import CatFamilySystem
 
 class CatFamilyBondingSystem:
@@ -15,8 +15,8 @@ class CatFamilyBondingSystem:
         relation = self.family_system.relation(first, second)
         if relation is None:
             return {'related': False, 'eligible': False, 'relation': None, 'reason': 'not_family'}
-        relationship = first.relationships.get(second.name, {})
-        tension = self._number(relationship.get('tension', 0.0))
+        relationship = first.relationships.get(second.name, CatRelationship.create())
+        tension = self._number(relationship.tension)
         care_events = max(int(getattr(first.maternal_care_received, 'care_events', 0)), int(getattr(second.maternal_care_received, 'care_events', 0)))
         play_events = max(int(first.sibling_play.partners.get(second.name, 0)), int(second.sibling_play.partners.get(first.name, 0)))
         parent_child = relation in {'mother', 'father', 'child'}

@@ -46,11 +46,11 @@ class CatSiblingPlaySystem:
             other_cat.name,
             CatRelationship.create(),
         )
-        relation['familiarity'] = self._clamp(float(relation.get('familiarity', 0.0)) + 0.04)
-        relation['trust'] = self._clamp(float(relation.get('trust', 0.5)) + 0.02)
-        relation['affiliation'] = self._clamp(float(relation.get('affiliation', 0.0)) + 0.03)
-        relation['tension'] = self._clamp(float(relation.get('tension', 0.0)) - 0.02)
-        relation['last_interaction'] = 'sibling_play'
+        relation.familiarity = self._clamp(float(relation.familiarity) + 0.04)
+        relation.trust = self._clamp(float(relation.trust) + 0.02)
+        relation.affiliation = self._clamp(float(relation.affiliation) + 0.03)
+        relation.tension = self._clamp(float(relation.tension) - 0.02)
+        relation.last_interaction = 'sibling_play'
 
     def _clamp(self, value):
         return max(0.0, min(1.0, value))

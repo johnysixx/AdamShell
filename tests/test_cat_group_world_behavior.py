@@ -86,15 +86,13 @@ class CatGroupWorldBehaviorTests(unittest.TestCase):
             object_relation.tension = 0.9
             for cat, other, relation, expected in (
                 (members[0], members[1], object_relation, (0.98, 1.0)),
-                (members[1], members[0], {}, (0.08, 0.16)),
+                (members[1], members[0], CatRelationship.create(), (0.08, 0.16)),
             ):
                 history = [{'kind': 'shared_rest'}]
-                relation.update({
-                    'trust': 0.75,
-                    'affiliation': 0.4,
-                    'trust_history': history,
-                    'meet_count': 3,
-                })
+                relation.trust = 0.75
+                relation.affiliation = 0.4
+                relation.trust_history = history
+                relation.meet_count = 3
                 cat.relationships[other.name] = relation
                 records.append((cat, other, relation, history, expected))
 
@@ -103,12 +101,12 @@ class CatGroupWorldBehaviorTests(unittest.TestCase):
             conflict.resolve(first, second, self.cats.cats, resource='milk')
             for cat, other, relation, history, expected in records:
                 self.assertIs(cat.relationships[other.name], relation)
-                self.assertAlmostEqual(relation['tension'], expected[index])
-                self.assertEqual(relation['trust'], 0.75)
-                self.assertEqual(relation['affiliation'], 0.4)
-                self.assertIs(relation['trust_history'], history)
+                self.assertAlmostEqual(relation.tension, expected[index])
+                self.assertEqual(relation.trust, 0.75)
+                self.assertEqual(relation.affiliation, 0.4)
+                self.assertIs(relation.trust_history, history)
                 self.assertEqual(history, [{'kind': 'shared_rest'}])
-                self.assertEqual(relation['meet_count'], 3)
+                self.assertEqual(relation.meet_count, 3)
 
     def _assert_decisive_conflict(self, first_wins):
         first = self._group(self.members[:3], 'first')

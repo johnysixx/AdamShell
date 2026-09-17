@@ -104,23 +104,21 @@ class CatGroupNormTests(unittest.TestCase):
         sanctions = CatGroupSanctionSystem(self.groups)
         for cat, other, relation in (
             (self.first, self.second, CatRelationship.create()),
-            (self.second, self.first, {}),
+            (self.second, self.first, CatRelationship.create()),
         ):
             history = [{'kind': 'shared_rest'}]
-            relation.update({
-                'affiliation': 0.4,
-                'trust': 0.8,
-                'trust_history': history,
-                'meet_count': 3,
-            })
+            relation.affiliation = 0.4
+            relation.trust = 0.8
+            relation.trust_history = history
+            relation.meet_count = 3
             cat.relationships[other.name] = relation
 
             avoidance = sanctions.sanction(
                 self.group_id, cat, CatViolation(severity=0.3)
             )
             self.assertEqual(avoidance['sanction'], 'social_avoidance')
-            self.assertAlmostEqual(relation['affiliation'], 0.35)
-            self.assertEqual(relation['trust'], 0.8)
+            self.assertAlmostEqual(relation.affiliation, 0.35)
+            self.assertEqual(relation.trust, 0.8)
 
             loss = sanctions.sanction(
                 self.group_id, cat, CatViolation(severity=0.5)
@@ -129,12 +127,12 @@ class CatGroupNormTests(unittest.TestCase):
             self.assertEqual(loss['sanction'], 'trust_loss')
             self.assertAlmostEqual(loss['severity'], 0.58)
             self.assertIs(cat.relationships[other.name], relation)
-            self.assertAlmostEqual(relation['trust'], 0.563)
-            self.assertAlmostEqual(relation['affiliation'], 0.35)
+            self.assertAlmostEqual(relation.trust, 0.563)
+            self.assertAlmostEqual(relation.affiliation, 0.35)
             self.assertAlmostEqual(cat.norms.trust_penalties, 0.237)
-            self.assertIs(relation['trust_history'], history)
+            self.assertIs(relation.trust_history, history)
             self.assertEqual(history, [{'kind': 'shared_rest'}])
-            self.assertEqual(relation['meet_count'], 3)
+            self.assertEqual(relation.meet_count, 3)
 
 
 if __name__ == '__main__':

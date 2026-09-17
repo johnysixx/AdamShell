@@ -1,4 +1,5 @@
 from copy import deepcopy
+from cats.cat_social_objects import CatRelationship
 from cats.cat import Cat
 
 class CatGroupHierarchySystem:
@@ -40,8 +41,8 @@ class CatGroupHierarchySystem:
         for other in members:
             if other is cat:
                 continue
-            relation = other.relationships.get(cat.name, {})
-            relationship_scores.append(self._number(relation.get('trust', 0.5)) * 0.55 + self._number(relation.get('affiliation', 0.0)) * 0.3 + self._number(relation.get('familiarity', 0.0)) * 0.15)
+            relation = other.relationships.get(cat.name, CatRelationship.create())
+            relationship_scores.append(self._number(relation.trust) * 0.55 + self._number(relation.affiliation) * 0.3 + self._number(relation.familiarity) * 0.15)
         social_support = sum(relationship_scores) / len(relationship_scores) if relationship_scores else 0.5
         defense = min(1.0, int(cat.group.defense_events) / 5.0)
         participation = min(1.0, int(cat.group.group_events) / 20.0)

@@ -54,18 +54,17 @@ class CatLegendReputationTests(unittest.TestCase):
         record.trust = 0.8
         record.meet_count = 4
         record.trust_history = [{'reason': 'past_observation'}]
-        legacy = {
-            'trust': 0.6,
-            'trust_history': [{'reason': 'earlier_observation'}],
-            'custom_note': 'preserve_me',
-        }
+        legacy = CatRelationship.create()
+        legacy.trust = 0.6
+        legacy.trust_history = [{'reason': 'earlier_observation'}]
+        legacy.custom_note = 'preserve_me'
 
         for name, relation, expected in (
             (self.storyteller.name, record, 0.7),
             ('legacy_storyteller', legacy, 0.5),
         ):
             self.listener.relationships[name] = relation
-            history = relation.get('trust_history')
+            history = relation.trust_history
             prior_event = dict(history[0])
             first = CatKnowledge.adjust_storyteller_trust(
                 self.listener, name, 0.1, 'confirmed',
@@ -77,8 +76,8 @@ class CatLegendReputationTests(unittest.TestCase):
             )
 
             self.assertIs(self.listener.relationships[name], relation)
-            self.assertIs(relation.get('trust_history'), history)
-            self.assertAlmostEqual(relation.get('trust'), expected)
+            self.assertIs(relation.trust_history, history)
+            self.assertAlmostEqual(relation.trust, expected)
             self.assertAlmostEqual(
                 CatKnowledge._trust_in_cat(self.listener, name), expected,
             )
@@ -90,7 +89,7 @@ class CatLegendReputationTests(unittest.TestCase):
             self.assertAlmostEqual(history[2]['current'], expected)
 
         self.assertEqual(record.meet_count, 4)
-        self.assertEqual(legacy['custom_note'], 'preserve_me')
+        self.assertEqual(legacy.custom_note, 'preserve_me')
 
 
 if __name__ == '__main__':

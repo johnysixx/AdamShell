@@ -94,7 +94,9 @@ class CatGroupSystemTests(unittest.TestCase):
         relation.meet_count = 4
         history = [{'reason': 'past_meeting'}]
         relation.trust_history = history
-        legacy = {'trust': 0.7, 'custom_note': 'known_before_group'}
+        legacy = CatRelationship.create()
+        legacy.trust = 0.7
+        legacy.custom_note = 'known_before_group'
         self.first.relationships[self.second.name] = relation
         self.second.relationships[self.first.name] = legacy
 
@@ -114,9 +116,9 @@ class CatGroupSystemTests(unittest.TestCase):
         self.assertAlmostEqual(relation.shared_scent, 0.5)
         self.assertEqual(relation.meet_count, 4)
         self.assertIs(relation.trust_history, history)
-        self.assertAlmostEqual(legacy['trust'], 0.7)
-        self.assertAlmostEqual(legacy['shared_scent'], 0.2)
-        self.assertEqual(legacy['custom_note'], 'known_before_group')
+        self.assertAlmostEqual(legacy.trust, 0.7)
+        self.assertAlmostEqual(legacy.shared_scent, 0.2)
+        self.assertEqual(legacy.custom_note, 'known_before_group')
 
 
 if __name__ == '__main__':

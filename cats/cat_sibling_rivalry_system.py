@@ -30,11 +30,11 @@ class CatSiblingRivalrySystem:
         )
         tension_gain = 0.12 * intensity * (0.5 if bonded else 1.0)
         for relationship in (first_relation, second_relation):
-            relationship['familiarity'] = self._clamp(relationship['familiarity'] + 0.02)
-            relationship['tension'] = self._clamp(relationship['tension'] + tension_gain)
-            relationship['affiliation'] = self._clamp(relationship['affiliation'] - 0.04 * intensity)
-            relationship['last_interaction'] = 'sibling_rivalry'
-        tension = max(first_relation['tension'], second_relation['tension'])
+            relationship.familiarity = self._clamp(relationship.familiarity + 0.02)
+            relationship.tension = self._clamp(relationship.tension + tension_gain)
+            relationship.affiliation = self._clamp(relationship.affiliation - 0.04 * intensity)
+            relationship.last_interaction = 'sibling_rivalry'
+        tension = max(first_relation.tension, second_relation.tension)
         if tension < 0.35:
             outcome = 'playful_competition'
         elif tension < 0.7:
@@ -53,8 +53,8 @@ class CatSiblingRivalrySystem:
             return {'name': 'sibling_reconciliation_denied', 'reconciled': False}
         for cat, other in ((first, second), (second, first)):
             relationship = self._relationship(cat, other)
-            relationship['tension'] = self._clamp(relationship['tension'] - 0.15)
-            relationship['affiliation'] = self._clamp(relationship['affiliation'] + 0.05)
+            relationship.tension = self._clamp(relationship.tension - 0.15)
+            relationship.affiliation = self._clamp(relationship.affiliation + 0.05)
         event = {'name': 'cat_siblings_reconciled', 'first': first.name, 'second': second.name, 'reconciled': True}
         first.social_interactions.append(deepcopy(event))
         second.social_interactions.append(deepcopy(event))
@@ -65,11 +65,6 @@ class CatSiblingRivalrySystem:
             other_cat.name,
             CatRelationship.create(),
         )
-        relation.setdefault('familiarity', 0.0)
-        relation.setdefault('trust', 0.5)
-        relation.setdefault('affiliation', 0.0)
-        relation.setdefault('tension', 0.0)
-        relation.setdefault('shared_scent', 0.0)
         return relation
 
     def _record(self, first, second, resource, event):
