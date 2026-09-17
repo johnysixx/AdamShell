@@ -1553,9 +1553,7 @@ class CatQuantumBoxTransfer:
             )
         )
 
-        action = decision[
-            "action"
-        ]
+        action = decision.action
 
         return_plan = None
         continuation_plan = None

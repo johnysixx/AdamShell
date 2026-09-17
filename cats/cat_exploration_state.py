@@ -2,6 +2,33 @@ from dataclasses import dataclass, field
 
 
 @dataclass(slots=True)
+class CatAfterArrivalCandidate:
+    action: str
+    score: float
+    reasons: list = field(
+        default_factory=list
+    )
+
+
+@dataclass(slots=True)
+class CatAfterArrivalDecision:
+    selected: bool = False
+
+    action: str | None = None
+    score: float | None = None
+
+    reasons: list = field(
+        default_factory=list
+    )
+
+    finalists: list = field(
+        default_factory=list
+    )
+
+    quantum_roll: int | None = None
+
+
+@dataclass(slots=True)
 class CatScentDestinationCandidate:
     identity: str | None
     layer: str | None

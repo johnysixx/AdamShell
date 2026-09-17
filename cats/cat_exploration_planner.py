@@ -1,6 +1,8 @@
 from copy import deepcopy
 
 from .cat_exploration_state import (
+    CatAfterArrivalCandidate,
+    CatAfterArrivalDecision,
     CatExplorationCandidate,
     CatExplorationPlan,
     CatScentDestinationCandidate,
@@ -273,47 +275,47 @@ class CatExplorationPlanner:
             return_score = 0.0
 
         candidates = [
-            {
-                "action": "continue_exploration",
-                "score": min(
+            CatAfterArrivalCandidate(
+                action="continue_exploration",
+                score=min(
                     1.0,
                     continue_score
                 ),
-                "reasons": [
+                reasons=[
                     "curiosity",
                     "courage",
-                    "intellect"
-                ]
-            },
-            {
-                "action": "rest_at_destination",
-                "score": min(
+                    "intellect",
+                ],
+            ),
+            CatAfterArrivalCandidate(
+                action="rest_at_destination",
+                score=min(
                     1.0,
                     rest_score
                 ),
-                "reasons": [
+                reasons=[
                     "patience",
-                    "destination_reached"
-                ]
-            },
-            {
-                "action": (
+                    "destination_reached",
+                ],
+            ),
+            CatAfterArrivalCandidate(
+                action=(
                     "return_via_exploration_pair"
                 ),
-                "score": min(
+                score=min(
                     1.0,
                     return_score
                 ),
-                "reasons": [
+                reasons=[
                     "known_return_path",
                     "patience",
-                    "risk_evaluation"
-                ]
-            }
+                    "risk_evaluation",
+                ],
+            ),
         ]
 
         candidates.sort(
-            key=lambda item: item["score"],
+            key=lambda item: item.score,
             reverse=True
         )
 
@@ -339,22 +341,18 @@ class CatExplorationPlanner:
                 else finalists[1]
             )
 
-        return {
-            "selected": True,
-            "action": selected[
-                "action"
-            ],
-            "score": selected[
-                "score"
-            ],
-            "reasons": list(
-                selected["reasons"]
+        return CatAfterArrivalDecision(
+            selected=True,
+            action=selected.action,
+            score=selected.score,
+            reasons=list(
+                selected.reasons
             ),
-            "finalists": deepcopy(
+            finalists=deepcopy(
                 finalists
             ),
-            "quantum_roll": quantum_roll
-        }
+            quantum_roll=quantum_roll,
+        )
 
     @classmethod
     def choose_continuation_destination(
