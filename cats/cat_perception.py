@@ -6,6 +6,7 @@ from .cat_exploration_planner import CatExplorationPlanner
 from .cat_olfaction import CatOlfaction
 from .cat_knowledge import CatKnowledge
 from .cat_perception_state import (
+    CatCronenbergObservation,
     CatNearbyCatObservation,
     CatPerceptionFailure,
     CatPerceptionState,
@@ -117,12 +118,12 @@ class CatPerception:
             ],
             nearby_cat_details=nearby_cats,
             visible_cronenbergs=[
-                item['id']
+                item.id
                 for item in visible_cronenbergs
             ],
             visible_cronenberg_details=visible_cronenbergs,
             huntable_cronenbergs=[
-                item['id']
+                item.id
                 for item in huntable_cronenbergs
             ],
             huntable_cronenberg_details=huntable_cronenbergs,
@@ -235,13 +236,67 @@ class CatPerception:
             distance = self._distance(position, cronenberg_position)
             if distance > radius:
                 continue
-            observed.append({'id': cronenberg.id, 'name': getattr(cronenberg, 'name', cronenberg.id), 'size': float(getattr(cronenberg, 'size', 1.0)), 'distance': distance, 'position': deepcopy(cronenberg_position)})
-        observed.sort(key=lambda item: item['distance'])
+            observed.append(
+                CatCronenbergObservation(
+                    id=cronenberg.id,
+                    name=getattr(
+                        cronenberg,
+                        'name',
+                        cronenberg.id,
+                    ),
+                    size=float(
+                        getattr(
+                            cronenberg,
+                            'size',
+                            1.0,
+                        )
+                    ),
+                    distance=distance,
+                    position=deepcopy(
+                        cronenberg_position
+                    ),
+                )
+            )
+
+        observed.sort(
+            key=lambda item: item.distance
+        )
         return observed
 
     def _huntable_cronenbergs(self, cat, cronenbergs):
-        cat_size = max(1e-06, float(cat.size))
-        return [{**item, 'size_ratio': item['size'] / cat_size} for item in cronenbergs if item['size'] / cat_size <= self.HUNTABLE_SIZE_RATIO]
+        cat_size = max(
+            1e-06,
+            float(cat.size),
+        )
+
+        huntable = []
+
+        for item in cronenbergs:
+            size_ratio = (
+                item.size
+                / cat_size
+            )
+
+            if (
+                size_ratio
+                > self.HUNTABLE_SIZE_RATIO
+            ):
+                continue
+
+            huntable.append(
+                CatCronenbergObservation(
+                    id=item.id,
+                    name=item.name,
+                    size=item.size,
+                    distance=item.distance,
+                    position=deepcopy(
+                        item.position
+                    ),
+                    size_ratio=size_ratio,
+                )
+            )
+
+        return huntable
 
     def _observe_quantum_boxes(self, cat, position, radius):
         observed = []
@@ -380,7 +435,10 @@ class CatPerception:
         if not cronenbergs:
             return 0.0
         cat_size = max(1e-06, float(cat.size))
-        highest_ratio = max((item['size'] / cat_size for item in cronenbergs))
+        highest_ratio = max(
+            item.size / cat_size
+            for item in cronenbergs
+        )
         return min(1.0, highest_ratio / 2.0)
 
     def _distance(self, first, second):

@@ -10,6 +10,16 @@ class CatPerceptionFailure:
 
 
 @dataclass(slots=True)
+class CatCronenbergObservation:
+    id: str
+    name: str
+    size: float
+    distance: float
+    position: object
+    size_ratio: float | None = None
+
+
+@dataclass(slots=True)
 class CatNearbyCatObservation:
     name: str
     distance: float
