@@ -8,6 +8,7 @@ from .cat_knowledge import CatKnowledge
 from .cat_perception_state import (
     CatPerceptionFailure,
     CatPerceptionState,
+    CatVisibleBoxObservation,
 )
 
 class CatPerception:
@@ -41,8 +42,17 @@ class CatPerception:
         visible_cronenbergs = self._observe_cronenbergs(position=position, radius=radius)
         huntable_cronenbergs = self._huntable_cronenbergs(cat=cat, cronenbergs=visible_cronenbergs)
         visible_boxes = self._observe_quantum_boxes(cat=cat, position=position, radius=radius)
-        unexplored_boxes = [item for item in visible_boxes if not item.get('occupied', False) and (not self._box_was_explored(cat=cat, box_id=item['id']))]
-        occupied_transfer_boxes = [item for item in visible_boxes if item.get('occupied', False)]
+        unexplored_boxes = [
+            item
+            for item in visible_boxes
+            if not item.occupied
+            and not item.explored
+        ]
+        occupied_transfer_boxes = [
+            item
+            for item in visible_boxes
+            if item.occupied
+        ]
         bar_observation = self._observe_bar(cat=cat, position=position, radius=radius)
         danger = self._cronenberg_danger(cat=cat, cronenbergs=visible_cronenbergs)
         current_layer = cat.current_layer or 'quantum_layer'
@@ -62,10 +72,7 @@ class CatPerception:
         smelled_by_id = {item.get('entity_id'): item for item in olfaction.get('detected_aromas', [])}
         boxes_by_id = {getattr(box, 'id', None): box for box in getattr(self.universe, 'quantum_boxes', [])}
         for visible_box in visible_boxes:
-            if isinstance(visible_box, dict):
-                box_id = visible_box.get('id') or visible_box.get('box_id')
-            else:
-                box_id = visible_box
+            box_id = visible_box.id
             if box_id is None:
                 continue
             box = boxes_by_id.get(box_id)
@@ -120,16 +127,16 @@ class CatPerception:
             huntable_cronenberg_details=huntable_cronenbergs,
             cronenberg_danger=danger,
             visible_boxes=[
-                item['id']
+                item.id
                 for item in visible_boxes
             ],
             visible_box_details=visible_boxes,
             unexplored_boxes=[
-                item['id']
+                item.id
                 for item in unexplored_boxes
             ],
             occupied_transfer_boxes=[
-                item['id']
+                item.id
                 for item in occupied_transfer_boxes
             ],
             occupied_transfer_box_details=occupied_transfer_boxes,
@@ -245,14 +252,76 @@ class CatPerception:
             cat_observation = getattr(box, 'cat_observation_state', None)
             occupancy = cat_observation(cat) if callable(cat_observation) else {'visible': True, 'occupied': False, 'occupancy_state': 'unknown', 'occupant_identity_visible': False}
             explored = self._box_was_explored(cat=cat, box_id=box.id)
-            detail = {'id': box.id, 'explored': explored, 'occupied': occupancy.get('occupied', False), 'occupancy_state': occupancy.get('occupancy_state', 'unknown'), 'occupant_identity_visible': occupancy.get('occupant_identity_visible', False), 'distance': distance, 'position': deepcopy(box_position)}
+            detail = CatVisibleBoxObservation(
+                id=box.id,
+                explored=explored,
+                occupied=bool(
+                    occupancy.get(
+                        'occupied',
+                        False,
+                    )
+                ),
+                occupancy_state=occupancy.get(
+                    'occupancy_state',
+                    'unknown',
+                ),
+                occupant_identity_visible=bool(
+                    occupancy.get(
+                        'occupant_identity_visible',
+                        False,
+                    )
+                ),
+                distance=distance,
+                position=deepcopy(
+                    box_position
+                ),
+            )
+
             if explored:
-                knowledge = CatKnowledge.ensure_cat_knowledge(cat)
-                pairing_principle_known = bool(knowledge.known_principles.quantum_boxes_are_paired)
-                recognized_as_quantum_box = occupancy.get('recognized_as_quantum_box', True)
-                detail.update({'state': getattr(box, 'state', None), 'collapsed': bool(box.collapse.collapsed), 'recognized_as_quantum_box': recognized_as_quantum_box, 'paired': bool(recognized_as_quantum_box and pairing_principle_known), 'counterpart_known': False})
+                knowledge = (
+                    CatKnowledge
+                    .ensure_cat_knowledge(cat)
+                )
+
+                pairing_principle_known = bool(
+                    knowledge
+                    .known_principles
+                    .quantum_boxes_are_paired
+                )
+
+                recognized_as_quantum_box = bool(
+                    occupancy.get(
+                        'recognized_as_quantum_box',
+                        True,
+                    )
+                )
+
+                detail.state = getattr(
+                    box,
+                    'state',
+                    None,
+                )
+
+                detail.collapsed = bool(
+                    box.collapse.collapsed
+                )
+
+                detail.recognized_as_quantum_box = (
+                    recognized_as_quantum_box
+                )
+
+                detail.paired = bool(
+                    recognized_as_quantum_box
+                    and pairing_principle_known
+                )
+
+                detail.counterpart_known = False
+
             observed.append(detail)
-        observed.sort(key=lambda item: item['distance'])
+
+        observed.sort(
+            key=lambda item: item.distance
+        )
         return observed
 
     def _observe_bar(self, cat, position, radius):

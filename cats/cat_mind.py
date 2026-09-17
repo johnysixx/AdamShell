@@ -150,22 +150,22 @@ class CatMind:
                 travel_score = 0.3 + curiosity * 0.35 + courage * 0.2 + intellect_normalized * 0.15 + quantum_memory_score
                 candidates.append(cls._candidate(intention_type='travel_through_known_quantum_box', score=travel_score, reasons=['quantum_counterpart_sensed', 'quantum_pair_currently_valid', 'curiosity', 'courage', *(['negative_quantum_travel_memory'] if negative_quantum_memories else [])], target={'source_box_id': source_box_id, 'counterpart_box_id': counterpart_box_id, 'source_layer': counterpart_observation.get('source_layer'), 'target_layer': counterpart_observation.get('counterpart_layer'), 'target_position': deepcopy(counterpart_observation.get('counterpart_position', {}))}))
         for box_detail in observations.visible_box_details:
-            if not box_detail.get('explored', False):
+            if not box_detail.explored:
                 continue
-            if not box_detail.get('recognized_as_quantum_box', False):
+            if not box_detail.recognized_as_quantum_box:
                 continue
-            if not box_detail.get('paired', False):
+            if not box_detail.paired:
                 continue
-            if box_detail.get('counterpart_known', False):
+            if box_detail.counterpart_known:
                 continue
-            if float(box_detail.get('distance', 999999.0)) > 1e-09:
+            if float(box_detail.distance) > 1e-09:
                 continue
             quantum_travel_memories = cat.memory.recall(event_type='quantum_box_layer_transfer')
             quantum_travel_count = len(quantum_travel_memories)
             experienced_quantum_traveler = quantum_travel_count > 0
             quantum_experience_bonus = min(0.2, quantum_travel_count * 0.075)
             resonance_score = 0.3 + curiosity * 0.35 + intellect_normalized * 0.3 + quantum_experience_bonus
-            candidates.append(cls._candidate(intention_type='sense_quantum_counterpart', score=resonance_score, reasons=['quantum_box_explored', 'quantum_pair_resonance_possible', 'curiosity', 'intellect', *(['experienced_quantum_traveler'] if experienced_quantum_traveler else [])], target={'box_id': box_detail['id']}))
+            candidates.append(cls._candidate(intention_type='sense_quantum_counterpart', score=resonance_score, reasons=['quantum_box_explored', 'quantum_pair_resonance_possible', 'curiosity', 'intellect', *(['experienced_quantum_traveler'] if experienced_quantum_traveler else [])], target={'box_id': box_detail.id}))
         boxes = observations.unexplored_boxes
         if boxes:
             explore_score = 0.25 + curiosity * 0.55 + courage * 0.1

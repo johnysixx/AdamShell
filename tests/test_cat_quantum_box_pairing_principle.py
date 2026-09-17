@@ -22,7 +22,7 @@ class CatQuantumBoxPairingPrincipleTests(unittest.TestCase):
 
     def box_detail(self):
         observed = self.observe()
-        return next((item for item in observed.visible_box_details if item['id'] == self.box.id))
+        return next((item for item in observed.visible_box_details if item.id == self.box.id))
 
     def explore_box(self):
         self.cat.mind.current_intention = {'type': 'explore_box', 'target': self.box.id, 'score': 1.0, 'reasons': ['test']}
@@ -37,17 +37,17 @@ class CatQuantumBoxPairingPrincipleTests(unittest.TestCase):
         knowledge = CatKnowledge.ensure_cat_knowledge(self.cat)
         self.assertTrue(knowledge.known_principles.quantum_boxes_are_paired)
         before = self.box_detail()
-        self.assertFalse(before['explored'])
-        self.assertNotIn('paired', before)
+        self.assertFalse(before.explored)
+        self.assertIsNone(before.paired)
         result = self.explore_box()
         self.assertEqual(result['name'], 'cat_explored_quantum_box')
         after = self.box_detail()
-        self.assertTrue(after['recognized_as_quantum_box'])
-        self.assertTrue(after['paired'])
-        self.assertFalse(after['counterpart_known'])
-        self.assertNotIn('counterpart_box_id', after)
-        self.assertNotIn('target_layer', after)
-        self.assertNotIn('quantum_counterpart', after)
+        self.assertTrue(after.recognized_as_quantum_box)
+        self.assertTrue(after.paired)
+        self.assertFalse(after.counterpart_known)
+        self.assertFalse(hasattr(after, 'counterpart_box_id'))
+        self.assertFalse(hasattr(after, 'target_layer'))
+        self.assertFalse(hasattr(after, 'quantum_counterpart'))
 
     def test_disappearing_box_leaves_memory_not_perception(self):
         result = self.explore_box()
@@ -57,7 +57,7 @@ class CatQuantumBoxPairingPrincipleTests(unittest.TestCase):
         self.universe.quantum_boxes.remove(self.box)
         observed = self.observe()
         self.assertNotIn(self.box.id, observed.visible_boxes)
-        self.assertFalse(any((item.get('id') == self.box.id for item in observed.visible_box_details)))
+        self.assertFalse(any((item.id == self.box.id for item in observed.visible_box_details)))
         memories_after = self.cat.memory.recall(event_type='quantum_box_observed')
         self.assertTrue(any((self.box.id in memory.get('participants', []) for memory in memories_after)))
         knowledge = CatKnowledge.ensure_cat_knowledge(self.cat)

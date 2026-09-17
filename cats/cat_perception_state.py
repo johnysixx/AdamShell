@@ -10,6 +10,23 @@ class CatPerceptionFailure:
 
 
 @dataclass(slots=True)
+class CatVisibleBoxObservation:
+    id: str
+    explored: bool
+    occupied: bool
+    occupancy_state: str
+    occupant_identity_visible: bool
+    distance: float
+    position: object
+
+    state: object | None = None
+    collapsed: bool | None = None
+    recognized_as_quantum_box: bool | None = None
+    paired: bool | None = None
+    counterpart_known: bool | None = None
+
+
+@dataclass(slots=True)
 class CatPerceptionState:
     cat: str | None = None
     position: object = None

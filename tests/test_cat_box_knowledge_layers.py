@@ -18,17 +18,17 @@ class CatBoxKnowledgeLayerTests(unittest.TestCase):
 
     def _box_detail(self):
         observed = CatPerception(self.cats).observe(self.cat)
-        return next((item for item in observed.visible_box_details if item['id'] == self.box.id))
+        return next((item for item in observed.visible_box_details if item.id == self.box.id))
 
     def test_distant_box_hides_quantum_internal_state(self):
         detail = self._box_detail()
-        self.assertFalse(detail['explored'])
-        self.assertNotIn('state', detail)
-        self.assertNotIn('collapsed', detail)
-        self.assertNotIn('recognized_as_quantum_box', detail)
-        self.assertIn('position', detail)
-        self.assertIn('distance', detail)
-        self.assertIn('occupied', detail)
+        self.assertFalse(detail.explored)
+        self.assertIsNone(detail.state)
+        self.assertIsNone(detail.collapsed)
+        self.assertIsNone(detail.recognized_as_quantum_box)
+        self.assertIsNotNone(detail.position)
+        self.assertIsNotNone(detail.distance)
+        self.assertIsNotNone(detail.occupied)
 
     def test_explored_box_reveals_quantum_state(self):
         self.cat.mind.current_intention = {'type': 'explore_box', 'target': self.box.id, 'score': 1.0, 'reasons': ['test']}
@@ -39,15 +39,15 @@ class CatBoxKnowledgeLayerTests(unittest.TestCase):
             result = self.cats.execute_cat_intention(self.cat)
         self.assertEqual(result['name'], 'cat_explored_quantum_box')
         detail = self._box_detail()
-        self.assertTrue(detail['explored'])
-        self.assertIn('state', detail)
-        self.assertIn('collapsed', detail)
-        self.assertTrue(detail['recognized_as_quantum_box'])
+        self.assertTrue(detail.explored)
+        self.assertIsNotNone(detail.state)
+        self.assertIsNotNone(detail.collapsed)
+        self.assertTrue(detail.recognized_as_quantum_box)
 
     def test_exploration_does_not_reveal_counterpart(self):
         detail = self._box_detail()
-        self.assertNotIn('quantum_counterpart', detail)
-        self.assertNotIn('counterpart_box_id', detail)
-        self.assertNotIn('target_layer', detail)
+        self.assertFalse(hasattr(detail, 'quantum_counterpart'))
+        self.assertFalse(hasattr(detail, 'counterpart_box_id'))
+        self.assertFalse(hasattr(detail, 'target_layer'))
 if __name__ == '__main__':
     unittest.main()
