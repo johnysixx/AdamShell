@@ -390,3 +390,10 @@ class CatKnownAroma:
                 ),
             ),
         )
+
+
+
+@dataclass(slots=True)
+class CatKnownPrinciples:
+
+    quantum_boxes_are_paired: bool = True

@@ -35,7 +35,7 @@ class CatQuantumBoxPairingPrincipleTests(unittest.TestCase):
 
     def test_pairing_is_known_as_principle_not_as_route(self):
         knowledge = CatKnowledge.ensure_cat_knowledge(self.cat)
-        self.assertTrue(knowledge['known_principles']['quantum_boxes_are_paired'])
+        self.assertTrue(knowledge['known_principles'].quantum_boxes_are_paired)
         before = self.box_detail()
         self.assertFalse(before['explored'])
         self.assertNotIn('paired', before)
@@ -61,6 +61,6 @@ class CatQuantumBoxPairingPrincipleTests(unittest.TestCase):
         memories_after = self.cat.memory.recall(event_type='quantum_box_observed')
         self.assertTrue(any((self.box.id in memory.get('participants', []) for memory in memories_after)))
         knowledge = CatKnowledge.ensure_cat_knowledge(self.cat)
-        self.assertTrue(knowledge['known_principles']['quantum_boxes_are_paired'])
+        self.assertTrue(knowledge['known_principles'].quantum_boxes_are_paired)
 if __name__ == '__main__':
     unittest.main()

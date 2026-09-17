@@ -5,6 +5,7 @@ from cats.cat_knowledge_objects import (
     CatHeardLegend,
     CatKnownAroma,
     CatKnownPlace,
+    CatKnownPrinciples,
     CatScentPlaceMemory,
     CatVerifiedLegendRecord,
 )
@@ -21,9 +22,25 @@ class CatKnowledge:
         knowledge.setdefault('verified_legends', [])
         knowledge.setdefault('known_aromas', [])
         knowledge.setdefault('known_scent_places', [])
-        principles = knowledge.setdefault('known_principles', {})
-        principles.setdefault('quantum_boxes_are_paired', True)
-        knowledge.setdefault('current_quantum_layer_map', None)
+
+        principles = knowledge.setdefault(
+            'known_principles',
+            CatKnownPrinciples(),
+        )
+
+        if not isinstance(
+            principles,
+            CatKnownPrinciples,
+        ):
+            raise TypeError(
+                'known_principles must be '
+                'CatKnownPrinciples.'
+            )
+
+        knowledge.setdefault(
+            'current_quantum_layer_map',
+            None,
+        )
         return knowledge
 
     @classmethod
