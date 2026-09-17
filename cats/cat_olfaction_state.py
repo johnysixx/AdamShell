@@ -18,3 +18,16 @@ class CatAromaRecognition:
     matches: list = field(
         default_factory=list
     )
+
+@dataclass(slots=True)
+class CatDetectedAroma:
+    entity_id: object
+    actual_identity: str | None
+    position: object
+    distance: float
+
+    components: dict
+    raw_components: dict
+
+    perceived_intensity: float
+    recognition: CatAromaRecognition`n

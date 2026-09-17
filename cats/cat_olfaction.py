@@ -2,6 +2,7 @@ from copy import deepcopy
 import math
 from universe.aroma_profile import AromaProfile
 from cats.cat_knowledge import CatKnowledge
+from cats.cat_olfaction_state import CatDetectedAroma
 
 class CatOlfaction:
     DEFAULT_RADIUS = 14.0
@@ -18,7 +19,7 @@ class CatOlfaction:
             observation = cls._sniff_entity(cat=cat, entity=entity, cat_position=cat_position, radius=radius)
             if observation is None:
                 continue
-            entity_id = observation['entity_id']
+            entity_id = observation.entity_id
             if entity_id in seen_ids:
                 continue
             seen_ids.add(entity_id)
@@ -27,7 +28,7 @@ class CatOlfaction:
             observation = cls._sniff_entity(cat=cat, entity=entity, cat_position=cat_position, radius=radius)
             if observation is None:
                 continue
-            entity_id = observation['entity_id']
+            entity_id = observation.entity_id
             if entity_id in seen_ids:
                 continue
             seen_ids.add(entity_id)
@@ -40,14 +41,25 @@ class CatOlfaction:
             observation = cls._sniff_entity(cat=cat, entity=quantum_box, cat_position=cat_position, radius=radius)
             if observation is None:
                 continue
-            entity_id = observation['entity_id']
+            entity_id = observation.entity_id
             if entity_id in seen_ids:
                 continue
             seen_ids.add(entity_id)
             detected.append(observation)
         ambient = cls._sniff_ambient(cat=cat, universe=universe)
-        detected.sort(key=lambda item: item['perceived_intensity'], reverse=True)
-        ozone_detected = any((float(item['components'].get('ozone', 0.0)) > 0.15 for item in detected))
+        detected.sort(
+            key=lambda item: item.perceived_intensity,
+            reverse=True,
+        )
+        ozone_detected = any(
+            float(
+                item.components.get(
+                    'ozone',
+                    0.0,
+                )
+            ) > 0.15
+            for item in detected
+        )
         return {'cat': cat.name, 'radius': radius, 'detected_aromas': detected, 'ambient_aroma': ambient, 'ozone_detected': ozone_detected, 'detected_count': len(detected), 'sniffed': True}
 
     @classmethod
@@ -66,7 +78,22 @@ class CatOlfaction:
         perceived = {name: float(value) * distance_factor for name, value in components.items()}
         recognition = CatKnowledge.recognize_aroma(cat, components)
         identity = profile.get('identity')
-        return {'entity_id': cls._entity_id(entity), 'actual_identity': identity, 'position': deepcopy(position), 'distance': distance, 'components': perceived, 'raw_components': components, 'perceived_intensity': sum(perceived.values()), 'recognition': recognition}
+        return CatDetectedAroma(
+            entity_id=cls._entity_id(
+                entity
+            ),
+            actual_identity=identity,
+            position=deepcopy(
+                position
+            ),
+            distance=distance,
+            components=perceived,
+            raw_components=components,
+            perceived_intensity=sum(
+                perceived.values()
+            ),
+            recognition=recognition,
+        )
 
     @classmethod
     def _sniff_ambient(cls, cat, universe):

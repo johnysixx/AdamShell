@@ -32,7 +32,7 @@ class CatQuantumBoxLayerVisibilityTests(unittest.TestCase):
 
     def test_cat_only_smells_box_in_current_layer(self):
         result = CatOlfaction.sniff(self.observer, self.universe)
-        smelled_ids = {item['entity_id'] for item in result['detected_aromas']}
+        smelled_ids = {item.entity_id for item in result['detected_aromas']}
         self.assertIn(self.source.id, smelled_ids)
         self.assertNotIn(self.target.id, smelled_ids)
 

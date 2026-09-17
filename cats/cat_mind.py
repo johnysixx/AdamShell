@@ -97,12 +97,12 @@ class CatMind:
             })
         reached_scent = cat.known_scent_follow or {}
         currently_smelt_identities = {
-            item['recognition'].identity
+            item.recognition.identity
             for item in observations.olfaction.get(
                 'detected_aromas',
                 [],
             )
-            if item['recognition'].recognized
+            if item.recognition.recognized
         }
         if isinstance(reached_scent, dict) and reached_scent.get('arrived', False) and (reached_scent.get('identity') not in currently_smelt_identities):
             local_scent_places = []
@@ -210,8 +210,8 @@ class CatMind:
             identity = reached_scent.get('identity')
             direction = reached_scent.get('trail_direction', {})
             target_smelt_now = any(
-                item['recognition'].recognized
-                and item['recognition'].identity == identity
+                item.recognition.recognized
+                and item.recognition.identity == identity
                 for item in observations.olfaction.get(
                     'detected_aromas',
                     [],

@@ -44,11 +44,11 @@ class CatScentReorientationAfterTransferTests(unittest.TestCase):
         perception = CatPerception(self.cats)
         observations = perception.observe(self.tracker)
         self.assertEqual(observations.current_layer, 'quantum_layer')
-        smelled = {item['entity_id']: item for item in observations.olfaction['detected_aromas']}
+        smelled = {item.entity_id: item for item in observations.olfaction['detected_aromas']}
         self.assertIn(self.trail_box.id, smelled)
         trail_smell = smelled[self.trail_box.id]
-        self.assertTrue(trail_smell['recognition'].recognized)
-        self.assertEqual(trail_smell['recognition'].identity, 'cat:creator')
+        self.assertTrue(trail_smell.recognition.recognized)
+        self.assertEqual(trail_smell.recognition.identity, 'cat:creator')
         memories = observations.scent_memories
         trail_memories = [memory for memory in memories if memory.source_id == self.trail_box.id]
         self.assertEqual(len(trail_memories), 1)

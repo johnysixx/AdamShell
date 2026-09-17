@@ -336,8 +336,8 @@ class CatIntentionExecutor:
                     'detected_aromas',
                     [],
                 )
-                if item['recognition'].recognized
-                and item['recognition'].identity
+                if item.recognition.recognized
+                and item.recognition.identity
                 == search.get('identity')
             ),
             None,
@@ -351,13 +351,13 @@ class CatIntentionExecutor:
             search['arrived'] = False
             search['reacquired'] = True
             search['reacquired_at'] = dict(cat.position or {})
-            search['reacquired_source_id'] = reacquired.get('entity_id')
+            search['reacquired_source_id'] = reacquired.entity_id
             if hasattr(cat, 'active_route_id'):
                 del cat.active_route_id
             mind = cat.mind
             mind.previous_intention = deepcopy(intention)
             mind.current_intention = None
-            event = {'name': 'cat_reacquired_scent_during_search', 'cat': cat.name, 'identity': search.get('identity'), 'source_id': reacquired.get('entity_id'), 'position': dict(cat.position or {}), 'olfaction': deepcopy(olfaction), 'search_interrupted': True, 'decision_source': 'cat_mind', 'executed': True}
+            event = {'name': 'cat_reacquired_scent_during_search', 'cat': cat.name, 'identity': search.get('identity'), 'source_id': reacquired.entity_id, 'position': dict(cat.position or {}), 'olfaction': deepcopy(olfaction), 'search_interrupted': True, 'decision_source': 'cat_mind', 'executed': True}
             mind.active_body_execution = deepcopy(event)
             return self._record(event)
         if result.get('arrived', False):
