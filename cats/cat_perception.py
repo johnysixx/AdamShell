@@ -6,6 +6,7 @@ from .cat_exploration_planner import CatExplorationPlanner
 from .cat_olfaction import CatOlfaction
 from .cat_knowledge import CatKnowledge
 from .cat_perception_state import (
+    CatBarObservation,
     CatCronenbergObservation,
     CatNearbyCatObservation,
     CatPerceptionFailure,
@@ -109,9 +110,9 @@ class CatPerception:
             cat=cat.name,
             position=deepcopy(position),
             vision_radius=radius,
-            bar_known=bar_observation['known'],
-            bar_visible=bar_observation['visible'],
-            bar_distance=bar_observation['distance'],
+            bar_known=bar_observation.known,
+            bar_visible=bar_observation.visible,
+            bar_distance=bar_observation.distance,
             nearby_cats=[
                 item.name
                 for item in nearby_cats
@@ -391,17 +392,70 @@ class CatPerception:
         )
         return observed
 
-    def _observe_bar(self, cat, position, radius):
-        quantum_space = getattr(self.universe, 'quantum_space', None)
+    def _observe_bar(
+        self,
+        cat,
+        position,
+        radius,
+    ):
+        quantum_space = getattr(
+            self.universe,
+            'quantum_space',
+            None,
+        )
+
         if quantum_space is None:
-            return {'known': self._cat_knows_bar(cat), 'visible': False, 'distance': None}
-        door = getattr(quantum_space, 'bar_front_door', None)
+            return CatBarObservation(
+                known=self._cat_knows_bar(
+                    cat
+                ),
+                visible=False,
+                distance=None,
+            )
+
+        door = getattr(
+            quantum_space,
+            'bar_front_door',
+            None,
+        )
+
         if not door:
-            return {'known': self._cat_knows_bar(cat), 'visible': False, 'distance': None}
-        door_position = door.get('position')
-        distance = self._distance(position, door_position) if door_position is not None else None
-        visible = bool(distance is not None and distance <= radius)
-        return {'known': bool(visible or self._cat_knows_bar(cat)), 'visible': visible, 'distance': distance}
+            return CatBarObservation(
+                known=self._cat_knows_bar(
+                    cat
+                ),
+                visible=False,
+                distance=None,
+            )
+
+        door_position = door.get(
+            'position'
+        )
+
+        distance = (
+            self._distance(
+                position,
+                door_position,
+            )
+            if door_position is not None
+            else None
+        )
+
+        visible = bool(
+            distance is not None
+            and distance <= radius
+        )
+
+        return CatBarObservation(
+            known=bool(
+                visible
+                or self._cat_knows_bar(
+                    cat
+                )
+            ),
+            visible=visible,
+            distance=distance,
+        )
 
     def _cat_knows_bar(self, cat):
         traits = cat.special_traits
