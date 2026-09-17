@@ -17,7 +17,7 @@ class CatCulturalAdoptionSystem:
         sociability = self._number(traits.sociability)
         courage = self._number(traits.courage)
         category = tradition.get('category')
-        category_affinity = {'exploration': curiosity, 'social': sociability, 'defense': courage, 'knowledge': self._number(cat.intellect.get('normalized', 0.5)), 'navigation': curiosity, 'ritual': sociability, 'hunting': courage * 0.6 + curiosity * 0.4}.get(category, 0.5)
+        category_affinity = {'exploration': curiosity, 'social': sociability, 'defense': courage, 'knowledge': self._number(cat.intellect.normalized), 'navigation': curiosity, 'ritual': sociability, 'hunting': courage * 0.6 + curiosity * 0.4}.get(category, 0.5)
         strength = self._number(tradition.get('strength', 0.0))
         score = category_affinity * 0.55 + strength * 0.35 + 0.1
         return {'tradition': tradition_name, 'known': True, 'category': category, 'score': round(score, 4), 'adopt': score >= 0.5}

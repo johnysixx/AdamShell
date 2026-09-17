@@ -1,4 +1,19 @@
 import random
+from dataclasses import dataclass
+
+
+@dataclass(slots=True)
+class CatIntellectState:
+
+    score: int
+    raw_score: float
+    normalized: float
+    distribution: str
+    mean: float
+    standard_deviation: float
+    minimum: int
+    maximum: int
+    source: str
 
 
 class CatIntellect:
@@ -35,21 +50,21 @@ class CatIntellect:
             )
         )
 
-        return {
-            "score": score,
-            "raw_score": raw_score,
-            "normalized": cls.normalize(
+        return CatIntellectState(
+            score=score,
+            raw_score=raw_score,
+            normalized=cls.normalize(
                 score
             ),
-            "distribution": "gaussian",
-            "mean": cls.MEAN_SCORE,
-            "standard_deviation": (
+            distribution="gaussian",
+            mean=cls.MEAN_SCORE,
+            standard_deviation=(
                 cls.STANDARD_DEVIATION
             ),
-            "minimum": cls.MINIMUM_SCORE,
-            "maximum": cls.MAXIMUM_SCORE,
-            "source": "natural_cat_variation"
-        }
+            minimum=cls.MINIMUM_SCORE,
+            maximum=cls.MAXIMUM_SCORE,
+            source="natural_cat_variation",
+        )
 
     @classmethod
     def ensure_state(
@@ -66,11 +81,17 @@ class CatIntellect:
             intellect = cls.create_state()
             cat.intellect = intellect
 
-        score = int(
-            intellect.get(
-                "score",
-                cls.MEAN_SCORE
+        if not isinstance(
+            intellect,
+            CatIntellectState,
+        ):
+            raise TypeError(
+                "Cat intellect must be "
+                "CatIntellectState."
             )
+
+        score = int(
+            intellect.score
         )
 
         score = min(
@@ -81,41 +102,12 @@ class CatIntellect:
             )
         )
 
-        intellect["score"] = score
-        intellect["normalized"] = (
+        intellect.score = score
+
+        intellect.normalized = (
             cls.normalize(
                 score
             )
-        )
-
-        intellect.setdefault(
-            "distribution",
-            "gaussian"
-        )
-
-        intellect.setdefault(
-            "mean",
-            cls.MEAN_SCORE
-        )
-
-        intellect.setdefault(
-            "standard_deviation",
-            cls.STANDARD_DEVIATION
-        )
-
-        intellect.setdefault(
-            "minimum",
-            cls.MINIMUM_SCORE
-        )
-
-        intellect.setdefault(
-            "maximum",
-            cls.MAXIMUM_SCORE
-        )
-
-        intellect.setdefault(
-            "source",
-            "natural_cat_variation"
         )
 
         return intellect
@@ -143,10 +135,10 @@ class CatIntellect:
         candidate_count
     ):
         """
-        Vyšší intelekt znamená přesnější
-        zúžení rozumných možností.
+        Vy??? intelekt znamen? p?esn?j??
+        z??en? rozumn?ch mo?nost?.
 
-        Neurčuje samotnou vůli kočky.
+        Neur?uje samotnou v?li ko?ky.
         """
         candidate_count = max(
             1,
@@ -155,7 +147,7 @@ class CatIntellect:
 
         score = cls.ensure_state(
             cat
-        )["score"]
+        ).score
 
         if score >= 130:
             preferred_count = 2
@@ -181,7 +173,7 @@ class CatIntellect:
     ):
         score = cls.ensure_state(
             cat
-        )["score"]
+        ).score
 
         if score >= 130:
             return "exceptional"

@@ -127,7 +127,7 @@ class CatMind:
                 scent_score += aggression * 0.15
             candidates.append(cls._candidate(intention_type='follow_scent_through_box', score=scent_score, reasons=['recognized_scent_on_box', 'paired_quantum_box', 'scent_continues_cross_layer', 'curiosity'], target={'identity': identity, 'box_id': best_scent_transfer['box_id'], 'counterpart_box_id': best_scent_transfer['counterpart_box_id'], 'source_layer': best_scent_transfer.get('source_layer'), 'target_layer': best_scent_transfer.get('target_layer')}))
         intellect = CatIntellect.ensure_state(cat)
-        intellect_normalized = float(intellect.get('normalized', 0.5))
+        intellect_normalized = float(intellect.normalized)
         counterpart_observation = getattr(cat, 'current_quantum_counterpart_observation', None)
         if isinstance(counterpart_observation, dict) and counterpart_observation.get('pair_currently_valid', False) and counterpart_observation.get('temporary', False):
             source_box_id = counterpart_observation.get('source_box_id')
@@ -242,7 +242,7 @@ class CatMind:
         mind.previous_intention = deepcopy(previous)
         mind.current_intention = deepcopy(winner)
         mind.decision_count += 1
-        event = {'name': 'cat_intention_selected', 'cat': cat.name, 'intention': winner['type'], 'target': winner.get('target'), 'score': winner['score'], 'reasons': list(winner['reasons']), 'quantum_roll': quantum_roll, 'intellect_score': CatIntellect.ensure_state(cat)['score'], 'intellect_category': CatIntellect.category(cat), 'finalist_count': len(finalists), 'finalists': deepcopy(finalists), 'previous_intention': deepcopy(previous), 'selected': True}
+        event = {'name': 'cat_intention_selected', 'cat': cat.name, 'intention': winner['type'], 'target': winner.get('target'), 'score': winner['score'], 'reasons': list(winner['reasons']), 'quantum_roll': quantum_roll, 'intellect_score': CatIntellect.ensure_state(cat).score, 'intellect_category': CatIntellect.category(cat), 'finalist_count': len(finalists), 'finalists': deepcopy(finalists), 'previous_intention': deepcopy(previous), 'selected': True}
         mind.history.append(deepcopy(event))
         return event
 

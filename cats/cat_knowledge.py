@@ -251,10 +251,7 @@ class CatKnowledge:
         )
 
         intellect = float(
-            listener.intellect.get(
-                'normalized',
-                0.5,
-            )
+            listener.intellect.normalized
         )
 
         source_confidence = float(
@@ -880,7 +877,7 @@ class CatKnowledge:
         traits = storyteller.personality.traits
         curiosity = float(traits.curiosity)
         patience = float(traits.patience)
-        intellect = float(storyteller.intellect.get('normalized', 0.5))
+        intellect = float(storyteller.intellect.normalized)
         trust = cls._trust_in_cat(storyteller, listener_name)
         confidence = float(getattr(legend, 'confidence', 0.5))
         verification_count = int(getattr(legend, 'verification_count', 1))

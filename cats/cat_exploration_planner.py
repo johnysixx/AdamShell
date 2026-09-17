@@ -257,10 +257,7 @@ class CatExplorationPlanner:
         )
 
         intellect = float(
-            cat.intellect.get(
-                "normalized",
-                0.5
-            )
+            cat.intellect.normalized
         )
 
         continue_score = (
@@ -405,10 +402,7 @@ class CatExplorationPlanner:
         )
 
         intellect = float(
-            cat.intellect.get(
-                "normalized",
-                0.5
-            )
+            cat.intellect.normalized
         )
 
         memory = cat.memory
@@ -816,10 +810,7 @@ class CatExplorationPlanner:
         )
 
         intellect = float(
-            cat.intellect.get(
-                "normalized",
-                0.5
-            )
+            cat.intellect.normalized
         )
 
         visits = int(

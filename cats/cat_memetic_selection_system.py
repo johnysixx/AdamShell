@@ -34,7 +34,7 @@ class CatMemeticSelectionSystem:
         adopted = []
         rejected = []
         for cat in self.group_system._member_objects(group, cats):
-            intellect = self._number(cat.intellect.get('normalized', 0.5))
+            intellect = self._number(cat.intellect.normalized)
             curiosity = self._number(cat.personality.traits.curiosity)
             confidence = self._number(getattr(innovation, 'confidence', 0.0))
             verified_bonus = 0.15 if getattr(innovation, 'verified', False) else 0.0
