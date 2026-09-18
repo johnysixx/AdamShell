@@ -28,6 +28,8 @@ from cats.cat_intention_state import CatQuantumBoxTravelTarget
 
 from cats.cat_perception_state import CatScentTransferCandidate
 
+from cats.cat_intention_state import CatQuantumCounterpartSenseTarget
+
 class CatMind:
     INTENTION_TYPES = ('visit_bar', 'visit_recipient', 'hunt_cronenberg', 'track_cronenberg_scent', 'follow_known_scent', 'search_for_scent', 'follow_scent_through_box', 'avoid_cronenberg_scent', 'explore_box', 'sense_quantum_counterpart', 'travel_through_known_quantum_box', 'travel_trough_known_quantum_box', 'create_exploration_pair', 'approach_cat', 'share_legend', 'observe', 'wander', 'rest')
 
@@ -394,7 +396,32 @@ class CatMind:
             experienced_quantum_traveler = quantum_travel_count > 0
             quantum_experience_bonus = min(0.2, quantum_travel_count * 0.075)
             resonance_score = 0.3 + curiosity * 0.35 + intellect_normalized * 0.3 + quantum_experience_bonus
-            candidates.append(cls._candidate(intention_type='sense_quantum_counterpart', score=resonance_score, reasons=['quantum_box_explored', 'quantum_pair_resonance_possible', 'curiosity', 'intellect', *(['experienced_quantum_traveler'] if experienced_quantum_traveler else [])], target={'box_id': box_detail.id}))
+            candidates.append(
+                cls._candidate(
+                    intention_type=(
+                        'sense_quantum_counterpart'
+                    ),
+                    score=resonance_score,
+                    reasons=[
+                        'quantum_box_explored',
+                        'quantum_pair_resonance_possible',
+                        'curiosity',
+                        'intellect',
+                        *(
+                            [
+                                'experienced_quantum_traveler'
+                            ]
+                            if experienced_quantum_traveler
+                            else []
+                        ),
+                    ],
+                    target=(
+                        CatQuantumCounterpartSenseTarget(
+                            box_id=box_detail.id,
+                        )
+                    ),
+                )
+            )
         boxes = observations.unexplored_boxes
         if boxes:
             explore_score = 0.25 + curiosity * 0.55 + courage * 0.1

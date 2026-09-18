@@ -100,3 +100,9 @@ class CatQuantumBoxTravelTarget:
     target_layer: str | None = None
 
     target_position: object = None
+
+
+
+@dataclass(slots=True)
+class CatQuantumCounterpartSenseTarget:
+    box_id: object = None

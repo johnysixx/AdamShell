@@ -8,6 +8,8 @@ from cats.cats import Cats
 from cats.cat_mind import CatMind
 from cats.cat_perception import CatPerception
 
+from cats.cat_intention_state import CatQuantumCounterpartSenseTarget
+
 class CatQuantumCounterpartSensingTests(unittest.TestCase):
 
     def setUp(self):
@@ -34,7 +36,11 @@ class CatQuantumCounterpartSensingTests(unittest.TestCase):
         candidates = CatMind.consider(cat=self.cat, observations=observations)
         resonance = [candidate for candidate in candidates if candidate.type == 'sense_quantum_counterpart']
         self.assertEqual(len(resonance), 1)
-        self.assertEqual(resonance[0].target['box_id'], self.source.id)
+        self.assertEqual(resonance[0].target.box_id, self.source.id)
+        self.assertIsInstance(
+            resonance[0].target,
+            CatQuantumCounterpartSenseTarget,
+        )
 
     def test_sensing_reveals_current_counterpart_location(self):
         candidates = CatMind.consider(cat=self.cat, observations=self.observations())

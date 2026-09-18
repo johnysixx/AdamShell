@@ -25,6 +25,8 @@ from cats.cat_social_system import CatSocialSystem
 
 from cats.cat_intention_state import CatQuantumBoxTravelTarget
 
+from cats.cat_intention_state import CatQuantumCounterpartSenseTarget
+
 class CatIntentionExecutor:
     NAVIGATION_INTENTS = {'visit_bar': 'return_to_bar', 'visit_recipient': 'follow_entity', 'hunt_cronenberg': 'hunt_nearest_cronenberg', 'track_cronenberg_scent': 'hunt_nearest_cronenberg', 'avoid_cronenberg_scent': 'return_to_bar'}
     DEFERRED_INTENTS = {'observe': 'cat_observation_body_system'}
@@ -362,11 +364,24 @@ class CatIntentionExecutor:
         return self._record(event)
 
     def _execute_sense_quantum_counterpart(self, cat, intention):
-        target = intention.target or {}
-        if isinstance(target, dict):
-            source_box_id = target.get('box_id')
-        else:
-            source_box_id = target
+        target = intention.target
+
+        if not isinstance(
+            target,
+            CatQuantumCounterpartSenseTarget,
+        ):
+            return self._record({
+                'name': (
+                    'cat_quantum_counterpart_sensing_failed'
+                ),
+                'cat': cat.name,
+                'reason': (
+                    'invalid_quantum_counterpart_sense_target'
+                ),
+                'executed': False,
+            })
+
+        source_box_id = target.box_id
         if source_box_id is None:
             return self._record({'name': 'cat_quantum_counterpart_sensing_failed', 'cat': cat.name, 'reason': 'missing_box_id', 'executed': False})
         source_box = next((box for box in getattr(self.universe, 'quantum_boxes', []) if getattr(box, 'id', None) == source_box_id), None)
