@@ -14,6 +14,8 @@ from cats.cat_family_system import CatFamilySystem
 from cats.development_resolver import CatDevelopmentResolver
 from cats.cat_intention_state import CatIntentionCandidate
 
+from cats.cat_intention_state import CatApproachCatTarget
+
 class CatSocialInteractionTests(unittest.TestCase):
 
     def setUp(self):
@@ -146,7 +148,7 @@ class CatSocialInteractionTests(unittest.TestCase):
 
     def test_approach_cat_triggers_social_meeting_when_near(self):
         first, second = self._social_pair()
-        first.mind.current_intention = CatIntentionCandidate(type='approach_cat', target=second.name)
+        first.mind.current_intention = CatIntentionCandidate(type='approach_cat', target=CatApproachCatTarget(cat_name=second.name))
         result = self.cats.execute_cat_intention(first)
         self.assertEqual(result['name'], 'cat_approach_completed')
         self.assertTrue(result['executed'])

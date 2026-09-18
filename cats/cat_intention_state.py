@@ -126,3 +126,9 @@ class CatExplorationPairTarget:
 @dataclass(slots=True)
 class CatVisitRecipientTarget:
     recipient_id: str | None = None
+
+
+
+@dataclass(slots=True)
+class CatApproachCatTarget:
+    cat_name: str | None = None

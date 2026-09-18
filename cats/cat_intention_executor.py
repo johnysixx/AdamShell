@@ -35,6 +35,8 @@ from cats.cat_intention_state import CatExplorationPairTarget
 
 from cats.cat_intention_state import CatVisitRecipientTarget
 
+from cats.cat_intention_state import CatApproachCatTarget
+
 class CatIntentionExecutor:
     NAVIGATION_INTENTS = {'visit_bar': 'return_to_bar', 'visit_recipient': 'follow_entity', 'hunt_cronenberg': 'hunt_nearest_cronenberg', 'track_cronenberg_scent': 'hunt_nearest_cronenberg', 'avoid_cronenberg_scent': 'return_to_bar'}
     DEFERRED_INTENTS = {'observe': 'cat_observation_body_system'}
@@ -1005,10 +1007,21 @@ class CatIntentionExecutor:
 
     def _execute_approach_cat(self, cat, intention, step_size=None):
         target = intention.target
-        if isinstance(target, dict):
-            target_name = target.get('cat') or target.get('name')
-        else:
-            target_name = target
+
+        if not isinstance(
+            target,
+            CatApproachCatTarget,
+        ):
+            return self._record({
+                'name': 'cat_approach_failed',
+                'cat': cat.name,
+                'reason': (
+                    'invalid_approach_cat_target'
+                ),
+                'executed': False,
+            })
+
+        target_name = target.cat_name
         if not target_name:
             return self._record({'name': 'cat_approach_failed', 'cat': cat.name, 'reason': 'missing_target_cat', 'executed': False})
         target_cat = next((candidate for candidate in self.cats_layer.cats if isinstance(candidate, Cat) and candidate is not cat and (candidate.name == target_name)), None)

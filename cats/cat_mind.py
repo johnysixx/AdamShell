@@ -36,6 +36,8 @@ from cats.cat_intention_state import CatExplorationPairTarget
 
 from cats.cat_intention_state import CatVisitRecipientTarget
 
+from cats.cat_intention_state import CatApproachCatTarget
+
 class CatMind:
     INTENTION_TYPES = ('visit_bar', 'visit_recipient', 'hunt_cronenberg', 'track_cronenberg_scent', 'follow_known_scent', 'search_for_scent', 'follow_scent_through_box', 'avoid_cronenberg_scent', 'explore_box', 'sense_quantum_counterpart', 'travel_through_known_quantum_box', 'travel_trough_known_quantum_box', 'create_exploration_pair', 'approach_cat', 'share_legend', 'observe', 'wander', 'rest')
 
@@ -461,7 +463,7 @@ class CatMind:
                 candidates.append(cls._candidate(intention_type='share_legend', score=0.25 + patience * 0.15 + curiosity * 0.15, reasons=['another_cat_nearby', 'shareable_knowledge_exists'], target=nearby_cats[0]))
         if nearby_cats:
             social_score = 0.2 + empathy * 0.5 + curiosity * 0.1
-            candidates.append(cls._candidate(intention_type='approach_cat', score=social_score, reasons=['nearby_cat', 'empathy'], target=nearby_cats[0]))
+            candidates.append(cls._candidate(intention_type='approach_cat', score=social_score, reasons=['nearby_cat', 'empathy'], target=CatApproachCatTarget(cat_name=nearby_cats[0])))
         if observations.interesting_unknown:
             candidates.append(cls._candidate(intention_type='observe', score=0.2 + curiosity * 0.4 + patience * 0.2, reasons=['interesting_unknown', 'curiosity', 'patience']))
         needs = getattr(cat, 'needs', {})
@@ -469,7 +471,7 @@ class CatMind:
         social_need = float(getattr(needs, 'social', 0.0))
         curiosity_need = float(getattr(needs, 'curiosity', 0.0))
         if nearby_cats and social_need > 0.0:
-            candidates.append(cls._candidate(intention_type='approach_cat', score=0.18 + social_need * 0.72 + empathy * 0.1, reasons=['social_need', 'nearby_cat'], target=nearby_cats[0]))
+            candidates.append(cls._candidate(intention_type='approach_cat', score=0.18 + social_need * 0.72 + empathy * 0.1, reasons=['social_need', 'nearby_cat'], target=CatApproachCatTarget(cat_name=nearby_cats[0])))
         if getattr(cat, 'position', None) is not None:
             candidates.append(cls._candidate(intention_type='wander', score=0.12 + curiosity_need * 0.68 + curiosity * 0.12, reasons=['curiosity_need', 'autonomous_movement']))
         candidates.append(cls._candidate(intention_type='rest', score=0.15 + patience * 0.25 + fatigue_need * 0.65, reasons=['rest_is_available']))

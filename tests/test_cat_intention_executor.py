@@ -8,6 +8,8 @@ from cats.cat_intention_state import CatIntentionCandidate
 
 from cats.cat_intention_state import CatVisitRecipientTarget
 
+from cats.cat_intention_state import CatApproachCatTarget
+
 class CatIntentionExecutorTests(unittest.TestCase):
 
     def setUp(self):
@@ -123,7 +125,7 @@ class CatIntentionExecutorTests(unittest.TestCase):
         target_cat = self.cats.create_cat(name='target_cat', color='white', fur_length='short')
         target_cat.position = {'x': 4.0, 'y': 0.0, 'z': 0.0}
         target_cat.current_layer = self.cat.current_layer
-        self.set_intention('approach_cat', target='target_cat')
+        self.set_intention('approach_cat', target=CatApproachCatTarget(cat_name='target_cat'))
         result = self.cats.execute_cat_intention(self.cat)
         self.assertTrue(result['executed'])
         self.assertEqual(result['name'], 'cat_approach_started')
@@ -136,7 +138,7 @@ class CatIntentionExecutorTests(unittest.TestCase):
         target_cat = self.cats.create_cat(name='target_cat', color='white', fur_length='short')
         target_cat.position = {'x': 0.0, 'y': 0.0, 'z': 0.0}
         target_cat.current_layer = self.cat.current_layer
-        self.set_intention('approach_cat', target='target_cat')
+        self.set_intention('approach_cat', target=CatApproachCatTarget(cat_name='target_cat'))
         result = self.cats.execute_cat_intention(self.cat)
         self.assertTrue(result['executed'])
         self.assertTrue(result['arrived'])
