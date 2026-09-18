@@ -120,3 +120,9 @@ class CatExplorationPairTarget:
     layer: str | None = None
     position: object = None
     energy_cost: float = 0.0
+
+
+
+@dataclass(slots=True)
+class CatVisitRecipientTarget:
+    recipient_id: str | None = None

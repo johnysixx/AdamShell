@@ -33,6 +33,8 @@ from cats.cat_box_exploration_state import CatBoxExplorationState
 
 from cats.cat_intention_state import CatExplorationPairTarget
 
+from cats.cat_intention_state import CatVisitRecipientTarget
+
 class CatIntentionExecutor:
     NAVIGATION_INTENTS = {'visit_bar': 'return_to_bar', 'visit_recipient': 'follow_entity', 'hunt_cronenberg': 'hunt_nearest_cronenberg', 'track_cronenberg_scent': 'hunt_nearest_cronenberg', 'avoid_cronenberg_scent': 'return_to_bar'}
     DEFERRED_INTENTS = {'observe': 'cat_observation_body_system'}
@@ -95,8 +97,42 @@ class CatIntentionExecutor:
         intention_type = intention.type
         body_intent = self.NAVIGATION_INTENTS[intention_type]
         if intention_type == 'visit_recipient':
-            target = intention.target or {}
-            cat.navigation_target = target.get('recipient')
+            target = intention.target
+
+            if not isinstance(
+                target,
+                CatVisitRecipientTarget,
+            ):
+                return self._record({
+                    'name': (
+                        'cat_intention_body_action_failed'
+                    ),
+                    'cat': cat.name,
+                    'intention': intention_type,
+                    'body_intent': body_intent,
+                    'reason': (
+                        'invalid_visit_recipient_target'
+                    ),
+                    'executed': False,
+                })
+
+            if target.recipient_id is None:
+                return self._record({
+                    'name': (
+                        'cat_intention_body_action_failed'
+                    ),
+                    'cat': cat.name,
+                    'intention': intention_type,
+                    'body_intent': body_intent,
+                    'reason': (
+                        'missing_recipient_id'
+                    ),
+                    'executed': False,
+                })
+
+            cat.navigation_target = (
+                target.recipient_id
+            )
         previous_suggestion = cat.suggested_intent
         cat.suggested_intent = body_intent
         offer = self.cats_layer.offer_navigation_for_suggested_intent(cat=cat, cronenbergs=cronenbergs, step_size=step_size)

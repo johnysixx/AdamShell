@@ -6,6 +6,8 @@ from cats.cat_mind import CatMind
 from cats.cat_perception_state import CatPerceptionState
 from cats.cat_intention_state import CatIntentionCandidate
 
+from cats.cat_intention_state import CatVisitRecipientTarget
+
 class CatIntentionExecutorTests(unittest.TestCase):
 
     def setUp(self):
@@ -80,7 +82,7 @@ class CatIntentionExecutorTests(unittest.TestCase):
         self.assertEqual(result['reason'], 'no_current_intention')
 
     def test_visit_recipient_requests_follow_entity_navigation(self):
-        self.set_intention('visit_recipient', target={'recipient': 'wizard'})
+        self.set_intention('visit_recipient', target=CatVisitRecipientTarget(recipient_id='wizard'))
         original_navigation = self.cats.offer_navigation_for_suggested_intent
         original_acceptance = self.cats.accept_navigation_offer
         captured = {}
@@ -109,7 +111,7 @@ class CatIntentionExecutorTests(unittest.TestCase):
         recipient = SocialEntity.from_mapping({'id': 'wizard', 'type': 'idea_entity', 'needs_cat': False, 'current_layer': 'idea_universe', 'position': {'x': 4.0, 'y': 3.0, 'z': 0.0}})
         self.universe.cat_recipient_registry.register(recipient)
         self.cat.current_layer = 'idea_universe'
-        self.set_intention('visit_recipient', target={'recipient': 'wizard'})
+        self.set_intention('visit_recipient', target=CatVisitRecipientTarget(recipient_id='wizard'))
         result = self.cats.execute_cat_intention(self.cat)
         self.assertTrue(result['executed'])
         self.assertEqual(result['body_intent'], 'follow_entity')

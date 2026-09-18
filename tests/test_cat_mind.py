@@ -7,6 +7,8 @@ from cats.cat_personality import CatPersonality
 
 from cats.cat_intention_state import CatExploreBoxTarget
 
+from cats.cat_intention_state import CatVisitRecipientTarget
+
 class CatMindTests(unittest.TestCase):
 
     def setUp(self):
@@ -94,5 +96,12 @@ class CatMindTests(unittest.TestCase):
         candidates = CatMind.consider(cat, observations)
         visit_recipient = next((candidate for candidate in candidates if candidate.type == 'visit_recipient'), None)
         self.assertIsNotNone(visit_recipient)
-        self.assertEqual(visit_recipient.target, {'recipient': 'wizard'})
+        self.assertIsInstance(
+            visit_recipient.target,
+            CatVisitRecipientTarget,
+        )
+        self.assertEqual(
+            visit_recipient.target.recipient_id,
+            'wizard',
+        )
         self.assertIn('assigned_recipient', visit_recipient.reasons)

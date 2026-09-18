@@ -34,6 +34,8 @@ from cats.cat_intention_state import CatExploreBoxTarget
 
 from cats.cat_intention_state import CatExplorationPairTarget
 
+from cats.cat_intention_state import CatVisitRecipientTarget
+
 class CatMind:
     INTENTION_TYPES = ('visit_bar', 'visit_recipient', 'hunt_cronenberg', 'track_cronenberg_scent', 'follow_known_scent', 'search_for_scent', 'follow_scent_through_box', 'avoid_cronenberg_scent', 'explore_box', 'sense_quantum_counterpart', 'travel_through_known_quantum_box', 'travel_trough_known_quantum_box', 'create_exploration_pair', 'approach_cat', 'share_legend', 'observe', 'wander', 'rest')
 
@@ -97,7 +99,7 @@ class CatMind:
         recipient = cat.recipient
         if recipient is not None:
             recipient_score = 0.25 + empathy * 0.3 + curiosity * 0.1 + patience * 0.05
-            candidates.append(cls._candidate(intention_type='visit_recipient', score=recipient_score, reasons=['assigned_recipient', 'empathy', 'curiosity'], target={'recipient': recipient}))
+            candidates.append(cls._candidate(intention_type='visit_recipient', score=recipient_score, reasons=['assigned_recipient', 'empathy', 'curiosity'], target=CatVisitRecipientTarget(recipient_id=recipient)))
         huntable = observations.huntable_cronenbergs
         if huntable:
             danger = float(observations.cronenberg_danger)
