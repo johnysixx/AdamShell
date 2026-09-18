@@ -27,6 +27,8 @@ from cats.cat_intention_state import CatQuantumBoxTravelTarget
 
 from cats.cat_intention_state import CatQuantumCounterpartSenseTarget
 
+from cats.cat_intention_state import CatExploreBoxTarget
+
 class CatIntentionExecutor:
     NAVIGATION_INTENTS = {'visit_bar': 'return_to_bar', 'visit_recipient': 'follow_entity', 'hunt_cronenberg': 'hunt_nearest_cronenberg', 'track_cronenberg_scent': 'hunt_nearest_cronenberg', 'avoid_cronenberg_scent': 'return_to_bar'}
     DEFERRED_INTENTS = {'observe': 'cat_observation_body_system'}
@@ -442,10 +444,23 @@ class CatIntentionExecutor:
 
     def _execute_explore_box(self, cat, intention, cronenbergs=None, step_size=None):
         target = intention.target
-        if isinstance(target, dict):
-            box_id = target.get('id') or target.get('box_id')
-        else:
-            box_id = target
+
+        if not isinstance(
+            target,
+            CatExploreBoxTarget,
+        ):
+            return self._record({
+                'name': (
+                    'cat_box_exploration_failed'
+                ),
+                'cat': cat.name,
+                'reason': (
+                    'invalid_explore_box_target'
+                ),
+                'executed': False,
+            })
+
+        box_id = target.box_id
         if box_id is None:
             return self._record({'name': 'cat_box_exploration_failed', 'cat': cat.name, 'reason': 'missing_box_id', 'executed': False})
         box = next((candidate for candidate in getattr(self.universe, 'quantum_boxes', []) if getattr(candidate, 'id', None) == box_id), None)

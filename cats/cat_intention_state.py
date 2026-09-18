@@ -106,3 +106,9 @@ class CatQuantumBoxTravelTarget:
 @dataclass(slots=True)
 class CatQuantumCounterpartSenseTarget:
     box_id: object = None
+
+
+
+@dataclass(slots=True)
+class CatExploreBoxTarget:
+    box_id: object = None

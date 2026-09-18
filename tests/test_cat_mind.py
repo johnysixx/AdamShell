@@ -5,6 +5,8 @@ from cats.cat_mind import CatMind
 from cats.cat_perception_state import CatPerceptionState
 from cats.cat_personality import CatPersonality
 
+from cats.cat_intention_state import CatExploreBoxTarget
+
 class CatMindTests(unittest.TestCase):
 
     def setUp(self):
@@ -26,7 +28,14 @@ class CatMindTests(unittest.TestCase):
         self.traits().courage = 0.7
         result = CatMind.decide(cat=self.cat, observations=CatPerceptionState(unexplored_boxes=['box_alpha']))
         self.assertEqual(result['intention'], 'explore_box')
-        self.assertEqual(result['target'], 'box_alpha')
+        self.assertIsInstance(
+            result['target'],
+            CatExploreBoxTarget,
+        )
+        self.assertEqual(
+            result['target'].box_id,
+            'box_alpha',
+        )
 
     def test_brave_aggressive_cat_considers_hunt(self):
         self.traits().courage = 1.0

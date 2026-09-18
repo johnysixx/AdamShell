@@ -5,6 +5,8 @@ from cats.cat_knowledge import CatKnowledge
 from cats.cat_perception import CatPerception
 from cats.cat_intention_state import CatIntentionCandidate
 
+from cats.cat_intention_state import CatExploreBoxTarget
+
 class CatQuantumBoxPairingPrincipleTests(unittest.TestCase):
 
     def setUp(self):
@@ -30,7 +32,7 @@ class CatQuantumBoxPairingPrincipleTests(unittest.TestCase):
 
             type='explore_box',
 
-            target=self.box.id,
+            target=CatExploreBoxTarget(box_id=self.box.id),
 
             score=1.0,
 

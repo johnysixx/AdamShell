@@ -4,6 +4,8 @@ from cats.cats import Cats
 from cats.cat_perception import CatPerception
 from cats.cat_intention_state import CatIntentionCandidate
 
+from cats.cat_intention_state import CatExploreBoxTarget
+
 class CatBoxKnowledgeLayerTests(unittest.TestCase):
 
     def setUp(self):
@@ -36,7 +38,7 @@ class CatBoxKnowledgeLayerTests(unittest.TestCase):
 
             type='explore_box',
 
-            target=self.box.id,
+            target=CatExploreBoxTarget(box_id=self.box.id),
 
             score=1.0,
 

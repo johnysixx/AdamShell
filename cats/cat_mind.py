@@ -30,6 +30,8 @@ from cats.cat_perception_state import CatScentTransferCandidate
 
 from cats.cat_intention_state import CatQuantumCounterpartSenseTarget
 
+from cats.cat_intention_state import CatExploreBoxTarget
+
 class CatMind:
     INTENTION_TYPES = ('visit_bar', 'visit_recipient', 'hunt_cronenberg', 'track_cronenberg_scent', 'follow_known_scent', 'search_for_scent', 'follow_scent_through_box', 'avoid_cronenberg_scent', 'explore_box', 'sense_quantum_counterpart', 'travel_through_known_quantum_box', 'travel_trough_known_quantum_box', 'create_exploration_pair', 'approach_cat', 'share_legend', 'observe', 'wander', 'rest')
 
@@ -425,7 +427,7 @@ class CatMind:
         boxes = observations.unexplored_boxes
         if boxes:
             explore_score = 0.25 + curiosity * 0.55 + courage * 0.1
-            candidates.append(cls._candidate(intention_type='explore_box', score=explore_score, reasons=['unexplored_box_visible', 'curiosity'], target=boxes[0]))
+            candidates.append(cls._candidate(intention_type='explore_box', score=explore_score, reasons=['unexplored_box_visible', 'curiosity'], target=CatExploreBoxTarget(box_id=boxes[0])))
         if not boxes and observations.can_create_exploration_pair:
             exploration_plan = observations.exploration_plan
             exploration_reasons = set(exploration_plan.reasons)
