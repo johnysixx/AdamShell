@@ -6,6 +6,7 @@ from cats.cat_intention_state import (
     CatIntentionCandidate,
     CatKnownScentTarget,
     CatScentSearchTarget,
+    CatScentBoxTarget,
 )
 from cats.cat_scent_direction_state import (
     CatScentTrailDirection,
@@ -96,9 +97,27 @@ class CatIntentionExecutor:
         return self._record(event)
 
     def _execute_follow_scent_through_box(self, cat, intention, cronenbergs=None, step_size=None):
-        target = intention.target or {}
-        source_box_id = target.get('box_id')
-        target_box_id = target.get('counterpart_box_id')
+        target = intention.target
+
+        if not isinstance(
+            target,
+            CatScentBoxTarget,
+        ):
+            return self._record({
+                'name': (
+                    'cat_scent_box_transfer_failed'
+                ),
+                'cat': cat.name,
+                'reason': (
+                    'invalid_scent_box_target'
+                ),
+                'executed': False,
+            })
+
+        source_box_id = target.box_id
+        target_box_id = (
+            target.counterpart_box_id
+        )
         if source_box_id is None or target_box_id is None:
             return self._record({'name': 'cat_scent_box_transfer_failed', 'cat': cat.name, 'reason': 'missing_box_pair', 'executed': False})
         transfer_system = getattr(self.universe, 'cat_box_transfer', None)
@@ -106,9 +125,9 @@ class CatIntentionExecutor:
             return self._record({'name': 'cat_scent_box_transfer_failed', 'cat': cat.name, 'reason': 'cat_box_transfer_unavailable', 'executed': False})
         source_box = next((box for box in getattr(self.universe, 'quantum_boxes', []) if getattr(box, 'id', None) == source_box_id), None)
         if source_box is None:
-            return self._finish_scent_box_follow(cat=cat, intention=intention, event={'name': 'cat_scent_box_transfer_failed', 'cat': cat.name, 'identity': target.get('identity'), 'source_box_id': source_box_id, 'target_box_id': target_box_id, 'reason': 'source_box_not_found', 'executed': False})
+            return self._finish_scent_box_follow(cat=cat, intention=intention, event={'name': 'cat_scent_box_transfer_failed', 'cat': cat.name, 'identity': target.identity, 'source_box_id': source_box_id, 'target_box_id': target_box_id, 'reason': 'source_box_not_found', 'executed': False})
         if getattr(source_box, 'current_layer', None) != cat.current_layer:
-            return self._finish_scent_box_follow(cat=cat, intention=intention, event={'name': 'cat_scent_box_transfer_failed', 'cat': cat.name, 'identity': target.get('identity'), 'source_box_id': source_box_id, 'target_box_id': target_box_id, 'reason': 'source_box_not_in_cat_layer', 'executed': False})
+            return self._finish_scent_box_follow(cat=cat, intention=intention, event={'name': 'cat_scent_box_transfer_failed', 'cat': cat.name, 'identity': target.identity, 'source_box_id': source_box_id, 'target_box_id': target_box_id, 'reason': 'source_box_not_in_cat_layer', 'executed': False})
         follow = cat.scent_box_follow
         if isinstance(follow, dict) and follow.get('active', False) and (follow.get('source_box_id') == source_box_id) and (follow.get('target_box_id') == target_box_id):
             return self._advance_scent_box_follow(cat=cat, intention=intention, cronenbergs=cronenbergs)
@@ -125,9 +144,9 @@ class CatIntentionExecutor:
         route = planned['route']
         route.state = 'ready'
         cat.active_route_id = route.route_id
-        cat.scent_box_follow = {'active': True, 'arrived_at_box': False, 'route_id': route.route_id, 'source_box_id': source_box_id, 'target_box_id': target_box_id, 'identity': target.get('identity'), 'destination': dict(source_position)}
+        cat.scent_box_follow = {'active': True, 'arrived_at_box': False, 'route_id': route.route_id, 'source_box_id': source_box_id, 'target_box_id': target_box_id, 'identity': target.identity, 'destination': dict(source_position)}
         cat.state = 'following_scent_to_quantum_box'
-        event = {'name': 'cat_following_scent_to_box', 'cat': cat.name, 'identity': target.get('identity'), 'source_box_id': source_box_id, 'target_box_id': target_box_id, 'route_id': route.route_id, 'destination': dict(source_position), 'arrived_at_box': False, 'decision_source': 'cat_mind', 'executed': True}
+        event = {'name': 'cat_following_scent_to_box', 'cat': cat.name, 'identity': target.identity, 'source_box_id': source_box_id, 'target_box_id': target_box_id, 'route_id': route.route_id, 'destination': dict(source_position), 'arrived_at_box': False, 'decision_source': 'cat_mind', 'executed': True}
         cat.mind.active_body_execution = deepcopy(event)
         return self._record(event)
 
@@ -146,9 +165,18 @@ class CatIntentionExecutor:
         return self._record(event)
 
     def _transfer_scent_box_follow(self, cat, intention, source_box_id, target_box_id):
-        target = intention.target or {}
+        target = intention.target
+
+        if not isinstance(
+            target,
+            CatScentBoxTarget,
+        ):
+            raise TypeError(
+                'Scent box target must be '
+                'CatScentBoxTarget.'
+            )
         result = self.universe.cat_box_transfer.transfer_cat(cat=cat, source_box_id=source_box_id, target_box_id=target_box_id)
-        event = {'name': 'cat_followed_scent_through_box' if result.get('transferred', False) else 'cat_scent_box_transfer_failed', 'cat': cat.name, 'identity': target.get('identity'), 'source_box_id': source_box_id, 'target_box_id': target_box_id, 'source_layer': target.get('source_layer'), 'target_layer': target.get('target_layer'), 'transfer': result, 'arrived_at_box': True, 'decision_source': 'cat_mind', 'executed': result.get('transferred', False)}
+        event = {'name': 'cat_followed_scent_through_box' if result.get('transferred', False) else 'cat_scent_box_transfer_failed', 'cat': cat.name, 'identity': target.identity, 'source_box_id': source_box_id, 'target_box_id': target_box_id, 'source_layer': target.source_layer, 'target_layer': target.target_layer, 'transfer': result, 'arrived_at_box': True, 'decision_source': 'cat_mind', 'executed': result.get('transferred', False)}
         return self._finish_scent_box_follow(cat=cat, intention=intention, event=event)
 
     def _finish_scent_box_follow(self, cat, intention, event):

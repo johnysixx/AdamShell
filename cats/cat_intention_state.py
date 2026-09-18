@@ -78,3 +78,13 @@ class CatScentSearchTarget:
             raise TypeError(
                 'Scent search target trail direction must be CatScentTrailDirection.'
             )
+
+
+
+@dataclass(slots=True)
+class CatScentBoxTarget:
+    identity: str | None = None
+    box_id: object = None
+    counterpart_box_id: object = None
+    source_layer: str | None = None
+    target_layer: str | None = None

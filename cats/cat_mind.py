@@ -4,6 +4,7 @@ from cats.cat_intention_state import (
     CatIntentionCandidate,
     CatKnownScentTarget,
     CatScentSearchTarget,
+    CatScentBoxTarget,
 )
 from cats.cat_knowledge import CatKnowledge
 from cats.cat_perception_state import (
@@ -220,7 +221,43 @@ class CatMind:
             scent_score = 0.2 + curiosity * 0.3 + courage * 0.2 + float(best_scent_transfer.get('similarity', 0.0)) * 0.25
             if identity == 'cronenberg':
                 scent_score += aggression * 0.15
-            candidates.append(cls._candidate(intention_type='follow_scent_through_box', score=scent_score, reasons=['recognized_scent_on_box', 'paired_quantum_box', 'scent_continues_cross_layer', 'curiosity'], target={'identity': identity, 'box_id': best_scent_transfer['box_id'], 'counterpart_box_id': best_scent_transfer['counterpart_box_id'], 'source_layer': best_scent_transfer.get('source_layer'), 'target_layer': best_scent_transfer.get('target_layer')}))
+            candidates.append(
+                cls._candidate(
+                    intention_type=(
+                        'follow_scent_through_box'
+                    ),
+                    score=scent_score,
+                    reasons=[
+                        'recognized_scent_on_box',
+                        'paired_quantum_box',
+                        'scent_continues_cross_layer',
+                        'curiosity',
+                    ],
+                    target=CatScentBoxTarget(
+                        identity=identity,
+                        box_id=(
+                            best_scent_transfer[
+                                'box_id'
+                            ]
+                        ),
+                        counterpart_box_id=(
+                            best_scent_transfer[
+                                'counterpart_box_id'
+                            ]
+                        ),
+                        source_layer=(
+                            best_scent_transfer.get(
+                                'source_layer'
+                            )
+                        ),
+                        target_layer=(
+                            best_scent_transfer.get(
+                                'target_layer'
+                            )
+                        ),
+                    ),
+                )
+            )
         intellect = CatIntellect.ensure_state(cat)
         intellect_normalized = float(intellect.normalized)
         counterpart_observation = getattr(cat, 'current_quantum_counterpart_observation', None)

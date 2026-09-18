@@ -1,7 +1,10 @@
 import unittest
 from universe.universe import Universe
 from cats.cats import Cats
-from cats.cat_intention_state import CatIntentionCandidate
+from cats.cat_intention_state import (
+    CatIntentionCandidate,
+    CatScentBoxTarget,
+)
 from universe.dark_sector import QUANTUM_BOX_ENERGY_COST_J
 
 class CatScentBoxApproachTests(unittest.TestCase):
@@ -24,7 +27,13 @@ class CatScentBoxApproachTests(unittest.TestCase):
 
             type='follow_scent_through_box',
 
-            target={'identity': 'cat:creator', 'box_id': self.source.id, 'counterpart_box_id': self.target.id, 'source_layer': 'meeting_place', 'target_layer': 'quantum_layer'},
+            target=CatScentBoxTarget(
+                identity='cat:creator',
+                box_id=self.source.id,
+                counterpart_box_id=self.target.id,
+                source_layer='meeting_place',
+                target_layer='quantum_layer',
+            ),
 
             score=1.0,
 
