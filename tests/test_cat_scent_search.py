@@ -5,6 +5,7 @@ from cats.cat_mind import CatMind
 from cats.cat_perception import CatPerception
 from cats.cat_scent_navigation_state import (
     CatKnownScentFollowState,
+    CatScentSearchState,
 )
 
 class CatScentSearchTests(unittest.TestCase):
@@ -65,7 +66,7 @@ class CatScentSearchTests(unittest.TestCase):
                 break
         self.assertEqual(result['name'], 'cat_completed_scent_search_step')
         self.assertGreater(self.cat.position['x'], 3.0)
-        self.assertEqual(self.cat.scent_search['attempts'], 1)
+        self.assertEqual(self.cat.scent_search.attempts, 1)
         self.assertIsNone(self.cat.mind.current_intention)
 
     def test_search_stops_when_target_scent_is_reacquired(self):
@@ -84,8 +85,8 @@ class CatScentSearchTests(unittest.TestCase):
         self.assertEqual(reacquired['name'], 'cat_reacquired_scent_during_search')
         self.assertEqual(reacquired['identity'], 'cat:pazuzu')
         self.assertTrue(reacquired['search_interrupted'])
-        self.assertFalse(self.cat.scent_search['active'])
-        self.assertTrue(self.cat.scent_search['reacquired'])
+        self.assertFalse(self.cat.scent_search.active)
+        self.assertTrue(self.cat.scent_search.reacquired)
         self.assertIsNone(self.cat.mind.current_intention)
         self.assertFalse(hasattr(self.cat, 'active_route_id'))
         route = self.universe.quantum_space.find_cat_route(self.cat.name)
@@ -94,15 +95,29 @@ class CatScentSearchTests(unittest.TestCase):
         self.assertTrue(any((memory.identity == 'cat:pazuzu' for memory in memories)))
 
     def test_search_stops_after_max_attempts(self):
-        self.cat.scent_search = {'active': False, 'identity': 'cat:pazuzu', 'layer': 'quantum_layer', 'attempts': 3, 'max_attempts': 3, 'arrived': True}
+        self.cat.scent_search = CatScentSearchState(
+            active=False,
+            identity='cat:pazuzu',
+            layer='quantum_layer',
+            attempts=3,
+            max_attempts=3,
+            arrived=True,
+        )
         candidates = CatMind.consider(cat=self.cat, observations=self.observations())
         search = [candidate for candidate in candidates if candidate.type == 'search_for_scent']
         self.assertEqual(search, [])
         self.assertTrue(self.cat.known_scent_follow.arrived)
-        self.assertEqual(self.cat.scent_search['attempts'], 3)
+        self.assertEqual(self.cat.scent_search.attempts, 3)
 
     def test_exhausted_search_returns_cat_to_normal_decision_candidates(self):
-        self.cat.scent_search = {'active': False, 'identity': 'cat:pazuzu', 'layer': 'quantum_layer', 'attempts': 3, 'max_attempts': 3, 'arrived': True}
+        self.cat.scent_search = CatScentSearchState(
+            active=False,
+            identity='cat:pazuzu',
+            layer='quantum_layer',
+            attempts=3,
+            max_attempts=3,
+            arrived=True,
+        )
         self.cat.mind.current_intention = None
         candidates = CatMind.consider(cat=self.cat, observations=self.observations())
         self.assertTrue(candidates)

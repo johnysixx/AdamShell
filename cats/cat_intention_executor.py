@@ -8,6 +8,7 @@ from cats.cat_intention_state import (
 )
 from cats.cat_scent_navigation_state import (
     CatKnownScentFollowState,
+    CatScentSearchState,
 )
 from cats.cat_social_system import CatSocialSystem
 
@@ -322,7 +323,22 @@ class CatIntentionExecutor:
         if identity is None or not isinstance(unit_vector, dict):
             return self._record({'name': 'cat_scent_search_failed', 'cat': cat.name, 'reason': 'invalid_search_direction', 'executed': False})
         search = cat.scent_search
-        if isinstance(search, dict) and search.get('active', False) and (search.get('identity') == identity):
+        if (
+            search is not None
+            and not isinstance(
+                search,
+                CatScentSearchState,
+            )
+        ):
+            raise TypeError(
+                'Cat scent search state must be '
+                'CatScentSearchState.'
+            )
+        if (
+            isinstance(search, CatScentSearchState)
+            and search.active
+            and search.identity == identity
+        ):
             return self._advance_scent_search(cat=cat, intention=intention, cronenbergs=cronenbergs)
         start = cat.position or {}
         distance = float(target.get('search_distance', 1.0))
@@ -334,13 +350,30 @@ class CatIntentionExecutor:
         route = planned['route']
         route.state = 'ready'
         cat.active_route_id = route.route_id
-        cat.scent_search = {'active': True, 'identity': identity, 'layer': cat.current_layer, 'route_id': route.route_id, 'attempts': int(target.get('attempt', 1)) - 1, 'current_attempt': int(target.get('attempt', 1)), 'max_attempts': int(target.get('max_attempts', 1)), 'start_position': dict(start), 'destination': dict(destination), 'trail_direction': deepcopy(direction), 'arrived': False}
+        cat.scent_search = CatScentSearchState(
+            active=True,
+            identity=identity,
+            layer=cat.current_layer,
+            route_id=route.route_id,
+            attempts=int(target.get('attempt', 1)) - 1,
+            current_attempt=int(target.get('attempt', 1)),
+            max_attempts=int(target.get('max_attempts', 1)),
+            start_position=dict(start),
+            destination=dict(destination),
+            trail_direction=deepcopy(direction),
+            arrived=False,
+        )
         event = {'name': 'cat_searching_for_scent', 'cat': cat.name, 'identity': identity, 'attempt': target.get('attempt', 1), 'max_attempts': target.get('max_attempts', 1), 'route_id': route.route_id, 'start_position': dict(start), 'destination': dict(destination), 'arrived': False, 'decision_source': 'cat_mind', 'executed': True}
         cat.mind.active_body_execution = deepcopy(event)
         return self._record(event)
 
     def _advance_scent_search(self, cat, intention, cronenbergs=None):
         search = cat.scent_search
+        if not isinstance(search, CatScentSearchState):
+            raise TypeError(
+                'Cat scent search state must be '
+                'CatScentSearchState.'
+            )
         result = self.universe.quantum_space.advance_cat_route(cat=cat, cronenbergs=cronenbergs if cronenbergs is not None else getattr(self.universe, 'cronenbergs', []), encounter_system=self.universe.cat_cronenberg_encounter, universe=self.universe)
         position = result.get('position')
         if position is not None:
@@ -352,7 +385,7 @@ class CatIntentionExecutor:
                 for item in olfaction.detected_aromas
                 if item.recognition.recognized
                 and item.recognition.identity
-                == search.get('identity')
+                == search.identity
             ),
             None,
         )
@@ -361,36 +394,41 @@ class CatIntentionExecutor:
             route = self.universe.quantum_space.find_cat_route(cat.name)
             if route is not None:
                 route.stop_observation()
-            search['active'] = False
-            search['arrived'] = False
-            search['reacquired'] = True
-            search['reacquired_at'] = dict(cat.position or {})
-            search['reacquired_source_id'] = reacquired.entity_id
+            search.active = False
+            search.arrived = False
+            search.reacquired = True
+            search.reacquired_at = dict(cat.position or {})
+            search.reacquired_source_id = reacquired.entity_id
             if hasattr(cat, 'active_route_id'):
                 del cat.active_route_id
             mind = cat.mind
             mind.previous_intention = deepcopy(intention)
             mind.current_intention = None
-            event = {'name': 'cat_reacquired_scent_during_search', 'cat': cat.name, 'identity': search.get('identity'), 'source_id': reacquired.entity_id, 'position': dict(cat.position or {}), 'olfaction': deepcopy(olfaction), 'search_interrupted': True, 'decision_source': 'cat_mind', 'executed': True}
+            event = {'name': 'cat_reacquired_scent_during_search', 'cat': cat.name, 'identity': search.identity, 'source_id': reacquired.entity_id, 'position': dict(cat.position or {}), 'olfaction': deepcopy(olfaction), 'search_interrupted': True, 'decision_source': 'cat_mind', 'executed': True}
             mind.active_body_execution = deepcopy(event)
             return self._record(event)
         if result.get('arrived', False):
             return self._finish_scent_search(cat=cat, intention=intention)
-        event = {'name': 'cat_searching_for_scent', 'cat': cat.name, 'identity': search.get('identity'), 'attempt': search.get('current_attempt'), 'max_attempts': search.get('max_attempts'), 'route_id': search.get('route_id'), 'position': dict(position) if position is not None else None, 'destination': dict(search['destination']), 'arrived': False, 'decision_source': 'cat_mind', 'executed': result.get('result') != 'no_active_route'}
+        event = {'name': 'cat_searching_for_scent', 'cat': cat.name, 'identity': search.identity, 'attempt': search.current_attempt, 'max_attempts': search.max_attempts, 'route_id': search.route_id, 'position': dict(position) if position is not None else None, 'destination': dict(search.destination), 'arrived': False, 'decision_source': 'cat_mind', 'executed': result.get('result') != 'no_active_route'}
         cat.mind.active_body_execution = deepcopy(event)
         return self._record(event)
 
     def _finish_scent_search(self, cat, intention):
         search = cat.scent_search
-        search['active'] = False
-        search['arrived'] = True
-        search['attempts'] = int(search.get('current_attempt', 1))
+        if not isinstance(search, CatScentSearchState):
+            raise TypeError(
+                'Cat scent search state must be '
+                'CatScentSearchState.'
+            )
+        search.active = False
+        search.arrived = True
+        search.attempts = int((search.current_attempt or 1))
         if hasattr(cat, 'active_route_id'):
             del cat.active_route_id
         mind = cat.mind
         mind.previous_intention = deepcopy(intention)
         mind.current_intention = None
-        event = {'name': 'cat_completed_scent_search_step', 'cat': cat.name, 'identity': search.get('identity'), 'attempt': search.get('attempts'), 'max_attempts': search.get('max_attempts'), 'position': dict(cat.position or {}), 'trail_direction': deepcopy(search.get('trail_direction')), 'arrived': True, 'decision_source': 'cat_mind', 'executed': True}
+        event = {'name': 'cat_completed_scent_search_step', 'cat': cat.name, 'identity': search.identity, 'attempt': search.attempts, 'max_attempts': search.max_attempts, 'position': dict(cat.position or {}), 'trail_direction': deepcopy(search.trail_direction), 'arrived': True, 'decision_source': 'cat_mind', 'executed': True}
         mind.active_body_execution = deepcopy(event)
         return self._record(event)
 

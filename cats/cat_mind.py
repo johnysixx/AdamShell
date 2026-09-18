@@ -10,6 +10,7 @@ from cats.cat_perception_state import (
 )
 from cats.cat_scent_navigation_state import (
     CatKnownScentFollowState,
+    CatScentSearchState,
 )
 from copy import deepcopy
 
@@ -310,9 +311,34 @@ class CatMind:
                 traits = cat.personality.traits
                 curiosity = float(traits.curiosity)
                 courage = float(traits.courage)
-                previous_search = cat.scent_search or {}
-                if isinstance(previous_search, dict) and previous_search.get('identity') == identity and (previous_search.get('layer') == cat.current_layer):
-                    attempts = int(previous_search.get('attempts', 0))
+                previous_search = cat.scent_search
+
+                if (
+                    previous_search is not None
+                    and not isinstance(
+                        previous_search,
+                        CatScentSearchState,
+                    )
+                ):
+                    raise TypeError(
+                        'Cat scent search state '
+                        'must be '
+                        'CatScentSearchState.'
+                    )
+
+                if (
+                    isinstance(
+                        previous_search,
+                        CatScentSearchState,
+                    )
+                    and previous_search.identity
+                    == identity
+                    and previous_search.layer
+                    == cat.current_layer
+                ):
+                    attempts = int(
+                        previous_search.attempts
+                    )
                 else:
                     attempts = 0
                 max_attempts = max(1, min(3, 1 + int(round(curiosity * 2.0))))
