@@ -112,3 +112,11 @@ class CatQuantumCounterpartSenseTarget:
 @dataclass(slots=True)
 class CatExploreBoxTarget:
     box_id: object = None
+
+
+
+@dataclass(slots=True)
+class CatExplorationPairTarget:
+    layer: str | None = None
+    position: object = None
+    energy_cost: float = 0.0

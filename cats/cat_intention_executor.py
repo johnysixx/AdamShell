@@ -31,6 +31,8 @@ from cats.cat_intention_state import CatExploreBoxTarget
 
 from cats.cat_box_exploration_state import CatBoxExplorationState
 
+from cats.cat_intention_state import CatExplorationPairTarget
+
 class CatIntentionExecutor:
     NAVIGATION_INTENTS = {'visit_bar': 'return_to_bar', 'visit_recipient': 'follow_entity', 'hunt_cronenberg': 'hunt_nearest_cronenberg', 'track_cronenberg_scent': 'hunt_nearest_cronenberg', 'avoid_cronenberg_scent': 'return_to_bar'}
     DEFERRED_INTENTS = {'observe': 'cat_observation_body_system'}
@@ -887,9 +889,28 @@ class CatIntentionExecutor:
         Executor pouze vytvo?? t?lesnou cestu
         a zah?j? p?enos.
         """
-        target = intention.target or {}
-        destination_layer = target.get('layer')
-        destination_position = target.get('position')
+        target = intention.target
+
+        if not isinstance(
+            target,
+            CatExplorationPairTarget,
+        ):
+            return self._record({
+                'name': (
+                    'cat_exploration_pair_creation_failed'
+                ),
+                'cat': cat.name,
+                'intention': (
+                    'create_exploration_pair'
+                ),
+                'reason': (
+                    'invalid_exploration_pair_target'
+                ),
+                'executed': False,
+            })
+
+        destination_layer = target.layer
+        destination_position = target.position
         if destination_layer is None or destination_position is None:
             return self._record({'name': 'cat_exploration_pair_creation_failed', 'cat': cat.name, 'intention': 'create_exploration_pair', 'reason': 'missing_exploration_destination', 'executed': False})
         transfer_system = getattr(self.universe, 'cat_box_transfer', None)

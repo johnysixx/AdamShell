@@ -3,6 +3,8 @@ from universe.universe import Universe
 from cats.cats import Cats
 from universe.dark_sector import QUANTUM_BOX_ENERGY_COST_J
 
+from cats.cat_intention_state import CatExplorationPairTarget
+
 class CatAutonomousExplorationPairTests(unittest.TestCase):
 
     def setUp(self):
@@ -25,7 +27,26 @@ class CatAutonomousExplorationPairTests(unittest.TestCase):
         observations = self.cats.observe_cat(self.cat)
         from cats.cat_mind import CatMind
         decision = CatMind.decide(cat=self.cat, observations=observations)
-        self.assertEqual(decision['intention'], 'create_exploration_pair')
+        self.assertEqual(
+            decision['intention'],
+            'create_exploration_pair',
+        )
+        self.assertIsInstance(
+            decision['target'],
+            CatExplorationPairTarget,
+        )
+        self.assertEqual(
+            decision['target'].layer,
+            observations.exploration_destination_layer,
+        )
+        self.assertEqual(
+            decision['target'].position,
+            observations.exploration_destination_position,
+        )
+        self.assertEqual(
+            decision['target'].energy_cost,
+            observations.exploration_pair_energy_cost,
+        )
 
     def test_think_and_act_creates_and_uses_stable_pair(self):
         before_boxes = len(self.universe.quantum_boxes)

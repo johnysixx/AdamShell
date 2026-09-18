@@ -32,6 +32,8 @@ from cats.cat_intention_state import CatQuantumCounterpartSenseTarget
 
 from cats.cat_intention_state import CatExploreBoxTarget
 
+from cats.cat_intention_state import CatExplorationPairTarget
+
 class CatMind:
     INTENTION_TYPES = ('visit_bar', 'visit_recipient', 'hunt_cronenberg', 'track_cronenberg_scent', 'follow_known_scent', 'search_for_scent', 'follow_scent_through_box', 'avoid_cronenberg_scent', 'explore_box', 'sense_quantum_counterpart', 'travel_through_known_quantum_box', 'travel_trough_known_quantum_box', 'create_exploration_pair', 'approach_cat', 'share_legend', 'observe', 'wander', 'rest')
 
@@ -436,7 +438,20 @@ class CatMind:
             reasons = ['no_usable_box_visible', 'sufficient_energy', 'curiosity', 'quantum_pair_creation_possible']
             if explicit_goal_bonus > 0.0:
                 reasons.append('explicit_exploration_goal')
-            candidates.append(cls._candidate(intention_type='create_exploration_pair', score=pair_score, reasons=reasons, target={'layer': observations.exploration_destination_layer, 'position': observations.exploration_destination_position, 'energy_cost': observations.exploration_pair_energy_cost}))
+            candidates.append(cls._candidate(intention_type='create_exploration_pair', score=pair_score, reasons=reasons, target=CatExplorationPairTarget(
+                layer=(
+                    observations
+                    .exploration_destination_layer
+                ),
+                position=(
+                    observations
+                    .exploration_destination_position
+                ),
+                energy_cost=(
+                    observations
+                    .exploration_pair_energy_cost
+                ),
+            )))
         nearby_cats = observations.nearby_cats
         if nearby_cats:
             legend_count = int(observations.shareable_legend_count)
