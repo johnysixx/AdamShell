@@ -37,6 +37,8 @@ from cats.cat_intention_state import CatVisitRecipientTarget
 
 from cats.cat_intention_state import CatApproachCatTarget
 
+from cats.cat_intention_state import CatShareLegendTarget
+
 class CatIntentionExecutor:
     NAVIGATION_INTENTS = {'visit_bar': 'return_to_bar', 'visit_recipient': 'follow_entity', 'hunt_cronenberg': 'hunt_nearest_cronenberg', 'track_cronenberg_scent': 'hunt_nearest_cronenberg', 'avoid_cronenberg_scent': 'return_to_bar'}
     DEFERRED_INTENTS = {'observe': 'cat_observation_body_system'}
@@ -897,11 +899,26 @@ class CatIntentionExecutor:
 
     def _execute_share_legend(self, cat, intention):
         target = intention.target
+
+        if not isinstance(
+            target,
+            CatShareLegendTarget,
+        ):
+            return self._record({
+                'name': (
+                    'cat_legend_not_shared'
+                ),
+                'cat': cat.name,
+                'reason': (
+                    'invalid_share_legend_target'
+                ),
+                'executed': False,
+            })
+
+        target_name = (
+            target.listener_name
+        )
         listener = None
-        if isinstance(target, dict):
-            target_name = target.get('name') or target.get('id')
-        else:
-            target_name = target
         for candidate in getattr(self.universe, 'entities', []):
             if not isinstance(candidate, dict):
                 continue

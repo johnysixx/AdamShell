@@ -38,6 +38,8 @@ from cats.cat_intention_state import CatVisitRecipientTarget
 
 from cats.cat_intention_state import CatApproachCatTarget
 
+from cats.cat_intention_state import CatShareLegendTarget
+
 class CatMind:
     INTENTION_TYPES = ('visit_bar', 'visit_recipient', 'hunt_cronenberg', 'track_cronenberg_scent', 'follow_known_scent', 'search_for_scent', 'follow_scent_through_box', 'avoid_cronenberg_scent', 'explore_box', 'sense_quantum_counterpart', 'travel_through_known_quantum_box', 'travel_trough_known_quantum_box', 'create_exploration_pair', 'approach_cat', 'share_legend', 'observe', 'wander', 'rest')
 
@@ -460,7 +462,7 @@ class CatMind:
         if nearby_cats:
             legend_count = int(observations.shareable_legend_count)
             if legend_count > 0:
-                candidates.append(cls._candidate(intention_type='share_legend', score=0.25 + patience * 0.15 + curiosity * 0.15, reasons=['another_cat_nearby', 'shareable_knowledge_exists'], target=nearby_cats[0]))
+                candidates.append(cls._candidate(intention_type='share_legend', score=0.25 + patience * 0.15 + curiosity * 0.15, reasons=['another_cat_nearby', 'shareable_knowledge_exists'], target=CatShareLegendTarget(listener_name=nearby_cats[0])))
         if nearby_cats:
             social_score = 0.2 + empathy * 0.5 + curiosity * 0.1
             candidates.append(cls._candidate(intention_type='approach_cat', score=social_score, reasons=['nearby_cat', 'empathy'], target=CatApproachCatTarget(cat_name=nearby_cats[0])))

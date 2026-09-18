@@ -132,3 +132,9 @@ class CatVisitRecipientTarget:
 @dataclass(slots=True)
 class CatApproachCatTarget:
     cat_name: str | None = None
+
+
+
+@dataclass(slots=True)
+class CatShareLegendTarget:
+    listener_name: str | None = None
