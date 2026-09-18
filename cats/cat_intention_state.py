@@ -36,3 +36,16 @@ class CatKnownScentTarget:
     freshness: float | None = None
 
     trail_direction: object = None
+
+
+
+@dataclass(slots=True)
+class CatScentSearchTarget:
+    identity: str | None = None
+    layer: str | None = None
+    from_position: object = None
+    trail_direction: object = None
+
+    attempt: int = 1
+    max_attempts: int = 1
+    search_distance: float = 1.0

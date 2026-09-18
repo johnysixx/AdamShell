@@ -3,6 +3,7 @@ from cats.cat_intellect import CatIntellect
 from cats.cat_intention_state import (
     CatIntentionCandidate,
     CatKnownScentTarget,
+    CatScentSearchTarget,
 )
 from cats.cat_knowledge import CatKnowledge
 from cats.cat_perception_state import (
@@ -346,7 +347,35 @@ class CatMind:
                     direction_confidence = float(direction.get('confidence', 0.0))
                     search_distance = 1.0 + curiosity + courage * 0.5
                     search_score = 0.38 + curiosity * 0.18 + courage * 0.08 + direction_confidence * 0.2 - attempts * 0.08
-                    candidates.append(cls._candidate(intention_type='search_for_scent', score=search_score, reasons=['last_known_scent_reached', 'target_scent_not_detected', 'trail_direction_inferred', 'local_search'], target={'identity': identity, 'layer': cat.current_layer, 'from_position': dict(cat.position or {}), 'trail_direction': deepcopy(direction), 'attempt': attempts + 1, 'max_attempts': max_attempts, 'search_distance': search_distance}))
+                    candidates.append(
+                        cls._candidate(
+                            intention_type=(
+                                'search_for_scent'
+                            ),
+                            score=search_score,
+                            reasons=[
+                                'last_known_scent_reached',
+                                'target_scent_not_detected',
+                                'trail_direction_inferred',
+                                'local_search',
+                            ],
+                            target=CatScentSearchTarget(
+                                identity=identity,
+                                layer=cat.current_layer,
+                                from_position=dict(
+                                    cat.position or {}
+                                ),
+                                trail_direction=deepcopy(
+                                    direction
+                                ),
+                                attempt=attempts + 1,
+                                max_attempts=max_attempts,
+                                search_distance=(
+                                    search_distance
+                                ),
+                            ),
+                        )
+                    )
         candidates.sort(
             key=lambda item: item.score,
             reverse=True,

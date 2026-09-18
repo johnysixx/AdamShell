@@ -4,6 +4,7 @@ from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat_intention_state import (
     CatIntentionCandidate,
+    CatScentSearchTarget,
 )
 from cats.cat_mind import CatMind
 from cats.cat_perception import CatPerception
@@ -70,13 +71,13 @@ class CatScentSearchStateObjectTests(
     def search_intention(self):
         return CatIntentionCandidate(
             type='search_for_scent',
-            target={
-                'identity': 'cat:pazuzu',
-                'layer': 'quantum_layer',
-                'from_position': dict(
+            target=CatScentSearchTarget(
+                identity='cat:pazuzu',
+                layer='quantum_layer',
+                from_position=dict(
                     self.cat.position
                 ),
-                'trail_direction': {
+                trail_direction={
                     'inferred': True,
                     'unit_vector': {
                         'x': 1.0,
@@ -85,10 +86,10 @@ class CatScentSearchStateObjectTests(
                     },
                     'confidence': 0.8,
                 },
-                'attempt': 1,
-                'max_attempts': 3,
-                'search_distance': 1.0,
-            },
+                attempt=1,
+                max_attempts=3,
+                search_distance=1.0,
+            ),
             score=1.0,
             reasons=['test'],
         )

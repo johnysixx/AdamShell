@@ -5,6 +5,7 @@ from cats.cat import Cat
 from cats.cat_intention_state import (
     CatIntentionCandidate,
     CatKnownScentTarget,
+    CatScentSearchTarget,
 )
 from cats.cat_scent_navigation_state import (
     CatKnownScentFollowState,
@@ -316,9 +317,24 @@ class CatIntentionExecutor:
         return self._record(event)
 
     def _execute_search_for_scent(self, cat, intention, cronenbergs=None, step_size=None):
-        target = intention.target or {}
-        identity = target.get('identity')
-        direction = target.get('trail_direction', {})
+        target = intention.target
+
+        if not isinstance(
+            target,
+            CatScentSearchTarget,
+        ):
+            return self._record({
+                'name': 'cat_scent_search_failed',
+                'cat': cat.name,
+                'reason': 'invalid_search_target',
+                'executed': False,
+            })
+
+        identity = target.identity
+        direction = (
+            target.trail_direction
+            or {}
+        )
         unit_vector = direction.get('unit_vector')
         if identity is None or not isinstance(unit_vector, dict):
             return self._record({'name': 'cat_scent_search_failed', 'cat': cat.name, 'reason': 'invalid_search_direction', 'executed': False})
@@ -341,7 +357,7 @@ class CatIntentionExecutor:
         ):
             return self._advance_scent_search(cat=cat, intention=intention, cronenbergs=cronenbergs)
         start = cat.position or {}
-        distance = float(target.get('search_distance', 1.0))
+        distance = float(target.search_distance)
         destination = {axis: float(start.get(axis, 0.0)) + float(unit_vector.get(axis, 0.0)) * distance for axis in ('x', 'y', 'z')}
         quantum_space = getattr(self.universe, 'quantum_space', None)
         if quantum_space is None:
@@ -355,15 +371,15 @@ class CatIntentionExecutor:
             identity=identity,
             layer=cat.current_layer,
             route_id=route.route_id,
-            attempts=int(target.get('attempt', 1)) - 1,
-            current_attempt=int(target.get('attempt', 1)),
-            max_attempts=int(target.get('max_attempts', 1)),
+            attempts=int(target.attempt) - 1,
+            current_attempt=int(target.attempt),
+            max_attempts=int(target.max_attempts),
             start_position=dict(start),
             destination=dict(destination),
             trail_direction=deepcopy(direction),
             arrived=False,
         )
-        event = {'name': 'cat_searching_for_scent', 'cat': cat.name, 'identity': identity, 'attempt': target.get('attempt', 1), 'max_attempts': target.get('max_attempts', 1), 'route_id': route.route_id, 'start_position': dict(start), 'destination': dict(destination), 'arrived': False, 'decision_source': 'cat_mind', 'executed': True}
+        event = {'name': 'cat_searching_for_scent', 'cat': cat.name, 'identity': identity, 'attempt': target.attempt, 'max_attempts': target.max_attempts, 'route_id': route.route_id, 'start_position': dict(start), 'destination': dict(destination), 'arrived': False, 'decision_source': 'cat_mind', 'executed': True}
         cat.mind.active_body_execution = deepcopy(event)
         return self._record(event)
 

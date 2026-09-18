@@ -50,7 +50,7 @@ class CatScentSearchTests(unittest.TestCase):
         candidates = CatMind.consider(cat=self.cat, observations=self.observations())
         search = [candidate for candidate in candidates if candidate.type == 'search_for_scent']
         self.assertEqual(len(search), 1)
-        self.assertEqual(search[0].target['identity'], 'cat:pazuzu')
+        self.assertEqual(search[0].target.identity, 'cat:pazuzu')
 
     def test_search_is_physical_and_limited(self):
         candidates = CatMind.consider(cat=self.cat, observations=self.observations())
