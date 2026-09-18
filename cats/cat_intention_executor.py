@@ -14,6 +14,7 @@ from cats.cat_scent_direction_state import (
 from cats.cat_scent_navigation_state import (
     CatKnownScentFollowState,
     CatScentSearchState,
+    CatScentBoxFollowState,
 )
 from cats.cat_social_system import CatSocialSystem
 
@@ -129,8 +130,36 @@ class CatIntentionExecutor:
         if getattr(source_box, 'current_layer', None) != cat.current_layer:
             return self._finish_scent_box_follow(cat=cat, intention=intention, event={'name': 'cat_scent_box_transfer_failed', 'cat': cat.name, 'identity': target.identity, 'source_box_id': source_box_id, 'target_box_id': target_box_id, 'reason': 'source_box_not_in_cat_layer', 'executed': False})
         follow = cat.scent_box_follow
-        if isinstance(follow, dict) and follow.get('active', False) and (follow.get('source_box_id') == source_box_id) and (follow.get('target_box_id') == target_box_id):
-            return self._advance_scent_box_follow(cat=cat, intention=intention, cronenbergs=cronenbergs)
+
+        if (
+            follow is not None
+            and not isinstance(
+                follow,
+                CatScentBoxFollowState,
+            )
+        ):
+            raise TypeError(
+                'Cat scent box follow state '
+                'must be '
+                'CatScentBoxFollowState.'
+            )
+
+        if (
+            isinstance(
+                follow,
+                CatScentBoxFollowState,
+            )
+            and follow.active
+            and follow.source_box_id
+            == source_box_id
+            and follow.target_box_id
+            == target_box_id
+        ):
+            return self._advance_scent_box_follow(
+                cat=cat,
+                intention=intention,
+                cronenbergs=cronenbergs,
+            )
         cat_position = cat.position
         source_position = getattr(source_box, 'position', None)
         if not isinstance(cat_position, dict) or not isinstance(source_position, dict):
@@ -144,7 +173,19 @@ class CatIntentionExecutor:
         route = planned['route']
         route.state = 'ready'
         cat.active_route_id = route.route_id
-        cat.scent_box_follow = {'active': True, 'arrived_at_box': False, 'route_id': route.route_id, 'source_box_id': source_box_id, 'target_box_id': target_box_id, 'identity': target.identity, 'destination': dict(source_position)}
+        cat.scent_box_follow = (
+            CatScentBoxFollowState(
+                active=True,
+                arrived_at_box=False,
+                route_id=route.route_id,
+                source_box_id=source_box_id,
+                target_box_id=target_box_id,
+                identity=target.identity,
+                destination=dict(
+                    source_position
+                ),
+            )
+        )
         cat.state = 'following_scent_to_quantum_box'
         event = {'name': 'cat_following_scent_to_box', 'cat': cat.name, 'identity': target.identity, 'source_box_id': source_box_id, 'target_box_id': target_box_id, 'route_id': route.route_id, 'destination': dict(source_position), 'arrived_at_box': False, 'decision_source': 'cat_mind', 'executed': True}
         cat.mind.active_body_execution = deepcopy(event)
@@ -152,15 +193,26 @@ class CatIntentionExecutor:
 
     def _advance_scent_box_follow(self, cat, intention, cronenbergs=None):
         follow = cat.scent_box_follow
+
+        if not isinstance(
+            follow,
+            CatScentBoxFollowState,
+        ):
+            raise TypeError(
+                'Cat scent box follow state '
+                'must be '
+                'CatScentBoxFollowState.'
+            )
+
         result = self.universe.quantum_space.advance_cat_route(cat=cat, cronenbergs=cronenbergs if cronenbergs is not None else getattr(self.universe, 'cronenbergs', []), encounter_system=self.universe.cat_cronenberg_encounter, universe=self.universe)
         position = result.get('position')
         if position is not None:
             cat.position = dict(position)
         if result.get('arrived', False):
-            follow['arrived_at_box'] = True
-            follow['active'] = False
-            return self._transfer_scent_box_follow(cat=cat, intention=intention, source_box_id=follow['source_box_id'], target_box_id=follow['target_box_id'])
-        event = {'name': 'cat_following_scent_to_box', 'cat': cat.name, 'identity': follow.get('identity'), 'source_box_id': follow['source_box_id'], 'target_box_id': follow['target_box_id'], 'route_id': follow['route_id'], 'position': dict(position) if position is not None else None, 'route_result': result.get('result'), 'arrived_at_box': False, 'decision_source': 'cat_mind', 'executed': result.get('result') != 'no_active_route'}
+            follow.arrived_at_box = True
+            follow.active = False
+            return self._transfer_scent_box_follow(cat=cat, intention=intention, source_box_id=follow.source_box_id, target_box_id=follow.target_box_id)
+        event = {'name': 'cat_following_scent_to_box', 'cat': cat.name, 'identity': follow.identity, 'source_box_id': follow.source_box_id, 'target_box_id': follow.target_box_id, 'route_id': follow.route_id, 'position': dict(position) if position is not None else None, 'route_result': result.get('result'), 'arrived_at_box': False, 'decision_source': 'cat_mind', 'executed': result.get('result') != 'no_active_route'}
         cat.mind.active_body_execution = deepcopy(event)
         return self._record(event)
 
@@ -187,8 +239,25 @@ class CatIntentionExecutor:
         if hasattr(cat, 'active_route_id'):
             del cat.active_route_id
         follow = cat.scent_box_follow
-        if isinstance(follow, dict):
-            follow['active'] = False
+
+        if (
+            follow is not None
+            and not isinstance(
+                follow,
+                CatScentBoxFollowState,
+            )
+        ):
+            raise TypeError(
+                'Cat scent box follow state '
+                'must be '
+                'CatScentBoxFollowState.'
+            )
+
+        if isinstance(
+            follow,
+            CatScentBoxFollowState,
+        ):
+            follow.active = False
         return self._record(event)
 
     @staticmethod

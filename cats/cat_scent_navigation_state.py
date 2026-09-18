@@ -63,3 +63,18 @@ class CatScentSearchState:
             raise TypeError(
                 'Scent search trail direction must be CatScentTrailDirection.'
             )
+
+
+
+@dataclass(slots=True)
+class CatScentBoxFollowState:
+    active: bool = False
+    arrived_at_box: bool = False
+
+    route_id: str | None = None
+
+    source_box_id: object = None
+    target_box_id: object = None
+    identity: str | None = None
+
+    destination: object = None

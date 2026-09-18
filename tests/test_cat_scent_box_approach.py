@@ -1,4 +1,8 @@
 import unittest
+
+from cats.cat_scent_navigation_state import (
+    CatScentBoxFollowState,
+)
 from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat_intention_state import (
@@ -47,7 +51,7 @@ class CatScentBoxApproachTests(unittest.TestCase):
         self.assertEqual(self.tracker.current_layer, 'meeting_place')
         self.assertEqual(self.tracker.position, {'x': 0.0, 'y': 0.0, 'z': 0.0})
         self.assertIsNotNone(self.tracker.mind.current_intention)
-        self.assertTrue(self.tracker.scent_box_follow['active'])
+        self.assertTrue(self.tracker.scent_box_follow.active)
         last = first
         for _ in range(10):
             last = self.cats.execute_cat_intention(self.tracker)
@@ -57,7 +61,7 @@ class CatScentBoxApproachTests(unittest.TestCase):
         self.assertTrue(last['transfer']['transferred'])
         self.assertEqual(self.tracker.current_layer, 'quantum_layer')
         self.assertIsNone(self.tracker.mind.current_intention)
-        self.assertTrue(self.tracker.scent_box_follow['arrived_at_box'])
+        self.assertTrue(self.tracker.scent_box_follow.arrived_at_box)
 
     def test_cat_already_at_box_transfers_immediately(self):
         self.tracker.position = dict(self.source.position)
@@ -65,5 +69,58 @@ class CatScentBoxApproachTests(unittest.TestCase):
         self.assertEqual(result['name'], 'cat_followed_scent_through_box')
         self.assertTrue(result['transfer']['transferred'])
         self.assertEqual(self.tracker.current_layer, 'quantum_layer')
+
+    def test_scent_box_follow_is_object_state(
+        self
+    ):
+        self.cats.execute_cat_intention(
+            self.tracker
+        )
+
+        state = (
+            self.tracker.scent_box_follow
+        )
+
+        self.assertIsInstance(
+            state,
+            CatScentBoxFollowState,
+        )
+
+        self.assertFalse(
+            hasattr(
+                state,
+                'get',
+            )
+        )
+
+        self.assertFalse(
+            hasattr(
+                state,
+                '__getitem__',
+            )
+        )
+
+    def test_mapping_scent_box_follow_is_rejected(
+        self
+    ):
+        self.tracker.scent_box_follow = {
+            'active': True,
+            'arrived_at_box': False,
+            'route_id': 'legacy_route',
+            'source_box_id': self.source.id,
+            'target_box_id': self.target.id,
+            'identity': 'cat:creator',
+            'destination': dict(
+                self.source.position
+            ),
+        }
+
+        with self.assertRaises(
+            TypeError
+        ):
+            self.cats.execute_cat_intention(
+                self.tracker
+            )
+
 if __name__ == '__main__':
     unittest.main()
