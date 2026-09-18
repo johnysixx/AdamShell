@@ -1,4 +1,8 @@
 import unittest
+
+from cats.cat_quantum_observation_state import (
+    CatQuantumCounterpartObservation,
+)
 from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat_mind import CatMind
@@ -44,6 +48,10 @@ class CatQuantumCounterpartSensingTests(unittest.TestCase):
         self.assertEqual(observation['counterpart_position'], self.target.position)
         self.assertTrue(observation['temporary'])
         self.assertTrue(observation['pair_currently_valid'])
+        self.assertIsInstance(
+            self.cat.current_quantum_counterpart_observation,
+            CatQuantumCounterpartObservation,
+        )
 
     def test_counterpart_observation_disappears_with_pair(self):
         candidates = CatMind.consider(cat=self.cat, observations=self.observations())
@@ -56,7 +64,7 @@ class CatQuantumCounterpartSensingTests(unittest.TestCase):
         self.universe.quantum_boxes.remove(self.target)
         after = self.observations()
         self.assertIsNone(after.quantum_counterpart_observation)
-        self.assertFalse(hasattr(self.cat, 'current_quantum_counterpart_observation'))
+        self.assertIsNone(self.cat.current_quantum_counterpart_observation)
 
     def test_previous_quantum_travel_increases_sensing_score(self):
         inexperienced_candidates = CatMind.consider(cat=self.cat, observations=self.observations())
@@ -95,5 +103,27 @@ class CatQuantumCounterpartSensingTests(unittest.TestCase):
         after = next((candidate for candidate in after_candidates if candidate.type == 'travel_through_known_quantum_box'))
         self.assertLess(after.score, before.score)
         self.assertIn('negative_quantum_travel_memory', after.reasons)
+
+    def test_mapping_observation_is_rejected(
+        self
+    ):
+        self.cat.current_quantum_counterpart_observation = {
+            'source_box_id': self.source.id,
+            'counterpart_box_id': self.target.id,
+            'source_layer': 'quantum_layer',
+            'counterpart_layer': 'meeting_place',
+            'counterpart_position': dict(
+                self.target.position
+            ),
+            'observed_tick': 0,
+            'temporary': True,
+            'pair_currently_valid': True,
+        }
+
+        with self.assertRaises(
+            TypeError
+        ):
+            self.observations()
+
 if __name__ == '__main__':
     unittest.main()

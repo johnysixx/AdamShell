@@ -1,4 +1,8 @@
 from copy import deepcopy
+
+from cats.cat_quantum_observation_state import (
+    CatQuantumCounterpartObservation,
+)
 from cats.cat_knowledge import CatKnowledge
 from cats.cat_olfaction import CatOlfaction
 from cats.cat import Cat
@@ -272,12 +276,38 @@ class CatIntentionExecutor:
         counterpart_box_id = target.get('counterpart_box_id')
         if source_box_id is None or counterpart_box_id is None:
             return self._record({'name': 'cat_quantum_box_travel_failed', 'cat': cat.name, 'reason': 'missing_box_pair', 'executed': False})
-        observation = getattr(cat, 'current_quantum_counterpart_observation', None)
-        if not isinstance(observation, dict):
-            return self._record({'name': 'cat_quantum_box_travel_failed', 'cat': cat.name, 'source_box_id': source_box_id, 'counterpart_box_id': counterpart_box_id, 'reason': 'counterpart_observation_missing', 'executed': False})
-        if not observation.get('pair_currently_valid', False):
+        observation = (
+            cat.current_quantum_counterpart_observation
+        )
+
+        if observation is None:
+            return self._record({
+                'name': (
+                    'cat_quantum_box_travel_failed'
+                ),
+                'cat': cat.name,
+                'source_box_id': source_box_id,
+                'counterpart_box_id': (
+                    counterpart_box_id
+                ),
+                'reason': (
+                    'counterpart_observation_missing'
+                ),
+                'executed': False,
+            })
+
+        if not isinstance(
+            observation,
+            CatQuantumCounterpartObservation,
+        ):
+            raise TypeError(
+                'Quantum counterpart observation '
+                'must be '
+                'CatQuantumCounterpartObservation.'
+            )
+        if not observation.pair_currently_valid:
             return self._record({'name': 'cat_quantum_box_travel_failed', 'cat': cat.name, 'source_box_id': source_box_id, 'counterpart_box_id': counterpart_box_id, 'reason': 'counterpart_observation_invalid', 'executed': False})
-        if observation.get('source_box_id') != source_box_id:
+        if observation.source_box_id != source_box_id:
             return self._record({'name': 'cat_quantum_box_travel_failed', 'cat': cat.name, 'source_box_id': source_box_id, 'counterpart_box_id': counterpart_box_id, 'reason': 'observation_pair_mismatch', 'executed': False})
         source_box = next((box for box in getattr(self.universe, 'quantum_boxes', []) if getattr(box, 'id', None) == source_box_id), None)
         if source_box is None:
@@ -338,12 +368,41 @@ class CatIntentionExecutor:
         reverse_pairing = getattr(counterpart, 'quantum_counterpart', None)
         if reverse_pairing is None or not reverse_pairing.paired or reverse_pairing.box_id != source_box_id:
             return self._record({'name': 'cat_quantum_counterpart_sensing_failed', 'cat': cat.name, 'source_box_id': source_box_id, 'reason': 'pair_not_reciprocal', 'executed': False})
-        observation = {'source_box_id': source_box_id, 'counterpart_box_id': counterpart.id, 'source_layer': getattr(source_box, 'current_layer', None), 'counterpart_layer': getattr(counterpart, 'current_layer', None), 'counterpart_position': deepcopy(getattr(counterpart, 'position', {})), 'observed_tick': getattr(self.universe, 'universe_tick', None), 'temporary': True, 'pair_currently_valid': True}
-        cat.current_quantum_counterpart_observation = deepcopy(observation)
+        observation = (
+            CatQuantumCounterpartObservation(
+                source_box_id=source_box_id,
+                counterpart_box_id=counterpart.id,
+                source_layer=getattr(
+                    source_box,
+                    'current_layer',
+                    None,
+                ),
+                counterpart_layer=getattr(
+                    counterpart,
+                    'current_layer',
+                    None,
+                ),
+                counterpart_position=deepcopy(
+                    getattr(
+                        counterpart,
+                        'position',
+                        {},
+                    )
+                ),
+                observed_tick=getattr(
+                    self.universe,
+                    'universe_tick',
+                    None,
+                ),
+                temporary=True,
+                pair_currently_valid=True,
+            )
+        )
+        cat.current_quantum_counterpart_observation = observation
         mind = cat.mind
         mind.previous_intention = deepcopy(intention)
         mind.current_intention = None
-        event = {'name': 'cat_sensed_quantum_counterpart', 'cat': cat.name, 'observation': deepcopy(observation), 'decision_source': 'cat_mind', 'executed': True}
+        event = {'name': 'cat_sensed_quantum_counterpart', 'cat': cat.name, 'observation': observation.to_dict(), 'decision_source': 'cat_mind', 'executed': True}
         mind.active_body_execution = deepcopy(event)
         return self._record(event)
 

@@ -1,4 +1,8 @@
 import unittest
+
+from cats.cat_quantum_observation_state import (
+    CatQuantumCounterpartObservation,
+)
 from universe.universe import Universe
 from cats.cats import Cats
 
@@ -51,7 +55,10 @@ class CatThoughtCycleTests(unittest.TestCase):
         self.assertTrue(first_cycle['completed'])
         self.assertEqual(first_cycle['decision']['intention'], 'sense_quantum_counterpart')
         self.assertTrue(first_cycle['execution']['executed'])
-        self.assertTrue(hasattr(self.cat, 'current_quantum_counterpart_observation'))
+        self.assertIsInstance(
+            self.cat.current_quantum_counterpart_observation,
+            CatQuantumCounterpartObservation,
+        )
         second_cycle = self.cats.think_and_act(cat=self.cat)
         self.assertTrue(second_cycle['completed'])
         self.assertEqual(second_cycle['decision']['intention'], 'travel_through_known_quantum_box')

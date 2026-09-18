@@ -1,6 +1,10 @@
 from cats.cat import Cat
 import math
 from copy import deepcopy
+
+from cats.cat_quantum_observation_state import (
+    CatQuantumCounterpartObservation,
+)
 from universe.dark_sector import QUANTUM_BOX_ENERGY_COST_J
 from .cat_exploration_planner import CatExplorationPlanner
 from .cat_olfaction import CatOlfaction
@@ -100,16 +104,42 @@ class CatPerception:
             if counterpart_box is None:
                 continue
             scent_transfer_candidates.append({'box_id': box_id, 'counterpart_box_id': counterpart_id, 'identity': recognition.identity, 'similarity': recognition.similarity, 'source_layer': getattr(box, 'current_layer', cat.current_layer), 'target_layer': getattr(counterpart_box, 'current_layer', None), 'box_position': deepcopy(getattr(box, 'position', {})), 'counterpart_position': deepcopy(getattr(counterpart_box, 'position', {}))})
-        counterpart_observation = deepcopy(getattr(cat, 'current_quantum_counterpart_observation', None))
-        if isinstance(counterpart_observation, dict):
-            source_id = counterpart_observation.get('source_box_id')
-            counterpart_id = counterpart_observation.get('counterpart_box_id')
+        counterpart_observation = deepcopy(
+            cat.current_quantum_counterpart_observation
+        )
+
+        if (
+            counterpart_observation is not None
+            and not isinstance(
+                counterpart_observation,
+                CatQuantumCounterpartObservation,
+            )
+        ):
+            raise TypeError(
+                'Quantum counterpart observation '
+                'must be '
+                'CatQuantumCounterpartObservation.'
+            )
+
+        if isinstance(
+            counterpart_observation,
+            CatQuantumCounterpartObservation,
+        ):
+            source_id = (
+                counterpart_observation
+                .source_box_id
+            )
+            counterpart_id = (
+                counterpart_observation
+                .counterpart_box_id
+            )
             source_box = next((box for box in getattr(self.universe, 'quantum_boxes', []) if getattr(box, 'id', None) == source_id), None)
             counterpart_box = next((box for box in getattr(self.universe, 'quantum_boxes', []) if getattr(box, 'id', None) == counterpart_id), None)
             valid = source_box is not None and counterpart_box is not None and source_box.quantum_counterpart.paired and (source_box.quantum_counterpart.box_id == counterpart_id) and counterpart_box.quantum_counterpart.paired and (counterpart_box.quantum_counterpart.box_id == source_id)
             if not valid:
-                if hasattr(cat, 'current_quantum_counterpart_observation'):
-                    delattr(cat, 'current_quantum_counterpart_observation')
+                cat.current_quantum_counterpart_observation = (
+                    None
+                )
                 counterpart_observation = None
         observations = CatPerceptionState(
             cat=cat.name,

@@ -76,6 +76,7 @@ class Cat(SocialMixin):
         self.scent_search = None
         self.known_scent_follow = None
         self.scent_box_follow = None
+        self.current_quantum_counterpart_observation = None
         self.quantum_transfer = None
         self.quantum_exploration = None
         self.quantum_return = None

@@ -19,6 +19,10 @@ from cats.cat_scent_navigation_state import (
 )
 from copy import deepcopy
 
+from cats.cat_quantum_observation_state import (
+    CatQuantumCounterpartObservation,
+)
+
 class CatMind:
     INTENTION_TYPES = ('visit_bar', 'visit_recipient', 'hunt_cronenberg', 'track_cronenberg_scent', 'follow_known_scent', 'search_for_scent', 'follow_scent_through_box', 'avoid_cronenberg_scent', 'explore_box', 'sense_quantum_counterpart', 'travel_through_known_quantum_box', 'travel_trough_known_quantum_box', 'create_exploration_pair', 'approach_cat', 'share_legend', 'observe', 'wander', 'rest')
 
@@ -260,15 +264,45 @@ class CatMind:
             )
         intellect = CatIntellect.ensure_state(cat)
         intellect_normalized = float(intellect.normalized)
-        counterpart_observation = getattr(cat, 'current_quantum_counterpart_observation', None)
-        if isinstance(counterpart_observation, dict) and counterpart_observation.get('pair_currently_valid', False) and counterpart_observation.get('temporary', False):
-            source_box_id = counterpart_observation.get('source_box_id')
-            counterpart_box_id = counterpart_observation.get('counterpart_box_id')
+        counterpart_observation = (
+            cat.current_quantum_counterpart_observation
+        )
+
+        if (
+            counterpart_observation is not None
+            and not isinstance(
+                counterpart_observation,
+                CatQuantumCounterpartObservation,
+            )
+        ):
+            raise TypeError(
+                'Quantum counterpart observation '
+                'must be '
+                'CatQuantumCounterpartObservation.'
+            )
+
+        if (
+            isinstance(
+                counterpart_observation,
+                CatQuantumCounterpartObservation,
+            )
+            and counterpart_observation
+            .pair_currently_valid
+            and counterpart_observation.temporary
+        ):
+            source_box_id = (
+                counterpart_observation
+                .source_box_id
+            )
+            counterpart_box_id = (
+                counterpart_observation
+                .counterpart_box_id
+            )
             if source_box_id is not None and counterpart_box_id is not None:
                 quantum_memory_score = cls._quantum_travel_memory_score(cat)
                 negative_quantum_memories = cat.memory.recall(event_type='quantum_box_layer_transfer_failed')
                 travel_score = 0.3 + curiosity * 0.35 + courage * 0.2 + intellect_normalized * 0.15 + quantum_memory_score
-                candidates.append(cls._candidate(intention_type='travel_through_known_quantum_box', score=travel_score, reasons=['quantum_counterpart_sensed', 'quantum_pair_currently_valid', 'curiosity', 'courage', *(['negative_quantum_travel_memory'] if negative_quantum_memories else [])], target={'source_box_id': source_box_id, 'counterpart_box_id': counterpart_box_id, 'source_layer': counterpart_observation.get('source_layer'), 'target_layer': counterpart_observation.get('counterpart_layer'), 'target_position': deepcopy(counterpart_observation.get('counterpart_position', {}))}))
+                candidates.append(cls._candidate(intention_type='travel_through_known_quantum_box', score=travel_score, reasons=['quantum_counterpart_sensed', 'quantum_pair_currently_valid', 'curiosity', 'courage', *(['negative_quantum_travel_memory'] if negative_quantum_memories else [])], target={'source_box_id': source_box_id, 'counterpart_box_id': counterpart_box_id, 'source_layer': counterpart_observation.source_layer, 'target_layer': counterpart_observation.counterpart_layer, 'target_position': deepcopy(counterpart_observation.counterpart_position or {})}))
         for box_detail in observations.visible_box_details:
             if not box_detail.explored:
                 continue
