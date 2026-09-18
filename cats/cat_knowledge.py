@@ -1,5 +1,9 @@
 from cats.cat import Cat
 from copy import deepcopy
+
+from cats.cat_scent_direction_state import (
+    CatScentTrailDirection,
+)
 from cats.cat_social_objects import CatLegend, CatRelationship
 from cats.cat_olfaction_state import (
     CatAromaMatch,
@@ -702,12 +706,10 @@ class CatKnowledge:
         ]
 
         if len(memories) < 2:
-            return {
-                'inferred': False,
-                'reason': (
-                    'not_enough_scent_points'
-                ),
-            }
+            return CatScentTrailDirection(
+                inferred=False,
+                reason='not_enough_scent_points',
+            )
 
         memories.sort(
             key=lambda memory: int(
@@ -730,12 +732,10 @@ class CatKnowledge:
         )
 
         if older is None:
-            return {
-                'inferred': False,
-                'reason': (
-                    'no_distinct_scent_positions'
-                ),
-            }
+            return CatScentTrailDirection(
+                inferred=False,
+                reason='no_distinct_scent_positions',
+            )
 
         start = older.position
         end = newest.position
@@ -769,12 +769,10 @@ class CatKnowledge:
         ) ** 0.5
 
         if distance <= 0.0:
-            return {
-                'inferred': False,
-                'reason': (
-                    'zero_length_scent_direction'
-                ),
-            }
+            return CatScentTrailDirection(
+                inferred=False,
+                reason='zero_length_scent_direction',
+            )
 
         tick_delta = (
             int(
@@ -786,12 +784,10 @@ class CatKnowledge:
         )
 
         if tick_delta <= 0:
-            return {
-                'inferred': False,
-                'reason': (
-                    'scent_order_not_temporal'
-                ),
-            }
+            return CatScentTrailDirection(
+                inferred=False,
+                reason='scent_order_not_temporal',
+            )
 
         unit_vector = {
             axis: (
@@ -840,30 +836,30 @@ class CatKnowledge:
             * freshness,
         )
 
-        return {
-            'inferred': True,
-            'identity': identity,
-            'layer': layer,
-            'from_position': deepcopy(
+        return CatScentTrailDirection(
+            inferred=True,
+            identity=identity,
+            layer=layer,
+            from_position=deepcopy(
                 start
             ),
-            'to_position': deepcopy(
+            to_position=deepcopy(
                 end
             ),
-            'vector': vector,
-            'unit_vector': unit_vector,
-            'distance': distance,
-            'tick_delta': tick_delta,
-            'newest_age_ticks': newest_age,
-            'freshness': freshness,
-            'confidence': confidence,
-            'from_source_id': (
+            vector=vector,
+            unit_vector=unit_vector,
+            distance=distance,
+            tick_delta=tick_delta,
+            newest_age_ticks=newest_age,
+            freshness=freshness,
+            confidence=confidence,
+            from_source_id=(
                 older.source_id
             ),
-            'to_source_id': (
+            to_source_id=(
                 newest.source_id
             ),
-        }
+        )
 
     @classmethod
     def choose_legend_to_share(cls, storyteller, listener, universe):

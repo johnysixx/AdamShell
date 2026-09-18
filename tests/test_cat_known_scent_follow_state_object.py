@@ -1,5 +1,9 @@
 import unittest
 
+from cats.cat_scent_direction_state import (
+    CatScentTrailDirection,
+)
+
 from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat_intention_state import (
@@ -93,9 +97,9 @@ class CatKnownScentFollowStateObjectTests(
                         'z': 0.0,
                     },
                     source_id='trace_latest',
-                    trail_direction={
-                        'inferred': True,
-                    },
+                    trail_direction=CatScentTrailDirection(
+                        inferred=True,
+                    ),
                 ),
                 score=1.0,
                 reasons=['test'],
@@ -138,9 +142,9 @@ class CatKnownScentFollowStateObjectTests(
                         self.cat.position
                     ),
                     source_id='trace_latest',
-                    trail_direction={
-                        'inferred': True,
-                    },
+                    trail_direction=CatScentTrailDirection(
+                        inferred=True,
+                    ),
                 ),
                 score=1.0,
                 reasons=['test'],

@@ -7,6 +7,9 @@ from cats.cat_intention_state import (
     CatKnownScentTarget,
     CatScentSearchTarget,
 )
+from cats.cat_scent_direction_state import (
+    CatScentTrailDirection,
+)
 from cats.cat_scent_navigation_state import (
     CatKnownScentFollowState,
     CatScentSearchState,
@@ -331,11 +334,23 @@ class CatIntentionExecutor:
             })
 
         identity = target.identity
-        direction = (
-            target.trail_direction
-            or {}
-        )
-        unit_vector = direction.get('unit_vector')
+        direction = target.trail_direction
+
+        if not isinstance(
+            direction,
+            CatScentTrailDirection,
+        ):
+            return self._record({
+                'name': 'cat_scent_search_failed',
+                'cat': cat.name,
+                'reason': (
+                    'invalid_search_direction'
+                ),
+                'executed': False,
+            })
+
+        unit_vector = direction.unit_vector
+
         if identity is None or not isinstance(unit_vector, dict):
             return self._record({'name': 'cat_scent_search_failed', 'cat': cat.name, 'reason': 'invalid_search_direction', 'executed': False})
         search = cat.scent_search

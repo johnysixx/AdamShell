@@ -1,4 +1,8 @@
 import unittest
+
+from cats.cat_scent_direction_state import (
+    CatScentTrailDirection,
+)
 from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat_intention_state import (
@@ -28,15 +32,11 @@ class CatKnownScentFollowLifecycleTests(unittest.TestCase):
                     'z': 0.0,
                 },
                 source_id='trace_latest',
-                trail_direction={
-                    'inferred': True,
-                    'unit_vector': {
-                        'x': 1.0,
-                        'y': 0.0,
-                        'z': 0.0,
-                    },
-                    'confidence': 0.8,
-                },
+                trail_direction=CatScentTrailDirection(
+                    inferred=True,
+                    unit_vector={'x': 1.0, 'y': 0.0, 'z': 0.0},
+                    confidence=0.8,
+                ),
             ),
 
             score=1.0,
@@ -59,6 +59,6 @@ class CatKnownScentFollowLifecycleTests(unittest.TestCase):
         self.assertTrue(self.cat.known_scent_follow.arrived)
         self.assertFalse(self.cat.known_scent_follow.active)
         self.assertIsNone(self.cat.mind.current_intention)
-        self.assertTrue(self.cat.known_scent_follow.trail_direction['inferred'])
+        self.assertTrue(self.cat.known_scent_follow.trail_direction.inferred)
 if __name__ == '__main__':
     unittest.main()

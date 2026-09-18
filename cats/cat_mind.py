@@ -9,6 +9,9 @@ from cats.cat_knowledge import CatKnowledge
 from cats.cat_perception_state import (
     CatPerceptionState
 )
+from cats.cat_scent_direction_state import (
+    CatScentTrailDirection,
+)
 from cats.cat_scent_navigation_state import (
     CatKnownScentFollowState,
     CatScentSearchState,
@@ -301,14 +304,35 @@ class CatMind:
             identity = reached_scent.identity
             direction = (
                 reached_scent.trail_direction
-                or {}
             )
+
+            if (
+                direction is not None
+                and not isinstance(
+                    direction,
+                    CatScentTrailDirection,
+                )
+            ):
+                raise TypeError(
+                    'Cat scent trail direction '
+                    'must be '
+                    'CatScentTrailDirection.'
+                )
+
             target_smelt_now = any(
                 item.recognition.recognized
                 and item.recognition.identity == identity
                 for item in observations.olfaction.detected_aromas
             )
-            if identity is not None and (not target_smelt_now) and isinstance(direction, dict) and direction.get('inferred', False):
+            if (
+                identity is not None
+                and not target_smelt_now
+                and isinstance(
+                    direction,
+                    CatScentTrailDirection,
+                )
+                and direction.inferred
+            ):
                 traits = cat.personality.traits
                 curiosity = float(traits.curiosity)
                 courage = float(traits.courage)
@@ -344,7 +368,7 @@ class CatMind:
                     attempts = 0
                 max_attempts = max(1, min(3, 1 + int(round(curiosity * 2.0))))
                 if attempts < max_attempts:
-                    direction_confidence = float(direction.get('confidence', 0.0))
+                    direction_confidence = float(direction.confidence or 0.0)
                     search_distance = 1.0 + curiosity + courage * 0.5
                     search_score = 0.38 + curiosity * 0.18 + courage * 0.08 + direction_confidence * 0.2 - attempts * 0.08
                     candidates.append(

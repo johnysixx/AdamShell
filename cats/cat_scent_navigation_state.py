@@ -1,4 +1,7 @@
 from dataclasses import dataclass
+from cats.cat_scent_direction_state import (
+    CatScentTrailDirection,
+)
 
 
 @dataclass(slots=True)
@@ -11,8 +14,21 @@ class CatKnownScentFollowState:
     source_id: object = None
 
     destination: object = None
-    trail_direction: object = None
+    trail_direction: (
+        CatScentTrailDirection | None
+    ) = None
 
+    def __post_init__(self):
+        if (
+            self.trail_direction is not None
+            and not isinstance(
+                self.trail_direction,
+                CatScentTrailDirection,
+            )
+        ):
+            raise TypeError(
+                'Known scent follow trail direction must be CatScentTrailDirection.'
+            )
 
 
 @dataclass(slots=True)
@@ -28,9 +44,22 @@ class CatScentSearchState:
 
     start_position: object = None
     destination: object = None
-    trail_direction: object = None
-
+    trail_direction: (
+        CatScentTrailDirection | None
+    ) = None
     arrived: bool = False
     reacquired: bool = False
     reacquired_at: object = None
     reacquired_source_id: object = None
+
+    def __post_init__(self):
+        if (
+            self.trail_direction is not None
+            and not isinstance(
+                self.trail_direction,
+                CatScentTrailDirection,
+            )
+        ):
+            raise TypeError(
+                'Scent search trail direction must be CatScentTrailDirection.'
+            )

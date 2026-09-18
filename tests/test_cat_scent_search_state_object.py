@@ -1,5 +1,9 @@
 import unittest
 
+from cats.cat_scent_direction_state import (
+    CatScentTrailDirection,
+)
+
 from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat_intention_state import (
@@ -49,15 +53,11 @@ class CatScentSearchStateObjectTests(
                 destination=dict(
                     self.cat.position
                 ),
-                trail_direction={
-                    'inferred': True,
-                    'unit_vector': {
-                        'x': 1.0,
-                        'y': 0.0,
-                        'z': 0.0,
-                    },
-                    'confidence': 0.8,
-                },
+                trail_direction=CatScentTrailDirection(
+                    inferred=True,
+                    unit_vector={'x': 1.0, 'y': 0.0, 'z': 0.0},
+                    confidence=0.8,
+                ),
             )
         )
 
@@ -77,15 +77,11 @@ class CatScentSearchStateObjectTests(
                 from_position=dict(
                     self.cat.position
                 ),
-                trail_direction={
-                    'inferred': True,
-                    'unit_vector': {
-                        'x': 1.0,
-                        'y': 0.0,
-                        'z': 0.0,
-                    },
-                    'confidence': 0.8,
-                },
+                trail_direction=CatScentTrailDirection(
+                    inferred=True,
+                    unit_vector={'x': 1.0, 'y': 0.0, 'z': 0.0},
+                    confidence=0.8,
+                ),
                 attempt=1,
                 max_attempts=3,
                 search_distance=1.0,

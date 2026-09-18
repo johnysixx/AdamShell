@@ -1,5 +1,9 @@
 import unittest
 
+from cats.cat_scent_direction_state import (
+    CatScentTrailDirection,
+)
+
 from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat_intention_state import (
@@ -43,9 +47,9 @@ class CatKnownScentTargetObjectTests(
             source_id="trace",
             age_ticks=5,
             freshness=0.9,
-            trail_direction={
-                "inferred": True,
-            },
+            trail_direction=CatScentTrailDirection(
+                inferred=True,
+            ),
         )
 
         self.assertFalse(
