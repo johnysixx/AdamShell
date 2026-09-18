@@ -29,6 +29,8 @@ from cats.cat_intention_state import CatQuantumCounterpartSenseTarget
 
 from cats.cat_intention_state import CatExploreBoxTarget
 
+from cats.cat_box_exploration_state import CatBoxExplorationState
+
 class CatIntentionExecutor:
     NAVIGATION_INTENTS = {'visit_bar': 'return_to_bar', 'visit_recipient': 'follow_entity', 'hunt_cronenberg': 'hunt_nearest_cronenberg', 'track_cronenberg_scent': 'hunt_nearest_cronenberg', 'avoid_cronenberg_scent': 'return_to_bar'}
     DEFERRED_INTENTS = {'observe': 'cat_observation_body_system'}
@@ -469,8 +471,30 @@ class CatIntentionExecutor:
         if getattr(box, 'current_layer', None) != (cat.current_layer or 'quantum_layer'):
             return self._record({'name': 'cat_box_exploration_failed', 'cat': cat.name, 'box_id': box_id, 'reason': 'box_not_in_cat_layer', 'executed': False})
         exploration = cat.box_exploration
-        if isinstance(exploration, dict) and exploration.get('active', False) and (exploration.get('box_id') == box_id):
-            return self._advance_box_exploration(cat=cat, intention=intention, cronenbergs=cronenbergs)
+
+        if (
+            exploration is not None
+            and not isinstance(
+                exploration,
+                CatBoxExplorationState,
+            )
+        ):
+            raise TypeError(
+                'Cat box exploration state '
+                'must be '
+                'CatBoxExplorationState.'
+            )
+
+        if (
+            exploration is not None
+            and exploration.active
+            and exploration.box_id == box_id
+        ):
+            return self._advance_box_exploration(
+                cat=cat,
+                intention=intention,
+                cronenbergs=cronenbergs,
+            )
         cat_position = cat.position or {}
         box_position = getattr(box, 'position', None)
         if not isinstance(box_position, dict):
@@ -484,23 +508,45 @@ class CatIntentionExecutor:
         route = planned['route']
         route.state = 'ready'
         cat.active_route_id = route.route_id
-        cat.box_exploration = {'active': True, 'arrived': False, 'box_id': box_id, 'route_id': route.route_id, 'destination': dict(box_position)}
+        cat.box_exploration = (
+            CatBoxExplorationState(
+                active=True,
+                arrived=False,
+                box_id=box_id,
+                route_id=route.route_id,
+                destination=dict(
+                    box_position
+                ),
+                observed=False,
+            )
+        )
         event = {'name': 'cat_approaching_box_to_explore', 'cat': cat.name, 'box_id': box_id, 'route_id': route.route_id, 'destination': dict(box_position), 'arrived': False, 'decision_source': 'cat_mind', 'executed': True}
         cat.mind.active_body_execution = deepcopy(event)
         return self._record(event)
 
     def _advance_box_exploration(self, cat, intention, cronenbergs=None):
         exploration = cat.box_exploration
+
+        if not isinstance(
+            exploration,
+            CatBoxExplorationState,
+        ):
+            raise TypeError(
+                'Cat box exploration state '
+                'must be '
+                'CatBoxExplorationState.'
+            )
+
         result = self.universe.quantum_space.advance_cat_route(cat=cat, cronenbergs=cronenbergs if cronenbergs is not None else getattr(self.universe, 'cronenbergs', []), encounter_system=self.universe.cat_cronenberg_encounter, universe=self.universe)
         position = result.get('position')
         if position is not None:
             cat.position = dict(position)
         if result.get('arrived', False):
-            box = next((candidate for candidate in getattr(self.universe, 'quantum_boxes', []) if getattr(candidate, 'id', None) == exploration.get('box_id')), None)
+            box = next((candidate for candidate in getattr(self.universe, 'quantum_boxes', []) if getattr(candidate, 'id', None) == exploration.box_id), None)
             if box is None:
                 return self._record({'name': 'cat_box_exploration_failed', 'cat': cat.name, 'reason': 'box_disappeared', 'executed': False})
             return self._finish_box_exploration(cat=cat, intention=intention, box=box)
-        event = {'name': 'cat_approaching_box_to_explore', 'cat': cat.name, 'box_id': exploration.get('box_id'), 'route_id': exploration.get('route_id'), 'position': dict(position) if position is not None else None, 'destination': dict(exploration['destination']), 'arrived': False, 'decision_source': 'cat_mind', 'executed': result.get('result') != 'no_active_route'}
+        event = {'name': 'cat_approaching_box_to_explore', 'cat': cat.name, 'box_id': exploration.box_id, 'route_id': exploration.route_id, 'position': dict(position) if position is not None else None, 'destination': dict(exploration.destination), 'arrived': False, 'decision_source': 'cat_mind', 'executed': result.get('result') != 'no_active_route'}
         cat.mind.active_body_execution = deepcopy(event)
         return self._record(event)
 
@@ -511,10 +557,27 @@ class CatIntentionExecutor:
         remembered = None
         if memory is not None:
             remembered = memory.remember(event_type='quantum_box_observed', universe_tick=getattr(self.universe, 'universe_tick', None), location=cat.current_layer, participants=[box_id], details={'box_id': box_id, 'position': deepcopy(getattr(box, 'position', {})), 'observation': deepcopy(observation)})
-        if cat.box_exploration is None:
-            cat.box_exploration = {}
         exploration = cat.box_exploration
-        exploration.update({'active': False, 'arrived': True, 'box_id': box_id, 'observed': True})
+
+        if exploration is None:
+            exploration = (
+                CatBoxExplorationState()
+            )
+            cat.box_exploration = exploration
+        elif not isinstance(
+            exploration,
+            CatBoxExplorationState,
+        ):
+            raise TypeError(
+                'Cat box exploration state '
+                'must be '
+                'CatBoxExplorationState.'
+            )
+
+        exploration.active = False
+        exploration.arrived = True
+        exploration.box_id = box_id
+        exploration.observed = True
         if hasattr(cat, 'active_route_id'):
             del cat.active_route_id
         mind = cat.mind

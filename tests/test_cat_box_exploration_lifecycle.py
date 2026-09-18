@@ -6,6 +6,8 @@ from cats.cat_intention_state import CatIntentionCandidate
 
 from cats.cat_intention_state import CatExploreBoxTarget
 
+from cats.cat_box_exploration_state import CatBoxExplorationState
+
 class CatBoxExplorationLifecycleTests(unittest.TestCase):
 
     def setUp(self):
@@ -43,10 +45,49 @@ class CatBoxExplorationLifecycleTests(unittest.TestCase):
                 break
         self.assertEqual(result['name'], 'cat_explored_quantum_box')
         self.assertEqual(self.cat.position, self.box.position)
-        self.assertTrue(self.cat.box_exploration['arrived'])
-        self.assertTrue(self.cat.box_exploration['observed'])
+        self.assertIsInstance(
+            self.cat.box_exploration,
+            CatBoxExplorationState,
+        )
+        self.assertTrue(
+            self.cat.box_exploration.arrived
+        )
+        self.assertTrue(self.cat.box_exploration.observed)
         self.assertIsNone(self.cat.mind.current_intention)
         after = CatPerception(self.cats).observe(self.cat)
         self.assertNotIn(self.box.id, after.unexplored_boxes)
+
+    def test_mapping_runtime_state_is_rejected(
+        self
+    ):
+        self.cat.box_exploration = {
+            'active': True,
+            'arrived': False,
+            'box_id': self.box.id,
+            'route_id': 'legacy_route',
+            'destination': dict(
+                self.box.position
+            ),
+            'observed': False,
+        }
+
+        self.cat.mind.current_intention = (
+            CatIntentionCandidate(
+                type='explore_box',
+                target=CatExploreBoxTarget(
+                    box_id=self.box.id
+                ),
+                score=1.0,
+                reasons=['test'],
+            )
+        )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            self.cats.execute_cat_intention(
+                self.cat
+            )
+
 if __name__ == '__main__':
     unittest.main()
