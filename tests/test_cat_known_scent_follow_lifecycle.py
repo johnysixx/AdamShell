@@ -56,9 +56,9 @@ class CatKnownScentFollowLifecycleTests(unittest.TestCase):
                 break
         self.assertEqual(result['name'], 'cat_reached_known_scent')
         self.assertEqual(self.cat.position, {'x': 3.0, 'y': 0.0, 'z': 0.0})
-        self.assertTrue(self.cat.known_scent_follow['arrived'])
-        self.assertFalse(self.cat.known_scent_follow['active'])
+        self.assertTrue(self.cat.known_scent_follow.arrived)
+        self.assertFalse(self.cat.known_scent_follow.active)
         self.assertIsNone(self.cat.mind.current_intention)
-        self.assertTrue(self.cat.known_scent_follow['trail_direction']['inferred'])
+        self.assertTrue(self.cat.known_scent_follow.trail_direction['inferred'])
 if __name__ == '__main__':
     unittest.main()

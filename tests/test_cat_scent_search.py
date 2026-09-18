@@ -3,6 +3,9 @@ from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat_mind import CatMind
 from cats.cat_perception import CatPerception
+from cats.cat_scent_navigation_state import (
+    CatKnownScentFollowState,
+)
 
 class CatScentSearchTests(unittest.TestCase):
 
@@ -16,7 +19,28 @@ class CatScentSearchTests(unittest.TestCase):
         traits = self.cat.personality.traits
         traits.curiosity = 1.0
         traits.courage = 1.0
-        self.cat.known_scent_follow = {'active': False, 'arrived': True, 'identity': 'cat:pazuzu', 'source_id': 'latest_trace', 'destination': {'x': 3.0, 'y': 0.0, 'z': 0.0}, 'trail_direction': {'inferred': True, 'unit_vector': {'x': 1.0, 'y': 0.0, 'z': 0.0}, 'confidence': 0.8}}
+        self.cat.known_scent_follow = (
+            CatKnownScentFollowState(
+                active=False,
+                arrived=True,
+                identity='cat:pazuzu',
+                source_id='latest_trace',
+                destination={
+                    'x': 3.0,
+                    'y': 0.0,
+                    'z': 0.0,
+                },
+                trail_direction={
+                    'inferred': True,
+                    'unit_vector': {
+                        'x': 1.0,
+                        'y': 0.0,
+                        'z': 0.0,
+                    },
+                    'confidence': 0.8,
+                },
+            )
+        )
 
     def observations(self):
         return CatPerception(self.cats).observe(self.cat)
@@ -74,7 +98,7 @@ class CatScentSearchTests(unittest.TestCase):
         candidates = CatMind.consider(cat=self.cat, observations=self.observations())
         search = [candidate for candidate in candidates if candidate.type == 'search_for_scent']
         self.assertEqual(search, [])
-        self.assertTrue(self.cat.known_scent_follow['arrived'])
+        self.assertTrue(self.cat.known_scent_follow.arrived)
         self.assertEqual(self.cat.scent_search['attempts'], 3)
 
     def test_exhausted_search_returns_cat_to_normal_decision_candidates(self):

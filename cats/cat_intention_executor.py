@@ -6,6 +6,9 @@ from cats.cat_intention_state import (
     CatIntentionCandidate,
     CatKnownScentTarget,
 )
+from cats.cat_scent_navigation_state import (
+    CatKnownScentFollowState,
+)
 from cats.cat_social_system import CatSocialSystem
 
 class CatIntentionExecutor:
@@ -410,7 +413,30 @@ class CatIntentionExecutor:
         if layer != cat.current_layer:
             return self._record({'name': 'cat_known_scent_follow_failed', 'cat': cat.name, 'identity': target.identity, 'reason': 'cross_layer_scent_navigation_not_available_yet', 'executed': False})
         follow = cat.known_scent_follow
-        if isinstance(follow, dict) and follow.get('active', False) and (follow.get('source_id') == target.source_id) and (follow.get('destination') == position):
+        if (
+            follow is not None
+            and not isinstance(
+                follow,
+                CatKnownScentFollowState,
+            )
+        ):
+            raise TypeError(
+                'Cat known scent follow state '
+                'must be '
+                'CatKnownScentFollowState.'
+            )
+
+        if (
+            isinstance(
+                follow,
+                CatKnownScentFollowState,
+            )
+            and follow.active
+            and follow.source_id
+            == target.source_id
+            and follow.destination
+            == position
+        ):
             return self._advance_known_scent_follow(cat=cat, intention=intention, cronenbergs=cronenbergs)
         cat_position = cat.position or {}
         already_there = all((abs(float(cat_position.get(axis, 0.0)) - float(position.get(axis, 0.0))) <= 1e-09 for axis in ('x', 'y', 'z')))
@@ -423,7 +449,21 @@ class CatIntentionExecutor:
         route = planned['route']
         route.state = 'ready'
         cat.active_route_id = route.route_id
-        cat.known_scent_follow = {'active': True, 'arrived': False, 'route_id': route.route_id, 'identity': target.identity, 'source_id': target.source_id, 'destination': dict(position), 'trail_direction': deepcopy(target.trail_direction)}
+        cat.known_scent_follow = (
+            CatKnownScentFollowState(
+                active=True,
+                arrived=False,
+                route_id=route.route_id,
+                identity=target.identity,
+                source_id=target.source_id,
+                destination=dict(
+                    position
+                ),
+                trail_direction=deepcopy(
+                    target.trail_direction
+                ),
+            )
+        )
         event = {'name': 'cat_following_known_scent', 'cat': cat.name, 'identity': target.identity, 'layer': layer, 'destination': dict(position), 'route_id': route.route_id, 'arrived': False, 'decision_source': 'cat_mind', 'executed': True}
         cat.mind.active_body_execution = deepcopy(event)
         return self._record(event)
@@ -436,16 +476,39 @@ class CatIntentionExecutor:
             cat.position = dict(position)
         if result.get('arrived', False):
             return self._finish_known_scent_follow(cat=cat, intention=intention, position=cat.position)
-        event = {'name': 'cat_following_known_scent', 'cat': cat.name, 'identity': follow.get('identity'), 'layer': cat.current_layer, 'destination': dict(follow['destination']), 'route_id': follow['route_id'], 'position': dict(position) if position is not None else None, 'arrived': False, 'decision_source': 'cat_mind', 'executed': result.get('result') != 'no_active_route'}
+        event = {'name': 'cat_following_known_scent', 'cat': cat.name, 'identity': follow.identity, 'layer': cat.current_layer, 'destination': dict(follow.destination), 'route_id': follow.route_id, 'position': dict(position) if position is not None else None, 'arrived': False, 'decision_source': 'cat_mind', 'executed': result.get('result') != 'no_active_route'}
         cat.mind.active_body_execution = deepcopy(event)
         return self._record(event)
 
     def _finish_known_scent_follow(self, cat, intention, position):
         target = intention.target
-        if cat.known_scent_follow is None:
-            cat.known_scent_follow = {}
         follow = cat.known_scent_follow
-        follow.update({'active': False, 'arrived': True, 'identity': target.identity, 'source_id': target.source_id, 'destination': dict(position), 'trail_direction': deepcopy(target.trail_direction)})
+
+        if follow is None:
+            follow = (
+                CatKnownScentFollowState()
+            )
+            cat.known_scent_follow = follow
+        elif not isinstance(
+            follow,
+            CatKnownScentFollowState,
+        ):
+            raise TypeError(
+                'Cat known scent follow state '
+                'must be '
+                'CatKnownScentFollowState.'
+            )
+
+        follow.active = False
+        follow.arrived = True
+        follow.identity = target.identity
+        follow.source_id = target.source_id
+        follow.destination = dict(
+            position
+        )
+        follow.trail_direction = deepcopy(
+            target.trail_direction
+        )
         if hasattr(cat, 'active_route_id'):
             del cat.active_route_id
         mind = cat.mind

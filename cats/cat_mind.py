@@ -8,6 +8,9 @@ from cats.cat_knowledge import CatKnowledge
 from cats.cat_perception_state import (
     CatPerceptionState
 )
+from cats.cat_scent_navigation_state import (
+    CatKnownScentFollowState,
+)
 from copy import deepcopy
 
 class CatMind:
@@ -106,13 +109,35 @@ class CatMind:
                 'age_ticks': age_ticks,
                 'freshness': freshness,
             })
-        reached_scent = cat.known_scent_follow or {}
+        reached_scent = cat.known_scent_follow
+        if (
+            reached_scent is not None
+            and not isinstance(
+                reached_scent,
+                CatKnownScentFollowState,
+            )
+        ):
+            raise TypeError(
+                'Cat known scent follow state '
+                'must be '
+                'CatKnownScentFollowState.'
+            )
         currently_smelt_identities = {
             item.recognition.identity
             for item in observations.olfaction.detected_aromas
             if item.recognition.recognized
         }
-        if isinstance(reached_scent, dict) and reached_scent.get('arrived', False) and (reached_scent.get('identity') not in currently_smelt_identities):
+        if (
+            isinstance(
+                reached_scent,
+                CatKnownScentFollowState,
+            )
+            and reached_scent.arrived
+            and (
+                reached_scent.identity
+                not in currently_smelt_identities
+            )
+        ):
             local_scent_places = []
         if local_scent_places:
             strongest = max(
@@ -251,10 +276,31 @@ class CatMind:
         if getattr(cat, 'position', None) is not None:
             candidates.append(cls._candidate(intention_type='wander', score=0.12 + curiosity_need * 0.68 + curiosity * 0.12, reasons=['curiosity_need', 'autonomous_movement']))
         candidates.append(cls._candidate(intention_type='rest', score=0.15 + patience * 0.25 + fatigue_need * 0.65, reasons=['rest_is_available']))
-        reached_scent = cat.known_scent_follow or {}
-        if isinstance(reached_scent, dict) and reached_scent.get('arrived', False):
-            identity = reached_scent.get('identity')
-            direction = reached_scent.get('trail_direction', {})
+        reached_scent = cat.known_scent_follow
+        if (
+            reached_scent is not None
+            and not isinstance(
+                reached_scent,
+                CatKnownScentFollowState,
+            )
+        ):
+            raise TypeError(
+                'Cat known scent follow state '
+                'must be '
+                'CatKnownScentFollowState.'
+            )
+        if (
+            isinstance(
+                reached_scent,
+                CatKnownScentFollowState,
+            )
+            and reached_scent.arrived
+        ):
+            identity = reached_scent.identity
+            direction = (
+                reached_scent.trail_direction
+                or {}
+            )
             target_smelt_now = any(
                 item.recognition.recognized
                 and item.recognition.identity == identity
