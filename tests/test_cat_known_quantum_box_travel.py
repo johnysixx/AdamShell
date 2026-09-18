@@ -27,7 +27,7 @@ class CatKnownQuantumBoxTravelTests(unittest.TestCase):
 
     def sense_counterpart(self):
         candidates = CatMind.consider(cat=self.cat, observations=self.observations())
-        intention = next((candidate for candidate in candidates if candidate['type'] == 'sense_quantum_counterpart'))
+        intention = next((candidate for candidate in candidates if candidate.type == 'sense_quantum_counterpart'))
         self.cat.mind.current_intention = intention
         result = self.cats.execute_cat_intention(self.cat)
         self.assertTrue(result['executed'])
@@ -35,14 +35,14 @@ class CatKnownQuantumBoxTravelTests(unittest.TestCase):
     def test_current_observation_creates_travel_intention(self):
         self.sense_counterpart()
         candidates = CatMind.consider(cat=self.cat, observations=self.observations())
-        travel = next((candidate for candidate in candidates if candidate['type'] == 'travel_through_known_quantum_box'))
-        self.assertEqual(travel['target']['source_box_id'], self.source.id)
-        self.assertEqual(travel['target']['counterpart_box_id'], self.target.id)
+        travel = next((candidate for candidate in candidates if candidate.type == 'travel_through_known_quantum_box'))
+        self.assertEqual(travel.target['source_box_id'], self.source.id)
+        self.assertEqual(travel.target['counterpart_box_id'], self.target.id)
 
     def test_travel_intention_transfers_cat(self):
         self.sense_counterpart()
         candidates = CatMind.consider(cat=self.cat, observations=self.observations())
-        travel = next((candidate for candidate in candidates if candidate['type'] == 'travel_through_known_quantum_box'))
+        travel = next((candidate for candidate in candidates if candidate.type == 'travel_through_known_quantum_box'))
         self.cat.mind.current_intention = travel
         result = self.cats.execute_cat_intention(self.cat)
         self.assertTrue(result['executed'])
@@ -53,7 +53,7 @@ class CatKnownQuantumBoxTravelTests(unittest.TestCase):
     def test_stale_observation_cannot_teleport_from_distance(self):
         self.sense_counterpart()
         candidates = CatMind.consider(cat=self.cat, observations=self.observations())
-        travel = next((candidate for candidate in candidates if candidate['type'] == 'travel_through_known_quantum_box'))
+        travel = next((candidate for candidate in candidates if candidate.type == 'travel_through_known_quantum_box'))
         self.cat.position = {'x': 100.0, 'y': 100.0, 'z': 0.0}
         self.cat.mind.current_intention = travel
         result = self.cats.execute_cat_intention(self.cat)
@@ -64,7 +64,7 @@ class CatKnownQuantumBoxTravelTests(unittest.TestCase):
     def test_successful_travel_is_remembered_as_route(self):
         self.sense_counterpart()
         candidates = CatMind.consider(cat=self.cat, observations=self.observations())
-        travel = next((candidate for candidate in candidates if candidate['type'] == 'travel_through_known_quantum_box'))
+        travel = next((candidate for candidate in candidates if candidate.type == 'travel_through_known_quantum_box'))
         self.cat.mind.current_intention = travel
         result = self.cats.execute_cat_intention(self.cat)
         self.assertTrue(result['executed'])
@@ -79,7 +79,7 @@ class CatKnownQuantumBoxTravelTests(unittest.TestCase):
     def test_failed_quantum_transfer_creates_cronenberg_and_memory(self):
         self.sense_counterpart()
         candidates = CatMind.consider(cat=self.cat, observations=self.observations())
-        travel = next((candidate for candidate in candidates if candidate['type'] == 'travel_through_known_quantum_box'))
+        travel = next((candidate for candidate in candidates if candidate.type == 'travel_through_known_quantum_box'))
         self.cat.mind.current_intention = travel
         cronenberg_count_before = len(self.universe.cronenbergs)
 

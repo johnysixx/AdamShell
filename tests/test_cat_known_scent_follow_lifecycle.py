@@ -1,6 +1,7 @@
 import unittest
 from universe.universe import Universe
 from cats.cats import Cats
+from cats.cat_intention_state import CatIntentionCandidate
 
 class CatKnownScentFollowLifecycleTests(unittest.TestCase):
 
@@ -11,7 +12,17 @@ class CatKnownScentFollowLifecycleTests(unittest.TestCase):
         self.cat = self.cats.create_cat(name='tracker', color='black', fur_length='short')
         self.cat.current_layer = 'quantum_layer'
         self.cat.position = {'x': 0.0, 'y': 0.0, 'z': 0.0}
-        self.cat.mind.current_intention = {'type': 'follow_known_scent', 'target': {'identity': 'cat:pazuzu', 'layer': 'quantum_layer', 'position': {'x': 3.0, 'y': 0.0, 'z': 0.0}, 'source_id': 'trace_latest', 'trail_direction': {'inferred': True, 'unit_vector': {'x': 1.0, 'y': 0.0, 'z': 0.0}, 'confidence': 0.8}}, 'score': 1.0, 'reasons': ['test']}
+        self.cat.mind.current_intention = CatIntentionCandidate(
+
+            type='follow_known_scent',
+
+            target={'identity': 'cat:pazuzu', 'layer': 'quantum_layer', 'position': {'x': 3.0, 'y': 0.0, 'z': 0.0}, 'source_id': 'trace_latest', 'trail_direction': {'inferred': True, 'unit_vector': {'x': 1.0, 'y': 0.0, 'z': 0.0}, 'confidence': 0.8}},
+
+            score=1.0,
+
+            reasons=['test'],
+
+        )
 
     def test_cat_reaches_last_known_scent_point(self):
         first = self.cats.execute_cat_intention(self.cat)

@@ -1,5 +1,6 @@
 from cats.cat_components import CatMindState
 from cats.cat_intellect import CatIntellect
+from cats.cat_intention_state import CatIntentionCandidate
 from cats.cat_knowledge import CatKnowledge
 from cats.cat_perception_state import (
     CatPerceptionState
@@ -11,7 +12,14 @@ class CatMind:
 
     @classmethod
     def create_state(cls):
-        return CatMindState(**{'current_intention': None, 'previous_intention': None, 'candidates': [], 'decision_count': 0, 'history': []}, observation_history=[])
+        return CatMindState(
+            current_intention=None,
+            previous_intention=None,
+            candidates=[],
+            decision_count=0,
+            history=[],
+            observation_history=[],
+        )
 
     @classmethod
     def ensure_state(cls, cat):
@@ -226,7 +234,10 @@ class CatMind:
                     search_distance = 1.0 + curiosity + courage * 0.5
                     search_score = 0.38 + curiosity * 0.18 + courage * 0.08 + direction_confidence * 0.2 - attempts * 0.08
                     candidates.append(cls._candidate(intention_type='search_for_scent', score=search_score, reasons=['last_known_scent_reached', 'target_scent_not_detected', 'trail_direction_inferred', 'local_search'], target={'identity': identity, 'layer': cat.current_layer, 'from_position': dict(cat.position or {}), 'trail_direction': deepcopy(direction), 'attempt': attempts + 1, 'max_attempts': max_attempts, 'search_distance': search_distance}))
-        candidates.sort(key=lambda item: item['score'], reverse=True)
+        candidates.sort(
+            key=lambda item: item.score,
+            reverse=True,
+        )
         mind = cls.ensure_state(cat)
         mind.candidates = deepcopy(candidates)
         return deepcopy(candidates)
@@ -262,7 +273,7 @@ class CatMind:
         mind.previous_intention = deepcopy(previous)
         mind.current_intention = deepcopy(winner)
         mind.decision_count += 1
-        event = {'name': 'cat_intention_selected', 'cat': cat.name, 'intention': winner['type'], 'target': winner.get('target'), 'score': winner['score'], 'reasons': list(winner['reasons']), 'quantum_roll': quantum_roll, 'intellect_score': CatIntellect.ensure_state(cat).score, 'intellect_category': CatIntellect.category(cat), 'finalist_count': len(finalists), 'finalists': deepcopy(finalists), 'previous_intention': deepcopy(previous), 'selected': True}
+        event = {'name': 'cat_intention_selected', 'cat': cat.name, 'intention': winner.type, 'target': winner.target, 'score': winner.score, 'reasons': list(winner.reasons), 'quantum_roll': quantum_roll, 'intellect_score': CatIntellect.ensure_state(cat).score, 'intellect_category': CatIntellect.category(cat), 'finalist_count': len(finalists), 'finalists': deepcopy(finalists), 'previous_intention': deepcopy(previous), 'selected': True}
         mind.history.append(deepcopy(event))
         return event
 
@@ -280,7 +291,12 @@ class CatMind:
     def _candidate(cls, intention_type, score, reasons, target=None):
         if intention_type not in cls.INTENTION_TYPES:
             raise ValueError(f'Unknown cat intention: {intention_type}')
-        return {'type': intention_type, 'target': target, 'score': min(1.0, max(0.0, float(score))), 'reasons': list(reasons)}
+        return CatIntentionCandidate(
+            type=intention_type,
+            target=target,
+            score=score,
+            reasons=reasons,
+        )
 
     @classmethod
     def _quantum_failure_bar_score(cls, cat):

@@ -2,6 +2,7 @@ import unittest
 from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat_perception import CatPerception
+from cats.cat_intention_state import CatIntentionCandidate
 
 class CatBoxExplorationLifecycleTests(unittest.TestCase):
 
@@ -19,7 +20,17 @@ class CatBoxExplorationLifecycleTests(unittest.TestCase):
     def test_cat_physically_explores_box(self):
         before = CatPerception(self.cats).observe(self.cat)
         self.assertIn(self.box.id, before.unexplored_boxes)
-        self.cat.mind.current_intention = {'type': 'explore_box', 'target': self.box.id, 'score': 1.0, 'reasons': ['test']}
+        self.cat.mind.current_intention = CatIntentionCandidate(
+
+            type='explore_box',
+
+            target=self.box.id,
+
+            score=1.0,
+
+            reasons=['test'],
+
+        )
         first = self.cats.execute_cat_intention(self.cat)
         self.assertEqual(first['name'], 'cat_approaching_box_to_explore')
         self.assertEqual(self.cat.position, {'x': 0.0, 'y': 0.0, 'z': 0.0})

@@ -3,6 +3,7 @@ from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat_mind import CatMind
 from cats.cat_perception import CatPerception
+from cats.cat_intention_state import CatIntentionCandidate
 
 class CatDisappearedBoxMemoryTests(unittest.TestCase):
 
@@ -19,7 +20,17 @@ class CatDisappearedBoxMemoryTests(unittest.TestCase):
 
     def test_disappeared_box_memory_is_not_current_box_target(self):
         box_id = self.box.id
-        self.cat.mind.current_intention = {'type': 'explore_box', 'target': box_id, 'score': 1.0, 'reasons': ['test']}
+        self.cat.mind.current_intention = CatIntentionCandidate(
+
+            type='explore_box',
+
+            target=box_id,
+
+            score=1.0,
+
+            reasons=['test'],
+
+        )
         result = self.cats.execute_cat_intention(self.cat)
         for _ in range(10):
             if result['name'] == 'cat_explored_quantum_box':
@@ -33,7 +44,7 @@ class CatDisappearedBoxMemoryTests(unittest.TestCase):
         self.assertNotIn(box_id, observations.visible_boxes)
         self.assertNotIn(box_id, observations.unexplored_boxes)
         candidates = CatMind.consider(cat=self.cat, observations=observations)
-        stale_box_targets = [candidate for candidate in candidates if candidate.get('type') == 'explore_box' and (candidate.get('target') == box_id or (isinstance(candidate.get('target'), dict) and (candidate['target'].get('id') == box_id or candidate['target'].get('box_id') == box_id)))]
+        stale_box_targets = [candidate for candidate in candidates if candidate.type == 'explore_box' and (candidate.target == box_id or (isinstance(candidate.target, dict) and (candidate.target.get('id') == box_id or candidate.target.get('box_id') == box_id)))]
         self.assertEqual(stale_box_targets, [])
         memories_after = self.cat.memory.recall(event_type='quantum_box_observed')
         self.assertTrue(any((box_id in memory.get('participants', []) for memory in memories_after)))

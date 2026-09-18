@@ -39,7 +39,7 @@ class CatCronenbergScentBehaviorTests(unittest.TestCase):
         observations.smelled_cronenbergs = []
         observations.ozone_detected = True
         candidates = CatMind.consider(cat=self.cat, observations=observations)
-        intentions = {candidate['type'] for candidate in candidates}
+        intentions = {candidate.type for candidate in candidates}
         self.assertNotIn('track_cronenberg_scent', intentions)
         self.assertNotIn('avoid_cronenberg_scent', intentions)
 if __name__ == '__main__':

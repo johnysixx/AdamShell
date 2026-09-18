@@ -1,6 +1,7 @@
 import unittest
 from universe.universe import Universe
 from cats.cats import Cats
+from cats.cat_intention_state import CatIntentionCandidate
 from universe.dark_sector import QUANTUM_BOX_ENERGY_COST_J
 
 class CatScentBoxApproachTests(unittest.TestCase):
@@ -19,7 +20,17 @@ class CatScentBoxApproachTests(unittest.TestCase):
         creation = self.universe.cat_box_transfer.create_exploration_pair(cat=self.creator, destination_layer='quantum_layer', destination_position={'x': 8.0, 'y': 0.0, 'z': 0.0}, source_position={'x': 3.0, 'y': 0.0, 'z': 0.0})
         self.source = creation['source_box']
         self.target = creation['target_box']
-        self.tracker.mind.current_intention = {'type': 'follow_scent_through_box', 'target': {'identity': 'cat:creator', 'box_id': self.source.id, 'counterpart_box_id': self.target.id, 'source_layer': 'meeting_place', 'target_layer': 'quantum_layer'}, 'score': 1.0, 'reasons': ['test']}
+        self.tracker.mind.current_intention = CatIntentionCandidate(
+
+            type='follow_scent_through_box',
+
+            target={'identity': 'cat:creator', 'box_id': self.source.id, 'counterpart_box_id': self.target.id, 'source_layer': 'meeting_place', 'target_layer': 'quantum_layer'},
+
+            score=1.0,
+
+            reasons=['test'],
+
+        )
 
     def test_cat_walks_to_box_before_transfer(self):
         first = self.cats.execute_cat_intention(self.tracker)

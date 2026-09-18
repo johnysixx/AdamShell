@@ -82,12 +82,12 @@ class CatAutonomousNeedsMovementSocialTests(
         rest = next(
             candidate
             for candidate in candidates
-            if candidate["type"]
+            if candidate.type
             == "rest"
         )
 
         self.assertGreaterEqual(
-            rest["score"],
+            rest.score,
             0.80
         )
 
@@ -140,4 +140,3 @@ class CatAutonomousNeedsMovementSocialTests(
 
 if __name__ == "__main__":
     unittest.main()
-

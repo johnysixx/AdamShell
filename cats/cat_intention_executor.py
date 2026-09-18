@@ -2,6 +2,7 @@ from copy import deepcopy
 from cats.cat_knowledge import CatKnowledge
 from cats.cat_olfaction import CatOlfaction
 from cats.cat import Cat
+from cats.cat_intention_state import CatIntentionCandidate
 from cats.cat_social_system import CatSocialSystem
 
 class CatIntentionExecutor:
@@ -23,7 +24,17 @@ class CatIntentionExecutor:
         intention = getattr(mind, 'current_intention', None)
         if not intention:
             return self._record({'name': 'cat_intention_execution_skipped', 'cat': cat.name, 'reason': 'no_current_intention', 'executed': False})
-        intention_type = intention.get('type')
+
+        if not isinstance(
+            intention,
+            CatIntentionCandidate,
+        ):
+            raise TypeError(
+                "Cat current intention must be "
+                "CatIntentionCandidate."
+            )
+
+        intention_type = intention.type
         if intention_type in self.NAVIGATION_INTENTS:
             return self._execute_navigation(cat=cat, intention=intention, cronenbergs=cronenbergs, step_size=step_size)
         if intention_type == 'wander':
@@ -53,10 +64,10 @@ class CatIntentionExecutor:
         return self._record({'name': 'cat_intention_execution_failed', 'cat': cat.name, 'intention': intention_type, 'reason': 'unsupported_intention', 'executed': False})
 
     def _execute_navigation(self, cat, intention, cronenbergs, step_size):
-        intention_type = intention['type']
+        intention_type = intention.type
         body_intent = self.NAVIGATION_INTENTS[intention_type]
         if intention_type == 'visit_recipient':
-            target = intention.get('target') or {}
+            target = intention.target or {}
             cat.navigation_target = target.get('recipient')
         previous_suggestion = cat.suggested_intent
         cat.suggested_intent = body_intent
@@ -68,13 +79,13 @@ class CatIntentionExecutor:
         if not acceptance.get('accepted', False):
             return self._record({'name': 'cat_intention_body_action_failed', 'cat': cat.name, 'intention': intention_type, 'body_intent': body_intent, 'reason': acceptance.get('result', 'navigation_not_accepted'), 'navigation_offer': offer, 'acceptance': acceptance, 'executed': False})
         cat.state = 'acting_on_own_intention'
-        event = {'name': 'cat_intention_navigation_started', 'cat': cat.name, 'intention': intention_type, 'body_intent': body_intent, 'target': intention.get('target'), 'route_id': acceptance.get('route_id'), 'destination': acceptance.get('destination'), 'decision_source': 'cat_mind', 'navigation_offer': {key: value for key, value in offer.items() if key not in {'route', 'plan'}}, 'executed': True}
+        event = {'name': 'cat_intention_navigation_started', 'cat': cat.name, 'intention': intention_type, 'body_intent': body_intent, 'target': intention.target, 'route_id': acceptance.get('route_id'), 'destination': acceptance.get('destination'), 'decision_source': 'cat_mind', 'navigation_offer': {key: value for key, value in offer.items() if key not in {'route', 'plan'}}, 'executed': True}
         mind = cat.mind
         mind.active_body_execution = deepcopy(event)
         return self._record(event)
 
     def _execute_follow_scent_through_box(self, cat, intention, cronenbergs=None, step_size=None):
-        target = intention.get('target', {})
+        target = intention.target or {}
         source_box_id = target.get('box_id')
         target_box_id = target.get('counterpart_box_id')
         if source_box_id is None or target_box_id is None:
@@ -124,7 +135,7 @@ class CatIntentionExecutor:
         return self._record(event)
 
     def _transfer_scent_box_follow(self, cat, intention, source_box_id, target_box_id):
-        target = intention.get('target', {})
+        target = intention.target or {}
         result = self.universe.cat_box_transfer.transfer_cat(cat=cat, source_box_id=source_box_id, target_box_id=target_box_id)
         event = {'name': 'cat_followed_scent_through_box' if result.get('transferred', False) else 'cat_scent_box_transfer_failed', 'cat': cat.name, 'identity': target.get('identity'), 'source_box_id': source_box_id, 'target_box_id': target_box_id, 'source_layer': target.get('source_layer'), 'target_layer': target.get('target_layer'), 'transfer': result, 'arrived_at_box': True, 'decision_source': 'cat_mind', 'executed': result.get('transferred', False)}
         return self._finish_scent_box_follow(cat=cat, intention=intention, event=event)
@@ -146,7 +157,7 @@ class CatIntentionExecutor:
         return all((abs(float(first.get(axis, 0.0)) - float(second.get(axis, 0.0))) <= tolerance for axis in ('x', 'y', 'z')))
 
     def _execute_travel_through_known_quantum_box(self, cat, intention):
-        target = intention.get('target', {})
+        target = intention.target or {}
         if not isinstance(target, dict):
             return self._record({'name': 'cat_quantum_box_travel_failed', 'cat': cat.name, 'reason': 'invalid_target', 'executed': False})
         source_box_id = target.get('source_box_id')
@@ -194,7 +205,7 @@ class CatIntentionExecutor:
         return self._record(event)
 
     def _execute_sense_quantum_counterpart(self, cat, intention):
-        target = intention.get('target', {})
+        target = intention.target or {}
         if isinstance(target, dict):
             source_box_id = target.get('box_id')
         else:
@@ -229,7 +240,7 @@ class CatIntentionExecutor:
         return self._record(event)
 
     def _execute_explore_box(self, cat, intention, cronenbergs=None, step_size=None):
-        target = intention.get('target')
+        target = intention.target
         if isinstance(target, dict):
             box_id = target.get('id') or target.get('box_id')
         else:
@@ -298,7 +309,7 @@ class CatIntentionExecutor:
         return self._record(event)
 
     def _execute_search_for_scent(self, cat, intention, cronenbergs=None, step_size=None):
-        target = intention.get('target', {})
+        target = intention.target or {}
         identity = target.get('identity')
         direction = target.get('trail_direction', {})
         unit_vector = direction.get('unit_vector')
@@ -378,7 +389,7 @@ class CatIntentionExecutor:
         return self._record(event)
 
     def _execute_follow_known_scent(self, cat, intention, cronenbergs=None, step_size=None):
-        target = intention.get('target', {})
+        target = intention.target or {}
         layer = target.get('layer')
         position = target.get('position')
         if layer is None or not isinstance(position, dict):
@@ -417,7 +428,7 @@ class CatIntentionExecutor:
         return self._record(event)
 
     def _finish_known_scent_follow(self, cat, intention, position):
-        target = intention.get('target', {})
+        target = intention.target or {}
         if cat.known_scent_follow is None:
             cat.known_scent_follow = {}
         follow = cat.known_scent_follow
@@ -432,7 +443,7 @@ class CatIntentionExecutor:
         return self._record(event)
 
     def _execute_share_legend(self, cat, intention):
-        target = intention.get('target')
+        target = intention.target
         listener = None
         if isinstance(target, dict):
             target_name = target.get('name') or target.get('id')
@@ -463,7 +474,7 @@ class CatIntentionExecutor:
         Executor pouze vytvo?? t?lesnou cestu
         a zah?j? p?enos.
         """
-        target = intention.get('target', {})
+        target = intention.target or {}
         destination_layer = target.get('layer')
         destination_position = target.get('position')
         if destination_layer is None or destination_position is None:
@@ -523,7 +534,7 @@ class CatIntentionExecutor:
         return self._record(event)
 
     def _execute_approach_cat(self, cat, intention, step_size=None):
-        target = intention.get('target')
+        target = intention.target
         if isinstance(target, dict):
             target_name = target.get('cat') or target.get('name')
         else:
@@ -564,10 +575,10 @@ class CatIntentionExecutor:
         return self._record(event)
 
     def _defer_intention(self, cat, intention):
-        intention_type = intention['type']
+        intention_type = intention.type
         required_system = self.DEFERRED_INTENTS[intention_type]
         cat.state = 'intention_waiting_for_body_system'
-        event = {'name': 'cat_intention_body_action_deferred', 'cat': cat.name, 'intention': intention_type, 'target': intention.get('target'), 'required_system': required_system, 'decision_preserved': True, 'executed': False, 'deferred': True}
+        event = {'name': 'cat_intention_body_action_deferred', 'cat': cat.name, 'intention': intention_type, 'target': intention.target, 'required_system': required_system, 'decision_preserved': True, 'executed': False, 'deferred': True}
         cat.mind.active_body_execution = deepcopy(event)
         return self._record(event)
 

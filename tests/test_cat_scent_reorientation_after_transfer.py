@@ -3,6 +3,7 @@ from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat_perception import CatPerception
 from cats.cat_mind import CatMind
+from cats.cat_intention_state import CatIntentionCandidate
 from universe.aroma_residue import AromaResidue
 from universe.dark_sector import QUANTUM_BOX_ENERGY_COST_J
 
@@ -26,7 +27,17 @@ class CatScentReorientationAfterTransferTests(unittest.TestCase):
         self.trail_box = self.universe.create_quantum_box(layer='quantum_layer')
         self.trail_box.position = {'x': 9.0, 'y': 0.0, 'z': 0.0}
         AromaResidue.transfer(source_profile=self.creator.aroma, target=self.trail_box, source_identity='creator', fraction=0.3)
-        self.tracker.mind.current_intention = {'type': 'follow_scent_through_box', 'target': {'identity': 'cat:creator', 'box_id': self.source.id, 'counterpart_box_id': self.target.id, 'source_layer': 'meeting_place', 'target_layer': 'quantum_layer'}, 'score': 1.0, 'reasons': ['test']}
+        self.tracker.mind.current_intention = CatIntentionCandidate(
+
+            type='follow_scent_through_box',
+
+            target={'identity': 'cat:creator', 'box_id': self.source.id, 'counterpart_box_id': self.target.id, 'source_layer': 'meeting_place', 'target_layer': 'quantum_layer'},
+
+            score=1.0,
+
+            reasons=['test'],
+
+        )
 
     def transfer_tracker(self):
         result = None
@@ -80,6 +91,6 @@ class CatScentReorientationAfterTransferTests(unittest.TestCase):
         self.assertEqual(decision['target']['layer'], 'quantum_layer')
         self.assertEqual(decision['target']['source_id'], self.trail_box.id)
         self.assertEqual(decision['target']['position'], self.trail_box.position)
-        self.assertEqual(self.tracker.mind.current_intention['type'], 'follow_known_scent')
+        self.assertEqual(self.tracker.mind.current_intention.type, 'follow_known_scent')
 if __name__ == '__main__':
     unittest.main()

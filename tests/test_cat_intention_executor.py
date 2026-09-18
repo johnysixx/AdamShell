@@ -4,6 +4,7 @@ from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat_mind import CatMind
 from cats.cat_perception_state import CatPerceptionState
+from cats.cat_intention_state import CatIntentionCandidate
 
 class CatIntentionExecutorTests(unittest.TestCase):
 
@@ -15,7 +16,17 @@ class CatIntentionExecutorTests(unittest.TestCase):
         self.cat.position = {'x': 0.0, 'y': 0.0, 'z': 0.0}
 
     def set_intention(self, intention_type, target=None):
-        self.cat.mind.current_intention = {'type': intention_type, 'target': target, 'score': 0.8, 'reasons': ['test']}
+        self.cat.mind.current_intention = CatIntentionCandidate(
+
+            type=intention_type,
+
+            target=target,
+
+            score=0.8,
+
+            reasons=['test'],
+
+        )
 
     def create_cronenberg(self):
         cronenberg = self.universe.create_cronenberg_from_quantum_error(error=RuntimeError('Executor test.'), source_component='test', source_operation='cat_intention_executor')
@@ -53,7 +64,7 @@ class CatIntentionExecutorTests(unittest.TestCase):
         self.assertFalse(result['executed'])
         self.assertTrue(result['deferred'])
         self.assertTrue(result['decision_preserved'])
-        self.assertEqual(self.cat.mind.current_intention['type'], 'observe')
+        self.assertEqual(self.cat.mind.current_intention.type, 'observe')
 
     def test_executor_does_not_make_new_decision(self):
         decision = CatMind.decide(cat=self.cat, observations=CatPerceptionState(bar_known=True, bar_visible=True))

@@ -38,8 +38,8 @@ class CatCrossLayerScentNavigationTests(unittest.TestCase):
         traits.curiosity = 1.0
         traits.courage = 1.0
         candidates = CatMind.consider(cat=self.tracker, observations=observations)
-        scent_candidates = [candidate for candidate in candidates if candidate['type'] == 'follow_scent_through_box']
+        scent_candidates = [candidate for candidate in candidates if candidate.type == 'follow_scent_through_box']
         self.assertEqual(len(scent_candidates), 1)
-        self.assertEqual(scent_candidates[0]['target']['identity'], 'cat:pazuzu')
+        self.assertEqual(scent_candidates[0].target['identity'], 'cat:pazuzu')
 if __name__ == '__main__':
     unittest.main()
