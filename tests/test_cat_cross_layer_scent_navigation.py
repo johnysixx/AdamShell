@@ -5,6 +5,8 @@ from cats.cat_perception import CatPerception
 from cats.cat_mind import CatMind
 from universe.aroma_residue import AromaResidue
 
+from cats.cat_perception_state import CatScentTransferCandidate
+
 class CatCrossLayerScentNavigationTests(unittest.TestCase):
 
     def setUp(self):
@@ -28,8 +30,12 @@ class CatCrossLayerScentNavigationTests(unittest.TestCase):
         result = perception.observe(self.tracker)
         candidates = result.scent_transfer_candidates
         self.assertEqual(len(candidates), 1)
-        self.assertEqual(candidates[0]['identity'], 'cat:pazuzu')
-        self.assertEqual(candidates[0]['counterpart_box_id'], self.target.id)
+        self.assertIsInstance(
+            candidates[0],
+            CatScentTransferCandidate,
+        )
+        self.assertEqual(candidates[0].identity, 'cat:pazuzu')
+        self.assertEqual(candidates[0].counterpart_box_id, self.target.id)
 
     def test_mind_can_choose_to_follow_scent_through_box(self):
         perception = CatPerception(self.cats)
@@ -41,5 +47,48 @@ class CatCrossLayerScentNavigationTests(unittest.TestCase):
         scent_candidates = [candidate for candidate in candidates if candidate.type == 'follow_scent_through_box']
         self.assertEqual(len(scent_candidates), 1)
         self.assertEqual(scent_candidates[0].target.identity, 'cat:pazuzu')
+
+    def test_mind_rejects_mapping_scent_transfer_candidate(
+        self
+    ):
+        perception = CatPerception(
+            self.cats
+        )
+
+        observations = perception.observe(
+            self.tracker
+        )
+
+        observations.scent_transfer_candidates = [
+            {
+                'box_id': self.source.id,
+                'counterpart_box_id': (
+                    self.target.id
+                ),
+                'identity': 'cat:pazuzu',
+                'similarity': 1.0,
+                'source_layer': (
+                    'meeting_place'
+                ),
+                'target_layer': (
+                    'quantum_layer'
+                ),
+                'box_position': dict(
+                    self.source.position
+                ),
+                'counterpart_position': dict(
+                    self.target.position
+                ),
+            }
+        ]
+
+        with self.assertRaises(
+            TypeError
+        ):
+            CatMind.consider(
+                cat=self.tracker,
+                observations=observations,
+            )
+
 if __name__ == '__main__':
     unittest.main()

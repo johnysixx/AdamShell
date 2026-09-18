@@ -58,6 +58,21 @@ class CatVisibleBoxObservation:
 
 
 @dataclass(slots=True)
+class CatScentTransferCandidate:
+    box_id: object = None
+    counterpart_box_id: object = None
+
+    identity: str | None = None
+    similarity: float = 0.0
+
+    source_layer: str | None = None
+    target_layer: str | None = None
+
+    box_position: object = None
+    counterpart_position: object = None
+
+
+@dataclass(slots=True)
 class CatPerceptionState:
     cat: str | None = None
     position: object = None
@@ -125,7 +140,7 @@ class CatPerceptionState:
     scent_memories: list = field(
         default_factory=list
     )
-    scent_transfer_candidates: list = field(
+    scent_transfer_candidates: list[CatScentTransferCandidate] = field(
         default_factory=list
     )
     smelled_entities: list = field(

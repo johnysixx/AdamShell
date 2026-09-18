@@ -26,6 +26,8 @@ from cats.cat_quantum_observation_state import (
 
 from cats.cat_intention_state import CatQuantumBoxTravelTarget
 
+from cats.cat_perception_state import CatScentTransferCandidate
+
 class CatMind:
     INTENTION_TYPES = ('visit_bar', 'visit_recipient', 'hunt_cronenberg', 'track_cronenberg_scent', 'follow_known_scent', 'search_for_scent', 'follow_scent_through_box', 'avoid_cronenberg_scent', 'explore_box', 'sense_quantum_counterpart', 'travel_through_known_quantum_box', 'travel_trough_known_quantum_box', 'create_exploration_pair', 'approach_cat', 'share_legend', 'observe', 'wander', 'rest')
 
@@ -221,13 +223,47 @@ class CatMind:
                         ),
                     )
                 )
-        scent_transfers = observations.scent_transfer_candidates
+        scent_transfers = (
+            observations.scent_transfer_candidates
+        )
+
+        for scent_transfer in scent_transfers:
+            if not isinstance(
+                scent_transfer,
+                CatScentTransferCandidate,
+            ):
+                raise TypeError(
+                    'Scent transfer candidate '
+                    'must be '
+                    'CatScentTransferCandidate.'
+                )
+
         if scent_transfers:
-            best_scent_transfer = max(scent_transfers, key=lambda item: float(item.get('similarity', 0.0)))
-            identity = best_scent_transfer.get('identity')
-            scent_score = 0.2 + curiosity * 0.3 + courage * 0.2 + float(best_scent_transfer.get('similarity', 0.0)) * 0.25
+            best_scent_transfer = max(
+                scent_transfers,
+                key=lambda item: float(
+                    item.similarity
+                ),
+            )
+
+            identity = (
+                best_scent_transfer.identity
+            )
+
+            scent_score = (
+                0.2
+                + curiosity * 0.3
+                + courage * 0.2
+                + float(
+                    best_scent_transfer.similarity
+                ) * 0.25
+            )
+
             if identity == 'cronenberg':
-                scent_score += aggression * 0.15
+                scent_score += (
+                    aggression * 0.15
+                )
+
             candidates.append(
                 cls._candidate(
                     intention_type=(
@@ -243,28 +279,25 @@ class CatMind:
                     target=CatScentBoxTarget(
                         identity=identity,
                         box_id=(
-                            best_scent_transfer[
-                                'box_id'
-                            ]
+                            best_scent_transfer
+                            .box_id
                         ),
                         counterpart_box_id=(
-                            best_scent_transfer[
-                                'counterpart_box_id'
-                            ]
+                            best_scent_transfer
+                            .counterpart_box_id
                         ),
                         source_layer=(
-                            best_scent_transfer.get(
-                                'source_layer'
-                            )
+                            best_scent_transfer
+                            .source_layer
                         ),
                         target_layer=(
-                            best_scent_transfer.get(
-                                'target_layer'
-                            )
+                            best_scent_transfer
+                            .target_layer
                         ),
                     ),
                 )
             )
+
         intellect = CatIntellect.ensure_state(cat)
         intellect_normalized = float(intellect.normalized)
         counterpart_observation = (

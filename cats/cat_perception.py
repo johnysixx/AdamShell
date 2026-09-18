@@ -18,6 +18,8 @@ from .cat_perception_state import (
     CatVisibleBoxObservation,
 )
 
+from cats.cat_perception_state import CatScentTransferCandidate
+
 class CatPerception:
     DEFAULT_VISION_RADIUS = 8.0
     NEARBY_CAT_RADIUS = 4.0
@@ -103,7 +105,44 @@ class CatPerception:
             counterpart_box = boxes_by_id.get(counterpart_id)
             if counterpart_box is None:
                 continue
-            scent_transfer_candidates.append({'box_id': box_id, 'counterpart_box_id': counterpart_id, 'identity': recognition.identity, 'similarity': recognition.similarity, 'source_layer': getattr(box, 'current_layer', cat.current_layer), 'target_layer': getattr(counterpart_box, 'current_layer', None), 'box_position': deepcopy(getattr(box, 'position', {})), 'counterpart_position': deepcopy(getattr(counterpart_box, 'position', {}))})
+            scent_transfer_candidates.append(
+                CatScentTransferCandidate(
+                    box_id=box_id,
+                    counterpart_box_id=(
+                        counterpart_id
+                    ),
+                    identity=(
+                        recognition.identity
+                    ),
+                    similarity=float(
+                        recognition.similarity
+                    ),
+                    source_layer=getattr(
+                        box,
+                        'current_layer',
+                        cat.current_layer,
+                    ),
+                    target_layer=getattr(
+                        counterpart_box,
+                        'current_layer',
+                        None,
+                    ),
+                    box_position=deepcopy(
+                        getattr(
+                            box,
+                            'position',
+                            {},
+                        )
+                    ),
+                    counterpart_position=deepcopy(
+                        getattr(
+                            counterpart_box,
+                            'position',
+                            {},
+                        )
+                    ),
+                )
+            )
         counterpart_observation = deepcopy(
             cat.current_quantum_counterpart_observation
         )
