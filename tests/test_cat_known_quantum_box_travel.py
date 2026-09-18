@@ -36,8 +36,8 @@ class CatKnownQuantumBoxTravelTests(unittest.TestCase):
         self.sense_counterpart()
         candidates = CatMind.consider(cat=self.cat, observations=self.observations())
         travel = next((candidate for candidate in candidates if candidate.type == 'travel_through_known_quantum_box'))
-        self.assertEqual(travel.target['source_box_id'], self.source.id)
-        self.assertEqual(travel.target['counterpart_box_id'], self.target.id)
+        self.assertEqual(travel.target.source_box_id, self.source.id)
+        self.assertEqual(travel.target.counterpart_box_id, self.target.id)
 
     def test_travel_intention_transfers_cat(self):
         self.sense_counterpart()

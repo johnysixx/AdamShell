@@ -88,3 +88,15 @@ class CatScentBoxTarget:
     counterpart_box_id: object = None
     source_layer: str | None = None
     target_layer: str | None = None
+
+
+
+@dataclass(slots=True)
+class CatQuantumBoxTravelTarget:
+    source_box_id: object = None
+    counterpart_box_id: object = None
+
+    source_layer: str | None = None
+    target_layer: str | None = None
+
+    target_position: object = None

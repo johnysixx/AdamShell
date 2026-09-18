@@ -5,6 +5,7 @@ from cats.cat_intention_state import (
     CatKnownScentTarget,
     CatScentSearchTarget,
     CatScentBoxTarget,
+    CatQuantumBoxTravelTarget,
 )
 from cats.cat_knowledge import CatKnowledge
 from cats.cat_perception_state import (
@@ -22,6 +23,8 @@ from copy import deepcopy
 from cats.cat_quantum_observation_state import (
     CatQuantumCounterpartObservation,
 )
+
+from cats.cat_intention_state import CatQuantumBoxTravelTarget
 
 class CatMind:
     INTENTION_TYPES = ('visit_bar', 'visit_recipient', 'hunt_cronenberg', 'track_cronenberg_scent', 'follow_known_scent', 'search_for_scent', 'follow_scent_through_box', 'avoid_cronenberg_scent', 'explore_box', 'sense_quantum_counterpart', 'travel_through_known_quantum_box', 'travel_trough_known_quantum_box', 'create_exploration_pair', 'approach_cat', 'share_legend', 'observe', 'wander', 'rest')
@@ -302,7 +305,46 @@ class CatMind:
                 quantum_memory_score = cls._quantum_travel_memory_score(cat)
                 negative_quantum_memories = cat.memory.recall(event_type='quantum_box_layer_transfer_failed')
                 travel_score = 0.3 + curiosity * 0.35 + courage * 0.2 + intellect_normalized * 0.15 + quantum_memory_score
-                candidates.append(cls._candidate(intention_type='travel_through_known_quantum_box', score=travel_score, reasons=['quantum_counterpart_sensed', 'quantum_pair_currently_valid', 'curiosity', 'courage', *(['negative_quantum_travel_memory'] if negative_quantum_memories else [])], target={'source_box_id': source_box_id, 'counterpart_box_id': counterpart_box_id, 'source_layer': counterpart_observation.source_layer, 'target_layer': counterpart_observation.counterpart_layer, 'target_position': deepcopy(counterpart_observation.counterpart_position or {})}))
+                candidates.append(
+                    cls._candidate(
+                        intention_type=(
+                            'travel_through_known_quantum_box'
+                        ),
+                        score=travel_score,
+                        reasons=[
+                            'quantum_counterpart_sensed',
+                            'quantum_pair_currently_valid',
+                            'curiosity',
+                            'courage',
+                            *(
+                                [
+                                    'negative_quantum_travel_memory'
+                                ]
+                                if negative_quantum_memories
+                                else []
+                            ),
+                        ],
+                        target=CatQuantumBoxTravelTarget(
+                            source_box_id=source_box_id,
+                            counterpart_box_id=(
+                                counterpart_box_id
+                            ),
+                            source_layer=(
+                                counterpart_observation
+                                .source_layer
+                            ),
+                            target_layer=(
+                                counterpart_observation
+                                .counterpart_layer
+                            ),
+                            target_position=deepcopy(
+                                counterpart_observation
+                                .counterpart_position
+                                or {}
+                            ),
+                        ),
+                    )
+                )
         for box_detail in observations.visible_box_details:
             if not box_detail.explored:
                 continue

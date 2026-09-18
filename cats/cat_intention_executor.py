@@ -11,6 +11,7 @@ from cats.cat_intention_state import (
     CatKnownScentTarget,
     CatScentSearchTarget,
     CatScentBoxTarget,
+    CatQuantumBoxTravelTarget,
 )
 from cats.cat_scent_direction_state import (
     CatScentTrailDirection,
@@ -21,6 +22,8 @@ from cats.cat_scent_navigation_state import (
     CatScentBoxFollowState,
 )
 from cats.cat_social_system import CatSocialSystem
+
+from cats.cat_intention_state import CatQuantumBoxTravelTarget
 
 class CatIntentionExecutor:
     NAVIGATION_INTENTS = {'visit_bar': 'return_to_bar', 'visit_recipient': 'follow_entity', 'hunt_cronenberg': 'hunt_nearest_cronenberg', 'track_cronenberg_scent': 'hunt_nearest_cronenberg', 'avoid_cronenberg_scent': 'return_to_bar'}
@@ -269,11 +272,27 @@ class CatIntentionExecutor:
         return all((abs(float(first.get(axis, 0.0)) - float(second.get(axis, 0.0))) <= tolerance for axis in ('x', 'y', 'z')))
 
     def _execute_travel_through_known_quantum_box(self, cat, intention):
-        target = intention.target or {}
-        if not isinstance(target, dict):
-            return self._record({'name': 'cat_quantum_box_travel_failed', 'cat': cat.name, 'reason': 'invalid_target', 'executed': False})
-        source_box_id = target.get('source_box_id')
-        counterpart_box_id = target.get('counterpart_box_id')
+        target = intention.target
+
+        if not isinstance(
+            target,
+            CatQuantumBoxTravelTarget,
+        ):
+            return self._record({
+                'name': (
+                    'cat_quantum_box_travel_failed'
+                ),
+                'cat': cat.name,
+                'reason': (
+                    'invalid_quantum_box_travel_target'
+                ),
+                'executed': False,
+            })
+
+        source_box_id = target.source_box_id
+        counterpart_box_id = (
+            target.counterpart_box_id
+        )
         if source_box_id is None or counterpart_box_id is None:
             return self._record({'name': 'cat_quantum_box_travel_failed', 'cat': cat.name, 'reason': 'missing_box_pair', 'executed': False})
         observation = (
@@ -325,7 +344,7 @@ class CatIntentionExecutor:
             return self._record({'name': 'cat_quantum_box_travel_failed', 'cat': cat.name, 'source_box_id': source_box_id, 'counterpart_box_id': counterpart_box_id, 'reason': 'cat_box_tranfer_unavaible', 'executed': False})
         result = transfer_system.transfer_cat(cat=cat, source_box_id=source_box_id, target_box_id=counterpart_box_id)
         transferred = result.get('transferred', False)
-        event = {'name': 'cat_traveled_through_known_quantum_box' if transferred else 'cat_quantum_box_travel_failed', 'cat': cat.name, 'source_box_id': source_box_id, 'counterpart_box_id': counterpart_box_id, 'source_layer': target.get('source_layer'), 'transfer': deepcopy(result), 'decision_source': 'cat_mind', 'executed': transferred}
+        event = {'name': 'cat_traveled_through_known_quantum_box' if transferred else 'cat_quantum_box_travel_failed', 'cat': cat.name, 'source_box_id': source_box_id, 'counterpart_box_id': counterpart_box_id, 'source_layer': target.source_layer, 'transfer': deepcopy(result), 'decision_source': 'cat_mind', 'executed': transferred}
         mind = cat.mind
         mind.previous_intention = deepcopy(intention)
         mind.current_intention = None
@@ -335,7 +354,7 @@ class CatIntentionExecutor:
             return self._record(event)
         failure_reason = result.get('reason', 'quantum_transfer_failed')
         cronenberg = self.universe.create_cronenberg_from_quantum_error(error=RuntimeError(f'Cat quantum box transfer failed: {failure_reason}'), source_component='cat_intention_executor', source_operation='quantum_box_travel_failed')
-        memory = cat.memory.remember(event_type='quantum_box_layer_transfer_failed', universe_tick=self.universe.quantum_state.tick_count, location=deepcopy(cat.position), participants=[source_box_id, counterpart_box_id], details={'source_layer': target.get('source_layer'), 'target_layer': target.get('target_layer'), 'reason': failure_reason, 'cronenberg_id': cronenberg.id})
+        memory = cat.memory.remember(event_type='quantum_box_layer_transfer_failed', universe_tick=self.universe.quantum_state.tick_count, location=deepcopy(cat.position), participants=[source_box_id, counterpart_box_id], details={'source_layer': target.source_layer, 'target_layer': target.target_layer, 'reason': failure_reason, 'cronenberg_id': cronenberg.id})
         event['reason'] = failure_reason
         event['cronenberg_id'] = cronenberg.id
         event['memory'] = deepcopy(memory)
