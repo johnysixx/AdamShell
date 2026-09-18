@@ -1,6 +1,9 @@
 from cats.cat_components import CatMindState
 from cats.cat_intellect import CatIntellect
-from cats.cat_intention_state import CatIntentionCandidate
+from cats.cat_intention_state import (
+    CatIntentionCandidate,
+    CatKnownScentTarget,
+)
 from cats.cat_knowledge import CatKnowledge
 from cats.cat_perception_state import (
     CatPerceptionState
@@ -141,7 +144,45 @@ class CatMind:
             identity = memory.identity
             if identity not in (None, 'unknown_aroma', 'cronenberg'):
                 scent_direction = CatKnowledge.infer_scent_direction(cat=cat, identity=identity, layer=current_layer)
-                candidates.append(cls._candidate(intention_type='follow_known_scent', score=0.15 + curiosity * 0.25 + courage * 0.1 + float(memory.confidence) * 0.25, reasons=['known_scent_place', 'recognized_identity', 'curiosity'], target={'identity': identity, 'layer': memory.layer, 'position': deepcopy(memory.position), 'source_id': memory.source_id, 'age_ticks': strongest['age_ticks'], 'freshness': strongest['freshness'], 'trail_direction': deepcopy(scent_direction)}))
+                candidates.append(
+                    cls._candidate(
+                        intention_type=(
+                            'follow_known_scent'
+                        ),
+                        score=(
+                            0.15
+                            + curiosity * 0.25
+                            + courage * 0.1
+                            + float(
+                                memory.confidence
+                            ) * 0.25
+                        ),
+                        reasons=[
+                            'known_scent_place',
+                            'recognized_identity',
+                            'curiosity',
+                        ],
+                        target=CatKnownScentTarget(
+                            identity=identity,
+                            layer=memory.layer,
+                            position=deepcopy(
+                                memory.position
+                            ),
+                            source_id=(
+                                memory.source_id
+                            ),
+                            age_ticks=strongest[
+                                'age_ticks'
+                            ],
+                            freshness=strongest[
+                                'freshness'
+                            ],
+                            trail_direction=deepcopy(
+                                scent_direction
+                            ),
+                        ),
+                    )
+                )
         scent_transfers = observations.scent_transfer_candidates
         if scent_transfers:
             best_scent_transfer = max(scent_transfers, key=lambda item: float(item.get('similarity', 0.0)))

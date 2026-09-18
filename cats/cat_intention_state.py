@@ -22,3 +22,17 @@ class CatIntentionCandidate:
         self.reasons = list(
             self.reasons
         )
+
+
+
+@dataclass(slots=True)
+class CatKnownScentTarget:
+    identity: str | None = None
+    layer: str | None = None
+    position: object = None
+    source_id: object = None
+
+    age_ticks: int | None = None
+    freshness: float | None = None
+
+    trail_direction: object = None
