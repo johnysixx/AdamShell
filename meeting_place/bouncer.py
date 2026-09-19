@@ -1,5 +1,8 @@
 from core.entity.social_entity import SocialMixin
 from universe.logger import UniverseLogger
+from cats.cat_meow_bar_access_state import (
+    CatMeowBarAccessState,
+)
 from .bar_objects import BarOrigin, BouncerPrincipleAttributes, CatEntryPolicy
 
 class Bouncer(SocialMixin):
@@ -55,14 +58,34 @@ class Bouncer(SocialMixin):
     def can_enter_with_cat(self, human, escorting_cat):
         human_name = self._get_entity_name(human)
         cat_name = self._get_entity_name(escorting_cat)
-        claim = self._entity_value(human, 'meow_bar_invitation')
-        if not isinstance(claim, dict):
-            return {'authorized': False, 'reason': 'no_MEOW_invitation'}
-        if claim.get('source') != 'cat_MEOW_invitation':
-            return {'authorized': False, 'reason': 'invalid_MEOW_source'}
+        claim = self._entity_value(
+            human,
+            'meow_bar_invitation',
+        )
+
+        if claim is None:
+            return {
+                'authorized': False,
+                'reason': 'no_MEOW_invitation',
+            }
+
+        if not isinstance(
+            claim,
+            CatMeowBarAccessState,
+        ):
+            raise TypeError(
+                'MEOW bar invitation state must be '
+                'CatMeowBarAccessState.'
+            )
+
+        if claim.source != 'cat_MEOW_invitation':
+            return {
+                'authorized': False,
+                'reason': 'invalid_MEOW_source',
+            }
         if self.meow_invitation_system is None:
             return {'authorized': False, 'reason': 'MEOW_registry_unavailable'}
-        invitation_id = claim.get('invitation_id')
+        invitation_id = claim.invitation_id
         invitation = self.meow_invitation_system.get(invitation_id)
         if invitation is None:
             return {'authorized': False, 'reason': 'unknown_MEOW_invitation'}
@@ -70,7 +93,7 @@ class Bouncer(SocialMixin):
             return {'authorized': False, 'reason': 'MEOW_wrong_human'}
         if invitation.cat != cat_name:
             return {'authorized': False, 'reason': 'MEOW_wrong_cat'}
-        if claim.get('inviting_cat') != cat_name:
+        if claim.inviting_cat != cat_name:
             return {'authorized': False, 'reason': 'MEOW_claim_cat_mismatch'}
         if not invitation.understood:
             return {'authorized': False, 'reason': 'MEOW_not_understood'}

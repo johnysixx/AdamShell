@@ -1,5 +1,9 @@
 from copy import deepcopy
 
+from cats.cat_meow_bar_access_state import (
+    CatMeowBarAccessState,
+)
+
 class CatBarGuidanceSystem:
 
     def __init__(self, invitation_system, meeting_place):
@@ -19,7 +23,12 @@ class CatBarGuidanceSystem:
             return self._failed(cat, human, 'MEOW_not_understood')
         if invitation.used:
             return self._failed(cat, human, 'invitation_already_used')
-        temporary_access = {'source': 'cat_MEOW_invitation', 'inviting_cat': cat.name, 'invitation_id': invitation_id, 'permanent': False}
+        temporary_access = CatMeowBarAccessState(
+            source='cat_MEOW_invitation',
+            inviting_cat=cat.name,
+            invitation_id=invitation_id,
+            permanent=False,
+        )
         self._set(human, 'meow_bar_invitation', temporary_access)
         self._set(human, 'guided_by_cat', cat.name)
         add_entity = getattr(self.meeting_place, 'add_entity', None)

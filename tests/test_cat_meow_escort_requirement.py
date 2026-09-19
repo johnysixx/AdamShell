@@ -6,6 +6,9 @@ from cats.cats import Cats
 from cats.cat_human_bond_system import CatHumanBondSystem
 from cats.cat_meow_invitation_system import CatMeowInvitationSystem
 from cats.cat_bar_guidance_system import CatBarGuidanceSystem
+from cats.cat_meow_bar_access_state import (
+    CatMeowBarAccessState
+)
 
 class Human:
 
@@ -32,7 +35,14 @@ class CatMEOWEscortRequirementTests(unittest.TestCase):
         self.offered = self.invitations.offer(self.cat, self.human)
         self.assertTrue(self.offered.offered)
         self.invitations.interpret(self.offered.id, self.human, understood=True)
-        self.human.meow_bar_invitation = {'source': 'cat_MEOW_invitation', 'inviting_cat': self.cat.name, 'invitation_id': self.offered.id, 'permanent': False}
+        self.human.meow_bar_invitation = (
+            CatMeowBarAccessState(
+                source='cat_MEOW_invitation',
+                inviting_cat=self.cat.name,
+                invitation_id=self.offered.id,
+                permanent=False,
+            )
+        )
         self.meeting.bouncer.register_meow_invitation_system(self.invitations)
 
     def test_valid_MEOW_without_cat_does_not_admit(self):
