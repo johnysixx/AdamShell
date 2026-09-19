@@ -3,6 +3,8 @@ from universe.universe import Universe
 from cats.cats import Cats
 from universe.dark_sector import QUANTUM_BOX_ENERGY_COST_J
 
+from cats.cat_quantum_exploration_state import CatQuantumExplorationState
+
 class CatQuantumExplorationMovementTests(unittest.TestCase):
 
     def setUp(self):
@@ -22,13 +24,17 @@ class CatQuantumExplorationMovementTests(unittest.TestCase):
         self.assertEqual(self.cat.current_layer, 'quantum_layer')
         self.assertNotEqual(self.cat.position, {'x': 6.0, 'y': 0.0, 'z': 0.0})
         exploration = self.cat.quantum_exploration
-        self.assertTrue(exploration['active'])
-        self.assertEqual(exploration['destination'], {'x': 6.0, 'y': 0.0, 'z': 0.0})
+        self.assertIsInstance(
+            exploration,
+            CatQuantumExplorationState,
+        )
+        self.assertTrue(exploration.active)
+        self.assertEqual(exploration.destination, {'x': 6.0, 'y': 0.0, 'z': 0.0})
 
     def test_quantum_route_is_most_direct_possible(self):
         self.cats.think_and_act(cat=self.cat)
         exploration = self.cat.quantum_exploration
-        self.assertEqual(exploration['stabilized_path']['path_kind'], 'most_direct_possible')
+        self.assertEqual(exploration.stabilized_path['path_kind'], 'most_direct_possible')
 
     def test_cat_advances_along_quantum_route(self):
         self.cats.think_and_act(cat=self.cat)
@@ -45,9 +51,13 @@ class CatQuantumExplorationMovementTests(unittest.TestCase):
                 break
         self.assertTrue(result['arrived'])
         history = self.cat.quantum_exploration_history
+        self.assertIsInstance(
+            history[-1],
+            CatQuantumExplorationState,
+        )
         self.assertGreaterEqual(len(history), 1)
-        self.assertTrue(history[-1]['arrived'])
-        self.assertEqual(history[-1]['destination'], {'x': 6.0, 'y': 0.0, 'z': 0.0})
+        self.assertTrue(history[-1].arrived)
+        self.assertEqual(history[-1].destination, {'x': 6.0, 'y': 0.0, 'z': 0.0})
         self.assertEqual(self.cat.position, {'x': 6.0, 'y': 0.0, 'z': 0.0})
         self.assertIsNotNone(result.get('arrival_resolution'))
         self.assertTrue(result['arrival_resolution']['resolved'])

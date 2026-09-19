@@ -20,6 +20,8 @@ from universe.dark_sector import (
 
 from cats.cat_quantum_return_state import CatQuantumReturnState
 
+from cats.cat_quantum_exploration_state import CatQuantumExplorationState
+
 class CatQuantumBoxTransfer:
 
     def __init__(
@@ -1152,6 +1154,23 @@ class CatQuantumBoxTransfer:
         pair_id,
         step_size=None
     ):
+        current_exploration = (
+            cat.quantum_exploration
+        )
+
+        if (
+            current_exploration is not None
+            and not isinstance(
+                current_exploration,
+                CatQuantumExplorationState,
+            )
+        ):
+            raise TypeError(
+                'Cat quantum exploration state '
+                'must be '
+                'CatQuantumExplorationState.'
+            )
+
         pair = next(
             (
                 item
@@ -1235,14 +1254,18 @@ class CatQuantumBoxTransfer:
             route.route_id
         )
 
-        cat.quantum_exploration = {
-            "active": True,
-            "pair_id": pair_id,
-            "route_id": route.route_id,
-            "destination": destination,
-            "stabilized_path": stabilized,
-            "arrived": False
-        }
+        cat.quantum_exploration = (
+            CatQuantumExplorationState(
+                active=True,
+                arrived=False,
+                pair_id=pair_id,
+                route_id=route.route_id,
+                destination=destination,
+                stabilized_path=stabilized,
+                stage=1,
+                continuation=False,
+            )
+        )
 
         event = {
             "name": (
@@ -1280,7 +1303,20 @@ class CatQuantumBoxTransfer:
     ):
         exploration = cat.quantum_exploration
 
-        if not exploration:
+        if (
+            exploration is not None
+            and not isinstance(
+                exploration,
+                CatQuantumExplorationState,
+            )
+        ):
+            raise TypeError(
+                'Cat quantum exploration state '
+                'must be '
+                'CatQuantumExplorationState.'
+            )
+
+        if exploration is None:
             return {
                 "name": (
                     "cat_quantum_exploration_"
@@ -1291,10 +1327,7 @@ class CatQuantumBoxTransfer:
                 "advanced": False
             }
 
-        if not exploration.get(
-            "active",
-            False
-        ):
+        if not exploration.active:
             return {
                 "name": (
                     "cat_quantum_exploration_"
@@ -1352,8 +1385,8 @@ class CatQuantumBoxTransfer:
             "arrived",
             False
         ):
-            exploration["active"] = False
-            exploration["arrived"] = True
+            exploration.active = False
+            exploration.arrived = True
 
             exploration_history = getattr(
                 cat,
@@ -1388,12 +1421,8 @@ class CatQuantumBoxTransfer:
                 "cat_quantum_exploration_advanced"
             ),
             "cat": cat.name,
-            "pair_id": exploration[
-                "pair_id"
-            ],
-            "route_id": exploration[
-                "route_id"
-            ],
+            "pair_id": exploration.pair_id,
+            "route_id": exploration.route_id,
             "position": (
                 dict(position)
                 if position is not None
@@ -1447,11 +1476,24 @@ class CatQuantumBoxTransfer:
         cat,
         quantum_roll=None
     ):
-        exploration = (cat.quantum_exploration or {})
+        exploration = cat.quantum_exploration
 
-        if not exploration.get(
-            "arrived",
-            False
+        if (
+            exploration is not None
+            and not isinstance(
+                exploration,
+                CatQuantumExplorationState,
+            )
+        ):
+            raise TypeError(
+                'Cat quantum exploration state '
+                'must be '
+                'CatQuantumExplorationState.'
+            )
+
+        if (
+            exploration is None
+            or not exploration.arrived
         ):
             return {
                 "name": (
@@ -1465,9 +1507,7 @@ class CatQuantumBoxTransfer:
 
         pair = (
             self._find_stable_pair_by_id(
-                exploration.get(
-                    "pair_id"
-                )
+                exploration.pair_id
             )
         )
 
@@ -1494,9 +1534,7 @@ class CatQuantumBoxTransfer:
                     "position": dict(
                         cat.position
                     ),
-                    "pair_id": exploration.get(
-                        "pair_id"
-                    )
+                    "pair_id": exploration.pair_id
                 }
             )
 
@@ -1515,14 +1553,9 @@ class CatQuantumBoxTransfer:
                     self.universe.universe_tick
                 ),
                 details={
-                    "pair_id": exploration.get(
-                        "pair_id"
-                    ),
+                    "pair_id": exploration.pair_id,
                     "exploration_stage": (
-                        exploration.get(
-                            "stage",
-                            1
-                        )
+                        exploration.stage
                     )
                 }
             )
@@ -1631,9 +1664,7 @@ class CatQuantumBoxTransfer:
                 "arrival_resolved"
             ),
             "cat": cat.name,
-            "pair_id": exploration.get(
-                "pair_id"
-            ),
+            "pair_id": exploration.pair_id,
             "position": dict(
                 cat.position
             ),
@@ -1662,10 +1693,25 @@ class CatQuantumBoxTransfer:
         self,
         cat
     ):
-        exploration = (cat.quantum_exploration or {})
+        exploration = cat.quantum_exploration
 
-        pair_id = exploration.get(
-            "pair_id"
+        if (
+            exploration is not None
+            and not isinstance(
+                exploration,
+                CatQuantumExplorationState,
+            )
+        ):
+            raise TypeError(
+                'Cat quantum exploration state '
+                'must be '
+                'CatQuantumExplorationState.'
+            )
+
+        pair_id = (
+            exploration.pair_id
+            if exploration is not None
+            else None
         )
 
         pair = self._find_stable_pair_by_id(
@@ -1757,22 +1803,17 @@ class CatQuantumBoxTransfer:
         )
 
         stage = int(
-            exploration.get(
-                "stage",
-                1
-            )
+            exploration.stage
         ) + 1
 
-        cat.quantum_exploration = {
-            "active": True,
-            "arrived": False,
-            "pair_id": pair_id,
-            "route_id": route.route_id,
-            "destination": destination,
-            "stabilized_path": stabilized,
-            "stage": stage,
-            "continuation": True
-        }
+        exploration.active = True
+        exploration.arrived = False
+        exploration.pair_id = pair_id
+        exploration.route_id = route.route_id
+        exploration.destination = destination
+        exploration.stabilized_path = stabilized
+        exploration.stage = stage
+        exploration.continuation = True
 
         cat.state = (
             "continuing_quantum_exploration"

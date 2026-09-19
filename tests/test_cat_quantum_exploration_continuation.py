@@ -33,8 +33,8 @@ class CatQuantumExplorationContinuationTests(unittest.TestCase):
         self.assertEqual(resolution['action'], 'continue_exploration')
         continuation = resolution['continuation_plan']
         self.assertTrue(continuation['continued'])
-        self.assertTrue(self.cat.quantum_exploration['active'])
-        self.assertEqual(self.cat.quantum_exploration['stage'], 2)
+        self.assertTrue(self.cat.quantum_exploration.active)
+        self.assertEqual(self.cat.quantum_exploration.stage, 2)
 
     def test_continuation_does_not_create_new_pair(self):
         self.assertEqual(len(self.universe.stable_cat_box_pairs), 0)
@@ -52,7 +52,7 @@ class CatQuantumExplorationContinuationTests(unittest.TestCase):
     def test_second_goal_is_different(self):
         first_goal = dict(self.cat.exploration_goal['position'])
         self.reach_first_goal()
-        second_goal = dict(self.cat.quantum_exploration['destination'])
+        second_goal = dict(self.cat.quantum_exploration.destination)
         self.assertNotEqual(first_goal, second_goal)
 if __name__ == '__main__':
     unittest.main()

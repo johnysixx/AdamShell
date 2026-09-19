@@ -17,6 +17,8 @@ from .cat_need_system import CatNeedSystem
 
 from .cat_quantum_return_state import CatQuantumReturnState
 
+from .cat_quantum_exploration_state import CatQuantumExplorationState
+
 class Cats:
 
     def __init__(self, universe):
@@ -367,7 +369,27 @@ class Cats:
             result = self.advance_cat_quantum_return(cat)
             return {'name': 'cat_autonomous_tick_completed', 'cat': cat.name, 'mode': 'quantum_return', 'result': result, 'completed': True}
         quantum_exploration = getattr(cat, 'quantum_exploration', None)
-        if isinstance(quantum_exploration, dict) and quantum_exploration.get('active', False):
+
+        if (
+            quantum_exploration is not None
+            and not isinstance(
+                quantum_exploration,
+                CatQuantumExplorationState,
+            )
+        ):
+            raise TypeError(
+                'Cat quantum exploration state '
+                'must be '
+                'CatQuantumExplorationState.'
+            )
+
+        if (
+            isinstance(
+                quantum_exploration,
+                CatQuantumExplorationState,
+            )
+            and quantum_exploration.active
+        ):
             result = self.advance_cat_quantum_exploration(cat)
             return {'name': 'cat_autonomous_tick_completed', 'cat': cat.name, 'mode': 'quantum_exploration', 'result': result, 'completed': True}
         if getattr(cat, 'position', None) is None:
