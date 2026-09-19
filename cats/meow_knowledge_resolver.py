@@ -107,7 +107,7 @@ class MeowKnowledgeResolver:
         if mother_name is not None and teacher_name == mother_name:
             return {'allowed': True, 'reason': 'biological_mother_available', 'role': 'biological_mother'}
         teacher_wisdom = FelineWisdom.ensure_state(teacher)
-        teaching_ability = teacher_wisdom['abilities'].get('teach_other_cats')
+        teaching_ability = teacher_wisdom.abilities.get('teach_other_cats')
         can_teach_other_cats = bool(teaching_ability and teaching_ability.get('learned', False))
         if can_teach_other_cats:
             return {'allowed': True, 'reason': 'qualified_feline_teacher', 'role': 'dice_cat_teacher' if getattr(teacher, 'origin', None) == 'dice_manifestation' else 'qualified_cat_teacher'}
@@ -117,16 +117,16 @@ class MeowKnowledgeResolver:
         teacher_wisdom = FelineWisdom.ensure_state(teacher)
         kitten_wisdom = FelineWisdom.ensure_state(kitten)
         transferred = []
-        for knowledge_name, knowledge in teacher_wisdom['awareness'].items():
+        for knowledge_name, knowledge in teacher_wisdom.awareness.items():
             domain = knowledge.get('domain')
             if domain not in FelineWisdom.MEOW_ALLOWED_DOMAINS:
                 continue
             copied = {'name': knowledge_name, 'domain': domain, 'known_to_exist': True, 'description': knowledge.get('description'), 'known_teachers': list(knowledge.get('known_teachers', [])), 'transfer_mode': 'awareness_only', 'received_from': teacher.name, 'received_on_day': current_day}
-            kitten_wisdom['awareness'][knowledge_name] = copied
+            kitten_wisdom.awareness[knowledge_name] = copied
             transferred.append(copied)
         event = {'name': 'meow_feline_awareness_transmitted', 'teacher': teacher.name, 'kitten': kitten.name, 'day': current_day, 'transferred': transferred, 'transferred_count': len(transferred), 'ability_methods_transferred': 0}
-        teacher_wisdom['transmission_history'].append(event)
-        kitten_wisdom['transmission_history'].append(event)
+        teacher_wisdom.transmission_history.append(event)
+        kitten_wisdom.transmission_history.append(event)
         return event
 
     def _complete_skill(self, kitten, skill_name, teacher_name, current_day):

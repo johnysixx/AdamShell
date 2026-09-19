@@ -364,9 +364,23 @@ class Universe:
             skill.learned_on_day = 0
         learning.complete = True
         learning.teaching_required = False
-        feline_wisdom = _entity_attr_setdefault(cat, 'feline_wisdom', {'awareness': {}, 'abilities': {}, 'history': []})
-        feline_wisdom['abilities'].pop('teach_other_cats', None)
-        feline_wisdom['abilities'].pop('teach_teaching', None)
+        from cats.feline_wisdom import FelineWisdom
+
+        feline_wisdom = (
+            FelineWisdom.ensure_state(
+                cat
+            )
+        )
+
+        feline_wisdom.abilities.pop(
+            'teach_other_cats',
+            None,
+        )
+
+        feline_wisdom.abilities.pop(
+            'teach_teaching',
+            None,
+        )
         cat.state = 'juvenile_cat_from_quantum_box'
         return cat
 

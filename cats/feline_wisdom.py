@@ -1,67 +1,56 @@
+from cats.feline_wisdom_state import (
+    FelineWisdomState,
+)
+
+
 class FelineWisdom:
 
     MEOW_ALLOWED_DOMAINS = frozenset({
         "physics",
-        "feline"
+        "feline",
     })
 
     @classmethod
     def create_state(
         cls,
-        can_transmit_meow=False
+        can_transmit_meow=False,
     ):
-        return {
-            "can_transmit_meow": bool(
+        return FelineWisdomState(
+            can_transmit_meow=bool(
                 can_transmit_meow
-            ),
-            "awareness": {},
-            "abilities": {},
-            "transmission_history": [],
-            "lesson_history": []
-        }
+            )
+        )
 
     @classmethod
     def ensure_state(
         cls,
         cat,
-        can_transmit_meow=None
+        can_transmit_meow=None,
     ):
         wisdom = getattr(
             cat,
             "feline_wisdom",
-            None
+            None,
         )
 
         if wisdom is None:
             wisdom = cls.create_state()
+
             cat.feline_wisdom = wisdom
 
-        if can_transmit_meow is not None:
-            wisdom[
-                "can_transmit_meow"
-            ] = bool(
-                can_transmit_meow
+        elif not isinstance(
+            wisdom,
+            FelineWisdomState,
+        ):
+            raise TypeError(
+                "Feline wisdom state must be "
+                "FelineWisdomState."
             )
 
-        wisdom.setdefault(
-            "awareness",
-            {}
-        )
-
-        wisdom.setdefault(
-            "abilities",
-            {}
-        )
-
-        wisdom.setdefault(
-            "transmission_history",
-            []
-        )
-
-        wisdom.setdefault(
-            "lesson_history",
-            []
-        )
+        if can_transmit_meow is not None:
+            wisdom.set_can_transmit_meow(
+                can_transmit_meow
+            )
 
         return wisdom
 
@@ -72,7 +61,7 @@ class FelineWisdom:
         knowledge_name,
         domain,
         description=None,
-        known_teachers=None
+        known_teachers=None,
     ):
         if domain not in (
             cls.MEOW_ALLOWED_DOMAINS
@@ -94,12 +83,11 @@ class FelineWisdom:
             "known_teachers": list(
                 known_teachers or []
             ),
-            "transfer_mode": "awareness_only"
+            "transfer_mode":
+                "awareness_only",
         }
 
-        wisdom[
-            "awareness"
-        ][
+        wisdom.awareness[
             knowledge_name
         ] = awareness
 
@@ -112,21 +100,23 @@ class FelineWisdom:
         ability_name,
         method_name,
         teacher_name,
-        constraints=None
+        constraints=None,
     ):
         wisdom = cls.ensure_state(
             cat
         )
 
-        ability = wisdom[
-            "abilities"
-        ].setdefault(
-            ability_name,
-            {
-                "learned": False,
-                "methods": {},
-                "can_close": False
-            }
+        ability = (
+            wisdom
+            .abilities
+            .setdefault(
+                ability_name,
+                {
+                    "learned": False,
+                    "methods": {},
+                    "can_close": False,
+                },
+            )
         )
 
         method = {
@@ -134,7 +124,7 @@ class FelineWisdom:
             "teacher": teacher_name,
             "constraints": dict(
                 constraints or {}
-            )
+            ),
         }
 
         ability[
@@ -143,6 +133,8 @@ class FelineWisdom:
             method_name
         ] = method
 
-        ability["learned"] = True
+        ability[
+            "learned"
+        ] = True
 
         return method

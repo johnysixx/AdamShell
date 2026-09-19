@@ -44,8 +44,8 @@ class MeowFelineWisdomIntegrationTests(unittest.TestCase):
         wisdom = self.kitten.feline_wisdom
         self.assertTrue(result['transmitted'])
         self.assertEqual(result['teacher_role'], 'biological_mother')
-        self.assertIn('open_human_door', wisdom['awareness'])
-        self.assertNotIn('open_human_door', wisdom['abilities'])
+        self.assertIn('open_human_door', wisdom.awareness)
+        self.assertNotIn('open_human_door', wisdom.abilities)
         self.assertEqual(result['ability_methods_transferred'], 0)
 
     def test_unrelated_natural_cat_cannot_teach_meow(self):
@@ -63,14 +63,14 @@ class MeowFelineWisdomIntegrationTests(unittest.TestCase):
         self.assertTrue(result['transmitted'])
         self.assertEqual(result['teacher_role'], 'dice_cat_teacher')
         self.assertEqual(result['transmission_source'], 'qualified_dice_cat_transmission')
-        self.assertIn('open_human_door', self.kitten.feline_wisdom['awareness'])
+        self.assertIn('open_human_door', self.kitten.feline_wisdom.awareness)
 
     def test_meow_ignores_forbidden_domains(self):
         teacher_wisdom = FelineWisdom.ensure_state(self.mother)
-        teacher_wisdom['awareness']['forbidden_magic'] = {'name': 'forbidden_magic', 'domain': 'magic', 'known_to_exist': True}
+        teacher_wisdom.awareness['forbidden_magic'] = {'name': 'forbidden_magic', 'domain': 'magic', 'known_to_exist': True}
         result = self.resolver.transmit(mother=self.mother, kitten=self.kitten, current_day=90)
         self.assertTrue(result['transmitted'])
-        self.assertNotIn('forbidden_magic', self.kitten.feline_wisdom['awareness'])
+        self.assertNotIn('forbidden_magic', self.kitten.feline_wisdom.awareness)
 
     def test_untrained_dice_cat_cannot_teach_orphan(self):
         self.kitten.family.parents.mother = None

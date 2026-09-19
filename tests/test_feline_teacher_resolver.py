@@ -69,13 +69,13 @@ class FelineTeacherResolverTests(unittest.TestCase):
         result = self.teachers.request_lesson(student=self.kitten, ability_name='open_human_door', method_name='hang_on_handle', ability_resolver=self.abilities)
         self.assertTrue(result['learned'])
         self.assertEqual(result['teacher'], 'pazuzu')
-        methods = self.kitten.feline_wisdom['abilities']['open_human_door']['methods']
+        methods = self.kitten.feline_wisdom.abilities['open_human_door']['methods']
         self.assertIn('hang_on_handle', methods)
 
     def test_awareness_does_not_teach_before_lesson(self):
         self.give_door_awareness()
         self.teachers.find_teachers(student=self.kitten, ability_name='open_human_door')
         wisdom = self.kitten.feline_wisdom
-        self.assertNotIn('open_human_door', wisdom['abilities'])
+        self.assertNotIn('open_human_door', wisdom.abilities)
 if __name__ == '__main__':
     unittest.main()

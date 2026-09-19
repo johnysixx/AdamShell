@@ -20,7 +20,7 @@ class QuantumBoxCatProfileTests(unittest.TestCase):
     def test_quantum_box_cat_cannot_teach_yet(self):
         result = self.universe.manifest_cat(name='box_kitten', source='quantum_box_opened')
         cat = result['cat']
-        abilities = cat.feline_wisdom['abilities']
+        abilities = cat.feline_wisdom.abilities
         self.assertNotIn('teach_other_cats', abilities)
         self.assertNotIn('teach_teaching', abilities)
 

@@ -28,8 +28,8 @@ class FelineAbilityLearningTests(unittest.TestCase):
         wisdom = self.kitten.feline_wisdom
         self.assertTrue(result['transmitted'])
         self.assertEqual(result['methods_transferred'], 0)
-        self.assertTrue(wisdom['awareness']['open_human_door']['known_to_exist'])
-        self.assertNotIn('open_human_door', wisdom['abilities'])
+        self.assertTrue(wisdom.awareness['open_human_door']['known_to_exist'])
+        self.assertNotIn('open_human_door', wisdom.abilities)
 
     def test_pazuzu_teaches_handle_method(self):
         result = self.resolver.teach_method(teacher=self.pazuzu, student=self.kitten, ability_name='open_human_door', method_name='hang_on_handle')
@@ -62,7 +62,7 @@ class FelineAbilityLearningTests(unittest.TestCase):
     def test_cat_can_learn_both_methods(self):
         self.resolver.teach_method(teacher=self.pazuzu, student=self.kitten, ability_name='open_human_door', method_name='hang_on_handle')
         self.resolver.teach_method(teacher=self.queen, student=self.kitten, ability_name='open_human_door', method_name='pull_with_paw')
-        methods = self.kitten.feline_wisdom['abilities']['open_human_door']['methods']
+        methods = self.kitten.feline_wisdom.abilities['open_human_door']['methods']
         self.assertEqual(set(methods), {'hang_on_handle', 'pull_with_paw'})
 
     def test_queen_cannot_open_locked_door(self):

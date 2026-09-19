@@ -30,19 +30,19 @@ class FelineAbilityResolver:
     def transmit_meow_awareness(self, teacher, student):
         teacher_wisdom = FelineWisdom.ensure_state(teacher)
         student_wisdom = FelineWisdom.ensure_state(student)
-        if not teacher_wisdom.get('can_transmit_meow', False):
+        if not teacher_wisdom.can_transmit_meow:
             return self._deny(name='meow_awareness_transmission_denied', teacher=teacher, student=student, reason='teacher_cannot_transmit_meow')
         transferred = []
-        for knowledge_name, knowledge in teacher_wisdom['awareness'].items():
+        for knowledge_name, knowledge in teacher_wisdom.awareness.items():
             domain = knowledge.get('domain')
             if domain not in FelineWisdom.MEOW_ALLOWED_DOMAINS:
                 continue
             copied = {'name': knowledge_name, 'domain': domain, 'known_to_exist': True, 'description': knowledge.get('description'), 'known_teachers': list(knowledge.get('known_teachers', [])), 'transfer_mode': 'awareness_only'}
-            student_wisdom['awareness'][knowledge_name] = copied
+            student_wisdom.awareness[knowledge_name] = copied
             transferred.append(copied)
         event = {'name': 'meow_ability_awareness_transmitted', 'teacher': teacher.name, 'student': student.name, 'transferred': transferred, 'transferred_count': len(transferred), 'methods_transferred': 0, 'transmitted': True}
-        teacher_wisdom['transmission_history'].append(event)
-        student_wisdom['transmission_history'].append(event)
+        teacher_wisdom.transmission_history.append(event)
+        student_wisdom.transmission_history.append(event)
         self._record(event)
         return event
 
@@ -55,7 +55,7 @@ class FelineAbilityResolver:
                 return self._create_teaching_cronenberg(teacher=teacher, student=student, ability_name=ability_name, reason=permission['reason'])
             return self._deny(name='feline_ability_lesson_denied', teacher=teacher, student=student, reason=permission['reason'])
         teacher_wisdom = FelineWisdom.ensure_state(teacher)
-        teacher_ability = teacher_wisdom['abilities'].get(ability_name)
+        teacher_ability = teacher_wisdom.abilities.get(ability_name)
         if not teacher_ability:
             return self._deny(name='feline_ability_lesson_denied', teacher=teacher, student=student, reason='teacher_does_not_know_ability')
         teacher_method = teacher_ability['methods'].get(method_name)
@@ -65,13 +65,13 @@ class FelineAbilityResolver:
         teacher_personality = CatPersonality.apply_experience(cat=teacher, source='successfully_taught_other_cat', changes={'empathy': 0.02, 'patience': 0.015}, metadata={'student': student.name, 'ability': ability_name, 'method': method_name})
         student_personality = CatPersonality.apply_experience(cat=student, source='learned_from_other_cat', changes={'curiosity': 0.01}, metadata={'teacher': teacher.name, 'ability': ability_name, 'method': method_name})
         event = {'name': 'feline_ability_method_learned', 'teacher': teacher.name, 'student': student.name, 'ability': ability_name, 'method': method_name, 'constraints': dict(learned_method['constraints']), 'teacher_personality': teacher_personality, 'student_personality': student_personality, 'learned': True}
-        FelineWisdom.ensure_state(student)['lesson_history'].append(event)
+        FelineWisdom.ensure_state(student).lesson_history.append(event)
         self._record(event)
         return event
 
     def can_open_human_door(self, cat, locked, opens_toward_cat):
         wisdom = FelineWisdom.ensure_state(cat)
-        ability = wisdom['abilities'].get(self.OPEN_HUMAN_DOOR)
+        ability = wisdom.abilities.get(self.OPEN_HUMAN_DOOR)
         if not ability or not ability.get('learned', False):
             return {'allowed': False, 'reason': 'human_door_ability_not_learned'}
         if locked:
@@ -135,7 +135,7 @@ class FelineAbilityResolver:
         }
 
     def _knows_ability(self, wisdom, ability_name):
-        ability = wisdom['abilities'].get(ability_name)
+        ability = wisdom.abilities.get(ability_name)
         return bool(ability and ability.get('learned', False))
 
     def _create_teaching_cronenberg(self, teacher, student, ability_name, reason):
