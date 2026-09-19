@@ -1,5 +1,8 @@
 from copy import deepcopy
 from cats.cat import Cat
+from cats.cat_cultural_preference_state import (
+    CatCulturalPreferenceState
+)
 
 class CatCulturalAdoptionSystem:
 
@@ -44,8 +47,29 @@ class CatCulturalAdoptionSystem:
         preference = group.culture.preferences.get(preference_name)
         if preference is None:
             return {'name': 'cat_cultural_preference_denied', 'reason': 'unknown_preference', 'adopted': False}
-        cat.culture.preferences[preference_name] = deepcopy(preference)
-        return {'name': 'cat_cultural_preference_adopted', 'cat': cat.name, 'preference': preference_name, 'value': preference.get('value'), 'adopted': True}
+
+        if not isinstance(
+            preference,
+            CatCulturalPreferenceState,
+        ):
+            raise TypeError(
+                'Cat cultural preference record '
+                'must be '
+                'CatCulturalPreferenceState.'
+            )
+
+        cat.culture.preferences[
+            preference_name
+        ] = deepcopy(preference)
+
+        return {
+            'name':
+                'cat_cultural_preference_adopted',
+            'cat': cat.name,
+            'preference': preference_name,
+            'value': preference.value,
+            'adopted': True,
+        }
 
     def _require_cat(self, cat):
         if not isinstance(cat, Cat):

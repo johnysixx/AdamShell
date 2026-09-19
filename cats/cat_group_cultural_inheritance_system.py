@@ -1,5 +1,9 @@
 from copy import deepcopy
 
+from cats.cat_cultural_preference_state import (
+    CatCulturalPreferenceState
+)
+
 class CatGroupCulturalInheritanceSystem:
 
     def __init__(self, group_system):
@@ -22,10 +26,36 @@ class CatGroupCulturalInheritanceSystem:
             inherited['inherited_from'] = parent_group_id
             child_culture.traditions[name] = inherited
         for name, preference in parent_culture.preferences.items():
-            inherited = deepcopy(preference)
-            inherited['strength'] = self._clamp(float(inherited.get('strength', 0.0)) * retention)
-            inherited['inherited_from'] = parent_group_id
-            child_culture.preferences[name] = inherited
+            if not isinstance(
+                preference,
+                CatCulturalPreferenceState,
+            ):
+                raise TypeError(
+                    'Cat cultural preference '
+                    'record must be '
+                    'CatCulturalPreferenceState.'
+                )
+
+            inherited = deepcopy(
+                preference
+            )
+
+            inherited.strength = (
+                self._clamp(
+                    float(
+                        inherited.strength
+                    )
+                    * retention
+                )
+            )
+
+            inherited.inherited_from = (
+                parent_group_id
+            )
+
+            child_culture.preferences[
+                name
+            ] = inherited
         event = {'name': 'cat_group_culture_inherited', 'parent_group': parent_group_id, 'child_group': child_group_id, 'retention': retention, 'inherited_traits': list(child_culture.traits), 'inherited_traditions': list(child_culture.traditions), 'inherited_preferences': list(child_culture.preferences)}
         parent.history.append(deepcopy(event))
         child.history.append(deepcopy(event))

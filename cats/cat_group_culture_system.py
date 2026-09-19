@@ -1,5 +1,9 @@
 from copy import deepcopy
 
+from cats.cat_cultural_preference_state import (
+    CatCulturalPreferenceState
+)
+
 class CatGroupCultureSystem:
 
     def __init__(self, group_system):
@@ -23,11 +27,47 @@ class CatGroupCultureSystem:
     def express_preference(self, group_id, preference, value, strength=0.1):
         group = self.group_system._group(group_id)
         preferences = group.culture.preferences
-        record = preferences.setdefault(preference, {'value': value, 'strength': 0.0, 'expressions': 0})
-        record['value'] = value
-        record['expressions'] += 1
-        record['strength'] = self._clamp(float(record['strength']) + float(strength))
-        return {'name': 'cat_group_preference_expressed', 'group_id': group_id, 'preference': preference, 'value': value, 'strength': record['strength']}
+        record = preferences.get(
+            preference
+        )
+
+        if record is None:
+            record = (
+                CatCulturalPreferenceState(
+                    value=value
+                )
+            )
+
+            preferences[
+                preference
+            ] = record
+
+        elif not isinstance(
+            record,
+            CatCulturalPreferenceState,
+        ):
+            raise TypeError(
+                'Cat cultural preference record '
+                'must be '
+                'CatCulturalPreferenceState.'
+            )
+
+        record.value = value
+        record.expressions += 1
+
+        record.strength = self._clamp(
+            float(record.strength)
+            + float(strength)
+        )
+
+        return {
+            'name':
+                'cat_group_preference_expressed',
+            'group_id': group_id,
+            'preference': preference,
+            'value': value,
+            'strength': record.strength,
+        }
 
     def profile(self, group_id):
         group = self.group_system._group(group_id)

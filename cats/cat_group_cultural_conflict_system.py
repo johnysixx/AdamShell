@@ -1,5 +1,9 @@
 from copy import deepcopy
 
+from cats.cat_cultural_preference_state import (
+    CatCulturalPreferenceState
+)
+
 class CatGroupCulturalConflictSystem:
 
     def __init__(self, group_system):
@@ -16,8 +20,41 @@ class CatGroupCulturalConflictSystem:
         second_preferences = second_culture.preferences
         shared_preferences = set(first_preferences).intersection(second_preferences)
         for name in shared_preferences:
-            first_value = first_preferences[name].get('value')
-            second_value = second_preferences[name].get('value')
+            first_preference = (
+                first_preferences[name]
+            )
+
+            second_preference = (
+                second_preferences[name]
+            )
+
+            if not isinstance(
+                first_preference,
+                CatCulturalPreferenceState,
+            ):
+                raise TypeError(
+                    'Cat cultural preference '
+                    'record must be '
+                    'CatCulturalPreferenceState.'
+                )
+
+            if not isinstance(
+                second_preference,
+                CatCulturalPreferenceState,
+            ):
+                raise TypeError(
+                    'Cat cultural preference '
+                    'record must be '
+                    'CatCulturalPreferenceState.'
+                )
+
+            first_value = (
+                first_preference.value
+            )
+
+            second_value = (
+                second_preference.value
+            )
             if first_value == second_value:
                 agreements.append(name)
             else:

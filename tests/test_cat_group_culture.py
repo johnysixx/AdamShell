@@ -11,6 +11,9 @@ from cats.cat_group_knowledge_system import (
 from cats.cat_group_culture_system import (
     CatGroupCultureSystem
 )
+from cats.cat_cultural_preference_state import (
+    CatCulturalPreferenceState
+)
 from cats.cat_group_myth_system import (
     CatGroupMythSystem
 )
@@ -146,12 +149,19 @@ class CatGroupCultureTests(
             self.group_id
         )
 
-        self.assertEqual(
+        preference = (
             profile.preferences[
                 "sleeping_place"
-            ][
-                "value"
-            ],
+            ]
+        )
+
+        self.assertIsInstance(
+            preference,
+            CatCulturalPreferenceState,
+        )
+
+        self.assertEqual(
+            preference.value,
             "bar_cloth"
         )
 
