@@ -3,6 +3,8 @@ from universe.universe import Universe
 from cats.cats import Cats
 from universe.dark_sector import QUANTUM_BOX_ENERGY_COST_J
 
+from cats.cat_exploration_goal import CatExplorationGoal
+
 class CatQuantumExplorationContinuationTests(unittest.TestCase):
 
     def setUp(self):
@@ -13,7 +15,10 @@ class CatQuantumExplorationContinuationTests(unittest.TestCase):
         self.cat.current_layer = 'meeting_place'
         self.cat.position = {'x': 0.0, 'y': 0.0, 'z': 0.0}
         self.cat.idea_energy = QUANTUM_BOX_ENERGY_COST_J * 10.0
-        self.cat.exploration_goal = {'layer': 'quantum_layer', 'position': {'x': 4.0, 'y': 0.0, 'z': 0.0}}
+        self.cat.exploration_goal = CatExplorationGoal(
+            layer='quantum_layer',
+            position={'x': 4.0, 'y': 0.0, 'z': 0.0},
+        )
         traits = self.cat.personality.traits
         traits.curiosity = 1.0
         traits.courage = 1.0
@@ -50,7 +55,7 @@ class CatQuantumExplorationContinuationTests(unittest.TestCase):
         self.assertIn(pair['remote_box_id'], [box.id for box in self.universe.quantum_boxes])
 
     def test_second_goal_is_different(self):
-        first_goal = dict(self.cat.exploration_goal['position'])
+        first_goal = dict(self.cat.exploration_goal.position)
         self.reach_first_goal()
         second_goal = dict(self.cat.quantum_exploration.destination)
         self.assertNotEqual(first_goal, second_goal)

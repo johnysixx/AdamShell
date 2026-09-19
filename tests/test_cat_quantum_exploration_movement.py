@@ -5,6 +5,8 @@ from universe.dark_sector import QUANTUM_BOX_ENERGY_COST_J
 
 from cats.cat_quantum_exploration_state import CatQuantumExplorationState
 
+from cats.cat_exploration_goal import CatExplorationGoal
+
 class CatQuantumExplorationMovementTests(unittest.TestCase):
 
     def setUp(self):
@@ -15,7 +17,10 @@ class CatQuantumExplorationMovementTests(unittest.TestCase):
         self.cat.current_layer = 'meeting_place'
         self.cat.position = {'x': 0.0, 'y': 0.0, 'z': 0.0}
         self.cat.idea_energy = QUANTUM_BOX_ENERGY_COST_J * 10.0
-        self.cat.exploration_goal = {'layer': 'quantum_layer', 'position': {'x': 6.0, 'y': 0.0, 'z': 0.0}}
+        self.cat.exploration_goal = CatExplorationGoal(
+            layer='quantum_layer',
+            position={'x': 6.0, 'y': 0.0, 'z': 0.0},
+        )
         self.cat.personality.traits.curiosity = 1.0
 
     def test_pair_entry_is_not_final_destination(self):

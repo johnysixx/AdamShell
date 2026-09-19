@@ -7,6 +7,8 @@ from cats.cat_exploration_planner import (
 )
 
 
+from cats.cat_exploration_goal import CatExplorationGoal
+
 class CatExplorationPlannerTests(
     unittest.TestCase
 ):
@@ -58,14 +60,14 @@ class CatExplorationPlannerTests(
     def test_explicit_goal_has_priority(
         self
     ):
-        self.cat.exploration_goal = {
-            "layer": "eden",
-            "position": {
+        self.cat.exploration_goal = CatExplorationGoal(
+            layer="eden",
+            position={
                 "x": 9.0,
                 "y": 8.0,
                 "z": 7.0
-            }
-        }
+            },
+        )
 
         result = (
             CatExplorationPlanner

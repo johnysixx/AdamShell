@@ -12,6 +12,8 @@ from .cat_exploration_state import (
 )
 
 
+from .cat_exploration_goal import CatExplorationGoal
+
 class CatExplorationPlanner:
 
     POSITIVE_MEMORY_TYPES = {
@@ -574,17 +576,21 @@ class CatExplorationPlanner:
             None
         )
 
-        if isinstance(
-            explicit_goal,
-            dict
+        if (
+            explicit_goal is not None
+            and not isinstance(
+                explicit_goal,
+                CatExplorationGoal,
+            )
         ):
-            layer = explicit_goal.get(
-                "layer"
+            raise TypeError(
+                'Cat exploration goal '
+                'must be CatExplorationGoal.'
             )
 
-            position = explicit_goal.get(
-                "position"
-            )
+        if explicit_goal is not None:
+            layer = explicit_goal.layer
+            position = explicit_goal.position
 
             if layer is not None:
                 candidates.append(
