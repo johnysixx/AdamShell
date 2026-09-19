@@ -1,3 +1,8 @@
+from cats.duplicate_consumption_energy_state import (
+    DuplicateConsumptionEnergyState,
+)
+
+
 class DuplicateConsumptionEnergy:
 
     QUEUE_ATTRIBUTE = (
@@ -21,12 +26,40 @@ class DuplicateConsumptionEnergy:
                 []
             )
 
+        self._require_queue()
+
     @property
     def queue(self):
-        return getattr(
+        return self._require_queue()
+
+    def _require_queue(self):
+        queue = getattr(
             self.universe,
             self.QUEUE_ATTRIBUTE
         )
+
+        if not isinstance(
+            queue,
+            list,
+        ):
+            raise TypeError(
+                "Duplicate consumption energy "
+                "queue must be list."
+            )
+
+        for item in queue:
+
+            if not isinstance(
+                item,
+                DuplicateConsumptionEnergyState,
+            ):
+                raise TypeError(
+                    "Duplicate consumption energy "
+                    "record must be "
+                    "DuplicateConsumptionEnergyState."
+                )
+
+        return queue
 
     def store(
         self,
@@ -42,34 +75,49 @@ class DuplicateConsumptionEnergy:
             self.queue
         ) + 1
 
-        item = {
-            "name": (
-                "duplicate_consumption_energy_stored"
-            ),
-            "energy_id": (
-                f"cat_consumption_energy_"
-                f"{item_number:04d}"
-            ),
-            "cat": cat.name,
-            "source": source,
-            "day": int(day),
-            "amount": max(
-                0.0,
-                float(amount)
-            ),
-            "energy_kind": energy_kind,
-            "resolved": False,
-            "resolution": None,
-            "energy_conserved": True
-        }
+        item = (
+            DuplicateConsumptionEnergyState(
+                energy_id=(
+                    f"cat_consumption_energy_"
+                    f"{item_number:04d}"
+                ),
+                cat=cat.name,
+                source=source,
+                day=int(day),
+                amount=max(
+                    0.0,
+                    float(amount)
+                ),
+                energy_kind=energy_kind,
+            )
+        )
 
         self.queue.append(
             item
         )
 
-        self._record(
-            item
-        )
+        self._record({
+            "name":
+                item.name,
+            "energy_id":
+                item.energy_id,
+            "cat":
+                item.cat,
+            "source":
+                item.source,
+            "day":
+                item.day,
+            "amount":
+                item.amount,
+            "energy_kind":
+                item.energy_kind,
+            "resolved":
+                item.resolved,
+            "resolution":
+                item.resolution,
+            "energy_conserved":
+                item.energy_conserved,
+        })
 
         return item
 
@@ -81,10 +129,7 @@ class DuplicateConsumptionEnergy:
             (
                 item
                 for item in self.queue
-                if not item.get(
-                    "resolved",
-                    False
-                )
+                if not item.resolved
             ),
             None
         )
@@ -129,29 +174,30 @@ class DuplicateConsumptionEnergy:
                 )
             )
 
-        pending.update({
-            "resolved": True,
-            "resolution": result[
+        pending.resolve(
+            resolution=result[
                 "resolution"
             ],
-            "cat_d20_value": value,
-            "resolved_entity_id": (
+            cat_d20_value=value,
+            resolved_entity_id=(
                 result.get(
                     "resolved_entity_id"
                 )
-            )
-        })
+            ),
+        )
 
         event = {
             "name": (
                 "duplicate_consumption_energy_resolved"
             ),
-            "energy_id": pending[
-                "energy_id"
-            ],
-            "cat": pending["cat"],
-            "source": pending["source"],
-            "amount": pending["amount"],
+            "energy_id":
+                pending.energy_id,
+            "cat":
+                pending.cat,
+            "source":
+                pending.source,
+            "amount":
+                pending.amount,
             "cat_d20_value": value,
             "resolution": result[
                 "resolution"

@@ -222,7 +222,7 @@ class DuplicateConsumptionEnergyTests(
             for item
             in self.universe
             .pending_cat_consumption_energy
-            if not item["resolved"]
+            if not item.resolved
         ]
 
         self.assertEqual(
