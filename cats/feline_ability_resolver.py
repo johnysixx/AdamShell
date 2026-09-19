@@ -58,13 +58,13 @@ class FelineAbilityResolver:
         teacher_ability = teacher_wisdom.ability_record(ability_name)
         if teacher_ability is None:
             return self._deny(name='feline_ability_lesson_denied', teacher=teacher, student=student, reason='teacher_does_not_know_ability')
-        teacher_method = teacher_ability.methods.get(method_name)
+        teacher_method = teacher_ability.method_record(method_name)
         if teacher_method is None:
             return self._deny(name='feline_ability_lesson_denied', teacher=teacher, student=student, reason='teacher_does_not_know_method')
-        learned_method = FelineWisdom.learn_ability_method(cat=student, ability_name=ability_name, method_name=method_name, teacher_name=teacher.name, constraints=teacher_method['constraints'])
+        learned_method = FelineWisdom.learn_ability_method(cat=student, ability_name=ability_name, method_name=method_name, teacher_name=teacher.name, constraints=teacher_method.constraints)
         teacher_personality = CatPersonality.apply_experience(cat=teacher, source='successfully_taught_other_cat', changes={'empathy': 0.02, 'patience': 0.015}, metadata={'student': student.name, 'ability': ability_name, 'method': method_name})
         student_personality = CatPersonality.apply_experience(cat=student, source='learned_from_other_cat', changes={'curiosity': 0.01}, metadata={'teacher': teacher.name, 'ability': ability_name, 'method': method_name})
-        event = {'name': 'feline_ability_method_learned', 'teacher': teacher.name, 'student': student.name, 'ability': ability_name, 'method': method_name, 'constraints': dict(learned_method['constraints']), 'teacher_personality': teacher_personality, 'student_personality': student_personality, 'learned': True}
+        event = {'name': 'feline_ability_method_learned', 'teacher': teacher.name, 'student': student.name, 'ability': ability_name, 'method': method_name, 'constraints': dict(learned_method.constraints), 'teacher_personality': teacher_personality, 'student_personality': student_personality, 'learned': True}
         FelineWisdom.ensure_state(student).lesson_history.append(event)
         self._record(event)
         return event
@@ -77,12 +77,12 @@ class FelineAbilityResolver:
         if locked:
             return {'allowed': False, 'reason': 'door_is_locked'}
         usable_methods = []
-        for method in ability.methods.values():
-            constraints = method['constraints']
+        for method in ability.method_records():
+            constraints = method.constraints
             if opens_toward_cat and constraints.get('opens_toward_cat', False):
-                usable_methods.append(method['name'])
+                usable_methods.append(method.name)
             if not opens_toward_cat and constraints.get('opens_away_from_cat', False):
-                usable_methods.append(method['name'])
+                usable_methods.append(method.name)
         if not usable_methods:
             return {'allowed': False, 'reason': 'no_learned_method_for_door_direction'}
         return {'allowed': True, 'reason': 'door_can_be_opened', 'usable_methods': usable_methods}

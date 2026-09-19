@@ -23,8 +23,8 @@ class FelineTeacherResolver:
                 ability = teacher_wisdom.ability_record(ability_name)
                 if ability is not None and ability.learned:
                     candidate['knows_ability'] = True
-                    candidate['methods'] = list(
-                        ability.methods.keys()
+                    candidate['methods'] = (
+                        ability.method_names()
                     )
                     teachers.append({'cat': teacher, 'name': teacher_name, 'methods': list(candidate['methods'])})
             candidates.append(candidate)

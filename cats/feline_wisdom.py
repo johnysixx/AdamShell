@@ -1,3 +1,6 @@
+from cats.feline_ability_method_state import (
+    FelineAbilityMethodState,
+)
 from cats.feline_awareness_state import (
     FelineAwarenessState,
 )
@@ -114,17 +117,19 @@ class FelineWisdom:
             ability_name
         )
 
-        method = {
-            "name": method_name,
-            "teacher": teacher_name,
-            "constraints": dict(
-                constraints or {}
-            ),
-        }
+        method = (
+            FelineAbilityMethodState(
+                name=method_name,
+                teacher=teacher_name,
+                constraints=dict(
+                    constraints or {}
+                ),
+            )
+        )
 
-        ability.methods[
-            method_name
-        ] = method
+        ability.store_method(
+            method
+        )
 
         ability.mark_learned()
 
