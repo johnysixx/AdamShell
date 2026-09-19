@@ -1,4 +1,5 @@
 from cats.cat_group_myth_lineage_system import CatGroupMythLineageSystem
+from cats.cat_myth_lineage_state import CatMythLineageState
 from copy import deepcopy
 from uuid import uuid4
 from cats.cat_culture_objects import CatGroupMyth
@@ -48,8 +49,31 @@ class CatGroupMythSystem:
         copied.verified = False
         target.myths[new_myth_id] = copied
         lineage_system = CatGroupMythLineageSystem(self.group_system)
-        if root_myth_id not in target.myth_lineages:
-            target.myth_lineages[root_myth_id] = {'root_myth': root_myth_id, 'versions': [root_myth_id], 'children': {}}
+        lineage = target.myth_lineages.get(
+            root_myth_id
+        )
+
+        if lineage is None:
+            lineage = CatMythLineageState(
+                root_myth=root_myth_id
+            )
+
+            lineage.register_version(
+                root_myth_id
+            )
+
+            target.myth_lineages[
+                root_myth_id
+            ] = lineage
+
+        elif not isinstance(
+            lineage,
+            CatMythLineageState,
+        ):
+            raise TypeError(
+                'Cat myth lineage record must be '
+                'CatMythLineageState.'
+            )
         if new_myth_id != parent_myth_id:
             lineage_system.register_descendant(target_group_id, root_myth_id, parent_myth_id, new_myth_id)
         return {'name': 'cat_group_myth_retold', 'source_group': source_group_id, 'target_group': target_group_id, 'myth_id': new_myth_id, 'parent_myth_id': parent_myth_id, 'root_myth_id': root_myth_id, 'credibility': copied.credibility, 'transformed': transformation is not None, 'retold': True}
