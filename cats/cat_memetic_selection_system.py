@@ -1,5 +1,9 @@
 from copy import deepcopy
 
+from cats.cat_memetic_selection_state import (
+    CatMemeticSelectionState,
+)
+
 class CatMemeticSelectionSystem:
 
     def __init__(self, group_system):
@@ -14,11 +18,27 @@ class CatMemeticSelectionSystem:
         rejected = []
         for cat in self.group_system._member_objects(group, cats):
             score = self._myth_score(cat, myth)
-            cat.culture.exposures += 1
+
             if score >= 0.45:
-                cat.culture.myths[myth_id] = {'score': score, 'group_id': group_id}
+                state = self._selection_state(
+                    cat.culture.myths,
+                    myth_id,
+                )
+
+                cat.culture.exposures += 1
+
+                state.record(
+                    group_id=group_id,
+                    score=score,
+                )
+
+                cat.culture.myths[
+                    myth_id
+                ] = state
+
                 adopted.append(cat.name)
             else:
+                cat.culture.exposures += 1
                 rejected.append(cat.name)
         fitness = self._fitness(exposures=len(adopted) + len(rejected), adoptions=len(adopted), retellings=int(getattr(myth, 'retellings', 0)), credibility=float(getattr(myth, 'credibility', 0.0)))
         myth.memetic_fitness = fitness
@@ -40,7 +60,23 @@ class CatMemeticSelectionSystem:
             verified_bonus = 0.15 if getattr(innovation, 'verified', False) else 0.0
             score = intellect * 0.35 + curiosity * 0.25 + confidence * 0.3 + verified_bonus + 0.1
             if score >= 0.5:
-                cat.culture.innovations[innovation_id] = {'score': round(score, 4), 'group_id': group_id}
+                state = self._selection_state(
+                    cat.culture.innovations,
+                    innovation_id,
+                )
+
+                state.record(
+                    group_id=group_id,
+                    score=round(
+                        score,
+                        4,
+                    ),
+                )
+
+                cat.culture.innovations[
+                    innovation_id
+                ] = state
+
                 adopted.append(cat.name)
             else:
                 rejected.append(cat.name)
@@ -73,6 +109,32 @@ class CatMemeticSelectionSystem:
             else:
                 fading.append(innovation_id)
         return {'group_id': group_id, 'surviving': surviving, 'fading': fading}
+
+    def _selection_state(
+        self,
+        registry,
+        meme_id,
+    ):
+        state = registry.get(
+            meme_id
+        )
+
+        if state is None:
+            state = (
+                CatMemeticSelectionState()
+            )
+
+        elif not isinstance(
+            state,
+            CatMemeticSelectionState,
+        ):
+            raise TypeError(
+                'Cat memetic selection record '
+                'must be '
+                'CatMemeticSelectionState.'
+            )
+
+        return state
 
     def _myth_score(self, cat, myth):
         curiosity = self._number(cat.personality.traits.curiosity)
