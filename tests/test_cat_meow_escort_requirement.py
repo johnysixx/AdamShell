@@ -69,9 +69,16 @@ class CatMEOWEscortRequirementTests(unittest.TestCase):
         self.assertEqual(self.cat.current_layer, 'meeting_place')
         self.assertEqual(self.human.current_layer, 'meeting_place')
         guest = self.meeting.cat_invited_guests[self.human.name]
-        self.assertTrue(guest['cat_present'])
-        self.assertTrue(guest['entered_together'])
-        self.assertEqual(guest['inviting_cat'], self.cat.name)
+        self.assertTrue(
+            guest.cat_present
+        )
+        self.assertTrue(
+            guest.entered_together
+        )
+        self.assertEqual(
+            guest.inviting_cat,
+            self.cat.name,
+        )
 
     def test_invitation_becomes_used_only_after_entry(self):
         guidance = CatBarGuidanceSystem(self.invitations, self.meeting)

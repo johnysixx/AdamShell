@@ -93,8 +93,14 @@ class CatMEOWBarInvitationTests(unittest.TestCase):
         result = guidance.guide(self.cat, self.human, offered.id)
         self.assertTrue(result['guided'])
         guest = self.meeting_place.cat_invited_guests[self.human.name]
-        self.assertFalse(guest['permanent_access'])
-        self.assertTrue(guest['cat_present'])
-        self.assertTrue(guest['entered_together'])
+        self.assertFalse(
+            guest.permanent_access
+        )
+        self.assertTrue(
+            guest.cat_present
+        )
+        self.assertTrue(
+            guest.entered_together
+        )
 if __name__ == '__main__':
     unittest.main()
