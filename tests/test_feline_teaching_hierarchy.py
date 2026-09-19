@@ -29,7 +29,9 @@ class FelineTeachingHierarchyTests(unittest.TestCase):
         result = self.teach_pazuzu_to_teach()
         self.assertTrue(result['learned'])
         ability = self.pazuzu.feline_wisdom.abilities['teach_other_cats']
-        self.assertTrue(ability['learned'])
+        self.assertTrue(
+            ability.learned
+        )
 
     def test_teacher_can_teach_own_ability(self):
         self.teach_pazuzu_to_teach()
@@ -40,7 +42,14 @@ class FelineTeachingHierarchyTests(unittest.TestCase):
         self.teach_pazuzu_to_teach()
         result = self.resolver.teach_method(teacher=self.pazuzu, student=self.kitten, ability_name='teach_other_cats', method_name='garfield_teaching_method')
         self.assertTrue(result['learned'])
-        self.assertTrue(self.kitten.feline_wisdom.abilities['teach_other_cats']['learned'])
+        self.assertTrue(
+            self.kitten
+            .feline_wisdom
+            .abilities[
+                'teach_other_cats'
+            ]
+            .learned
+        )
 
     def test_forbidden_foreign_teacher_creation_makes_cronenberg(self):
         self.teach_pazuzu_to_teach()

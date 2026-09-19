@@ -290,8 +290,14 @@ class KittenUpbringingResolver:
         if parental_exception:
             return True
         wisdom = FelineWisdom.ensure_state(candidate)
-        teaching = wisdom.abilities.get('teach_other_cats')
-        return bool(teaching and teaching.get('learned', False))
+        teaching = wisdom.ability_record(
+            'teach_other_cats'
+        )
+
+        return bool(
+            teaching is not None
+            and teaching.learned
+        )
 
     def _knows_meow(self, cat):
         meow = getattr(cat.learning, 'meow_knowledge', None)

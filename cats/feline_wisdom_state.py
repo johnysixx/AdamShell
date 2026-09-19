@@ -1,5 +1,8 @@
 from dataclasses import dataclass, field
 
+from cats.feline_ability_state import (
+    FelineAbilityState,
+)
 from cats.feline_awareness_state import (
     FelineAwarenessState,
 )
@@ -93,4 +96,87 @@ class FelineWisdomState:
             yield (
                 knowledge_name,
                 awareness,
+            )
+
+    def store_ability(
+        self,
+        ability_name,
+        ability,
+    ):
+        if not isinstance(
+            ability,
+            FelineAbilityState,
+        ):
+            raise TypeError(
+                "Feline ability record must "
+                "be FelineAbilityState."
+            )
+
+        self.abilities[
+            ability_name
+        ] = ability
+
+        return ability
+
+    def ability_record(
+        self,
+        ability_name,
+    ):
+        ability = self.abilities.get(
+            ability_name
+        )
+
+        if ability is None:
+            return None
+
+        if not isinstance(
+            ability,
+            FelineAbilityState,
+        ):
+            raise TypeError(
+                "Feline ability record must "
+                "be FelineAbilityState."
+            )
+
+        return ability
+
+    def ensure_ability(
+        self,
+        ability_name,
+    ):
+        ability = self.ability_record(
+            ability_name
+        )
+
+        if ability is None:
+            ability = FelineAbilityState()
+
+            self.store_ability(
+                ability_name,
+                ability,
+            )
+
+        return ability
+
+    def ability_items(
+        self,
+    ):
+        for (
+            ability_name,
+            ability,
+        ) in self.abilities.items():
+
+            if not isinstance(
+                ability,
+                FelineAbilityState,
+            ):
+                raise TypeError(
+                    "Feline ability record "
+                    "must be "
+                    "FelineAbilityState."
+                )
+
+            yield (
+                ability_name,
+                ability,
             )

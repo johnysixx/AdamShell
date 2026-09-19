@@ -68,7 +68,14 @@ class FelineAbilityLearningTests(unittest.TestCase):
     def test_cat_can_learn_both_methods(self):
         self.resolver.teach_method(teacher=self.pazuzu, student=self.kitten, ability_name='open_human_door', method_name='hang_on_handle')
         self.resolver.teach_method(teacher=self.queen, student=self.kitten, ability_name='open_human_door', method_name='pull_with_paw')
-        methods = self.kitten.feline_wisdom.abilities['open_human_door']['methods']
+        methods = (
+            self.kitten
+            .feline_wisdom
+            .abilities[
+                'open_human_door'
+            ]
+            .methods
+        )
         self.assertEqual(set(methods), {'hang_on_handle', 'pull_with_paw'})
 
     def test_queen_cannot_open_locked_door(self):

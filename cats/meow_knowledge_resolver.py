@@ -107,8 +107,17 @@ class MeowKnowledgeResolver:
         if mother_name is not None and teacher_name == mother_name:
             return {'allowed': True, 'reason': 'biological_mother_available', 'role': 'biological_mother'}
         teacher_wisdom = FelineWisdom.ensure_state(teacher)
-        teaching_ability = teacher_wisdom.abilities.get('teach_other_cats')
-        can_teach_other_cats = bool(teaching_ability and teaching_ability.get('learned', False))
+        teaching_ability = (
+            teacher_wisdom
+            .ability_record(
+                'teach_other_cats'
+            )
+        )
+
+        can_teach_other_cats = bool(
+            teaching_ability is not None
+            and teaching_ability.learned
+        )
         if can_teach_other_cats:
             return {'allowed': True, 'reason': 'qualified_feline_teacher', 'role': 'dice_cat_teacher' if getattr(teacher, 'origin', None) == 'dice_manifestation' else 'qualified_cat_teacher'}
         return {'allowed': False, 'reason': 'teacher_has_not_learned_to_teach', 'role': None}

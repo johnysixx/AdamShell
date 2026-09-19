@@ -110,17 +110,8 @@ class FelineWisdom:
             cat
         )
 
-        ability = (
-            wisdom
-            .abilities
-            .setdefault(
-                ability_name,
-                {
-                    "learned": False,
-                    "methods": {},
-                    "can_close": False,
-                },
-            )
+        ability = wisdom.ensure_ability(
+            ability_name
         )
 
         method = {
@@ -131,14 +122,10 @@ class FelineWisdom:
             ),
         }
 
-        ability[
-            "methods"
-        ][
+        ability.methods[
             method_name
         ] = method
 
-        ability[
-            "learned"
-        ] = True
+        ability.mark_learned()
 
         return method

@@ -55,10 +55,10 @@ class FelineAbilityResolver:
                 return self._create_teaching_cronenberg(teacher=teacher, student=student, ability_name=ability_name, reason=permission['reason'])
             return self._deny(name='feline_ability_lesson_denied', teacher=teacher, student=student, reason=permission['reason'])
         teacher_wisdom = FelineWisdom.ensure_state(teacher)
-        teacher_ability = teacher_wisdom.abilities.get(ability_name)
-        if not teacher_ability:
+        teacher_ability = teacher_wisdom.ability_record(ability_name)
+        if teacher_ability is None:
             return self._deny(name='feline_ability_lesson_denied', teacher=teacher, student=student, reason='teacher_does_not_know_ability')
-        teacher_method = teacher_ability['methods'].get(method_name)
+        teacher_method = teacher_ability.methods.get(method_name)
         if teacher_method is None:
             return self._deny(name='feline_ability_lesson_denied', teacher=teacher, student=student, reason='teacher_does_not_know_method')
         learned_method = FelineWisdom.learn_ability_method(cat=student, ability_name=ability_name, method_name=method_name, teacher_name=teacher.name, constraints=teacher_method['constraints'])
@@ -71,13 +71,13 @@ class FelineAbilityResolver:
 
     def can_open_human_door(self, cat, locked, opens_toward_cat):
         wisdom = FelineWisdom.ensure_state(cat)
-        ability = wisdom.abilities.get(self.OPEN_HUMAN_DOOR)
-        if not ability or not ability.get('learned', False):
+        ability = wisdom.ability_record(self.OPEN_HUMAN_DOOR)
+        if ability is None or not ability.learned:
             return {'allowed': False, 'reason': 'human_door_ability_not_learned'}
         if locked:
             return {'allowed': False, 'reason': 'door_is_locked'}
         usable_methods = []
-        for method in ability['methods'].values():
+        for method in ability.methods.values():
             constraints = method['constraints']
             if opens_toward_cat and constraints.get('opens_toward_cat', False):
                 usable_methods.append(method['name'])
@@ -135,8 +135,11 @@ class FelineAbilityResolver:
         }
 
     def _knows_ability(self, wisdom, ability_name):
-        ability = wisdom.abilities.get(ability_name)
-        return bool(ability and ability.get('learned', False))
+        ability = wisdom.ability_record(ability_name)
+        return bool(
+            ability is not None
+            and ability.learned
+        )
 
     def _create_teaching_cronenberg(self, teacher, student, ability_name, reason):
         error = RuntimeError(f"Forbidden feline teaching paradox: {getattr(teacher, 'name', None)} attempted to teach {ability_name} to {getattr(student, 'name', None)} without teach_teaching.")

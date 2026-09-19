@@ -20,10 +20,12 @@ class FelineTeacherResolver:
             candidate = {'name': teacher_name, 'cat_found': teacher is not None, 'knows_ability': False, 'methods': []}
             if teacher is not None:
                 teacher_wisdom = FelineWisdom.ensure_state(teacher)
-                ability = teacher_wisdom.abilities.get(ability_name)
-                if ability is not None and ability.get('learned', False):
+                ability = teacher_wisdom.ability_record(ability_name)
+                if ability is not None and ability.learned:
                     candidate['knows_ability'] = True
-                    candidate['methods'] = list(ability.get('methods', {}).keys())
+                    candidate['methods'] = list(
+                        ability.methods.keys()
+                    )
                     teachers.append({'cat': teacher, 'name': teacher_name, 'methods': list(candidate['methods'])})
             candidates.append(candidate)
         reason = 'teachers_found' if teachers else 'no_available_verified_teacher'
