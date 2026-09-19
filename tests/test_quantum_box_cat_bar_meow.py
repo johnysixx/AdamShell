@@ -3,6 +3,7 @@ from multiverse import UniverseRegistry
 from universe.universe import Universe
 from universe.bootstraps.universe_bootstrap import UniverseBootstrap
 from universe.bootstraps.entity_bootstrap import EntityBootstrap
+from cats.kitten_growth_state import KittenGrowthState
 
 class QuantumBoxCatBarMeowTests(unittest.TestCase):
 
@@ -39,7 +40,14 @@ class QuantumBoxCatBarMeowTests(unittest.TestCase):
         self.assertGreater(self.cat.size, size_before)
         self.assertGreater(self.cat.strength, strength_before)
         growth = self.cat.growth
-        self.assertEqual(growth['milk_feedings'], 1)
+        self.assertIsInstance(
+            growth,
+            KittenGrowthState,
+        )
+        self.assertEqual(
+            growth.milk_feedings,
+            1,
+        )
         milk_event = next((event for event in self.bar.events if isinstance(event, dict) and event.get('name') == 'cat_drank_milk_at_bar'))
         self.assertTrue(milk_event['served'])
         self.assertTrue(milk_event['growth']['grew'])

@@ -3,6 +3,7 @@ from universe.universe import Universe
 from cats.cats import Cats
 from cats.development_resolver import CatDevelopmentResolver
 from cats.kitten_upbringing_resolver import KittenUpbringingResolver
+from cats.kitten_growth_state import KittenGrowthState
 
 class KittenGrowthTests(unittest.TestCase):
 
@@ -30,7 +31,14 @@ class KittenGrowthTests(unittest.TestCase):
         self.assertGreater(self.kitten.size, self.initial_size)
         self.assertGreater(self.kitten.strength, self.initial_strength)
         growth = self.kitten.growth
-        self.assertEqual(growth['milk_feedings'], 1)
+        self.assertIsInstance(
+            growth,
+            KittenGrowthState,
+        )
+        self.assertEqual(
+            growth.milk_feedings,
+            1,
+        )
 
     def test_same_milk_day_is_not_counted_twice(self):
         self.run_day(1)
@@ -42,7 +50,14 @@ class KittenGrowthTests(unittest.TestCase):
     def test_dead_cronenberg_delivery_causes_growth(self):
         self.run_day(14)
         growth = self.kitten.growth
-        self.assertGreater(growth['cronenberg_mass_consumed'], 0.0)
+        self.assertIsInstance(
+            growth,
+            KittenGrowthState,
+        )
+        self.assertGreater(
+            growth.cronenberg_mass_consumed,
+            0.0,
+        )
 
     def test_first_kill_causes_growth(self):
         size_before = self.kitten.size
