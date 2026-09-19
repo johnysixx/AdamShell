@@ -8,6 +8,9 @@ from meeting_place.bartender import Bartender
 from meeting_place.bouncer import Bouncer
 from meeting_place.bar_blacklist import BarBlacklist
 from meeting_place.bar_incident_book import BarIncidentBook
+from meeting_place.bar_incident_state import (
+    BarIncidentState,
+)
 from meeting_place.bar_hex_geometry import BarHexGeometry
 from meeting_place.bar_objects import (
     BarSecurityConfiscation,
@@ -302,7 +305,7 @@ class BarSecurityProtocolTests(unittest.TestCase):
         self.assertEqual(self.blacklist.denied_identities, [])
 
     def test_generic_security_incident_summons_bouncer_without_blacklist(self):
-        incident = {'name': 'bar_security_incident', 'category': 'disturbance', 'reason': 'unknown_disturbance', 'offender': None, 'blacklist_after': False}
+        incident = BarIncidentState(category='disturbance', reason='unknown_disturbance', offender=None, blacklist_after=False)
         result = self.protocol.handle_security_incident(incident)
         self.assertTrue(result)
         self.assertEqual(self.bouncer.state, 'responding_inside_bar')
@@ -313,11 +316,11 @@ class BarSecurityProtocolTests(unittest.TestCase):
         from meeting_place.bar_incident_book import BarIncidentBook
         incident_book = BarIncidentBook(recorder=BackRoomBlackBox())
         self.protocol.incident_book = incident_book
-        incident = {'name': 'bar_security_incident', 'category': 'disturbance', 'reason': 'unknown_disturbance', 'offender': None}
+        incident = BarIncidentState(category='disturbance', reason='unknown_disturbance', offender=None)
         result = self.protocol.handle_security_incident(incident)
         self.assertTrue(result)
         self.assertEqual(len(incident_book.incidents), 1)
-        self.assertEqual(incident_book.incidents[0]['reason'], 'unknown_disturbance')
+        self.assertEqual(incident_book.incidents[0].reason, 'unknown_disturbance')
         self.assertEqual(self.bouncer.state, 'responding_inside_bar')
 
     def test_unauthorized_area_incident_is_recorded_with_offender(self):
@@ -327,8 +330,8 @@ class BarSecurityProtocolTests(unittest.TestCase):
         self.assertTrue(result)
         self.assertEqual(len(self.incident_book.incidents), 1)
         incident = self.incident_book.incidents[0]
-        self.assertEqual(incident['reason'], 'unauthorized_area')
-        self.assertEqual(incident['offender'], 'guest_1')
+        self.assertEqual(incident.reason, 'unauthorized_area')
+        self.assertEqual(incident.offender, 'guest_1')
 
     def test_unauthorized_area_incident_is_marked_resolved(self):
         guest = SocialEntity.from_mapping({'name': 'guest_1', 'type': 'guest', 'state': 'behind_bar', 'position': {'x': 4000, 'y': 0}, 'existence_pct': 100.0, 'energy_j': 100.0})
@@ -336,15 +339,15 @@ class BarSecurityProtocolTests(unittest.TestCase):
         result = self.protocol.handle_guest_entry(guest, service)
         self.assertTrue(result)
         incident = self.incident_book.incidents[-1]
-        self.assertTrue(incident['resolved'])
+        self.assertTrue(incident.resolved)
 
     def test_generic_security_incident_is_resolved_as_bouncer_summoned(self):
-        incident = {'name': 'bar_security_incident', 'category': 'disturbance', 'reason': 'unknown_disturbance', 'offender': None}
+        incident = BarIncidentState(category='disturbance', reason='unknown_disturbance', offender=None)
         result = self.protocol.handle_security_incident(incident)
         self.assertTrue(result)
         entry = self.incident_book.incidents[-1]
-        self.assertTrue(entry['resolved'])
-        self.assertEqual(entry['resolution'], 'bouncer_summoned')
+        self.assertTrue(entry.resolved)
+        self.assertEqual(entry.resolution, 'bouncer_summoned')
         self.assertEqual(self.blacklist.denied_identities, [])
 if __name__ == '__main__':
     unittest.main()

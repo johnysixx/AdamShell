@@ -4,6 +4,9 @@ from meeting_place.bar_objects import (
     BarSecurityConfiscation,
     BarSecurityEnergyAllocation,
 )
+from meeting_place.bar_incident_state import (
+    BarIncidentState,
+)
 
 class BarSecurityProtocol:
 
@@ -50,13 +53,22 @@ class BarSecurityProtocol:
         return True
 
     def handle_security_incident(self, incident, resolve_immediately=True):
+        if not isinstance(
+            incident,
+            BarIncidentState,
+        ):
+            raise TypeError(
+                "Security incident must be "
+                "BarIncidentState."
+            )
+
         incident_book = getattr(self, 'incident_book', None)
         if incident_book is None:
             return False
         self.last_incident_entry = incident_book.record(incident)
         red_button = self.bar_counter.red_button
         red_button.activate_alarm()
-        handled = self.handle_bartender_red_button_press(reason=incident.get('reason', 'generic_security_call'))
+        handled = self.handle_bartender_red_button_press(reason=incident.reason)
         if not handled:
             return False
         if resolve_immediately:
@@ -69,7 +81,11 @@ class BarSecurityProtocol:
         if target.kind != 'service_floor':
             return False
         guest_name = getattr(guest, 'world_key', None) or getattr(guest, 'name', None)
-        incident = {'name': 'bar_security_incident', 'category': 'access_violation', 'reason': 'unauthorized_area', 'offender': guest_name}
+        incident = BarIncidentState(
+            category='access_violation',
+            reason='unauthorized_area',
+            offender=guest_name,
+        )
         handled = self.handle_security_incident(incident, resolve_immediately=False)
         if not handled:
             return False

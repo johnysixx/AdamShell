@@ -1,6 +1,9 @@
 from meeting_place.cat_invited_guest_state import (
     CatInvitedGuestState,
 )
+from meeting_place.bar_incident_state import (
+    BarIncidentState,
+)
 from meeting_place.bar_objects import (
     BarDrink,
     BarIngredientStock,
@@ -370,10 +373,24 @@ class MeetingPlace:
 
     def emit_event(self, event):
         self.events.append(event)
-        if isinstance(event, dict):
+
+        if isinstance(
+            event,
+            BarIncidentState,
+        ):
+            self.back_room_black_box.record(
+                event=event.name,
+                data=event,
+                source='meeting_place',
+                tick=self.tick_count,
+            )
+
+        elif isinstance(event, dict):
             self.back_room_black_box.record(event=event.get('name', 'meeting_place_event'), data=event, source='meeting_place', tick=self.tick_count)
+
         else:
             self.back_room_black_box.record(event=event, source='meeting_place', tick=self.tick_count)
+
         self.bartender.observe_event(event)
         self.show_bar_story_count()
         UniverseLogger.event(f'MEETING PLACE EVENT: {event}')

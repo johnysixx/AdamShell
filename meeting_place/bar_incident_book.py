@@ -1,4 +1,7 @@
 from universe.logger import UniverseLogger
+from meeting_place.bar_incident_state import (
+    BarIncidentState,
+)
 
 
 class BarIncidentBook:
@@ -54,18 +57,39 @@ class BarIncidentBook:
         if self.recorder is None:
             return []
 
-        return [
-            entry["data"]
-            for entry in self.recorder.entries
+        incidents = []
+
+        for recorder_entry in (
+            self.recorder.entries
+        ):
             if (
-                entry.get("event")
-                == "bar_security_incident"
-                and isinstance(
-                    entry.get("data"),
-                    dict
+                recorder_entry.get(
+                    "event"
+                )
+                != "bar_security_incident"
+            ):
+                continue
+
+            incident = (
+                recorder_entry.get(
+                    "data"
                 )
             )
-        ]
+
+            if not isinstance(
+                incident,
+                BarIncidentState,
+            ):
+                raise TypeError(
+                    "Bar incident record must "
+                    "be BarIncidentState."
+                )
+
+            incidents.append(
+                incident
+            )
+
+        return incidents
 
     def record(
         self,
@@ -73,15 +97,14 @@ class BarIncidentBook:
     ):
         if not isinstance(
             incident,
-            dict
+            BarIncidentState,
         ):
             raise TypeError(
-                "Bar incident must be a dict."
+                "Bar incident must be "
+                "BarIncidentState."
             )
 
-        name = incident.get(
-            "name"
-        )
+        name = incident.name
 
         if name != "bar_security_incident":
             raise ValueError(
@@ -89,8 +112,8 @@ class BarIncidentBook:
                 "'bar_security_incident'."
             )
 
-        category = incident.get(
-            "category"
+        category = (
+            incident.category
         )
 
         if not category:
@@ -103,8 +126,8 @@ class BarIncidentBook:
                 f"Unknown bar incident category: {category}"
             )
 
-        reason = incident.get(
-            "reason"
+        reason = (
+            incident.reason
         )
 
         if not reason:
@@ -112,13 +135,8 @@ class BarIncidentBook:
                 "Bar incident requires reason."
             )
 
-        if "offender" not in incident:
-            raise ValueError(
-                "Bar incident requires offender field."
-            )
-
-        offender = incident.get(
-            "offender"
+        offender = (
+            incident.offender
         )
 
         if (
@@ -160,37 +178,42 @@ class BarIncidentBook:
                 f"{expected_category}."
             )
 
-        entry = dict(
-            incident
-        )
-
-        entry["resolved"] = False
-
+        incident.resolved = False
+        incident.resolution = None
 
         if self.event_emitter is not None:
             self.event_emitter(
-                entry
+                incident
             )
         else:
             self.recorder.record(
-                event=entry["name"],
-                data=entry,
+                event=incident.name,
+                data=incident,
                 source=self.name,
                 tick=None
             )
 
         UniverseLogger.event(
             "BAR INCIDENT RECORDED: "
-            f"{entry.get('reason')}"
+            f"{incident.reason}"
         )
 
-        return entry
+        return incident
 
     def resolve(
         self,
         entry,
         resolution
     ):
+        if not isinstance(
+            entry,
+            BarIncidentState,
+        ):
+            raise TypeError(
+                "Bar incident entry must be "
+                "BarIncidentState."
+            )
+
         if entry not in self.incidents:
             raise ValueError(
                 "Incident entry is not in this book."
@@ -206,9 +229,7 @@ class BarIncidentBook:
                 f"Unknown incident resolution: {resolution}"
             )
 
-        reason = entry.get(
-            "reason"
-        )
+        reason = entry.reason
 
         expected_resolution = (
             self.REASON_RESOLUTIONS.get(
@@ -225,12 +246,13 @@ class BarIncidentBook:
                 f"{expected_resolution}."
             )
 
-        entry["resolved"] = True
-        entry["resolution"] = resolution
+        entry.resolve(
+            resolution
+        )
 
         UniverseLogger.event(
             "BAR INCIDENT RESOLVED: "
-            f"{entry.get('reason')} "
+            f"{entry.reason} "
             f"AS {resolution}"
         )
 

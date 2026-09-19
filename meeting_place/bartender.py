@@ -1,5 +1,8 @@
 from core.entity.social_entity import SocialMixin
 from universe.logger import UniverseLogger
+from meeting_place.bar_incident_state import (
+    BarIncidentState,
+)
 from .bar_objects import (
     BarOrigin,
     BarShift,
@@ -94,8 +97,28 @@ class Bartender(SocialMixin):
     def end_shift(self, bar_day=None, shift_start_tick=None, shift_end_tick=None):
         observed_events = []
         for event in self.event_memory:
-            if isinstance(event, dict) and event.get('name') == 'bar_security_incident' and (event.get('resolution') == 'ejected_and_blacklisted'):
+            if (
+                isinstance(
+                    event,
+                    BarIncidentState,
+                )
+                and event.resolution
+                == 'ejected_and_blacklisted'
+            ):
+                observed = {
+                    'kind':
+                        'ejection',
+                    'subject':
+                        event.offender,
+                    'observed_reason':
+                        event.reason,
+                    'observed_outcome':
+                        'ejected',
+                }
+
+            elif isinstance(event, dict) and event.get('name') == 'bar_security_incident' and (event.get('resolution') == 'ejected_and_blacklisted'):
                 observed = {'kind': 'ejection', 'subject': event.get('offender'), 'observed_reason': event.get('reason'), 'observed_outcome': 'ejected'}
+
             else:
                 observed = {'kind': 'ordinary', 'observed_event': event}
             observed_events.append(observed)
