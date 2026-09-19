@@ -3,6 +3,9 @@ from cats.cat import Cat
 from cats.cat_cultural_preference_state import (
     CatCulturalPreferenceState
 )
+from cats.cat_cultural_tradition_evaluation_state import (
+    CatCulturalTraditionEvaluationState
+)
 from cats.cat_cultural_tradition_state import (
     CatCulturalTraditionState
 )
@@ -54,19 +57,80 @@ class CatCulturalAdoptionSystem:
         return {'tradition': tradition_name, 'known': True, 'category': category, 'score': round(score, 4), 'adopt': score >= 0.5}
 
     def expose_to_tradition(self, cat, group_id, tradition_name):
-        evaluation = self.evaluate_tradition(cat, group_id, tradition_name)
+        evaluation = self.evaluate_tradition(
+            cat,
+            group_id,
+            tradition_name,
+        )
+
         if not evaluation['known']:
-            return {'name': 'cat_cultural_exposure_denied', 'reason': 'unknown_tradition', 'adopted': False}
+            return {
+                'name':
+                    'cat_cultural_exposure_denied',
+                'reason':
+                    'unknown_tradition',
+                'adopted':
+                    False,
+            }
+
+        self._require_evaluation_records(
+            cat
+        )
+
+        record = (
+            CatCulturalTraditionEvaluationState(
+                group_id=group_id,
+                score=float(
+                    evaluation['score']
+                ),
+                category=(
+                    evaluation['category']
+                ),
+            )
+        )
+
         cat.culture.exposures += 1
+
         if evaluation['adopt']:
-            cat.culture.adopted_traditions[tradition_name] = {'group_id': group_id, 'score': evaluation['score'], 'category': evaluation['category']}
-            cat.culture.rejected_traditions.pop(tradition_name, None)
+            cat.culture.adopted_traditions[
+                tradition_name
+            ] = record
+
+            cat.culture.rejected_traditions.pop(
+                tradition_name,
+                None,
+            )
+
             outcome = 'adopted'
+
         else:
-            cat.culture.rejected_traditions[tradition_name] = {'group_id': group_id, 'score': evaluation['score'], 'category': evaluation['category']}
+            cat.culture.rejected_traditions[
+                tradition_name
+            ] = record
+
             outcome = 'rejected'
-        event = {'name': 'cat_cultural_tradition_evaluated', 'cat': cat.name, 'group_id': group_id, 'tradition': tradition_name, 'score': evaluation['score'], 'outcome': outcome, 'adopted': outcome == 'adopted'}
-        cat.social_interactions.append(deepcopy(event))
+
+        event = {
+            'name':
+                'cat_cultural_tradition_evaluated',
+            'cat':
+                cat.name,
+            'group_id':
+                group_id,
+            'tradition':
+                tradition_name,
+            'score':
+                evaluation['score'],
+            'outcome':
+                outcome,
+            'adopted':
+                outcome == 'adopted',
+        }
+
+        cat.social_interactions.append(
+            deepcopy(event)
+        )
+
         return event
 
     def adopt_preference(self, cat, group_id, preference_name):
@@ -98,6 +162,28 @@ class CatCulturalAdoptionSystem:
             'value': preference.value,
             'adopted': True,
         }
+
+    def _require_evaluation_records(
+        self,
+        cat,
+    ):
+        registries = (
+            cat.culture.adopted_traditions,
+            cat.culture.rejected_traditions,
+        )
+
+        for registry in registries:
+            for record in registry.values():
+
+                if not isinstance(
+                    record,
+                    CatCulturalTraditionEvaluationState,
+                ):
+                    raise TypeError(
+                        'Cat cultural tradition '
+                        'evaluation record must be '
+                        'CatCulturalTraditionEvaluationState.'
+                    )
 
     def _require_cat(self, cat):
         if not isinstance(cat, Cat):
