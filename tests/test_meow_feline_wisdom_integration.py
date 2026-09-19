@@ -1,3 +1,7 @@
+from cats.feline_awareness_state import (
+    FelineAwarenessState,
+)
+
 import unittest
 from universe.universe import Universe
 from cats.cats import Cats
@@ -67,7 +71,13 @@ class MeowFelineWisdomIntegrationTests(unittest.TestCase):
 
     def test_meow_ignores_forbidden_domains(self):
         teacher_wisdom = FelineWisdom.ensure_state(self.mother)
-        teacher_wisdom.awareness['forbidden_magic'] = {'name': 'forbidden_magic', 'domain': 'magic', 'known_to_exist': True}
+        teacher_wisdom.store_awareness(
+            FelineAwarenessState(
+                name='forbidden_magic',
+                domain='magic',
+                known_to_exist=True,
+            )
+        )
         result = self.resolver.transmit(mother=self.mother, kitten=self.kitten, current_day=90)
         self.assertTrue(result['transmitted'])
         self.assertNotIn('forbidden_magic', self.kitten.feline_wisdom.awareness)

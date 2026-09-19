@@ -1,3 +1,6 @@
+from cats.feline_awareness_state import (
+    FelineAwarenessState,
+)
 from cats.feline_wisdom_state import (
     FelineWisdomState,
 )
@@ -75,23 +78,24 @@ class FelineWisdom:
             cat
         )
 
-        awareness = {
-            "name": knowledge_name,
-            "domain": domain,
-            "known_to_exist": True,
-            "description": description,
-            "known_teachers": list(
-                known_teachers or []
-            ),
-            "transfer_mode":
-                "awareness_only",
-        }
+        awareness = (
+            FelineAwarenessState(
+                name=knowledge_name,
+                domain=domain,
+                known_to_exist=True,
+                description=description,
+                known_teachers=list(
+                    known_teachers or []
+                ),
+                transfer_mode=(
+                    "awareness_only"
+                ),
+            )
+        )
 
-        wisdom.awareness[
-            knowledge_name
-        ] = awareness
-
-        return awareness
+        return wisdom.store_awareness(
+            awareness
+        )
 
     @classmethod
     def learn_ability_method(

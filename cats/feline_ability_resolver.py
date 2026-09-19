@@ -33,12 +33,12 @@ class FelineAbilityResolver:
         if not teacher_wisdom.can_transmit_meow:
             return self._deny(name='meow_awareness_transmission_denied', teacher=teacher, student=student, reason='teacher_cannot_transmit_meow')
         transferred = []
-        for knowledge_name, knowledge in teacher_wisdom.awareness.items():
-            domain = knowledge.get('domain')
+        for knowledge_name, knowledge in teacher_wisdom.awareness_items():
+            domain = knowledge.domain
             if domain not in FelineWisdom.MEOW_ALLOWED_DOMAINS:
                 continue
-            copied = {'name': knowledge_name, 'domain': domain, 'known_to_exist': True, 'description': knowledge.get('description'), 'known_teachers': list(knowledge.get('known_teachers', [])), 'transfer_mode': 'awareness_only'}
-            student_wisdom.awareness[knowledge_name] = copied
+            copied = knowledge.copy_for_transfer()
+            student_wisdom.store_awareness(copied)
             transferred.append(copied)
         event = {'name': 'meow_ability_awareness_transmitted', 'teacher': teacher.name, 'student': student.name, 'transferred': transferred, 'transferred_count': len(transferred), 'methods_transferred': 0, 'transmitted': True}
         teacher_wisdom.transmission_history.append(event)

@@ -117,12 +117,15 @@ class MeowKnowledgeResolver:
         teacher_wisdom = FelineWisdom.ensure_state(teacher)
         kitten_wisdom = FelineWisdom.ensure_state(kitten)
         transferred = []
-        for knowledge_name, knowledge in teacher_wisdom.awareness.items():
-            domain = knowledge.get('domain')
+        for knowledge_name, knowledge in teacher_wisdom.awareness_items():
+            domain = knowledge.domain
             if domain not in FelineWisdom.MEOW_ALLOWED_DOMAINS:
                 continue
-            copied = {'name': knowledge_name, 'domain': domain, 'known_to_exist': True, 'description': knowledge.get('description'), 'known_teachers': list(knowledge.get('known_teachers', [])), 'transfer_mode': 'awareness_only', 'received_from': teacher.name, 'received_on_day': current_day}
-            kitten_wisdom.awareness[knowledge_name] = copied
+            copied = knowledge.copy_for_transfer(
+                received_from=teacher.name,
+                received_on_day=current_day,
+            )
+            kitten_wisdom.store_awareness(copied)
             transferred.append(copied)
         event = {'name': 'meow_feline_awareness_transmitted', 'teacher': teacher.name, 'kitten': kitten.name, 'day': current_day, 'transferred': transferred, 'transferred_count': len(transferred), 'ability_methods_transferred': 0}
         teacher_wisdom.transmission_history.append(event)

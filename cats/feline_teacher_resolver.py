@@ -8,11 +8,11 @@ class FelineTeacherResolver:
 
     def find_teachers(self, student, ability_name, cats=None):
         wisdom = FelineWisdom.ensure_state(student)
-        awareness = wisdom.awareness.get(ability_name)
+        awareness = wisdom.awareness_record(ability_name)
         if awareness is None:
             return self._result(student=student, ability_name=ability_name, reason='ability_not_known_to_exist', candidates=[], teachers=[])
         cats = self._resolve_cats(cats)
-        known_teacher_names = list(awareness.get('known_teachers', []))
+        known_teacher_names = list(awareness.known_teachers)
         candidates = []
         teachers = []
         for teacher_name in known_teacher_names:

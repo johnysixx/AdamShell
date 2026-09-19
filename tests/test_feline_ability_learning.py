@@ -28,7 +28,13 @@ class FelineAbilityLearningTests(unittest.TestCase):
         wisdom = self.kitten.feline_wisdom
         self.assertTrue(result['transmitted'])
         self.assertEqual(result['methods_transferred'], 0)
-        self.assertTrue(wisdom.awareness['open_human_door']['known_to_exist'])
+        self.assertTrue(
+            wisdom
+            .awareness[
+                'open_human_door'
+            ]
+            .known_to_exist
+        )
         self.assertNotIn('open_human_door', wisdom.abilities)
 
     def test_pazuzu_teaches_handle_method(self):
