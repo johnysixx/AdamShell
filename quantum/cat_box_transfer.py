@@ -7,6 +7,7 @@ from cats.cat_knowledge import (
     CatKnowledge
 )
 from cats.cat import Cat
+from cats.cat_access_rules import CatAccessRules
 from universe.aroma_residue import (
     AromaResidue
 )
@@ -2250,15 +2251,31 @@ class CatQuantumBoxTransfer:
 
         access = cat.access
 
+        if isinstance(
+            access,
+            CatAccessRules,
+        ):
+            access_rules = access
+        elif isinstance(access, dict):
+            access_rules = access.get(
+                "cat_access"
+            )
+        else:
+            access_rules = None
+
+        if not isinstance(
+            access_rules,
+            CatAccessRules,
+        ):
+            raise TypeError(
+                'Cat access rules must be '
+                'CatAccessRules.'
+            )
+
         return bool(
-            access.get(
-                "can_access_anywhere",
-                False
-            )
-            and "boxes" in access.get(
-                "access_via",
-                []
-            )
+            access_rules.can_access_anywhere
+            and "boxes"
+            in access_rules.access_via
         )
 
     def _find_box(

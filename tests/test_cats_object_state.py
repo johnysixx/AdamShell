@@ -2,6 +2,7 @@ import unittest
 
 from cats.cats import Cats
 from cats.cats_state import CatsState
+from cats.cat_access_rules import CatAccessRules
 from universe.universe import Universe
 
 
@@ -40,15 +41,22 @@ class CatsObjectStateTests(unittest.TestCase):
         self.assertEqual(state.events, [])
         self.assertEqual(state.tick_count, 0)
         self.assertEqual(state.default_idea_energy, 100)
-        self.assertEqual(
+        self.assertIsInstance(
             state.access_rules,
-            {
-                "can_access_anywhere": True,
-                "access_via": [
-                    "boxes",
-                    "cat_doors",
-                ],
-            },
+            CatAccessRules,
+        )
+
+        self.assertTrue(
+            state.access_rules
+            .can_access_anywhere
+        )
+
+        self.assertEqual(
+            state.access_rules.access_via,
+            [
+                "boxes",
+                "cat_doors",
+            ],
         )
 
     def test_values_are_owned_by_same_state_object(self):
@@ -91,9 +99,14 @@ class CatsObjectStateTests(unittest.TestCase):
         boundary = universe.world["cats"]
 
         self.assertIs(boundary["cats"], cats.cats)
-        self.assertIs(
+        self.assertIsInstance(
             boundary["access_rules"],
-            cats.access_rules,
+            dict,
+        )
+
+        self.assertEqual(
+            boundary["access_rules"],
+            cats.access_rules.to_dict(),
         )
         self.assertIs(
             boundary["allowed_colors"],
@@ -169,7 +182,7 @@ class CatsObjectStateTests(unittest.TestCase):
         self.assertEqual(cats.events, [])
         self.assertNotIn(
             "changed",
-            cats.access_rules["access_via"],
+            cats.access_rules.access_via,
         )
         self.assertNotIn("changed", cats.allowed_colors)
         self.assertEqual(cats.cats, [])
@@ -192,7 +205,7 @@ class CatsObjectStateTests(unittest.TestCase):
         self.assertEqual(state.events, [])
         self.assertNotIn(
             "changed",
-            state.access_rules["access_via"],
+            state.access_rules.access_via,
         )
         self.assertNotIn("changed", state.allowed_patterns)
         self.assertEqual(state.cats, [])

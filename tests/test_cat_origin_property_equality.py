@@ -1,5 +1,7 @@
 import unittest
 
+from cats.cat_access_rules import CatAccessRules
+
 from universe.universe import Universe
 
 
@@ -80,13 +82,7 @@ class CatOriginPropertyEqualityTests(
                 )
 
     def test_all_origins_have_same_access(self):
-        expected_access = {
-            "can_access_anywhere": True,
-            "access_via": [
-                "boxes",
-                "cat_doors"
-            ]
-        }
+        expected_access = CatAccessRules()
 
         for cat in self.cats:
             with self.subTest(

@@ -1,5 +1,7 @@
-﻿from copy import deepcopy
+from copy import deepcopy
 from dataclasses import dataclass, field
+
+from .cat_access_rules import CatAccessRules
 
 
 def _default_allowed_colors():
@@ -48,16 +50,6 @@ def _default_allowed_eye_colors():
     ]
 
 
-def _default_access_rules():
-    return {
-        "can_access_anywhere": True,
-        "access_via": [
-            "boxes",
-            "cat_doors",
-        ],
-    }
-
-
 @dataclass(slots=True)
 class CatsState:
 
@@ -82,8 +74,8 @@ class CatsState:
         default_factory=lambda: ["female", "male"]
     )
     default_idea_energy: int = 100
-    access_rules: dict = field(
-        default_factory=_default_access_rules
+    access_rules: CatAccessRules = field(
+        default_factory=CatAccessRules
     )
 
     def to_dict(self):
@@ -101,5 +93,5 @@ class CatsState:
             ),
             "allowed_sexes": list(self.allowed_sexes),
             "default_idea_energy": self.default_idea_energy,
-            "access_rules": deepcopy(self.access_rules),
+            "access_rules": self.access_rules.to_dict(),
         }

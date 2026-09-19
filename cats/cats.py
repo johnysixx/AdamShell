@@ -6,6 +6,7 @@ from .genotype import CatGenotype
 from .cat_learning import CatLearning
 from .cat import Cat
 from .cats_state import CatsState
+from .cat_access_rules import CatAccessRules
 from .cat_personality import CatPersonality
 from .cat_mind import CatMind
 from .cat_intellect import CatIntellect
@@ -78,7 +79,20 @@ class Cats:
 
     @property
     def access_rules(self):
-        return self.cats_state.access_rules
+        access_rules = (
+            self.cats_state.access_rules
+        )
+
+        if not isinstance(
+            access_rules,
+            CatAccessRules,
+        ):
+            raise TypeError(
+                'Cat access rules must be '
+                'CatAccessRules.'
+            )
+
+        return access_rules
 
     @property
     def public_state(self):
@@ -91,7 +105,7 @@ class Cats:
             'allowed_fur_lengths': self.allowed_fur_lengths,
             'allowed_sexes': self.allowed_sexes,
             'default_idea_energy': self.default_idea_energy,
-            'access_rules': self.access_rules,
+            'access_rules': self.access_rules.to_dict(),
             'cats': self.cats,
             'cats_state': self.cats_state.to_dict(),
         }
@@ -408,10 +422,12 @@ class Cats:
     def can_travel(self, cat, via):
         if cat.type != 'cat':
             return False
-        if not self.access_rules.get('can_access_anywhere', False):
+        access_rules = self.access_rules
+
+        if not access_rules.can_access_anywhere:
             return False
-        allowed_routes = self.access_rules.get('access_via', [])
-        return via in allowed_routes
+
+        return via in access_rules.access_via
 
     def emit_event(self, event):
         self.events.append(event)
