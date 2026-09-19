@@ -3,6 +3,9 @@ from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat_family_system import CatFamilySystem
 from cats.cat_maternal_care_system import CatMaternalCareSystem
+from cats.cat_maternal_kitten_care_state import (
+    CatMaternalKittenCareState
+)
 
 class CatMaternalCareSystemTests(unittest.TestCase):
 
@@ -51,6 +54,26 @@ class CatMaternalCareSystemTests(unittest.TestCase):
         self.assertEqual(self.kitten.maternal_care_received.mother, self.mother.name)
         self.assertEqual(self.kitten.maternal_care_received.nursing_events, 1)
         self.assertEqual(self.kitten.maternal_care_received.warming_events, 1)
+        kitten_state = (
+            self.mother
+            .maternal_care
+            .kittens[self.kitten.name]
+        )
+
+        self.assertIsInstance(
+            kitten_state,
+            CatMaternalKittenCareState,
+        )
+
+        self.assertEqual(
+            kitten_state.care_events,
+            1,
+        )
+
+        self.assertEqual(
+            kitten_state.last_care_day,
+            20,
+        )
 
     def test_non_mother_cannot_provide_maternal_care(self):
         stranger = self.cats.create_cat(name='stranger', color='white', fur_length='short')

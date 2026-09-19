@@ -1,4 +1,7 @@
 from copy import deepcopy
+from cats.cat_maternal_kitten_care_state import (
+    CatMaternalKittenCareState,
+)
 from cats.cat import Cat
 from cats.cat_family_system import CatFamilySystem
 from cats.cat_parentage_state import (
@@ -325,17 +328,9 @@ class CatMaternalCareSystem:
             .maternal_care
         )
 
-        kitten_state = (
-            state
-            .kittens
-            .setdefault(
-                kitten.name,
-                {
-                    "care_events": 0,
-                    "last_care_day": None,
-                    "last_phase": None,
-                }
-            )
+        kitten_state = self._kitten_state(
+            state,
+            kitten.name,
         )
 
         state.active = (
@@ -345,17 +340,10 @@ class CatMaternalCareSystem:
 
         state.care_events += 1
 
-        kitten_state[
-            "care_events"
-        ] += 1
-
-        kitten_state[
-            "last_care_day"
-        ] = event["day"]
-
-        kitten_state[
-            "last_phase"
-        ] = event["phase"]
+        kitten_state.record(
+            event["day"],
+            event["phase"],
+        )
 
         received = (
             kitten
@@ -470,12 +458,16 @@ class CatMaternalCareSystem:
 
     def _record_state_only(self, mother, kitten, event):
         state = mother.maternal_care
-        kitten_state = state.kittens.setdefault(kitten.name, {'care_events': 0, 'last_care_day': None, 'last_phase': None})
+        kitten_state = self._kitten_state(
+            state,
+            kitten.name,
+        )
         state.active = event['phase'] != 'maternal_independence'
         state.care_events += 1
-        kitten_state['care_events'] += 1
-        kitten_state['last_care_day'] = event['day']
-        kitten_state['last_phase'] = event['phase']
+        kitten_state.record(
+            event['day'],
+            event['phase'],
+        )
         received = kitten.maternal_care_received
         received.mother = mother.name
         received.care_events += 1
@@ -490,11 +482,15 @@ class CatMaternalCareSystem:
     def _record(self, mother, kitten, event):
         state = mother.maternal_care
         state.active = event['phase'] != 'maternal_independence'
-        kitten_state = state.kittens.setdefault(kitten.name, {'care_events': 0, 'last_care_day': None, 'last_phase': None})
+        kitten_state = self._kitten_state(
+            state,
+            kitten.name,
+        )
         state.care_events += 1
-        kitten_state['care_events'] += 1
-        kitten_state['last_care_day'] = event['day']
-        kitten_state['last_phase'] = event['phase']
+        kitten_state.record(
+            event['day'],
+            event['phase'],
+        )
         received = kitten.maternal_care_received
         received.mother = mother.name
         received.care_events += 1
@@ -508,6 +504,38 @@ class CatMaternalCareSystem:
         emit_event = getattr(self.cats_layer, 'emit_event', None)
         if callable(emit_event):
             emit_event(deepcopy(event))
+
+    def _kitten_state(
+        self,
+        maternal_state,
+        kitten_name,
+    ):
+        kitten_state = (
+            maternal_state.kittens.get(
+                kitten_name
+            )
+        )
+
+        if kitten_state is None:
+            kitten_state = (
+                CatMaternalKittenCareState()
+            )
+
+            maternal_state.kittens[
+                kitten_name
+            ] = kitten_state
+
+        elif not isinstance(
+            kitten_state,
+            CatMaternalKittenCareState,
+        ):
+            raise TypeError(
+                'Maternal kitten care record '
+                'must be '
+                'CatMaternalKittenCareState.'
+            )
+
+        return kitten_state
 
     def _require_cat(self, cat):
         if not isinstance(cat, Cat):
