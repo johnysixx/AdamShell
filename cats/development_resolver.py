@@ -5,6 +5,9 @@ from cats.cat_learning import (
     CatLearning
 )
 from cats.cat import Cat
+from cats.cat_parentage_state import (
+    CatParentageState
+)
 
 
 class CatDevelopmentResolver:
@@ -55,6 +58,15 @@ class CatDevelopmentResolver:
         cat.birth_day = birth_day
         cat.developmental_stage = (
             "newborn"
+        )
+
+        parentage = (
+            CatParentageState
+            .require_from_cat(cat)
+        )
+
+        parentage.mother = (
+            cat.mother_name
         )
 
         cat.learning = (

@@ -14,7 +14,8 @@ class FelineTeachingHierarchyTests(unittest.TestCase):
         self.pazuzu = self.cats.create_cat(name='pazuzu', color='black', fur_length='short', origin='canonical_birth')
         self.foreign_cat = self.cats.create_cat(name='foreign_cat', color='gray', fur_length='short', origin='natural_birth')
         self.kitten = self.cats.create_cat(name='kitten', color='black', fur_length='short', origin='kitten_birth_resolver')
-        self.kitten.parents = {'mother': None, 'father': 'pazuzu'}
+        self.kitten.family.parents.mother = None
+        self.kitten.family.parents.father = 'pazuzu'
         self.resolver.register_garfield_teaching_abilities(self.garfield)
         self.resolver.register_pazuzu_door_method(self.pazuzu)
 

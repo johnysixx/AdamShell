@@ -57,10 +57,12 @@ class KittenUpbringingResolverTests(
             origin="kitten_birth_resolver"
         )
 
-        self.kitten.parents = {
-            "mother": "mother",
-            "father": "father"
-        }
+        self.kitten.family.parents.mother = (
+            "mother"
+        )
+        self.kitten.family.parents.father = (
+            "father"
+        )
 
         self.kitten.mother_name = "mother"
 

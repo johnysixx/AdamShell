@@ -17,7 +17,8 @@ class KittenLateEducationTests(unittest.TestCase):
         self.garfield = self.cats.create_cat(name='garfield', color='orange', fur_length='short', origin='canonical_birth')
         self.dice_teacher = self.cats.create_cat(name='dice_teacher', color='gray', fur_length='short', origin='dice_manifestation')
         self.kitten = self.cats.create_cat(name='kitten', color='white', fur_length='short', origin='kitten_birth_resolver')
-        self.kitten.parents = {'mother': 'mother', 'father': None}
+        self.kitten.family.parents.mother = 'mother'
+        self.kitten.family.parents.father = None
         self.kitten.mother_name = 'mother'
         self.development.initialize_newborn(self.kitten, birth_day=0)
         self.complete_early_education()
@@ -89,7 +90,7 @@ class KittenLateEducationTests(unittest.TestCase):
         self.complete_hunting_education()
         self.teach_all_vocalizations()
         self.run_at_age(75)
-        self.kitten.parents['mother'] = None
+        self.kitten.family.parents.mother = None
         self.kitten.learning.teacher_mother = 'dice_teacher'
         self.cats.cats.remove(self.mother)
         lesson = self.abilities.teach_method(teacher=self.garfield, student=self.dice_teacher, ability_name='teach_other_cats', method_name='garfield_teaching_method')
@@ -104,7 +105,7 @@ class KittenLateEducationTests(unittest.TestCase):
         self.complete_hunting_education()
         self.teach_all_vocalizations()
         self.run_at_age(75)
-        self.kitten.parents['mother'] = None
+        self.kitten.family.parents.mother = None
         self.kitten.learning.teacher_mother = None
         self.cats.cats.remove(self.mother)
         self.cats.cats.remove(self.garfield)

@@ -328,7 +328,7 @@ class CatSocialInteractionTests(unittest.TestCase):
         mother, kitten = self._social_pair()
         mother.name = 'mother'
         kitten.name = 'kitten'
-        kitten.family.parents['mother'] = mother.name
+        kitten.family.parents.mother = mother.name
         mother.family.children.append(kitten.name)
         social = CatSocialSystem(self.cats)
         assessment = social.assess(kitten, mother)

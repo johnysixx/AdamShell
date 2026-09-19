@@ -11,6 +11,9 @@ from cats.cat_learning_state import CatLearningState
 from cats.feline_wisdom import FelineWisdom
 from cats.cat_personality import CatPersonality
 from cats.kitten_growth import KittenGrowth
+from cats.cat_parentage_state import (
+    CatParentageState
+)
 
 class KittenUpbringingResolver:
     CARE_ONLY_LAST_DAY = 13
@@ -339,14 +342,15 @@ class KittenUpbringingResolver:
         cats,
         parent_role
     ):
-        parents = getattr(
-            kitten,
-            "parents",
-            {}
+        parents = (
+            CatParentageState
+            .require_from_cat(kitten)
         )
 
-        parent_name = parents.get(
-            parent_role
+        parent_name = (
+            parents.name_for_role(
+                parent_role
+            )
         )
 
         if parent_name is not None:

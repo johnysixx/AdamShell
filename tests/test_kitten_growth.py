@@ -15,7 +15,8 @@ class KittenGrowthTests(unittest.TestCase):
         self.mother = self.cats.create_cat(name='mother', color='black', fur_length='short', origin='natural_birth')
         self.father = self.cats.create_cat(name='father', color='gray', fur_length='short', sex='male', origin='natural_birth')
         self.kitten = self.cats.create_cat(name='kitten', color='white', fur_length='short', origin='kitten_birth_resolver')
-        self.kitten.parents = {'mother': 'mother', 'father': 'father'}
+        self.kitten.family.parents.mother = 'mother'
+        self.kitten.family.parents.father = 'father'
         self.kitten.mother_name = 'mother'
         self.kitten.father_name = 'father'
         self.development.initialize_newborn(self.kitten, birth_day=0)

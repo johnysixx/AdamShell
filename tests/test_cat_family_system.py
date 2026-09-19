@@ -18,14 +18,26 @@ class CatFamilySystemTests(unittest.TestCase):
         kitten = self.cats.create_cat(name=name, color='white', fur_length='short')
         kitten.mother_name = self.mother.name
         kitten.father_name = father_name
-        kitten.parents = {'mother': self.mother.name, 'father': father_name}
+        kitten.family.parents.mother = (
+            self.mother.name
+        )
+        kitten.family.parents.father = (
+            father_name
+        )
         return kitten
 
     def test_register_birth_sets_parents(self):
         kitten = self._kitten('kitten_1')
         self.family.register_birth(mother=self.mother, kittens=[kitten], cats=self.cats.cats)
-        self.assertEqual(kitten.family.parents['mother'], self.mother.name)
-        self.assertEqual(kitten.family.parents['father'], self.father.name)
+        self.assertEqual(
+            kitten.family.parents.mother,
+            self.mother.name,
+        )
+
+        self.assertEqual(
+            kitten.family.parents.father,
+            self.father.name,
+        )
 
     def test_mother_registers_child(self):
         kitten = self._kitten('kitten_1')

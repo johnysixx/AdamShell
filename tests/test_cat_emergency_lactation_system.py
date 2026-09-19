@@ -82,16 +82,10 @@ class CatEmergencyLactationSystemTests(
             "missing_mother"
         )
 
-        kitten.parents = {
-            "mother":
-                "missing_mother",
-            "father":
-                None,
-        }
-
-        kitten.family.parents[
-            "mother"
-        ] = "missing_mother"
+        kitten.family.parents.mother = (
+            "missing_mother"
+        )
+        kitten.family.parents.father = None
 
         kitten.learning = (
             CatLearning
@@ -204,13 +198,9 @@ class CatEmergencyLactationSystemTests(
             mother.name
         )
 
-        self.kitten.parents[
-            "mother"
-        ] = mother.name
-
-        self.kitten.family.parents[
-            "mother"
-        ] = mother.name
+        self.kitten.family.parents.mother = (
+            mother.name
+        )
 
         result = (
             self.system

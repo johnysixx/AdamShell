@@ -13,7 +13,8 @@ class CatPersonalitySocializationTests(unittest.TestCase):
         self.upbringing = KittenUpbringingResolver(self.universe)
         self.mother = self.cats.create_cat(name='mother', color='black', fur_length='short', origin='natural_birth')
         self.kitten = self.cats.create_cat(name='kitten', color='white', fur_length='short', origin='kitten_birth_resolver')
-        self.kitten.parents = {'mother': 'mother', 'father': None}
+        self.kitten.family.parents.mother = 'mother'
+        self.kitten.family.parents.father = None
         self.kitten.mother_name = 'mother'
         self.development.initialize_newborn(self.kitten, birth_day=0)
 

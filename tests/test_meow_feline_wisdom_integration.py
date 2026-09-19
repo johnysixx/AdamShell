@@ -19,7 +19,8 @@ class MeowFelineWisdomIntegrationTests(unittest.TestCase):
         self.dice_cat = self.cats.create_cat(name='dice_cat', color='gray', fur_length='short', origin='dice_manifestation')
         self.other_cat = self.cats.create_cat(name='other_cat', color='orange', fur_length='short', origin='natural_birth')
         self.kitten = self.cats.create_cat(name='kitten', color='white', fur_length='short', origin='kitten_birth_resolver')
-        self.kitten.parents = {'mother': 'mother', 'father': None}
+        self.kitten.family.parents.mother = 'mother'
+        self.kitten.family.parents.father = None
         self.kitten.mother_name = 'mother'
         self.development.initialize_newborn(self.kitten, birth_day=0)
         self.abilities.register_garfield_teaching_abilities(self.garfield)
@@ -53,7 +54,7 @@ class MeowFelineWisdomIntegrationTests(unittest.TestCase):
         self.assertEqual(result['reason'], 'teacher_has_not_learned_to_teach')
 
     def test_dice_cat_can_teach_orphaned_kitten(self):
-        self.kitten.parents['mother'] = None
+        self.kitten.family.parents.mother = None
         self.kitten.learning.teacher_mother = None
         teaching_lesson = self.abilities.teach_method(teacher=self.garfield, student=self.dice_cat, ability_name='teach_other_cats', method_name='garfield_teaching_method')
         self.assertTrue(teaching_lesson['learned'])
@@ -72,7 +73,7 @@ class MeowFelineWisdomIntegrationTests(unittest.TestCase):
         self.assertNotIn('forbidden_magic', self.kitten.feline_wisdom['awareness'])
 
     def test_untrained_dice_cat_cannot_teach_orphan(self):
-        self.kitten.parents['mother'] = None
+        self.kitten.family.parents.mother = None
         self.kitten.learning.teacher_mother = None
         result = self.resolver.transmit(mother=self.dice_cat, kitten=self.kitten, current_day=90)
         self.assertFalse(result['transmitted'])

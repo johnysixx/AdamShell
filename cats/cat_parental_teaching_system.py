@@ -1,6 +1,9 @@
 from copy import deepcopy
 from cats.cat import Cat
 from cats.cat_family_system import CatFamilySystem
+from cats.cat_parentage_state import (
+    CatParentageState
+)
 from cats.cat_learning_state import CatSkillState
 from cats.cat_social_objects import CatRelationship
 
@@ -48,10 +51,15 @@ class CatParentalTeachingSystem:
         return event
 
     def _parent_role(self, parent, kitten):
-        parents = kitten.family.parents
-        if parents.get('mother') == parent.name:
+        parents = (
+            CatParentageState
+            .require_from_cat(kitten)
+        )
+
+        if parents.mother == parent.name:
             return 'mother'
-        if parents.get('father') == parent.name:
+
+        if parents.father == parent.name:
             return 'father'
         return None
 

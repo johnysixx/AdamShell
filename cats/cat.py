@@ -3,6 +3,7 @@ from cats.cat_knowledge_objects import CatKnowledgeState
 from core.entity.social_entity import SocialMixin
 
 from cats.cat_distribution_state import CatDistributionState
+from cats.cat_parentage_state import CatParentageState
 
 class Cat(SocialMixin):
     """
@@ -42,7 +43,13 @@ class Cat(SocialMixin):
         self.social_memory = CatSocialMemories(records={})
         self.territories = CatTerritories(claims={})
         self.bonds = CatBonds(records={})
-        self.family = CatFamily(parents={'mother': None, 'father': None}, children=[], siblings=[], littermates=[], half_siblings=[])
+        self.family = CatFamily(
+            parents=CatParentageState(),
+            children=[],
+            siblings=[],
+            littermates=[],
+            half_siblings=[],
+        )
         self.maternal_care = MaternalCare(active=False, kittens={}, care_events=0)
         self.maternal_care_received = MaternalCareReceived(mother=None, foster_mother=None, care_events=0, foster_care_events=0, nursing_events=0, foster_nursing_events=0, cleaning_events=0, warming_events=0, protection_events=0, retrieval_events=0, last_care_day=None, last_phase=None, needs_milk=False, needs_teaching=False, rescued_to_bar=False, garfield_advice_received=False)
         self.emergency_nursing = CatEmergencyNursing.create_state(

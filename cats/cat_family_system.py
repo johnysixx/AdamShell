@@ -1,4 +1,7 @@
 from cats.cat import Cat
+from cats.cat_parentage_state import (
+    CatParentageState
+)
 
 class CatFamilySystem:
 
@@ -26,10 +29,15 @@ class CatFamilySystem:
         self._require_cat(other_cat)
         if other_cat.name in cat.family.children:
             return 'child'
-        parents = cat.family.parents
-        if parents.get('mother') == other_cat.name:
+        parents = (
+            CatParentageState
+            .require_from_cat(cat)
+        )
+
+        if parents.mother == other_cat.name:
             return 'mother'
-        if parents.get('father') == other_cat.name:
+
+        if parents.father == other_cat.name:
             return 'father'
         if other_cat.name in cat.family.littermates:
             if other_cat.name in cat.family.half_siblings:
@@ -44,9 +52,19 @@ class CatFamilySystem:
     def are_related(self, cat, other_cat):
         return self.relation(cat, other_cat) is not None
 
-    def _set_parents(self, kitten, mother, father):
-        kitten.family.parents['mother'] = mother
-        kitten.family.parents['father'] = father
+    def _set_parents(
+        self,
+        kitten,
+        mother,
+        father,
+    ):
+        parents = (
+            CatParentageState
+            .require_from_cat(kitten)
+        )
+
+        parents.mother = mother
+        parents.father = father
 
     def _link_littermates(self, kittens):
         for index, first in enumerate(kittens):
@@ -56,10 +74,27 @@ class CatFamilySystem:
                 self._add_unique(second.family.littermates, first.name)
 
     def _link_siblings(self, first, second):
-        first_parents = first.family.parents
-        second_parents = second.family.parents
-        same_mother = first_parents.get('mother') is not None and first_parents.get('mother') == second_parents.get('mother')
-        same_father = first_parents.get('father') is not None and first_parents.get('father') == second_parents.get('father')
+        first_parents = (
+            CatParentageState
+            .require_from_cat(first)
+        )
+
+        second_parents = (
+            CatParentageState
+            .require_from_cat(second)
+        )
+
+        same_mother = (
+            first_parents.mother is not None
+            and first_parents.mother
+            == second_parents.mother
+        )
+
+        same_father = (
+            first_parents.father is not None
+            and first_parents.father
+            == second_parents.father
+        )
         if same_mother and same_father:
             self._add_unique(first.family.siblings, second.name)
             self._add_unique(second.family.siblings, first.name)

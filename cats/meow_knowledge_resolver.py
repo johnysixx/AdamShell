@@ -1,5 +1,8 @@
 from cats.feline_wisdom import FelineWisdom
 from cats.cat_learning_state import CatLearningState
+from cats.cat_parentage_state import (
+    CatParentageState
+)
 
 class MeowKnowledgeResolver:
     REQUIRED_EXPERIENCES = ('socialization', 'litter_box', 'box_travel', 'cat_door_travel', 'hunting', 'adult_meowing', 'human_communication')
@@ -93,15 +96,14 @@ class MeowKnowledgeResolver:
 
     def _resolve_teacher_role(self, teacher, kitten):
         teacher_name = getattr(teacher, 'name', None)
-        parents = getattr(kitten, 'parents', None)
-        if parents is not None:
-            mother_name = parents.get('mother')
-        else:
-            mother_name = getattr(
-                getattr(kitten, 'learning', None),
-                'teacher_mother',
-                None,
-            )
+        parentage = (
+            CatParentageState
+            .require_from_cat(kitten)
+        )
+
+        mother_name = (
+            parentage.mother
+        )
         if mother_name is not None and teacher_name == mother_name:
             return {'allowed': True, 'reason': 'biological_mother_available', 'role': 'biological_mother'}
         teacher_wisdom = FelineWisdom.ensure_state(teacher)

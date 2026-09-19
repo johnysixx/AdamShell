@@ -1,6 +1,9 @@
 from copy import deepcopy
 from cats.cat import Cat
 from cats.cat_family_system import CatFamilySystem
+from cats.cat_parentage_state import (
+    CatParentageState
+)
 
 class CatMaternalCareSystem:
     NEONATAL_END_DAY = 14
@@ -25,7 +28,16 @@ class CatMaternalCareSystem:
         self._require_cat(mother)
         self._require_cat(kitten)
         relation = self.family_system.relation(mother, kitten)
-        biological_child = relation == 'child' and kitten.family.parents.get('mother') == mother.name
+        parentage = (
+            CatParentageState
+            .require_from_cat(kitten)
+        )
+
+        biological_child = (
+            relation == 'child'
+            and parentage.mother
+            == mother.name
+        )
         phase = self.care_phase(age_days)
         return {'mother': mother.name, 'kitten': kitten.name, 'biological_child': biological_child, 'phase': phase, 'nursing': biological_child and phase != 'maternal_independence', 'cleaning': biological_child, 'warming': biological_child and phase == 'neonatal_maternal_care', 'protection': biological_child, 'retrieval': biological_child and phase in {'neonatal_maternal_care', 'complete_maternal_care'}, 'active': biological_child and phase != 'maternal_independence'}
 

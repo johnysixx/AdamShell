@@ -4,6 +4,9 @@ from cats.cat import Cat
 from cats.cat_maternal_care_system import (
     CatMaternalCareSystem
 )
+from cats.cat_parentage_state import (
+    CatParentageState
+)
 from cats.garfield_training_system import (
     GarfieldTrainingSystem
 )
@@ -446,40 +449,13 @@ class CatEmergencyLactationSystem:
         self,
         kitten
     ):
-        family = getattr(
-            kitten,
-            "family",
-            None
+        parentage = (
+            CatParentageState
+            .require_from_cat(kitten)
         )
 
-        if family is not None:
-
-            mother = (
-                getattr(
-                    family,
-                    "parents",
-                    {}
-                )
-                .get(
-                    "mother"
-                )
-            )
-
-            if mother is not None:
-                return mother
-
-        parents = getattr(
-            kitten,
-            "parents",
-            {}
-        )
-
-        mother = parents.get(
-            "mother"
-        )
-
-        if mother is not None:
-            return mother
+        if parentage.mother is not None:
+            return parentage.mother
 
         return getattr(
             kitten,

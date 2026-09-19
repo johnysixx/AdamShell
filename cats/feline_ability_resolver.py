@@ -1,5 +1,8 @@
 from cats.feline_wisdom import FelineWisdom
 from cats.cat_personality import CatPersonality
+from cats.cat_parentage_state import (
+    CatParentageState
+)
 
 class FelineAbilityResolver:
     TEACH_OTHER_CATS = 'teach_other_cats'
@@ -121,8 +124,15 @@ class FelineAbilityResolver:
 
     def _is_parent_of(self, teacher, student):
         teacher_name = getattr(teacher, 'name', None)
-        parents = getattr(student, 'parents', {})
-        return teacher_name in {parents.get('mother'), parents.get('father')}
+        parents = (
+            CatParentageState
+            .require_from_cat(student)
+        )
+
+        return teacher_name in {
+            parents.mother,
+            parents.father,
+        }
 
     def _knows_ability(self, wisdom, ability_name):
         ability = wisdom['abilities'].get(ability_name)
