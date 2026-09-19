@@ -8,6 +8,9 @@ from cats.development_resolver import (
 from cats.kitten_upbringing_resolver import (
     KittenUpbringingResolver
 )
+from cats.kitten_upbringing_state import (
+    KittenCronenbergExperienceState,
+)
 
 
 class KittenUpbringingResolverTests(
@@ -129,14 +132,18 @@ class KittenUpbringingResolverTests(
             event_names
         )
 
-        experience = self.kitten.upbringing[
-            "cronenberg_experience"
-        ]
+        experience = (
+            self.kitten.upbringing
+            .cronenberg_experience
+        )
+
+        self.assertIsInstance(
+            experience,
+            KittenCronenbergExperienceState,
+        )
 
         self.assertEqual(
-            experience[
-                "father_food_deliveries"
-            ],
+            experience.father_food_deliveries,
             1
         )
 
@@ -255,12 +262,18 @@ class KittenUpbringingResolverTests(
             event_names
         )
 
-        experience = self.kitten.upbringing[
-            "cronenberg_experience"
-        ]
+        experience = (
+            self.kitten.upbringing
+            .cronenberg_experience
+        )
+
+        self.assertIsInstance(
+            experience,
+            KittenCronenbergExperienceState,
+        )
 
         self.assertEqual(
-            experience["live_deliveries"],
+            experience.live_deliveries,
             1
         )
 
@@ -330,12 +343,18 @@ class KittenUpbringingResolverTests(
             event_names
         )
 
-        experience = self.kitten.upbringing[
-            "cronenberg_experience"
-        ]
+        experience = (
+            self.kitten.upbringing
+            .cronenberg_experience
+        )
+
+        self.assertIsInstance(
+            experience,
+            KittenCronenbergExperienceState,
+        )
 
         self.assertEqual(
-            experience["successful_kills"],
+            experience.successful_kills,
             1
         )
 
@@ -412,17 +431,23 @@ class KittenUpbringingResolverTests(
             "hunting"
         ]
 
-        experience = self.kitten.upbringing[
-            "cronenberg_experience"
-        ]
+        experience = (
+            self.kitten.upbringing
+            .cronenberg_experience
+        )
+
+        self.assertIsInstance(
+            experience,
+            KittenCronenbergExperienceState,
+        )
 
         self.assertGreaterEqual(
-            experience["successful_kills"],
+            experience.successful_kills,
             1
         )
 
         self.assertGreaterEqual(
-            experience["family_hunts"],
+            experience.family_hunts,
             3
         )
 
