@@ -19,6 +19,8 @@ from .cat_quantum_return_state import CatQuantumReturnState
 
 from .cat_quantum_exploration_state import CatQuantumExplorationState
 
+from .cat_navigation_offer_state import CatNavigationOfferState
+
 class Cats:
 
     def __init__(self, universe):
@@ -170,6 +172,22 @@ class Cats:
             return {'name': 'cat_navigation_not_offered', 'result': 'invalid_cat', 'offered': False}
         if cat.type != 'cat':
             return {'name': 'cat_navigation_not_offered', 'result': 'not_a_cat', 'offered': False}
+
+        current_offer = cat.navigation_offer
+
+        if (
+            current_offer is not None
+            and not isinstance(
+                current_offer,
+                CatNavigationOfferState,
+            )
+        ):
+            raise TypeError(
+                'Cat navigation offer state '
+                'must be '
+                'CatNavigationOfferState.'
+            )
+
         suggested_intent = cat.suggested_intent
         if suggested_intent is None:
             return {'name': 'cat_navigation_not_offered', 'result': 'no_suggested_intent', 'cat': cat.name, 'offered': False}
@@ -205,7 +223,21 @@ class Cats:
         if route is None:
             return {'name': 'cat_navigation_not_offered', 'result': plan.get('result', 'route_not_planned'), 'cat': cat.name, 'suggested_intent': suggested_intent, 'plan': plan, 'offered': False}
         offer = {'name': 'cat_navigation_offered', 'cat': cat.name, 'suggested_intent': suggested_intent, 'route_id': route.route_id, 'destination': route.destination, 'route_step_count': len(route.route_steps), 'accepted': False, 'offered': True}
-        cat.navigation_offer = dict(offer)
+
+        cat.navigation_offer = (
+            CatNavigationOfferState(
+                suggested_intent=suggested_intent,
+                route_id=route.route_id,
+                destination=route.destination,
+                route_step_count=len(
+                    route.route_steps
+                ),
+                accepted=False,
+                declined=False,
+                offered=True,
+            )
+        )
+
         self.emit_event(offer)
         return {**offer, 'plan': plan, 'route': route}
 
@@ -215,15 +247,25 @@ class Cats:
         offer = cat.navigation_offer
         if offer is None:
             return {'name': 'cat_navigation_offer_not_accepted', 'result': 'no_navigation_offer', 'cat': cat.name, 'accepted': False}
+
+        if not isinstance(
+            offer,
+            CatNavigationOfferState,
+        ):
+            raise TypeError(
+                'Cat navigation offer state '
+                'must be '
+                'CatNavigationOfferState.'
+            )
+
         quantum_space = getattr(self.universe, 'quantum_space', None)
         if quantum_space is None:
             return {'name': 'cat_navigation_offer_not_accepted', 'result': 'quantum_space_unavailable', 'cat': cat.name, 'accepted': False}
         route = quantum_space.find_cat_route(cat.name)
         if route is None:
             return {'name': 'cat_navigation_offer_not_accepted', 'result': 'offered_route_not_found', 'cat': cat.name, 'accepted': False}
-        offer['accepted'] = True
-        cat.intent = offer['suggested_intent']
-        cat.navigation_offer = offer
+        offer.accepted = True
+        cat.intent = offer.suggested_intent
         cat.active_route_id = route.route_id
         route.state = 'ready'
         event = {'name': 'cat_navigation_offer_accepted', 'cat': cat.name, 'intent': cat.intent, 'route_id': route.route_id, 'destination': route.destination, 'accepted': True}
@@ -236,18 +278,28 @@ class Cats:
         offer = cat.navigation_offer
         if offer is None:
             return {'name': 'cat_navigation_offer_not_declined', 'result': 'no_navigation_offer', 'cat': cat.name, 'declined': False}
+
+        if not isinstance(
+            offer,
+            CatNavigationOfferState,
+        ):
+            raise TypeError(
+                'Cat navigation offer state '
+                'must be '
+                'CatNavigationOfferState.'
+            )
+
         quantum_space = getattr(self.universe, 'quantum_space', None)
         route = quantum_space.find_cat_route(cat.name) if quantum_space is not None else None
         if route is not None:
             route.stop_observation()
-        offer['accepted'] = False
-        offer['declined'] = True
-        cat.navigation_offer = offer
+        offer.accepted = False
+        offer.declined = True
         if hasattr(cat, 'intent'):
             del cat.intent
         if hasattr(cat, 'active_route_id'):
             del cat.active_route_id
-        event = {'name': 'cat_navigation_offer_declined', 'cat': cat.name, 'route_id': offer.get('route_id'), 'destination': offer.get('destination'), 'declined': True}
+        event = {'name': 'cat_navigation_offer_declined', 'cat': cat.name, 'route_id': offer.route_id, 'destination': offer.destination, 'declined': True}
         self.emit_event(event)
         return {**event, 'route': route}
 
@@ -257,13 +309,24 @@ class Cats:
         offer = cat.navigation_offer
         if offer is None:
             return {'name': 'cat_navigation_decision_failed', 'result': 'no_navigation_offer', 'cat': cat.name, 'decided': False}
+
+        if not isinstance(
+            offer,
+            CatNavigationOfferState,
+        ):
+            raise TypeError(
+                'Cat navigation offer state '
+                'must be '
+                'CatNavigationOfferState.'
+            )
+
         acceptance_chance = float(acceptance_chance)
         if not 0.0 <= acceptance_chance <= 1.0:
             raise ValueError('Cat navigation acceptance chance must be between 0 and 1.')
         rng = rng or random
         decision_roll = float(rng.random())
         accepted = decision_roll < acceptance_chance
-        decision = {'name': 'cat_navigation_offer_decided', 'cat': cat.name, 'route_id': offer.get('route_id'), 'destination': offer.get('destination'), 'suggested_intent': offer.get('suggested_intent'), 'decision_roll': decision_roll, 'acceptance_chance': acceptance_chance, 'decision': 'accepted' if accepted else 'declined', 'decided': True}
+        decision = {'name': 'cat_navigation_offer_decided', 'cat': cat.name, 'route_id': offer.route_id, 'destination': offer.destination, 'suggested_intent': offer.suggested_intent, 'decision_roll': decision_roll, 'acceptance_chance': acceptance_chance, 'decision': 'accepted' if accepted else 'declined', 'decided': True}
         cat.last_navigation_decision = dict(decision)
         self.emit_event(decision)
         if accepted:

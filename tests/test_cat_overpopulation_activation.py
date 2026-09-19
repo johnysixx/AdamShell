@@ -3,6 +3,8 @@ import unittest
 from universe.universe import Universe
 
 
+from cats.cat_navigation_offer_state import CatNavigationOfferState
+
 class CatOverpopulationActivationTests(
     unittest.TestCase
 ):
@@ -130,10 +132,13 @@ class CatOverpopulationActivationTests(
             "ready"
         )
 
+        self.assertIsInstance(
+            cat.navigation_offer,
+            CatNavigationOfferState,
+        )
+
         self.assertTrue(
-            cat.navigation_offer[
-                "accepted"
-            ]
+            cat.navigation_offer.accepted
         )
 
     def test_cat_can_decline_navigation_offer(self):
@@ -199,10 +204,13 @@ class CatOverpopulationActivationTests(
             "released"
         )
 
+        self.assertIsInstance(
+            cat.navigation_offer,
+            CatNavigationOfferState,
+        )
+
         self.assertTrue(
-            cat.navigation_offer[
-                "declined"
-            ]
+            cat.navigation_offer.declined
         )
 
     def test_veteran_cat_returns_to_bar_at_quota(self):
