@@ -1,6 +1,10 @@
 from copy import deepcopy
 from uuid import uuid4
 
+from cats.cat_ritual_lineage_state import (
+    CatRitualLineageState,
+)
+
 class CatGroupRitualEvolutionSystem:
 
     def __init__(self, group_system):
@@ -11,9 +15,15 @@ class CatGroupRitualEvolutionSystem:
         ritual = group.rituals.get(ritual_name)
         if ritual is None:
             return {'name': 'cat_ritual_lineage_denied', 'reason': 'unknown_ritual', 'registered': False}
-        lineage = group.ritual_lineages.setdefault(ritual_name, {'root_ritual': ritual_name, 'versions': [], 'children': {}})
-        if ritual_name not in lineage['versions']:
-            lineage['versions'].append(ritual_name)
+        lineage = self._lineage(
+            group,
+            ritual_name,
+            create=True,
+        )
+
+        lineage.register_version(
+            ritual_name
+        )
         ritual.lineage_root = ritual_name
         ritual.parent_ritual = None
         ritual.generation = 0
@@ -39,16 +49,73 @@ class CatGroupRitualEvolutionSystem:
         child.generation = int(getattr(parent, 'generation', 0)) + 1
         child.mutation_reason = mutation_reason
         group.rituals[new_name] = child
-        lineage = group.ritual_lineages.setdefault(root, {'root_ritual': root, 'versions': [root], 'children': {}})
-        if new_name not in lineage['versions']:
-            lineage['versions'].append(new_name)
-        lineage['children'].setdefault(ritual_name, [])
-        if new_name not in lineage['children'][ritual_name]:
-            lineage['children'][ritual_name].append(new_name)
+        lineage = self._lineage(
+            group,
+            root,
+            create=True,
+        )
+
+        lineage.register_version(
+            root
+        )
+
+        lineage.register_child(
+            ritual_name,
+            new_name,
+        )
         event = {'name': 'cat_group_ritual_mutated', 'group_id': group_id, 'parent_ritual': ritual_name, 'new_ritual': new_name, 'lineage_root': root, 'generation': child.generation, 'reason': mutation_reason, 'mutated': True}
         group.history.append(deepcopy(event))
         return event
 
-    def lineage(self, group_id, root_ritual):
-        group = self.group_system._group(group_id)
-        return deepcopy(group.ritual_lineages.get(root_ritual))
+    def lineage(
+        self,
+        group_id,
+        root_ritual,
+    ):
+        group = self.group_system._group(
+            group_id
+        )
+
+        lineage = self._lineage(
+            group,
+            root_ritual,
+            create=False,
+        )
+
+        return deepcopy(lineage)
+
+    def _lineage(
+        self,
+        group,
+        root_ritual,
+        create=False,
+    ):
+        lineage = group.ritual_lineages.get(
+            root_ritual
+        )
+
+        if lineage is None:
+            if not create:
+                return None
+
+            lineage = (
+                CatRitualLineageState(
+                    root_ritual=root_ritual
+                )
+            )
+
+            group.ritual_lineages[
+                root_ritual
+            ] = lineage
+
+        elif not isinstance(
+            lineage,
+            CatRitualLineageState,
+        ):
+            raise TypeError(
+                'Cat ritual lineage record '
+                'must be '
+                'CatRitualLineageState.'
+            )
+
+        return lineage

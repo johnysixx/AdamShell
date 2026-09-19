@@ -6,6 +6,7 @@ from cats.cat_group_role_system import CatGroupRoleSystem
 from cats.cat_group_role_specialization_system import CatGroupRoleSpecializationSystem
 from cats.cat_group_ritual_system import CatGroupRitualSystem
 from cats.cat_group_ritual_evolution_system import CatGroupRitualEvolutionSystem
+from cats.cat_ritual_lineage_state import CatRitualLineageState
 from cats.cat_group_institution_system import CatGroupInstitutionSystem
 from cats.cat_group_split_system import CatGroupSplitSystem
 
@@ -31,6 +32,26 @@ class CatGroupRitualSpecializationTests(unittest.TestCase):
         self.assertEqual(ritual.lineage_root, 'evening_patrol')
         self.assertEqual(ritual.generation, 0)
 
+        lineage = (
+            self.groups
+            .groups[self.group_id]
+            .ritual_lineages[
+                'evening_patrol'
+            ]
+        )
+
+        self.assertIsInstance(
+            lineage,
+            CatRitualLineageState,
+        )
+
+        self.assertEqual(
+            lineage.versions,
+            [
+                'evening_patrol'
+            ],
+        )
+
     def test_ritual_can_mutate_into_descendant(self):
         rituals = CatGroupRitualSystem(self.groups)
         rituals.define(self.group_id, 'evening_patrol', 'territory', required_roles=['guardian'])
@@ -40,6 +61,30 @@ class CatGroupRitualSpecializationTests(unittest.TestCase):
         child = self.groups.groups[self.group_id].rituals['silent_evening_patrol']
         self.assertEqual(child.parent_ritual, 'evening_patrol')
         self.assertEqual(child.generation, 1)
+
+        lineage = evolution.lineage(
+            self.group_id,
+            'evening_patrol',
+        )
+
+        self.assertIsInstance(
+            lineage,
+            CatRitualLineageState,
+        )
+
+        self.assertIn(
+            'silent_evening_patrol',
+            lineage.versions,
+        )
+
+        self.assertEqual(
+            lineage.children[
+                'evening_patrol'
+            ],
+            [
+                'silent_evening_patrol'
+            ],
+        )
 
     def test_guardian_can_specialize(self):
         cat = self.members[0]
