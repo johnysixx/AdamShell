@@ -918,13 +918,23 @@ class CatIntentionExecutor:
         target_name = (
             target.listener_name
         )
-        listener = None
-        for candidate in getattr(self.universe, 'entities', []):
-            if not isinstance(candidate, dict):
-                continue
-            if candidate.get('name') == target_name:
-                listener = candidate
-                break
+        listener = next(
+            (
+                candidate
+                for candidate
+                in self.cats_layer.cats
+                if (
+                    isinstance(
+                        candidate,
+                        Cat,
+                    )
+                    and candidate is not cat
+                    and candidate.name
+                    == target_name
+                )
+            ),
+            None,
+        )
         if listener is None:
             return self._record({'name': 'cat_legend_not_shared', 'cat': cat.name, 'listener': target_name, 'reason': 'listener_not_found', 'executed': False})
         result = CatKnowledge.share_legend(storyteller=cat, listener=listener, universe=self.universe)
