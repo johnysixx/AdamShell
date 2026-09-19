@@ -3,6 +3,9 @@ from copy import deepcopy
 from cats.cat_cultural_preference_state import (
     CatCulturalPreferenceState
 )
+from cats.cat_cultural_tradition_state import (
+    CatCulturalTraditionState
+)
 
 class CatGroupCulturalInheritanceSystem:
 
@@ -21,10 +24,37 @@ class CatGroupCulturalInheritanceSystem:
         for trait, value in parent_culture.traits.items():
             child_culture.traits[trait] = self._clamp(float(value) * retention)
         for name, tradition in parent_culture.traditions.items():
-            inherited = deepcopy(tradition)
-            inherited['strength'] = self._clamp(float(inherited.get('strength', 0.0)) * retention)
-            inherited['inherited_from'] = parent_group_id
-            child_culture.traditions[name] = inherited
+            if not isinstance(
+                tradition,
+                CatCulturalTraditionState,
+            ):
+                raise TypeError(
+                    'Cat cultural tradition '
+                    'record must be '
+                    'CatCulturalTraditionState.'
+                )
+
+            inherited_tradition = deepcopy(
+                tradition
+            )
+
+            inherited_tradition.strength = (
+                self._clamp(
+                    float(
+                        inherited_tradition
+                        .strength
+                    )
+                    * retention
+                )
+            )
+
+            inherited_tradition.inherited_from = (
+                parent_group_id
+            )
+
+            child_culture.traditions[
+                name
+            ] = inherited_tradition
         for name, preference in parent_culture.preferences.items():
             if not isinstance(
                 preference,

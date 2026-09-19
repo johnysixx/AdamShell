@@ -14,6 +14,9 @@ from cats.cat_group_culture_system import (
 from cats.cat_cultural_preference_state import (
     CatCulturalPreferenceState
 )
+from cats.cat_cultural_tradition_state import (
+    CatCulturalTraditionState
+)
 from cats.cat_group_myth_system import (
     CatGroupMythSystem
 )
@@ -115,12 +118,19 @@ class CatGroupCultureTests(
             self.group_id
         )
 
-        self.assertEqual(
+        tradition = (
             profile.traditions[
                 "evening_box_patrol"
-            ][
-                "occurrences"
-            ],
+            ]
+        )
+
+        self.assertIsInstance(
+            tradition,
+            CatCulturalTraditionState,
+        )
+
+        self.assertEqual(
+            tradition.occurrences,
             5
         )
 

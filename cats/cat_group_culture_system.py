@@ -3,6 +3,9 @@ from copy import deepcopy
 from cats.cat_cultural_preference_state import (
     CatCulturalPreferenceState
 )
+from cats.cat_cultural_tradition_state import (
+    CatCulturalTraditionState
+)
 
 class CatGroupCultureSystem:
 
@@ -13,13 +16,69 @@ class CatGroupCultureSystem:
         group = self.group_system._group(group_id)
         culture = group.culture
         traditions = culture.traditions
-        tradition = traditions.setdefault(practice, {'name': practice, 'category': category, 'occurrences': 0, 'strength': 0.0})
-        tradition['occurrences'] += 1
-        tradition['strength'] = self._clamp(float(tradition['strength']) + float(weight))
-        trait = self._trait_for_category(category)
+
+        tradition = traditions.get(
+            practice
+        )
+
+        if tradition is None:
+            tradition = (
+                CatCulturalTraditionState(
+                    name=practice,
+                    category=category,
+                )
+            )
+
+            traditions[
+                practice
+            ] = tradition
+
+        elif not isinstance(
+            tradition,
+            CatCulturalTraditionState,
+        ):
+            raise TypeError(
+                'Cat cultural tradition record '
+                'must be '
+                'CatCulturalTraditionState.'
+            )
+
+        tradition.name = practice
+        tradition.category = category
+        tradition.occurrences += 1
+
+        tradition.strength = self._clamp(
+            float(tradition.strength)
+            + float(weight)
+        )
+
+        trait = self._trait_for_category(
+            category
+        )
+
         traits = culture.traits
-        traits[trait] = self._clamp(float(traits.get(trait, 0.0)) + float(weight) * 0.5)
-        event = {'name': 'cat_group_cultural_practice', 'group_id': group_id, 'practice': practice, 'category': category, 'participants': list(participants or []), 'strength': tradition['strength']}
+
+        traits[trait] = self._clamp(
+            float(
+                traits.get(
+                    trait,
+                    0.0
+                )
+            )
+            + float(weight) * 0.5
+        )
+
+        event = {
+            'name':
+                'cat_group_cultural_practice',
+            'group_id': group_id,
+            'practice': practice,
+            'category': category,
+            'participants':
+                list(participants or []),
+            'strength':
+                tradition.strength,
+        }
         culture.history.append(deepcopy(event))
         group.history.append(deepcopy(event))
         return event
