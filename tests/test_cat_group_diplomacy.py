@@ -8,6 +8,9 @@ from cats.cat_group_system import (
 from cats.cat_group_memory_system import (
     CatGroupMemorySystem
 )
+from cats.cat_group_memory_state import (
+    CatGroupMemoryState
+)
 from cats.cat_group_diplomacy_system import (
     CatGroupDiplomacySystem
 )
@@ -92,13 +95,23 @@ class CatGroupDiplomacyTests(
             self.first_group
         )
 
+        self.assertIsInstance(
+            first,
+            CatGroupMemoryState,
+        )
+
+        self.assertIsInstance(
+            second,
+            CatGroupMemoryState,
+        )
+
         self.assertEqual(
-            first["conflicts"],
+            first.conflicts,
             1
         )
 
         self.assertEqual(
-            second["conflicts"],
+            second.conflicts,
             1
         )
 

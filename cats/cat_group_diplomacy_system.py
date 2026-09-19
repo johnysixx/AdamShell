@@ -10,7 +10,18 @@ class CatGroupDiplomacySystem:
     def evaluate(self, group_id, other_group_id):
         group = self.group_system._group(group_id)
         memory = self.memory.relation_memory(group_id, other_group_id)
-        score = memory['peaceful_encounters'] * 0.08 + memory['cooperations'] * 0.18 - memory['conflicts'] * 0.1 - memory['betrayals'] * 0.4 - memory['defeats'] * 0.04
+        score = (
+            memory.peaceful_encounters
+            * 0.08
+            + memory.cooperations
+            * 0.18
+            - memory.conflicts
+            * 0.1
+            - memory.betrayals
+            * 0.4
+            - memory.defeats
+            * 0.04
+        )
         score = max(-1.0, min(1.0, score))
         if other_group_id in group.alliances:
             status = 'allied'
@@ -24,7 +35,13 @@ class CatGroupDiplomacySystem:
             status = 'rival'
         else:
             status = 'hostile'
-        result = {'group_id': group_id, 'other_group_id': other_group_id, 'score': round(score, 4), 'status': status, 'memory': deepcopy(memory)}
+        result = {
+            'group_id': group_id,
+            'other_group_id': other_group_id,
+            'score': round(score, 4),
+            'status': status,
+            'memory': memory.to_dict(),
+        }
         group.diplomacy[other_group_id] = deepcopy(result)
         return result
 

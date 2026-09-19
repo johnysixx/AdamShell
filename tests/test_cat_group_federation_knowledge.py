@@ -401,9 +401,7 @@ class CatGroupFederationKnowledgeTests(
         )
 
         self.assertEqual(
-            remembered[
-                "conflicts"
-            ],
+            remembered.conflicts,
             0
         )
 
@@ -439,9 +437,7 @@ class CatGroupFederationKnowledgeTests(
         )
 
         self.assertEqual(
-            remembered[
-                "betrayals"
-            ],
+            remembered.betrayals,
             1
         )
 

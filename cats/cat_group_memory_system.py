@@ -1,5 +1,9 @@
 from copy import deepcopy
 
+from cats.cat_group_memory_state import (
+    CatGroupMemoryState,
+)
+
 class CatGroupMemorySystem:
     MAX_RECENT_EVENTS = 12
 
@@ -29,36 +33,60 @@ class CatGroupMemorySystem:
         group = self.group_system._group(group_id)
         return deepcopy(self._memory(group, other_group_id))
 
-    def _memory(self, group, other_group_id):
-        return group.group_memory.setdefault(other_group_id, {'encounters': 0, 'peaceful_encounters': 0, 'conflicts': 0, 'victories': 0, 'defeats': 0, 'standoffs': 0, 'cooperations': 0, 'betrayals': 0, 'last_outcome': None, 'recent_events': []})
+    def _memory(
+        self,
+        group,
+        other_group_id,
+    ):
+        memory = group.group_memory.get(
+            other_group_id
+        )
+
+        if memory is None:
+            memory = CatGroupMemoryState()
+
+            group.group_memory[
+                other_group_id
+            ] = memory
+
+        elif not isinstance(
+            memory,
+            CatGroupMemoryState,
+        ):
+            raise TypeError(
+                'Cat group memory record must be '
+                'CatGroupMemoryState.'
+            )
+
+        return memory
 
     def _apply(self, memory, event, own_group_id):
-        memory['encounters'] += 1
+        memory.encounters += 1
         if event.get('betrayal', False):
-            memory['betrayals'] += 1
+            memory.betrayals += 1
             outcome = 'betrayal'
         elif event.get('cooperation', False):
-            memory['cooperations'] += 1
+            memory.cooperations += 1
             outcome = 'cooperation'
         elif event.get('conflict', False):
-            memory['conflicts'] += 1
+            memory.conflicts += 1
             winner = event.get('winner')
             loser = event.get('loser')
             if winner is None:
-                memory['standoffs'] += 1
+                memory.standoffs += 1
                 outcome = 'standoff'
             elif winner == own_group_id:
-                memory['victories'] += 1
+                memory.victories += 1
                 outcome = 'victory'
             elif loser == own_group_id:
-                memory['defeats'] += 1
+                memory.defeats += 1
                 outcome = 'defeat'
             else:
                 outcome = 'conflict'
         else:
-            memory['peaceful_encounters'] += 1
+            memory.peaceful_encounters += 1
             outcome = 'peaceful'
-        memory['last_outcome'] = outcome
-        recent = list(memory.get('recent_events', []))
+        memory.last_outcome = outcome
+        recent = list(memory.recent_events)
         recent.append(outcome)
-        memory['recent_events'] = recent[-self.MAX_RECENT_EVENTS:]
+        memory.recent_events = recent[-self.MAX_RECENT_EVENTS:]
