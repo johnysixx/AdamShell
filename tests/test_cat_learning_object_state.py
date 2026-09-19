@@ -1,4 +1,4 @@
-﻿import unittest
+import unittest
 
 from cats.cat_learning import CatLearning
 from cats.cat_learning_state import (
@@ -213,17 +213,16 @@ class CatLearningObjectStateTests(
         )
 
         self.assertEqual(
-            set(vocalizations),
+            set(vocalizations.names()),
             set(
                 CatLearning
                 .ADULT_VOCALIZATIONS
             ),
         )
 
-        self.assertFalse(
-            any(
-                vocalizations.values()
-            )
+        self.assertEqual(
+            vocalizations.learned_count(),
+            0,
         )
 
     def test_to_dict_is_detached_recursive_boundary(
@@ -322,7 +321,9 @@ class CatLearningObjectStateTests(
         self.assertFalse(
             learning
             .skills["adult_meowing"]
-            .vocalizations["food_request"]
+            .vocalizations.knows(
+                "food_request"
+            )
         )
 
         self.assertEqual(

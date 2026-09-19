@@ -1,6 +1,10 @@
 from copy import deepcopy
 from dataclasses import dataclass, field
 
+from cats.cat_adult_vocalization_state import (
+    CatAdultVocalizationState,
+)
+
 
 @dataclass(slots=True)
 class CatSkillState:
@@ -9,7 +13,7 @@ class CatSkillState:
     progress: float = 0.0
     teacher: str | None = None
     learned_on_day: int | None = None
-    vocalizations: dict = field(default_factory=dict)
+    vocalizations: CatAdultVocalizationState | None = None
 
     def to_dict(self):
         state = {
@@ -19,9 +23,9 @@ class CatSkillState:
             "learned_on_day": self.learned_on_day,
         }
 
-        if self.vocalizations:
-            state["vocalizations"] = dict(
-                self.vocalizations
+        if self.vocalizations is not None:
+            state["vocalizations"] = (
+                self.vocalizations.to_dict()
             )
 
         return state

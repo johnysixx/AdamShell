@@ -1,3 +1,6 @@
+from cats.cat_adult_vocalization_state import (
+    CatAdultVocalizationState
+)
 from cats.cat_learning import CatLearning
 from cats.cat_learning_state import CatLearningState
 
@@ -26,20 +29,40 @@ class AdultVocalizationResolver:
             return self._deny(teacher, kitten, vocalization, current_day, 'teacher_does_not_know_adult_meowing')
         if kitten_skill is None:
             return self._deny(teacher, kitten, vocalization, current_day, 'kitten_learning_state_unavailable')
-        teacher_vocalizations = teacher_skill.vocalizations
-        if not teacher_vocalizations.get(vocalization, False):
+        teacher_vocalizations = (
+            self._require_vocalizations(
+                teacher_skill
+            )
+        )
+
+        if not teacher_vocalizations.knows(
+            vocalization
+        ):
             return self._deny(teacher, kitten, vocalization, current_day, 'teacher_does_not_know_vocalization')
-        kitten_vocalizations = kitten_skill.vocalizations
-        if not kitten_vocalizations:
-            kitten_vocalizations.update({
-                name: False
-                for name in CatLearning.ADULT_VOCALIZATIONS
-            })
-        if kitten_vocalizations.get(vocalization, False):
+
+        kitten_vocalizations = (
+            self._require_vocalizations(
+                kitten_skill
+            )
+        )
+
+        if kitten_vocalizations.knows(
+            vocalization
+        ):
             return self._deny(teacher, kitten, vocalization, current_day, 'vocalization_already_learned')
-        kitten_vocalizations[vocalization] = True
-        learned_count = sum((1 for learned in kitten_vocalizations.values() if learned))
-        total_count = len(CatLearning.ADULT_VOCALIZATIONS)
+
+        kitten_vocalizations.learn(
+            vocalization
+        )
+
+        learned_count = (
+            kitten_vocalizations
+            .learned_count()
+        )
+
+        total_count = len(
+            CatLearning.ADULT_VOCALIZATIONS
+        )
         kitten_skill.progress = learned_count / total_count
         completed = learned_count == total_count
         if completed:
@@ -56,6 +79,26 @@ class AdultVocalizationResolver:
         if quantum_events is not None:
             quantum_events.append(event)
         return event
+
+    def _require_vocalizations(
+        self,
+        skill,
+    ):
+        vocalizations = (
+            skill.vocalizations
+        )
+
+        if not isinstance(
+            vocalizations,
+            CatAdultVocalizationState,
+        ):
+            raise TypeError(
+                'Adult feline vocalization '
+                'state must be '
+                'CatAdultVocalizationState.'
+            )
+
+        return vocalizations
 
     def teach_all(self, teacher, kitten, current_day):
         results = []

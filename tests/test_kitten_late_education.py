@@ -67,7 +67,9 @@ class KittenLateEducationTests(unittest.TestCase):
         self.teach_all_vocalizations()
         skill = self.kitten.learning.skills['adult_meowing']
         self.assertTrue(skill.learned)
-        self.assertTrue(all(skill.vocalizations.values()))
+        self.assertTrue(
+            skill.vocalizations.complete
+        )
 
     def test_human_communication_is_learned_on_day_75(self):
         self.teach_all_vocalizations()

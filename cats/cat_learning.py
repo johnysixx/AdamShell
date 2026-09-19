@@ -1,3 +1,6 @@
+from cats.cat_adult_vocalization_state import (
+    CatAdultVocalizationState,
+)
 from cats.cat_learning_state import (
     CatLearningState,
     CatMeowKnowledgeState,
@@ -78,13 +81,11 @@ class CatLearning:
                     teacher=None,
                     learned_on_day=None,
                     vocalizations=(
-                        {
-                            vocalization: True
-                            for vocalization
-                            in cls.ADULT_VOCALIZATIONS
-                        }
+                        CatAdultVocalizationState.create(
+                            learned=True
+                        )
                         if skill == "adult_meowing"
-                        else {}
+                        else None
                     ),
                 )
                 for skill in cls.SKILLS
@@ -128,13 +129,11 @@ class CatLearning:
                     teacher=None,
                     learned_on_day=None,
                     vocalizations=(
-                        {
-                            vocalization: False
-                            for vocalization
-                            in cls.ADULT_VOCALIZATIONS
-                        }
+                        CatAdultVocalizationState.create(
+                            learned=False
+                        )
                         if skill == "adult_meowing"
-                        else {}
+                        else None
                     ),
                 )
                 for skill in cls.SKILLS

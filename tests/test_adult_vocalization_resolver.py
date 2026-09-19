@@ -21,13 +21,27 @@ class AdultVocalizationResolverTests(unittest.TestCase):
 
     def test_newborn_knows_no_adult_vocalizations(self):
         vocalizations = self.kitten.learning.skills['adult_meowing'].vocalizations
-        self.assertEqual(set(vocalizations.keys()), set(CatLearning.ADULT_VOCALIZATIONS))
-        self.assertFalse(any(vocalizations.values()))
+        self.assertEqual(
+            set(vocalizations.names()),
+            set(
+                CatLearning.ADULT_VOCALIZATIONS
+            ),
+        )
+        self.assertEqual(
+            vocalizations.learned_count(),
+            0,
+        )
 
     def test_mother_teaches_one_vocalization(self):
         result = self.vocalization.teach(teacher=self.mother, kitten=self.kitten, vocalization='food_request', current_day=60)
         self.assertTrue(result['taught'])
-        self.assertTrue(self.kitten.learning.skills['adult_meowing'].vocalizations['food_request'])
+        self.assertTrue(
+            self.kitten
+            .learning
+            .skills['adult_meowing']
+            .vocalizations
+            .knows('food_request')
+        )
         self.assertFalse(self.kitten.learning.adult_meowing_learned)
 
     def test_complete_repertoire_is_learned(self):
@@ -35,7 +49,9 @@ class AdultVocalizationResolverTests(unittest.TestCase):
         skill = self.kitten.learning.skills['adult_meowing']
         self.assertTrue(result['complete'])
         self.assertTrue(skill.learned)
-        self.assertTrue(all(skill.vocalizations.values()))
+        self.assertTrue(
+            skill.vocalizations.complete
+        )
         self.assertTrue(self.kitten.learning.adult_meowing_learned)
 
     def test_meow_is_denied_without_adult_repertoire(self):
