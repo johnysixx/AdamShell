@@ -1,5 +1,9 @@
 from copy import deepcopy
 
+from cats.cat_group_role_state import (
+    CatGroupRoleState,
+)
+
 class CatGroupRoleSystem:
     ROLE_PROFILES = {'storyteller': {'traits': {'sociability': 0.45, 'curiosity': 0.35}, 'knowledge_weight': 0.2}, 'scout': {'traits': {'curiosity': 0.55, 'courage': 0.35}, 'knowledge_weight': 0.1}, 'guardian': {'traits': {'courage': 0.6}, 'influence_weight': 0.4}, 'kitten_teacher': {'traits': {'sociability': 0.4}, 'knowledge_weight': 0.35}, 'scent_keeper': {'traits': {'sociability': 0.3}, 'group_scent_weight': 0.5}, 'mediator': {'traits': {'sociability': 0.55}, 'influence_weight': 0.3}}
 
@@ -27,11 +31,48 @@ class CatGroupRoleSystem:
         check = self.suitability(group_id, cat, role)
         if not check['eligible']:
             return {'name': 'cat_group_role_denied', 'group_id': group_id, 'cat': cat.name, 'role': role, 'reason': check.get('reason', 'insufficient_suitability'), 'assigned': False}
-        group = self.group_system._group(group_id)
-        holders = group.roles.setdefault(role, [])
+        existing = cat.group_roles.active.get(
+            role
+        )
+
+        if (
+            existing is not None
+            and not isinstance(
+                existing,
+                CatGroupRoleState,
+            )
+        ):
+            raise TypeError(
+                'Cat group role record must be '
+                'CatGroupRoleState.'
+            )
+
+        if existing is None:
+            existing = CatGroupRoleState()
+
+        group = self.group_system._group(
+            group_id
+        )
+
+        holders = group.roles.setdefault(
+            role,
+            []
+        )
+
         if cat.name not in holders:
-            holders.append(cat.name)
-        cat.group_roles.active[role] = {'group_id': group_id, 'score': check['score']}
+            holders.append(
+                cat.name
+            )
+
+        existing.assign_base(
+            group_id=group_id,
+            score=check['score'],
+        )
+
+        cat.group_roles.active[
+            role
+        ] = existing
+
         cat.group_roles.role_events += 1
         event = {'name': 'cat_group_role_assigned', 'group_id': group_id, 'cat': cat.name, 'role': role, 'score': check['score'], 'assigned': True}
         cat.group_roles.history.append(deepcopy(event))

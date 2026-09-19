@@ -3,6 +3,7 @@ from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat_group_system import CatGroupSystem
 from cats.cat_group_role_system import CatGroupRoleSystem
+from cats.cat_group_role_state import CatGroupRoleState
 from cats.cat_group_ritual_system import CatGroupRitualSystem
 from cats.cat_group_institution_system import CatGroupInstitutionSystem
 
@@ -24,6 +25,26 @@ class CatGroupInstitutionTests(unittest.TestCase):
         result = roles.assign(self.group_id, self.first, 'guardian')
         self.assertTrue(result['assigned'])
         self.assertIn('guardian', self.first.group_roles.active)
+
+        role = (
+            self.first.group_roles.active[
+                'guardian'
+            ]
+        )
+
+        self.assertIsInstance(
+            role,
+            CatGroupRoleState,
+        )
+
+        self.assertEqual(
+            role.group_id,
+            self.group_id,
+        )
+
+        self.assertFalse(
+            role.specialized
+        )
 
     def test_role_can_be_released(self):
         self.first.personality.traits.courage = 1.0
