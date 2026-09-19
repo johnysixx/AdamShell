@@ -2,6 +2,8 @@ from cats.cat_components import CatFamily, MaternalCare, MaternalCareReceived, S
 from cats.cat_knowledge_objects import CatKnowledgeState
 from core.entity.social_entity import SocialMixin
 
+from cats.cat_distribution_state import CatDistributionState
+
 class Cat(SocialMixin):
     """
     A living cat entity.
@@ -93,7 +95,7 @@ class Cat(SocialMixin):
         self.birth_percentile = None
         self.canonical_identity = None
         self.recipient = None
-        self.distribution = None
+        self.distribution = CatDistributionState()
         self.cat_d20 = None
         self.cat_d20_box = None
         self.type = 'cat'

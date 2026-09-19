@@ -1,5 +1,7 @@
 from cats.cat import Cat
 
+from cats.cat_distribution_state import CatDistributionState
+
 class CatDistributionSystem:
 
     def __init__(self, meeting_entities, idea_entities, recipient_registry=None):
@@ -8,6 +10,17 @@ class CatDistributionSystem:
         self.recipient_registry = recipient_registry
 
     def handle_after_milk(self, cat):
+        distribution = cat.distribution
+
+        if not isinstance(
+            distribution,
+            CatDistributionState,
+        ):
+            raise TypeError(
+                'Cat distribution state '
+                'must be CatDistributionState.'
+            )
+
         if not isinstance(cat, Cat):
             raise TypeError('CatDistributionSystem requires Cat.')
         if cat.recipient is not None:
@@ -16,11 +29,15 @@ class CatDistributionSystem:
         if recipient is not None:
             recipient_id = getattr(recipient, 'id', None) or getattr(recipient, 'world_key', None) or getattr(recipient, 'name', None)
             cat.recipient = recipient_id
-            cat.distribution = {'recipient': recipient_id, 'status': 'assigned', 'suggested_layer': None}
+            distribution.recipient = recipient_id
+            distribution.status = 'assigned'
+            distribution.suggested_layer = None
             recipient.needs_cat = False
             return {'name': 'cat_assigned_to_recipient', 'cat': cat.name, 'recipient': recipient_id, 'status': 'assigned', 'distributed': True}
         suggested_layer = 'idea_universe'
-        cat.distribution = {'recipient': None, 'status': 'unassigned', 'suggested_layer': suggested_layer}
+        distribution.recipient = None
+        distribution.status = 'unassigned'
+        distribution.suggested_layer = suggested_layer
         return {'name': 'cat_distribution_suggested', 'cat': cat.name, 'status': 'unassigned', 'suggested_layer': suggested_layer, 'distributed': False}
 
     def _find_waiting_recipient(self):

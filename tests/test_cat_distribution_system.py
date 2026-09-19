@@ -27,7 +27,7 @@ class CatDistributionSystemTests(unittest.TestCase):
         self.assertIn(cat, meeting_entities)
         self.assertNotIn(cat, idea_entities)
         self.assertEqual(cat.current_layer, 'meeting_place')
-        self.assertEqual(cat.distribution['suggested_layer'], 'idea_universe')
+        self.assertEqual(cat.distribution.suggested_layer, 'idea_universe')
 
     def test_assigned_cat_is_not_distributed(self):
         cat = self.make_cat(name='house_cat', recipient='alice')
@@ -53,8 +53,8 @@ class CatDistributionSystemTests(unittest.TestCase):
         self.assertEqual(result['status'], 'assigned')
         self.assertEqual(result['recipient'], 'alice')
         self.assertEqual(cat.recipient, 'alice')
-        self.assertEqual(cat.distribution['status'], 'assigned')
-        self.assertEqual(cat.distribution['recipient'], 'alice')
+        self.assertEqual(cat.distribution.status, 'assigned')
+        self.assertEqual(cat.distribution.recipient, 'alice')
         self.assertIn(cat, meeting_entities)
         self.assertEqual(cat.current_layer, 'meeting_place')
         self.assertFalse(recipient.needs_cat)
