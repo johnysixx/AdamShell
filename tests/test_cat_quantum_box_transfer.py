@@ -7,6 +7,8 @@ from universe.dark_sector import (
 )
 
 
+from cats.cat_quantum_transfer_state import CatQuantumTransferState
+
 class CatQuantumBoxTransferTests(
     unittest.TestCase
 ):
@@ -110,6 +112,25 @@ class CatQuantumBoxTransferTests(
         self.assertEqual(
             self.cat.position,
             self.target.position
+        )
+
+        self.assertIsInstance(
+            self.cat.quantum_transfer,
+            CatQuantumTransferState,
+        )
+
+        self.assertFalse(
+            self.cat.quantum_transfer.active
+        )
+
+        self.assertEqual(
+            self.cat.quantum_transfer.state,
+            'collapsed',
+        )
+
+        self.assertTrue(
+            self.cat.quantum_transfer
+            .target_box_consumed
         )
 
     def test_target_box_is_consumed(

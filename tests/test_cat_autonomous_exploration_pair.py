@@ -5,6 +5,8 @@ from universe.dark_sector import QUANTUM_BOX_ENERGY_COST_J
 
 from cats.cat_intention_state import CatExplorationPairTarget
 
+from cats.cat_quantum_transfer_state import CatQuantumTransferState
+
 class CatAutonomousExplorationPairTests(unittest.TestCase):
 
     def setUp(self):
@@ -65,6 +67,18 @@ class CatAutonomousExplorationPairTests(unittest.TestCase):
         self.assertTrue(execution['transfer']['transferred'])
         self.assertTrue(execution['transfer']['pair_remains_stable'])
         self.assertFalse(execution['transfer']['target_box_consumed'])
+        self.assertIsInstance(
+            self.cat.quantum_transfer,
+            CatQuantumTransferState,
+        )
+        self.assertFalse(
+            self.cat.quantum_transfer
+            .target_box_consumed
+        )
+        self.assertIsNotNone(
+            self.cat.quantum_transfer
+            .stable_pair_id
+        )
         self.assertIsNone(self.cat.mind.current_intention)
 
     def test_existing_unexplored_box_is_preferred(self):

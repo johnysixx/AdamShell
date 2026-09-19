@@ -22,6 +22,8 @@ from cats.cat_quantum_return_state import CatQuantumReturnState
 
 from cats.cat_quantum_exploration_state import CatQuantumExplorationState
 
+from cats.cat_quantum_transfer_state import CatQuantumTransferState
+
 class CatQuantumBoxTransfer:
 
     def __init__(
@@ -308,7 +310,7 @@ class CatQuantumBoxTransfer:
         cat,
         source_box,
         target_box,
-        transfer,
+        transfer_state,
         pair
     ):
         """
@@ -349,20 +351,14 @@ class CatQuantumBoxTransfer:
             "stable_exploration_pair"
         )
 
-        cat.quantum_transfer.update({
-            "active": False,
-            "state": "collapsed",
-            "cat_is_here": True,
-            "cat_is_not_here": False,
-            "resolved_layer": target_layer,
-            "resolved_position": (
-                target_position
-            ),
-            "target_box_consumed": False,
-            "stable_pair_id": pair[
+        transfer_state.collapse(
+            resolved_layer=target_layer,
+            resolved_position=target_position,
+            target_box_consumed=False,
+            stable_pair_id=pair[
                 "pair_id"
-            ]
-        })
+            ],
+        )
 
         for box in (
             source_box,
@@ -493,9 +489,7 @@ class CatQuantumBoxTransfer:
                         "pair_id"
                     ],
                     "source_layer": (
-                        transfer[
-                            "source_layer"
-                        ]
+                        transfer_state.source_layer
                     ),
                     "target_layer": (
                         target_layer
@@ -518,9 +512,7 @@ class CatQuantumBoxTransfer:
             "pair_id": pair["pair_id"],
             "source_box_id": source_box.id,
             "target_box_id": target_box.id,
-            "source_layer": transfer[
-                "source_layer"
-            ],
+            "source_layer": transfer_state.source_layer,
             "target_layer": target_layer,
             "target_box_consumed": False,
             "source_box_survived": True,
@@ -827,6 +819,20 @@ class CatQuantumBoxTransfer:
         source_box_id,
         target_box_id
     ):
+        current_transfer = cat.quantum_transfer
+
+        if (
+            current_transfer is not None
+            and not isinstance(
+                current_transfer,
+                CatQuantumTransferState,
+            )
+        ):
+            raise TypeError(
+                'Cat quantum transfer state '
+                'must be CatQuantumTransferState.'
+            )
+
         source_box = self._find_box(
             source_box_id
         )
@@ -862,17 +868,42 @@ class CatQuantumBoxTransfer:
                 "cat_cannot_recognize_quantum_pair"
             )
 
-        transfer = source_box.begin_cat_transfer(
+        source_box.begin_cat_transfer(
             cat=cat,
             target_box=target_box,
             tick=self.universe.quantum_state.tick_count
         )
 
-        cat.quantum_transfer = {
-            **deepcopy(transfer),
-            "cat_is_here": True,
-            "cat_is_not_here": True
-        }
+        box_transfer = source_box.cat_transfer
+
+        cat.quantum_transfer = (
+            CatQuantumTransferState(
+                active=box_transfer.active,
+                state=box_transfer.state,
+                cat_name=box_transfer.cat_name,
+                source_box_id=(
+                    box_transfer.source_box_id
+                ),
+                target_box_id=(
+                    box_transfer.target_box_id
+                ),
+                source_layer=(
+                    box_transfer.source_layer
+                ),
+                target_layer=(
+                    box_transfer.target_layer
+                ),
+                started_tick=(
+                    box_transfer.started_tick
+                ),
+                cat_is_here=True,
+                cat_is_not_here=True,
+            )
+        )
+
+        transfer_state = (
+            cat.quantum_transfer
+        )
 
         cat.state = (
             "quantum_box_transfer_superposition"
@@ -899,7 +930,7 @@ class CatQuantumBoxTransfer:
                     cat=cat,
                     source_box=source_box,
                     target_box=target_box,
-                    transfer=transfer,
+                    transfer_state=transfer_state,
                     pair=stable_pair
                 )
             )
@@ -976,15 +1007,11 @@ class CatQuantumBoxTransfer:
             "target_box"
         )
 
-        cat.quantum_transfer.update({
-            "active": False,
-            "state": "collapsed",
-            "cat_is_here": True,
-            "cat_is_not_here": False,
-            "resolved_layer": target_layer,
-            "resolved_position": target_position,
-            "target_box_consumed": True
-        })
+        transfer_state.collapse(
+            resolved_layer=target_layer,
+            resolved_position=target_position,
+            target_box_consumed=True,
+        )
 
         trail = self._create_trail(
             cat=cat,
@@ -1011,7 +1038,7 @@ class CatQuantumBoxTransfer:
                 ],
                 details={
                     "source_layer": (
-                        transfer["source_layer"]
+                        transfer_state.source_layer
                     ),
                     "target_layer": target_layer,
                     "target_box_consumed": True,
@@ -1027,9 +1054,7 @@ class CatQuantumBoxTransfer:
             "cat": cat.name,
             "source_box_id": source_box.id,
             "target_box_id": target_box.id,
-            "source_layer": transfer[
-                "source_layer"
-            ],
+            "source_layer": transfer_state.source_layer,
             "target_layer": target_layer,
             "source_box_survived": True,
             "target_box_consumed": True,
