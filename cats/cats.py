@@ -21,6 +21,8 @@ from .cat_quantum_exploration_state import CatQuantumExplorationState
 
 from .cat_navigation_offer_state import CatNavigationOfferState
 
+from .cat_navigation_decision_state import CatNavigationDecisionState
+
 class Cats:
 
     def __init__(self, universe):
@@ -320,6 +322,23 @@ class Cats:
                 'CatNavigationOfferState.'
             )
 
+        current_decision = (
+            cat.last_navigation_decision
+        )
+
+        if (
+            current_decision is not None
+            and not isinstance(
+                current_decision,
+                CatNavigationDecisionState,
+            )
+        ):
+            raise TypeError(
+                'Cat navigation decision state '
+                'must be '
+                'CatNavigationDecisionState.'
+            )
+
         acceptance_chance = float(acceptance_chance)
         if not 0.0 <= acceptance_chance <= 1.0:
             raise ValueError('Cat navigation acceptance chance must be between 0 and 1.')
@@ -327,7 +346,27 @@ class Cats:
         decision_roll = float(rng.random())
         accepted = decision_roll < acceptance_chance
         decision = {'name': 'cat_navigation_offer_decided', 'cat': cat.name, 'route_id': offer.route_id, 'destination': offer.destination, 'suggested_intent': offer.suggested_intent, 'decision_roll': decision_roll, 'acceptance_chance': acceptance_chance, 'decision': 'accepted' if accepted else 'declined', 'decided': True}
-        cat.last_navigation_decision = dict(decision)
+
+        cat.last_navigation_decision = (
+            CatNavigationDecisionState(
+                route_id=offer.route_id,
+                destination=offer.destination,
+                suggested_intent=(
+                    offer.suggested_intent
+                ),
+                decision_roll=decision_roll,
+                acceptance_chance=(
+                    acceptance_chance
+                ),
+                decision=(
+                    'accepted'
+                    if accepted
+                    else 'declined'
+                ),
+                decided=True,
+            )
+        )
+
         self.emit_event(decision)
         if accepted:
             result = self.accept_navigation_offer(cat)
