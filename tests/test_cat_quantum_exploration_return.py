@@ -3,6 +3,8 @@ from universe.universe import Universe
 from cats.cats import Cats
 from universe.dark_sector import QUANTUM_BOX_ENERGY_COST_J
 
+from cats.cat_quantum_return_state import CatQuantumReturnState
+
 class CatQuantumExplorationReturnTests(unittest.TestCase):
 
     def setUp(self):
@@ -37,7 +39,13 @@ class CatQuantumExplorationReturnTests(unittest.TestCase):
         resolution = result['arrival_resolution']
         self.assertEqual(resolution['action'], 'return_via_exploration_pair')
         self.assertTrue(resolution['return_plan']['started'])
-        self.assertTrue(self.cat.quantum_return['active'])
+        self.assertIsInstance(
+            self.cat.quantum_return,
+            CatQuantumReturnState,
+        )
+        self.assertTrue(
+            self.cat.quantum_return.active
+        )
 
     def test_creator_eventually_returns_and_pair_dissolves(self):
         self.reach_goal()

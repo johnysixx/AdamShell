@@ -18,6 +18,8 @@ from universe.dark_sector import (
 )
 
 
+from cats.cat_quantum_return_state import CatQuantumReturnState
+
 class CatQuantumBoxTransfer:
 
     def __init__(
@@ -1804,6 +1806,20 @@ class CatQuantumBoxTransfer:
         cat,
         pair_id
     ):
+        current_return = cat.quantum_return
+
+        if (
+            current_return is not None
+            and not isinstance(
+                current_return,
+                CatQuantumReturnState,
+            )
+        ):
+            raise TypeError(
+                'Cat quantum return state '
+                'must be CatQuantumReturnState.'
+            )
+
         pair = self._find_stable_pair_by_id(
             pair_id
         )
@@ -1890,20 +1906,22 @@ class CatQuantumBoxTransfer:
             route.route_id
         )
 
-        cat.quantum_return = {
-            "active": True,
-            "arrived_at_box": False,
-            "pair_id": pair_id,
-            "route_id": route.route_id,
-            "remote_box_id": (
-                pair["remote_box_id"]
-            ),
-            "anchor_box_id": (
-                pair["anchor_box_id"]
-            ),
-            "destination": destination,
-            "stabilized_path": stabilized
-        }
+        cat.quantum_return = (
+            CatQuantumReturnState(
+                active=True,
+                arrived_at_box=False,
+                pair_id=pair_id,
+                route_id=route.route_id,
+                remote_box_id=(
+                    pair["remote_box_id"]
+                ),
+                anchor_box_id=(
+                    pair["anchor_box_id"]
+                ),
+                destination=destination,
+                stabilized_path=stabilized,
+            )
+        )
 
         return {
             "name": (
@@ -1923,9 +1941,21 @@ class CatQuantumBoxTransfer:
     ):
         returning = cat.quantum_return
 
-        if not returning or not returning.get(
-            "active",
-            False
+        if (
+            returning is not None
+            and not isinstance(
+                returning,
+                CatQuantumReturnState,
+            )
+        ):
+            raise TypeError(
+                'Cat quantum return state '
+                'must be CatQuantumReturnState.'
+            )
+
+        if (
+            returning is None
+            or not returning.active
         ):
             return {
                 "name": (
@@ -1971,20 +2001,18 @@ class CatQuantumBoxTransfer:
             "arrived",
             False
         ):
-            returning[
-                "arrived_at_box"
-            ] = True
+            returning.arrived_at_box = True
 
-            returning["active"] = False
+            returning.active = False
 
             transfer_result = self.transfer_cat(
                 cat=cat,
-                source_box_id=returning[
-                    "remote_box_id"
-                ],
-                target_box_id=returning[
-                    "anchor_box_id"
-                ]
+                source_box_id=(
+                    returning.remote_box_id
+                ),
+                target_box_id=(
+                    returning.anchor_box_id
+                )
             )
 
             if transfer_result.get(
@@ -2001,9 +2029,7 @@ class CatQuantumBoxTransfer:
                 "cat_quantum_return_advanced"
             ),
             "cat": cat.name,
-            "pair_id": returning[
-                "pair_id"
-            ],
+            "pair_id": returning.pair_id,
             "position": (
                 dict(position)
                 if position is not None

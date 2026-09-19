@@ -15,6 +15,8 @@ from universe.aroma_profile import AromaProfile
 from .cat_knowledge import CatKnowledge
 from .cat_need_system import CatNeedSystem
 
+from .cat_quantum_return_state import CatQuantumReturnState
+
 class Cats:
 
     def __init__(self, universe):
@@ -342,7 +344,26 @@ class Cats:
         if not getattr(cat, 'active', True):
             return {'name': 'cat_autonomous_tick_skipped', 'cat': cat.name, 'reason': 'inactive', 'completed': False}
         quantum_return = getattr(cat, 'quantum_return', None)
-        if isinstance(quantum_return, dict) and quantum_return.get('active', False):
+
+        if (
+            quantum_return is not None
+            and not isinstance(
+                quantum_return,
+                CatQuantumReturnState,
+            )
+        ):
+            raise TypeError(
+                'Cat quantum return state '
+                'must be CatQuantumReturnState.'
+            )
+
+        if (
+            isinstance(
+                quantum_return,
+                CatQuantumReturnState,
+            )
+            and quantum_return.active
+        ):
             result = self.advance_cat_quantum_return(cat)
             return {'name': 'cat_autonomous_tick_completed', 'cat': cat.name, 'mode': 'quantum_return', 'result': result, 'completed': True}
         quantum_exploration = getattr(cat, 'quantum_exploration', None)
