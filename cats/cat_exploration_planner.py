@@ -400,20 +400,14 @@ class CatExplorationPlanner:
 
         visited_positions = []
 
-        for event in getattr(
-            memory,
-            "events",
-            []
-        ):
-            if event.get(
-                "event_type"
-            ) != "successful_exploration":
+        for event in memory.records():
+            if (
+                event.event_type
+                != "successful_exploration"
+            ):
                 continue
 
-            details = event.get(
-                "details",
-                {}
-            )
+            details = event.details
 
             if details.get(
                 "target_layer"
@@ -655,18 +649,11 @@ class CatExplorationPlanner:
 
         memory = cat.memory
 
-        for event in getattr(
-            memory,
-            "events",
-            []
-        ):
-            details = event.get(
-                "details",
-                {}
-            )
+        for event in memory.records():
+            details = event.details
 
-            event_type = event.get(
-                "event_type"
+            event_type = (
+                event.event_type
             )
 
             layers = []
@@ -688,8 +675,8 @@ class CatExplorationPlanner:
                         )
                     )
 
-            location = event.get(
-                "location"
+            location = (
+                event.location
             )
 
             if isinstance(

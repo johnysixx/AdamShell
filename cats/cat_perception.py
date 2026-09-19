@@ -538,10 +538,10 @@ class CatPerception:
         memory = cat.memory
         if memory is None:
             return False
-        for event in getattr(memory, 'events', []):
-            if event.get('location') in {'meeting_place', 'bar', 'bar_front_door'}:
+        for event in memory.records():
+            if event.location in {'meeting_place', 'bar', 'bar_front_door'}:
                 return True
-            if event.get('event_type') in {'bar_entry', 'cat_drank_milk_at_bar', 'bouncer_petted_cat', 'safe_at_bar'}:
+            if event.event_type in {'bar_entry', 'cat_drank_milk_at_bar', 'bouncer_petted_cat', 'safe_at_bar'}:
                 return True
         return False
 
@@ -549,12 +549,12 @@ class CatPerception:
         memory = cat.memory
         if memory is None:
             return False
-        for event in getattr(memory, 'events', []):
-            if event.get('event_type') not in {'box_explored', 'box_entered', 'quantum_box_observed'}:
+        for event in memory.records():
+            if event.event_type not in {'box_explored', 'box_entered', 'quantum_box_observed'}:
                 continue
-            if box_id in event.get('participants', []):
+            if box_id in event.participants:
                 return True
-            details = event.get('details', {})
+            details = event.details
             if details.get('box_id') == box_id:
                 return True
         return False

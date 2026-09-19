@@ -684,7 +684,7 @@ class CatMind:
         memory = cat.memory
         if memory is None:
             return 0.0
-        events = getattr(memory, 'events', [])
+        events = memory.records()
         positive_types = {'bar_entry', 'cat_drank_milk_at_bar', 'bouncer_petted_cat', 'safe_at_bar'}
-        positive_count = sum((1 for event in events if event.get('event_type') in positive_types))
+        positive_count = sum((1 for event in events if event.event_type in positive_types))
         return min(0.3, positive_count * 0.06)

@@ -1,4 +1,8 @@
-﻿from copy import deepcopy
+from copy import deepcopy
+
+from cats.cat_memory_record import (
+    CatMemoryRecord,
+)
 
 
 class CatMemory:
@@ -16,41 +20,55 @@ class CatMemory:
         participants=None,
         details=None
     ):
+        self._require_events()
         self.sequence += 1
 
-        memory = {
-            "memory_id": (
+        memory = CatMemoryRecord(
+            memory_id=(
                 f"{self.cat_name}_memory_"
                 f"{self.sequence}"
             ),
-            "sequence": self.sequence,
-            "event_type": str(event_type),
-            "universe_tick": universe_tick,
-            "location": location,
-            "participants": list(
+            sequence=self.sequence,
+            event_type=str(
+                event_type
+            ),
+            universe_tick=universe_tick,
+            location=deepcopy(
+                location
+            ),
+            participants=list(
                 participants or []
             ),
-            "details": deepcopy(
+            details=deepcopy(
                 details or {}
-            )
-        }
+            ),
+        )
 
-        self.events.append(memory)
+        self.events.append(
+            memory
+        )
 
-        return deepcopy(memory)
+        return deepcopy(
+            memory
+        )
 
     def recall(
         self,
         event_type=None,
         participant=None
     ):
-        memories = self.events
+        memories = (
+            self._require_events()
+        )
 
         if event_type is not None:
             memories = [
                 memory
                 for memory in memories
-                if memory["event_type"] == event_type
+                if (
+                    memory.event_type
+                    == event_type
+                )
             ]
 
         if participant is not None:
@@ -58,10 +76,45 @@ class CatMemory:
                 memory
                 for memory in memories
                 if participant
-                in memory["participants"]
+                in memory.participants
             ]
 
-        return deepcopy(memories)
+        return deepcopy(
+            memories
+        )
+
+    def _require_events(
+        self,
+    ):
+        if not isinstance(
+            self.events,
+            list,
+        ):
+            raise TypeError(
+                "Cat memory events "
+                "must be list."
+            )
+
+        for memory in self.events:
+
+            if not isinstance(
+                memory,
+                CatMemoryRecord,
+            ):
+                raise TypeError(
+                    "Cat memory record "
+                    "must be "
+                    "CatMemoryRecord."
+                )
+
+        return self.events
+
+    def records(
+        self,
+    ):
+        return tuple(
+            self._require_events()
+        )
 
     def remember_entity(
         self,
@@ -131,7 +184,7 @@ class CatMemory:
         return [
             memory
             for memory in self.cronenberg_encounters
-            if memory["details"].get(
+            if memory.details.get(
                 "result"
             ) == "cronenberg_hunted"
         ]
@@ -140,8 +193,9 @@ class CatMemory:
     def routes(self):
         return [
             memory
-            for memory in self.events
-            if memory["event_type"].startswith(
+            for memory
+            in self._require_events()
+            if memory.event_type.startswith(
                 "route_"
             )
         ]
@@ -153,7 +207,9 @@ class CatMemory:
             "memory_count": len(
                 self.events
             ),
-            "events": deepcopy(
-                self.events
-            )
+            "events": [
+                memory.to_dict()
+                for memory
+                in self._require_events()
+            ]
         }

@@ -71,10 +71,10 @@ class CatKnownQuantumBoxTravelTests(unittest.TestCase):
         memories = self.cat.memory.recall(event_type='quantum_box_layer_transfer')
         self.assertTrue(memories)
         memory = memories[-1]
-        self.assertEqual(memory['participants'], [self.source.id, self.target.id])
-        self.assertEqual(memory['details']['source_layer'], 'quantum_layer')
-        self.assertEqual(memory['details']['target_layer'], 'meeting_place')
-        self.assertTrue(memory['details']['target_box_consumed'])
+        self.assertEqual(memory.participants, [self.source.id, self.target.id])
+        self.assertEqual(memory.details['source_layer'], 'quantum_layer')
+        self.assertEqual(memory.details['target_layer'], 'meeting_place')
+        self.assertTrue(memory.details['target_box_consumed'])
 
     def test_failed_quantum_transfer_creates_cronenberg_and_memory(self):
         self.sense_counterpart()
@@ -97,7 +97,7 @@ class CatKnownQuantumBoxTravelTests(unittest.TestCase):
         self.assertEqual(manifested['source_operation'], 'quantum_box_travel_failed')
         memories = self.cat.memory.recall(event_type='quantum_box_layer_transfer_failed')
         self.assertEqual(len(memories), 1)
-        self.assertEqual(memories[0]['participants'], [self.source.id, self.target.id])
-        self.assertEqual(memories[0]['details']['reason'], 'simulated_quantum_transfer_error')
+        self.assertEqual(memories[0].participants, [self.source.id, self.target.id])
+        self.assertEqual(memories[0].details['reason'], 'simulated_quantum_transfer_error')
 if __name__ == '__main__':
     unittest.main()

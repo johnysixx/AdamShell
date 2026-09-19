@@ -37,7 +37,7 @@ class CatQuantumExplorationReturnTests(unittest.TestCase):
     def test_arrival_is_written_to_memory(self):
         self.reach_goal()
         events = self.cat.memory.events
-        self.assertTrue(any((event.get('event_type') == 'successful_exploration' for event in events)))
+        self.assertTrue(any((event.event_type == 'successful_exploration' for event in events)))
 
     def test_cat_can_choose_return_after_exploration(self):
         result = self.reach_goal()

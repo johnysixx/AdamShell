@@ -40,7 +40,7 @@ class CatDisappearedBoxMemoryTests(unittest.TestCase):
             result = self.cats.execute_cat_intention(self.cat)
         self.assertEqual(result['name'], 'cat_explored_quantum_box')
         memories = self.cat.memory.recall(event_type='quantum_box_observed')
-        self.assertTrue(any((box_id in memory.get('participants', []) for memory in memories)))
+        self.assertTrue(any((box_id in memory.participants for memory in memories)))
         self.universe.quantum_boxes.remove(self.box)
         observations = CatPerception(self.cats).observe(self.cat)
         self.assertNotIn(box_id, observations.visible_boxes)
@@ -63,6 +63,6 @@ class CatDisappearedBoxMemoryTests(unittest.TestCase):
         ]
         self.assertEqual(stale_box_targets, [])
         memories_after = self.cat.memory.recall(event_type='quantum_box_observed')
-        self.assertTrue(any((box_id in memory.get('participants', []) for memory in memories_after)))
+        self.assertTrue(any((box_id in memory.participants for memory in memories_after)))
 if __name__ == '__main__':
     unittest.main()
