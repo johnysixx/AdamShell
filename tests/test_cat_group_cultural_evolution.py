@@ -26,6 +26,9 @@ from cats.cat_group_innovation_system import (
 from cats.cat_group_innovation_tree_system import (
     CatGroupInnovationTreeSystem
 )
+from cats.cat_innovation_tree_state import (
+    CatInnovationTreeState
+)
 
 
 class CatGroupCulturalEvolutionTests(
@@ -329,6 +332,26 @@ class CatGroupCulturalEvolutionTests(
                 "innovation_id"
             ],
             descendants
+        )
+
+        tree_state = (
+            self.groups
+            .groups[self.parent]
+            .innovation_tree[
+                second[
+                    "innovation_id"
+                ]
+            ]
+        )
+
+        self.assertIsInstance(
+            tree_state,
+            CatInnovationTreeState,
+        )
+
+        self.assertEqual(
+            tree_state.generation,
+            1,
         )
 
         record = self.groups.groups[self.parent].innovations[
