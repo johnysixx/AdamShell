@@ -3,6 +3,9 @@ from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat_group_system import CatGroupSystem
 from cats.cat_social_objects import CatRelationship
+from cats.cat_group_territory_state import (
+    CatGroupTerritoryState,
+)
 
 class CatGroupSystemTests(unittest.TestCase):
 
@@ -62,6 +65,32 @@ class CatGroupSystemTests(unittest.TestCase):
         key = 'meeting_place::bar_window'
         self.assertIn(key, self.first.territories.claims)
         self.assertIn(key, self.second.territories.claims)
+
+        territory = (
+            self.group_system
+            .groups[group_id]
+            .territories[key]
+        )
+
+        self.assertIsInstance(
+            territory,
+            CatGroupTerritoryState,
+        )
+
+        self.assertEqual(
+            territory.layer,
+            'meeting_place',
+        )
+
+        self.assertEqual(
+            territory.location,
+            'bar_window',
+        )
+
+        self.assertAlmostEqual(
+            territory.strength,
+            0.8,
+        )
 
     def test_group_responds_collectively_to_threat(self):
         group_id = self._create_group()

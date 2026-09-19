@@ -4,6 +4,9 @@ from cats.cat import Cat
 from cats.cat_group import CatGroup
 from cats.cat_social_objects import CatRelationship
 from cats.cat_territory_system import CatTerritorySystem
+from cats.cat_group_territory_state import (
+    CatGroupTerritoryState,
+)
 
 class CatGroupSystem:
 
@@ -98,11 +101,59 @@ class CatGroupSystem:
         group = self._group(group_id)
         members = self._member_objects(group, cats)
         key = f'{layer}::{location}'
+
+        territory = group.territories.get(
+            key
+        )
+
+        if (
+            territory is not None
+            and not isinstance(
+                territory,
+                CatGroupTerritoryState,
+            )
+        ):
+            raise TypeError(
+                'Cat group territory record '
+                'must be '
+                'CatGroupTerritoryState.'
+            )
+
+        if territory is None:
+            territory = (
+                CatGroupTerritoryState()
+            )
+
         claims = []
+
         for member in members:
-            claim = self.territory_system.claim(member, layer=layer, location=location, strength=strength)
-            claims.append(deepcopy(claim))
-        group.territories[key] = {'layer': layer, 'location': location, 'strength': self._clamp(strength), 'members': [member.name for member in members]}
+            claim = self.territory_system.claim(
+                member,
+                layer=layer,
+                location=location,
+                strength=strength,
+            )
+
+            claims.append(
+                deepcopy(claim)
+            )
+
+        territory.record_claim(
+            layer=layer,
+            location=location,
+            strength=self._clamp(
+                strength
+            ),
+            members=[
+                member.name
+                for member in members
+            ],
+        )
+
+        group.territories[
+            key
+        ] = territory
+
         event = {'name': 'cat_group_territory_claimed', 'group_id': group_id, 'territory': key, 'member_count': len(members), 'claimed': True}
         self._record(group, event, cats=members)
         return {**event, 'claims': claims}
