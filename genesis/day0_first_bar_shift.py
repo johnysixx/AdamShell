@@ -7,6 +7,7 @@ from meeting_place.bar_objects import (
     BarDrinkDiscussion,
     BarDrinkDesiredProperty,
     BarDrinkAssessment,
+    BarDrinkProposal,
     BarDrinkIdea,
     BarDrinkSpeakerContribution,
     BarDrinkOrder,
@@ -632,9 +633,9 @@ class Day0FirstBarShift:
                 sweetness='good',
                 full_body='still_missing',
             ),
-            proposal={
-                'bitterness': True,
-            },
+            proposal=BarDrinkProposal(
+                bitterness=True,
+            ),
         )
         discussion.add_idea(
             observation

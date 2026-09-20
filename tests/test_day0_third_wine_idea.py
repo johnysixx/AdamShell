@@ -35,7 +35,7 @@ class Day0ThirdWineIdeaTests(unittest.TestCase):
 
     def test_serpent_proposes_bitterness(self):
         result = self.scene.advance_to_third_wine_idea()
-        self.assertTrue(result['wine_idea'].proposal['bitterness'])
+        self.assertTrue(result['wine_idea'].proposal.bitterness)
 
     def test_wine_discussion_has_three_ideas(self):
         self.scene.advance_to_third_wine_idea()
@@ -43,7 +43,7 @@ class Day0ThirdWineIdeaTests(unittest.TestCase):
         self.assertEqual(len(ideas), 3)
         self.assertEqual(ideas[0].serpent.proposal, 'flavor_should_be_fuller')
         self.assertTrue(ideas[1].desired_property.sweetness)
-        self.assertTrue(ideas[2].proposal['bitterness'])
+        self.assertTrue(ideas[2].proposal.bitterness)
 
     def test_discussion_is_still_unresolved(self):
         self.scene.advance_to_third_wine_idea()

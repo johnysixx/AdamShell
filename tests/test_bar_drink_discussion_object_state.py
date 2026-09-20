@@ -11,6 +11,7 @@ from meeting_place.bar_objects import (
     BarDrinkDiscussion,
     BarDrinkDesiredProperty,
     BarDrinkAssessment,
+    BarDrinkProposal,
     BarDrinkIdea,
     BarDrinkSpeakerContribution,
     BarWineHypothesis,
@@ -203,6 +204,43 @@ class BarDrinkDiscussionObjectStateTests(
                 },
             )
 
+    def test_proposal_is_object_only(
+        self
+    ):
+        proposal = BarDrinkProposal(
+            bitterness=True,
+        )
+        idea = BarDrinkIdea(
+            subject="wine",
+            proposal=proposal,
+        )
+
+        self.assertIs(
+            idea.proposal,
+            proposal,
+        )
+        self.assertTrue(
+            idea.proposal.bitterness
+        )
+        self._assert_object_only(
+            idea.proposal,
+            "bitterness",
+        )
+
+    def test_proposal_mapping_is_rejected(
+        self
+    ):
+        with self.assertRaisesRegex(
+            TypeError,
+            "BarDrinkProposal",
+        ):
+            BarDrinkIdea(
+                subject="wine",
+                proposal={
+                    "bitterness": True,
+                },
+            )
+
     def test_speaker_contributions_are_object_only(
         self
     ):
@@ -271,6 +309,9 @@ class BarDrinkDiscussionObjectStateTests(
                     sweetness="good",
                     full_body="still_missing",
                 ),
+                proposal=BarDrinkProposal(
+                    bitterness=True,
+                ),
             )
         )
         discussion.current_hypothesis = (
@@ -294,6 +335,9 @@ class BarDrinkDiscussionObjectStateTests(
         snapshot["ideas"][0][
             "assessment"
         ]["sweetness"] = "changed"
+        snapshot["ideas"][0][
+            "proposal"
+        ]["bitterness"] = False
         snapshot["current_hypothesis"][
             "acidity"
         ] = False
@@ -315,6 +359,9 @@ class BarDrinkDiscussionObjectStateTests(
         self.assertEqual(
             idea.assessment.sweetness,
             "good",
+        )
+        self.assertTrue(
+            idea.proposal.bitterness
         )
         self.assertTrue(
             discussion
