@@ -9,6 +9,7 @@ from meeting_place.bar_objects import (
     BarDrinkAssessment,
     BarDrinkProposal,
     BarDrinkRevision,
+    BarDrinkQualification,
     BarDrinkIdea,
     BarDrinkSpeakerContribution,
     BarDrinkOrder,
@@ -1020,9 +1021,9 @@ class Day0FirstBarShift:
             subject='wine',
             source='serpent',
             agrees_with='acidity',
-            qualification={
-                'acidity': 'moderate',
-            },
+            qualification=BarDrinkQualification(
+                acidity='moderate',
+            ),
             meaning=(
                 'acidity_is_right_but_too_much_'
                 'would_make_the_wine_bad'

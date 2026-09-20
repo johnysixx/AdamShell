@@ -2,6 +2,7 @@ import unittest
 from multiverse import UniverseRegistry
 from universe.universe import Universe
 from meeting_place.meeting_place import MeetingPlace
+from meeting_place.bar_objects import BarDrinkQualification
 from library import Library
 from gods import Gods
 from idea_entities import IdeaEntities
@@ -24,6 +25,18 @@ class Day0BalancedWineAcidityTests(unittest.TestCase):
         result = self.scene.advance_to_balanced_acidity_idea()
         event = result['balance']['event']
         self.assertEqual(event['too_much_acidity'], 'bad')
+
+    def test_balance_idea_keeps_qualification_object(self):
+        result = self.scene.advance_to_balanced_acidity_idea()
+        idea = result['balance']['idea']
+        self.assertIsInstance(
+            idea.qualification,
+            BarDrinkQualification,
+        )
+        self.assertEqual(
+            idea.qualification.acidity,
+            'moderate',
+        )
 
     def test_desired_acidity_becomes_moderate(self):
         self.scene.advance_to_balanced_acidity_idea()

@@ -13,6 +13,7 @@ from meeting_place.bar_objects import (
     BarDrinkAssessment,
     BarDrinkProposal,
     BarDrinkRevision,
+    BarDrinkQualification,
     BarDrinkIdea,
     BarDrinkSpeakerContribution,
     BarWineHypothesis,
@@ -286,6 +287,44 @@ class BarDrinkDiscussionObjectStateTests(
                 },
             )
 
+    def test_qualification_is_object_only(
+        self
+    ):
+        qualification = BarDrinkQualification(
+            acidity="moderate",
+        )
+        idea = BarDrinkIdea(
+            subject="wine",
+            qualification=qualification,
+        )
+
+        self.assertIs(
+            idea.qualification,
+            qualification,
+        )
+        self.assertEqual(
+            idea.qualification.acidity,
+            "moderate",
+        )
+        self._assert_object_only(
+            idea.qualification,
+            "acidity",
+        )
+
+    def test_qualification_mapping_is_rejected(
+        self
+    ):
+        with self.assertRaisesRegex(
+            TypeError,
+            "BarDrinkQualification",
+        ):
+            BarDrinkIdea(
+                subject="wine",
+                qualification={
+                    "acidity": "moderate",
+                },
+            )
+
     def test_speaker_contributions_are_object_only(
         self
     ):
@@ -361,6 +400,9 @@ class BarDrinkDiscussionObjectStateTests(
                     remove="bitterness",
                     add="acidity",
                 ),
+                qualification=BarDrinkQualification(
+                    acidity="moderate",
+                ),
             )
         )
         discussion.current_hypothesis = (
@@ -390,6 +432,9 @@ class BarDrinkDiscussionObjectStateTests(
         snapshot["ideas"][0][
             "revision"
         ]["remove"] = "sweetness"
+        snapshot["ideas"][0][
+            "qualification"
+        ]["acidity"] = "high"
         snapshot["current_hypothesis"][
             "acidity"
         ] = False
@@ -418,6 +463,10 @@ class BarDrinkDiscussionObjectStateTests(
         self.assertEqual(
             idea.revision.remove,
             "bitterness",
+        )
+        self.assertEqual(
+            idea.qualification.acidity,
+            "moderate",
         )
         self.assertTrue(
             discussion

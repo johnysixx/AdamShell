@@ -163,6 +163,19 @@ class BarDrinkRevision:
 
 
 @dataclass(slots=True)
+class BarDrinkQualification:
+    acidity: str | None = None
+
+    def to_dict(self):
+        result = {}
+
+        if self.acidity is not None:
+            result["acidity"] = self.acidity
+
+        return result
+
+
+@dataclass(slots=True)
 class BarDrinkIdea:
     subject: str
     source: str | None = None
@@ -174,7 +187,7 @@ class BarDrinkIdea:
     proposal: BarDrinkProposal | None = None
     revision: BarDrinkRevision | None = None
     agrees_with: str | None = None
-    qualification: dict | None = None
+    qualification: BarDrinkQualification | None = None
     meaning: str | None = None
 
     def __post_init__(self):
@@ -240,6 +253,18 @@ class BarDrinkIdea:
                 "BarDrinkRevision."
             )
 
+        if (
+            self.qualification is not None
+            and not isinstance(
+                self.qualification,
+                BarDrinkQualification,
+            )
+        ):
+            raise TypeError(
+                "Bar drink idea qualification must be "
+                "BarDrinkQualification."
+            )
+
     def to_dict(self):
         result = {
             "subject": self.subject,
@@ -271,11 +296,15 @@ class BarDrinkIdea:
                 self.revision.to_dict()
             )
 
+        if self.qualification is not None:
+            result["qualification"] = (
+                self.qualification.to_dict()
+            )
+
         for name in (
             "source",
             "observation",
             "agrees_with",
-            "qualification",
             "meaning",
         ):
             value = getattr(
