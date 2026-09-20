@@ -1,4 +1,17 @@
-﻿class LemonadeBatchProfile:
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True, slots=True)
+class LemonadeTraitProfile:
+    acidity: float = 0.0
+    sweetness: float = 0.0
+    bitterness: float = 0.0
+    viscosity: float = 0.0
+    stability: float = 0.0
+    dark_energy_affinity: float = 0.0
+    growth_efficiency: float = 0.0
+    cat_scent: float = 0.0
+    quantum_coherence: float = 0.0
 
     TRAIT_NAMES = (
         "acidity",
@@ -9,8 +22,104 @@
         "dark_energy_affinity",
         "growth_efficiency",
         "cat_scent",
-        "quantum_coherence"
+        "quantum_coherence",
     )
+
+    def value_for(self, trait_name, default=0.0):
+        if trait_name not in self.TRAIT_NAMES:
+            return default
+        return getattr(self, trait_name)
+
+    def to_dict(self):
+        return {
+            trait_name: self.value_for(trait_name)
+            for trait_name in self.TRAIT_NAMES
+        }
+
+
+@dataclass(frozen=True, slots=True)
+class LemonadeEntangledPair:
+    cronenberg_ids: tuple[str, ...]
+    strength: float
+    link_types: tuple[str | None, ...]
+
+    def to_dict(self):
+        return {
+            "cronenberg_ids": list(self.cronenberg_ids),
+            "strength": self.strength,
+            "link_types": list(self.link_types),
+        }
+
+
+@dataclass(frozen=True, slots=True)
+class LemonadeProfile:
+    traits: LemonadeTraitProfile
+    source_mass: float
+    source_cronenbergs: tuple[str, ...]
+    entanglement_strength: float
+    entangled_pairs: tuple[LemonadeEntangledPair, ...]
+    dominant_trait: str | None
+
+    def __post_init__(self):
+        if not isinstance(self.traits, LemonadeTraitProfile):
+            raise TypeError(
+                "Lemonade profile traits must be LemonadeTraitProfile."
+            )
+        if any(
+            not isinstance(pair, LemonadeEntangledPair)
+            for pair in self.entangled_pairs
+        ):
+            raise TypeError(
+                "Lemonade profile entangled pairs must be objects."
+            )
+
+    @property
+    def source_count(self):
+        return len(self.source_cronenbergs)
+
+    @property
+    def entangled_pair_count(self):
+        return len(self.entangled_pairs)
+
+    def to_dict(self):
+        return {
+            "traits": self.traits.to_dict(),
+            "source_count": self.source_count,
+            "source_mass": self.source_mass,
+            "source_cronenbergs": list(self.source_cronenbergs),
+            "entangled_pair_count": self.entangled_pair_count,
+            "entanglement_strength": self.entanglement_strength,
+            "entangled_pairs": [
+                pair.to_dict()
+                for pair in self.entangled_pairs
+            ],
+            "dominant_trait": self.dominant_trait,
+        }
+
+
+@dataclass(frozen=True, slots=True)
+class LemonadeBatchRecord:
+    amount_litres: float
+    source: str
+    profile: LemonadeProfile
+
+    def __post_init__(self):
+        if not isinstance(self.profile, LemonadeProfile):
+            raise TypeError(
+                "Lemonade batch profile must be LemonadeProfile."
+            )
+
+    def to_dict(self):
+        return {
+            "amount_litres": self.amount_litres,
+            "source": self.source,
+            "profile": self.profile.to_dict(),
+        }
+
+
+class LemonadeBatchProfile:
+
+    TRAIT_NAMES = LemonadeTraitProfile.TRAIT_NAMES
 
     def build(self, cronenbergs):
         cronenbergs = list(cronenbergs)
@@ -22,9 +131,9 @@
                     getattr(
                         cronenberg,
                         "size",
-                        1.0
+                        1.0,
                     )
-                )
+                ),
             )
             for cronenberg in cronenbergs
         )
@@ -44,15 +153,15 @@
                         getattr(
                             cronenberg,
                             "size",
-                            1.0
+                            1.0,
                         )
-                    )
+                    ),
                 )
 
                 traits = getattr(
                     cronenberg,
                     "traits",
-                    None
+                    None,
                 )
 
                 if traits is None:
@@ -61,7 +170,7 @@
                     trait_value = float(
                         traits.value_for(
                             trait_name,
-                            1.0
+                            1.0,
                         )
                     )
 
@@ -71,10 +180,10 @@
 
             weighted_traits[trait_name] = round(
                 weighted_total / total_mass,
-                4
+                4,
             )
 
-        entangled_pairs = (
+        entangled_pairs = tuple(
             self._find_entangled_pairs(
                 cronenbergs
             )
@@ -82,20 +191,20 @@
 
         entanglement_strength = round(
             sum(
-                pair["strength"]
+                pair.strength
                 for pair in entangled_pairs
             ),
-            4
+            4,
         )
 
         coherence_bonus = min(
             0.50,
-            entanglement_strength * 0.10
+            entanglement_strength * 0.10,
         )
 
         instability_penalty = min(
             0.30,
-            entanglement_strength * 0.05
+            entanglement_strength * 0.05,
         )
 
         weighted_traits[
@@ -105,9 +214,9 @@
                 2.50,
                 weighted_traits[
                     "quantum_coherence"
-                ] + coherence_bonus
+                ] + coherence_bonus,
             ),
-            4
+            4,
         )
 
         weighted_traits[
@@ -117,47 +226,38 @@
                 0.10,
                 weighted_traits[
                     "stability"
-                ] - instability_penalty
+                ] - instability_penalty,
             ),
-            4
+            4,
         )
 
         dominant_trait = max(
             weighted_traits,
-            key=weighted_traits.get
+            key=weighted_traits.get,
         )
 
-        return {
-            "traits": weighted_traits,
-            "source_count": len(
-                cronenbergs
+        return LemonadeProfile(
+            traits=LemonadeTraitProfile(
+                **weighted_traits
             ),
-            "source_mass": round(
+            source_mass=round(
                 total_mass,
-                4
+                4,
             ),
-            "source_cronenbergs": [
+            source_cronenbergs=tuple(
                 cronenberg.name
-                for cronenberg
-                in cronenbergs
-            ],
-            "entangled_pair_count": len(
-                entangled_pairs
+                for cronenberg in cronenbergs
             ),
-            "entanglement_strength": (
+            entanglement_strength=(
                 entanglement_strength
             ),
-            "entangled_pairs": (
-                entangled_pairs
-            ),
-            "dominant_trait": (
-                dominant_trait
-            )
-        }
+            entangled_pairs=entangled_pairs,
+            dominant_trait=dominant_trait,
+        )
 
     def _find_entangled_pairs(
         self,
-        cronenbergs
+        cronenbergs,
     ):
         by_id = {
             cronenberg.id: cronenberg
@@ -171,7 +271,7 @@
             for link in getattr(
                 cronenberg,
                 "quantum_links",
-                []
+                [],
             ):
                 target_id = link.get(
                     "target_id"
@@ -184,7 +284,7 @@
                     sorted(
                         (
                             cronenberg.id,
-                            target_id
+                            target_id,
                         )
                     )
                 )
@@ -199,7 +299,7 @@
                     for reverse_link in getattr(
                         by_id[target_id],
                         "quantum_links",
-                        []
+                        [],
                     )
                     if reverse_link.get(
                         "target_id"
@@ -209,7 +309,7 @@
                 forward_strength = float(
                     link.get(
                         "strength",
-                        0.0
+                        0.0,
                     )
                 )
 
@@ -218,56 +318,58 @@
                         float(
                             reverse_link.get(
                                 "strength",
-                                0.0
+                                0.0,
                             )
                         )
                         for reverse_link
                         in reverse_links
                     ),
-                    default=0.0
+                    default=0.0,
                 )
 
                 pair_strength = round(
                     max(
                         forward_strength,
-                        reverse_strength
+                        reverse_strength,
                     ),
-                    4
+                    4,
                 )
 
-                found_pairs.append({
-                    "cronenberg_ids": list(
-                        pair_key
-                    ),
-                    "strength": pair_strength,
-                    "link_types": sorted({
-                        link.get(
+                link_types = {
+                    link.get("link_type"),
+                    *[
+                        reverse_link.get(
                             "link_type"
-                        ),
-                        *[
-                            reverse_link.get(
-                                "link_type"
+                        )
+                        for reverse_link
+                        in reverse_links
+                    ],
+                }
+
+                found_pairs.append(
+                    LemonadeEntangledPair(
+                        cronenberg_ids=pair_key,
+                        strength=pair_strength,
+                        link_types=tuple(
+                            sorted(
+                                link_types,
+                                key=lambda value: (
+                                    value is None,
+                                    str(value),
+                                ),
                             )
-                            for reverse_link
-                            in reverse_links
-                        ]
-                    })
-                })
+                        ),
+                    )
+                )
 
         return found_pairs
 
     def empty_profile(self):
-        return {
-            "traits": {
-                trait_name: 0.0
-                for trait_name
-                in self.TRAIT_NAMES
-            },
-            "source_count": 0,
-            "source_mass": 0.0,
-            "source_cronenbergs": [],
-            "entangled_pair_count": 0,
-            "entanglement_strength": 0.0,
-            "entangled_pairs": [],
-            "dominant_trait": None
-        }
+        return LemonadeProfile(
+            traits=LemonadeTraitProfile(),
+            source_mass=0.0,
+            source_cronenbergs=(),
+            entanglement_strength=0.0,
+            entangled_pairs=(),
+            dominant_trait=None,
+        )

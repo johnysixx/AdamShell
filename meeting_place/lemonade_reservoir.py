@@ -1,4 +1,9 @@
-﻿from universe.logger import UniverseLogger
+from universe.logger import UniverseLogger
+from .lemonade_profile import (
+    LemonadeBatchRecord,
+    LemonadeProfile,
+    LemonadeTraitProfile,
+)
 
 
 class LemonadeReservoir:
@@ -33,7 +38,7 @@ class LemonadeReservoir:
         self,
         amount_litres,
         source="cronenberg_processing",
-        profile=None
+        profile=None,
     ):
         amount_litres = float(
             amount_litres
@@ -44,6 +49,18 @@ class LemonadeReservoir:
                 "Lemonade amount must be positive."
             )
 
+        if (
+            profile is not None
+            and not isinstance(
+                profile,
+                LemonadeProfile,
+            )
+        ):
+            raise TypeError(
+                "Lemonade reservoir requires "
+                "LemonadeProfile objects."
+            )
+
         self.amount_litres += amount_litres
         self.total_added_litres += amount_litres
 
@@ -52,20 +69,20 @@ class LemonadeReservoir:
         )
 
         if profile is not None:
-            profile = dict(profile)
-
-            self.batch_history.append({
-                "amount_litres": amount_litres,
-                "source": source,
-                "profile": profile
-            })
+            self.batch_history.append(
+                LemonadeBatchRecord(
+                    amount_litres=amount_litres,
+                    source=source,
+                    profile=profile,
+                )
+            )
 
             self.current_profile = (
                 self._mix_profiles(
                     current_profile=self.current_profile,
                     current_amount=previous_amount,
                     added_profile=profile,
-                    added_amount=amount_litres
+                    added_amount=amount_litres,
                 )
             )
 
@@ -73,7 +90,7 @@ class LemonadeReservoir:
             "name": "lemonade_added",
             "source": source,
             "amount_litres": amount_litres,
-            "remaining_litres": self.amount_litres
+            "remaining_litres": self.amount_litres,
         }
 
         self.events.append(
@@ -93,57 +110,33 @@ class LemonadeReservoir:
 
         return event
 
-    def _copy_profile(self, profile):
-        if profile is None:
-            return None
-
-        return {
-            "traits": dict(
-                profile.get("traits", {})
-            ),
-            "source_count": profile.get(
-                "source_count",
-                0
-            ),
-            "source_mass": profile.get(
-                "source_mass",
-                0.0
-            ),
-            "source_cronenbergs": list(
-                profile.get(
-                    "source_cronenbergs",
-                    []
-                )
-            ),
-            "entangled_pair_count": profile.get(
-                "entangled_pair_count",
-                0
-            ),
-            "entanglement_strength": profile.get(
-                "entanglement_strength",
-                0.0
-            ),
-            "entangled_pairs": [
-                dict(pair)
-                for pair in profile.get(
-                    "entangled_pairs",
-                    []
-                )
-            ],
-            "dominant_trait": profile.get(
-                "dominant_trait"
-            )
-        }
-
     def _mix_profiles(
         self,
         current_profile,
         current_amount,
         added_profile,
-        added_amount
+        added_amount,
     ):
         if current_profile is None:
-            return dict(added_profile)
+            return added_profile
+
+        if not isinstance(
+            current_profile,
+            LemonadeProfile,
+        ):
+            raise TypeError(
+                "Current lemonade profile must be "
+                "LemonadeProfile."
+            )
+
+        if not isinstance(
+            added_profile,
+            LemonadeProfile,
+        ):
+            raise TypeError(
+                "Added lemonade profile must be "
+                "LemonadeProfile."
+            )
 
         total_amount = (
             float(current_amount)
@@ -151,36 +144,24 @@ class LemonadeReservoir:
         )
 
         if total_amount <= 0.0:
-            return dict(added_profile)
-
-        current_traits = current_profile.get(
-            "traits",
-            {}
-        )
-
-        added_traits = added_profile.get(
-            "traits",
-            {}
-        )
-
-        trait_names = set(
-            current_traits
-        ) | set(added_traits)
+            return added_profile
 
         mixed_traits = {}
 
-        for trait_name in trait_names:
+        for trait_name in (
+            LemonadeTraitProfile.TRAIT_NAMES
+        ):
             current_value = float(
-                current_traits.get(
+                current_profile.traits.value_for(
                     trait_name,
-                    0.0
+                    0.0,
                 )
             )
 
             added_value = float(
-                added_traits.get(
+                added_profile.traits.value_for(
                     trait_name,
-                    0.0
+                    0.0,
                 )
             )
 
@@ -189,96 +170,54 @@ class LemonadeReservoir:
                     current_value * current_amount
                     + added_value * added_amount
                 ) / total_amount,
-                4
+                4,
             )
 
-        source_ids = list(dict.fromkeys(
-            list(
-                current_profile.get(
-                    "source_cronenbergs",
-                    []
-                )
-            )
-            + list(
-                added_profile.get(
-                    "source_cronenbergs",
-                    []
-                )
-            )
-        ))
+        source_ids = []
+        seen_source_ids = set()
 
-        return {
-            "traits": mixed_traits,
-            "source_count": len(source_ids),
-            "source_mass": round(
-                float(
-                    current_profile.get(
-                        "source_mass",
-                        0.0
-                    )
-                )
-                + float(
-                    added_profile.get(
-                        "source_mass",
-                        0.0
-                    )
-                ),
-                4
+        for source_id in (
+            current_profile.source_cronenbergs
+            + added_profile.source_cronenbergs
+        ):
+            if source_id in seen_source_ids:
+                continue
+            seen_source_ids.add(source_id)
+            source_ids.append(source_id)
+
+        dominant_trait = max(
+            mixed_traits,
+            key=mixed_traits.get,
+        ) if mixed_traits else None
+
+        return LemonadeProfile(
+            traits=LemonadeTraitProfile(
+                **mixed_traits
             ),
-            "source_cronenbergs": source_ids,
-            "entangled_pair_count": (
-                int(
-                    current_profile.get(
-                        "entangled_pair_count",
-                        0
-                    )
-                )
-                + int(
-                    added_profile.get(
-                        "entangled_pair_count",
-                        0
-                    )
-                )
+            source_mass=round(
+                current_profile.source_mass
+                + added_profile.source_mass,
+                4,
             ),
-            "entanglement_strength": round(
-                float(
-                    current_profile.get(
-                        "entanglement_strength",
-                        0.0
-                    )
-                )
-                + float(
-                    added_profile.get(
-                        "entanglement_strength",
-                        0.0
-                    )
-                ),
-                4
+            source_cronenbergs=tuple(
+                source_ids
             ),
-            "entangled_pairs": (
-                list(
-                    current_profile.get(
-                        "entangled_pairs",
-                        []
-                    )
-                )
-                + list(
-                    added_profile.get(
-                        "entangled_pairs",
-                        []
-                    )
-                )
+            entanglement_strength=round(
+                current_profile.entanglement_strength
+                + added_profile.entanglement_strength,
+                4,
             ),
-            "dominant_trait": max(
-                mixed_traits,
-                key=mixed_traits.get
-            ) if mixed_traits else None
-        }
+            entangled_pairs=(
+                current_profile.entangled_pairs
+                + added_profile.entangled_pairs
+            ),
+            dominant_trait=dominant_trait,
+        )
 
     def serve(
         self,
         drinker_name,
-        location
+        location,
     ):
         if not self.is_available:
             UniverseLogger.event(
@@ -296,8 +235,10 @@ class LemonadeReservoir:
             self.serving_size_litres
         )
 
-        serving_profile = self._copy_profile(
-            self.current_profile
+        serving_profile = (
+            self.current_profile.to_dict()
+            if self.current_profile is not None
+            else None
         )
 
         event = {
@@ -311,7 +252,7 @@ class LemonadeReservoir:
             "lemonade_profile": serving_profile,
             "remaining_litres": (
                 self.amount_litres
-            )
+            ),
         }
 
         self.events.append(
@@ -350,9 +291,13 @@ class LemonadeReservoir:
             "total_added_litres": (
                 self.total_added_litres
             ),
-            "current_profile": self.current_profile,
+            "current_profile": (
+                self.current_profile.to_dict()
+                if self.current_profile is not None
+                else None
+            ),
             "batch_count": len(self.batch_history),
             "total_served_litres": (
                 self.total_served_litres
-            )
+            ),
         }

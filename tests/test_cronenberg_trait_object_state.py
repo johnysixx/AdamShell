@@ -6,7 +6,9 @@ from core.entity.cronenberg_system.traits import (
     CronenbergTraitValues,
 )
 from meeting_place.lemonade_profile import (
-    LemonadeBatchProfile
+    LemonadeBatchProfile,
+    LemonadeProfile,
+    LemonadeTraitProfile,
 )
 
 
@@ -178,12 +180,28 @@ class CronenbergTraitObjectStateTests(
             [first, second]
         )
 
+        self.assertIsInstance(
+            profile,
+            LemonadeProfile,
+        )
+        self.assertIsInstance(
+            profile.traits,
+            LemonadeTraitProfile,
+        )
+        self._assert_object_only(
+            profile,
+            "source_mass",
+        )
+        self._assert_object_only(
+            profile.traits,
+            "acidity",
+        )
         self.assertEqual(
-            profile["traits"]["acidity"],
+            profile.traits.acidity,
             1.75
         )
         self.assertEqual(
-            profile["source_mass"],
+            profile.source_mass,
             4.0
         )
 
