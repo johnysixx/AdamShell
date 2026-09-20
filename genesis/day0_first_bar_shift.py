@@ -8,6 +8,7 @@ from meeting_place.bar_objects import (
     BarDrinkDesiredProperty,
     BarDrinkAssessment,
     BarDrinkProposal,
+    BarDrinkRevision,
     BarDrinkIdea,
     BarDrinkSpeakerContribution,
     BarDrinkOrder,
@@ -901,10 +902,10 @@ class Day0FirstBarShift:
         idea = BarDrinkIdea(
             subject='wine',
             source='lilith',
-            revision={
-                'remove': 'bitterness',
-                'add': 'acidity',
-            },
+            revision=BarDrinkRevision(
+                remove='bitterness',
+                add='acidity',
+            ),
             desired_property=BarDrinkDesiredProperty(
                 acidity=True,
             ),

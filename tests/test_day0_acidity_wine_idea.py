@@ -31,6 +31,12 @@ class Day0AcidityWineIdeaTests(unittest.TestCase):
         idea = result['revised']['idea']
         self.assertTrue(idea.desired_property.acidity)
 
+    def test_lilith_revision_replaces_bitterness_with_acidity(self):
+        result = self.scene.advance_to_acidity_wine_idea()
+        revision = result['revised']['idea'].revision
+        self.assertEqual(revision.remove, 'bitterness')
+        self.assertEqual(revision.add, 'acidity')
+
     def test_current_hypothesis_replaces_bitterness_with_acidity(self):
         self.scene.advance_to_acidity_wine_idea()
         hypothesis = self.scene.serpent_lilith_good_drink_discussion.current_hypothesis

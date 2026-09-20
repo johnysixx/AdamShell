@@ -12,6 +12,7 @@ from meeting_place.bar_objects import (
     BarDrinkDesiredProperty,
     BarDrinkAssessment,
     BarDrinkProposal,
+    BarDrinkRevision,
     BarDrinkIdea,
     BarDrinkSpeakerContribution,
     BarWineHypothesis,
@@ -241,6 +242,50 @@ class BarDrinkDiscussionObjectStateTests(
                 },
             )
 
+    def test_revision_is_object_only(
+        self
+    ):
+        revision = BarDrinkRevision(
+            remove="bitterness",
+            add="acidity",
+        )
+        idea = BarDrinkIdea(
+            subject="wine",
+            revision=revision,
+        )
+
+        self.assertIs(
+            idea.revision,
+            revision,
+        )
+        self.assertEqual(
+            idea.revision.remove,
+            "bitterness",
+        )
+        self.assertEqual(
+            idea.revision.add,
+            "acidity",
+        )
+        self._assert_object_only(
+            idea.revision,
+            "remove",
+        )
+
+    def test_revision_mapping_is_rejected(
+        self
+    ):
+        with self.assertRaisesRegex(
+            TypeError,
+            "BarDrinkRevision",
+        ):
+            BarDrinkIdea(
+                subject="wine",
+                revision={
+                    "remove": "bitterness",
+                    "add": "acidity",
+                },
+            )
+
     def test_speaker_contributions_are_object_only(
         self
     ):
@@ -312,6 +357,10 @@ class BarDrinkDiscussionObjectStateTests(
                 proposal=BarDrinkProposal(
                     bitterness=True,
                 ),
+                revision=BarDrinkRevision(
+                    remove="bitterness",
+                    add="acidity",
+                ),
             )
         )
         discussion.current_hypothesis = (
@@ -338,6 +387,9 @@ class BarDrinkDiscussionObjectStateTests(
         snapshot["ideas"][0][
             "proposal"
         ]["bitterness"] = False
+        snapshot["ideas"][0][
+            "revision"
+        ]["remove"] = "sweetness"
         snapshot["current_hypothesis"][
             "acidity"
         ] = False
@@ -362,6 +414,10 @@ class BarDrinkDiscussionObjectStateTests(
         )
         self.assertTrue(
             idea.proposal.bitterness
+        )
+        self.assertEqual(
+            idea.revision.remove,
+            "bitterness",
         )
         self.assertTrue(
             discussion
