@@ -1,7 +1,7 @@
 import unittest
 from types import SimpleNamespace
 
-from meeting_place.bar_objects import BarDrink, BarTabItem
+from meeting_place.bar_objects import BarDrink, BarDrinkGarnish, BarTabItem
 from meeting_place.bar_receipt_state import BarReceiptState
 from meeting_place.meeting_place import MeetingPlace
 from multiverse import UniverseRegistry
@@ -100,7 +100,7 @@ class BarDrinkObjectStateTests(unittest.TestCase):
             name="lilith",
             type="learned_bar_drink",
             effects={"energy_j": 1.0},
-            garnish={"ingredient": "lemon"},
+            garnish=BarDrinkGarnish(ingredient="lemon"),
         )
 
         snapshot = drink.to_dict()
@@ -112,8 +112,48 @@ class BarDrinkObjectStateTests(unittest.TestCase):
             1.0,
         )
         self.assertEqual(
-            drink.garnish["ingredient"],
+            drink.garnish.ingredient,
             "lemon",
+        )
+
+
+    def test_garnish_requires_domain_object(self):
+        with self.assertRaises(TypeError):
+            BarDrink(
+                name="water_with_lemon_slice",
+                type="basic_bar_drink",
+                garnish={
+                    "ingredient": "lemon",
+                },
+            )
+
+    def test_garnish_is_domain_object(self):
+        garnish = BarDrinkGarnish(
+            ingredient="lemon",
+            amount="slice",
+            price=0,
+        )
+        drink = BarDrink(
+            name="water_with_lemon_slice",
+            type="basic_bar_drink",
+            garnish=garnish,
+        )
+
+        self.assertIs(
+            drink.garnish,
+            garnish,
+        )
+        self.assertEqual(
+            drink.garnish.ingredient,
+            "lemon",
+        )
+        self.assertEqual(
+            drink.garnish.amount,
+            "slice",
+        )
+        self.assertEqual(
+            drink.garnish.price,
+            0,
         )
 
 

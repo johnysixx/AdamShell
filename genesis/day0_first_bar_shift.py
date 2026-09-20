@@ -4,6 +4,7 @@ from meeting_place.bar_objects import (
     CatD20State,
     BarConversation,
     BarDrink,
+    BarDrinkGarnish,
     BarDrinkDiscussion,
     BarDrinkDesiredProperty,
     BarDrinkAssessment,
@@ -1336,11 +1337,11 @@ class Day0FirstBarShift:
             type='basic_bar_drink',
             category='basic_drink',
             base='water',
-            garnish={
-                'ingredient': 'lemon',
-                'amount': 'slice',
-                'price': 0,
-            },
+            garnish=BarDrinkGarnish(
+                ingredient='lemon',
+                amount='slice',
+                price=0,
+            ),
             price_basis='water',
         )
         order.complete(

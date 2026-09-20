@@ -8,6 +8,7 @@ from idea_entities import IdeaEntities
 from library import Library
 from meeting_place.bar_objects import (
     BarDrink,
+    BarDrinkGarnish,
     BarDrinkOrder,
     BarGuestBet,
     BarGuestState,
@@ -106,9 +107,9 @@ class BarGuestStateObjectStateTests(
         drink = BarDrink(
             name="water_with_lemon_slice",
             type="basic_bar_drink",
-            garnish={
-                "ingredient": "lemon",
-            },
+            garnish=BarDrinkGarnish(
+                ingredient="lemon",
+            ),
         )
         order = BarDrinkOrder(
             guest="serpent",
@@ -166,7 +167,7 @@ class BarGuestStateObjectStateTests(
             state.bet.accepted
         )
         self.assertEqual(
-            drink.garnish["ingredient"],
+            drink.garnish.ingredient,
             "lemon"
         )
         self.assertTrue(
