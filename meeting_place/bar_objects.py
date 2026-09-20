@@ -840,6 +840,12 @@ class CatD20State:
         return result
 
 @dataclass(slots=True)
+class BarPosition:
+    x: float
+    y: float
+
+
+@dataclass(slots=True)
 class BarHexCell:
     name: str
     x: float

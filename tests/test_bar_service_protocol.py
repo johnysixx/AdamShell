@@ -8,6 +8,7 @@ from meeting_place.bar_hex_geometry import (
 from meeting_place.bar_service_protocol import (
     BarServiceProtocol
 )
+from meeting_place.bar_objects import BarPosition
 
 
 class BarServiceProtocolTests(
@@ -47,9 +48,14 @@ class BarServiceProtocolTests(
             bartender.position
         )
 
+        self.assertIsInstance(
+            bartender.position,
+            BarPosition,
+        )
+
         cell = self.geometry.find_cell(
-            x=bartender.position["x"],
-            y=bartender.position["y"]
+            x=bartender.position.x,
+            y=bartender.position.y
         )
 
         self.assertIsNotNone(
@@ -101,10 +107,10 @@ class BarServiceProtocolTests(
 
         self.assertEqual(
             bartender.position,
-            {
-                "x": target_service.x,
-                "y": target_service.y
-            }
+            BarPosition(
+                x=target_service.x,
+                y=target_service.y,
+            )
         )
 
         customer = self.geometry.find_cell(
@@ -115,9 +121,7 @@ class BarServiceProtocolTests(
             customer
         )
 
-        position_before = dict(
-            bartender.position
-        )
+        position_before = bartender.position
 
         rejected = self.protocol.move_bartender(
             bartender,

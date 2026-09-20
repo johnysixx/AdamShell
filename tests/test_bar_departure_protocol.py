@@ -3,6 +3,7 @@ import unittest
 from meeting_place.bar_hex_geometry import BarHexGeometry
 from meeting_place.bar_arrival_protocol import BarArrivalProtocol
 from meeting_place.bar_departure_protocol import BarDepartureProtocol
+from meeting_place.bar_objects import BarPosition
 
 class BarDepartureProtocolTests(unittest.TestCase):
 
@@ -15,7 +16,8 @@ class BarDepartureProtocolTests(unittest.TestCase):
         guest = SocialEntity.from_mapping(SocialEntity.from_mapping({'name': 'guest_1', 'type': 'human', 'state': 'entering', 'position': None}))
         arrived = self.arrival.arrive(guest)
         self.assertTrue(arrived)
-        occupied_place = self.geometry.find_cell(x=guest.position['x'], y=guest.position['y'])
+        self.assertIsInstance(guest.position, BarPosition)
+        occupied_place = self.geometry.find_cell(x=guest.position.x, y=guest.position.y)
         self.assertEqual(occupied_place.occupied_by, 'guest_1')
         customer_count_before = len([cell for cell in self.geometry.cells if cell.kind == 'customer_floor'])
         result = self.departure.leave_bar(guest)
@@ -32,11 +34,11 @@ class BarDepartureProtocolTests(unittest.TestCase):
         guest_2 = SocialEntity.from_mapping({'name': 'guest_2', 'type': 'human', 'state': 'entering', 'position': None})
         self.arrival.arrive(guest_1)
         self.arrival.arrive(guest_2)
-        guest_1_position = dict(guest_1.position)
-        guest_2.position = dict(guest_1_position)
+        guest_1_position = guest_1.position
+        guest_2.position = guest_1_position
         result = self.departure.leave_bar(guest_2)
         self.assertFalse(result)
-        place = self.geometry.find_cell(x=guest_1_position['x'], y=guest_1_position['y'])
+        place = self.geometry.find_cell(x=guest_1_position.x, y=guest_1_position.y)
         self.assertEqual(place.occupied_by, 'guest_1')
         self.assertEqual(guest_2.state, 'at_bar')
 
@@ -46,14 +48,14 @@ class BarDepartureProtocolTests(unittest.TestCase):
             self.assertTrue(self.arrival.arrive(guest))
         customer_floor_before = [cell for cell in self.geometry.cells if cell.kind == 'customer_floor']
         self.assertEqual(len(customer_floor_before), 4)
-        fourth_position = dict(guests[3].position)
+        fourth_position = guests[3].position
         self.assertTrue(self.departure.leave_bar(guests[3]))
         guest_5 = SocialEntity.from_mapping({'name': 'guest_5', 'type': 'human', 'state': 'entering', 'position': None})
         self.assertTrue(self.arrival.arrive(guest_5))
         self.assertEqual(guest_5.position, fourth_position)
         customer_floor_after = [cell for cell in self.geometry.cells if cell.kind == 'customer_floor']
         self.assertEqual(len(customer_floor_after), 4)
-        reused_place = self.geometry.find_cell(x=fourth_position['x'], y=fourth_position['y'])
+        reused_place = self.geometry.find_cell(x=fourth_position.x, y=fourth_position.y)
         self.assertEqual(reused_place.occupied_by, 'guest_5')
 if __name__ == '__main__':
     unittest.main()

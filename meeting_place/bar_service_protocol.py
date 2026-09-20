@@ -1,3 +1,6 @@
+from meeting_place.bar_objects import BarPosition
+
+
 class BarServiceProtocol:
 
     def __init__(self, geometry):
@@ -9,11 +12,11 @@ class BarServiceProtocol:
         if target.kind != "service_floor":
             return False
         position = getattr(bartender, "position", None)
-        if position is None:
+        if not isinstance(position, BarPosition):
             return False
         start = self.geometry.find_cell(
-            x=position["x"],
-            y=position["y"],
+            x=position.x,
+            y=position.y,
         )
         if start is None or start.kind != "service_floor":
             return False
@@ -36,7 +39,7 @@ class BarServiceProtocol:
                 queue.append(neighbor)
         if not reachable:
             return False
-        bartender.position = {"x": target.x, "y": target.y}
+        bartender.position = BarPosition(x=target.x, y=target.y)
         bartender.state = "behind_bar"
         return True
 
@@ -48,6 +51,6 @@ class BarServiceProtocol:
             return False
         if service.kind != "service_floor":
             return False
-        bartender.position = {"x": service.x, "y": service.y}
+        bartender.position = BarPosition(x=service.x, y=service.y)
         bartender.state = "behind_bar"
         return True

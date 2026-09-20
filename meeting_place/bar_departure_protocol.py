@@ -1,3 +1,6 @@
+from meeting_place.bar_objects import BarPosition
+
+
 class BarDepartureProtocol:
 
     def __init__(self, geometry):
@@ -8,9 +11,9 @@ class BarDepartureProtocol:
             return False
         guest_id = getattr(guest, 'name', None)
         position = getattr(guest, 'position', None)
-        if guest_id is None or position is None:
+        if guest_id is None or not isinstance(position, BarPosition):
             return False
-        place = self.geometry.find_cell(x=position['x'], y=position['y'])
+        place = self.geometry.find_cell(x=position.x, y=position.y)
         if place is None:
             return False
         if place.kind != 'customer_floor':
