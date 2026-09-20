@@ -9,6 +9,7 @@ from library import Library
 from meeting_place.bar_objects import (
     BarBeerHypothesis,
     BarDrinkDiscussion,
+    BarDrinkDesiredProperty,
     BarDrinkIdea,
     BarDrinkSpeakerContribution,
     BarWineHypothesis,
@@ -51,12 +52,13 @@ class BarDrinkDiscussionObjectStateTests(
         self
     ):
         discussion = BarDrinkDiscussion()
+        desired_property = BarDrinkDesiredProperty(
+            sweetness=True,
+        )
         idea = BarDrinkIdea(
             subject="wine",
             source="lilith",
-            desired_property={
-                "sweetness": True,
-            },
+            desired_property=desired_property,
         )
 
         result = discussion.add_idea(
@@ -114,6 +116,48 @@ class BarDrinkDiscussionObjectStateTests(
             "bitterness"
         )
 
+
+
+    def test_desired_property_is_object_only(
+        self
+    ):
+        desired_property = BarDrinkDesiredProperty(
+            sweetness=True,
+            acidity=False,
+        )
+        idea = BarDrinkIdea(
+            subject="wine",
+            desired_property=desired_property,
+        )
+
+        self.assertIs(
+            idea.desired_property,
+            desired_property,
+        )
+        self.assertTrue(
+            idea.desired_property.sweetness
+        )
+        self.assertFalse(
+            idea.desired_property.acidity
+        )
+        self._assert_object_only(
+            idea.desired_property,
+            "sweetness",
+        )
+
+    def test_desired_property_mapping_is_rejected(
+        self
+    ):
+        with self.assertRaisesRegex(
+            TypeError,
+            "BarDrinkDesiredProperty",
+        ):
+            BarDrinkIdea(
+                subject="wine",
+                desired_property={
+                    "sweetness": True,
+                },
+            )
 
     def test_speaker_contributions_are_object_only(
         self
@@ -176,6 +220,9 @@ class BarDrinkDiscussionObjectStateTests(
                 serpent=BarDrinkSpeakerContribution(
                     proposal="flavor_should_be_fuller",
                 ),
+                desired_property=BarDrinkDesiredProperty(
+                    sweetness=True,
+                ),
             )
         )
         discussion.current_hypothesis = (
@@ -193,6 +240,9 @@ class BarDrinkDiscussionObjectStateTests(
         snapshot["ideas"][0][
             "serpent"
         ]["proposal"] = "changed"
+        snapshot["ideas"][0][
+            "desired_property"
+        ]["sweetness"] = False
         snapshot["current_hypothesis"][
             "acidity"
         ] = False
@@ -207,6 +257,9 @@ class BarDrinkDiscussionObjectStateTests(
         self.assertEqual(
             idea.serpent.proposal,
             "flavor_should_be_fuller"
+        )
+        self.assertTrue(
+            idea.desired_property.sweetness
         )
         self.assertTrue(
             discussion

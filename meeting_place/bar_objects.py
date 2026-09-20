@@ -99,13 +99,30 @@ class BarDrinkSpeakerContribution:
 
 
 @dataclass(slots=True)
+class BarDrinkDesiredProperty:
+    sweetness: bool | None = None
+    acidity: bool | None = None
+
+    def to_dict(self):
+        result = {}
+
+        if self.sweetness is not None:
+            result["sweetness"] = self.sweetness
+
+        if self.acidity is not None:
+            result["acidity"] = self.acidity
+
+        return result
+
+
+@dataclass(slots=True)
 class BarDrinkIdea:
     subject: str
     source: str | None = None
     lilith: BarDrinkSpeakerContribution | None = None
     serpent: BarDrinkSpeakerContribution | None = None
     observation: str | dict | None = None
-    desired_property: dict | None = None
+    desired_property: BarDrinkDesiredProperty | None = None
     assessment: dict | None = None
     proposal: dict | None = None
     revision: dict | None = None
@@ -128,6 +145,18 @@ class BarDrinkIdea:
                     "must be BarDrinkSpeakerContribution."
                 )
 
+        if (
+            self.desired_property is not None
+            and not isinstance(
+                self.desired_property,
+                BarDrinkDesiredProperty,
+            )
+        ):
+            raise TypeError(
+                "Bar drink idea desired_property must be "
+                "BarDrinkDesiredProperty."
+            )
+
     def to_dict(self):
         result = {
             "subject": self.subject,
@@ -139,10 +168,14 @@ class BarDrinkIdea:
         if self.serpent is not None:
             result["serpent"] = self.serpent.to_dict()
 
+        if self.desired_property is not None:
+            result["desired_property"] = (
+                self.desired_property.to_dict()
+            )
+
         for name in (
             "source",
             "observation",
-            "desired_property",
             "assessment",
             "proposal",
             "revision",

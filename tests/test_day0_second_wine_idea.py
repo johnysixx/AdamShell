@@ -32,14 +32,14 @@ class Day0SecondWineIdeaTests(unittest.TestCase):
         result = self.scene.advance_to_second_wine_idea()
         idea = result['wine_idea']['idea']
         self.assertEqual(idea.subject, 'wine')
-        self.assertTrue(idea.desired_property['sweetness'])
+        self.assertTrue(idea.desired_property.sweetness)
 
     def test_wine_discussion_now_has_two_ideas(self):
         self.scene.advance_to_second_wine_idea()
         ideas = self.scene.serpent_lilith_good_drink_discussion.ideas
         self.assertEqual(len(ideas), 2)
         self.assertEqual(ideas[0].serpent.proposal, 'flavor_should_be_fuller')
-        self.assertTrue(ideas[1].desired_property['sweetness'])
+        self.assertTrue(ideas[1].desired_property.sweetness)
 
     def test_discussion_is_still_unresolved(self):
         self.scene.advance_to_second_wine_idea()

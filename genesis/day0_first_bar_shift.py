@@ -5,6 +5,7 @@ from meeting_place.bar_objects import (
     BarConversation,
     BarDrink,
     BarDrinkDiscussion,
+    BarDrinkDesiredProperty,
     BarDrinkIdea,
     BarDrinkSpeakerContribution,
     BarDrinkOrder,
@@ -572,9 +573,9 @@ class Day0FirstBarShift:
             subject='wine',
             source='lilith',
             observation='wine_should_be_sweet',
-            desired_property={
-                'sweetness': True,
-            },
+            desired_property=BarDrinkDesiredProperty(
+                sweetness=True,
+            ),
         )
         discussion.add_idea(
             idea
@@ -902,9 +903,9 @@ class Day0FirstBarShift:
                 'remove': 'bitterness',
                 'add': 'acidity',
             },
-            desired_property={
-                'acidity': True,
-            },
+            desired_property=BarDrinkDesiredProperty(
+                acidity=True,
+            ),
         )
         discussion.add_idea(
             idea
