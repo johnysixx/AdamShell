@@ -8,6 +8,7 @@ from meeting_place.cash_register import CashRegister
 from meeting_place.bar_receipt_state import BarReceiptState
 from meeting_place.fridge import BarFridge
 from meeting_place.bar_objects import (
+    BarDrink,
     BarGlass,
     BarHexCell,
     BarInventoryItem,
@@ -56,7 +57,9 @@ class BarObjectStateSecondCutTests(unittest.TestCase):
         guest = SimpleNamespace(name="guest", type="human")
         tab = register.add_to_tab(
             guest,
-            {"name": "beer", "category": "basic_drink"},
+            BarDrink(
+                name="beer", type="basic_bar_drink", category="basic_drink"
+            ),
         )
         self.assertIsInstance(tab, BarTab)
         self.assertIsInstance(tab.items[0], BarTabItem)
@@ -72,7 +75,9 @@ class BarObjectStateSecondCutTests(unittest.TestCase):
         guest = SimpleNamespace(name="guest", type="human")
         register.add_to_tab(
             guest,
-            {"name": "beer", "category": "basic_drink"},
+            BarDrink(
+                name="beer", type="basic_bar_drink", category="basic_drink"
+            ),
         )
         receipt = register.print_open_tab_receipt(guest)
         self.assertIsInstance(

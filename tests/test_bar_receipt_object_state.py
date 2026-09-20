@@ -2,6 +2,7 @@ import unittest
 from types import SimpleNamespace
 
 from meeting_place.bar_objects import (
+    BarDrink,
     BarTabItem,
 )
 from meeting_place.bar_receipt_state import (
@@ -57,10 +58,11 @@ class BarReceiptObjectStateTests(
     def test_open_tab_receipt_and_items_are_objects(self):
         self.register.add_to_tab(
             self.guest,
-            {
-                "name": "beer",
-                "category": "basic_drink",
-            },
+            BarDrink(
+                name="beer",
+                type="basic_bar_drink",
+                category="basic_drink",
+            ),
         )
 
         receipt = (
@@ -91,8 +93,9 @@ class BarReceiptObjectStateTests(
         )
 
     def test_staff_receipt_items_are_objects(self):
-        drink = SimpleNamespace(
+        drink = BarDrink(
             name="wine",
+            type="basic_bar_drink",
             category="basic_drink",
         )
 
@@ -115,8 +118,9 @@ class BarReceiptObjectStateTests(
         )
 
     def test_receipt_owns_payment_object_and_exports_detached_snapshot(self):
-        drink = SimpleNamespace(
+        drink = BarDrink(
             name="rum",
+            type="basic_bar_drink",
             category="basic_drink",
         )
 

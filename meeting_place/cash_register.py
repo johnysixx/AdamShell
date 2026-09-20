@@ -1,7 +1,9 @@
+from collections.abc import Iterable
 from dataclasses import replace
 
 from universe.logger import UniverseLogger
 from meeting_place.bar_objects import (
+    BarDrink,
     BarTab,
     BarTabItem,
 )
@@ -51,43 +53,26 @@ class CashRegister:
 
         return tab
 
-    def _drink_identity(self, drink):
-        if isinstance(
-            drink,
-            dict,
-        ):
-            return (
-                drink.get("name"),
-                drink.get("category"),
-            )
+    def _drink_identity(self, drink: BarDrink) -> tuple[str, str | None]:
+        if not isinstance(drink, BarDrink):
+            raise TypeError("Cash register drink must be BarDrink.")
 
-        return (
-            getattr(
-                drink,
-                "name",
-                str(drink),
-            ),
-            getattr(
-                drink,
-                "category",
-                None,
-            ),
-        )
+        return drink.name, drink.category
 
     def add_to_tab(
         self,
         entity,
-        drink,
+        drink: BarDrink,
     ):
-        tab = self.open_tab(
-            entity
-        )
-
         (
             drink_name,
             drink_category,
         ) = self._drink_identity(
             drink
+        )
+
+        tab = self.open_tab(
+            entity
         )
 
         tab.add_item(
@@ -212,7 +197,7 @@ class CashRegister:
     def print_staff_purchase_receipt(
         self,
         entity,
-        drinks,
+        drinks: Iterable[BarDrink],
     ):
         (
             entity_name,
@@ -221,7 +206,6 @@ class CashRegister:
             entity
         )
 
-        self.receipt_count += 1
         items = []
 
         for drink in drinks:
@@ -239,6 +223,8 @@ class CashRegister:
                         drink_category,
                 )
             )
+
+        self.receipt_count += 1
 
         receipt = BarReceiptState(
             receipt_number=
@@ -276,13 +262,11 @@ class CashRegister:
     def print_receipt(
         self,
         entity,
-        drink,
+        drink: BarDrink,
         payment: BarPaymentState,
     ):
         if not isinstance(payment, BarPaymentState):
             raise TypeError("Cash register payment must be BarPaymentState.")
-
-        self.receipt_count += 1
 
         entity_name = getattr(
             entity,
@@ -302,6 +286,8 @@ class CashRegister:
         ) = self._drink_identity(
             drink
         )
+
+        self.receipt_count += 1
 
         if entity_type == "god":
             receipt_kind = (
