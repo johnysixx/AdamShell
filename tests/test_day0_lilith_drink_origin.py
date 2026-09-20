@@ -2,6 +2,7 @@ import unittest
 from multiverse import UniverseRegistry
 from universe.universe import Universe
 from meeting_place.meeting_place import MeetingPlace
+from meeting_place.bar_objects import BarDrinkPreparation
 from library import Library
 from gods import Gods
 from idea_entities import IdeaEntities
@@ -37,6 +38,18 @@ class Day0LilithDrinkOriginTests(unittest.TestCase):
         self.assertEqual(drink.name, 'vodka_with_lemon')
         self.assertEqual(drink.price_basis, 'vodka')
         self.assertEqual(drink.effects, {})
+        self.assertIsInstance(
+            drink.preparation,
+            BarDrinkPreparation,
+        )
+        self.assertEqual(
+            drink.preparation.vodka,
+            1,
+        )
+        self.assertEqual(
+            drink.preparation.lemon,
+            'drop',
+        )
 
     def test_lilith_recipe_uses_whole_lemon_and_sugar_cube(self):
         self.scene.bartender_returns_with_lemon()

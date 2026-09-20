@@ -5,6 +5,7 @@ from meeting_place.bar_objects import (
     BarConversation,
     BarDrink,
     BarDrinkGarnish,
+    BarDrinkPreparation,
     BarDrinkDiscussion,
     BarDrinkDesiredProperty,
     BarDrinkAssessment,
@@ -311,7 +312,10 @@ class Day0FirstBarShift:
         drink = self.meeting_place.mix_basic_drink('vodka_with_lemon')
         drink.price_basis = 'vodka'
         drink.effects = {}
-        drink.preparation = {'vodka': 1, 'lemon': 'drop'}
+        drink.preparation = BarDrinkPreparation(
+            vodka=1,
+            lemon='drop',
+        )
         self.lilith_order.record_attempt(
             drink
         )

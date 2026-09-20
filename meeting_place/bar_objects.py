@@ -1278,6 +1278,23 @@ class BarTab:
 
 
 @dataclass(slots=True)
+class BarDrinkPreparation:
+    vodka: int | float | None = None
+    lemon: str | int | float | None = None
+
+    def to_dict(self):
+        result = {}
+
+        if self.vodka is not None:
+            result["vodka"] = self.vodka
+
+        if self.lemon is not None:
+            result["lemon"] = self.lemon
+
+        return result
+
+
+@dataclass(slots=True)
 class BarDrinkGarnish:
     ingredient: str
     amount: str | int | float | None = None
@@ -1307,7 +1324,7 @@ class BarDrink:
     effects: dict = field(default_factory=dict)
     base: str | None = None
     garnish: BarDrinkGarnish | None = None
-    preparation: dict | None = None
+    preparation: BarDrinkPreparation | None = None
 
     def __post_init__(self):
         if (
@@ -1319,6 +1336,17 @@ class BarDrink:
         ):
             raise TypeError(
                 "Bar drink garnish must be BarDrinkGarnish."
+            )
+
+        if (
+            self.preparation is not None
+            and not isinstance(
+                self.preparation,
+                BarDrinkPreparation,
+            )
+        ):
+            raise TypeError(
+                "Bar drink preparation must be BarDrinkPreparation."
             )
 
     def to_dict(self):
@@ -1352,8 +1380,8 @@ class BarDrink:
             )
 
         if self.preparation is not None:
-            result["preparation"] = deepcopy(
-                self.preparation
+            result["preparation"] = (
+                self.preparation.to_dict()
             )
 
         return result

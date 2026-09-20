@@ -1,7 +1,12 @@
 import unittest
 from types import SimpleNamespace
 
-from meeting_place.bar_objects import BarDrink, BarDrinkGarnish, BarTabItem
+from meeting_place.bar_objects import (
+    BarDrink,
+    BarDrinkGarnish,
+    BarDrinkPreparation,
+    BarTabItem,
+)
 from meeting_place.bar_receipt_state import BarReceiptState
 from meeting_place.meeting_place import MeetingPlace
 from multiverse import UniverseRegistry
@@ -101,11 +106,16 @@ class BarDrinkObjectStateTests(unittest.TestCase):
             type="learned_bar_drink",
             effects={"energy_j": 1.0},
             garnish=BarDrinkGarnish(ingredient="lemon"),
+            preparation=BarDrinkPreparation(
+                vodka=1,
+                lemon="drop",
+            ),
         )
 
         snapshot = drink.to_dict()
         snapshot["effects"]["energy_j"] = 9.0
         snapshot["garnish"]["ingredient"] = "lime"
+        snapshot["preparation"]["lemon"] = "whole"
 
         self.assertEqual(
             drink.effects["energy_j"],
@@ -114,6 +124,10 @@ class BarDrinkObjectStateTests(unittest.TestCase):
         self.assertEqual(
             drink.garnish.ingredient,
             "lemon",
+        )
+        self.assertEqual(
+            drink.preparation.lemon,
+            "drop",
         )
 
 
@@ -126,6 +140,57 @@ class BarDrinkObjectStateTests(unittest.TestCase):
                     "ingredient": "lemon",
                 },
             )
+
+    def test_preparation_requires_domain_object(self):
+        with self.assertRaises(TypeError):
+            BarDrink(
+                name="vodka_with_lemon",
+                type="basic_bar_drink",
+                preparation={
+                    "vodka": 1,
+                    "lemon": "drop",
+                },
+            )
+
+    def test_preparation_is_domain_object(self):
+        preparation = BarDrinkPreparation(
+            vodka=1,
+            lemon="drop",
+        )
+        drink = BarDrink(
+            name="vodka_with_lemon",
+            type="basic_bar_drink",
+            preparation=preparation,
+        )
+
+        self.assertIs(
+            drink.preparation,
+            preparation,
+        )
+        self.assertEqual(
+            drink.preparation.vodka,
+            1,
+        )
+        self.assertEqual(
+            drink.preparation.lemon,
+            "drop",
+        )
+
+        for name in (
+            "get",
+            "keys",
+            "items",
+            "values",
+            "__getitem__",
+        ):
+            self.assertFalse(
+                hasattr(preparation, name),
+                name,
+            )
+
+        with self.assertRaises(TypeError):
+            _ = preparation["lemon"]
+
 
     def test_garnish_is_domain_object(self):
         garnish = BarDrinkGarnish(
