@@ -1,4 +1,5 @@
 import unittest
+from core.entity.components import SpatialVector3
 from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat_olfaction import CatOlfaction
@@ -18,7 +19,7 @@ class CatScentPlaceMemoryTests(unittest.TestCase):
         self.observer.current_layer = 'quantum_layer'
         self.cats.learn_cat_aroma(observer=self.observer, observed_cat=self.pazuzu)
         self.box = self.universe.create_quantum_box()
-        self.box.position = {'x': 2.0, 'y': 0.0, 'z': 0.0}
+        self.box.position = SpatialVector3(x=2.0, y=0.0, z=0.0)
         AromaResidue.transfer(source_profile=self.pazuzu.aroma, target=self.box, source_identity='pazuzu', fraction=0.3)
 
     def sniff_and_remember(self):
@@ -32,7 +33,7 @@ class CatScentPlaceMemoryTests(unittest.TestCase):
         self.assertEqual(len(pazuzu_memories), 1)
         memory = pazuzu_memories[0]
         self.assertEqual(memory.source_id, self.box.id)
-        self.assertEqual(memory.position, self.box.position)
+        self.assertEqual(memory.position, self.box.position.to_dict())
 
     def test_repeated_smell_increases_confidence(self):
         self.sniff_and_remember()

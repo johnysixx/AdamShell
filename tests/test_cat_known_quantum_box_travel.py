@@ -1,4 +1,5 @@
 import unittest
+from core.entity.components import SpatialVector3
 from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat_mind import CatMind
@@ -16,10 +17,10 @@ class CatKnownQuantumBoxTravelTests(unittest.TestCase):
         self.target = self.universe.create_quantum_box()
         self.source.current_layer = 'quantum_layer'
         self.target.current_layer = 'meeting_place'
-        self.source.position = {'x': 2.0, 'y': 0.0, 'z': 0.0}
-        self.target.position = {'x': 9.0, 'y': 4.0, 'z': 0.0}
+        self.source.position = SpatialVector3(x=2.0, y=0.0, z=0.0)
+        self.target.position = SpatialVector3(x=9.0, y=4.0, z=0.0)
         self.source.pair_with(self.target)
-        self.cat.position = dict(self.source.position)
+        self.cat.position = self.source.position.to_dict()
         self.cat.memory.remember(event_type='quantum_box_observed', universe_tick=0, location='quantum_layer', participants=[self.source.id], details={'box_id': self.source.id})
 
     def observations(self):
@@ -48,7 +49,7 @@ class CatKnownQuantumBoxTravelTests(unittest.TestCase):
         self.assertTrue(result['executed'])
         self.assertEqual(result['name'], 'cat_traveled_through_known_quantum_box')
         self.assertEqual(self.cat.current_layer, self.target.current_layer)
-        self.assertEqual(self.cat.position, self.target.position)
+        self.assertEqual(self.cat.position, self.target.position.to_dict())
 
     def test_stale_observation_cannot_teleport_from_distance(self):
         self.sense_counterpart()

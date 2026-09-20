@@ -45,7 +45,7 @@ class QuantumUniverseSpace:
         self.configuration_id = f'quantum_configuration_{self.configuration_seed}'
         self.geometry_engine.configure(self.configuration_seed)
         self.reconfiguration_count += 1
-        self.quantum_die_box.move_to({'x': 0.0, 'y': 0.0, 'z': 0.0})
+        self.quantum_die_box.move_to(SpatialVector3.zero())
         print(f'QUANTUM SPACE RECONFIGURED CAUSE={cause} CONFIG={self.configuration_id} ACTIVE_CAT_ROUTES={len(active_routes)}')
 
     def quantum_tick(self, rng=None):

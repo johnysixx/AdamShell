@@ -1,4 +1,5 @@
 import unittest
+from core.entity.components import SpatialVector3
 from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat_perception import CatPerception
@@ -28,7 +29,7 @@ class CatScentReorientationAfterTransferTests(unittest.TestCase):
         self.source = creation['source_box']
         self.target = creation['target_box']
         self.trail_box = self.universe.create_quantum_box(layer='quantum_layer')
-        self.trail_box.position = {'x': 9.0, 'y': 0.0, 'z': 0.0}
+        self.trail_box.position = SpatialVector3(x=9.0, y=0.0, z=0.0)
         AromaResidue.transfer(source_profile=self.creator.aroma, target=self.trail_box, source_identity='creator', fraction=0.3)
         self.tracker.mind.current_intention = CatIntentionCandidate(
 
@@ -99,7 +100,7 @@ class CatScentReorientationAfterTransferTests(unittest.TestCase):
         self.assertEqual(decision['target'].identity, 'cat:creator')
         self.assertEqual(decision['target'].layer, 'quantum_layer')
         self.assertEqual(decision['target'].source_id, self.trail_box.id)
-        self.assertEqual(decision['target'].position, self.trail_box.position)
+        self.assertEqual(decision['target'].position, self.trail_box.position.to_dict())
         self.assertEqual(self.tracker.mind.current_intention.type, 'follow_known_scent')
 if __name__ == '__main__':
     unittest.main()

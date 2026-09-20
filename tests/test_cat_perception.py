@@ -1,6 +1,6 @@
 import unittest
-from universe.universe import Universe
 from core.entity.components import SpatialVector3
+from universe.universe import Universe
 from cats.cats import Cats
 
 class CatPerceptionTests(unittest.TestCase):
@@ -40,7 +40,7 @@ class CatPerceptionTests(unittest.TestCase):
 
     def test_quantum_box_is_unexplored_until_remembered(self):
         box = self.universe.create_quantum_box()
-        box.position = {'x': 2.0, 'y': 0.0, 'z': 0.0}
+        box.position = SpatialVector3(x=2.0, y=0.0, z=0.0)
         first = self.cats.observe_cat(self.cat)
         self.assertIn(box.id, first.unexplored_boxes)
         self.cat.memory.remember(event_type='box_explored', participants=[box.id], details={'box_id': box.id})

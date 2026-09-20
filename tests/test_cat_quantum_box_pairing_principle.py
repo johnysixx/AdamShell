@@ -1,4 +1,5 @@
 import unittest
+from core.entity.components import SpatialVector3
 from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat_knowledge import CatKnowledge
@@ -18,7 +19,7 @@ class CatQuantumBoxPairingPrincipleTests(unittest.TestCase):
         self.cat.position = {'x': 0.0, 'y': 0.0, 'z': 0.0}
         self.box = self.universe.create_quantum_box()
         self.box.current_layer = 'quantum_layer'
-        self.box.position = {'x': 3.0, 'y': 0.0, 'z': 0.0}
+        self.box.position = SpatialVector3(x=3.0, y=0.0, z=0.0)
 
     def observe(self):
         return CatPerception(self.cats).observe(self.cat)

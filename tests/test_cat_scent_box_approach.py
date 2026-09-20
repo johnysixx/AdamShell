@@ -64,7 +64,7 @@ class CatScentBoxApproachTests(unittest.TestCase):
         self.assertTrue(self.tracker.scent_box_follow.arrived_at_box)
 
     def test_cat_already_at_box_transfers_immediately(self):
-        self.tracker.position = dict(self.source.position)
+        self.tracker.position = self.source.position.to_dict()
         result = self.cats.execute_cat_intention(self.tracker)
         self.assertEqual(result['name'], 'cat_followed_scent_through_box')
         self.assertTrue(result['transfer']['transferred'])
@@ -110,9 +110,7 @@ class CatScentBoxApproachTests(unittest.TestCase):
             'source_box_id': self.source.id,
             'target_box_id': self.target.id,
             'identity': 'cat:creator',
-            'destination': dict(
-                self.source.position
-            ),
+            'destination': self.source.position.to_dict(),
         }
 
         with self.assertRaises(

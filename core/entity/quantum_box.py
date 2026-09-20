@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 
 from core.actualization.possibility import Possibility
 from core.actualization.potential import Potential
+from core.entity.components import SpatialVector3
 
 
 @dataclass(slots=True)
@@ -177,7 +178,11 @@ class QuantumBox:
     def __init__(self, rng=None):
         rng = rng or random
         self.id = f'quantum_box_{uuid.uuid4().hex[:8]}'
-        self.position = {'x': rng.uniform(-1.0, 1.0), 'y': rng.uniform(-1.0, 1.0), 'z': rng.uniform(-1.0, 1.0)}
+        self._position = SpatialVector3(
+            x=rng.uniform(-1.0, 1.0),
+            y=rng.uniform(-1.0, 1.0),
+            z=rng.uniform(-1.0, 1.0),
+        )
         self.state = 'superposition'
         self.age_ticks = 0
         self.box_class = '1x'
@@ -193,6 +198,22 @@ class QuantumBox:
         self.collapse = (
             QuantumBoxCollapseState()
         )
+
+    @property
+    def position(self):
+        return self._position
+
+    @position.setter
+    def position(self, position):
+        if not isinstance(position, SpatialVector3):
+            raise TypeError(
+                "Quantum box position must be a SpatialVector3 object."
+            )
+        self._position = position
+
+    def move_to(self, position):
+        self.position = position
+        return self.position
 
     def pair_with(self, counterpart):
         if counterpart is self:
@@ -302,7 +323,7 @@ class QuantumBox:
         return {
             'id': self.id,
             'type': 'quantum_box',
-            'position': self.position.copy(),
+            'position': self.position.to_dict(),
             'state': self.state,
             'content_state': (
                 'unresolved'

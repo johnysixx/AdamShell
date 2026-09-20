@@ -7,6 +7,7 @@ from cats.cat_olfaction_state import (
     CatDetectedAroma,
     CatOlfactionState,
 )
+from core.entity.components import SpatialVector3
 
 class CatOlfaction:
     DEFAULT_RADIUS = 14.0
@@ -149,6 +150,8 @@ class CatOlfaction:
 
     @staticmethod
     def _position(position):
+        if isinstance(position, SpatialVector3):
+            return position.to_dict()
         if not isinstance(position, dict):
             return {'x': 0.0, 'y': 0.0, 'z': 0.0}
         return {'x': float(position.get('x', 0.0)), 'y': float(position.get('y', 0.0)), 'z': float(position.get('z', 0.0))}

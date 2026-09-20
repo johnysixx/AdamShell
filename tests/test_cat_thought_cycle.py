@@ -1,4 +1,5 @@
 import unittest
+from core.entity.components import SpatialVector3
 
 from cats.cat_quantum_observation_state import (
     CatQuantumCounterpartObservation,
@@ -25,7 +26,7 @@ class CatThoughtCycleTests(unittest.TestCase):
     def test_curious_cat_notices_new_box(self):
         self.cat.personality.traits.curiosity = 1.0
         box = self.universe.create_quantum_box()
-        box.position = {'x': 1.5, 'y': 0.0, 'z': 0.0}
+        box.position = SpatialVector3(x=1.5, y=0.0, z=0.0)
         result = self.cats.think_and_act(cat=self.cat)
         self.assertEqual(result['decision']['intention'], 'explore_box')
         self.assertTrue(result['execution']['executed'])
@@ -46,10 +47,10 @@ class CatThoughtCycleTests(unittest.TestCase):
         target = self.universe.create_quantum_box()
         source.current_layer = 'quantum_layer'
         target.current_layer = 'meeting_place'
-        source.position = {'x': 1.0, 'y': 0.0, 'z': 0.0}
-        target.position = {'x': 9.0, 'y': 4.0, 'z': 0.0}
+        source.position = SpatialVector3(x=1.0, y=0.0, z=0.0)
+        target.position = SpatialVector3(x=9.0, y=4.0, z=0.0)
         source.pair_with(target)
-        self.cat.position = dict(source.position)
+        self.cat.position = source.position.to_dict()
         self.cat.memory.remember(event_type='quantum_box_observed', universe_tick=0, location='quantum_layer', participants=[source.id], details={'box_id': source.id})
         first_cycle = self.cats.think_and_act(cat=self.cat)
         self.assertTrue(first_cycle['completed'])
@@ -64,6 +65,6 @@ class CatThoughtCycleTests(unittest.TestCase):
         self.assertEqual(second_cycle['decision']['intention'], 'travel_through_known_quantum_box')
         self.assertTrue(second_cycle['execution']['executed'])
         self.assertEqual(self.cat.current_layer, target.current_layer)
-        self.assertEqual(self.cat.position, target.position)
+        self.assertEqual(self.cat.position, target.position.to_dict())
 if __name__ == '__main__':
     unittest.main()

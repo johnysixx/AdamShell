@@ -1,4 +1,5 @@
 import unittest
+from core.entity.components import SpatialVector3
 
 from cats.cat_quantum_observation_state import (
     CatQuantumCounterpartObservation,
@@ -22,8 +23,8 @@ class CatQuantumCounterpartSensingTests(unittest.TestCase):
         self.target = self.universe.create_quantum_box()
         self.source.current_layer = 'quantum_layer'
         self.target.current_layer = 'meeting_place'
-        self.source.position = {'x': 2.0, 'y': 0.0, 'z': 0.0}
-        self.target.position = {'x': 9.0, 'y': 4.0, 'z': 0.0}
+        self.source.position = SpatialVector3(x=2.0, y=0.0, z=0.0)
+        self.target.position = SpatialVector3(x=9.0, y=4.0, z=0.0)
         self.source.pair_with(self.target)
         self.cat.position = {'x': 2.0, 'y': 0.0, 'z': 0.0}
         self.cat.memory.remember(event_type='quantum_box_observed', universe_tick=0, location='quantum_layer', participants=[self.source.id], details={'box_id': self.source.id})
@@ -51,7 +52,7 @@ class CatQuantumCounterpartSensingTests(unittest.TestCase):
         observation = result['observation']
         self.assertEqual(observation['counterpart_box_id'], self.target.id)
         self.assertEqual(observation['counterpart_layer'], 'meeting_place')
-        self.assertEqual(observation['counterpart_position'], self.target.position)
+        self.assertEqual(observation['counterpart_position'], self.target.position.to_dict())
         self.assertTrue(observation['temporary'])
         self.assertTrue(observation['pair_currently_valid'])
         self.assertIsInstance(
@@ -118,9 +119,7 @@ class CatQuantumCounterpartSensingTests(unittest.TestCase):
             'counterpart_box_id': self.target.id,
             'source_layer': 'quantum_layer',
             'counterpart_layer': 'meeting_place',
-            'counterpart_position': dict(
-                self.target.position
-            ),
+            'counterpart_position': self.target.position.to_dict(),
             'observed_tick': 0,
             'temporary': True,
             'pair_currently_valid': True,

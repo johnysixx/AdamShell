@@ -128,19 +128,21 @@ class CatPerception:
                         'current_layer',
                         None,
                     ),
-                    box_position=deepcopy(
-                        getattr(
-                            box,
-                            'position',
-                            {},
+                    box_position=(
+                        box.position.to_dict()
+                        if isinstance(
+                            getattr(box, 'position', None),
+                            SpatialVector3,
                         )
+                        else None
                     ),
-                    counterpart_position=deepcopy(
-                        getattr(
-                            counterpart_box,
-                            'position',
-                            {},
+                    counterpart_position=(
+                        counterpart_box.position.to_dict()
+                        if isinstance(
+                            getattr(counterpart_box, 'position', None),
+                            SpatialVector3,
                         )
+                        else None
                     ),
                 )
             )
@@ -390,7 +392,12 @@ class CatPerception:
             box_position = getattr(box, 'position', None)
             if box_position is None:
                 continue
-            distance = self._distance(position, box_position)
+            box_position_snapshot = (
+                box_position.to_dict()
+                if isinstance(box_position, SpatialVector3)
+                else box_position
+            )
+            distance = self._distance(position, box_position_snapshot)
             if distance > radius:
                 continue
             cat_observation = getattr(box, 'cat_observation_state', None)
@@ -417,7 +424,7 @@ class CatPerception:
                 ),
                 distance=distance,
                 position=deepcopy(
-                    box_position
+                    box_position_snapshot
                 ),
             )
 

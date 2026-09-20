@@ -1,4 +1,5 @@
 import unittest
+from core.entity.components import SpatialVector3
 from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat_perception import CatPerception
@@ -19,7 +20,7 @@ class CatBoxExplorationLifecycleTests(unittest.TestCase):
         self.cat.position = {'x': 0.0, 'y': 0.0, 'z': 0.0}
         self.box = self.universe.create_quantum_box()
         self.box.current_layer = 'quantum_layer'
-        self.box.position = {'x': 3.0, 'y': 0.0, 'z': 0.0}
+        self.box.position = SpatialVector3(x=3.0, y=0.0, z=0.0)
 
     def test_cat_physically_explores_box(self):
         before = CatPerception(self.cats).observe(self.cat)
@@ -44,7 +45,7 @@ class CatBoxExplorationLifecycleTests(unittest.TestCase):
             if result['name'] == 'cat_explored_quantum_box':
                 break
         self.assertEqual(result['name'], 'cat_explored_quantum_box')
-        self.assertEqual(self.cat.position, self.box.position)
+        self.assertEqual(self.cat.position, self.box.position.to_dict())
         self.assertIsInstance(
             self.cat.box_exploration,
             CatBoxExplorationState,
@@ -65,9 +66,7 @@ class CatBoxExplorationLifecycleTests(unittest.TestCase):
             'arrived': False,
             'box_id': self.box.id,
             'route_id': 'legacy_route',
-            'destination': dict(
-                self.box.position
-            ),
+            'destination': self.box.position.to_dict(),
             'observed': False,
         }
 

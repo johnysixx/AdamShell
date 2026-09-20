@@ -1,4 +1,5 @@
 from copy import deepcopy
+from core.entity.components import SpatialVector3
 
 from cats.cat_exploration_planner import (
     CatExplorationPlanner
@@ -155,16 +156,19 @@ class CatQuantumBoxTransfer:
             )
         )
 
-        source_box.position = dict(
+        source_position_snapshot = (
             source_position
-            or (
-                cat.position
-                or {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                }
-            )
+            or cat.position
+            or {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+            }
+        )
+        source_box.position = SpatialVector3(
+            x=source_position_snapshot["x"],
+            y=source_position_snapshot["y"],
+            z=source_position_snapshot["z"],
         )
 
         exploration_destination_position = dict(
@@ -175,12 +179,12 @@ class CatQuantumBoxTransfer:
         # vzd?len? krabice samotn?m c?lem.
         # Je pouze vstupn?m bodem.
         if destination_layer == "quantum_layer":
-            target_box.position = dict(
-                source_box.position
-            )
+            target_box.position = source_box.position
         else:
-            target_box.position = dict(
-                exploration_destination_position
+            target_box.position = SpatialVector3(
+                x=exploration_destination_position["x"],
+                y=exploration_destination_position["y"],
+                z=exploration_destination_position["z"],
             )
 
         self.pair_boxes(
@@ -331,9 +335,7 @@ class CatQuantumBoxTransfer:
                 cat_name
             )
 
-        target_position = dict(
-            target_box.position
-        )
+        target_position = target_box.position.to_dict()
 
         target_layer = (
             target_box.current_layer
@@ -910,9 +912,7 @@ class CatQuantumBoxTransfer:
             "quantum_box_transfer_superposition"
         )
 
-        target_position = dict(
-            target_box.position
-        )
+        target_position = target_box.position.to_dict()
 
         target_layer = (
             target_box.current_layer
@@ -1124,16 +1124,19 @@ class CatQuantumBoxTransfer:
 
         counterpart.current_layer = cat.current_layer
 
-        counterpart.position = dict(
+        counterpart_position_snapshot = (
             position
-            or (
-                cat.position
-                or {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                }
-            )
+            or cat.position
+            or {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+            }
+        )
+        counterpart.position = SpatialVector3(
+            x=counterpart_position_snapshot["x"],
+            y=counterpart_position_snapshot["y"],
+            z=counterpart_position_snapshot["z"],
         )
 
         pair_event = self.pair_boxes(
@@ -1154,9 +1157,7 @@ class CatQuantumBoxTransfer:
             "counterpart_layer": (
                 counterpart.current_layer
             ),
-            "position": dict(
-                counterpart.position
-            ),
+            "position": counterpart.position.to_dict(),
             "energy_cost": energy_cost,
             "remaining_cat_energy": (
                 cat.idea_energy
@@ -1940,9 +1941,7 @@ class CatQuantumBoxTransfer:
                 "started": False
             }
 
-        destination = dict(
-            remote_box.position
-        )
+        destination = remote_box.position.to_dict()
 
         stabilized = self.stabilize_direct_trail(
             cat=cat,
@@ -2222,12 +2221,8 @@ class CatQuantumBoxTransfer:
             "to_layer": (
                 target_box.current_layer
             ),
-            "start_position": dict(
-                source_box.position
-            ),
-            "end_position": dict(
-                target_box.position
-            ),
+            "start_position": source_box.position.to_dict(),
+            "end_position": target_box.position.to_dict(),
             "stability": 0.50,
             "uses": 1,
             "age_ticks": 0

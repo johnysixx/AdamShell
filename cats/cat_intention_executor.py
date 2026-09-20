@@ -1,4 +1,5 @@
 from copy import deepcopy
+from core.entity.components import SpatialVector3
 
 from cats.cat_quantum_observation_state import (
     CatQuantumCounterpartObservation,
@@ -216,9 +217,10 @@ class CatIntentionExecutor:
                 cronenbergs=cronenbergs,
             )
         cat_position = cat.position
-        source_position = getattr(source_box, 'position', None)
-        if not isinstance(cat_position, dict) or not isinstance(source_position, dict):
+        source_position_object = getattr(source_box, 'position', None)
+        if not isinstance(cat_position, dict) or not isinstance(source_position_object, SpatialVector3):
             return self._record({'name': 'cat_scent_box_transfer_failed', 'cat': cat.name, 'reason': 'missing_position', 'executed': False})
+        source_position = source_position_object.to_dict()
         if self._same_position(cat_position, source_position):
             return self._transfer_scent_box_follow(cat=cat, intention=intention, source_box_id=source_box_id, target_box_id=target_box_id)
         quantum_space = getattr(self.universe, 'quantum_space', None)
@@ -381,10 +383,11 @@ class CatIntentionExecutor:
             return self._record({'name': 'cat_quantum_box_travel_failed', 'cat': cat.name, 'source_box_id': source_box_id, 'counterpart_box_id': counterpart_box_id, 'reason': 'source_box_no_longer_exists', 'executed': False})
         if getattr(source_box, 'current_layer', None) != cat.current_layer:
             return self._record({'name': 'cat_quantum_box_travel_failed', 'cat': cat.name, 'source_box_id': source_box_id, 'counterpart_box_id': counterpart_box_id, 'reason': 'source_box_not_in_cat_layer', 'executed': False})
-        source_position = getattr(source_box, 'position', None)
+        source_position_object = getattr(source_box, 'position', None)
         cat_possition = cat.position
-        if not isinstance(source_position, dict):
+        if not isinstance(source_position_object, SpatialVector3):
             return self._record({'name': 'cat_quantum_box_travel_failed', 'cat': cat.name, 'source_box_id': source_box_id, 'counterpart_box_id': counterpart_box_id, 'reason': 'missing_position', 'executed': False})
+        source_position = source_position_object.to_dict()
         if not self._same_position(cat_possition, source_position):
             return self._record({'name': 'cat_quantum_box_travel_failed', 'cat': cat.name, 'source_box_id': source_box_id, 'counterpart_box_id': counterpart_box_id, 'reason': 'cat_not_at_source_box', 'executed': False})
         transfer_system = getattr(self.universe, 'cat_box_transfer', None)
@@ -435,8 +438,11 @@ class CatIntentionExecutor:
             return self._record({'name': 'cat_quantum_counterpart_sensing_failed', 'cat': cat.name, 'source_box_id': source_box_id, 'reason': 'source_box_no_longer_exists', 'executed': False})
         if getattr(source_box, 'current_layer', None) != cat.current_layer:
             return self._record({'name': 'cat_quantum_counterpart_sensing_failed', 'cat': cat.name, 'source_box_id': source_box_id, 'reason': 'source_box_not_in_cat_layer', 'executed': False})
-        source_position = getattr(source_box, 'position', None)
-        if not isinstance(source_position, dict) or not self._same_position(cat.position or {}, source_position):
+        source_position_object = getattr(source_box, 'position', None)
+        if not isinstance(source_position_object, SpatialVector3):
+            return self._record({'name': 'cat_quantum_counterpart_sensing_failed', 'cat': cat.name, 'source_box_id': source_box_id, 'reason': 'cat_not_at_source_box', 'executed': False})
+        source_position = source_position_object.to_dict()
+        if not self._same_position(cat.position or {}, source_position):
             return self._record({'name': 'cat_quantum_counterpart_sensing_failed', 'cat': cat.name, 'source_box_id': source_box_id, 'reason': 'cat_not_at_source_box', 'executed': False})
         pairing = getattr(source_box, 'quantum_counterpart', None)
         if pairing is None or not pairing.paired:
@@ -462,12 +468,13 @@ class CatIntentionExecutor:
                     'current_layer',
                     None,
                 ),
-                counterpart_position=deepcopy(
-                    getattr(
-                        counterpart,
-                        'position',
-                        {},
+                counterpart_position=(
+                    counterpart.position.to_dict()
+                    if isinstance(
+                        getattr(counterpart, 'position', None),
+                        SpatialVector3,
                     )
+                    else None
                 ),
                 observed_tick=getattr(
                     self.universe,
@@ -538,9 +545,10 @@ class CatIntentionExecutor:
                 cronenbergs=cronenbergs,
             )
         cat_position = cat.position or {}
-        box_position = getattr(box, 'position', None)
-        if not isinstance(box_position, dict):
+        box_position_object = getattr(box, 'position', None)
+        if not isinstance(box_position_object, SpatialVector3):
             return self._record({'name': 'cat_box_exploration_failed', 'cat': cat.name, 'box_id': box_id, 'reason': 'box_position_missing', 'executed': False})
+        box_position = box_position_object.to_dict()
         if self._same_position(cat_position, box_position):
             return self._finish_box_exploration(cat=cat, intention=intention, box=box)
         quantum_space = getattr(self.universe, 'quantum_space', None)

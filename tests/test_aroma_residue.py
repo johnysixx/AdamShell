@@ -1,4 +1,5 @@
 import unittest
+from core.entity.components import SpatialVector3
 from universe.universe import Universe
 from cats.cats import Cats
 from universe.aroma_profile import AromaProfile
@@ -33,7 +34,7 @@ class AromaResidueTests(unittest.TestCase):
 
     def test_other_cat_can_smell_residue_on_box(self):
         box = self.universe.create_quantum_box()
-        box.position = {'x': 1.0, 'y': 0.0, 'z': 0.0}
+        box.position = SpatialVector3(x=1.0, y=0.0, z=0.0)
         self.cats.learn_cat_aroma(observer=self.observer, observed_cat=self.pazuzu)
         AromaResidue.transfer(self.pazuzu.aroma, box, 'pazuzu', fraction=0.3)
         result = CatOlfaction.sniff(self.observer, self.universe)

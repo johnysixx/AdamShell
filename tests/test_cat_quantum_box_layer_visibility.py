@@ -1,4 +1,5 @@
 import unittest
+from core.entity.components import SpatialVector3
 from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat_perception import CatPerception
@@ -17,8 +18,8 @@ class CatQuantumBoxLayerVisibilityTests(unittest.TestCase):
         self.observer.position = {'x': 0.0, 'y': 0.0, 'z': 0.0}
         self.source = self.universe.create_quantum_box(layer='meeting_place')
         self.target = self.universe.create_quantum_box(layer='quantum_layer')
-        self.source.position = {'x': 1.0, 'y': 0.0, 'z': 0.0}
-        self.target.position = {'x': 1.0, 'y': 0.0, 'z': 0.0}
+        self.source.position = SpatialVector3(x=1.0, y=0.0, z=0.0)
+        self.target.position = SpatialVector3(x=1.0, y=0.0, z=0.0)
         self.universe.cat_box_transfer.pair_boxes(self.source, self.target)
         self.cats.learn_cat_aroma(observer=self.observer, observed_cat=self.pazuzu)
         AromaResidue.transfer(source_profile=self.pazuzu.aroma, target=self.source, source_identity='pazuzu', fraction=0.3)

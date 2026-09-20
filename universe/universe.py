@@ -305,14 +305,14 @@ class Universe:
         result = box.collapse_state(cause='opened', observer=observer, tick=self.quantum_state.tick_count, rng=rng)
         self.statistics.record_quantum_collapse()
         if result == 'cat':
-            manifestation = self.manifest_cat(name=f'cat_from_{box.id}', source='quantum_box_opened', position=box.position)
+            manifestation = self.manifest_cat(name=f'cat_from_{box.id}', source='quantum_box_opened', position=box.position.to_dict())
             event = manifestation['event']
             event['collapse_cause'] = 'opened'
             event['box_id'] = box.id
             event['observer'] = observer
             UniverseLogger.event(f'CAT JUMPS OUT OF QUANTUM BOX: {box.id}')
         else:
-            event = {'name': 'empty_quantum_box_opened', 'collapse_cause': 'opened', 'box_id': box.id, 'position': box.position.copy(), 'observer': observer, 'tick': self.quantum_state.tick_count}
+            event = {'name': 'empty_quantum_box_opened', 'collapse_cause': 'opened', 'box_id': box.id, 'position': box.position.to_dict(), 'observer': observer, 'tick': self.quantum_state.tick_count}
             UniverseLogger.event(f'QUANTUM BOX WAS EMPTY: {box.id}')
         self.quantum_boxes.remove(box)
         self.statistics.record_quantum_box_disappeared()
@@ -389,7 +389,7 @@ class Universe:
         box.current_layer = layer
         self.quantum_boxes.append(box)
         self.statistics.record_quantum_box_created()
-        UniverseLogger.event(f"QUANTUM BOX CREATED: {box.id} AT x={box.position['x']:.3f} y={box.position['y']:.3f} z={box.position['z']:.3f}")
+        UniverseLogger.event(f"QUANTUM BOX CREATED: {box.id} AT x={box.position.x:.3f} y={box.position.y:.3f} z={box.position.z:.3f}")
         return box
 
     def should_collapse_quantum_box(self, box, rng=None):
@@ -421,7 +421,7 @@ class Universe:
             result = box.collapse_state(cause='spontaneous', observer=None, tick=self.quantum_state.tick_count)
             self.statistics.record_quantum_collapse()
             if result == 'cat':
-                manifestation = self.manifest_cat(name=f'cat_from_{box.id}', source='quantum_box_spontaneous_collapse', position=box.position)
+                manifestation = self.manifest_cat(name=f'cat_from_{box.id}', source='quantum_box_spontaneous_collapse', position=box.position.to_dict())
                 event = manifestation['event']
                 event['collapse_cause'] = 'spontaneous'
                 event['box_id'] = box.id

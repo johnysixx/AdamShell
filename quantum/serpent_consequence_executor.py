@@ -100,7 +100,7 @@ class SerpentConsequenceExecutor:
 
         return {
             "box_id": box.id,
-            "position": dict(box.position),
+            "position": box.position.to_dict(),
             "state": box.state
         }
 

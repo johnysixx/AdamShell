@@ -1,4 +1,5 @@
 import unittest
+from core.entity.components import SpatialVector3
 
 from universe.universe import Universe
 from cats.cats import Cats
@@ -45,11 +46,7 @@ class CatVisibleBoxObservationObjectTests(
             "quantum_layer"
         )
 
-        self.box.position = {
-            "x": 3.0,
-            "y": 0.0,
-            "z": 0.0,
-        }
+        self.box.position = SpatialVector3(x=3.0, y=0.0, z=0.0)
 
     def box_detail(self):
         observations = (

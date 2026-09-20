@@ -1,6 +1,7 @@
 import unittest
 from types import SimpleNamespace
 
+from core.entity.components import SpatialVector3
 from core.entity.quantum_box import (
     QuantumBox,
     QuantumBoxCatTransferState,
@@ -42,6 +43,15 @@ class QuantumBoxObjectStateTests(
         self
     ):
         box = QuantumBox()
+
+        self.assertIsInstance(
+            box.position,
+            SpatialVector3,
+        )
+        self._assert_object_only(
+            box.position,
+            'x',
+        )
 
         for value, key, expected_type in (
             (
@@ -250,6 +260,27 @@ class QuantumBoxObjectStateTests(
             'cat'
         )
 
+    def test_position_requires_spatial_vector(
+        self
+    ):
+        box = QuantumBox()
+
+        with self.assertRaises(TypeError):
+            box.position = {
+                'x': 1.0,
+                'y': 2.0,
+                'z': 3.0,
+            }
+
+        position = SpatialVector3(
+            x=1.0,
+            y=2.0,
+            z=3.0,
+        )
+        box.move_to(position)
+
+        self.assertIs(box.position, position)
+
     def test_public_state_is_detached_dict(
         self
     ):
@@ -270,7 +301,7 @@ class QuantumBoxObjectStateTests(
         ] = False
 
         self.assertNotEqual(
-            source.position['x'],
+            source.position.x,
             99.0
         )
         self.assertTrue(

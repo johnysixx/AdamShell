@@ -2,6 +2,7 @@ import unittest
 
 from universe.universe import Universe
 from cats.cats import Cats
+from core.entity.components import SpatialVector3
 from universe.dark_sector import (
     QUANTUM_BOX_ENERGY_COST_J
 )
@@ -49,17 +50,17 @@ class CatQuantumBoxTransferTests(
             )
         )
 
-        self.source.position = {
-            "x": 1.0,
-            "y": 1.0,
-            "z": 1.0
-        }
+        self.source.position = SpatialVector3(
+            x=1.0,
+            y=1.0,
+            z=1.0,
+        )
 
-        self.target.position = {
-            "x": 8.0,
-            "y": 4.0,
-            "z": -2.0
-        }
+        self.target.position = SpatialVector3(
+            x=8.0,
+            y=4.0,
+            z=-2.0,
+        )
 
         self.universe.cat_box_transfer\
             .pair_boxes(
@@ -111,7 +112,7 @@ class CatQuantumBoxTransferTests(
 
         self.assertEqual(
             self.cat.position,
-            self.target.position
+            self.target.position.to_dict()
         )
 
         self.assertIsInstance(
@@ -235,7 +236,7 @@ class CatQuantumBoxTransferTests(
         )
 
         self.assertEqual(
-            counterpart.position,
+            counterpart.position.to_dict(),
             self.cat.position
         )
 

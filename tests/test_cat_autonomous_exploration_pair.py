@@ -1,4 +1,5 @@
 import unittest
+from core.entity.components import SpatialVector3
 from universe.universe import Universe
 from cats.cats import Cats
 from universe.dark_sector import QUANTUM_BOX_ENERGY_COST_J
@@ -83,7 +84,7 @@ class CatAutonomousExplorationPairTests(unittest.TestCase):
 
     def test_existing_unexplored_box_is_preferred(self):
         box = self.universe.create_quantum_box(layer='meeting_place')
-        box.position = {'x': 3.5, 'y': 1.0, 'z': 0.0}
+        box.position = SpatialVector3(x=3.5, y=1.0, z=0.0)
         observations = self.cats.observe_cat(self.cat)
         self.assertFalse(observations.can_create_exploration_pair)
         from cats.cat_mind import CatMind
