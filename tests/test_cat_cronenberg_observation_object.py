@@ -1,6 +1,7 @@
 import unittest
 
 from universe.universe import Universe
+from core.entity.components import SpatialVector3
 from cats.cats import Cats
 from cats.cat_perception_state import (
     CatCronenbergObservation,
@@ -49,11 +50,11 @@ class CatCronenbergObservationObjectTests(
 
         cronenberg.size = float(size)
 
-        cronenberg.position = {
-            "x": float(x),
-            "y": 0.0,
-            "z": 0.0,
-        }
+        cronenberg.position = SpatialVector3(
+            x=float(x),
+            y=0.0,
+            z=0.0,
+        )
 
         return cronenberg
 

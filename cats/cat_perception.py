@@ -1,4 +1,5 @@
 from cats.cat import Cat
+from core.entity.components import SpatialVector3
 import math
 from copy import deepcopy
 
@@ -306,9 +307,10 @@ class CatPerception:
             if not getattr(cronenberg, 'is_alive', False):
                 continue
             cronenberg_position = getattr(cronenberg, 'position', None)
-            if cronenberg_position is None:
+            if not isinstance(cronenberg_position, SpatialVector3):
                 continue
-            distance = self._distance(position, cronenberg_position)
+            cronenberg_position_snapshot = cronenberg_position.to_dict()
+            distance = self._distance(position, cronenberg_position_snapshot)
             if distance > radius:
                 continue
             observed.append(

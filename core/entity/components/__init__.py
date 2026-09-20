@@ -1,6 +1,7 @@
-﻿from .spatial import SpatialComponent
+from .spatial import SpatialComponent, SpatialVector3
 
 
 __all__ = [
-    "SpatialComponent"
+    "SpatialComponent",
+    "SpatialVector3",
 ]

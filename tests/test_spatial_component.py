@@ -1,6 +1,9 @@
 import unittest
 
-from core.entity.components import SpatialComponent
+from core.entity.components import (
+    SpatialComponent,
+    SpatialVector3,
+)
 from core.entity.entity import Entity
 
 
@@ -21,13 +24,20 @@ class SpatialComponentTests(
             spatial.has_position
         )
 
+        position = SpatialVector3(
+            x=3.0,
+            y=4.0,
+            z=0.0,
+        )
+
         event = spatial.move_to(
-            {
-                "x": 3.0,
-                "y": 4.0,
-                "z": 0.0
-            },
+            position,
             zone="hunting_area"
+        )
+
+        self.assertIs(
+            spatial.position,
+            position,
         )
 
         self.assertEqual(
@@ -51,13 +61,9 @@ class SpatialComponentTests(
 
         previous = spatial.clear_position()
 
-        self.assertEqual(
+        self.assertIs(
             previous,
-            {
-                "x": 3.0,
-                "y": 4.0,
-                "z": 0.0
-            }
+            position,
         )
 
         self.assertIsNone(
@@ -73,23 +79,29 @@ class SpatialComponentTests(
             entity.position
         )
 
-        entity.position = {
-            "x": 1.0,
-            "y": 2.0,
-            "z": 3.0
-        }
+        original_position = SpatialVector3(
+            x=1.0,
+            y=2.0,
+            z=3.0,
+        )
+        entity.position = original_position
 
-        self.assertEqual(
+        self.assertIs(
             entity.position,
-            entity.spatial.position
+            original_position,
+        )
+        self.assertIs(
+            entity.position,
+            entity.spatial.position,
         )
 
+        new_position = SpatialVector3(
+            x=4.0,
+            y=5.0,
+            z=6.0,
+        )
         event = entity.move_to(
-            {
-                "x": 4.0,
-                "y": 5.0,
-                "z": 6.0
-            },
+            new_position,
             layer="quantum_layer",
             zone="test_zone"
         )
@@ -103,13 +115,9 @@ class SpatialComponentTests(
             }
         )
 
-        self.assertEqual(
+        self.assertIs(
             entity.position,
-            {
-                "x": 4.0,
-                "y": 5.0,
-                "z": 6.0
-            }
+            new_position,
         )
 
         self.assertEqual(
@@ -131,6 +139,56 @@ class SpatialComponentTests(
         self.assertFalse(
             entity.spatial.has_position
         )
+
+    def test_spatial_component_requires_vector_objects(self):
+        spatial = SpatialComponent()
+
+        with self.assertRaises(TypeError):
+            spatial.set_position({
+                "x": 1.0,
+                "y": 2.0,
+                "z": 3.0,
+            })
+
+        with self.assertRaises(TypeError):
+            spatial.set_velocity({
+                "x": 1.0,
+                "y": 0.0,
+                "z": 0.0,
+            })
+
+        with self.assertRaises(TypeError):
+            spatial.set_rotation({
+                "x": 0.0,
+                "y": 90.0,
+                "z": 0.0,
+            })
+
+    def test_spatial_vectors_are_objects_with_detached_snapshots(self):
+        vector = SpatialVector3(
+            x=1,
+            y=2,
+            z=3,
+        )
+
+        self.assertEqual(vector.x, 1.0)
+        self.assertEqual(vector.y, 2.0)
+        self.assertEqual(vector.z, 3.0)
+        self.assertEqual(
+            vector.distance_to(
+                SpatialVector3(
+                    x=4,
+                    y=6,
+                    z=3,
+                )
+            ),
+            5.0,
+        )
+
+        snapshot = vector.to_dict()
+        snapshot["x"] = 99.0
+
+        self.assertEqual(vector.x, 1.0)
 
 
 if __name__ == "__main__":

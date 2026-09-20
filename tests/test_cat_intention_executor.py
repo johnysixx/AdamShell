@@ -1,4 +1,5 @@
 from core.entity.social_entity import SocialEntity
+from core.entity.components import SpatialVector3
 import unittest
 from universe.universe import Universe
 from cats.cats import Cats
@@ -34,7 +35,7 @@ class CatIntentionExecutorTests(unittest.TestCase):
 
     def create_cronenberg(self):
         cronenberg = self.universe.create_cronenberg_from_quantum_error(error=RuntimeError('Executor test.'), source_component='test', source_operation='cat_intention_executor')
-        cronenberg.position = {'x': 3.0, 'y': 0.0, 'z': 0.0}
+        cronenberg.position = SpatialVector3(x=3.0, y=0.0, z=0.0)
         cronenberg.size = 0.5
         return cronenberg
 

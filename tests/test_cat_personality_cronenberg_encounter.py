@@ -1,5 +1,6 @@
 import unittest
 from universe.universe import Universe
+from core.entity.components import SpatialVector3
 
 class FixedRng:
 
@@ -19,12 +20,12 @@ class CatPersonalityCronenbergEncounterTests(unittest.TestCase):
 
     def create_cronenberg(self, size):
         cronenberg = self.universe.create_cronenberg_from_quantum_error(error=RuntimeError('Personality encounter test.'), source_component='test', source_operation='personality_encounter')
-        cronenberg.position = {'x': 1.0, 'y': 0.0, 'z': 0.0}
+        cronenberg.position = SpatialVector3(x=1.0, y=0.0, z=0.0)
         cronenberg.size = float(size)
         return cronenberg
 
     def create_route(self, cronenberg):
-        result = self.universe.quantum_space.plan_direct_cat_route(cat_id=self.cat.name, start_position={'x': 0.0, 'y': 0.0, 'z': 0.0}, destination_position=cronenberg.position, destination=cronenberg.id, step_size=1.0)
+        result = self.universe.quantum_space.plan_direct_cat_route(cat_id=self.cat.name, start_position={'x': 0.0, 'y': 0.0, 'z': 0.0}, destination_position=cronenberg.position.to_dict(), destination=cronenberg.id, step_size=1.0)
         return result['route']
 
     def traits(self):

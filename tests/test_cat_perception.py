@@ -1,5 +1,6 @@
 import unittest
 from universe.universe import Universe
+from core.entity.components import SpatialVector3
 from cats.cats import Cats
 
 class CatPerceptionTests(unittest.TestCase):
@@ -19,7 +20,7 @@ class CatPerceptionTests(unittest.TestCase):
     def create_cronenberg(self, size, position):
         cronenberg = self.universe.create_cronenberg_from_quantum_error(error=RuntimeError('Perception test.'), source_component='test', source_operation='cat_perception')
         cronenberg.size = float(size)
-        cronenberg.position = dict(position)
+        cronenberg.position = SpatialVector3(**position)
         return cronenberg
 
     def test_cat_sees_nearby_cat_only(self):

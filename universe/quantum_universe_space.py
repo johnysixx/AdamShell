@@ -1,6 +1,7 @@
 import random
 import uuid
 from core.entity.quantum_cat_route import QuantumCatRoute
+from core.entity.components import SpatialVector3
 from quantum.geometry_engine import QuantumGeometryEngine
 from navigation import NavigationEngine
 
@@ -73,6 +74,13 @@ class QuantumUniverseSpace:
         route = self.create_cat_route(cat_id=cat_id, route_steps=plan['route_steps'], start_position=start_position, destination=destination)
         return {'name': 'cat_direct_route_planned', 'cat_id': cat_id, 'destination': destination, 'plan': plan, 'route': route}
 
+    @staticmethod
+    def _cronenberg_position_snapshot(cronenberg):
+        position = getattr(cronenberg, 'position', None)
+        if not isinstance(position, SpatialVector3):
+            return None
+        return position.to_dict()
+
     def plan_cat_route_to_nearest_huntable_cronenberg(self, cat, cronenbergs, start_position=None, step_size=None, max_size_ratio=1.2):
         cat_id = getattr(cat, 'name', None)
         cat_size = float(getattr(cat, 'size', 1.0))
@@ -81,7 +89,11 @@ class QuantumUniverseSpace:
         if start_position is None:
             return {'name': 'cat_hunt_route_not_planned', 'result': 'cat_has_no_position', 'cat_id': cat_id}
         huntable = [cronenberg for cronenberg in cronenbergs if getattr(cronenberg, 'active', True) and getattr(cronenberg, 'is_alive', False) and (getattr(cronenberg, 'position', None) is not None) and (float(cronenberg.size) / cat_size <= float(max_size_ratio))]
-        nearest = self.navigation_engine.nearest_target(start_position, huntable)
+        nearest = self.navigation_engine.nearest_target(
+            start_position,
+            huntable,
+            position_getter=self._cronenberg_position_snapshot,
+        )
         if nearest is None:
             return {'name': 'cat_hunt_route_not_planned', 'result': 'no_huntable_cronenberg', 'cat_id': cat_id}
         target = nearest['target']
@@ -114,10 +126,10 @@ class QuantumUniverseSpace:
         next_position = route.next_position
         if next_position is None:
             return {'result': 'already_arrived'}
-        crossing_cronenbergs = [cronenberg for cronenberg in cronenbergs if getattr(cronenberg, 'is_alive', False) and route.position_matches(getattr(cronenberg, 'position', {}))]
+        crossing_cronenbergs = [cronenberg for cronenberg in cronenbergs if getattr(cronenberg, 'is_alive', False) and route.position_matches(self._cronenberg_position_snapshot(cronenberg) or {})]
         if crossing_cronenbergs:
             cronenberg = min(crossing_cronenbergs, key=lambda item: item.size)
-            cronenberg_position = getattr(cronenberg, 'position', None)
+            cronenberg_position = self._cronenberg_position_snapshot(cronenberg)
             previous_detour_count = route.detour_count_for(cronenberg_position)
             if previous_detour_count > 0:
 

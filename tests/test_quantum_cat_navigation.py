@@ -1,6 +1,7 @@
 import unittest
 
 from universe.universe import Universe
+from core.entity.components import SpatialVector3
 
 
 class QuantumCatNavigationTests(
@@ -32,11 +33,11 @@ class QuantumCatNavigationTests(
             )
         )
 
-        far.position = {
-            "x": 10.0,
-            "y": 0.0,
-            "z": 0.0
-        }
+        far.position = SpatialVector3(
+            x=10.0,
+            y=0.0,
+            z=0.0,
+        )
 
         far.size = 1.0
 
@@ -49,11 +50,11 @@ class QuantumCatNavigationTests(
             )
         )
 
-        near.position = {
-            "x": 3.0,
-            "y": 4.0,
-            "z": 0.0
-        }
+        near.position = SpatialVector3(
+            x=3.0,
+            y=4.0,
+            z=0.0,
+        )
 
         near.size = 1.0
 
@@ -66,11 +67,11 @@ class QuantumCatNavigationTests(
             )
         )
 
-        large.position = {
-            "x": 1.0,
-            "y": 0.0,
-            "z": 0.0
-        }
+        large.position = SpatialVector3(
+            x=1.0,
+            y=0.0,
+            z=0.0,
+        )
 
         large.size = 2.0
 
@@ -110,7 +111,7 @@ class QuantumCatNavigationTests(
 
         self.assertEqual(
             result["route"].route_steps[-1],
-            near.position
+            near.position.to_dict()
         )
 
     def test_no_huntable_cronenberg_returns_safe_result(self):
@@ -138,11 +139,11 @@ class QuantumCatNavigationTests(
             )
         )
 
-        large.position = {
-            "x": 1.0,
-            "y": 0.0,
-            "z": 0.0
-        }
+        large.position = SpatialVector3(
+            x=1.0,
+            y=0.0,
+            z=0.0,
+        )
 
         large.size = 2.0
 

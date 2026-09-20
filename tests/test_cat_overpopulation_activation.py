@@ -1,4 +1,5 @@
 import unittest
+from core.entity.components import SpatialVector3
 
 from universe.universe import Universe
 
@@ -95,11 +96,11 @@ class CatOverpopulationActivationTests(
             )
         )
 
-        target.position = {
-            "x": 3.0,
-            "y": 0.0,
-            "z": 0.0
-        }
+        target.position = SpatialVector3(
+            x=3.0,
+            y=0.0,
+            z=0.0,
+        )
 
         universe.cats_layer.offer_navigation_for_suggested_intent(
             cat
@@ -169,11 +170,11 @@ class CatOverpopulationActivationTests(
             )
         )
 
-        target.position = {
-            "x": 3.0,
-            "y": 0.0,
-            "z": 0.0
-        }
+        target.position = SpatialVector3(
+            x=3.0,
+            y=0.0,
+            z=0.0,
+        )
 
         universe.cats_layer.offer_navigation_for_suggested_intent(
             cat

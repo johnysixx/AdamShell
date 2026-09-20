@@ -1,5 +1,6 @@
 import random
 
+from core.entity.components import SpatialVector3
 from core.entity.cronenberg_system.origin import (
     CronenbergOrigin
 )
@@ -491,21 +492,11 @@ class CatCronenbergEncounter:
 
         if not isinstance(
             position,
-            dict
+            SpatialVector3
         ):
             return None
 
-        if not all(
-            axis in position
-            for axis in (
-                "x",
-                "y",
-                "z"
-            )
-        ):
-            return None
-
-        return dict(position)
+        return position.to_dict()
 
     @property
     def public_state(self):
