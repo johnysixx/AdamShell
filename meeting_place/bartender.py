@@ -4,7 +4,10 @@ from meeting_place.bar_incident_state import (
     BarIncidentState,
 )
 from .bar_objects import (
+    BarDrink,
+    BarInventoryItem,
     BarOrigin,
+    BarServingVessel,
     BarShift,
     DrinkRecipe,
 )
@@ -249,9 +252,14 @@ class Bartender(SocialMixin):
         self.observe_event(event)
         UniverseLogger.event(f'BARTENDER MIXES DRINK: {drink_name} for {guest_name}')
 
-    def pour_drink(self, guest_name, drink, serving_object):
+    def pour_drink(
+        self,
+        guest_name,
+        drink: BarDrink | BarInventoryItem,
+        serving_object: BarServingVessel,
+    ):
         drink_name = self.get_drink_name(drink)
-        serving_object_name = self.get_drink_name(serving_object)
+        serving_object_name = self._serving_object_name(serving_object)
         self.remember_first_order(guest_name, drink_name)
         serving_object.fill(
             drink_name
@@ -261,10 +269,15 @@ class Bartender(SocialMixin):
         UniverseLogger.event(f'BARTENDER POURS DRINK: {drink_name} into {serving_object_name} for {guest_name}')
         return serving_object
 
-    def get_drink_name(self, drink):
-        if isinstance(drink, dict):
-            return drink.get('name')
-        return getattr(drink, 'name', drink)
+    def get_drink_name(self, drink: BarDrink | BarInventoryItem):
+        if not isinstance(drink, (BarDrink, BarInventoryItem)):
+            raise TypeError("Bartender drink must be BarDrink or BarInventoryItem.")
+        return drink.name
+
+    def _serving_object_name(self, serving_object: BarServingVessel):
+        if not isinstance(serving_object, BarServingVessel):
+            raise TypeError("Bartender serving object must be BarServingVessel.")
+        return serving_object.name
 
     def idle_work(self):
         if not self.glasses_clean:
@@ -336,9 +349,14 @@ class Bartender(SocialMixin):
         UniverseLogger.event(f'BARTENDER REPLIES MEOW TO: {cat_name}')
         return {'cat_meow': cat_event, 'bartender_meow': reply_event}
 
-    def serve_without_order(self, guest_name, drink, serving_object):
+    def serve_without_order(
+        self,
+        guest_name,
+        drink: BarDrink | BarInventoryItem,
+        serving_object: BarServingVessel,
+    ):
         drink_name = self.get_drink_name(drink)
-        serving_object_name = self.get_drink_name(serving_object)
+        serving_object_name = self._serving_object_name(serving_object)
         serving_object.fill(
             drink_name
         )

@@ -127,6 +127,11 @@ class BarServingVesselObjectStateTests(
             "filled"
         )
 
+        self.assertEqual(
+            bartender.regular_drinks,
+            {"newton": "singularity"},
+        )
+
     def test_bartender_rejects_mapping_serving_bridge(
         self
     ):
@@ -139,8 +144,9 @@ class BarServingVesselObjectStateTests(
             type="created_cocktail",
         )
 
-        with self.assertRaises(
-            AttributeError
+        with self.assertRaisesRegex(
+            TypeError,
+            "BarServingVessel",
         ):
             bartender.pour_drink(
                 guest_name="newton",
