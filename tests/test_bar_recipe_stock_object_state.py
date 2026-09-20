@@ -13,6 +13,7 @@ from meeting_place.how_to_mix_drinks import (
 
 from meeting_place.bar_objects import (
     BarIngredientStock,
+    BarMenuItem,
     DrinkRecipe,
     RecipeIngredientRequirement,
 )
@@ -199,7 +200,7 @@ class BarRecipeStockObjectStateTests(
             revealed
         )
 
-    def test_menu_is_still_boundary_dict(
+    def test_menu_values_are_domain_objects(
         self
     ):
         universe = Universe()
@@ -220,14 +221,21 @@ class BarRecipeStockObjectStateTests(
 
         self.assertIsInstance(
             item,
-            dict
+            BarMenuItem
         )
 
         self.assertEqual(
-            item[
-                "menu_source"
-            ],
+            item.menu_source,
             "direct_stock"
+        )
+
+        self.assertIs(
+            item.stock,
+            bar.back_room.bar_ingredients["rum"]
+        )
+
+        self._assert_object_only(
+            item
         )
 
 

@@ -1,8 +1,9 @@
-﻿import unittest
+import unittest
 
 from universe.universe import Universe
 from multiverse import UniverseRegistry
 from meeting_place.meeting_place import MeetingPlace
+from meeting_place.bar_objects import DrinkRecipe
 
 
 class BarMenuCounterInteractionTests(unittest.TestCase):
@@ -19,14 +20,16 @@ class BarMenuCounterInteractionTests(unittest.TestCase):
 
         meeting_place.new_drinks[
             "singularity"
-        ] = {
-            "name": "singularity",
-            "status": "approved",
-            "ingredients": [
+        ] = DrinkRecipe(
+            name="singularity",
+            origin="test_recipe",
+            status="approved",
+            approved=True,
+            ingredients=[
                 "raspberry_rum",
-                "lemonade"
-            ]
-        }
+                "lemonade",
+            ],
+        )
 
         meeting_place.bar_menu_sign.open()
         meeting_place.bar_menu_sign.open_section(
@@ -64,11 +67,13 @@ class BarMenuCounterInteractionTests(unittest.TestCase):
 
         meeting_place.new_drinks[
             "singularity"
-        ] = {
-            "name": "singularity",
-            "status": "approved",
-            "ingredients": []
-        }
+        ] = DrinkRecipe(
+            name="singularity",
+            origin="test_recipe",
+            status="approved",
+            approved=True,
+            ingredients=[],
+        )
 
         meeting_place.bar_menu_sign.open()
         meeting_place.bar_menu_sign.open_section(
@@ -100,11 +105,13 @@ class BarMenuCounterInteractionTests(unittest.TestCase):
 
         meeting_place.new_drinks[
             "singularity"
-        ] = {
-            "name": "singularity",
-            "status": "approved",
-            "ingredients": []
-        }
+        ] = DrinkRecipe(
+            name="singularity",
+            origin="test_recipe",
+            status="approved",
+            approved=True,
+            ingredients=[],
+        )
 
         meeting_place.bar_menu_sign.open()
         meeting_place.bar_menu_sign.open_section(

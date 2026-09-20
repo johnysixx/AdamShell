@@ -1,4 +1,5 @@
 ﻿from universe.logger import UniverseLogger
+from meeting_place.bar_objects import BarMenuItem, DrinkRecipe
 
 
 class BarMenuSign:
@@ -99,49 +100,28 @@ class BarMenuSign:
         drink_name
     ):
         if drink_name in self.new_drinks:
-            drink = self.new_drinks[
-                drink_name
-            ]
+            drink = self.new_drinks[drink_name]
+            if not isinstance(drink, DrinkRecipe):
+                raise TypeError("New drink values must be DrinkRecipe.")
             is_new = True
 
         elif drink_name in self.drink_menu:
-            drink = self.drink_menu[
-                drink_name
-            ]
+            drink = self.drink_menu[drink_name]
+            if not isinstance(drink, BarMenuItem):
+                raise TypeError("Bar menu values must be BarMenuItem.")
             is_new = False
 
         else:
-            raise ValueError(
-                "Unknown bar drink."
-            )
-
-        if isinstance(
-            drink,
-            dict
-        ):
-            ingredients = drink.get(
-                "ingredients",
-                []
-            )
-        else:
-            ingredients = getattr(
-                drink,
-                "ingredients",
-                []
-            )
+            raise ValueError("Unknown bar drink.")
 
         screen = {
             "screen": "drink_detail",
             "drink": drink_name,
             "is_new": is_new,
-            "ingredients": list(
-                ingredients
-            )
+            "ingredients": list(drink.ingredients),
         }
 
-        return self._show_screen(
-            screen
-        )
+        return self._show_screen(screen)
 
     def back(
         self

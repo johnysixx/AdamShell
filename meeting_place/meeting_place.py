@@ -7,6 +7,7 @@ from meeting_place.bar_incident_state import (
 from meeting_place.bar_objects import (
     BarDrink,
     BarIngredientStock,
+    BarMenuItem,
     DrinkRecipe,
 )
 import random
@@ -826,15 +827,17 @@ class MeetingPlace:
     def refresh_basic_drinks(self):
         ingredients = self.back_room.bar_ingredients
         for drink_name in list(self.drink_menu.keys()):
-            drink = self.drink_menu[drink_name]
-            if drink.get('menu_source') in {'direct_stock', 'basic_recipe'}:
+            menu_item = self.drink_menu[drink_name]
+            if not isinstance(menu_item, BarMenuItem):
+                raise TypeError('Bar menu values must be BarMenuItem.')
+            if menu_item.menu_source in {'direct_stock', 'basic_recipe'}:
                 del self.drink_menu[drink_name]
         for ingredient_name, stock in ingredients.items():
             if not stock.available:
                 continue
             if not stock.serve_directly:
                 continue
-            self.drink_menu[ingredient_name] = {'name': ingredient_name, 'type': 'bar_drink', 'menu_source': 'direct_stock'}
+            self.drink_menu[ingredient_name] = BarMenuItem.from_stock(stock)
         for drink_name, recipe in self.how_to_mix_drinks.recipes.items():
             if recipe.hidden:
                 continue
@@ -857,9 +860,9 @@ class MeetingPlace:
                         can_serve = False
                         break
             if can_serve:
-                menu_item = recipe.to_dict()
-                menu_item['menu_source'] = 'basic_recipe'
-                self.drink_menu[drink_name] = menu_item
+                self.drink_menu[drink_name] = BarMenuItem.from_recipe(
+                    recipe, menu_source='basic_recipe'
+                )
         return self.drink_menu
 
     def refresh_new_drinks(self):
@@ -878,7 +881,9 @@ class MeetingPlace:
         if drink_name not in self.new_drinks:
             raise ValueError('Unknown new drink.')
         recipe = self.new_drinks.pop(drink_name)
-        self.drink_menu[drink_name] = recipe.to_dict()
+        self.drink_menu[drink_name] = BarMenuItem.from_recipe(
+            recipe, menu_source='promoted_recipe'
+        )
         self.bartender.chronicle_memory.append({'kind': 'drink_promoted', 'drink': drink_name})
         UniverseLogger.event(f'BAR DRINK PROMOTED: {drink_name}')
         return recipe
@@ -890,17 +895,16 @@ class MeetingPlace:
         UniverseLogger.event(f'BAR DRINK REMOVED: {drink_name}')
         return True
 
-    def add_drink(self, drink, source='bar'):
-        if isinstance(drink, dict):
-            drink_name = drink.get('name')
-        else:
-            drink_name = getattr(drink, 'name', None)
-        if not drink_name:
+    def add_drink(self, drink: BarDrink, source='bar'):
+        if not isinstance(drink, BarDrink):
+            raise TypeError('Bar drink must be BarDrink.')
+        if not drink.name:
             raise ValueError('Bar drink requires name.')
-        self.drink_menu[drink_name] = drink
-        self.bartender.note_new_drink(drink=drink_name, source=source)
-        UniverseLogger.event(f'BAR DRINK ADDED: {drink_name}')
-        return drink
+        menu_item = BarMenuItem.from_drink(drink, menu_source=source)
+        self.drink_menu[drink.name] = menu_item
+        self.bartender.note_new_drink(drink=drink.name, source=source)
+        UniverseLogger.event(f'BAR DRINK ADDED: {drink.name}')
+        return menu_item
 
     def tick(self):
         self.tick_count += 1

@@ -1,4 +1,4 @@
-from meeting_place.bar_objects import DrinkRecipe
+from meeting_place.bar_objects import BarDrink, BarMenuItem, DrinkRecipe
 import unittest
 
 from universe.universe import Universe
@@ -45,10 +45,10 @@ class BarMenuSignIntegrationTests(unittest.TestCase):
             universe
         )
 
-        drink = {
-            "name": "absinthe",
-            "type": "bar_drink"
-        }
+        drink = BarDrink(
+            name="absinthe",
+            type="bar_drink",
+        )
 
         meeting_place.add_drink(
             drink=drink,
@@ -75,10 +75,11 @@ class BarMenuSignIntegrationTests(unittest.TestCase):
 
         meeting_place.new_drinks[
             "singularity"
-        ] = {
-            "name": "singularity",
-            "ingredients": []
-        }
+        ] = DrinkRecipe(
+            name="singularity",
+            origin="test_recipe",
+            ingredients=[],
+        )
 
         meeting_place.bar_menu_sign.open()
         meeting_place.bar_menu_sign.open_drink(
@@ -161,15 +162,20 @@ class BarMenuSignIntegrationTests(unittest.TestCase):
             meeting_place.new_drinks
         )
 
+        menu_item = meeting_place.drink_menu[
+            "singularity"
+        ]
         self.assertIsInstance(
-            meeting_place.drink_menu[
-                "singularity"
-            ],
-            dict
+            menu_item,
+            BarMenuItem
         )
         self.assertEqual(
-            meeting_place.drink_menu["singularity"]["name"],
+            menu_item.name,
             recipe.name
+        )
+        self.assertIs(
+            menu_item.recipe,
+            recipe
         )
 
         meeting_place.bar_menu_sign.open()
@@ -367,10 +373,10 @@ class BarMenuSignIntegrationTests(unittest.TestCase):
             universe
         )
 
-        drink = {
-            "name": "absinthe",
-            "type": "bar_drink"
-        }
+        drink = BarDrink(
+            name="absinthe",
+            type="bar_drink",
+        )
 
         meeting_place.add_drink(
             drink,

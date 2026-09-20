@@ -1696,3 +1696,68 @@ class DrinkRecipe:
             ] = self.revision_reason
 
         return result
+
+@dataclass(slots=True)
+class BarMenuItem:
+    name: str
+    type: str
+    menu_source: str
+    category: str | None = None
+    ingredients: tuple[str, ...] = field(default_factory=tuple)
+    drink: BarDrink | None = None
+    recipe: DrinkRecipe | None = None
+    stock: BarIngredientStock | None = None
+
+    @classmethod
+    def from_stock(cls, stock: BarIngredientStock):
+        if not isinstance(stock, BarIngredientStock):
+            raise TypeError("Bar menu stock must be BarIngredientStock.")
+
+        return cls(
+            name=stock.name,
+            type="bar_drink",
+            menu_source="direct_stock",
+            category=stock.category,
+            stock=stock,
+        )
+
+    @classmethod
+    def from_recipe(cls, recipe: DrinkRecipe, menu_source: str):
+        if not isinstance(recipe, DrinkRecipe):
+            raise TypeError("Bar menu recipe must be DrinkRecipe.")
+
+        return cls(
+            name=recipe.name,
+            type="mixed_bar_drink",
+            menu_source=menu_source,
+            category=recipe.category,
+            ingredients=tuple(recipe.ingredients),
+            recipe=recipe,
+        )
+
+    @classmethod
+    def from_drink(cls, drink: BarDrink, menu_source: str):
+        if not isinstance(drink, BarDrink):
+            raise TypeError("Bar menu drink must be BarDrink.")
+
+        return cls(
+            name=drink.name,
+            type=drink.type,
+            menu_source=menu_source,
+            category=drink.category,
+            ingredients=tuple(drink.ingredients),
+            drink=drink,
+        )
+
+    def to_dict(self):
+        result = {
+            "name": self.name,
+            "type": self.type,
+            "menu_source": self.menu_source,
+            "ingredients": list(self.ingredients),
+        }
+
+        if self.category is not None:
+            result["category"] = self.category
+
+        return result

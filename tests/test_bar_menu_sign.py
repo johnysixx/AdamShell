@@ -3,30 +3,44 @@
 from meeting_place.bar_menu_sign import (
     BarMenuSign
 )
+from meeting_place.bar_objects import BarMenuItem, DrinkRecipe
 
 
 class BarMenuSignTests(unittest.TestCase):
+
+    def _menu_item(self, name):
+        return BarMenuItem(
+            name=name,
+            type="bar_drink",
+            menu_source="test",
+        )
+
+    def _new_drink(
+        self,
+        name="singularity",
+        ingredients=(),
+        status=None,
+    ):
+        return DrinkRecipe(
+            name=name,
+            origin="test_recipe",
+            ingredients=list(ingredients),
+            status=status,
+            approved=status == "approved",
+        )
 
     def test_sign_shows_regular_menu_and_new_drinks(
         self
     ):
         drink_menu = {
-            "raspberry_rum": {
-                "name": "raspberry_rum",
-                "type": "bar_drink"
-            }
+            "raspberry_rum": self._menu_item("raspberry_rum")
         }
 
         new_drinks = {
-            "singularity": {
-                "name": "singularity",
-                "status": "approved",
-                "approved": True,
-                "ingredients": [
-                    "raspberry_rum",
-                    "lemonade"
-                ]
-            }
+            "singularity": self._new_drink(
+                ingredients=("raspberry_rum", "lemonade"),
+                status="approved",
+            )
         }
 
         sign = BarMenuSign(
@@ -78,10 +92,9 @@ class BarMenuSignTests(unittest.TestCase):
             {}
         )
 
-        new_drinks["singularity"] = {
-            "name": "singularity",
-            "status": "approved"
-        }
+        new_drinks["singularity"] = self._new_drink(
+            status="approved"
+        )
 
         self.assertIn(
             "singularity",
@@ -93,16 +106,13 @@ class BarMenuSignTests(unittest.TestCase):
         self
     ):
         drink_menu = {
-            "raspberry_rum": {
-                "name": "raspberry_rum"
-            }
+            "raspberry_rum": self._menu_item("raspberry_rum")
         }
 
         new_drinks = {
-            "singularity": {
-                "name": "singularity",
-                "status": "approved"
-            }
+            "singularity": self._new_drink(
+                status="approved"
+            )
         }
 
         sign = BarMenuSign(
@@ -128,21 +138,17 @@ class BarMenuSignTests(unittest.TestCase):
         self
     ):
         drink_menu = {
-            "raspberry_rum": {
-                "name": "raspberry_rum",
-                "type": "bar_drink"
-            }
+            "raspberry_rum": self._menu_item("raspberry_rum")
         }
 
         new_drinks = {
-            "singularity": {
-                "name": "singularity",
-                "status": "approved",
-                "ingredients": [
+            "singularity": self._new_drink(
+                ingredients=(
                     "raspberry_rum",
-                    "lemonade"
-                ]
-            }
+                    "lemonade",
+                ),
+                status="approved",
+            )
         }
 
         sign = BarMenuSign(
@@ -181,20 +187,17 @@ class BarMenuSignTests(unittest.TestCase):
         self
     ):
         drink_menu = {
-            "raspberry_rum": {
-                "name": "raspberry_rum"
-            }
+            "raspberry_rum": self._menu_item("raspberry_rum")
         }
 
         new_drinks = {
-            "singularity": {
-                "name": "singularity",
-                "status": "approved",
-                "ingredients": [
+            "singularity": self._new_drink(
+                ingredients=(
                     "raspberry_rum",
-                    "lemonade"
-                ]
-            }
+                    "lemonade",
+                ),
+                status="approved",
+            )
         }
 
         sign = BarMenuSign(
@@ -247,14 +250,10 @@ class BarMenuSignTests(unittest.TestCase):
     ):
         sign = BarMenuSign(
             drink_menu={
-                "raspberry_rum": {
-                    "name": "raspberry_rum"
-                }
+                "raspberry_rum": self._menu_item("raspberry_rum")
             },
             new_drinks={
-                "singularity": {
-                    "name": "singularity"
-                }
+                "singularity": self._new_drink()
             }
         )
 
@@ -289,12 +288,10 @@ class BarMenuSignTests(unittest.TestCase):
         sign = BarMenuSign(
             drink_menu={},
             new_drinks={
-                "singularity": {
-                    "name": "singularity"
-                },
-                "event_horizon": {
-                    "name": "event_horizon"
-                }
+                "singularity": self._new_drink(),
+                "event_horizon": self._new_drink(
+                    name="event_horizon"
+                )
             }
         )
 
@@ -325,12 +322,8 @@ class BarMenuSignTests(unittest.TestCase):
     ):
         sign = BarMenuSign(
             drink_menu={
-                "raspberry_rum": {
-                    "name": "raspberry_rum"
-                },
-                "absinthe": {
-                    "name": "absinthe"
-                }
+                "raspberry_rum": self._menu_item("raspberry_rum"),
+                "absinthe": self._menu_item("absinthe"),
             },
             new_drinks={}
         )
@@ -364,14 +357,13 @@ class BarMenuSignTests(unittest.TestCase):
         sign = BarMenuSign(
             drink_menu={},
             new_drinks={
-                "singularity": {
-                    "name": "singularity",
-                    "status": "approved",
-                    "ingredients": [
+                "singularity": self._new_drink(
+                    ingredients=(
                         "raspberry_rum",
-                        "lemonade"
-                    ]
-                }
+                        "lemonade",
+                    ),
+                    status="approved",
+                )
             }
         )
 
@@ -416,15 +408,12 @@ class BarMenuSignTests(unittest.TestCase):
     ):
         sign = BarMenuSign(
             drink_menu={
-                "raspberry_rum": {
-                    "name": "raspberry_rum"
-                }
+                "raspberry_rum": self._menu_item("raspberry_rum")
             },
             new_drinks={
-                "singularity": {
-                    "name": "singularity",
-                    "status": "approved"
-                }
+                "singularity": self._new_drink(
+                    status="approved"
+                )
             }
         )
 
@@ -483,18 +472,13 @@ class BarMenuSignTests(unittest.TestCase):
     ):
         sign = BarMenuSign(
             drink_menu={
-                "raspberry_rum": {
-                    "name": "raspberry_rum"
-                },
-                "absinthe": {
-                    "name": "absinthe"
-                }
+                "raspberry_rum": self._menu_item("raspberry_rum"),
+                "absinthe": self._menu_item("absinthe"),
             },
             new_drinks={
-                "singularity": {
-                    "name": "singularity",
-                    "status": "approved"
-                }
+                "singularity": self._new_drink(
+                    status="approved"
+                )
             }
         )
 
@@ -534,10 +518,7 @@ class BarMenuSignTests(unittest.TestCase):
         sign = BarMenuSign(
             drink_menu={},
             new_drinks={
-                "singularity": {
-                    "name": "singularity",
-                    "ingredients": []
-                }
+                "singularity": self._new_drink()
             }
         )
 
@@ -566,10 +547,7 @@ class BarMenuSignTests(unittest.TestCase):
         sign = BarMenuSign(
             drink_menu={},
             new_drinks={
-                "singularity": {
-                    "name": "singularity",
-                    "ingredients": []
-                }
+                "singularity": self._new_drink()
             }
         )
 
@@ -609,10 +587,7 @@ class BarMenuSignTests(unittest.TestCase):
         sign = BarMenuSign(
             drink_menu={},
             new_drinks={
-                "singularity": {
-                    "name": "singularity",
-                    "ingredients": []
-                }
+                "singularity": self._new_drink()
             }
         )
 

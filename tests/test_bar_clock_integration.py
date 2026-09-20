@@ -3,6 +3,7 @@ import unittest
 from universe.universe import Universe
 from multiverse import UniverseRegistry
 from meeting_place.meeting_place import MeetingPlace
+from meeting_place.bar_objects import BarDrink, BarMenuItem
 
 class BarClockIntegrationTests(unittest.TestCase):
 
@@ -99,9 +100,10 @@ class BarClockIntegrationTests(unittest.TestCase):
         universe = Universe()
         universe.universe_registry = UniverseRegistry()
         meeting_place = MeetingPlace(universe)
-        drink = SocialEntity.from_mapping({'name': 'absinthe', 'type': 'bar_drink'})
+        drink = BarDrink(name='absinthe', type='bar_drink')
         meeting_place.add_drink(drink=drink, source='new_bottle')
-        self.assertIs(meeting_place.drink_menu['absinthe'], drink)
+        self.assertIsInstance(meeting_place.drink_menu['absinthe'], BarMenuItem)
+        self.assertIs(meeting_place.drink_menu['absinthe'].drink, drink)
         self.assertEqual(len(meeting_place.bartender.chronicle_memory), 1)
         note = meeting_place.bartender.chronicle_memory[0]
         self.assertEqual(note['kind'], 'new_drink')
@@ -112,7 +114,7 @@ class BarClockIntegrationTests(unittest.TestCase):
         universe = Universe()
         universe.universe_registry = UniverseRegistry()
         meeting_place = MeetingPlace(universe)
-        meeting_place.add_drink(drink={'name': 'absinthe', 'type': 'bar_drink'}, source='new_bottle')
+        meeting_place.add_drink(drink=BarDrink(name='absinthe', type='bar_drink'), source='new_bottle')
         self.assertEqual(len(meeting_place.bar_counter.hidden_story_book.read_entries()), 0)
         for _ in range(24):
             meeting_place.tick()
@@ -130,7 +132,7 @@ class BarClockIntegrationTests(unittest.TestCase):
         universe = Universe()
         universe.universe_registry = UniverseRegistry()
         meeting_place = MeetingPlace(universe)
-        meeting_place.add_drink(drink={'name': 'absinthe', 'type': 'bar_drink'}, source='new_bottle')
+        meeting_place.add_drink(drink=BarDrink(name='absinthe', type='bar_drink'), source='new_bottle')
         self.assertEqual(len(meeting_place.bar_counter.hidden_story_book.read_entries()), 0)
         for _ in range(24):
             meeting_place.tick()
