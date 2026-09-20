@@ -162,14 +162,12 @@ class BarKnowledgeObjectStateTests(
             remembered.ideas[0],
             discussion.ideas[0]
         )
-        remembered.ideas[0].lilith[
-            "observation"
-        ] = "changed"
+        remembered.ideas[0].lilith.observation = (
+            "changed"
+        )
 
         self.assertEqual(
-            discussion.ideas[0].lilith[
-                "observation"
-            ],
+            discussion.ideas[0].lilith.observation,
             "wine_tastes_like_water"
         )
 

@@ -6,6 +6,7 @@ from meeting_place.bar_objects import (
     BarDrink,
     BarDrinkDiscussion,
     BarDrinkIdea,
+    BarDrinkSpeakerContribution,
     BarDrinkOrder,
     BarDrinkWager,
     BarGuestBet,
@@ -455,15 +456,13 @@ class Day0FirstBarShift:
             raise RuntimeError('Good drink discussion has not started.')
         observation = BarDrinkIdea(
             subject='wine',
-            lilith={
-                'observation':
-                    'wine_tastes_like_water',
-            },
-            serpent={
-                'agrees': True,
-                'proposal':
-                    'flavor_should_be_fuller',
-            },
+            lilith=BarDrinkSpeakerContribution(
+                observation='wine_tastes_like_water',
+            ),
+            serpent=BarDrinkSpeakerContribution(
+                agrees=True,
+                proposal='flavor_should_be_fuller',
+            ),
         )
         discussion.add_idea(
             observation

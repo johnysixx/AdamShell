@@ -78,11 +78,32 @@ class BarConversation:
 
 
 @dataclass(slots=True)
+class BarDrinkSpeakerContribution:
+    observation: str | None = None
+    agrees: bool | None = None
+    proposal: str | None = None
+
+    def to_dict(self):
+        result = {}
+
+        if self.observation is not None:
+            result["observation"] = self.observation
+
+        if self.agrees is not None:
+            result["agrees"] = self.agrees
+
+        if self.proposal is not None:
+            result["proposal"] = self.proposal
+
+        return result
+
+
+@dataclass(slots=True)
 class BarDrinkIdea:
     subject: str
     source: str | None = None
-    lilith: dict | None = None
-    serpent: dict | None = None
+    lilith: BarDrinkSpeakerContribution | None = None
+    serpent: BarDrinkSpeakerContribution | None = None
     observation: str | dict | None = None
     desired_property: dict | None = None
     assessment: dict | None = None
@@ -92,15 +113,34 @@ class BarDrinkIdea:
     qualification: dict | None = None
     meaning: str | None = None
 
+    def __post_init__(self):
+        for name in ("lilith", "serpent"):
+            value = getattr(self, name)
+            if (
+                value is not None
+                and not isinstance(
+                    value,
+                    BarDrinkSpeakerContribution,
+                )
+            ):
+                raise TypeError(
+                    f"Bar drink idea {name} contribution "
+                    "must be BarDrinkSpeakerContribution."
+                )
+
     def to_dict(self):
         result = {
             "subject": self.subject,
         }
 
+        if self.lilith is not None:
+            result["lilith"] = self.lilith.to_dict()
+
+        if self.serpent is not None:
+            result["serpent"] = self.serpent.to_dict()
+
         for name in (
             "source",
-            "lilith",
-            "serpent",
             "observation",
             "desired_property",
             "assessment",

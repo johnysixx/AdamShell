@@ -35,9 +35,9 @@ class Day0FirstGoodWineDiscussionTests(unittest.TestCase):
     def test_first_wine_observation_is_fuller_flavor(self):
         self.scene.lilith_and_serpent_take_first_table_drinks()
         observation = self.scene.lilith_and_serpent_make_first_wine_observation()
-        self.assertEqual(observation.lilith['observation'], 'wine_tastes_like_water')
-        self.assertTrue(observation.serpent['agrees'])
-        self.assertEqual(observation.serpent['proposal'], 'flavor_should_be_fuller')
+        self.assertEqual(observation.lilith.observation, 'wine_tastes_like_water')
+        self.assertTrue(observation.serpent.agrees)
+        self.assertEqual(observation.serpent.proposal, 'flavor_should_be_fuller')
 
     def test_discussion_is_still_unresolved(self):
         self.scene.lilith_and_serpent_take_first_table_drinks()

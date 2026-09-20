@@ -10,6 +10,7 @@ from meeting_place.bar_objects import (
     BarBeerHypothesis,
     BarDrinkDiscussion,
     BarDrinkIdea,
+    BarDrinkSpeakerContribution,
     BarWineHypothesis,
 )
 from meeting_place.meeting_place import (
@@ -113,6 +114,58 @@ class BarDrinkDiscussionObjectStateTests(
             "bitterness"
         )
 
+
+    def test_speaker_contributions_are_object_only(
+        self
+    ):
+        lilith = BarDrinkSpeakerContribution(
+            observation="wine_tastes_like_water",
+        )
+        serpent = BarDrinkSpeakerContribution(
+            agrees=True,
+            proposal="flavor_should_be_fuller",
+        )
+        idea = BarDrinkIdea(
+            subject="wine",
+            lilith=lilith,
+            serpent=serpent,
+        )
+
+        self.assertIs(idea.lilith, lilith)
+        self.assertIs(idea.serpent, serpent)
+        self.assertEqual(
+            idea.lilith.observation,
+            "wine_tastes_like_water",
+        )
+        self.assertTrue(idea.serpent.agrees)
+        self.assertEqual(
+            idea.serpent.proposal,
+            "flavor_should_be_fuller",
+        )
+        self._assert_object_only(
+            idea.lilith,
+            "observation",
+        )
+        self._assert_object_only(
+            idea.serpent,
+            "proposal",
+        )
+
+    def test_speaker_mapping_is_rejected(
+        self
+    ):
+        with self.assertRaisesRegex(
+            TypeError,
+            "BarDrinkSpeakerContribution",
+        ):
+            BarDrinkIdea(
+                subject="wine",
+                serpent={
+                    "proposal":
+                        "flavor_should_be_fuller",
+                },
+            )
+
     def test_snapshot_is_detached_boundary_dict(
         self
     ):
@@ -120,10 +173,9 @@ class BarDrinkDiscussionObjectStateTests(
         idea = discussion.add_idea(
             BarDrinkIdea(
                 subject="wine",
-                serpent={
-                    "proposal":
-                        "flavor_should_be_fuller",
-                },
+                serpent=BarDrinkSpeakerContribution(
+                    proposal="flavor_should_be_fuller",
+                ),
             )
         )
         discussion.current_hypothesis = (
@@ -153,7 +205,7 @@ class BarDrinkDiscussionObjectStateTests(
             ]
         )
         self.assertEqual(
-            idea.serpent["proposal"],
+            idea.serpent.proposal,
             "flavor_should_be_fuller"
         )
         self.assertTrue(
