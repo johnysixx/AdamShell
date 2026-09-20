@@ -1,27 +1,46 @@
 from universe.pre_cosmic_rules import REALITY_PAYMENT_RATIO, WILL_GAIN_PER_ENERGY_SERVING, captured_by_bar
 from core.entity.existence_energy import existence_pct_to_energy_j
+from meeting_place.bar_payment_state import BarPaymentState
 IDEA_ENTITY_ENERGY_EXISTENCE_COST_PERCENT = REALITY_PAYMENT_RATIO * 100
 GOD_ENERGY_CREATIVE_WILL_GAIN = 0.3
 GOD_ENTROPY_EXISTENCE_GAIN_PERCENT = 1.0
 
 class BarServiceRules:
 
-    def apply_basic_drink_payment(self, entity):
+    def apply_basic_drink_payment(self, entity) -> BarPaymentState:
         entity_type = self._get(entity, 'type')
         entity_name = self._get(entity, 'name')
         if entity_type == 'god':
-            return {'name': 'god_basic_drink_payment', 'entity': entity_name, 'payment_kind': 'god_rule', 'existence_paid_pct': 0.0, 'energy_paid_j': 0.0}
+            return BarPaymentState(
+                name='god_basic_drink_payment',
+                entity=entity_name,
+                payment_kind='god_rule',
+                existence_paid_pct=0.0,
+                energy_paid_j=0.0,
+            )
         if entity_type == 'idea_entity':
             energy_j = float(self._get(entity, 'energy_j', 0.0))
             energy_paid_j = energy_j * REALITY_PAYMENT_RATIO
             self._set(entity, 'energy_j', max(0.0, energy_j - energy_paid_j))
-            return {'name': 'idea_entity_basic_drink_payment', 'entity': entity_name, 'payment_kind': 'energy', 'energy_paid_j': energy_paid_j, 'existence_paid_pct': 0.0}
+            return BarPaymentState(
+                name='idea_entity_basic_drink_payment',
+                entity=entity_name,
+                payment_kind='energy',
+                energy_paid_j=energy_paid_j,
+                existence_paid_pct=0.0,
+            )
         if entity_type == 'root_entity':
             existence_by_world = self._get(entity, 'existence_by_world', {})
             current = float(existence_by_world.get('root_universe', 0.0))
             existence_paid_pct = min(25.0, current)
             existence_by_world['root_universe'] = current - existence_paid_pct
-            return {'name': 'root_entity_basic_drink_payment', 'entity': entity_name, 'payment_kind': 'root_existence', 'existence_paid_pct': existence_paid_pct, 'energy_paid_j': 0.0}
+            return BarPaymentState(
+                name='root_entity_basic_drink_payment',
+                entity=entity_name,
+                payment_kind='root_existence',
+                existence_paid_pct=existence_paid_pct,
+                energy_paid_j=0.0,
+            )
         if entity_type == 'physical_entity':
             existence_by_world = self._get(entity, 'existence_by_world', {})
             physical_before = float(existence_by_world.get('physical_universe', 0.0))
@@ -33,8 +52,22 @@ class BarServiceRules:
             converted_pct = max(0.0, existence_paid_pct - idea_gain_pct)
             generated_energy_j = existence_pct_to_energy_j(converted_pct)
             bar_energy_j = captured_by_bar(generated_energy_j)
-            return {'name': 'physical_entity_basic_drink_payment', 'entity': entity_name, 'payment_kind': 'reality_exchange', 'existence_paid_pct': existence_paid_pct, 'idea_existence_gain_pct': idea_gain_pct, 'existence_converted_to_energy_pct': converted_pct, 'generated_energy_j': generated_energy_j, 'bar_energy_j': bar_energy_j}
-        return {'name': 'basic_drink_payment_not_available', 'entity': entity_name, 'entity_type': entity_type, 'payment_kind': 'unsupported'}
+            return BarPaymentState(
+                name='physical_entity_basic_drink_payment',
+                entity=entity_name,
+                payment_kind='reality_exchange',
+                existence_paid_pct=existence_paid_pct,
+                idea_existence_gain_pct=idea_gain_pct,
+                existence_converted_to_energy_pct=converted_pct,
+                generated_energy_j=generated_energy_j,
+                bar_energy_j=bar_energy_j,
+            )
+        return BarPaymentState(
+            name='basic_drink_payment_not_available',
+            entity=entity_name,
+            entity_type=entity_type,
+            payment_kind='unsupported',
+        )
 
     def apply_energy_drink(self, entity):
         entity_type = self._get(entity, 'type')

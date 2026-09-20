@@ -783,9 +783,9 @@ class MeetingPlace:
         if not stock.available:
             raise ValueError('Basic drink is currently unavailable.')
         payment = self.service_rules.apply_basic_drink_payment(entity)
-        if payment.get('payment_kind') == 'unsupported':
+        if payment.payment_kind == 'unsupported':
             raise ValueError('Entity type cannot pay for a basic drink.')
-        bar_energy_j = float(payment.get('bar_energy_j', 0.0))
+        bar_energy_j = float(payment.bar_energy_j or 0.0)
         if bar_energy_j > 0.0:
             entity_name = self._get_entity_name(entity)
             self.add_bar_energy(source=f'basic_drink_payment:{entity_name}:{drink_name}', amount_j=bar_energy_j)

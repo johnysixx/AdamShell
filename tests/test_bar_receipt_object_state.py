@@ -7,6 +7,7 @@ from meeting_place.bar_objects import (
 from meeting_place.bar_receipt_state import (
     BarReceiptState,
 )
+from meeting_place.bar_payment_state import BarPaymentState
 from meeting_place.cash_register import (
     CashRegister,
 )
@@ -113,16 +114,19 @@ class BarReceiptObjectStateTests(
             BarTabItem,
         )
 
-    def test_payment_remains_dynamic_payload_at_boundary(self):
+    def test_receipt_owns_payment_object_and_exports_detached_snapshot(self):
         drink = SimpleNamespace(
             name="rum",
             category="basic_drink",
         )
 
-        payment = {
-            "payment_kind": "energy",
-            "energy_paid_j": 1.25,
-        }
+        payment = BarPaymentState(
+            name="idea_entity_basic_drink_payment",
+            entity=self.guest.name,
+            payment_kind="energy",
+            energy_paid_j=1.25,
+            existence_paid_pct=0.0,
+        )
 
         receipt = (
             self.register
@@ -135,15 +139,16 @@ class BarReceiptObjectStateTests(
 
         self.assertIsInstance(
             receipt.payment,
-            dict,
+            BarPaymentState,
         )
 
         self.assertEqual(
-            receipt.payment[
-                "energy_paid_j"
-            ],
+            receipt.payment.energy_paid_j,
             1.25,
         )
+        self.assertIsNot(receipt.payment, payment)
+        payment.energy_paid_j = 99.0
+        self.assertEqual(receipt.payment.energy_paid_j, 1.25)
 
         snapshot = (
             receipt.to_dict()
@@ -158,6 +163,15 @@ class BarReceiptObjectStateTests(
             snapshot["payment"],
             dict,
         )
+        self.assertEqual(snapshot["payment"], {
+            "name": "idea_entity_basic_drink_payment",
+            "entity": self.guest.name,
+            "payment_kind": "energy",
+            "energy_paid_j": 1.25,
+            "existence_paid_pct": 0.0,
+        })
+        snapshot["payment"]["energy_paid_j"] = 50.0
+        self.assertEqual(receipt.payment.energy_paid_j, 1.25)
 
     def test_legacy_mapping_receipt_is_rejected(self):
         self.register.receipts.append({

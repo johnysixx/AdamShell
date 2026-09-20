@@ -1,3 +1,5 @@
+from dataclasses import replace
+
 from universe.logger import UniverseLogger
 from meeting_place.bar_objects import (
     BarTab,
@@ -6,6 +8,7 @@ from meeting_place.bar_objects import (
 from meeting_place.bar_receipt_state import (
     BarReceiptState,
 )
+from meeting_place.bar_payment_state import BarPaymentState
 
 
 class CashRegister:
@@ -274,8 +277,11 @@ class CashRegister:
         self,
         entity,
         drink,
-        payment,
+        payment: BarPaymentState,
     ):
+        if not isinstance(payment, BarPaymentState):
+            raise TypeError("Cash register payment must be BarPaymentState.")
+
         self.receipt_count += 1
 
         entity_name = getattr(
@@ -325,7 +331,7 @@ class CashRegister:
             drink=drink_name,
             drink_category=
                 drink_category,
-            payment=dict(
+            payment=replace(
                 payment
             ),
             message=message,

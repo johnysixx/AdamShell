@@ -1,7 +1,7 @@
-from copy import deepcopy
 from dataclasses import dataclass, field
 
 from meeting_place.bar_objects import BarTabItem
+from meeting_place.bar_payment_state import BarPaymentState
 
 
 @dataclass(slots=True)
@@ -14,11 +14,15 @@ class BarReceiptState:
     status: str | None = None
     paid: bool | None = None
     items: list[BarTabItem] = field(default_factory=list)
-    payment: dict | None = None
+    payment: BarPaymentState | None = None
     message: str | None = None
     drink: str | None = None
     drink_category: str | None = None
     charge: float | int | None = None
+
+    def __post_init__(self):
+        if self.payment is not None and not isinstance(self.payment, BarPaymentState):
+            raise TypeError("Receipt payment must be BarPaymentState or None.")
 
     def to_dict(self):
         result = {
@@ -26,7 +30,7 @@ class BarReceiptState:
             "type": self.type,
             "guest": self.guest,
             "guest_type": self.guest_type,
-            "payment": deepcopy(self.payment),
+            "payment": self.payment.to_dict() if self.payment is not None else None,
         }
 
         if self.receipt_kind is not None:
