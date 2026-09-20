@@ -181,7 +181,7 @@ class BarDrinkIdea:
     source: str | None = None
     lilith: BarDrinkSpeakerContribution | None = None
     serpent: BarDrinkSpeakerContribution | None = None
-    observation: str | dict | None = None
+    observation: str | None = None
     desired_property: BarDrinkDesiredProperty | None = None
     assessment: BarDrinkAssessment | None = None
     proposal: BarDrinkProposal | None = None
@@ -191,6 +191,17 @@ class BarDrinkIdea:
     meaning: str | None = None
 
     def __post_init__(self):
+        if (
+            self.observation is not None
+            and not isinstance(
+                self.observation,
+                str,
+            )
+        ):
+            raise TypeError(
+                "Bar drink idea observation must be str."
+            )
+
         for name in ("lilith", "serpent"):
             value = getattr(self, name)
             if (

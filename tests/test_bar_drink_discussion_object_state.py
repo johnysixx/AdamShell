@@ -325,6 +325,33 @@ class BarDrinkDiscussionObjectStateTests(
                 },
             )
 
+    def test_observation_is_string_state(
+        self
+    ):
+        idea = BarDrinkIdea(
+            subject="wine",
+            observation="wine_should_be_sweet",
+        )
+
+        self.assertEqual(
+            idea.observation,
+            "wine_should_be_sweet",
+        )
+
+    def test_observation_mapping_is_rejected(
+        self
+    ):
+        with self.assertRaisesRegex(
+            TypeError,
+            "observation must be str",
+        ):
+            BarDrinkIdea(
+                subject="wine",
+                observation={
+                    "sweetness": True,
+                },
+            )
+
     def test_speaker_contributions_are_object_only(
         self
     ):

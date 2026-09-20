@@ -32,6 +32,7 @@ class Day0SecondWineIdeaTests(unittest.TestCase):
         result = self.scene.advance_to_second_wine_idea()
         idea = result['wine_idea']['idea']
         self.assertEqual(idea.subject, 'wine')
+        self.assertEqual(idea.observation, 'wine_should_be_sweet')
         self.assertTrue(idea.desired_property.sweetness)
 
     def test_wine_discussion_now_has_two_ideas(self):
