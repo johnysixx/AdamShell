@@ -113,9 +113,8 @@ class BarServiceOrderObjectStateTests(
         )
         self.assertEqual(
             order.receipt_number,
-            result["service"]["receipt"][
-                "receipt_number"
-            ]
+            result["service"]["receipt"]
+            .receipt_number
         )
         self._assert_object_only(
             order,

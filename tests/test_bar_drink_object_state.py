@@ -1,7 +1,8 @@
 import unittest
 from types import SimpleNamespace
 
-from meeting_place.bar_objects import BarDrink
+from meeting_place.bar_objects import BarDrink, BarTabItem
+from meeting_place.bar_receipt_state import BarReceiptState
 from meeting_place.meeting_place import MeetingPlace
 from multiverse import UniverseRegistry
 from universe.universe import Universe
@@ -60,7 +61,7 @@ class BarDrinkObjectStateTests(unittest.TestCase):
         with self.assertRaises(TypeError):
             _ = drink["name"]
 
-    def test_receipt_remains_boundary_snapshot(self):
+    def test_receipt_is_object_with_explicit_boundary_snapshot(self):
         bar = self._meeting_place()
         guest = SimpleNamespace(
             name="guest",
@@ -72,12 +73,25 @@ class BarDrinkObjectStateTests(unittest.TestCase):
             drink_names=["wine"],
         )
 
+        receipt = result["receipt"]
+
         self.assertIsInstance(
-            result["receipt"],
+            receipt,
+            BarReceiptState,
+        )
+        self.assertIsInstance(
+            receipt.items[0],
+            BarTabItem,
+        )
+
+        snapshot = receipt.to_dict()
+
+        self.assertIsInstance(
+            snapshot,
             dict,
         )
         self.assertIsInstance(
-            result["receipt"]["items"][0],
+            snapshot["items"][0],
             dict,
         )
 

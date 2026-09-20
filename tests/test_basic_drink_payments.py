@@ -64,11 +64,11 @@ class BasicDrinkPaymentTests(unittest.TestCase):
         god = SocialEntity.from_mapping({'name': 'god', 'type': 'god', 'existence_pct': 100.0, 'energy_j': 10.0})
         result = meeting_place.serve_basic_drink(entity=god, drink_name='rum')
         receipt = result['receipt']
-        self.assertEqual(receipt['receipt_kind'], 'god_free_drink_note')
-        self.assertEqual(receipt['message'], 'BOHOV? ZDE PIJ? ZDARMA.')
-        self.assertEqual(receipt['guest'], 'god')
-        self.assertEqual(receipt['drink'], 'rum')
-        self.assertEqual(receipt['payment']['existence_paid_pct'], 0.0)
+        self.assertEqual(receipt.receipt_kind, 'god_free_drink_note')
+        self.assertEqual(receipt.message, 'BOHOV? ZDE PIJ? ZDARMA.')
+        self.assertEqual(receipt.guest, 'god')
+        self.assertEqual(receipt.drink, 'rum')
+        self.assertEqual(receipt.payment['existence_paid_pct'], 0.0)
         self.assertIn(receipt, meeting_place.bar_counter.cash_register.receipts)
 if __name__ == '__main__':
     unittest.main()

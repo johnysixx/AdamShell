@@ -38,8 +38,8 @@ class Day0FirstBarShiftTests(unittest.TestCase):
         result = self.scene.serpent_orders_first_drinks()
         self.assertEqual([drink.name for drink in result['drinks']], ['wine', 'beer', 'mead'])
         self.assertIsNone(result['payment'])
-        self.assertFalse(result['receipt']['paid'])
-        self.assertEqual(result['receipt']['status'], 'open_unpaid')
+        self.assertFalse(result['receipt'].paid)
+        self.assertEqual(result['receipt'].status, 'open_unpaid')
 
     def test_bartender_refuses_serpent_bet(self):
         self.scene.start_shift()
@@ -84,9 +84,9 @@ class Day0FirstBarShiftTests(unittest.TestCase):
         self.assertEqual([item.drink for item in tab.items], ['wine', 'beer', 'mead'])
         self.assertEqual(len(self.bar.bar_counter.cash_register.receipts), 1)
         receipt = self.bar.bar_counter.cash_register.receipts[0]
-        self.assertEqual(receipt['status'], 'open_unpaid')
-        self.assertFalse(receipt['paid'])
-        self.assertIsNone(receipt['payment'])
+        self.assertEqual(receipt.status, 'open_unpaid')
+        self.assertFalse(receipt.paid)
+        self.assertIsNone(receipt.payment)
         god = self.scene.god
         self.assertIsNotNone(god)
         self.assertEqual(god.role, 'librarian')

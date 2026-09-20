@@ -41,8 +41,8 @@ class Day0GodReceivesWineTests(unittest.TestCase):
     def test_wine_is_added_to_existing_open_tab(self):
         result = self.scene.advance_to_god_receives_wine()
         receipt = result['service']['receipt']
-        self.assertFalse(receipt['paid'])
-        self.assertEqual(receipt['status'], 'open_unpaid')
+        self.assertFalse(receipt.paid)
+        self.assertEqual(receipt.status, 'open_unpaid')
 
     def test_event_order(self):
         self.scene.advance_to_god_receives_wine()

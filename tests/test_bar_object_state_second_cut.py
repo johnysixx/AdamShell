@@ -5,6 +5,7 @@ from meeting_place.bar_hex_geometry import BarHexGeometry
 from meeting_place.glass_shelf import GlassShelf
 from meeting_place.bottle_shelf import BottleShelf
 from meeting_place.cash_register import CashRegister
+from meeting_place.bar_receipt_state import BarReceiptState
 from meeting_place.fridge import BarFridge
 from meeting_place.bar_objects import (
     BarGlass,
@@ -66,7 +67,7 @@ class BarObjectStateSecondCutTests(unittest.TestCase):
         with self.assertRaises(TypeError):
             _ = tab["guest"]
 
-    def test_receipt_is_boundary_snapshot_dict(self):
+    def test_receipt_is_domain_object_with_snapshot_boundary(self):
         register = CashRegister()
         guest = SimpleNamespace(name="guest", type="human")
         register.add_to_tab(
@@ -74,5 +75,23 @@ class BarObjectStateSecondCutTests(unittest.TestCase):
             {"name": "beer", "category": "basic_drink"},
         )
         receipt = register.print_open_tab_receipt(guest)
-        self.assertIsInstance(receipt, dict)
-        self.assertIsInstance(receipt["items"][0], dict)
+        self.assertIsInstance(
+            receipt,
+            BarReceiptState,
+        )
+        self.assertIsInstance(
+            receipt.items[0],
+            BarTabItem,
+        )
+        self._assert_object_only(
+            receipt
+        )
+        snapshot = receipt.to_dict()
+        self.assertIsInstance(
+            snapshot,
+            dict,
+        )
+        self.assertIsInstance(
+            snapshot["items"][0],
+            dict,
+        )

@@ -85,9 +85,8 @@ class Day0FirstBarShift:
             tab='open',
             paid=False,
             receipt_number=(
-                result['receipt'][
-                    'receipt_number'
-                ]
+                result['receipt']
+                .receipt_number
             ),
         )
         self.history.append({'name': 'serpent_orders_wine_beer_and_mead'})
@@ -377,9 +376,9 @@ class Day0FirstBarShift:
         self.meeting_place.bar_counter.cash_register.add_to_tab(entity=self.lilith, drink=drink)
         receipt = self.meeting_place.bar_counter.cash_register.print_open_tab_receipt(self.lilith)
         self.lilith_order.attach_receipt(
-            receipt['receipt_number']
+            receipt.receipt_number
         )
-        event = {'name': 'bartender_hands_lilith_drink_and_receipt', 'guest': 'lilith', 'drink': 'lilith', 'receipt_number': receipt['receipt_number'], 'paid': False}
+        event = {'name': 'bartender_hands_lilith_drink_and_receipt', 'guest': 'lilith', 'drink': 'lilith', 'receipt_number': receipt.receipt_number, 'paid': False}
         self.meeting_place.emit_event(event)
         self.history.append(event)
         return {'drink': drink, 'receipt': receipt}
@@ -755,10 +754,10 @@ class Day0FirstBarShift:
         receipt = self.meeting_place.bar_counter.cash_register.print_open_tab_receipt(self.god)
         self.god.bar_state.drink = drink
         self.god.bar_state.receipt_number = (
-            receipt['receipt_number']
+            receipt.receipt_number
         )
         self.god.bar_state.activity = 'holding_lilith'
-        event = {'name': 'bartender_serves_gods_lilith', 'guest': 'god', 'drink': 'lilith', 'receipt_number': receipt['receipt_number'], 'paid': False, 'drunk': False}
+        event = {'name': 'bartender_serves_gods_lilith', 'guest': 'god', 'drink': 'lilith', 'receipt_number': receipt.receipt_number, 'paid': False, 'drunk': False}
         self.meeting_place.emit_event(event)
         self.history.append(event)
         return {'drink': drink, 'receipt': receipt}
@@ -996,13 +995,13 @@ class Day0FirstBarShift:
             drink
         )
         order.attach_receipt(
-            receipt['receipt_number']
+            receipt.receipt_number
         )
         self.god.bar_state.wine = drink
         self.god.bar_state.receipt_number = (
-            receipt['receipt_number']
+            receipt.receipt_number
         )
-        event = {'name': 'bartender_serves_god_wine_and_receipt', 'guest': 'god', 'drink': 'wine', 'receipt_number': receipt['receipt_number'], 'paid': False, 'tasted': False}
+        event = {'name': 'bartender_serves_god_wine_and_receipt', 'guest': 'god', 'drink': 'wine', 'receipt_number': receipt.receipt_number, 'paid': False, 'tasted': False}
         self.meeting_place.emit_event(event)
         self.history.append(event)
         return {'drink': drink, 'receipt': receipt, 'event': event}
@@ -1655,7 +1654,7 @@ class Day0FirstBarShift:
         self.meeting_place.emit_event(order_event)
         self.history.append(order_event)
         receipt = self.meeting_place.bar_counter.cash_register.print_staff_purchase_receipt(entity=bouncer, drinks=drinks)
-        served_event = {'name': 'bartender_serves_bouncer_tasting_drinks', 'bartender': 'bartender', 'bouncer': 'bouncer', 'drinks': list(drink_names), 'receipt_number': receipt['receipt_number'], 'receipt_kind': 'staff_purchase', 'paid': False, 'charge': 0}
+        served_event = {'name': 'bartender_serves_bouncer_tasting_drinks', 'bartender': 'bartender', 'bouncer': 'bouncer', 'drinks': list(drink_names), 'receipt_number': receipt.receipt_number, 'receipt_kind': 'staff_purchase', 'paid': False, 'charge': 0}
         self.meeting_place.emit_event(served_event)
         self.history.append(served_event)
         return {'drinks': drinks, 'receipt': receipt, 'order_event': order_event, 'served_event': served_event}

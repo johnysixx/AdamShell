@@ -766,7 +766,7 @@ class MeetingPlace:
             self.bar_counter.cash_register.add_to_tab(entity=entity, drink=drink)
         receipt = self.bar_counter.cash_register.print_open_tab_receipt(entity)
         entity_name = self._get_entity_name(entity)
-        event = {'name': 'bar_order_served_on_open_tab', 'guest': entity_name, 'drinks': [drink.name for drink in drinks], 'receipt_number': receipt['receipt_number'], 'paid': False}
+        event = {'name': 'bar_order_served_on_open_tab', 'guest': entity_name, 'drinks': [drink.name for drink in drinks], 'receipt_number': receipt.receipt_number, 'paid': False}
         self.emit_event(event)
         return {'drinks': drinks, 'receipt': receipt, 'payment': None, 'tab_status': 'open'}
 

@@ -114,21 +114,21 @@ class Day0BouncerTastingAndJudgeTests(
         ]
 
         self.assertEqual(
-            receipt["receipt_kind"],
+            receipt.receipt_kind,
             "staff_purchase"
         )
 
         self.assertEqual(
-            receipt["message"],
+            receipt.message,
             "PERSONALNI NAKUP"
         )
 
         self.assertIsNone(
-            receipt["payment"]
+            receipt.payment
         )
 
         self.assertEqual(
-            receipt["charge"],
+            receipt.charge,
             0
         )
 
