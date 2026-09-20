@@ -30,8 +30,8 @@ class Day0ThirdWineIdeaTests(unittest.TestCase):
     def test_serpent_says_sweetness_is_good_but_not_full_body(self):
         result = self.scene.advance_to_third_wine_idea()
         idea = result['wine_idea']
-        self.assertEqual(idea.assessment['sweetness'], 'good')
-        self.assertEqual(idea.assessment['full_body'], 'still_missing')
+        self.assertEqual(idea.assessment.sweetness, 'good')
+        self.assertEqual(idea.assessment.full_body, 'still_missing')
 
     def test_serpent_proposes_bitterness(self):
         result = self.scene.advance_to_third_wine_idea()

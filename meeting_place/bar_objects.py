@@ -116,6 +116,23 @@ class BarDrinkDesiredProperty:
 
 
 @dataclass(slots=True)
+class BarDrinkAssessment:
+    sweetness: str | None = None
+    full_body: str | None = None
+
+    def to_dict(self):
+        result = {}
+
+        if self.sweetness is not None:
+            result["sweetness"] = self.sweetness
+
+        if self.full_body is not None:
+            result["full_body"] = self.full_body
+
+        return result
+
+
+@dataclass(slots=True)
 class BarDrinkIdea:
     subject: str
     source: str | None = None
@@ -123,7 +140,7 @@ class BarDrinkIdea:
     serpent: BarDrinkSpeakerContribution | None = None
     observation: str | dict | None = None
     desired_property: BarDrinkDesiredProperty | None = None
-    assessment: dict | None = None
+    assessment: BarDrinkAssessment | None = None
     proposal: dict | None = None
     revision: dict | None = None
     agrees_with: str | None = None
@@ -157,6 +174,18 @@ class BarDrinkIdea:
                 "BarDrinkDesiredProperty."
             )
 
+        if (
+            self.assessment is not None
+            and not isinstance(
+                self.assessment,
+                BarDrinkAssessment,
+            )
+        ):
+            raise TypeError(
+                "Bar drink idea assessment must be "
+                "BarDrinkAssessment."
+            )
+
     def to_dict(self):
         result = {
             "subject": self.subject,
@@ -173,10 +202,14 @@ class BarDrinkIdea:
                 self.desired_property.to_dict()
             )
 
+        if self.assessment is not None:
+            result["assessment"] = (
+                self.assessment.to_dict()
+            )
+
         for name in (
             "source",
             "observation",
-            "assessment",
             "proposal",
             "revision",
             "agrees_with",

@@ -10,6 +10,7 @@ from meeting_place.bar_objects import (
     BarBeerHypothesis,
     BarDrinkDiscussion,
     BarDrinkDesiredProperty,
+    BarDrinkAssessment,
     BarDrinkIdea,
     BarDrinkSpeakerContribution,
     BarWineHypothesis,
@@ -159,6 +160,49 @@ class BarDrinkDiscussionObjectStateTests(
                 },
             )
 
+    def test_assessment_is_object_only(
+        self
+    ):
+        assessment = BarDrinkAssessment(
+            sweetness="good",
+            full_body="still_missing",
+        )
+        idea = BarDrinkIdea(
+            subject="wine",
+            assessment=assessment,
+        )
+
+        self.assertIs(
+            idea.assessment,
+            assessment,
+        )
+        self.assertEqual(
+            idea.assessment.sweetness,
+            "good",
+        )
+        self.assertEqual(
+            idea.assessment.full_body,
+            "still_missing",
+        )
+        self._assert_object_only(
+            idea.assessment,
+            "sweetness",
+        )
+
+    def test_assessment_mapping_is_rejected(
+        self
+    ):
+        with self.assertRaisesRegex(
+            TypeError,
+            "BarDrinkAssessment",
+        ):
+            BarDrinkIdea(
+                subject="wine",
+                assessment={
+                    "sweetness": "good",
+                },
+            )
+
     def test_speaker_contributions_are_object_only(
         self
     ):
@@ -223,6 +267,10 @@ class BarDrinkDiscussionObjectStateTests(
                 desired_property=BarDrinkDesiredProperty(
                     sweetness=True,
                 ),
+                assessment=BarDrinkAssessment(
+                    sweetness="good",
+                    full_body="still_missing",
+                ),
             )
         )
         discussion.current_hypothesis = (
@@ -243,6 +291,9 @@ class BarDrinkDiscussionObjectStateTests(
         snapshot["ideas"][0][
             "desired_property"
         ]["sweetness"] = False
+        snapshot["ideas"][0][
+            "assessment"
+        ]["sweetness"] = "changed"
         snapshot["current_hypothesis"][
             "acidity"
         ] = False
@@ -260,6 +311,10 @@ class BarDrinkDiscussionObjectStateTests(
         )
         self.assertTrue(
             idea.desired_property.sweetness
+        )
+        self.assertEqual(
+            idea.assessment.sweetness,
+            "good",
         )
         self.assertTrue(
             discussion

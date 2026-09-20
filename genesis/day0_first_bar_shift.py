@@ -6,6 +6,7 @@ from meeting_place.bar_objects import (
     BarDrink,
     BarDrinkDiscussion,
     BarDrinkDesiredProperty,
+    BarDrinkAssessment,
     BarDrinkIdea,
     BarDrinkSpeakerContribution,
     BarDrinkOrder,
@@ -627,10 +628,10 @@ class Day0FirstBarShift:
         observation = BarDrinkIdea(
             subject='wine',
             source='serpent',
-            assessment={
-                'sweetness': 'good',
-                'full_body': 'still_missing',
-            },
+            assessment=BarDrinkAssessment(
+                sweetness='good',
+                full_body='still_missing',
+            ),
             proposal={
                 'bitterness': True,
             },
