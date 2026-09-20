@@ -122,16 +122,12 @@ class CatSocialRelationshipsTests(
         )
 
         self.assertEqual(
-            relation[
-                "pet_count"
-            ],
+            relation.pet_count,
             1
         )
 
         self.assertGreater(
-            relation[
-                "affinity"
-            ],
+            relation.affinity,
             0.0
         )
 
