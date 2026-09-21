@@ -130,7 +130,7 @@ class Cats:
         if sex not in self.allowed_sexes:
             UniverseLogger.event(f'CAT CREATION DENIED: invalid sex {sex}')
             return None
-        cat = Cat(name=name, color=color, pattern=pattern, eye_color=eye_color, fur_length=fur_length, sex=sex, genotype=CatGenotype.create_founder(sex=sex), reproduction=CatReproduction.create_state(sex=sex, neutered=False), origin=origin, idea_energy=self.default_idea_energy, memory=CatMemory(name), access=self.access_rules, learning=CatLearning.create_complete_state(), personality=CatPersonality.create_state(), mind=CatMind.create_state(), intellect=CatIntellect.create_state(), aroma=AromaProfile.create(identity=f'cat:{name}', components={'cat': 1.0, 'fur': 0.8, f'individual_cat:{name}': 2.0}, intensity=1.0))
+        cat = Cat(name=name, color=color, pattern=pattern, eye_color=eye_color, fur_length=fur_length, sex=sex, genotype=CatGenotype.create_founder(sex=sex), reproduction=CatReproduction.create_state(sex=sex, neutered=False), origin=origin, idea_energy=self.default_idea_energy, memory=CatMemory(name), access=self.access_rules, learning=CatLearning.create_complete_state(), personality=CatPersonality.create_state(), mind=CatMind.create_state(), intellect=CatIntellect.create_state(), aroma=AromaProfile(identity=f'cat:{name}', base_components={'cat': 1.0, 'fur': 0.8, f'individual_cat:{name}': 2.0}, base_intensity=1.0))
         self.cats.append(cat)
         self.write_to_world()
         UniverseLogger.event(f'CAT CREATED: {name}')
@@ -143,24 +143,24 @@ class Cats:
         return CatKnowledge.learn_aroma(cat=cat, identity='raspberry_rum', components=raspberry_rum['aroma_profile'], source='direct_raspberry_rum_experience')
 
     def learn_cat_aroma(self, observer, observed_cat):
-        aroma = AromaProfile.current(observed_cat.aroma)
-        return CatKnowledge.learn_aroma(cat=observer, identity=observed_cat.aroma['identity'], components=aroma, source='direct_cat_contact')
+        aroma = observed_cat.aroma.current()
+        return CatKnowledge.learn_aroma(cat=observer, identity=observed_cat.aroma.identity, components=aroma, source='direct_cat_contact')
 
     def learn_cronenberg_aroma(self, cat, cronenberg):
-        aroma = AromaProfile.current(cronenberg.aroma)
+        aroma = cronenberg.aroma.current()
         return CatKnowledge.learn_aroma(cat=cat, identity='cronenberg', components=aroma, source='direct_cronenberg_encounter')
 
     def learn_aroma(self, cat, identity, components, source='direct_experience'):
         return CatKnowledge.learn_aroma(cat=cat, identity=identity, components=components, source=source)
 
     def add_surface_aroma(self, cat, source, components, intensity=1.0, decay_rate=0.03):
-        return AromaProfile.add_surface(profile=cat.aroma, source=source, components=components, intensity=intensity, decay_rate=decay_rate)
+        return cat.aroma.add_surface(source=source, components=components, intensity=intensity, decay_rate=decay_rate)
 
     def current_aroma(self, cat):
-        return AromaProfile.current(cat.aroma)
+        return cat.aroma.current()
 
     def decay_cat_aroma(self, cat, ticks=1):
-        return AromaProfile.decay(cat.aroma, ticks=ticks)
+        return cat.aroma.decay(ticks=ticks)
 
     def activate_for_cronenberg_overpopulation(self, cat, hunt_quota=10):
         if not isinstance(cat, Cat):

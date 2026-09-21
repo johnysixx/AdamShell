@@ -47,7 +47,7 @@ class CatOlfactionTests(unittest.TestCase):
         fake_cronenberg = type('FakeCronenberg', (), {})()
         fake_cronenberg.id = 'cronenberg_test'
         fake_cronenberg.position = {'x': 3.0, 'y': 0.0, 'z': 0.0}
-        fake_cronenberg.aroma = AromaProfile.create('cronenberg', {'ozone': 1.0, 'ionized_air': 0.85, 'electrical': 0.75})
+        fake_cronenberg.aroma = AromaProfile(identity='cronenberg', base_components={'ozone': 1.0, 'ionized_air': 0.85, 'electrical': 0.75})
         self.universe.cronenbergs.append(fake_cronenberg)
         result = CatOlfaction.sniff(self.observer, self.universe)
         self.assertTrue(result.ozone_detected)
@@ -58,9 +58,9 @@ class CatOlfactionTests(unittest.TestCase):
         fake_cronenberg = type('FakeCronenberg', (), {})()
         fake_cronenberg.id = 'cronenberg_test'
         fake_cronenberg.position = {'x': 3.0, 'y': 0.0, 'z': 0.0}
-        fake_cronenberg.aroma = AromaProfile.create('cronenberg', {'ozone': 1.0, 'ionized_air': 0.85, 'electrical': 0.75})
+        fake_cronenberg.aroma = AromaProfile(identity='cronenberg', base_components={'ozone': 1.0, 'ionized_air': 0.85, 'electrical': 0.75})
         self.universe.cronenbergs.append(fake_cronenberg)
-        self.cats.learn_aroma(cat=self.observer, identity='cronenberg', components=AromaProfile.current(fake_cronenberg.aroma), source='direct_cronenberg_encounter')
+        self.cats.learn_aroma(cat=self.observer, identity='cronenberg', components=fake_cronenberg.aroma.current(), source='direct_cronenberg_encounter')
         result = CatOlfaction.sniff(self.observer, self.universe)
         detected = next((item for item in result.detected_aromas if item.actual_identity == 'cronenberg'))
         self.assertTrue(detected.recognition.recognized)

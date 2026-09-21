@@ -323,13 +323,11 @@ class CatCronenbergEncounter:
 
         if not isinstance(
             aroma,
-            dict
+            AromaProfile
         ):
             return None
 
-        components = AromaProfile.current(
-            aroma
-        )
+        components = aroma.current()
 
         if not components:
             return None

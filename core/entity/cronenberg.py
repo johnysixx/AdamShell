@@ -55,15 +55,15 @@ class Cronenberg(Entity):
         self.size = 1.0
         self.juice_value = self.size
 
-        self.aroma = AromaProfile.create(
+        self.aroma = AromaProfile(
             identity="cronenberg",
-            components={
+            base_components={
                 "ozone": 1.0,
                 "ionized_air": 0.85,
                 "electrical": 0.75,
                 "metallic": 0.20
             },
-            intensity=1.0
+            base_intensity=1.0
         )
 
         self.aroma_chemical_marker = (

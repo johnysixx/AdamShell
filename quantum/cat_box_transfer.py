@@ -1,4 +1,6 @@
 from copy import deepcopy
+
+from universe.aroma_profile import AromaProfile
 from core.entity.components import SpatialVector3
 
 from cats.cat_exploration_planner import (
@@ -438,29 +440,30 @@ class CatQuantumBoxTransfer:
 
         cat_aroma = cat.aroma
 
-        if isinstance(
-            cat_aroma,
-            dict
-        ):
-            source_box_residue = (
-                AromaResidue.transfer(
-                    source_profile=cat_aroma,
-                    target=source_box,
-                    source_identity=cat_name,
-                    fraction=0.18,
-                    decay_rate=0.035
-                )
+        if not isinstance(cat_aroma, AromaProfile):
+            raise TypeError(
+                "Cat aroma must be an AromaProfile object."
             )
 
-            target_box_residue = (
-                AromaResidue.transfer(
-                    source_profile=cat_aroma,
-                    target=target_box,
-                    source_identity=cat_name,
-                    fraction=0.12,
-                    decay_rate=0.035
-                )
+        source_box_residue = (
+            AromaResidue.transfer(
+                source_profile=cat_aroma,
+                target=source_box,
+                source_identity=cat_name,
+                fraction=0.18,
+                decay_rate=0.035
             )
+        )
+
+        target_box_residue = (
+            AromaResidue.transfer(
+                source_profile=cat_aroma,
+                target=target_box,
+                source_identity=cat_name,
+                fraction=0.12,
+                decay_rate=0.035
+            )
+        )
 
         trail = self._create_trail(
             cat=cat,
@@ -964,19 +967,20 @@ class CatQuantumBoxTransfer:
 
         cat_aroma = cat.aroma
 
-        if isinstance(
-            cat_aroma,
-            dict
-        ):
-            source_box_aroma_residue = (
-                AromaResidue.transfer(
-                    source_profile=cat_aroma,
-                    target=source_box,
-                    source_identity=cat.name,
-                    fraction=0.18,
-                    decay_rate=0.035
-                )
+        if not isinstance(cat_aroma, AromaProfile):
+            raise TypeError(
+                "Cat aroma must be an AromaProfile object."
             )
+
+        source_box_aroma_residue = (
+            AromaResidue.transfer(
+                source_profile=cat_aroma,
+                target=source_box,
+                source_identity=cat.name,
+                fraction=0.18,
+                decay_rate=0.035
+            )
+        )
 
         target_box.consume_for_cat_transfer()
 

@@ -24,7 +24,7 @@ class CatBoxAromaExchangeTests(unittest.TestCase):
     def test_cat_leaves_aroma_on_source_box(self):
         self.universe.cat_box_transfer.transfer_cat(cat=self.pazuzu, source_box_id=self.source.id, target_box_id=self.target.id)
         self.assertTrue(hasattr(self.source, 'aroma'))
-        aroma = AromaProfile.current(self.source.aroma)
+        aroma = self.source.aroma.current()
         self.assertGreater(aroma['individual_cat:pazuzu'], 0.0)
 
     def test_next_cat_picks_up_previous_cat_scent(self):
@@ -32,7 +32,7 @@ class CatBoxAromaExchangeTests(unittest.TestCase):
         second_target = self.universe.create_quantum_box(layer='quantum_layer')
         self.universe.cat_box_transfer.pair_boxes(self.source, second_target)
         self.universe.cat_box_transfer.transfer_cat(cat=self.garfield, source_box_id=self.source.id, target_box_id=second_target.id)
-        aroma = AromaProfile.current(self.garfield.aroma)
+        aroma = self.garfield.aroma.current()
         self.assertGreater(aroma.get('individual_cat:pazuzu', 0.0), 0.0)
         self.assertGreater(aroma.get('individual_cat:garfield', 0.0), 0.0)
 if __name__ == '__main__':

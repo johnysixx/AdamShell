@@ -125,37 +125,29 @@ class ChemicalAromaFoundationsTests(
         )
 
         self.assertEqual(
-            cat.aroma["identity"],
+            cat.aroma.identity,
             "cat:pazuzu"
         )
 
     def test_surface_aroma_fades(
         self
     ):
-        profile = AromaProfile.create(
-            "test",
-            {"cat": 1.0}
+        profile = AromaProfile(
+            identity="test",
+            base_components={"cat": 1.0},
         )
 
-        AromaProfile.add_surface(
-            profile,
-            "fish",
-            {"fish": 1.0},
-            intensity=1.0
+        profile.add_surface(
+            source="fish",
+            components={"fish": 1.0},
+            intensity=1.0,
         )
 
-        before = AromaProfile.current(
-            profile
-        )["fish"]
+        before = profile.current()["fish"]
 
-        AromaProfile.decay(
-            profile,
-            ticks=10
-        )
+        profile.decay(ticks=10)
 
-        after = AromaProfile.current(
-            profile
-        )["fish"]
+        after = profile.current()["fish"]
 
         self.assertLess(
             after,
@@ -172,9 +164,7 @@ class ChemicalAromaFoundationsTests(
             source_operation="aroma"
         )
 
-        aroma = AromaProfile.current(
-            cronenberg.aroma
-        )
+        aroma = cronenberg.aroma.current()
 
         self.assertEqual(
             cronenberg

@@ -77,19 +77,19 @@ class CatOlfaction:
     @classmethod
     def _sniff_entity(cls, cat, entity, cat_position, radius):
         profile = cls._get(entity, 'aroma')
-        if not isinstance(profile, dict):
+        if not isinstance(profile, AromaProfile):
             return None
         position = cls._position(cls._get(entity, 'position'))
         distance = cls._distance(cat_position, position)
         if distance > radius:
             return None
-        components = AromaProfile.current(profile)
+        components = profile.current()
         if not components:
             return None
         distance_factor = 1.0 / (1.0 + distance)
         perceived = {name: float(value) * distance_factor for name, value in components.items()}
         recognition = CatKnowledge.recognize_aroma(cat, components)
-        identity = profile.get('identity')
+        identity = profile.identity
         return CatDetectedAroma(
             entity_id=cls._entity_id(
                 entity
