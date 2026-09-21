@@ -1,6 +1,7 @@
 import unittest
 
 from universe.cosmic_objects import StellarMaterialCloud
+from universe.planet_objects import EarthPlanet, Planet
 from universe.planet_state import PlanetFormationState
 from universe.planetary_materials import PlanetaryMaterials
 from universe.planets import Planets
@@ -168,7 +169,13 @@ class PlanetFormationObjectStateTests(
         )
         self.assertIsInstance(
             universe.world["earth"],
-            dict,
+            EarthPlanet,
+        )
+        self.assertTrue(
+            all(
+                isinstance(planet, Planet)
+                for planet in universe.world["solar_planets"]
+            )
         )
 
     def test_public_result_remains_dict_boundary(
@@ -209,7 +216,7 @@ class PlanetFormationObjectStateTests(
             process.planetary_state.earth_formed
         )
         self.assertEqual(
-            process.planets[2]["name"],
+            process.planets[2].name,
             "earth",
         )
         self.assertNotIn(

@@ -226,7 +226,7 @@ class StellarSystemFormationObjectStateTests(
 
         self.assertEqual(result["state"], "formed")
         self.assertEqual(
-            universe.world["earth"]["name"],
+            universe.world["earth"].name,
             "earth",
         )
 

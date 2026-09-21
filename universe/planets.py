@@ -1,5 +1,6 @@
 from copy import deepcopy
 
+from universe.planet_objects import EarthPlanet, Planet
 from universe.planet_state import PlanetFormationState
 from universe.stellar_system_objects import StellarSystem
 
@@ -50,7 +51,10 @@ class Planets:
             "name": self.name,
             "type": self.type,
             "state": self.state,
-            "planets": deepcopy(self.planets),
+            "planets": [
+                planet.to_dict()
+                for planet in self.planets
+            ],
             "planetary_materials": deepcopy(
                 self.planetary_materials
             ),
@@ -98,86 +102,106 @@ class Planets:
 
         self.state = "formed"
 
-        self.planets.append({
-            "name": "mercury",
-            "type": "rocky_planet",
-            "state": "formed",
-            "orbit": 1
-        })
+        self.planets.append(
+            Planet(
+                name="mercury",
+                type="rocky_planet",
+                state="formed",
+                orbit=1,
+            )
+        )
 
-        self.planets.append({
-            "name": "venus",
-            "type": "rocky_planet",
-            "state": "formed",
-            "orbit": 2
-        })
+        self.planets.append(
+            Planet(
+                name="venus",
+                type="rocky_planet",
+                state="formed",
+                orbit=2,
+            )
+        )
 
-        earth = {
-            "name": "earth",
-            "type": "rocky_planet",
-            "state": "formed",
-            "orbit": 3,
-            "has_iron_core": "iron" in available_elements,
-            "has_rocky_crust": "silicon" in available_elements and "iron" in available_elements,
-            "water_possible": "hydrogen" in available_elements and "oxygen" in available_elements,
-            "organic_molecules_possible": (
+        earth = EarthPlanet(
+            name="earth",
+            type="rocky_planet",
+            state="formed",
+            orbit=3,
+            has_iron_core="iron" in available_elements,
+            has_rocky_crust=(
+                "silicon" in available_elements
+                and "iron" in available_elements
+            ),
+            water_possible=(
+                "hydrogen" in available_elements
+                and "oxygen" in available_elements
+            ),
+            organic_molecules_possible=(
                 "carbon" in available_elements
                 and "hydrogen" in available_elements
                 and "oxygen" in available_elements
                 and "nitrogen" in available_elements
-            )
-        }
+            ),
+        )
 
         self.planets.append(earth)
 
-        self.planets.append({
-            "name": "mars",
-            "type": "rocky_planet",
-            "state": "formed",
-            "orbit": 4
-        })
+        self.planets.append(
+            Planet(
+                name="mars",
+                type="rocky_planet",
+                state="formed",
+                orbit=4,
+            )
+        )
 
-        self.planets.append({
-            "name": "jupiter",
-            "type": "gas_giant",
-            "state": "formed",
-            "orbit": 5
-        })
+        self.planets.append(
+            Planet(
+                name="jupiter",
+                type="gas_giant",
+                state="formed",
+                orbit=5,
+            )
+        )
 
-        self.planets.append({
-            "name": "saturn",
-            "type": "gas_giant",
-            "state": "formed",
-            "orbit": 6
-        })
+        self.planets.append(
+            Planet(
+                name="saturn",
+                type="gas_giant",
+                state="formed",
+                orbit=6,
+            )
+        )
 
-        self.planets.append({
-            "name": "uranus",
-            "type": "ice_giant",
-            "state": "formed",
-            "orbit": 7
-        })
+        self.planets.append(
+            Planet(
+                name="uranus",
+                type="ice_giant",
+                state="formed",
+                orbit=7,
+            )
+        )
 
-        self.planets.append({
-            "name": "neptune",
-            "type": "ice_giant",
-            "state": "formed",
-            "orbit": 8
-        })
+        self.planets.append(
+            Planet(
+                name="neptune",
+                type="ice_giant",
+                state="formed",
+                orbit=8,
+            )
+        )
 
         self.planetary_state.planets_formed = True
         self.planetary_state.earth_formed = True
         self.planetary_state.water_possible = (
-            earth["water_possible"]
+            earth.water_possible
         )
         self.planetary_state.ice_possible = (
-            earth["water_possible"]
+            earth.water_possible
         )
         self.planetary_state.minerals_possible = (
-            earth["has_rocky_crust"]
+            earth.has_rocky_crust
         )
         self.planetary_state.organic_molecules_possible = (
-            earth["organic_molecules_possible"]
+            earth.organic_molecules_possible
         )
 
         self.record_history()
@@ -207,7 +231,7 @@ class Planets:
 
     def find_planet(self, name):
         for planet in self.planets:
-            if planet["name"] == name:
+            if planet.name == name:
                 return planet
 
         return None
