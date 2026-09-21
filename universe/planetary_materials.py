@@ -1,6 +1,7 @@
-﻿from copy import deepcopy
-
 from universe.planet_state import PlanetFormationState
+from universe.planetary_material_objects import (
+    PlanetaryMaterial,
+)
 from universe.planetary_material_state import (
     PlanetaryMaterialState,
 )
@@ -25,9 +26,10 @@ class PlanetaryMaterials:
             "name": self.name,
             "type": self.type,
             "state": self.state,
-            "available_materials": deepcopy(
-                self.available_materials
-            ),
+            "available_materials": {
+                name: material.to_dict()
+                for name, material in self.available_materials.items()
+            },
             "material_state": self.material_state.to_dict(),
         }
 
@@ -102,11 +104,17 @@ class PlanetaryMaterials:
         if material is None:
             return
 
-        self.available_materials[material_name] = {
-            **material,
-            "state": "available",
-            "origin": "earth_planetary_materialization"
-        }
+        if not isinstance(material, PlanetaryMaterial):
+            raise TypeError(
+                "planetary material registry values must be "
+                "PlanetaryMaterial objects"
+            )
+
+        self.available_materials[material_name] = (
+            material.make_available(
+                origin="earth_planetary_materialization"
+            )
+        )
 
     def record_history(self):
         history = self.universe.world.setdefault("cosmic_history", [])

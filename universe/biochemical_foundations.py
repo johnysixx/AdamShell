@@ -1,7 +1,10 @@
-﻿from copy import deepcopy
+from copy import deepcopy
 
 from universe.biochemical_state import (
     BiochemicalFoundationState,
+)
+from universe.planetary_material_objects import (
+    AvailablePlanetaryMaterial,
 )
 
 
@@ -51,6 +54,14 @@ class BiochemicalFoundations:
             print("BIOCHEMICAL FOUNDATION FAILED: missing water or organic molecules")
             self.write_to_world()
             return self.public_state
+
+        for material_name in ("water", "organic_molecules"):
+            material = materials[material_name]
+            if not isinstance(material, AvailablePlanetaryMaterial):
+                raise TypeError(
+                    "available planetary material registry values must be "
+                    "AvailablePlanetaryMaterial objects"
+                )
 
         self.state = "formed"
 

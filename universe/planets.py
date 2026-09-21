@@ -1,6 +1,5 @@
-from copy import deepcopy
-
 from universe.planet_objects import EarthPlanet, Planet
+from universe.planetary_material_objects import PlanetaryMaterial
 from universe.planet_state import PlanetFormationState
 from universe.stellar_system_objects import StellarSystem
 
@@ -16,30 +15,32 @@ class Planets:
         self.planets = []
 
         self.planetary_materials = {
-            "water": {
-                "name": "water",
-                "type": "planetary_material",
-                "state": "possible",
-                "requires": ["hydrogen", "oxygen"]
-            },
-            "ice": {
-                "name": "ice",
-                "type": "planetary_material",
-                "state": "possible",
-                "requires": ["water", "cold"]
-            },
-            "minerals": {
-                "name": "minerals",
-                "type": "planetary_material",
-                "state": "possible",
-                "requires": ["silicon", "iron", "magnesium", "calcium"]
-            },
-            "organic_molecules": {
-                "name": "organic_molecules",
-                "type": "planetary_material",
-                "state": "possible",
-                "requires": ["carbon", "hydrogen", "oxygen", "nitrogen"]
-            }
+            "water": PlanetaryMaterial(
+                name="water",
+                requires=("hydrogen", "oxygen"),
+            ),
+            "ice": PlanetaryMaterial(
+                name="ice",
+                requires=("water", "cold"),
+            ),
+            "minerals": PlanetaryMaterial(
+                name="minerals",
+                requires=(
+                    "silicon",
+                    "iron",
+                    "magnesium",
+                    "calcium",
+                ),
+            ),
+            "organic_molecules": PlanetaryMaterial(
+                name="organic_molecules",
+                requires=(
+                    "carbon",
+                    "hydrogen",
+                    "oxygen",
+                    "nitrogen",
+                ),
+            ),
         }
 
         self.planetary_state = PlanetFormationState()
@@ -55,9 +56,10 @@ class Planets:
                 planet.to_dict()
                 for planet in self.planets
             ],
-            "planetary_materials": deepcopy(
-                self.planetary_materials
-            ),
+            "planetary_materials": {
+                name: material.to_dict()
+                for name, material in self.planetary_materials.items()
+            },
             "planetary_state": self.planetary_state.to_dict(),
         }
 

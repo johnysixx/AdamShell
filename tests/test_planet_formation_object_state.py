@@ -2,6 +2,7 @@ import unittest
 
 from universe.cosmic_objects import StellarMaterialCloud
 from universe.planet_objects import EarthPlanet, Planet
+from universe.planetary_material_objects import PlanetaryMaterial
 from universe.planet_state import PlanetFormationState
 from universe.planetary_materials import PlanetaryMaterials
 from universe.planets import Planets
@@ -167,6 +168,12 @@ class PlanetFormationObjectStateTests(
             universe.world["planetary_materials"],
             dict,
         )
+        self.assertTrue(
+            all(
+                isinstance(material, PlanetaryMaterial)
+                for material in process.planetary_materials.values()
+            )
+        )
         self.assertIsInstance(
             universe.world["earth"],
             EarthPlanet,
@@ -221,9 +228,7 @@ class PlanetFormationObjectStateTests(
         )
         self.assertNotIn(
             "fake_element",
-            process.planetary_materials["water"][
-                "requires"
-            ],
+            process.planetary_materials["water"].requires,
         )
 
     def test_possibilities_follow_available_elements(

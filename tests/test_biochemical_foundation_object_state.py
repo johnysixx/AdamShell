@@ -6,6 +6,9 @@ from universe.biochemical_foundations import (
 from universe.biochemical_state import (
     BiochemicalFoundationState,
 )
+from universe.planetary_material_objects import (
+    PlanetaryMaterial,
+)
 from universe.universe import Universe
 
 
@@ -14,15 +17,26 @@ class BiochemicalFoundationObjectStateTests(
 ):
 
     def _materials(self):
+        water = PlanetaryMaterial(
+            name="water",
+            requires=("hydrogen", "oxygen"),
+        )
+        organic_molecules = PlanetaryMaterial(
+            name="organic_molecules",
+            requires=(
+                "carbon",
+                "hydrogen",
+                "oxygen",
+                "nitrogen",
+            ),
+        )
         return {
-            "water": {
-                "name": "water",
-                "state": "available",
-            },
-            "organic_molecules": {
-                "name": "organic_molecules",
-                "state": "available",
-            },
+            "water": water.make_available(
+                origin="test_planetary_materialization"
+            ),
+            "organic_molecules": organic_molecules.make_available(
+                origin="test_planetary_materialization"
+            ),
         }
 
     def _formed_process(self):

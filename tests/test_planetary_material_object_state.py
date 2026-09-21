@@ -4,6 +4,10 @@ from universe.biochemical_foundations import (
     BiochemicalFoundations,
 )
 from universe.planet_state import PlanetFormationState
+from universe.planetary_material_objects import (
+    AvailablePlanetaryMaterial,
+    PlanetaryMaterial,
+)
 from universe.planetary_material_state import (
     PlanetaryMaterialState,
 )
@@ -35,27 +39,27 @@ class PlanetaryMaterialObjectStateTests(
 
     def _possible_materials(self):
         return {
-            "water": {
-                "name": "water",
-                "requires": ["hydrogen", "oxygen"],
-            },
-            "ice": {
-                "name": "ice",
-                "requires": ["water", "cold"],
-            },
-            "minerals": {
-                "name": "minerals",
-                "requires": ["silicon", "iron"],
-            },
-            "organic_molecules": {
-                "name": "organic_molecules",
-                "requires": [
+            "water": PlanetaryMaterial(
+                name="water",
+                requires=("hydrogen", "oxygen"),
+            ),
+            "ice": PlanetaryMaterial(
+                name="ice",
+                requires=("water", "cold"),
+            ),
+            "minerals": PlanetaryMaterial(
+                name="minerals",
+                requires=("silicon", "iron"),
+            ),
+            "organic_molecules": PlanetaryMaterial(
+                name="organic_molecules",
+                requires=(
                     "carbon",
                     "hydrogen",
                     "oxygen",
                     "nitrogen",
-                ],
-            },
+                ),
+            ),
         }
 
     def _materialized_process(self):
@@ -136,6 +140,12 @@ class PlanetaryMaterialObjectStateTests(
             ],
             dict,
         )
+        self.assertTrue(
+            all(
+                isinstance(material, AvailablePlanetaryMaterial)
+                for material in process.available_materials.values()
+            )
+        )
 
     def test_public_result_remains_dict_boundary(
         self
@@ -176,9 +186,7 @@ class PlanetaryMaterialObjectStateTests(
         )
         self.assertNotIn(
             "fake_element",
-            process.available_materials["water"][
-                "requires"
-            ],
+            process.available_materials["water"].requires,
         )
 
     def test_availability_follows_planet_state(
@@ -229,10 +237,10 @@ class PlanetaryMaterialObjectStateTests(
             )
         )
         universe.world["planetary_materials"] = {
-            "water": {
-                "name": "water",
-                "requires": ["hydrogen", "oxygen"],
-            }
+            "water": PlanetaryMaterial(
+                name="water",
+                requires=("hydrogen", "oxygen"),
+            )
         }
         process = PlanetaryMaterials(universe)
 
