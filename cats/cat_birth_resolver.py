@@ -2,7 +2,10 @@ from cats.cat_birth_effect_resolver import (
     CatBirthEffectResolver
 )
 
-from .cat_trait_dice_mapping import CatTraitDiceMapping
+from .cat_trait_dice_mapping import (
+    CatTraitDiceMapping,
+    CatTraitDiceMappingResult,
+)
 from .cat_genetics_validator import CatGeneticsValidator
 from .cat_birth_objects import (
     CatBirthProfile,
@@ -175,8 +178,17 @@ class CatBirthResolver:
 
         profile = {}
 
+        if not isinstance(
+            mapping,
+            CatTraitDiceMappingResult
+        ):
+            raise TypeError(
+                "trait dice mapping must be a "
+                "CatTraitDiceMappingResult object."
+            )
+
         for die_name, trait in (
-            mapping["die_to_trait"].items()
+            mapping.die_to_trait.items()
         ):
             profile[trait] = (
                 self._select_for_cat_birth(
@@ -443,8 +455,21 @@ class CatBirthResolver:
             birth["genetics"]
         )
 
-        cat.birth_trait_dice_mapping = (
+        birth_trait_dice_mapping = (
             birth["trait_dice_mapping"]
+        )
+
+        if not isinstance(
+            birth_trait_dice_mapping,
+            CatTraitDiceMappingResult
+        ):
+            raise TypeError(
+                "birth trait dice mapping must be a "
+                "CatTraitDiceMappingResult object."
+            )
+
+        cat.birth_trait_dice_mapping = (
+            birth_trait_dice_mapping
         )
 
         cat.birth_percentile = dict(
@@ -582,13 +607,17 @@ class CatBirthResolver:
         conflict_history = []
         cronenbergs_created = []
 
-        die_to_trait = dict(
-            mapping["die_to_trait"]
-        )
+        if not isinstance(
+            mapping,
+            CatTraitDiceMappingResult
+        ):
+            raise TypeError(
+                "mapping must be a "
+                "CatTraitDiceMappingResult object."
+            )
 
-        trait_to_die = dict(
-            mapping["trait_to_die"]
-        )
+        die_to_trait = mapping.die_to_trait
+        trait_to_die = mapping.trait_to_die
 
         trait_options = {
             "color": (

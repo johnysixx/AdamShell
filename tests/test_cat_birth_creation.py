@@ -12,6 +12,9 @@ from cats.cat_birth_objects import (
 from cats.cat_birth_resolver import (
     CatBirthResolver
 )
+from cats.cat_trait_dice_mapping import (
+    CatTraitDiceMappingResult,
+)
 
 
 class CatBirthCreationTests(
@@ -69,11 +72,14 @@ class CatBirthCreationTests(
                 "conflict_history": [],
                 "cronenberg_count": 0
             },
-            "trait_dice_mapping": {
-                "cat_d20_value": 8,
-                "die_to_trait": {},
-                "trait_to_die": {}
-            },
+            "trait_dice_mapping": (
+                CatTraitDiceMappingResult(
+                    cat_d20_value=8,
+                    permutation_index=0,
+                    die_to_trait={},
+                    trait_to_die={},
+                )
+            ),
             "percentile": {
                 "die": "d10_percentile",
                 "value": 70
@@ -148,6 +154,23 @@ class CatBirthCreationTests(
             cat.rolled_birth_profile,
             birth["rolled_profile"]
         )
+
+
+    def test_create_cat_rejects_legacy_trait_dice_mapping(self):
+        birth = self._ordinary_birth()
+        birth["trait_dice_mapping"] = {
+            "cat_d20_value": 8,
+            "permutation_index": 0,
+            "die_to_trait": {},
+            "trait_to_die": {},
+        }
+
+        self.resolver.resolve_profile = (
+            lambda rng=None: birth
+        )
+
+        with self.assertRaises(TypeError):
+            self.resolver.create_cat()
 
     def test_generated_cat_names_increment(self):
         birth = self._ordinary_birth()

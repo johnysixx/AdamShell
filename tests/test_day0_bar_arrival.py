@@ -5,6 +5,9 @@ from multiverse import UniverseRegistry
 from idea_universe import IdeaUniverse
 from meeting_place.meeting_place import MeetingPlace
 from idea_entities import IdeaEntities
+from cats.cat_trait_dice_mapping import (
+    CatTraitDiceMappingResult,
+)
 
 
 class Day0BarArrivalTests(unittest.TestCase):
@@ -109,11 +112,14 @@ class Day0BarArrivalTests(unittest.TestCase):
                 "conflict_history": [],
                 "cronenberg_count": 0
             },
-            "trait_dice_mapping": {
-                "cat_d20_value": 1,
-                "die_to_trait": {},
-                "trait_to_die": {}
-            },
+            "trait_dice_mapping": (
+                CatTraitDiceMappingResult(
+                    cat_d20_value=1,
+                    permutation_index=0,
+                    die_to_trait={},
+                    trait_to_die={},
+                )
+            ),
             "percentile": {
                 "die": "d10_percentile",
                 "value": 70
