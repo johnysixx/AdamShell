@@ -1,6 +1,5 @@
-from copy import deepcopy
-
 from universe.cosmic_objects import StellarMaterialCloud
+from universe.stellar_objects import PrimordialStar
 from universe.stellar_state import StellarFormationState
 
 
@@ -23,7 +22,7 @@ class Stars:
             "name": self.name,
             "type": self.type,
             "state": self.state,
-            "stars": deepcopy(self.stars),
+            "stars": [star.to_dict() for star in self.stars],
             "stellar_state": self.stellar_state.to_dict(),
         }
 
@@ -64,34 +63,38 @@ class Stars:
 
         self.state = "formed"
 
-        self.stars.append({
-            "name": "first_star",
-            "type": "primordial_star",
-            "generation": 1,
-            "state": "ignited",
-            "formed_from": star_forming_clouds[0].name,
-            "composition": {
-                "hydrogen": "dominant",
-                "helium": "secondary",
-                "trace_lithium": "trace"
-            },
-            "can_fuse_elements": True,
-            "can_create_heavy_elements": True
-        })
+        self.stars.append(
+            PrimordialStar(
+                name="first_star",
+                type="primordial_star",
+                generation=1,
+                state="ignited",
+                source_cloud=star_forming_clouds[0],
+                composition={
+                    "hydrogen": "dominant",
+                    "helium": "secondary",
+                    "trace_lithium": "trace",
+                },
+                can_fuse_elements=True,
+                can_create_heavy_elements=True,
+            )
+        )
 
-        self.stars.append({
-            "name": "deep_star",
-            "type": "primordial_star",
-            "generation": 1,
-            "state": "young",
-            "formed_from": star_forming_clouds[-1].name,
-            "composition": {
-                "hydrogen": "dominant",
-                "helium": "secondary"
-            },
-            "can_fuse_elements": True,
-            "can_create_heavy_elements": True
-        })
+        self.stars.append(
+            PrimordialStar(
+                name="deep_star",
+                type="primordial_star",
+                generation=1,
+                state="young",
+                source_cloud=star_forming_clouds[-1],
+                composition={
+                    "hydrogen": "dominant",
+                    "helium": "secondary",
+                },
+                can_fuse_elements=True,
+                can_create_heavy_elements=True,
+            )
+        )
 
         self.stellar_state.first_stars_formed = True
         self.stellar_state.stellar_fusion_possible = True

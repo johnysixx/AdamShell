@@ -1,6 +1,7 @@
 from copy import deepcopy
 
 from universe.cosmic_objects import StellarMaterialCloud
+from universe.stellar_objects import PrimordialStar
 from universe.supernova_enrichment_state import (
     SupernovaEnrichmentState,
 )
@@ -71,6 +72,12 @@ class SupernovaEnrichment:
             self.write_to_world()
             return self.public_state
 
+        for star in first_stars:
+            if not isinstance(star, PrimordialStar):
+                raise TypeError(
+                    "first_stars must contain PrimordialStar objects"
+                )
+
         self.supernova_enrichment_state.stars_available = (
             True
         )
@@ -94,7 +101,7 @@ class SupernovaEnrichment:
             "name": "first_supernova",
             "type": "supernova",
             "state": "exploded",
-            "source_star": first_stars[0]["name"],
+            "source_star": first_stars[0].name,
             "released_elements": list(elements.keys()),
         })
 

@@ -2,6 +2,7 @@ import unittest
 
 from universe.cosmic_objects import StellarMaterialCloud
 from universe.stars import Stars
+from universe.stellar_objects import PrimordialStar
 from universe.stellar_nucleosynthesis import (
     StellarNucleosynthesis,
 )
@@ -118,6 +119,12 @@ class StellarFormationObjectStateTests(
             universe.world["first_stars"],
             list,
         )
+        self.assertTrue(
+            all(
+                isinstance(star, PrimordialStar)
+                for star in universe.world["first_stars"]
+            )
+        )
         self.assertIsInstance(universe.world, dict)
 
     def test_public_result_remains_dict_boundary(
@@ -153,7 +160,7 @@ class StellarFormationObjectStateTests(
             process.stellar_state.first_stars_formed
         )
         self.assertEqual(
-            process.stars[0]["composition"][
+            process.stars[0].composition[
                 "hydrogen"
             ],
             "dominant",

@@ -1,5 +1,6 @@
-﻿from copy import deepcopy
+from copy import deepcopy
 
+from universe.stellar_objects import PrimordialStar
 from universe.stellar_nucleosynthesis_state import (
     StellarNucleosynthesisState,
 )
@@ -46,6 +47,12 @@ class StellarNucleosynthesis:
             print("STELLAR NUCLEOSYNTHESIS FAILED: no stars available")
             self.write_to_world()
             return self.public_state
+
+        for star in first_stars:
+            if not isinstance(star, PrimordialStar):
+                raise TypeError(
+                    "first_stars must contain PrimordialStar objects"
+                )
 
         if not stellar_state.stellar_fusion_possible:
             self.state = "failed"

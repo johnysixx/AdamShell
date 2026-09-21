@@ -4,6 +4,7 @@ from universe.cosmic_objects import StellarMaterialCloud
 from universe.heavy_element_nucleosynthesis import (
     HeavyElementNucleosynthesis,
 )
+from universe.stellar_objects import PrimordialStar
 from universe.supernova_enrichment import (
     SupernovaEnrichment,
 )
@@ -35,14 +36,33 @@ class SupernovaEnrichmentObjectStateTests(
         with self.assertRaises(TypeError):
             _ = value[key]
 
+    def _star(self, name="first_star"):
+        cloud = StellarMaterialCloud(
+            name="source_cloud",
+            type="germinal_cloud",
+            state="condensing",
+            composition={},
+            can_form_stars=True,
+        )
+        return PrimordialStar(
+            name=name,
+            type="primordial_star",
+            generation=1,
+            state="ignited",
+            source_cloud=cloud,
+            composition={
+                "hydrogen": "dominant",
+                "helium": "secondary",
+            },
+            can_fuse_elements=True,
+            can_create_heavy_elements=True,
+        )
+
     def _enriched_process(self):
         universe = Universe()
 
         universe.world["first_stars"] = [
-            {
-                "name": "first_star",
-                "state": "ignited",
-            }
+            self._star()
         ]
         universe.world["elements_up_to_iron"] = {
             "hydrogen": {
@@ -84,7 +104,7 @@ class SupernovaEnrichmentObjectStateTests(
     ):
         universe = Universe()
         universe.world["first_stars"] = [
-            {"name": "first_star"}
+            self._star()
         ]
         universe.world["elements_up_to_iron"] = {
             "iron": {
@@ -240,7 +260,7 @@ class SupernovaEnrichmentObjectStateTests(
     ):
         universe = Universe()
         universe.world["first_stars"] = [
-            {"name": "first_star"}
+            self._star()
         ]
 
         process = SupernovaEnrichment(universe)
@@ -286,7 +306,7 @@ class SupernovaEnrichmentObjectStateTests(
     ):
         universe = Universe()
         universe.world["first_stars"] = [
-            {"name": "first_star"}
+            self._star()
         ]
         universe.world["elements_up_to_iron"] = {
             "iron": {
