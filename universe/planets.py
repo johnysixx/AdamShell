@@ -1,6 +1,7 @@
-﻿from copy import deepcopy
+from copy import deepcopy
 
 from universe.planet_state import PlanetFormationState
+from universe.stellar_system_objects import StellarSystem
 
 
 class Planets:
@@ -79,16 +80,21 @@ class Planets:
             self.write_to_world()
             return self.public_state
 
-        disk = solar_system.get("protoplanetary_disk", {})
+        if not isinstance(solar_system, StellarSystem):
+            raise TypeError(
+                "solar_system must be a StellarSystem object"
+            )
 
-        if not disk.get("can_form_planets"):
+        disk = solar_system.protoplanetary_disk
+
+        if not disk.can_form_planets:
             self.state = "failed"
 
             print("PLANET FORMATION FAILED: protoplanetary disk cannot form planets")
             self.write_to_world()
             return self.public_state
 
-        available_elements = disk.get("available_elements", [])
+        available_elements = disk.available_elements
 
         self.state = "formed"
 

@@ -1,8 +1,14 @@
 import unittest
 
+from universe.cosmic_objects import StellarMaterialCloud
 from universe.planet_state import PlanetFormationState
 from universe.planetary_materials import PlanetaryMaterials
 from universe.planets import Planets
+from universe.stellar_system_objects import (
+    ProtoplanetaryDisk,
+    SecondGenerationStar,
+    StellarSystem,
+)
 from universe.universe import Universe
 
 
@@ -28,24 +34,67 @@ class PlanetFormationObjectStateTests(
         with self.assertRaises(TypeError):
             _ = value[key]
 
+    def _solar_system(
+        self,
+        available_elements,
+        *,
+        can_form_planets=True,
+    ):
+        elements = tuple(available_elements)
+        source_cloud = StellarMaterialCloud(
+            name="planet_test_cloud",
+            type="enriched_stellar_cloud",
+            state="expanding",
+            composition={
+                element_name: {}
+                for element_name in elements
+            },
+            can_form_stellar_systems=True,
+        )
+        return StellarSystem(
+            name="solar_system",
+            type="stellar_system",
+            state="forming",
+            generation=2,
+            source_cloud=source_cloud,
+            star=SecondGenerationStar(
+                name="sun",
+                type="main_sequence_star",
+                state="ignited",
+                generation=2,
+            ),
+            protoplanetary_disk=ProtoplanetaryDisk(
+                name="solar_protoplanetary_disk",
+                type="protoplanetary_disk",
+                state="rotating",
+                available_elements=elements,
+                can_form_planets=can_form_planets,
+                can_form_water=(
+                    "hydrogen" in elements
+                    and "oxygen" in elements
+                ),
+                can_form_iron_cores="iron" in elements,
+                can_form_rocky_worlds=(
+                    "silicon" in elements
+                    and "iron" in elements
+                ),
+            ),
+        )
+
     def _formed_process(self):
         universe = Universe()
-        universe.world["solar_system"] = {
-            "name": "solar_system",
-            "protoplanetary_disk": {
-                "can_form_planets": True,
-                "available_elements": [
-                    "hydrogen",
-                    "carbon",
-                    "nitrogen",
-                    "oxygen",
-                    "magnesium",
-                    "silicon",
-                    "calcium",
-                    "iron",
-                ],
-            },
-        }
+        universe.world["solar_system"] = self._solar_system(
+            (
+                "hydrogen",
+                "carbon",
+                "nitrogen",
+                "oxygen",
+                "magnesium",
+                "silicon",
+                "calcium",
+                "iron",
+            )
+        )
 
         process = Planets(universe)
         result = process.form_planets()
@@ -174,12 +223,9 @@ class PlanetFormationObjectStateTests(
         self
     ):
         universe = Universe()
-        universe.world["solar_system"] = {
-            "protoplanetary_disk": {
-                "can_form_planets": True,
-                "available_elements": ["hydrogen"],
-            }
-        }
+        universe.world["solar_system"] = self._solar_system(
+            ("hydrogen",)
+        )
         process = Planets(universe)
 
         process.form_planets()
@@ -225,11 +271,10 @@ class PlanetFormationObjectStateTests(
 
     def test_inactive_disk_preserves_state(self):
         universe = Universe()
-        universe.world["solar_system"] = {
-            "protoplanetary_disk": {
-                "can_form_planets": False,
-            }
-        }
+        universe.world["solar_system"] = self._solar_system(
+            (),
+            can_form_planets=False,
+        )
         process = Planets(universe)
 
         result = process.form_planets()
@@ -243,6 +288,18 @@ class PlanetFormationObjectStateTests(
                 "planets_formed"
             ]
         )
+
+
+    def test_legacy_solar_system_dict_is_rejected(self):
+        universe = Universe()
+        universe.world["solar_system"] = {
+            "name": "legacy_solar_system",
+            "protoplanetary_disk": {},
+        }
+        process = Planets(universe)
+
+        with self.assertRaises(TypeError):
+            process._form_planets_unprotected()
 
     def test_planetary_materials_reads_object_state(
         self
@@ -268,12 +325,9 @@ class PlanetFormationObjectStateTests(
         self
     ):
         universe = Universe()
-        universe.world["solar_system"] = {
-            "protoplanetary_disk": {
-                "can_form_planets": True,
-                "available_elements": ["iron"],
-            }
-        }
+        universe.world["solar_system"] = self._solar_system(
+            ("iron",)
+        )
         process = Planets(universe)
 
         def broken_history():

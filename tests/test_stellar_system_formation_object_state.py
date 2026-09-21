@@ -2,6 +2,11 @@ import unittest
 
 from universe.cosmic_objects import StellarMaterialCloud
 from universe.planets import Planets
+from universe.stellar_system_objects import (
+    ProtoplanetaryDisk,
+    SecondGenerationStar,
+    StellarSystem,
+)
 from universe.stellar_system_state import (
     StellarSystemFormationState,
 )
@@ -116,7 +121,15 @@ class StellarSystemFormationObjectStateTests(
         )
         self.assertIsInstance(
             universe.world["solar_system"],
-            dict,
+            StellarSystem,
+        )
+        self.assertIsInstance(
+            universe.world["solar_system"].star,
+            SecondGenerationStar,
+        )
+        self.assertIsInstance(
+            universe.world["solar_system"].protoplanetary_disk,
+            ProtoplanetaryDisk,
         )
 
     def test_public_result_remains_dict_boundary(
@@ -153,9 +166,9 @@ class StellarSystemFormationObjectStateTests(
         )
         self.assertNotIn(
             "fake",
-            process.systems[0][
-                "protoplanetary_disk"
-            ]["available_elements"],
+            process.systems[0]
+            .protoplanetary_disk
+            .available_elements,
         )
 
     def test_material_possibilities_follow_composition(

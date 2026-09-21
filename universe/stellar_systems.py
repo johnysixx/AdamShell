@@ -1,6 +1,9 @@
-from copy import deepcopy
-
 from universe.cosmic_objects import StellarMaterialCloud
+from universe.stellar_system_objects import (
+    ProtoplanetaryDisk,
+    SecondGenerationStar,
+    StellarSystem,
+)
 from universe.stellar_system_state import (
     StellarSystemFormationState,
 )
@@ -25,7 +28,10 @@ class StellarSystems:
             "name": self.name,
             "type": self.type,
             "state": self.state,
-            "systems": deepcopy(self.systems),
+            "systems": [
+                system.to_dict()
+                for system in self.systems
+            ],
             "system_state": self.system_state.to_dict(),
         }
 
@@ -68,57 +74,70 @@ class StellarSystems:
 
         source_cloud = system_forming_clouds[0]
         composition = source_cloud.composition
-        available_elements = list(composition.keys())
+        available_elements = tuple(composition.keys())
 
         self.state = "formed"
 
-        solar_system = {
-            "name": "solar_system",
-            "type": "stellar_system",
-            "state": "forming",
-            "generation": 2,
-            "formed_from": source_cloud.name,
-            "star": {
-                "name": "sun",
-                "type": "main_sequence_star",
-                "state": "ignited",
-                "generation": 2
-            },
-            "protoplanetary_disk": {
-                "name": "solar_protoplanetary_disk",
-                "type": "protoplanetary_disk",
-                "state": "rotating",
-                "available_elements": available_elements,
-                "can_form_planets": True,
-                "can_form_water": "hydrogen" in composition and "oxygen" in composition,
-                "can_form_iron_cores": "iron" in composition,
-                "can_form_rocky_worlds": "silicon" in composition and "iron" in composition
-            }
-        }
+        solar_disk = ProtoplanetaryDisk(
+            name="solar_protoplanetary_disk",
+            type="protoplanetary_disk",
+            state="rotating",
+            available_elements=available_elements,
+            can_form_planets=True,
+            can_form_water=(
+                "hydrogen" in composition
+                and "oxygen" in composition
+            ),
+            can_form_iron_cores="iron" in composition,
+            can_form_rocky_worlds=(
+                "silicon" in composition
+                and "iron" in composition
+            ),
+        )
+        solar_system = StellarSystem(
+            name="solar_system",
+            type="stellar_system",
+            state="forming",
+            generation=2,
+            source_cloud=source_cloud,
+            star=SecondGenerationStar(
+                name="sun",
+                type="main_sequence_star",
+                state="ignited",
+                generation=2,
+            ),
+            protoplanetary_disk=solar_disk,
+        )
 
-        deep_system = {
-            "name": "deep_system",
-            "type": "stellar_system",
-            "state": "forming",
-            "generation": 2,
-            "formed_from": source_cloud.name,
-            "star": {
-                "name": "deep_star_second_generation",
-                "type": "main_sequence_star",
-                "state": "young",
-                "generation": 2
-            },
-            "protoplanetary_disk": {
-                "name": "deep_protoplanetary_disk",
-                "type": "protoplanetary_disk",
-                "state": "rotating",
-                "available_elements": available_elements,
-                "can_form_planets": True,
-                "can_form_water": "hydrogen" in composition and "oxygen" in composition,
-                "can_form_iron_cores": "iron" in composition,
-                "can_form_rocky_worlds": "silicon" in composition and "iron" in composition
-            }
-        }
+        deep_system = StellarSystem(
+            name="deep_system",
+            type="stellar_system",
+            state="forming",
+            generation=2,
+            source_cloud=source_cloud,
+            star=SecondGenerationStar(
+                name="deep_star_second_generation",
+                type="main_sequence_star",
+                state="young",
+                generation=2,
+            ),
+            protoplanetary_disk=ProtoplanetaryDisk(
+                name="deep_protoplanetary_disk",
+                type="protoplanetary_disk",
+                state="rotating",
+                available_elements=available_elements,
+                can_form_planets=True,
+                can_form_water=(
+                    "hydrogen" in composition
+                    and "oxygen" in composition
+                ),
+                can_form_iron_cores="iron" in composition,
+                can_form_rocky_worlds=(
+                    "silicon" in composition
+                    and "iron" in composition
+                ),
+            ),
+        )
 
         self.systems.append(solar_system)
         self.systems.append(deep_system)
@@ -127,14 +146,10 @@ class StellarSystems:
         self.system_state.solar_system_formed = True
         self.system_state.planet_formation_possible = True
         self.system_state.water_formation_possible = (
-            solar_system["protoplanetary_disk"][
-                "can_form_water"
-            ]
+            solar_disk.can_form_water
         )
         self.system_state.rocky_worlds_possible = (
-            solar_system["protoplanetary_disk"][
-                "can_form_rocky_worlds"
-            ]
+            solar_disk.can_form_rocky_worlds
         )
 
         self.record_history()
