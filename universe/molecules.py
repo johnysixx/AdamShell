@@ -1,5 +1,4 @@
-﻿from copy import deepcopy
-
+from universe.chemical_objects import ChemicalMolecule
 from universe.molecule_state import MoleculeFormationState
 from universe.periodic_table import PeriodicTable
 
@@ -25,7 +24,10 @@ class Molecules:
             "name": self.name,
             "type": self.type,
             "state": self.state,
-            "molecules": deepcopy(self.molecules),
+            "molecules": {
+                name: molecule.to_dict()
+                for name, molecule in self.molecules.items()
+            },
             "molecule_state": self.molecule_state.to_dict(),
         }
 
@@ -124,50 +126,71 @@ class Molecules:
 
         self.molecule_state.periodic_table_available = True
 
-    def create_molecule(self, name, formula, components, category, meaning, future_use):
-        self.require_elements(components)
-
-        molecule = {
-            "name": name,
-            "type": "molecule",
-            "state": "formed",
-            "formula": formula,
-            "components": components,
-            "category": category,
-            "meaning": meaning,
-            "future_use": future_use
-        }
+    def create_molecule(
+        self,
+        name,
+        formula,
+        components,
+        category,
+        meaning,
+        future_use,
+    ):
+        molecule = ChemicalMolecule(
+            name=name,
+            formula=formula,
+            components=self.resolve_elements(components),
+            category=category,
+            meaning=meaning,
+            future_use=tuple(future_use),
+        )
 
         self.molecules[name] = molecule
 
         return molecule
 
     def create_alcohol(self, name, formula, components, meaning):
-        self.require_elements(components)
-
-        molecule = {
-            "name": name,
-            "type": "molecule",
-            "state": "formed",
-            "formula": formula,
-            "components": components,
-            "category": "alcohol",
-            "functional_group": "hydroxyl",
-            "functional_group_symbol": "-OH",
-            "meaning": meaning,
-            "future_use": ["organic_chemistry", "solvents", "bar_drinks"]
-        }
+        molecule = ChemicalMolecule(
+            name=name,
+            formula=formula,
+            components=self.resolve_elements(components),
+            category="alcohol",
+            functional_group="hydroxyl",
+            functional_group_symbol="-OH",
+            meaning=meaning,
+            future_use=(
+                "organic_chemistry",
+                "solvents",
+                "bar_drinks",
+            ),
+        )
 
         self.molecules[name] = molecule
 
         return molecule
 
-    def require_elements(self, components):
-        chemical_elements = self.universe.world.get("chemical_elements", {})
+    def resolve_elements(self, components):
+        if not isinstance(components, dict):
+            raise TypeError(
+                "components must be an element-name-to-count map"
+            )
 
-        for element_name in components:
-            if element_name not in chemical_elements:
-                raise ValueError(f"Missing element for molecule: {element_name}")
+        chemical_elements = self.universe.world.get(
+            "chemical_elements",
+            {},
+        )
+        resolved_components = {}
+
+        for element_name, count in components.items():
+            try:
+                element = chemical_elements[element_name]
+            except KeyError as error:
+                raise ValueError(
+                    f"Missing element for molecule: {element_name}"
+                ) from error
+
+            resolved_components[element] = count
+
+        return resolved_components
 
     def record_history(self):
         history = self.universe.world.setdefault("cosmic_history", [])

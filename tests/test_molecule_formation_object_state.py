@@ -141,9 +141,9 @@ class MoleculeFormationObjectStateTests(
             6,
         )
         self.assertEqual(
-            process.molecules["water"][
-                "components"
-            ]["hydrogen"],
+            process.molecules["water"].component_count(
+                "hydrogen"
+            ),
             2,
         )
 

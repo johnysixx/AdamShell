@@ -1,4 +1,6 @@
 from dataclasses import dataclass, field
+from types import MappingProxyType
+from collections.abc import Mapping
 
 
 @dataclass(frozen=True, slots=True)
@@ -213,3 +215,100 @@ class NeutralAtom:
             "discovered_element": self.discovered_element,
             "future_use": list(self.future_use),
         }
+
+
+@dataclass(frozen=True, slots=True)
+class ChemicalMolecule:
+    name: str
+    formula: str
+    components: Mapping[ChemicalElement, int]
+    category: str
+    meaning: str
+    future_use: tuple[str, ...] = field(default_factory=tuple)
+    functional_group: str | None = None
+    functional_group_symbol: str | None = None
+
+    def __post_init__(self):
+        if not self.name:
+            raise ValueError("Molecule name must not be empty")
+        if not self.formula:
+            raise ValueError("Molecule formula must not be empty")
+        if not isinstance(self.components, Mapping):
+            raise TypeError(
+                "components must be an element-to-count mapping"
+            )
+        if not self.components:
+            raise ValueError("Molecule must contain at least one element")
+
+        normalized_components = {}
+        for element, count in self.components.items():
+            if not isinstance(element, ChemicalElement):
+                raise TypeError(
+                    "Molecule component keys must be ChemicalElement objects"
+                )
+            if not isinstance(count, int) or isinstance(count, bool):
+                raise TypeError("Molecule component counts must be integers")
+            if count <= 0:
+                raise ValueError("Molecule component counts must be positive")
+            normalized_components[element] = count
+
+        object.__setattr__(
+            self,
+            "components",
+            MappingProxyType(normalized_components),
+        )
+        object.__setattr__(
+            self,
+            "future_use",
+            tuple(self.future_use),
+        )
+
+        if (
+            self.functional_group_symbol is not None
+            and self.functional_group is None
+        ):
+            raise ValueError(
+                "functional_group_symbol requires functional_group"
+            )
+
+    @property
+    def type(self):
+        return "molecule"
+
+    @property
+    def state(self):
+        return "formed"
+
+    @property
+    def atom_count(self):
+        return sum(self.components.values())
+
+    def component_count(self, element_name):
+        for element, count in self.components.items():
+            if element.name == element_name:
+                return count
+        return 0
+
+    def to_dict(self):
+        snapshot = {
+            "name": self.name,
+            "type": self.type,
+            "state": self.state,
+            "formula": self.formula,
+            "components": {
+                element.name: count
+                for element, count in self.components.items()
+            },
+            "category": self.category,
+            "meaning": self.meaning,
+            "future_use": list(self.future_use),
+        }
+
+        if self.functional_group is not None:
+            snapshot["functional_group"] = self.functional_group
+        if self.functional_group_symbol is not None:
+            snapshot["functional_group_symbol"] = (
+                self.functional_group_symbol
+            )
+
+        return snapshot
