@@ -228,6 +228,181 @@ class CatBirthGeneticsResult:
         }
 
 
+@dataclass(frozen=True)
+class CatBirthPercentileRoll:
+    die: str
+    value: int
+    attempt: int
+
+    def __post_init__(self):
+        if self.die != "d10_percentile":
+            raise ValueError(
+                "birth percentile roll must use d10_percentile."
+            )
+
+        if not isinstance(self.value, int):
+            raise TypeError(
+                "birth percentile value must be an integer."
+            )
+
+        if self.value not in range(0, 100, 10):
+            raise ValueError(
+                "birth percentile value must be one of "
+                "0, 10, ..., 90."
+            )
+
+        if not isinstance(self.attempt, int) or self.attempt < 1:
+            raise ValueError(
+                "birth percentile attempt must be a positive integer."
+            )
+
+    @classmethod
+    def from_dice_payload(cls, payload, *, attempt):
+        if not isinstance(payload, dict):
+            raise TypeError(
+                "dice percentile payload must be a dict boundary payload."
+            )
+
+        return cls(
+            die=payload["die"],
+            value=int(payload["value"]),
+            attempt=attempt,
+        )
+
+    @property
+    def sides(self):
+        return 10
+
+    @property
+    def face_value(self):
+        return 10 if self.value == 0 else self.value // 10
+
+    @property
+    def raw_value(self):
+        return self.face_value
+
+    @property
+    def percentile_tens(self):
+        return self.value
+
+    @property
+    def is_percentile(self):
+        return True
+
+    def to_dict(self):
+        return {
+            "die": self.die,
+            "sides": self.sides,
+            "face_value": self.face_value,
+            "percentile_tens": self.percentile_tens,
+            "raw_value": self.raw_value,
+            "value": self.value,
+            "is_percentile": self.is_percentile,
+            "attempt": self.attempt,
+        }
+
+
+@dataclass(frozen=True)
+class CatBirthPercentileResult:
+    final_roll: CatBirthPercentileRoll
+    history: tuple[CatBirthPercentileRoll, ...]
+    cronenbergs_created: tuple[object, ...] = ()
+
+    def __post_init__(self):
+        if not isinstance(
+            self.final_roll,
+            CatBirthPercentileRoll
+        ):
+            raise TypeError(
+                "final_roll must be a CatBirthPercentileRoll object."
+            )
+
+        if not isinstance(self.history, tuple):
+            raise TypeError(
+                "history must be a tuple of percentile roll objects."
+            )
+
+        if not self.history:
+            raise ValueError(
+                "percentile history must contain at least one roll."
+            )
+
+        if not all(
+            isinstance(item, CatBirthPercentileRoll)
+            for item in self.history
+        ):
+            raise TypeError(
+                "percentile history values must be "
+                "CatBirthPercentileRoll objects."
+            )
+
+        if self.final_roll is not self.history[-1]:
+            raise ValueError(
+                "final_roll must be the final percentile history item."
+            )
+
+        expected_attempts = tuple(
+            range(1, len(self.history) + 1)
+        )
+        actual_attempts = tuple(
+            item.attempt
+            for item in self.history
+        )
+
+        if actual_attempts != expected_attempts:
+            raise ValueError(
+                "percentile history attempts must be sequential."
+            )
+
+        if not isinstance(self.cronenbergs_created, tuple):
+            raise TypeError(
+                "cronenbergs_created must be a tuple."
+            )
+
+    @classmethod
+    def single(cls, *, value):
+        roll = CatBirthPercentileRoll(
+            die="d10_percentile",
+            value=value,
+            attempt=1,
+        )
+
+        return cls(
+            final_roll=roll,
+            history=(roll,),
+        )
+
+    @property
+    def die(self):
+        return self.final_roll.die
+
+    @property
+    def value(self):
+        return self.final_roll.value
+
+    @property
+    def reroll_count(self):
+        return len(self.history) - 1
+
+    @property
+    def cronenberg_count(self):
+        return len(self.cronenbergs_created)
+
+    def to_dict(self):
+        return {
+            "final_roll": self.final_roll.to_dict(),
+            "history": [
+                item.to_dict()
+                for item in self.history
+            ],
+            "reroll_count": self.reroll_count,
+            "cronenbergs_created": list(
+                self.cronenbergs_created
+            ),
+            "cronenberg_count": self.cronenberg_count,
+        }
+
+
 class KittenEmbryo(ComponentObject):
     pass
 

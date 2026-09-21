@@ -12,6 +12,8 @@ from .cat_birth_objects import (
     CatCanonicalBirthResolution,
     CatBirthGeneticsResult,
     CatGeneticConflictResolution,
+    CatBirthPercentileRoll,
+    CatBirthPercentileResult,
 )
 
 class CatBirthResolver:
@@ -108,54 +110,15 @@ class CatBirthResolver:
             for result in dice_result["results"]
         }
 
-        percentile_history = [
-            dict(
-                rolls["d10_percentile"]
+        percentile_result = (
+            self._resolve_birth_percentile(
+                rolls["d10_percentile"],
+                rng=rng,
             )
-        ]
+        )
 
-        cronenbergs_created = []
-
-        while (
-            percentile_history[-1]["value"]
-            == 0
-        ):
-            cronenberg = (
-                self.universe
-                .create_cronenberg_from_quantum_error(
-                    RuntimeError(
-                        "Cat birth percentile zero."
-                    ),
-                    "cat_birth_resolver",
-                    "percentile_zero"
-                )
-            )
-
-            cronenbergs_created.append(
-                cronenberg
-            )
-
-            if len(percentile_history) >= 100:
-                raise RuntimeError(
-                    "Percentile die remained zero "
-                    "after 100 rotations."
-                )
-
-            reroll = (
-                self.meeting_place
-                .dice_box
-                .rotate_named_die(
-                    "d10_percentile",
-                    rng=rng
-                )
-            )
-
-            percentile_history.append(
-                dict(reroll)
-            )
-
-        final_percentile = (
-            percentile_history[-1]
+        cronenbergs_created = list(
+            percentile_result.cronenbergs_created
         )
 
         mapping = (
@@ -302,12 +265,12 @@ class CatBirthResolver:
             "trait_dice_mapping": mapping,
             "cat_d20": cat_d20_result,
             "dice_box": dice_result,
-            "percentile": final_percentile,
+            "percentile": percentile_result,
             "percentile_history": (
-                percentile_history
+                percentile_result.history
             ),
             "percentile_reroll_count": (
-                len(percentile_history) - 1
+                percentile_result.reroll_count
             ),
             "cronenbergs_created": (
                 cronenbergs_created
@@ -333,6 +296,67 @@ class CatBirthResolver:
         )
 
         return event
+
+    def _resolve_birth_percentile(
+        self,
+        initial_roll,
+        rng=None,
+    ):
+        history = [
+            CatBirthPercentileRoll.from_dice_payload(
+                initial_roll,
+                attempt=1,
+            )
+        ]
+        cronenbergs_created = []
+
+        while history[-1].value == 0:
+            cronenberg = (
+                self.universe
+                .create_cronenberg_from_quantum_error(
+                    RuntimeError(
+                        "Cat birth percentile zero."
+                    ),
+                    "cat_birth_resolver",
+                    "percentile_zero"
+                )
+            )
+
+            cronenbergs_created.append(
+                cronenberg
+            )
+
+            if len(history) >= 100:
+                raise RuntimeError(
+                    "Percentile die remained zero "
+                    "after 100 rotations."
+                )
+
+            reroll = (
+                self.meeting_place
+                .dice_box
+                .rotate_named_die(
+                    "d10_percentile",
+                    rng=rng
+                )
+            )
+
+            history.append(
+                CatBirthPercentileRoll.from_dice_payload(
+                    reroll,
+                    attempt=len(history) + 1,
+                )
+            )
+
+        history_tuple = tuple(history)
+
+        return CatBirthPercentileResult(
+            final_roll=history_tuple[-1],
+            history=history_tuple,
+            cronenbergs_created=tuple(
+                cronenbergs_created
+            ),
+        )
 
     def create_cat(
         self,
@@ -483,9 +507,18 @@ class CatBirthResolver:
             birth_trait_dice_mapping
         )
 
-        cat.birth_percentile = dict(
-            birth["percentile"]
-        )
+        birth_percentile = birth["percentile"]
+
+        if not isinstance(
+            birth_percentile,
+            CatBirthPercentileResult
+        ):
+            raise TypeError(
+                "birth percentile must be a "
+                "CatBirthPercentileResult object."
+            )
+
+        cat.birth_percentile = birth_percentile
 
         cat.canonical_identity = (
             identity

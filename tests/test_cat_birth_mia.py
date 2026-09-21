@@ -10,6 +10,7 @@ from cats.cat_birth_objects import (
     CatCanonicalBirthResolution,
     CatBirthGeneticsResult,
     CatGeneticsValidation,
+    CatBirthPercentileResult,
 )
 from cats.cat_birth_resolver import (
     CatBirthResolver
@@ -112,10 +113,11 @@ class CatBirthMiaTests(
                     trait_to_die={},
                 )
             ),
-            "percentile": {
-                "die": "d10_percentile",
-                "value": 50
-            }
+            "percentile": (
+                CatBirthPercentileResult.single(
+                    value=50
+                )
+            )
         }
 
     def test_mia_rotates_all_registered_dice(self):

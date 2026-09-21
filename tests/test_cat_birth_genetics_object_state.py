@@ -11,6 +11,7 @@ from cats.cat_birth_objects import (
     CatBirthGeneticsResult,
     CatGeneticConflictResolution,
     CatGeneticsValidation,
+    CatBirthPercentileResult,
 )
 from cats.cat_birth_resolver import CatBirthResolver
 from cats.cat_trait_dice_mapping import (
@@ -197,10 +198,11 @@ class CatBirthGeneticsObjectStateTests(unittest.TestCase):
                 die_to_trait={},
                 trait_to_die={},
             ),
-            "percentile": {
-                "die": "d10_percentile",
-                "value": 50,
-            },
+            "percentile": (
+                CatBirthPercentileResult.single(
+                    value=50
+                )
+            ),
         }
 
         self.resolver.resolve_profile = (

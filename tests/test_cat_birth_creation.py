@@ -10,6 +10,7 @@ from cats.cat_birth_objects import (
     CatCanonicalBirthResolution,
     CatBirthGeneticsResult,
     CatGeneticsValidation,
+    CatBirthPercentileResult,
 )
 from cats.cat_birth_resolver import (
     CatBirthResolver
@@ -85,10 +86,11 @@ class CatBirthCreationTests(
                     trait_to_die={},
                 )
             ),
-            "percentile": {
-                "die": "d10_percentile",
-                "value": 70
-            }
+            "percentile": (
+                CatBirthPercentileResult.single(
+                    value=70
+                )
+            )
         }
 
     def test_create_cat_manifests_ordinary_cat(self):
@@ -160,6 +162,15 @@ class CatBirthCreationTests(
             birth["rolled_profile"]
         )
 
+        self.assertIs(
+            cat.birth_percentile,
+            birth["percentile"]
+        )
+        self.assertIsInstance(
+            cat.birth_percentile,
+            CatBirthPercentileResult
+        )
+
 
     def test_create_cat_rejects_legacy_trait_dice_mapping(self):
         birth = self._ordinary_birth()
@@ -168,6 +179,20 @@ class CatBirthCreationTests(
             "permutation_index": 0,
             "die_to_trait": {},
             "trait_to_die": {},
+        }
+
+        self.resolver.resolve_profile = (
+            lambda rng=None: birth
+        )
+
+        with self.assertRaises(TypeError):
+            self.resolver.create_cat()
+
+    def test_create_cat_rejects_legacy_percentile_dict(self):
+        birth = self._ordinary_birth()
+        birth["percentile"] = {
+            "die": "d10_percentile",
+            "value": 70,
         }
 
         self.resolver.resolve_profile = (

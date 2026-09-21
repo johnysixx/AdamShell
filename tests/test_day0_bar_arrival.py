@@ -58,6 +58,7 @@ class Day0BarArrivalTests(unittest.TestCase):
             CatCanonicalBirthResolution,
             CatBirthGeneticsResult,
             CatGeneticsValidation,
+    CatBirthPercentileResult,
         )
         from cats.cat_birth_resolver import (
             CatBirthResolver
@@ -125,10 +126,11 @@ class Day0BarArrivalTests(unittest.TestCase):
                     trait_to_die={},
                 )
             ),
-            "percentile": {
-                "die": "d10_percentile",
-                "value": 70
-            }
+            "percentile": (
+                CatBirthPercentileResult.single(
+                    value=70
+                )
+            )
         }
 
         resolver.resolve_profile = (

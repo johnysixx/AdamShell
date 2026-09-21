@@ -10,6 +10,7 @@ from cats.cat_birth_objects import (
     CatCanonicalBirthResolution,
     CatBirthGeneticsResult,
     CatGeneticsValidation,
+    CatBirthPercentileResult,
 )
 from cats.cat_birth_resolver import (
     CatBirthResolver
@@ -106,10 +107,11 @@ class CatBirthPazuzuTests(
                     trait_to_die={},
                 )
             ),
-            "percentile": {
-                "die": "d10_percentile",
-                "value": 70
-            }
+            "percentile": (
+                CatBirthPercentileResult.single(
+                    value=70
+                )
+            )
         }
 
     def test_first_canonical_birth_creates_pazuzu(self):
