@@ -1,4 +1,5 @@
-﻿from universe.periodic_table_state import (
+from universe.chemical_objects import ChemicalElement
+from universe.periodic_table_state import (
     PeriodicTableRegistryState,
 )
 
@@ -201,17 +202,20 @@ class PeriodicTable:
         return self.public_state
 
     def create_known_element(self, atomic_number, symbol, name):
-        return {
-            "name": name,
-            "symbol": symbol,
-            "type": "chemical_element",
-            "state": "recognized",
-            "atomic_number": atomic_number,
-            "protons": atomic_number,
-            "official": True,
-            "discovered": True,
-            "future_use": ["atoms", "isotopes", "molecules", "materials"]
-        }
+        return ChemicalElement(
+            name=name,
+            symbol=symbol,
+            atomic_number=atomic_number,
+            official=True,
+            discovered=True,
+            state="recognized",
+            future_use=(
+                "atoms",
+                "isotopes",
+                "molecules",
+                "materials",
+            ),
+        )
 
     def get_element(self, atomic_number):
         if not self.elements:
@@ -232,18 +236,21 @@ class PeriodicTable:
         name = self.create_temporary_systematic_name(atomic_number)
         symbol = self.create_temporary_systematic_symbol(atomic_number)
 
-        element = {
-            "name": name,
-            "symbol": symbol,
-            "type": "chemical_element",
-            "state": "hypothetical",
-            "atomic_number": atomic_number,
-            "protons": atomic_number,
-            "official": False,
-            "discovered": False,
-            "temporary_systematic_name": True,
-            "future_use": ["atoms", "isotopes", "molecules", "materials"]
-        }
+        element = ChemicalElement(
+            name=name,
+            symbol=symbol,
+            atomic_number=atomic_number,
+            official=False,
+            discovered=False,
+            state="hypothetical",
+            temporary_systematic_name=True,
+            future_use=(
+                "atoms",
+                "isotopes",
+                "molecules",
+                "materials",
+            ),
+        )
 
         self.future_elements[atomic_number] = element
         self.registry_state.future_element_count = len(
@@ -277,7 +284,7 @@ class PeriodicTable:
         self.universe.world["periodic_table"] = self.public_state
         self.universe.world["elements_by_atomic_number"] = self.elements
         self.universe.world["chemical_elements"] = {
-            element["name"]: element
+            element.name: element
             for element in self.elements.values()
         }
         self.universe.world["future_elements"] = self.future_elements

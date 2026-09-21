@@ -1,4 +1,4 @@
-﻿from copy import deepcopy
+from copy import deepcopy
 
 from universe.atomic_time_state import AtomicTimeState
 from universe.isotopes import Isotopes
@@ -21,11 +21,18 @@ class AtomicTime:
         self.public_state = self._build_public_state()
 
     def _build_public_state(self):
+        time_standards = deepcopy(self.time_standards)
+
+        for standard in time_standards.values():
+            isotope = standard.get("isotope")
+            if isotope is not None:
+                standard["isotope"] = isotope.to_dict()
+
         return {
             "name": self.name,
             "type": self.type,
             "state": self.state,
-            "time_standards": deepcopy(self.time_standards),
+            "time_standards": time_standards,
             "atomic_time_state": self.atomic_time_state.to_dict(),
         }
 

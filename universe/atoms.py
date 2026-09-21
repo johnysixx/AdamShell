@@ -1,6 +1,5 @@
-﻿from copy import deepcopy
-
 from universe.atom_state import AtomFormationState
+from universe.chemical_objects import NeutralAtom
 from universe.periodic_table import PeriodicTable
 
 
@@ -24,7 +23,10 @@ class Atoms:
             "name": self.name,
             "type": self.type,
             "state": self.state,
-            "atoms": deepcopy(self.atoms),
+            "atoms": {
+                name: atom.to_dict()
+                for name, atom in self.atoms.items()
+            },
             "atom_state": self.atom_state.to_dict(),
         }
 
@@ -76,24 +78,9 @@ class Atoms:
     def create_neutral_atom(self, atomic_number):
         element = self.periodic_table.get_element(atomic_number)
 
-        atom_name = f"{element['name']}_atom"
+        atom = NeutralAtom(element=element)
 
-        atom = {
-            "name": atom_name,
-            "type": "neutral_atom",
-            "state": "formed",
-            "element_name": element["name"],
-            "symbol": element["symbol"],
-            "atomic_number": atomic_number,
-            "protons": atomic_number,
-            "electrons": atomic_number,
-            "net_charge": 0,
-            "official_element": element["official"],
-            "discovered_element": element["discovered"],
-            "future_use": ["isotopes", "molecules", "materials"]
-        }
-
-        self.atoms[atom_name] = atom
+        self.atoms[atom.name] = atom
 
         return atom
 

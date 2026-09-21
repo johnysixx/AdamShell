@@ -1,5 +1,4 @@
-﻿from copy import deepcopy
-
+from universe.chemical_objects import Isotope
 from universe.isotope_state import (
     IsotopeFormationState,
 )
@@ -26,7 +25,10 @@ class Isotopes:
             "name": self.name,
             "type": self.type,
             "state": self.state,
-            "isotopes": deepcopy(self.isotopes),
+            "isotopes": {
+                name: isotope.to_dict()
+                for name, isotope in self.isotopes.items()
+            },
             "isotope_state": (
                 self.isotope_state.to_dict()
             ),
@@ -95,32 +97,16 @@ class Isotopes:
         self.isotope_state.periodic_table_available = True
 
     def create_isotope(self, atomic_number, mass_number, stability, future_use):
-        if mass_number < atomic_number:
-            raise ValueError("Mass number cannot be smaller than atomic number")
-
         element = self.periodic_table.get_element(atomic_number)
-        neutrons = mass_number - atomic_number
 
-        isotope_name = f"{element['name']}_{mass_number}"
+        isotope = Isotope(
+            element=element,
+            mass_number=mass_number,
+            stability=stability,
+            future_use=tuple(future_use),
+        )
 
-        isotope = {
-            "name": isotope_name,
-            "type": "isotope",
-            "state": "formed",
-            "element_name": element["name"],
-            "symbol": element["symbol"],
-            "atomic_number": atomic_number,
-            "mass_number": mass_number,
-            "protons": atomic_number,
-            "neutrons": neutrons,
-            "electrons_if_neutral_atom": atomic_number,
-            "stability": stability,
-            "official_element": element["official"],
-            "discovered_element": element["discovered"],
-            "future_use": future_use
-        }
-
-        self.isotopes[isotope_name] = isotope
+        self.isotopes[isotope.name] = isotope
 
         return isotope
 

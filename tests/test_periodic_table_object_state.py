@@ -1,5 +1,6 @@
 import unittest
 
+from universe.chemical_objects import ChemicalElement
 from universe.periodic_table import PeriodicTable
 from universe.periodic_table_state import (
     PeriodicTableRegistryState,
@@ -140,7 +141,14 @@ class PeriodicTableObjectStateTests(
 
         self.assertIs(table.registry_state, state)
         self.assertEqual(state.future_element_count, 1)
-        self.assertIsInstance(element, dict)
+        self.assertIsInstance(
+            element,
+            ChemicalElement,
+        )
+        self._assert_object_only(
+            element,
+            "atomic_number",
+        )
         self.assertIs(
             universe.world[
                 "element_registry_state"

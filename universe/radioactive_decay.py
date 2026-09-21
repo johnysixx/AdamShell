@@ -1,4 +1,4 @@
-﻿from copy import deepcopy
+from copy import deepcopy
 
 from universe.decay_state import RadioactiveDecayState
 from universe.isotopes import Isotopes
@@ -126,8 +126,8 @@ class RadioactiveDecay:
             "type": "radioactive_decay_pattern",
             "state": "available",
             "parent_isotope": isotope_name,
-            "parent_element": isotope["element_name"],
-            "parent_symbol": isotope["symbol"],
+            "parent_element": isotope.element_name,
+            "parent_symbol": isotope.symbol,
             "daughter_product": daughter_product,
             "half_life_years": half_life_years,
             "half_life_precision": "reference_approximation",

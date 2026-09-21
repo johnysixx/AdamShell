@@ -1,6 +1,7 @@
 import unittest
 
 from universe.atom_state import AtomFormationState
+from universe.chemical_objects import NeutralAtom
 from universe.atoms import Atoms
 from universe.universe import Universe
 
@@ -115,7 +116,7 @@ class AtomFormationObjectStateTests(
 
         self.assertEqual(process.atom_state.atom_count, 4)
         self.assertEqual(
-            process.atoms["hydrogen_atom"]["state"],
+            process.atoms["hydrogen_atom"].state,
             "formed",
         )
 

@@ -1,5 +1,6 @@
 import unittest
 
+from universe.chemical_objects import Isotope
 from universe.isotope_state import (
     IsotopeFormationState,
 )
@@ -141,9 +142,7 @@ class IsotopeFormationObjectStateTests(
             8,
         )
         self.assertEqual(
-            process.isotopes["hydrogen_1"][
-                "state"
-            ],
+            process.isotopes["hydrogen_1"].state,
             "formed",
         )
 

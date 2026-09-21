@@ -1,6 +1,7 @@
 import unittest
 
 from universe.atomic_time import AtomicTime
+from universe.chemical_objects import Isotope
 from universe.atomic_time_state import AtomicTimeState
 from universe.universe import Universe
 
@@ -125,11 +126,23 @@ class AtomicTimeObjectStateTests(
         self.assertTrue(
             process.atomic_time_state.si_second_defined
         )
+        live_isotope = process.time_standards[
+            "si_second"
+        ]["isotope"]
+
+        self.assertIsInstance(
+            live_isotope,
+            Isotope,
+        )
         self.assertEqual(
-            process.time_standards["si_second"][
-                "isotope"
-            ]["state"],
+            live_isotope.state,
             "formed",
+        )
+        self.assertIsInstance(
+            result["time_standards"]["si_second"][
+                "isotope"
+            ],
+            dict,
         )
 
     def test_definition_error_creates_cronenberg(
