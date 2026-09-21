@@ -1,4 +1,8 @@
-from .cat_birth_objects import CatBirthProfile
+from .cat_birth_objects import (
+    CatBirthProfile,
+    CatGeneticsValidation,
+)
+
 
 class CatGeneticsValidator:
 
@@ -15,22 +19,14 @@ class CatGeneticsValidator:
     def validate(
         self,
         profile,
-        genetics=None
+        karyotype=None
     ):
         if not isinstance(profile, CatBirthProfile):
             raise TypeError(
                 "profile must be a CatBirthProfile object."
             )
 
-        genetics = dict(
-            genetics or {}
-        )
-
         sex = profile.sex
-
-        karyotype = genetics.get(
-            "karyotype"
-        )
 
         if karyotype is None:
             karyotype = (
@@ -39,9 +35,10 @@ class CatGeneticsValidator:
                 else "XY"
             )
 
-        genetics["karyotype"] = (
-            karyotype
-        )
+        if not isinstance(karyotype, str):
+            raise TypeError(
+                "karyotype must be a string."
+            )
 
         color_requires_mosaic = (
             profile.color
@@ -71,66 +68,58 @@ class CatGeneticsValidator:
             reroll_die = None
 
         if not requires_two_x_color_mosaic:
-            return {
-                "valid": True,
-                "status": "standard_genetics",
-                "reason": None,
-                "genetics": genetics,
-                "conflicting_trait": None,
-                "reroll_die": None
-            }
+            return CatGeneticsValidation(
+                valid=True,
+                status="standard_genetics",
+                reason=None,
+                karyotype=karyotype,
+            )
 
         if karyotype in {
             "XX",
             "XXY"
         }:
-            return {
-                "valid": True,
-                "status": (
+            return CatGeneticsValidation(
+                valid=True,
+                status=(
                     "rare_genetic_exception"
                     if sex == "male"
                     else "standard_genetics"
                 ),
-                "reason": (
+                reason=(
                     "male_multicolor_requires_extra_x"
                     if sex == "male"
                     else None
                 ),
-                "genetics": genetics,
-                "conflicting_trait": None,
-                "reroll_die": None
-            }
+                karyotype=karyotype,
+            )
 
         if (
             sex == "male"
             and karyotype == "XY"
         ):
-            return {
-                "valid": False,
-                "status": (
+            return CatGeneticsValidation(
+                valid=False,
+                status=(
                     "impossible_for_declared_genotype"
                 ),
-                "reason": (
+                reason=(
                     "xy_male_cannot_form_standard_"
                     "orange_nonorange_x_mosaic"
                 ),
-                "genetics": genetics,
-                "conflicting_trait": (
-                    conflicting_trait
-                ),
-                "reroll_die": reroll_die
-            }
+                karyotype=karyotype,
+                conflicting_trait=conflicting_trait,
+                reroll_die=reroll_die,
+            )
 
-        return {
-            "valid": False,
-            "status": "unsupported_genetic_model",
-            "reason": (
+        return CatGeneticsValidation(
+            valid=False,
+            status="unsupported_genetic_model",
+            reason=(
                 "multicolor_profile_requires_"
                 "compatible_x_chromosome_model"
             ),
-            "genetics": genetics,
-            "conflicting_trait": (
-                conflicting_trait
-            ),
-            "reroll_die": reroll_die
-        }
+            karyotype=karyotype,
+            conflicting_trait=conflicting_trait,
+            reroll_die=reroll_die,
+        )

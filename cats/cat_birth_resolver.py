@@ -10,6 +10,8 @@ from .cat_genetics_validator import CatGeneticsValidator
 from .cat_birth_objects import (
     CatBirthProfile,
     CatCanonicalBirthResolution,
+    CatBirthGeneticsResult,
+    CatGeneticConflictResolution,
 )
 
 class CatBirthResolver:
@@ -222,7 +224,7 @@ class CatBirthResolver:
             )
         )
 
-        profile = genetics_result["profile"]
+        profile = genetics_result.profile
 
         woodoo_white_trace_applied = bool(
             getattr(
@@ -451,9 +453,18 @@ class CatBirthResolver:
         )
         cat.birth_canonical = canonical
 
-        cat.birth_genetics = (
-            birth["genetics"]
-        )
+        birth_genetics = birth["genetics"]
+
+        if not isinstance(
+            birth_genetics,
+            CatBirthGeneticsResult
+        ):
+            raise TypeError(
+                "birth genetics must be a "
+                "CatBirthGeneticsResult object."
+            )
+
+        cat.birth_genetics = birth_genetics
 
         birth_trait_dice_mapping = (
             birth["trait_dice_mapping"]
@@ -654,29 +665,20 @@ class CatBirthResolver:
                 )
             )
 
-            if validation["valid"]:
-                return {
-                    "valid": True,
-                    "profile": current_profile,
-                    "validation": validation,
-                    "conflict_count": len(
+            if validation.valid:
+                return CatBirthGeneticsResult(
+                    profile=current_profile,
+                    validation=validation,
+                    conflict_history=tuple(
                         conflict_history
                     ),
-                    "conflict_history": (
-                        conflict_history
-                    ),
-                    "cronenbergs_created": (
+                    cronenbergs_created=tuple(
                         cronenbergs_created
                     ),
-                    "cronenberg_count": len(
-                        cronenbergs_created
-                    )
-                }
+                )
 
             conflicting_trait = (
-                validation.get(
-                    "conflicting_trait"
-                )
+                validation.conflicting_trait
             )
 
             reroll_die = (
@@ -720,7 +722,7 @@ class CatBirthResolver:
                         "sides"
                     ],
                     cat_d20_value=(
-                        mapping["cat_d20_value"]
+                        mapping.cat_d20_value
                     )
                 )
             )
@@ -736,26 +738,16 @@ class CatBirthResolver:
                 reroll_die
             ] = reroll
 
-            conflict_event = {
-                "name": (
-                    "cat_birth_genetic_"
-                    "conflict_resolved"
-                ),
-                "attempt": attempt,
-                "reason": validation[
-                    "reason"
-                ],
-                "trait": trait,
-                "die": reroll_die,
-                "previous_value": (
-                    previous_value
-                ),
-                "new_value": new_value,
-                "reroll": dict(reroll)
-            }
-
             conflict_history.append(
-                conflict_event
+                CatGeneticConflictResolution(
+                    attempt=attempt,
+                    reason=validation.reason,
+                    trait=trait,
+                    die=reroll_die,
+                    previous_value=previous_value,
+                    new_value=new_value,
+                    reroll=dict(reroll),
+                )
             )
 
             cronenberg = (

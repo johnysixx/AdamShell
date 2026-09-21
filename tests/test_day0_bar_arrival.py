@@ -56,6 +56,8 @@ class Day0BarArrivalTests(unittest.TestCase):
         from cats.cat_birth_objects import (
             CatBirthProfile,
             CatCanonicalBirthResolution,
+            CatBirthGeneticsResult,
+            CatGeneticsValidation,
         )
         from cats.cat_birth_resolver import (
             CatBirthResolver
@@ -106,12 +108,15 @@ class Day0BarArrivalTests(unittest.TestCase):
                     ),
                 )
             ),
-            "genetics": {
-                "valid": True,
-                "conflict_count": 0,
-                "conflict_history": [],
-                "cronenberg_count": 0
-            },
+            "genetics": CatBirthGeneticsResult(
+                profile=profile,
+                validation=CatGeneticsValidation(
+                    valid=True,
+                    status="standard_genetics",
+                    reason=None,
+                    karyotype="XX",
+                ),
+            ),
             "trait_dice_mapping": (
                 CatTraitDiceMappingResult(
                     cat_d20_value=1,

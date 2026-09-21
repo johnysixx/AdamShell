@@ -1,4 +1,6 @@
 from dataclasses import dataclass, replace
+from types import MappingProxyType
+from typing import Mapping
 
 from core.entity.component_object import ComponentObject
 
@@ -99,6 +101,131 @@ class CatCanonicalBirthResolution:
             snapshot["forced_by"] = self.forced_by
 
         return snapshot
+
+
+@dataclass(frozen=True)
+class CatGeneticsValidation:
+    valid: bool
+    status: str
+    reason: str | None
+    karyotype: str
+    conflicting_trait: str | None = None
+    reroll_die: str | None = None
+
+    def to_dict(self):
+        return {
+            "valid": self.valid,
+            "status": self.status,
+            "reason": self.reason,
+            "karyotype": self.karyotype,
+            "conflicting_trait": self.conflicting_trait,
+            "reroll_die": self.reroll_die,
+        }
+
+
+@dataclass(frozen=True)
+class CatGeneticConflictResolution:
+    attempt: int
+    reason: str
+    trait: str
+    die: str
+    previous_value: str
+    new_value: str
+    reroll: Mapping[str, object]
+
+    def __post_init__(self):
+        if not isinstance(self.reroll, dict):
+            raise TypeError(
+                "reroll must be a dict boundary payload."
+            )
+
+        object.__setattr__(
+            self,
+            "reroll",
+            MappingProxyType(dict(self.reroll)),
+        )
+
+    def to_dict(self):
+        return {
+            "name": "cat_birth_genetic_conflict_resolved",
+            "attempt": self.attempt,
+            "reason": self.reason,
+            "trait": self.trait,
+            "die": self.die,
+            "previous_value": self.previous_value,
+            "new_value": self.new_value,
+            "reroll": dict(self.reroll),
+        }
+
+
+@dataclass(frozen=True)
+class CatBirthGeneticsResult:
+    profile: CatBirthProfile
+    validation: CatGeneticsValidation
+    conflict_history: tuple[CatGeneticConflictResolution, ...] = ()
+    cronenbergs_created: tuple[object, ...] = ()
+
+    def __post_init__(self):
+        if not isinstance(self.profile, CatBirthProfile):
+            raise TypeError(
+                "profile must be a CatBirthProfile object."
+            )
+
+        if not isinstance(
+            self.validation,
+            CatGeneticsValidation
+        ):
+            raise TypeError(
+                "validation must be a "
+                "CatGeneticsValidation object."
+            )
+
+        if not isinstance(self.conflict_history, tuple):
+            raise TypeError(
+                "conflict_history must be a tuple."
+            )
+
+        if not all(
+            isinstance(item, CatGeneticConflictResolution)
+            for item in self.conflict_history
+        ):
+            raise TypeError(
+                "conflict_history values must be "
+                "CatGeneticConflictResolution objects."
+            )
+
+        if not isinstance(self.cronenbergs_created, tuple):
+            raise TypeError(
+                "cronenbergs_created must be a tuple."
+            )
+
+    @property
+    def valid(self):
+        return self.validation.valid
+
+    @property
+    def conflict_count(self):
+        return len(self.conflict_history)
+
+    @property
+    def cronenberg_count(self):
+        return len(self.cronenbergs_created)
+
+    def to_dict(self):
+        return {
+            "valid": self.valid,
+            "profile": self.profile.to_dict(),
+            "validation": self.validation.to_dict(),
+            "conflict_count": self.conflict_count,
+            "conflict_history": [
+                item.to_dict()
+                for item in self.conflict_history
+            ],
+            "cronenbergs_created": list(
+                self.cronenbergs_created
+            ),
+            "cronenberg_count": self.cronenberg_count,
+        }
 
 
 class KittenEmbryo(ComponentObject):
