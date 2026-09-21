@@ -1,9 +1,39 @@
 import random
 import uuid
+from dataclasses import dataclass
 from core.entity.quantum_cat_route import QuantumCatRoute
 from core.entity.components import SpatialVector3
 from quantum.geometry_engine import QuantumGeometryEngine
 from navigation import NavigationEngine
+
+@dataclass(slots=True, frozen=True)
+class QuantumStaircase:
+    id: str
+    origin: SpatialVector3
+    destination: SpatialVector3
+    orientation: str
+    length: float
+
+    def __post_init__(self):
+        if not isinstance(self.origin, SpatialVector3):
+            raise TypeError(
+                "Quantum staircase origin must be a SpatialVector3 object."
+            )
+        if not isinstance(self.destination, SpatialVector3):
+            raise TypeError(
+                "Quantum staircase destination must be a SpatialVector3 object."
+            )
+        object.__setattr__(self, "length", float(self.length))
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "origin": self.origin.to_dict(),
+            "destination": self.destination.to_dict(),
+            "orientation": self.orientation,
+            "length": self.length,
+        }
+
 
 class QuantumUniverseSpace:
 
@@ -22,11 +52,39 @@ class QuantumUniverseSpace:
         self.bar_front_door = {'name': 'bar_front_door', 'position': {'x': 0.0, 'y': 0.0, 'z': 0.0}}
         self.reconfigure(cause='initialization')
 
+    @staticmethod
+    def _create_staircase(staircase_id, rng):
+        return QuantumStaircase(
+            id=staircase_id,
+            origin=SpatialVector3(
+                x=rng.uniform(-10.0, 10.0),
+                y=rng.uniform(-10.0, 10.0),
+                z=rng.uniform(-10.0, 10.0),
+            ),
+            destination=SpatialVector3(
+                x=rng.uniform(-10.0, 10.0),
+                y=rng.uniform(-10.0, 10.0),
+                z=rng.uniform(-10.0, 10.0),
+            ),
+            orientation=rng.choice(
+                ['up', 'down', 'left', 'right', 'inverted', 'impossible']
+            ),
+            length=rng.uniform(1.0, 8.0),
+        )
+
     def generate_space_sample(self, sample_key, count=8):
         if self.configuration_seed is None:
             raise RuntimeError('Quantum space has no configuration seed.')
-        local_rng = random.Random(f'{self.configuration_seed}:{sample_key}')
-        return [{'id': f'generated_staircase_{sample_key}_{index}', 'origin': {'x': local_rng.uniform(-10.0, 10.0), 'y': local_rng.uniform(-10.0, 10.0), 'z': local_rng.uniform(-10.0, 10.0)}, 'destination': {'x': local_rng.uniform(-10.0, 10.0), 'y': local_rng.uniform(-10.0, 10.0), 'z': local_rng.uniform(-10.0, 10.0)}, 'orientation': local_rng.choice(['up', 'down', 'left', 'right', 'inverted', 'impossible']), 'length': local_rng.uniform(1.0, 8.0)} for index in range(count)]
+        local_rng = random.Random(
+            f'{self.configuration_seed}:{sample_key}'
+        )
+        return [
+            self._create_staircase(
+                staircase_id=f'generated_staircase_{sample_key}_{index}',
+                rng=local_rng,
+            )
+            for index in range(count)
+        ]
 
     def get_active_cat_routes(self):
         return [route for route in self.cat_routes if route.observation_active]
@@ -39,7 +97,12 @@ class QuantumUniverseSpace:
         missing_count = target_count
         for _ in range(missing_count):
             staircase_id = f'staircase_{uuid.uuid4().hex[:8]}'
-            new_staircases.append({'id': staircase_id, 'origin': {'x': rng.uniform(-10.0, 10.0), 'y': rng.uniform(-10.0, 10.0), 'z': rng.uniform(-10.0, 10.0)}, 'destination': {'x': rng.uniform(-10.0, 10.0), 'y': rng.uniform(-10.0, 10.0), 'z': rng.uniform(-10.0, 10.0)}, 'orientation': rng.choice(['up', 'down', 'left', 'right', 'inverted', 'impossible']), 'length': rng.uniform(1.0, 8.0)})
+            new_staircases.append(
+                self._create_staircase(
+                    staircase_id=staircase_id,
+                    rng=rng,
+                )
+            )
         self.staircases = new_staircases
         self.configuration_seed = rng.randint(0, 2 ** 63 - 1)
         self.configuration_id = f'quantum_configuration_{self.configuration_seed}'
