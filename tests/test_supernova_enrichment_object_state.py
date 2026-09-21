@@ -4,7 +4,7 @@ from universe.cosmic_objects import StellarMaterialCloud
 from universe.heavy_element_nucleosynthesis import (
     HeavyElementNucleosynthesis,
 )
-from universe.stellar_objects import PrimordialStar
+from universe.stellar_objects import PrimordialStar, Supernova
 from universe.supernova_enrichment import (
     SupernovaEnrichment,
 )
@@ -171,6 +171,76 @@ class SupernovaEnrichmentObjectStateTests(
         self.assertTrue(cloud.contains_elements_up_to_iron)
         self.assertTrue(cloud.can_form_stellar_systems)
 
+    def test_supernova_is_object_only(self):
+        _, process, _ = self._enriched_process()
+
+        supernova = process.supernovae[0]
+
+        self.assertIsInstance(supernova, Supernova)
+        self._assert_object_only(supernova, "name")
+        self.assertEqual(supernova.name, "first_supernova")
+        self.assertEqual(supernova.state, "exploded")
+
+    def test_supernova_keeps_source_star_object(self):
+        universe = Universe()
+        source_star = self._star("source_star")
+        universe.world["first_stars"] = [source_star]
+        universe.world["elements_up_to_iron"] = {
+            "iron": {
+                "name": "iron",
+                "atomic_number": 26,
+            }
+        }
+
+        process = SupernovaEnrichment(universe)
+        process.enrich_space()
+
+        supernova = process.supernovae[0]
+        self.assertIs(supernova.source_star, source_star)
+        self.assertEqual(
+            supernova.source_star_name,
+            "source_star",
+        )
+
+    def test_supernova_rejects_legacy_source_star_dict(self):
+        with self.assertRaises(TypeError):
+            Supernova(
+                name="legacy_supernova",
+                type="supernova",
+                state="exploded",
+                source_star={"name": "legacy_star"},
+                released_elements=("iron",),
+            )
+
+    def test_released_elements_are_immutable_tuple(self):
+        _, process, _ = self._enriched_process()
+
+        supernova = process.supernovae[0]
+
+        self.assertIsInstance(
+            supernova.released_elements,
+            tuple,
+        )
+        with self.assertRaises(AttributeError):
+            supernova.released_elements.append("gold")
+
+    def test_supernova_to_dict_is_detached_boundary(self):
+        _, process, _ = self._enriched_process()
+
+        supernova = process.supernovae[0]
+        snapshot = supernova.to_dict()
+        snapshot["released_elements"].append("fake_element")
+        snapshot["source_star"] = "fake_star"
+
+        self.assertNotIn(
+            "fake_element",
+            supernova.released_elements,
+        )
+        self.assertEqual(
+            supernova.source_star_name,
+            "first_star",
+        )
+
     def test_public_result_remains_dict_boundary(
         self
     ):
@@ -219,9 +289,7 @@ class SupernovaEnrichmentObjectStateTests(
         )
         self.assertNotIn(
             "fake_element",
-            process.supernovae[0][
-                "released_elements"
-            ],
+            process.supernovae[0].released_elements,
         )
         self.assertEqual(
             process.enriched_clouds[0]

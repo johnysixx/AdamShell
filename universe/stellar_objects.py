@@ -62,3 +62,39 @@ class PrimordialStar:
             "can_fuse_elements": self.can_fuse_elements,
             "can_create_heavy_elements": self.can_create_heavy_elements,
         }
+
+@dataclass(frozen=True, slots=True)
+class Supernova:
+    name: str
+    type: str
+    state: str
+    source_star: PrimordialStar
+    released_elements: tuple[str, ...]
+
+    def __post_init__(self):
+        if not self.name:
+            raise ValueError("Supernova name must not be empty")
+        if not isinstance(self.source_star, PrimordialStar):
+            raise TypeError(
+                "source_star must be a PrimordialStar object"
+            )
+        if not isinstance(self.released_elements, tuple):
+            raise TypeError("released_elements must be a tuple")
+        for element_name in self.released_elements:
+            if not isinstance(element_name, str):
+                raise TypeError(
+                    "released_elements must contain strings"
+                )
+
+    @property
+    def source_star_name(self):
+        return self.source_star.name
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "type": self.type,
+            "state": self.state,
+            "source_star": self.source_star_name,
+            "released_elements": list(self.released_elements),
+        }

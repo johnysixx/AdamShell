@@ -1,7 +1,5 @@
-from copy import deepcopy
-
 from universe.cosmic_objects import StellarMaterialCloud
-from universe.stellar_objects import PrimordialStar
+from universe.stellar_objects import PrimordialStar, Supernova
 from universe.supernova_enrichment_state import (
     SupernovaEnrichmentState,
 )
@@ -29,7 +27,10 @@ class SupernovaEnrichment:
             "name": self.name,
             "type": self.type,
             "state": self.state,
-            "supernovae": deepcopy(self.supernovae),
+            "supernovae": [
+                supernova.to_dict()
+                for supernova in self.supernovae
+            ],
             "enriched_clouds": [
                 cloud.to_dict()
                 for cloud in self.enriched_clouds
@@ -97,13 +98,14 @@ class SupernovaEnrichment:
         )
         self.state = "enriched"
 
-        self.supernovae.append({
-            "name": "first_supernova",
-            "type": "supernova",
-            "state": "exploded",
-            "source_star": first_stars[0].name,
-            "released_elements": list(elements.keys()),
-        })
+        first_supernova = Supernova(
+            name="first_supernova",
+            type="supernova",
+            state="exploded",
+            source_star=first_stars[0],
+            released_elements=tuple(elements.keys()),
+        )
+        self.supernovae.append(first_supernova)
 
         self.supernova_enrichment_state.supernova_exploded = (
             True
@@ -117,7 +119,7 @@ class SupernovaEnrichment:
                 name="first_enriched_cloud",
                 type="enriched_stellar_cloud",
                 state="expanding",
-                origin="first_supernova",
+                origin=first_supernova.name,
                 composition=elements,
                 contains_elements_up_to_iron=True,
                 can_form_stellar_systems=True,
