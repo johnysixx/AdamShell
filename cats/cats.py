@@ -13,6 +13,7 @@ from .cat_intellect import CatIntellect
 from .cat_intention_executor import CatIntentionExecutor
 from .cat_perception import CatPerception
 from universe.aroma_profile import AromaProfile
+from universe.aroma_foundations import AromaMixture
 from .cat_knowledge import CatKnowledge
 from .cat_need_system import CatNeedSystem
 
@@ -138,9 +139,11 @@ class Cats:
 
     def learn_raspberry_rum_aroma(self, cat, meeting_place):
         raspberry_rum = getattr(meeting_place, 'raspberry_rum', None)
-        if not isinstance(raspberry_rum, dict):
-            return None
-        return CatKnowledge.learn_aroma(cat=cat, identity='raspberry_rum', components=raspberry_rum['aroma_profile'], source='direct_raspberry_rum_experience')
+        if not isinstance(raspberry_rum, AromaMixture):
+            raise TypeError(
+                'meeting_place.raspberry_rum must be an AromaMixture object.'
+            )
+        return CatKnowledge.learn_aroma(cat=cat, identity='raspberry_rum', components=raspberry_rum.aroma_profile, source='direct_raspberry_rum_experience')
 
     def learn_cat_aroma(self, observer, observed_cat):
         aroma = observed_cat.aroma.current()

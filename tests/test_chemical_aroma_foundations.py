@@ -33,16 +33,16 @@ class ChemicalAromaFoundationsTests(
 
         self.assertIn(
             "ethanol",
-            rum["chemical_base"]
+            rum.chemical_base
         )
 
         self.assertIn(
             "water",
-            rum["chemical_base"]
+            rum.chemical_base
         )
 
         self.assertGreater(
-            rum["aroma_profile"][
+            rum.aroma_profile[
                 "berry"
             ],
             0.0

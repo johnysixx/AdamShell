@@ -86,7 +86,7 @@ class MeetingPlace:
         self.new_drinks = {}
         self.bar_menu_sign = BarMenuSign(drink_menu=self.drink_menu, new_drinks=self.new_drinks)
         self.bar_counter.attach_menu_sign(self.bar_menu_sign)
-        self.ambient_aroma = AmbientAroma(dominant_source='raspberry_rum', profile=dict(self.raspberry_rum['aroma_profile']))
+        self.ambient_aroma = AmbientAroma(dominant_source='raspberry_rum', profile=dict(self.raspberry_rum.aroma_profile))
         self.fridge = BarFridge()
         self.energy_reservoir = BarEnergyReservoir()
         self.entropy_reservoir = BarEntropyReservoir()
