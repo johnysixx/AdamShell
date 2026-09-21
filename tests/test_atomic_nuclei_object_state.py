@@ -1,6 +1,7 @@
 import unittest
 
 from universe.atomic_nuclei import AtomicNuclei
+from universe.nuclear_objects import AtomicNucleus
 from universe.nuclear_state import (
     NuclearFormationState,
 )
@@ -118,9 +119,112 @@ class AtomicNucleiObjectStateTests(
         self.assertEqual(
             process.nuclei[
                 "hydrogen_nucleus"
-            ]["state"],
+            ].state,
             "formed",
         )
+
+
+    def test_nucleus_registry_stores_domain_objects(
+        self
+    ):
+        universe, process, _ = self._formed_nuclei()
+
+        hydrogen = process.nuclei[
+            "hydrogen_nucleus"
+        ]
+        helium = process.nuclei[
+            "helium_nucleus"
+        ]
+
+        self.assertIsInstance(
+            hydrogen,
+            AtomicNucleus,
+        )
+        self.assertIsInstance(
+            helium,
+            AtomicNucleus,
+        )
+        self.assertIs(
+            universe.world["light_nuclei"][
+                "hydrogen_nucleus"
+            ],
+            hydrogen,
+        )
+
+    def test_nucleus_is_object_only(
+        self
+    ):
+        _, process, _ = self._formed_nuclei()
+
+        self._assert_object_only(
+            process.nuclei["hydrogen_nucleus"],
+            "state",
+        )
+
+    def test_nucleus_values_are_attribute_based(
+        self
+    ):
+        _, process, _ = self._formed_nuclei()
+
+        deuterium = process.nuclei[
+            "deuterium_nucleus"
+        ]
+        lithium = process.nuclei[
+            "trace_lithium_nucleus"
+        ]
+
+        self.assertEqual(
+            deuterium.element_name,
+            "hydrogen",
+        )
+        self.assertEqual(deuterium.protons, 1)
+        self.assertEqual(deuterium.neutrons, 1)
+        self.assertEqual(deuterium.atomic_number, 1)
+        self.assertEqual(deuterium.mass_number, 2)
+        self.assertEqual(lithium.mass_number, 7)
+        self.assertEqual(
+            lithium.future_use,
+            ("elements", "atoms", "isotopes"),
+        )
+
+    def test_nucleus_to_dict_is_detached_boundary(
+        self
+    ):
+        nucleus = AtomicNucleus(
+            name="helium_nucleus",
+            element_name="helium",
+            protons=2,
+            neutrons=2,
+        )
+
+        snapshot = nucleus.to_dict()
+        snapshot["state"] = "changed"
+        snapshot["future_use"].append("changed")
+
+        self.assertEqual(nucleus.state, "formed")
+        self.assertNotIn(
+            "changed",
+            nucleus.future_use,
+        )
+
+    def test_nucleus_rejects_invalid_counts(
+        self
+    ):
+        with self.assertRaises(TypeError):
+            AtomicNucleus(
+                name="invalid",
+                element_name="invalid",
+                protons={"count": 1},
+                neutrons=0,
+            )
+
+        with self.assertRaises(ValueError):
+            AtomicNucleus(
+                name="invalid",
+                element_name="invalid",
+                protons=1,
+                neutrons=-1,
+            )
 
     def test_formation_error_creates_cronenberg(
         self

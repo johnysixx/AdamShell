@@ -1,5 +1,4 @@
-﻿from copy import deepcopy
-
+from universe.nuclear_objects import AtomicNucleus
 from universe.nuclear_state import (
     NuclearFormationState,
 )
@@ -24,7 +23,10 @@ class AtomicNuclei:
             "name": self.name,
             "type": self.type,
             "state": self.state,
-            "nuclei": deepcopy(self.nuclei),
+            "nuclei": {
+                name: nucleus.to_dict()
+                for name, nucleus in self.nuclei.items()
+            },
             "nuclear_state": (
                 self.nuclear_state.to_dict()
             ),
@@ -96,17 +98,12 @@ class AtomicNuclei:
         return self.public_state
 
     def add_nucleus(self, name, protons, neutrons, element_name):
-        self.nuclei[name] = {
-            "name": name,
-            "type": "atomic_nucleus",
-            "state": "formed",
-            "element_name": element_name,
-            "protons": protons,
-            "neutrons": neutrons,
-            "atomic_number": protons,
-            "mass_number": protons + neutrons,
-            "future_use": ["elements", "atoms", "isotopes"]
-        }
+        self.nuclei[name] = AtomicNucleus(
+            name=name,
+            element_name=element_name,
+            protons=protons,
+            neutrons=neutrons,
+        )
 
     def record_history(self):
         history = self.universe.world.setdefault("cosmic_history", [])
