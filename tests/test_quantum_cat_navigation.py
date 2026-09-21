@@ -111,7 +111,7 @@ class QuantumCatNavigationTests(
 
         self.assertEqual(
             result["route"].route_steps[-1],
-            near.position.to_dict()
+            near.position
         )
 
     def test_no_huntable_cronenberg_returns_safe_result(self):
@@ -200,21 +200,9 @@ class QuantumCatNavigationTests(
         self.assertEqual(
             route.route_steps,
             [
-                {
-                    "x": 4.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                {
-                    "x": 2.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                }
+                SpatialVector3(x=4.0, y=0.0, z=0.0),
+                SpatialVector3(x=2.0, y=0.0, z=0.0),
+                SpatialVector3(x=0.0, y=0.0, z=0.0),
             ]
         )
 
@@ -226,7 +214,7 @@ class QuantumCatNavigationTests(
         )
 
         self.assertEqual(
-            route.route_steps[-1],
+            route.route_steps[-1].to_dict(),
             space.bar_front_door[
                 "position"
             ]
@@ -273,11 +261,11 @@ class QuantumCatNavigationTests(
 
         self.assertEqual(
             route.route_steps[-1],
-            {
-                "x": 3.0,
-                "y": 4.0,
-                "z": 0.0
-            }
+            SpatialVector3(
+                x=3.0,
+                y=4.0,
+                z=0.0,
+            )
         )
 
         self.assertAlmostEqual(

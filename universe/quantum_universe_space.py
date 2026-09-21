@@ -65,13 +65,26 @@ class QuantumUniverseSpace:
         memory = self._get_cat_memory(cat)
         if memory is None:
             return None
-        route_details = {'route_id': route.route_id, 'destination': route.destination, 'start_position': dict(route.start_position), 'current_position': dict(route.current_position), 'current_step_index': route.current_step_index, 'next_position': route.next_position, 'route_state': route.state, 'has_arrived': route.has_arrived}
+        route_details = {'route_id': route.route_id, 'destination': route.destination, 'start_position': route.start_position.to_dict(), 'current_position': route.current_position.to_dict(), 'current_step_index': route.current_step_index, 'next_position': None if route.next_position is None else route.next_position.to_dict(), 'route_state': route.state, 'has_arrived': route.has_arrived}
         route_details.update(details or {})
-        return memory.remember(event_type=event_type, universe_tick=getattr(universe, 'universe_tick', None), location=dict(route.current_position), participants=[], details=route_details)
+        return memory.remember(event_type=event_type, universe_tick=getattr(universe, 'universe_tick', None), location=route.current_position.to_dict(), participants=[], details=route_details)
 
     def plan_direct_cat_route(self, cat_id, start_position, destination_position, destination, step_size=None):
         plan = self.navigation_engine.direct_route(start_position=start_position, destination_position=destination_position, step_size=step_size)
-        route = self.create_cat_route(cat_id=cat_id, route_steps=plan['route_steps'], start_position=start_position, destination=destination)
+        route_steps = [
+            SpatialVector3(
+                x=step['x'],
+                y=step['y'],
+                z=step['z'],
+            )
+            for step in plan['route_steps']
+        ]
+        route_start_position = SpatialVector3(
+            x=start_position['x'],
+            y=start_position['y'],
+            z=start_position['z'],
+        )
+        route = self.create_cat_route(cat_id=cat_id, route_steps=route_steps, start_position=route_start_position, destination=destination)
         return {'name': 'cat_direct_route_planned', 'cat_id': cat_id, 'destination': destination, 'plan': plan, 'route': route}
 
     @staticmethod
@@ -121,15 +134,15 @@ class QuantumUniverseSpace:
         if route is None:
             return {'result': 'no_active_route'}
         if not route.memory_started:
-            self._remember_cat_route_event(cat=cat, route=route, universe=universe, event_type='route_started', details={'route_steps': [dict(step) for step in route.route_steps]})
+            self._remember_cat_route_event(cat=cat, route=route, universe=universe, event_type='route_started', details={'route_steps': [step.to_dict() for step in route.route_steps]})
             route.memory_started = True
         next_position = route.next_position
         if next_position is None:
             return {'result': 'already_arrived'}
-        crossing_cronenbergs = [cronenberg for cronenberg in cronenbergs if getattr(cronenberg, 'is_alive', False) and route.position_matches(self._cronenberg_position_snapshot(cronenberg) or {})]
+        crossing_cronenbergs = [cronenberg for cronenberg in cronenbergs if getattr(cronenberg, 'is_alive', False) and isinstance(getattr(cronenberg, 'position', None), SpatialVector3) and route.position_matches(cronenberg.position)]
         if crossing_cronenbergs:
             cronenberg = min(crossing_cronenbergs, key=lambda item: item.size)
-            cronenberg_position = self._cronenberg_position_snapshot(cronenberg)
+            cronenberg_position = cronenberg.position
             previous_detour_count = route.detour_count_for(cronenberg_position)
             if previous_detour_count > 0:
 
@@ -138,21 +151,21 @@ class QuantumUniverseSpace:
                 quantum_error = universe.quantum_error_boundary.execute(operation=repeated_cat_route_paradox, source_component='quantum_cat_route', source_operation='repeated_detour_paradox')
                 manifested_cronenberg = quantum_error.get('cronenberg')
                 if manifested_cronenberg is not None:
-                    link_metadata = {'cat': cat_id, 'position': dict(cronenberg_position), 'source_operation': 'repeated_detour_paradox'}
+                    link_metadata = {'cat': cat_id, 'position': cronenberg_position.to_dict(), 'source_operation': 'repeated_detour_paradox'}
                     cronenberg.quantum_link_system.add_link(target_id=manifested_cronenberg.id, link_type='manifested_consequence', strength=1.0, created_tick=getattr(universe, 'universe_tick', None), metadata=link_metadata)
                     manifested_cronenberg.quantum_link_system.add_link(target_id=cronenberg.id, link_type='causal_paradox', strength=1.0, created_tick=getattr(universe, 'universe_tick', None), metadata=link_metadata)
-                route.record_encounter({'result': 'cat_route_paradox', 'cat': cat_id, 'blocked_by': cronenberg.name, 'position': dict(cronenberg_position)})
+                route.record_encounter({'result': 'cat_route_paradox', 'cat': cat_id, 'blocked_by': cronenberg.name, 'position': cronenberg_position.to_dict()})
                 return {'result': 'cat_route_paradox_created_cronenberg', 'cat': cat_id, 'blocked_by': cronenberg.name, 'quantum_error': quantum_error}
             encounter = encounter_system.resolve(cat=cat, cronenberg=cronenberg, route=route, universe=universe, rng=rng)
             if encounter.get('result') == 'cat_avoids_cronenberg':
-                self._remember_cat_route_event(cat=cat, route=route, universe=universe, event_type='route_detour', details={'blocked_by': cronenberg.name, 'blocked_position': dict(cronenberg_position), 'detour_position': dict(encounter['detour']), 'returns_to_original_route': True})
+                self._remember_cat_route_event(cat=cat, route=route, universe=universe, event_type='route_detour', details={'blocked_by': cronenberg.name, 'blocked_position': cronenberg_position.to_dict(), 'detour_position': dict(encounter['detour']), 'returns_to_original_route': True})
                 return encounter
-        previous_position = dict(route.current_position)
+        previous_position = route.current_position.to_dict()
         position = route.advance()
-        self._remember_cat_route_event(cat=cat, route=route, universe=universe, event_type='route_step', details={'previous_position': previous_position, 'position': dict(position) if position is not None else None})
+        self._remember_cat_route_event(cat=cat, route=route, universe=universe, event_type='route_step', details={'previous_position': previous_position, 'position': position.to_dict() if position is not None else None})
         if route.has_arrived:
-            self._remember_cat_route_event(cat=cat, route=route, universe=universe, event_type='route_arrived', details={'arrival_position': dict(route.current_position)})
-        return {'result': 'route_advanced', 'position': position, 'destination': route.destination, 'arrived': route.has_arrived}
+            self._remember_cat_route_event(cat=cat, route=route, universe=universe, event_type='route_arrived', details={'arrival_position': route.current_position.to_dict()})
+        return {'result': 'route_advanced', 'position': position.to_dict() if position is not None else None, 'destination': route.destination, 'arrived': route.has_arrived}
 
     @property
     def public_state(self):

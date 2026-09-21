@@ -1,4 +1,34 @@
 import uuid
+from dataclasses import dataclass
+
+from core.entity.components import SpatialVector3
+
+
+@dataclass(slots=True, frozen=True)
+class QuantumCatRouteDetour:
+    blocked_position: SpatialVector3
+    detour_position: SpatialVector3
+    returns_to_original_route: bool
+    destination: str
+
+    def __post_init__(self):
+        if not isinstance(self.blocked_position, SpatialVector3):
+            raise TypeError(
+                "Quantum cat route detour blocked_position must be a SpatialVector3 object."
+            )
+        if not isinstance(self.detour_position, SpatialVector3):
+            raise TypeError(
+                "Quantum cat route detour detour_position must be a SpatialVector3 object."
+            )
+
+    def to_dict(self):
+        return {
+            "blocked_position": self.blocked_position.to_dict(),
+            "detour_position": self.detour_position.to_dict(),
+            "returns_to_original_route": self.returns_to_original_route,
+            "destination": self.destination,
+        }
+
 
 class QuantumCatRoute:
 
@@ -18,18 +48,20 @@ class QuantumCatRoute:
         self.destination = destination
 
         self.route_steps = [
-            dict(step)
+            self._require_position(
+                step,
+                field_name="route step",
+            )
             for step in route_steps
         ]
 
-        self.start_position = dict(
-            start_position
+        self.start_position = self._require_position(
+            start_position,
+            field_name="start position",
         )
 
         self.current_step_index = 0
-        self.current_position = dict(
-            self.start_position
-        )
+        self.current_position = self.start_position
 
         self.detours = []
         self.encounters = []
@@ -39,6 +71,14 @@ class QuantumCatRoute:
         self.state = "observed"
         self.observation_active = True
 
+    @staticmethod
+    def _require_position(position, field_name):
+        if not isinstance(position, SpatialVector3):
+            raise TypeError(
+                f"Quantum cat route {field_name} must be a SpatialVector3 object."
+            )
+        return position
+
     @property
     def next_position(self):
         if (
@@ -47,11 +87,9 @@ class QuantumCatRoute:
         ):
             return None
 
-        return dict(
-            self.route_steps[
-                self.current_step_index
-            ]
-        )
+        return self.route_steps[
+            self.current_step_index
+        ]
 
     @property
     def has_arrived(self):
@@ -62,17 +100,20 @@ class QuantumCatRoute:
         position,
         tolerance=0.001
     ):
+        position = self._require_position(
+            position,
+            field_name="comparison position",
+        )
+
         next_position = self.next_position
 
         if next_position is None:
             return False
 
-        return all(
-            abs(
-                float(next_position[axis])
-                - float(position[axis])
-            ) <= tolerance
-            for axis in ("x", "y", "z")
+        return (
+            abs(next_position.x - position.x) <= tolerance
+            and abs(next_position.y - position.y) <= tolerance
+            and abs(next_position.z - position.z) <= tolerance
         )
 
     def advance(self):
@@ -83,13 +124,8 @@ class QuantumCatRoute:
             self.stop_observation()
             return None
 
-        self.current_position = dict(
-            next_position
-        )
-
+        self.current_position = next_position
         self.current_step_index += 1
-
-
 
         if self.has_arrived:
             self.state = "arrived"
@@ -97,24 +133,21 @@ class QuantumCatRoute:
         else:
             self.state = "travelling"
 
-        return dict(
-            self.current_position
-        )
+        return self.current_position
 
     def detour_count_for(self, blocked_position):
         if blocked_position is None:
             return 0
 
-        blocked_position = dict(
-            blocked_position
+        blocked_position = self._require_position(
+            blocked_position,
+            field_name="blocked position",
         )
 
         return sum(
             1
             for detour in self.detours
-            if detour.get(
-                "blocked_position"
-            ) == blocked_position
+            if detour.blocked_position == blocked_position
         )
 
     def make_minimal_detour(
@@ -122,42 +155,30 @@ class QuantumCatRoute:
         blocked_position,
         clearance=0.25
     ):
-        blocked_position = dict(
-            blocked_position
+        blocked_position = self._require_position(
+            blocked_position,
+            field_name="blocked position",
         )
 
-        detour_position = {
-            "x": float(
-                blocked_position["x"]
-            ),
-            "y": float(
-                blocked_position["y"]
-            ) + float(clearance),
-            "z": float(
-                blocked_position["z"]
+        detour_position = SpatialVector3(
+            x=blocked_position.x,
+            y=blocked_position.y + float(clearance),
+            z=blocked_position.z,
+        )
+
+        self.detours.append(
+            QuantumCatRouteDetour(
+                blocked_position=blocked_position,
+                detour_position=detour_position,
+                returns_to_original_route=True,
+                destination=self.destination,
             )
-        }
-
-        self.detours.append({
-            "blocked_position": (
-                blocked_position
-            ),
-            "detour_position": (
-                dict(detour_position)
-            ),
-            "returns_to_original_route": True,
-            "destination": self.destination
-        })
-
-        self.current_position = dict(
-            detour_position
         )
 
+        self.current_position = detour_position
         self.state = "avoiding_obstacle"
 
-        return dict(
-            detour_position
-        )
+        return detour_position
 
     def record_encounter(
         self,
@@ -180,30 +201,26 @@ class QuantumCatRoute:
             "route_id": self.route_id,
             "cat_id": self.cat_id,
             "destination": self.destination,
-            "route_steps": list(
-                self.route_steps
-            ),
-            "start_position": dict(
-                self.start_position
-            ),
-            "current_position": dict(
-                self.current_position
-            ),
-            "current_step_index": (
-                self.current_step_index
-            ),
+            "route_steps": [
+                step.to_dict()
+                for step in self.route_steps
+            ],
+            "start_position": self.start_position.to_dict(),
+            "current_position": self.current_position.to_dict(),
+            "current_step_index": self.current_step_index,
             "next_position": (
-                self.next_position
+                None
+                if self.next_position is None
+                else self.next_position.to_dict()
             ),
             "has_arrived": self.has_arrived,
-            "detours": list(
-                self.detours
-            ),
+            "detours": [
+                detour.to_dict()
+                for detour in self.detours
+            ],
             "encounters": list(
                 self.encounters
             ),
             "state": self.state,
-            "observation_active": (
-                self.observation_active
-            )
+            "observation_active": self.observation_active,
         }

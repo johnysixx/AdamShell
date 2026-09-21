@@ -81,7 +81,7 @@ class CatCronenbergEncounter:
                 "cat": cat_name,
                 "cronenberg": cronenberg.name,
                 "size_ratio": size_ratio,
-                "detour": detour,
+                "detour": detour.to_dict(),
                 "destination": route.destination
             }
 
@@ -106,7 +106,7 @@ class CatCronenbergEncounter:
                     "quantum_layer"
                 ),
                 details={
-                    "detour": dict(detour),
+                    "detour": detour.to_dict(),
                     "destination": route.destination
                 }
             )
@@ -496,7 +496,7 @@ class CatCronenbergEncounter:
         ):
             return None
 
-        return position.to_dict()
+        return position
 
     @property
     def public_state(self):
