@@ -1,8 +1,9 @@
-﻿from copy import deepcopy
+from copy import deepcopy
 
 from universe.big_bang_state import (
     BigBangCosmicState,
 )
+from universe.primordial_objects import PrimordialCosmicComponent
 
 
 class BigBang:
@@ -27,9 +28,10 @@ class BigBang:
             "type": self.type,
             "state": self.state,
             "phases": deepcopy(self.phases),
-            "primordial_elements": deepcopy(
-                self.primordial_elements
-            ),
+            "primordial_elements": {
+                name: component.to_dict()
+                for name, component in self.primordial_elements.items()
+            },
             "cosmic_state": self.cosmic_state.to_dict(),
         }
 
@@ -72,17 +74,17 @@ class BigBang:
     def form_primordial_plasma(self):
         self.cosmic_state.primordial_plasma_formed = True
 
-        self.primordial_elements["energy"] = {
-            "name": "energy",
-            "type": "primordial_force",
-            "state": "released"
-        }
+        self.primordial_elements["energy"] = PrimordialCosmicComponent(
+            name="energy",
+            type="primordial_force",
+            state="released",
+        )
 
-        self.primordial_elements["matter"] = {
-            "name": "matter",
-            "type": "primordial_substance",
-            "state": "forming"
-        }
+        self.primordial_elements["matter"] = PrimordialCosmicComponent(
+            name="matter",
+            type="primordial_substance",
+            state="forming",
+        )
 
         self.record_phase(
             name="primordial_plasma",
@@ -97,26 +99,26 @@ class BigBang:
             .light_nuclei_conditions_prepared
         ) = True
 
-        self.primordial_elements["hydrogen"] = {
-            "name": "hydrogen",
-            "type": "element",
-            "state": "formed",
-            "origin": "big_bang_nucleosynthesis"
-        }
+        self.primordial_elements["hydrogen"] = PrimordialCosmicComponent(
+            name="hydrogen",
+            type="element",
+            state="formed",
+            origin="big_bang_nucleosynthesis",
+        )
 
-        self.primordial_elements["helium"] = {
-            "name": "helium",
-            "type": "element",
-            "state": "formed",
-            "origin": "big_bang_nucleosynthesis"
-        }
+        self.primordial_elements["helium"] = PrimordialCosmicComponent(
+            name="helium",
+            type="element",
+            state="formed",
+            origin="big_bang_nucleosynthesis",
+        )
 
-        self.primordial_elements["trace_lithium"] = {
-            "name": "trace_lithium",
-            "type": "element",
-            "state": "trace",
-            "origin": "big_bang_nucleosynthesis"
-        }
+        self.primordial_elements["trace_lithium"] = PrimordialCosmicComponent(
+            name="trace_lithium",
+            type="element",
+            state="trace",
+            origin="big_bang_nucleosynthesis",
+        )
 
         self.record_phase(
             name="light_nuclei_conditions_prepared",

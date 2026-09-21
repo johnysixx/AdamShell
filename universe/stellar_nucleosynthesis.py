@@ -1,6 +1,7 @@
 from copy import deepcopy
 
 from universe.stellar_objects import PrimordialStar
+from universe.primordial_objects import PrimordialCosmicComponent
 from universe.stellar_nucleosynthesis_state import (
     StellarNucleosynthesisState,
 )
@@ -74,7 +75,16 @@ class StellarNucleosynthesis:
         )
 
         for element_name, element in primordial_elements.items():
-            if element.get("type") == "element":
+            if not isinstance(
+                element,
+                PrimordialCosmicComponent,
+            ):
+                raise TypeError(
+                    "primordial_elements must contain "
+                    "PrimordialCosmicComponent objects"
+                )
+
+            if element.type == "element":
                 self.elements_up_to_iron[element_name] = element
 
         self.add_stellar_element("beryllium", 4)

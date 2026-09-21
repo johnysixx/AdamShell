@@ -4,6 +4,7 @@ from universe.big_bang import BigBang
 from universe.big_bang_state import (
     BigBangCosmicState,
 )
+from universe.primordial_objects import PrimordialCosmicComponent
 from universe.universe import Universe
 
 
@@ -144,12 +145,80 @@ class BigBangCosmicObjectStateTests(
         self.assertEqual(
             process.primordial_elements[
                 "hydrogen"
-            ]["state"],
+            ].state,
             "formed",
         )
         self.assertEqual(
             process.phases[0]["name"],
             "primordial_void",
+        )
+
+    def test_primordial_registry_contains_component_objects(self):
+        universe = Universe()
+        universe.start_big_bang()
+
+        components = universe.world[
+            "primordial_elements"
+        ]
+
+        for component in components.values():
+            self.assertIsInstance(
+                component,
+                PrimordialCosmicComponent,
+            )
+
+        self.assertEqual(
+            components["energy"].type,
+            "primordial_force",
+        )
+        self.assertEqual(
+            components["matter"].state,
+            "forming",
+        )
+        self.assertEqual(
+            components["hydrogen"].type,
+            "element",
+        )
+        self.assertEqual(
+            components["hydrogen"].origin,
+            "big_bang_nucleosynthesis",
+        )
+
+    def test_primordial_components_are_object_only(self):
+        universe = Universe()
+        universe.start_big_bang()
+
+        hydrogen = universe.world[
+            "primordial_elements"
+        ]["hydrogen"]
+
+        self._assert_object_only(
+            hydrogen,
+            "state",
+        )
+
+    def test_public_primordial_snapshot_is_detached_dict(self):
+        universe = Universe()
+        result = universe.start_big_bang()
+
+        hydrogen = universe.world[
+            "primordial_elements"
+        ]["hydrogen"]
+
+        self.assertIsInstance(
+            result[
+                "primordial_elements"
+            ]["hydrogen"],
+            dict,
+        )
+
+        result[
+            "primordial_elements"
+        ]["hydrogen"]["state"] = "changed"
+
+        self.assertEqual(
+            hydrogen.state,
+            "formed",
         )
 
     def test_to_dict_is_detached_boundary(

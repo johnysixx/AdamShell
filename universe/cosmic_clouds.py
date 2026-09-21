@@ -2,6 +2,7 @@ from universe.cosmic_cloud_state import (
     CosmicCloudFormationState,
 )
 from universe.cosmic_objects import StellarMaterialCloud
+from universe.primordial_objects import PrimordialCosmicComponent
 
 
 class CosmicClouds:
@@ -65,6 +66,17 @@ class CosmicClouds:
             self.write_to_world()
             return self.public_state
 
+        hydrogen = primordial_elements["hydrogen"]
+
+        if not isinstance(
+            hydrogen,
+            PrimordialCosmicComponent,
+        ):
+            raise TypeError(
+                "primordial hydrogen must be a "
+                "PrimordialCosmicComponent"
+            )
+
         self.cosmic_cloud_state.hydrogen_available = True
 
         if "helium" not in primordial_elements:
@@ -76,6 +88,17 @@ class CosmicClouds:
             )
             self.write_to_world()
             return self.public_state
+
+        helium = primordial_elements["helium"]
+
+        if not isinstance(
+            helium,
+            PrimordialCosmicComponent,
+        ):
+            raise TypeError(
+                "primordial helium must be a "
+                "PrimordialCosmicComponent"
+            )
 
         self.cosmic_cloud_state.helium_available = True
         self.state = "formed"

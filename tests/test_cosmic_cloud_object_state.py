@@ -5,11 +5,20 @@ from universe.cosmic_cloud_state import (
 )
 from universe.cosmic_clouds import CosmicClouds
 from universe.cosmic_objects import StellarMaterialCloud
+from universe.primordial_objects import PrimordialCosmicComponent
 from universe.stars import Stars
 from universe.universe import Universe
 
 
 class CosmicCloudObjectStateTests(unittest.TestCase):
+
+    def _primordial_element(self, name):
+        return PrimordialCosmicComponent(
+            name=name,
+            type="element",
+            state="formed",
+            origin="big_bang_nucleosynthesis",
+        )
 
     def _assert_object_only(
         self,
@@ -32,14 +41,12 @@ class CosmicCloudObjectStateTests(unittest.TestCase):
     def _formed_clouds(self):
         universe = Universe()
         universe.world["primordial_elements"] = {
-            "hydrogen": {
-                "name": "hydrogen",
-                "atomic_number": 1,
-            },
-            "helium": {
-                "name": "helium",
-                "atomic_number": 2,
-            },
+            "hydrogen": self._primordial_element(
+                "hydrogen"
+            ),
+            "helium": self._primordial_element(
+                "helium"
+            ),
         }
 
         process = CosmicClouds(universe)
@@ -66,8 +73,12 @@ class CosmicCloudObjectStateTests(unittest.TestCase):
     def test_formation_mutates_same_state_object(self):
         universe = Universe()
         universe.world["primordial_elements"] = {
-            "hydrogen": {},
-            "helium": {},
+            "hydrogen": self._primordial_element(
+                "hydrogen"
+            ),
+            "helium": self._primordial_element(
+                "helium"
+            ),
         }
         process = CosmicClouds(universe)
         state = process.cosmic_cloud_state
@@ -171,7 +182,9 @@ class CosmicCloudObjectStateTests(unittest.TestCase):
     def test_missing_hydrogen_preserves_initial_state(self):
         universe = Universe()
         universe.world["primordial_elements"] = {
-            "helium": {},
+            "helium": self._primordial_element(
+                "helium"
+            ),
         }
         process = CosmicClouds(universe)
 
@@ -193,7 +206,9 @@ class CosmicCloudObjectStateTests(unittest.TestCase):
     def test_missing_helium_records_available_hydrogen(self):
         universe = Universe()
         universe.world["primordial_elements"] = {
-            "hydrogen": {},
+            "hydrogen": self._primordial_element(
+                "hydrogen"
+            ),
         }
         process = CosmicClouds(universe)
 
@@ -227,8 +242,12 @@ class CosmicCloudObjectStateTests(unittest.TestCase):
     def test_formation_error_creates_cronenberg(self):
         universe = Universe()
         universe.world["primordial_elements"] = {
-            "hydrogen": {},
-            "helium": {},
+            "hydrogen": self._primordial_element(
+                "hydrogen"
+            ),
+            "helium": self._primordial_element(
+                "helium"
+            ),
         }
         process = CosmicClouds(universe)
 
