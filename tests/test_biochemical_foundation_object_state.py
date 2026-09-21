@@ -3,6 +3,9 @@ import unittest
 from universe.biochemical_foundations import (
     BiochemicalFoundations,
 )
+from universe.biochemical_objects import (
+    BiochemicalCompound,
+)
 from universe.biochemical_state import (
     BiochemicalFoundationState,
 )
@@ -124,6 +127,12 @@ class BiochemicalFoundationObjectStateTests(
             dict,
         )
         self.assertIsInstance(result["compounds"], dict)
+        self.assertTrue(
+            all(
+                isinstance(compound, BiochemicalCompound)
+                for compound in process.compounds.values()
+            )
+        )
 
     def test_public_result_is_deeply_detached(self):
         _, process, result = self._formed_process()
@@ -140,7 +149,7 @@ class BiochemicalFoundationObjectStateTests(
         )
         self.assertNotIn(
             "fake_material",
-            process.compounds["sugars"]["requires"],
+            process.compounds["sugars"].requires,
         )
 
     def test_missing_material_preserves_initial_state(self):

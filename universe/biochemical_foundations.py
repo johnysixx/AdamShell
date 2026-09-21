@@ -1,5 +1,6 @@
-from copy import deepcopy
-
+from universe.biochemical_objects import (
+    BiochemicalCompound,
+)
 from universe.biochemical_state import (
     BiochemicalFoundationState,
 )
@@ -26,7 +27,10 @@ class BiochemicalFoundations:
             "name": self.name,
             "type": self.type,
             "state": self.state,
-            "compounds": deepcopy(self.compounds),
+            "compounds": {
+                name: compound.to_dict()
+                for name, compound in self.compounds.items()
+            },
             "biochemical_state": self.biochemical_state.to_dict(),
         }
 
@@ -112,14 +116,14 @@ class BiochemicalFoundations:
         return self.public_state
 
     def add_compound(self, name, compound_type, requires, future_use):
-        self.compounds[name] = {
-            "name": name,
-            "type": compound_type,
-            "state": "possible",
-            "requires": requires,
-            "future_use": future_use,
-            "origin": "planetary_biochemistry"
-        }
+        compound = BiochemicalCompound(
+            name=name,
+            compound_type=compound_type,
+            requires=tuple(requires),
+            future_use=tuple(future_use),
+        )
+        self.compounds[name] = compound
+        return compound
 
     def record_history(self):
         history = self.universe.world.setdefault("cosmic_history", [])
