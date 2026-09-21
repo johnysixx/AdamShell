@@ -1,3 +1,5 @@
+from .cat_birth_objects import CatBirthProfile
+
 class CatGeneticsValidator:
 
     TORTOISESHELL_COLORS = {
@@ -15,11 +17,16 @@ class CatGeneticsValidator:
         profile,
         genetics=None
     ):
+        if not isinstance(profile, CatBirthProfile):
+            raise TypeError(
+                "profile must be a CatBirthProfile object."
+            )
+
         genetics = dict(
             genetics or {}
         )
 
-        sex = profile.get("sex")
+        sex = profile.sex
 
         karyotype = genetics.get(
             "karyotype"
@@ -37,12 +44,12 @@ class CatGeneticsValidator:
         )
 
         color_requires_mosaic = (
-            profile.get("color")
+            profile.color
             in self.TORTOISESHELL_COLORS
         )
 
         pattern_requires_mosaic = (
-            profile.get("pattern")
+            profile.pattern
             in self.MULTICOLOR_PATTERNS
         )
 

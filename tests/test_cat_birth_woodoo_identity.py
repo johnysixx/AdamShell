@@ -5,6 +5,10 @@ from universe.universe import Universe
 from universe.bootstraps.universe_bootstrap import (
     UniverseBootstrap
 )
+from cats.cat_birth_objects import (
+    CatBirthProfile,
+    CatCanonicalBirthResolution,
+)
 from cats.cat_birth_resolver import (
     CatBirthResolver
 )
@@ -43,21 +47,21 @@ class CatBirthWoodooIdentityTests(
             bar
         )
 
-        self.canonical = {
-            "color": "black",
-            "fur_length": "short",
-            "pattern": "solid",
-            "eye_color": "green",
-            "sex": "female"
-        }
+        self.canonical = CatBirthProfile(
+            color="black",
+            fur_length="short",
+            pattern="solid",
+            eye_color="green",
+            sex="female",
+        )
 
-        self.ordinary = {
-            "color": "white",
-            "fur_length": "long",
-            "pattern": "tabby",
-            "eye_color": "blue",
-            "sex": "male"
-        }
+        self.ordinary = CatBirthProfile(
+            color="white",
+            fur_length="long",
+            pattern="tabby",
+            eye_color="blue",
+            sex="male",
+        )
 
     def _create_first_woodoo(self):
         first = (
@@ -92,22 +96,22 @@ class CatBirthWoodooIdentityTests(
         )
 
         self.assertEqual(
-            first["identity"],
+            first.identity,
             "pazuzu"
         )
 
         self.assertEqual(
-            second["identity"],
+            second.identity,
             "gib"
         )
 
         self.assertEqual(
-            third["identity"],
+            third.identity,
             "woodoo"
         )
 
         self.assertEqual(
-            third["profile"],
+            third.profile.to_dict(),
             {
                 "color": "black",
                 "fur_length": "short",
@@ -134,30 +138,30 @@ class CatBirthWoodooIdentityTests(
         )
 
         self.assertTrue(
-            result["matched"]
+            result.matched
         )
 
         self.assertEqual(
-            result["occurrence"],
+            result.occurrence,
             4
         )
 
         self.assertEqual(
-            result["identity"],
+            result.identity,
             "woodoo"
         )
 
         self.assertTrue(
-            result["woodoo_rebirth"]
+            result.woodoo_rebirth
         )
 
         self.assertEqual(
-            result["woodoo_birth_number"],
+            result.woodoo_birth_number,
             2
         )
 
         self.assertEqual(
-            result["profile"],
+            result.profile.to_dict(),
             {
                 "color": "black",
                 "fur_length": "short",
@@ -179,29 +183,29 @@ class CatBirthWoodooIdentityTests(
         )
 
         self.assertTrue(
-            result["matched"]
+            result.matched
         )
 
         self.assertEqual(
-            result["occurrence"],
+            result.occurrence,
             4
         )
 
         self.assertIsNone(
-            result["identity"]
+            result.identity
         )
 
         self.assertFalse(
-            result["woodoo_rebirth"]
+            result.woodoo_rebirth
         )
 
         self.assertEqual(
-            result["profile"],
+            result.profile,
             self.canonical
         )
 
         self.assertEqual(
-            result["profile"]["eye_color"],
+            result.profile.eye_color,
             "green"
         )
 
@@ -217,19 +221,19 @@ class CatBirthWoodooIdentityTests(
         )
 
         self.assertFalse(
-            result["matched"]
+            result.matched
         )
 
         self.assertIsNone(
-            result["identity"]
+            result.identity
         )
 
         self.assertFalse(
-            result["woodoo_rebirth"]
+            result.woodoo_rebirth
         )
 
         self.assertEqual(
-            result["profile"],
+            result.profile,
             self.ordinary
         )
 

@@ -4,6 +4,10 @@ from cats.cat_birth_effect_resolver import (
 
 from .cat_trait_dice_mapping import CatTraitDiceMapping
 from .cat_genetics_validator import CatGeneticsValidator
+from .cat_birth_objects import (
+    CatBirthProfile,
+    CatCanonicalBirthResolution,
+)
 
 class CatBirthResolver:
 
@@ -31,33 +35,33 @@ class CatBirthResolver:
             CatTraitDiceMapping()
         )
 
-        self.canonical_profile = {
-            "color": "black",
-            "fur_length": "short",
-            "pattern": "solid",
-            "eye_color": "green",
-            "sex": "female"
-        }
+        self.canonical_profile = CatBirthProfile(
+            color="black",
+            fur_length="short",
+            pattern="solid",
+            eye_color="green",
+            sex="female",
+        )
 
         self.canonical_profile_occurrences = 0
 
-        self.queen_elisabeth_profile = {
-            "color": "white",
-            "fur_length": "long",
-            "pattern": "tabby",
-            "eye_color": "green",
-            "sex": "female"
-        }
+        self.queen_elisabeth_profile = CatBirthProfile(
+            color="white",
+            fur_length="long",
+            pattern="tabby",
+            eye_color="green",
+            sex="female",
+        )
 
         self.queen_elisabeth_profile_occurrences = 0
 
-        self.garfield_profile = {
-            "color": "orange",
-            "fur_length": "short",
-            "pattern": "tabby",
-            "eye_color": "yellow",
-            "sex": "male"
-        }
+        self.garfield_profile = CatBirthProfile(
+            color="orange",
+            fur_length="short",
+            pattern="tabby",
+            eye_color="yellow",
+            sex="male",
+        )
 
         self.garfield_profile_occurrences = 0
 
@@ -189,22 +193,24 @@ class CatBirthResolver:
                 )
             )
 
-        rolled_profile = dict(
-            profile
+        rolled_profile = CatBirthProfile(
+            color=profile["color"],
+            fur_length=profile["fur_length"],
+            pattern=profile["pattern"],
+            eye_color=profile["eye_color"],
+            sex=profile["sex"],
         )
 
         genetics_result = (
             self._resolve_genetic_conflicts(
-                profile=profile,
+                profile=rolled_profile,
                 rolls=rolls,
                 mapping=mapping,
                 rng=rng
             )
         )
 
-        profile = dict(
-            genetics_result["profile"]
-        )
+        profile = genetics_result["profile"]
 
         woodoo_white_trace_applied = bool(
             getattr(
@@ -215,7 +221,10 @@ class CatBirthResolver:
         )
 
         if woodoo_white_trace_applied:
-            profile["color"] = "white"
+            profile = profile.with_trait(
+                "color",
+                "white"
+            )
 
             self.universe.next_cat_birth_white = False
 
@@ -233,29 +242,32 @@ class CatBirthResolver:
             self.canonical_profile_occurrences += 1
             self.woodoo_birth_count += 1
 
-            woodoo_profile = dict(
-                self.canonical_profile
+            woodoo_profile = (
+                self.canonical_profile.with_trait(
+                    "eye_color",
+                    "gold"
+                )
             )
 
-            woodoo_profile["eye_color"] = "gold"
-
-            canonical_result = {
-                "matched": True,
-                "occurrence": (
-                    self.canonical_profile_occurrences
-                ),
-                "identity": "woodoo",
-                "profile": woodoo_profile,
-                "special_birth_event": (
-                    "woodoo_rebirth_chaos"
-                ),
-                "woodoo_rebirth": True,
-                "woodoo_birth_number": (
-                    self.woodoo_birth_count
-                ),
-                "forced_birth": True,
-                "forced_by": "garfield"
-            }
+            canonical_result = (
+                CatCanonicalBirthResolution(
+                    matched=True,
+                    occurrence=(
+                        self.canonical_profile_occurrences
+                    ),
+                    identity="woodoo",
+                    profile=woodoo_profile,
+                    special_birth_event=(
+                        "woodoo_rebirth_chaos"
+                    ),
+                    woodoo_rebirth=True,
+                    woodoo_birth_number=(
+                        self.woodoo_birth_count
+                    ),
+                    forced_birth=True,
+                    forced_by="garfield",
+                )
+            )
 
         else:
             canonical_result = (
@@ -265,9 +277,7 @@ class CatBirthResolver:
                 )
             )
 
-        resolved_profile = dict(
-            canonical_result["profile"]
-        )
+        resolved_profile = canonical_result.profile
 
         event = {
             "name": "cat_birth_profile_resolved",
@@ -320,17 +330,27 @@ class CatBirthResolver:
             rng=rng
         )
 
-        profile = dict(
-            birth["profile"]
-        )
+        profile = birth["profile"]
+        canonical = birth["canonical"]
 
-        canonical = birth[
-            "canonical"
-        ]
+        if not isinstance(
+            profile,
+            CatBirthProfile
+        ):
+            raise TypeError(
+                "birth profile must be a CatBirthProfile object."
+            )
 
-        identity = canonical.get(
-            "identity"
-        )
+        if not isinstance(
+            canonical,
+            CatCanonicalBirthResolution
+        ):
+            raise TypeError(
+                "birth canonical state must be a "
+                "CatCanonicalBirthResolution object."
+            )
+
+        identity = canonical.identity
 
         if identity is not None:
             cat_name = identity
@@ -379,15 +399,11 @@ class CatBirthResolver:
             self.universe.manifest_cat(
                 name=cat_name,
                 source=source,
-                color=profile["color"],
-                fur_length=profile[
-                    "fur_length"
-                ],
-                pattern=profile["pattern"],
-                eye_color=profile[
-                    "eye_color"
-                ],
-                sex=profile["sex"]
+                color=profile.color,
+                fur_length=profile.fur_length,
+                pattern=profile.pattern,
+                eye_color=profile.eye_color,
+                sex=profile.sex
             )
         )
 
@@ -404,17 +420,24 @@ class CatBirthResolver:
             "cat"
         ]
 
-        cat.birth_profile = dict(
-            profile
-        )
-
-        cat.rolled_birth_profile = dict(
+        rolled_birth_profile = (
             birth["rolled_profile"]
         )
 
-        cat.birth_canonical = dict(
-            canonical
+        if not isinstance(
+            rolled_birth_profile,
+            CatBirthProfile
+        ):
+            raise TypeError(
+                "rolled birth profile must be a "
+                "CatBirthProfile object."
+            )
+
+        cat.birth_profile = profile
+        cat.rolled_birth_profile = (
+            rolled_birth_profile
         )
+        cat.birth_canonical = canonical
 
         cat.birth_genetics = (
             birth["genetics"]
@@ -454,9 +477,7 @@ class CatBirthResolver:
                 cat_name=cat_name,
                 rng=rng,
                 special_birth_event=(
-                    canonical.get(
-                        "special_birth_event"
-                    )
+                    canonical.special_birth_event
                 )
             )
         )
@@ -470,17 +491,12 @@ class CatBirthResolver:
                 None
             ),
             "identity": identity,
-            "profile": dict(profile),
+            "profile": profile.to_dict(),
             "canonical_occurrence": (
-                canonical.get(
-                    "occurrence",
-                    0
-                )
+                canonical.occurrence
             ),
             "special_birth_event": (
-                canonical.get(
-                    "special_birth_event"
-                )
+                canonical.special_birth_event
             ),
             "special_birth_result": (
                 special_birth_result
@@ -556,9 +572,12 @@ class CatBirthResolver:
         mapping,
         rng=None
     ):
-        current_profile = dict(
-            profile
-        )
+        if not isinstance(profile, CatBirthProfile):
+            raise TypeError(
+                "profile must be a CatBirthProfile object."
+            )
+
+        current_profile = profile
 
         conflict_history = []
         cronenbergs_created = []
@@ -609,9 +628,7 @@ class CatBirthResolver:
             if validation["valid"]:
                 return {
                     "valid": True,
-                    "profile": dict(
-                        current_profile
-                    ),
+                    "profile": current_profile,
                     "validation": validation,
                     "conflict_count": len(
                         conflict_history
@@ -650,7 +667,9 @@ class CatBirthResolver:
                 )
 
             previous_value = (
-                current_profile[trait]
+                current_profile.trait_value(
+                    trait
+                )
             )
 
             reroll = (
@@ -677,9 +696,12 @@ class CatBirthResolver:
                 )
             )
 
-            current_profile[
-                trait
-            ] = new_value
+            current_profile = (
+                current_profile.with_trait(
+                    trait,
+                    new_value
+                )
+            )
 
             rolls[
                 reroll_die
@@ -733,13 +755,16 @@ class CatBirthResolver:
         profile,
         rng=None
     ):
+        if not isinstance(profile, CatBirthProfile):
+            raise TypeError(
+                "profile must be a CatBirthProfile object."
+            )
+
         if profile == self.queen_elisabeth_profile:
             self.queen_elisabeth_profile_occurrences += 1
-
             occurrence = (
                 self.queen_elisabeth_profile_occurrences
             )
-
             identity = (
                 "queen_elisabeth"
                 if occurrence == 1
@@ -750,72 +775,58 @@ class CatBirthResolver:
                 )
             )
 
-            return {
-                "matched": True,
-                "occurrence": occurrence,
-                "identity": identity,
-                "profile": dict(profile),
-                "special_birth_event": (
+            return CatCanonicalBirthResolution(
+                matched=True,
+                occurrence=occurrence,
+                identity=identity,
+                profile=profile,
+                special_birth_event=(
                     "mia_birth_global_rotation"
                     if identity == "mia"
                     else (
                         "queen_elisabeth_birth_effects"
-                        if identity
-                        == "queen_elisabeth"
+                        if identity == "queen_elisabeth"
                         else None
                     )
                 ),
-                "woodoo_rebirth": False
-            }
+            )
 
         if profile == self.garfield_profile:
             self.garfield_profile_occurrences += 1
-
             occurrence = (
                 self.garfield_profile_occurrences
             )
 
-            return {
-                "matched": True,
-                "occurrence": occurrence,
-                "identity": (
+            return CatCanonicalBirthResolution(
+                matched=True,
+                occurrence=occurrence,
+                identity=(
                     "garfield"
                     if occurrence == 1
                     else None
                 ),
-                "profile": dict(profile),
-                "special_birth_event": (
-                    "garfield_birth_effect_"
-                    "combination"
+                profile=profile,
+                special_birth_event=(
+                    "garfield_birth_effect_combination"
                     if occurrence == 1
                     else None
                 ),
-                "woodoo_rebirth": False
-            }
+            )
 
-        is_canonical = (
-            profile == self.canonical_profile
-        )
-
-        if not is_canonical:
-            return {
-                "matched": False,
-                "occurrence": 0,
-                "identity": None,
-                "profile": dict(profile),
-                "special_birth_event": None,
-                "woodoo_rebirth": False
-            }
+        if profile != self.canonical_profile:
+            return CatCanonicalBirthResolution(
+                matched=False,
+                occurrence=0,
+                identity=None,
+                profile=profile,
+                special_birth_event=None,
+            )
 
         self.canonical_profile_occurrences += 1
-
         occurrence = (
             self.canonical_profile_occurrences
         )
-
-        resolved_profile = dict(
-            profile
-        )
+        resolved_profile = profile
 
         if occurrence == 1:
             identity = "pazuzu"
@@ -825,22 +836,27 @@ class CatBirthResolver:
 
         elif occurrence == 2:
             identity = "gib"
-            resolved_profile[
-                "fur_length"
-            ] = "long"
+            resolved_profile = (
+                profile.with_trait(
+                    "fur_length",
+                    "long"
+                )
+            )
             special_birth_event = (
                 "gib_global_dice_resonance"
             )
 
         elif occurrence == 3:
             identity = "woodoo"
-            resolved_profile[
-                "eye_color"
-            ] = "gold"
+            resolved_profile = (
+                profile.with_trait(
+                    "eye_color",
+                    "gold"
+                )
+            )
             special_birth_event = (
                 "woodoo_birth_chaos"
             )
-
             self.woodoo_birth_count += 1
 
         else:
@@ -848,63 +864,56 @@ class CatBirthResolver:
                 profile=profile,
                 rng=rng
             )
-
-            identity = rebirth[
-                "identity"
-            ]
-
-            resolved_profile = dict(
-                rebirth["profile"]
-            )
-
+            identity = rebirth.identity
+            resolved_profile = rebirth.profile
             special_birth_event = (
-                rebirth[
-                    "special_birth_event"
-                ]
+                rebirth.special_birth_event
             )
 
-        result = {
-            "matched": True,
-            "occurrence": occurrence,
-            "identity": identity,
-            "profile": resolved_profile,
-            "special_birth_event": (
-                special_birth_event
-            ),
-            "woodoo_rebirth": (
-                identity == "woodoo"
-                and occurrence > 3
-            )
-        }
-
-        if (
+        is_rebirth = (
             identity == "woodoo"
             and occurrence > 3
-        ):
-            result[
-                "woodoo_birth_number"
-            ] = self.woodoo_birth_count
+        )
 
-            result[
-                "rebirth_probability"
-            ] = self.woodoo_rebirth_chance
-
-        return result
+        return CatCanonicalBirthResolution(
+            matched=True,
+            occurrence=occurrence,
+            identity=identity,
+            profile=resolved_profile,
+            special_birth_event=(
+                special_birth_event
+            ),
+            woodoo_rebirth=is_rebirth,
+            woodoo_birth_number=(
+                self.woodoo_birth_count
+                if is_rebirth
+                else None
+            ),
+            rebirth_probability=(
+                self.woodoo_rebirth_chance
+                if is_rebirth
+                else None
+            ),
+        )
 
     def _resolve_woodoo_rebirth(
         self,
         profile,
         rng=None
     ):
+        if not isinstance(profile, CatBirthProfile):
+            raise TypeError(
+                "profile must be a CatBirthProfile object."
+            )
+
         if self.woodoo_birth_count < 1:
-            return {
-                "matched": False,
-                "occurrence": 0,
-                "identity": None,
-                "profile": dict(profile),
-                "special_birth_event": None,
-                "woodoo_rebirth": False
-            }
+            return CatCanonicalBirthResolution(
+                matched=False,
+                occurrence=0,
+                identity=None,
+                profile=profile,
+                special_birth_event=None,
+            )
 
         if rng is None:
             import random
@@ -916,41 +925,39 @@ class CatBirthResolver:
         )
 
         if not reborn:
-            return {
-                "matched": False,
-                "occurrence": 0,
-                "identity": None,
-                "profile": dict(profile),
-                "special_birth_event": None,
-                "woodoo_rebirth": False
-            }
+            return CatCanonicalBirthResolution(
+                matched=False,
+                occurrence=0,
+                identity=None,
+                profile=profile,
+                special_birth_event=None,
+            )
 
         self.woodoo_birth_count += 1
+        woodoo_profile = CatBirthProfile(
+            color="black",
+            fur_length="short",
+            pattern="solid",
+            eye_color="gold",
+            sex="female",
+        )
 
-        woodoo_profile = {
-            "color": "black",
-            "fur_length": "short",
-            "pattern": "solid",
-            "eye_color": "gold",
-            "sex": "female"
-        }
-
-        return {
-            "matched": False,
-            "occurrence": 0,
-            "identity": "woodoo",
-            "profile": woodoo_profile,
-            "special_birth_event": (
+        return CatCanonicalBirthResolution(
+            matched=False,
+            occurrence=0,
+            identity="woodoo",
+            profile=woodoo_profile,
+            special_birth_event=(
                 "woodoo_rebirth_chaos"
             ),
-            "woodoo_rebirth": True,
-            "woodoo_birth_number": (
+            woodoo_rebirth=True,
+            woodoo_birth_number=(
                 self.woodoo_birth_count
             ),
-            "rebirth_probability": (
+            rebirth_probability=(
                 self.woodoo_rebirth_chance
-            )
-        }
+            ),
+        )
 
     @staticmethod
     def _select_for_cat_birth(

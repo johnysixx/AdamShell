@@ -5,6 +5,10 @@ from universe.universe import Universe
 from universe.bootstraps.universe_bootstrap import (
     UniverseBootstrap
 )
+from cats.cat_birth_objects import (
+    CatBirthProfile,
+    CatCanonicalBirthResolution,
+)
 from cats.cat_birth_resolver import (
     CatBirthResolver
 )
@@ -58,26 +62,28 @@ class CatBirthPazuzuTests(
 
     @staticmethod
     def _pazuzu_birth():
-        profile = {
-            "color": "black",
-            "fur_length": "short",
-            "pattern": "solid",
-            "eye_color": "green",
-            "sex": "female"
-        }
+        profile = CatBirthProfile(
+            color="black",
+            fur_length="short",
+            pattern="solid",
+            eye_color="green",
+            sex="female",
+        )
 
         return {
-            "profile": dict(profile),
-            "rolled_profile": dict(profile),
-            "canonical": {
-                "matched": True,
-                "occurrence": 1,
-                "identity": "pazuzu",
-                "profile": dict(profile),
-                "special_birth_event": (
-                    "pazuzu_birth_dice_resonance"
+            "profile": profile,
+            "rolled_profile": profile,
+            "canonical": (
+                CatCanonicalBirthResolution(
+                    matched=True,
+                    occurrence=1,
+                    identity="pazuzu",
+                    profile=profile,
+                    special_birth_event=(
+                        "pazuzu_birth_dice_resonance"
+                    ),
                 )
-            },
+            ),
             "genetics": {
                 "valid": True,
                 "conflict_count": 0,

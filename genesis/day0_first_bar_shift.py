@@ -1503,7 +1503,7 @@ class Day0FirstBarShift:
         if self.cat_d20 is None:
             raise RuntimeError('CatD20 does not exist.')
         resolver = CatBirthResolver(self.universe, self.meeting_place)
-        garfield_profile = dict(resolver.garfield_profile)
+        garfield_profile = resolver.garfield_profile
         cat_d20_state = getattr(
             self.cat_d20,
             'cat_d20',
@@ -1518,12 +1518,16 @@ class Day0FirstBarShift:
             )
         cat_d20_state.prepare_target(
             target='garfield',
-            profile=CatD20Profile.from_dict(
-                garfield_profile
+            profile=CatD20Profile(
+                color=garfield_profile.color,
+                fur_length=garfield_profile.fur_length,
+                pattern=garfield_profile.pattern,
+                eye_color=garfield_profile.eye_color,
+                sex=garfield_profile.sex,
             ),
             pending=True,
         )
-        event = {'name': 'cat_d20_sets_next_birth_to_garfield', 'cat': 'cat_d20', 'target_name': 'garfield', 'profile': dict(garfield_profile), 'pending': True}
+        event = {'name': 'cat_d20_sets_next_birth_to_garfield', 'cat': 'cat_d20', 'target_name': 'garfield', 'profile': garfield_profile.to_dict(), 'pending': True}
         if not hasattr(self.meeting_place, 'cat_d20_secret_history'):
             self.meeting_place.cat_d20_secret_history = []
         self.meeting_place.cat_d20_secret_history.append(dict(event))

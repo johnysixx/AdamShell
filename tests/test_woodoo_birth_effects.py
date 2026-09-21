@@ -8,6 +8,10 @@ from universe.bootstraps.universe_bootstrap import (
 from cats.cat_birth_effect_resolver import (
     CatBirthEffectResolver
 )
+from cats.cat_birth_objects import (
+    CatBirthProfile,
+    CatCanonicalBirthResolution,
+)
 from cats.cat_birth_resolver import (
     CatBirthResolver
 )
@@ -165,17 +169,16 @@ class WoodooBirthEffectsTests(
             rng=None
         ):
             captured_profiles.append(
-                dict(profile)
+                profile.to_dict()
             )
 
-            return {
-                "matched": False,
-                "occurrence": 0,
-                "identity": None,
-                "profile": dict(profile),
-                "special_birth_event": None,
-                "woodoo_rebirth": False
-            }
+            return CatCanonicalBirthResolution(
+                matched=False,
+                occurrence=0,
+                identity=None,
+                profile=profile,
+                special_birth_event=None,
+            )
 
         resolver._resolve_canonical_profile = (
             capture_profile

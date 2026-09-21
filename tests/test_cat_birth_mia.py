@@ -5,6 +5,10 @@ from universe.universe import Universe
 from universe.bootstraps.universe_bootstrap import (
     UniverseBootstrap
 )
+from cats.cat_birth_objects import (
+    CatBirthProfile,
+    CatCanonicalBirthResolution,
+)
 from cats.cat_birth_resolver import (
     CatBirthResolver
 )
@@ -67,7 +71,7 @@ class CatBirthMiaTests(
         )
 
     def _mia_profile_result(self):
-        profile = dict(
+        profile = (
             self.resolver
             .queen_elisabeth_profile
         )
@@ -75,16 +79,17 @@ class CatBirthMiaTests(
         return {
             "profile": profile,
             "rolled_profile": profile,
-            "canonical": {
-                "matched": True,
-                "occurrence": 2,
-                "identity": "mia",
-                "profile": profile,
-                "special_birth_event": (
-                    "mia_birth_global_rotation"
-                ),
-                "woodoo_rebirth": False
-            },
+            "canonical": (
+                CatCanonicalBirthResolution(
+                    matched=True,
+                    occurrence=2,
+                    identity="mia",
+                    profile=profile,
+                    special_birth_event=(
+                        "mia_birth_global_rotation"
+                    ),
+                )
+            ),
             "genetics": {
                 "valid": True,
                 "conflict_count": 0,

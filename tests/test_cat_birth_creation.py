@@ -5,6 +5,10 @@ from universe.universe import Universe
 from universe.bootstraps.universe_bootstrap import (
     UniverseBootstrap
 )
+from cats.cat_birth_objects import (
+    CatBirthProfile,
+    CatCanonicalBirthResolution,
+)
 from cats.cat_birth_resolver import (
     CatBirthResolver
 )
@@ -39,34 +43,26 @@ class CatBirthCreationTests(
         )
 
     def _ordinary_birth(self):
+        profile = CatBirthProfile(
+            color="white",
+            fur_length="long",
+            pattern="tabby",
+            eye_color="blue",
+            sex="female",
+        )
+
         return {
-            "profile": {
-                "color": "white",
-                "fur_length": "long",
-                "pattern": "tabby",
-                "eye_color": "blue",
-                "sex": "female"
-            },
-            "rolled_profile": {
-                "color": "white",
-                "fur_length": "long",
-                "pattern": "tabby",
-                "eye_color": "blue",
-                "sex": "female"
-            },
-            "canonical": {
-                "matched": False,
-                "occurrence": 0,
-                "identity": None,
-                "profile": {
-                    "color": "white",
-                    "fur_length": "long",
-                    "pattern": "tabby",
-                    "eye_color": "blue",
-                    "sex": "female"
-                },
-                "special_birth_event": None
-            },
+            "profile": profile,
+            "rolled_profile": profile,
+            "canonical": (
+                CatCanonicalBirthResolution(
+                    matched=False,
+                    occurrence=0,
+                    identity=None,
+                    profile=profile,
+                    special_birth_event=None,
+                )
+            ),
             "genetics": {
                 "valid": True,
                 "conflict_count": 0,

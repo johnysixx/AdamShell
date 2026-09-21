@@ -8,6 +8,10 @@ from universe.bootstraps.universe_bootstrap import (
 from cats.cat_birth_effect_resolver import (
     CatBirthEffectResolver
 )
+from cats.cat_birth_objects import (
+    CatBirthProfile,
+    CatCanonicalBirthResolution,
+)
 from cats.cat_birth_resolver import (
     CatBirthResolver
 )
@@ -274,23 +278,21 @@ class CatBirthGarfieldEffectsTests(
         ]
 
         self.assertEqual(
-            canonical["identity"],
+            canonical.identity,
             "woodoo"
         )
 
         self.assertTrue(
-            canonical["forced_birth"]
+            canonical.forced_birth
         )
 
         self.assertEqual(
-            canonical["forced_by"],
+            canonical.forced_by,
             "garfield"
         )
 
         self.assertEqual(
-            canonical[
-                "special_birth_event"
-            ],
+            canonical.special_birth_event,
             "woodoo_rebirth_chaos"
         )
 

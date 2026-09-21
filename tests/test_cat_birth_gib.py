@@ -8,6 +8,10 @@ from universe.bootstraps.universe_bootstrap import (
 from universe.bootstraps.entity_bootstrap import (
     EntityBootstrap
 )
+from cats.cat_birth_objects import (
+    CatBirthProfile,
+    CatCanonicalBirthResolution,
+)
 from cats.cat_birth_resolver import (
     CatBirthResolver
 )
@@ -69,34 +73,34 @@ class CatBirthGibTests(
 
     @staticmethod
     def _gib_birth():
-        rolled_profile = {
-            "color": "black",
-            "fur_length": "short",
-            "pattern": "solid",
-            "eye_color": "green",
-            "sex": "female"
-        }
-
-        resolved_profile = dict(
-            rolled_profile
+        rolled_profile = CatBirthProfile(
+            color="black",
+            fur_length="short",
+            pattern="solid",
+            eye_color="green",
+            sex="female",
         )
-
-        resolved_profile[
-            "fur_length"
-        ] = "long"
+        resolved_profile = (
+            rolled_profile.with_trait(
+                "fur_length",
+                "long"
+            )
+        )
 
         return {
             "profile": resolved_profile,
             "rolled_profile": rolled_profile,
-            "canonical": {
-                "matched": True,
-                "occurrence": 2,
-                "identity": "gib",
-                "profile": resolved_profile,
-                "special_birth_event": (
-                    "gib_birth_global_resonance"
+            "canonical": (
+                CatCanonicalBirthResolution(
+                    matched=True,
+                    occurrence=2,
+                    identity="gib",
+                    profile=resolved_profile,
+                    special_birth_event=(
+                        "gib_birth_global_resonance"
+                    ),
                 )
-            },
+            ),
             "genetics": {
                 "valid": True,
                 "conflict_count": 0,
