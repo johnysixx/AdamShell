@@ -20,15 +20,13 @@ class CatPhenotypeResolver:
             genotype
         )
 
-        sex = genotype["sex"]
+        sex = genotype.sex
 
         orange_alleles = tuple(
-            genotype["orange_locus"]
+            genotype.orange_locus
         )
 
-        loci = genotype[
-            "autosomal_loci"
-        ]
+        loci = genotype.autosomal_loci
 
         base_color = (
             cls._resolve_base_color(

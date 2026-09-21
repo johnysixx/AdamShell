@@ -234,9 +234,7 @@ class KittenGeneticViabilityTests(
             )
         )
 
-        genotype[
-            "orange_locus"
-        ] = (
+        genotype.orange_locus = (
             "O",
             "o"
         )

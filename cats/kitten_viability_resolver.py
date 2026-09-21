@@ -32,10 +32,7 @@ class KittenGeneticViabilityResolver:
             }
 
         lethal_mutations = list(
-            genotype.get(
-                "lethal_mutations",
-                []
-            )
+            genotype.lethal_mutations
         )
 
         if lethal_mutations:
@@ -59,13 +56,11 @@ class KittenGeneticViabilityResolver:
             }
 
         chromosomes = tuple(
-            genotype[
-                "sex_chromosomes"
-            ]
+            genotype.sex_chromosomes
         )
 
         if (
-            genotype["sex"] == "male"
+            genotype.sex == "male"
             and chromosomes
             == (
                 "X",
@@ -79,9 +74,7 @@ class KittenGeneticViabilityResolver:
             ]
 
             orange = tuple(
-                genotype[
-                    "orange_locus"
-                ]
+                genotype.orange_locus
             )
 
             if set(orange) == {

@@ -99,14 +99,12 @@ class CatGenotypeInheritanceTests(
         )
 
         self.assertEqual(
-            kitten["sex"],
+            kitten.sex,
             "female"
         )
 
         self.assertEqual(
-            kitten[
-                "sex_chromosomes"
-            ],
+            kitten.sex_chromosomes,
             (
                 "X",
                 "X"
@@ -114,7 +112,7 @@ class CatGenotypeInheritanceTests(
         )
 
         self.assertEqual(
-            kitten["orange_locus"],
+            kitten.orange_locus,
             (
                 "O",
                 "o"
@@ -129,14 +127,12 @@ class CatGenotypeInheritanceTests(
         )
 
         self.assertEqual(
-            kitten["sex"],
+            kitten.sex,
             "male"
         )
 
         self.assertEqual(
-            kitten[
-                "sex_chromosomes"
-            ],
+            kitten.sex_chromosomes,
             (
                 "X",
                 "Y"
@@ -144,20 +140,14 @@ class CatGenotypeInheritanceTests(
         )
 
         self.assertEqual(
-            kitten["orange_locus"],
+            kitten.orange_locus,
             (
                 "o",
             )
         )
 
         self.assertIsNone(
-            kitten[
-                "inheritance_record"
-            ][
-                "orange_locus"
-            ][
-                "from_father"
-            ]
+            kitten.inheritance_record.orange_locus.from_father
         )
 
     def test_each_autosomal_locus_comes_from_both_parents(self):
@@ -168,9 +158,7 @@ class CatGenotypeInheritanceTests(
         )
 
         self.assertEqual(
-            kitten[
-                "autosomal_loci"
-            ][
+            kitten.autosomal_loci[
                 "black"
             ],
             (
@@ -180,9 +168,7 @@ class CatGenotypeInheritanceTests(
         )
 
         self.assertEqual(
-            kitten[
-                "autosomal_loci"
-            ][
+            kitten.autosomal_loci[
                 "dilution"
             ],
             (
@@ -191,21 +177,18 @@ class CatGenotypeInheritanceTests(
             )
         )
 
-        record = kitten[
-            "inheritance_record"
-        ][
-            "autosomal_loci"
-        ][
-            "longhair"
-        ]
+        record = (
+            kitten.inheritance_record
+            .autosomal_loci["longhair"]
+        )
 
         self.assertEqual(
-            record["from_mother"],
+            record.from_mother,
             "L"
         )
 
         self.assertEqual(
-            record["from_father"],
+            record.from_father,
             "l"
         )
 
@@ -216,9 +199,7 @@ class CatGenotypeInheritanceTests(
             )
         )
 
-        invalid[
-            "orange_locus"
-        ] = (
+        invalid.orange_locus = (
             "O",
             "o"
         )
