@@ -1,5 +1,6 @@
-﻿from copy import deepcopy
+from copy import deepcopy
 
+from universe.cosmic_objects import StellarMaterialCloud
 from universe.stellar_state import StellarFormationState
 
 
@@ -42,9 +43,16 @@ class Stars:
     def _form_first_stars_unprotected(self):
         germinal_clouds = self.universe.world.get("germinal_clouds", [])
 
+        for cloud in germinal_clouds:
+            if not isinstance(cloud, StellarMaterialCloud):
+                raise TypeError(
+                    "germinal_clouds must contain "
+                    "StellarMaterialCloud objects"
+                )
+
         star_forming_clouds = [
             cloud for cloud in germinal_clouds
-            if cloud.get("can_form_stars") is True
+            if cloud.can_form_stars is True
         ]
 
         if not star_forming_clouds:
@@ -61,7 +69,7 @@ class Stars:
             "type": "primordial_star",
             "generation": 1,
             "state": "ignited",
-            "formed_from": star_forming_clouds[0]["name"],
+            "formed_from": star_forming_clouds[0].name,
             "composition": {
                 "hydrogen": "dominant",
                 "helium": "secondary",
@@ -76,7 +84,7 @@ class Stars:
             "type": "primordial_star",
             "generation": 1,
             "state": "young",
-            "formed_from": star_forming_clouds[-1]["name"],
+            "formed_from": star_forming_clouds[-1].name,
             "composition": {
                 "hydrogen": "dominant",
                 "helium": "secondary"

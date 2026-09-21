@@ -1,5 +1,6 @@
-﻿from copy import deepcopy
+from copy import deepcopy
 
+from universe.cosmic_objects import StellarMaterialCloud
 from universe.heavy_element_nucleosynthesis_state import (
     HeavyElementNucleosynthesisState,
 )
@@ -108,11 +109,14 @@ class HeavyElementNucleosynthesis:
 
     def update_enriched_clouds(self, enriched_clouds):
         for cloud in enriched_clouds:
-            composition = cloud.setdefault("composition", {})
-            composition.update(self.heavy_elements)
+            if not isinstance(cloud, StellarMaterialCloud):
+                raise TypeError(
+                    "enriched_clouds must contain "
+                    "StellarMaterialCloud objects"
+                )
 
-            cloud["contains_heavy_elements"] = True
-            cloud["can_form_metal_rich_systems"] = True
+            cloud.add_components(self.heavy_elements)
+            cloud.mark_heavy_enrichment()
 
         self.process_state.enriched_clouds_updated = True
 

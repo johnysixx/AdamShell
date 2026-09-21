@@ -1,5 +1,6 @@
-﻿from copy import deepcopy
+from copy import deepcopy
 
+from universe.cosmic_objects import StellarMaterialCloud
 from universe.stellar_system_state import (
     StellarSystemFormationState,
 )
@@ -46,9 +47,16 @@ class StellarSystems:
     def _form_stellar_systems_unprotected(self):
         enriched_clouds = self.universe.world.get("enriched_clouds", [])
 
+        for cloud in enriched_clouds:
+            if not isinstance(cloud, StellarMaterialCloud):
+                raise TypeError(
+                    "enriched_clouds must contain "
+                    "StellarMaterialCloud objects"
+                )
+
         system_forming_clouds = [
             cloud for cloud in enriched_clouds
-            if cloud.get("can_form_stellar_systems") is True
+            if cloud.can_form_stellar_systems is True
         ]
 
         if not system_forming_clouds:
@@ -59,7 +67,7 @@ class StellarSystems:
             return self.public_state
 
         source_cloud = system_forming_clouds[0]
-        composition = source_cloud.get("composition", {})
+        composition = source_cloud.composition
         available_elements = list(composition.keys())
 
         self.state = "formed"
@@ -69,7 +77,7 @@ class StellarSystems:
             "type": "stellar_system",
             "state": "forming",
             "generation": 2,
-            "formed_from": source_cloud["name"],
+            "formed_from": source_cloud.name,
             "star": {
                 "name": "sun",
                 "type": "main_sequence_star",
@@ -93,7 +101,7 @@ class StellarSystems:
             "type": "stellar_system",
             "state": "forming",
             "generation": 2,
-            "formed_from": source_cloud["name"],
+            "formed_from": source_cloud.name,
             "star": {
                 "name": "deep_star_second_generation",
                 "type": "main_sequence_star",

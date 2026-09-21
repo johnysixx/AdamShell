@@ -1,5 +1,6 @@
 import unittest
 
+from universe.cosmic_objects import StellarMaterialCloud
 from universe.planets import Planets
 from universe.stellar_system_state import (
     StellarSystemFormationState,
@@ -33,16 +34,18 @@ class StellarSystemFormationObjectStateTests(
     def _formed_process(self):
         universe = Universe()
         universe.world["enriched_clouds"] = [
-            {
-                "name": "first_enriched_cloud",
-                "composition": {
+            StellarMaterialCloud(
+                name="first_enriched_cloud",
+                type="enriched_stellar_cloud",
+                state="expanding",
+                composition={
                     "hydrogen": {},
                     "oxygen": {},
                     "silicon": {},
                     "iron": {},
                 },
-                "can_form_stellar_systems": True,
-            }
+                can_form_stellar_systems=True,
+            )
         ]
 
         process = StellarSystems(universe)
@@ -160,11 +163,13 @@ class StellarSystemFormationObjectStateTests(
     ):
         universe = Universe()
         universe.world["enriched_clouds"] = [
-            {
-                "name": "hydrogen_cloud",
-                "composition": {"hydrogen": {}},
-                "can_form_stellar_systems": True,
-            }
+            StellarMaterialCloud(
+                name="hydrogen_cloud",
+                type="enriched_stellar_cloud",
+                state="expanding",
+                composition={"hydrogen": {}},
+                can_form_stellar_systems=True,
+            )
         ]
         process = StellarSystems(universe)
 
@@ -217,11 +222,13 @@ class StellarSystemFormationObjectStateTests(
     ):
         universe = Universe()
         universe.world["enriched_clouds"] = [
-            {
-                "name": "broken_cloud",
-                "composition": {"iron": {}},
-                "can_form_stellar_systems": True,
-            }
+            StellarMaterialCloud(
+                name="broken_cloud",
+                type="enriched_stellar_cloud",
+                state="expanding",
+                composition={"iron": {}},
+                can_form_stellar_systems=True,
+            )
         ]
         process = StellarSystems(universe)
 

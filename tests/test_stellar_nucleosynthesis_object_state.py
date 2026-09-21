@@ -1,5 +1,6 @@
-﻿import unittest
+import unittest
 
+from universe.cosmic_objects import StellarMaterialCloud
 from universe.stellar_nucleosynthesis import StellarNucleosynthesis
 from universe.stellar_nucleosynthesis_state import (
     StellarNucleosynthesisState,
@@ -13,7 +14,13 @@ class StellarNucleosynthesisObjectStateTests(unittest.TestCase):
     def _forged_process(self):
         universe = Universe()
         universe.world["germinal_clouds"] = [
-            {"name": "cloud_a", "can_form_stars": True},
+            StellarMaterialCloud(
+                name="cloud_a",
+                type="germinal_cloud",
+                state="condensing",
+                composition={},
+                can_form_stars=True,
+            ),
         ]
 
         Stars(universe).form_first_stars()

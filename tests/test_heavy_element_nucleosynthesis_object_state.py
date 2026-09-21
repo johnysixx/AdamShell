@@ -1,5 +1,6 @@
-﻿import unittest
+import unittest
 
+from universe.cosmic_objects import StellarMaterialCloud
 from universe.heavy_element_nucleosynthesis import (
     HeavyElementNucleosynthesis,
 )
@@ -24,10 +25,13 @@ class HeavyElementNucleosynthesisObjectStateTests(unittest.TestCase):
         }
 
         universe.world["enriched_clouds"] = [
-            {
-                "name": "enriched_cloud",
-                "composition": {},
-            }
+            StellarMaterialCloud(
+                name="enriched_cloud",
+                type="enriched_stellar_cloud",
+                state="expanding",
+                composition={},
+                can_form_stellar_systems=True,
+            )
         ]
 
         process = HeavyElementNucleosynthesis(universe)
@@ -72,6 +76,14 @@ class HeavyElementNucleosynthesisObjectStateTests(unittest.TestCase):
             universe.world["heavy_element_state"],
             process.process_state,
         )
+
+    def test_enrichment_updates_cloud_through_object_api(self):
+        universe, _, _ = self._forged_process()
+        cloud = universe.world["enriched_clouds"][0]
+
+        self.assertIn("gold", cloud.composition)
+        self.assertTrue(cloud.contains_heavy_elements)
+        self.assertTrue(cloud.can_form_metal_rich_systems)
 
     def test_public_result_remains_dict_boundary(self):
         _, _, result = self._forged_process()

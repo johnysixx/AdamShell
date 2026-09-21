@@ -4,6 +4,7 @@ from universe.cosmic_cloud_state import (
     CosmicCloudFormationState,
 )
 from universe.cosmic_clouds import CosmicClouds
+from universe.cosmic_objects import StellarMaterialCloud
 from universe.stars import Stars
 from universe.universe import Universe
 
@@ -126,9 +127,44 @@ class CosmicCloudObjectStateTests(unittest.TestCase):
             .germinal_clouds_formed
         )
         self.assertEqual(
-            process.clouds[0]["composition"][
+            process.clouds[0].composition[
                 "hydrogen"
             ],
+            "dominant",
+        )
+
+    def test_formed_clouds_are_object_only(self):
+        _, process, _ = self._formed_clouds()
+
+        cloud = process.clouds[0]
+
+        self.assertIsInstance(cloud, StellarMaterialCloud)
+        self._assert_object_only(cloud, "name")
+        self.assertEqual(cloud.name, "first_germinal_cloud")
+        self.assertTrue(cloud.can_form_stars)
+
+    def test_cloud_composition_is_read_only(self):
+        _, process, _ = self._formed_clouds()
+
+        cloud = process.clouds[0]
+
+        with self.assertRaises(TypeError):
+            cloud.composition["hydrogen"] = "missing"
+
+        self.assertEqual(
+            cloud.composition["hydrogen"],
+            "dominant",
+        )
+
+    def test_cloud_to_dict_is_detached_boundary(self):
+        _, process, _ = self._formed_clouds()
+
+        cloud = process.clouds[0]
+        snapshot = cloud.to_dict()
+        snapshot["composition"]["hydrogen"] = "missing"
+
+        self.assertEqual(
+            cloud.composition["hydrogen"],
             "dominant",
         )
 

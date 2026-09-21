@@ -1,5 +1,6 @@
-﻿import unittest
+import unittest
 
+from universe.cosmic_objects import StellarMaterialCloud
 from universe.heavy_element_nucleosynthesis import (
     HeavyElementNucleosynthesis,
 )
@@ -139,6 +140,17 @@ class SupernovaEnrichmentObjectStateTests(
             list,
         )
 
+    def test_enriched_cloud_is_object_only(self):
+        _, process, _ = self._enriched_process()
+
+        cloud = process.enriched_clouds[0]
+
+        self.assertIsInstance(cloud, StellarMaterialCloud)
+        self._assert_object_only(cloud, "name")
+        self.assertEqual(cloud.name, "first_enriched_cloud")
+        self.assertTrue(cloud.contains_elements_up_to_iron)
+        self.assertTrue(cloud.can_form_stellar_systems)
+
     def test_public_result_remains_dict_boundary(
         self
     ):
@@ -192,9 +204,8 @@ class SupernovaEnrichmentObjectStateTests(
             ],
         )
         self.assertEqual(
-            process.enriched_clouds[0][
-                "composition"
-            ]["iron"]["atomic_number"],
+            process.enriched_clouds[0]
+            .composition["iron"]["atomic_number"],
             26,
         )
         self.assertEqual(

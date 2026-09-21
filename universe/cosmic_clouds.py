@@ -1,8 +1,7 @@
-﻿from copy import deepcopy
-
 from universe.cosmic_cloud_state import (
     CosmicCloudFormationState,
 )
+from universe.cosmic_objects import StellarMaterialCloud
 
 
 class CosmicClouds:
@@ -26,7 +25,10 @@ class CosmicClouds:
             "name": self.name,
             "type": self.type,
             "state": self.state,
-            "clouds": deepcopy(self.clouds),
+            "clouds": [
+                cloud.to_dict()
+                for cloud in self.clouds
+            ],
             "cosmic_cloud_state": (
                 self.cosmic_cloud_state.to_dict()
             ),
@@ -78,28 +80,32 @@ class CosmicClouds:
         self.cosmic_cloud_state.helium_available = True
         self.state = "formed"
 
-        self.clouds.append({
-            "name": "first_germinal_cloud",
-            "type": "germinal_cloud",
-            "state": "condensing",
-            "composition": {
-                "hydrogen": "dominant",
-                "helium": "secondary",
-                "trace_lithium": "trace",
-            },
-            "can_form_stars": True,
-        })
+        self.clouds.append(
+            StellarMaterialCloud(
+                name="first_germinal_cloud",
+                type="germinal_cloud",
+                state="condensing",
+                composition={
+                    "hydrogen": "dominant",
+                    "helium": "secondary",
+                    "trace_lithium": "trace",
+                },
+                can_form_stars=True,
+            )
+        )
 
-        self.clouds.append({
-            "name": "deep_germinal_cloud",
-            "type": "germinal_cloud",
-            "state": "quiet",
-            "composition": {
-                "hydrogen": "dominant",
-                "helium": "secondary",
-            },
-            "can_form_stars": True,
-        })
+        self.clouds.append(
+            StellarMaterialCloud(
+                name="deep_germinal_cloud",
+                type="germinal_cloud",
+                state="quiet",
+                composition={
+                    "hydrogen": "dominant",
+                    "helium": "secondary",
+                },
+                can_form_stars=True,
+            )
+        )
 
         self.cosmic_cloud_state.germinal_clouds_formed = (
             True

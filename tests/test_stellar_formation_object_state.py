@@ -1,5 +1,6 @@
 import unittest
 
+from universe.cosmic_objects import StellarMaterialCloud
 from universe.stars import Stars
 from universe.stellar_nucleosynthesis import (
     StellarNucleosynthesis,
@@ -36,14 +37,20 @@ class StellarFormationObjectStateTests(
     def _formed_stars(self):
         universe = Universe()
         universe.world["germinal_clouds"] = [
-            {
-                "name": "first_germinal_cloud",
-                "can_form_stars": True,
-            },
-            {
-                "name": "deep_germinal_cloud",
-                "can_form_stars": True,
-            },
+            StellarMaterialCloud(
+                name="first_germinal_cloud",
+                type="germinal_cloud",
+                state="condensing",
+                composition={},
+                can_form_stars=True,
+            ),
+            StellarMaterialCloud(
+                name="deep_germinal_cloud",
+                type="germinal_cloud",
+                state="quiet",
+                composition={},
+                can_form_stars=True,
+            ),
         ]
         process = Stars(universe)
         result = process.form_first_stars()
@@ -74,10 +81,13 @@ class StellarFormationObjectStateTests(
     ):
         universe = Universe()
         universe.world["germinal_clouds"] = [
-            {
-                "name": "first_germinal_cloud",
-                "can_form_stars": True,
-            },
+            StellarMaterialCloud(
+                name="first_germinal_cloud",
+                type="germinal_cloud",
+                state="condensing",
+                composition={},
+                can_form_stars=True,
+            ),
         ]
         process = Stars(universe)
         state = process.stellar_state
@@ -160,15 +170,36 @@ class StellarFormationObjectStateTests(
         self.assertEqual(result["state"], "forged")
         self.assertIn("iron", process.elements_up_to_iron)
 
+    def test_rejects_legacy_cloud_dict(self):
+        universe = Universe()
+        universe.world["germinal_clouds"] = [
+            {
+                "name": "legacy_cloud",
+                "can_form_stars": True,
+            },
+        ]
+        process = Stars(universe)
+
+        result = process.form_first_stars()
+
+        self.assertEqual(result["type"], "quantum_error")
+        self.assertIn(
+            "StellarMaterialCloud",
+            result["cronenberg"].origin.error_message,
+        )
+
     def test_formation_error_creates_cronenberg(
         self
     ):
         universe = Universe()
         universe.world["germinal_clouds"] = [
-            {
-                "name": "broken_cloud",
-                "can_form_stars": True,
-            },
+            StellarMaterialCloud(
+                name="broken_cloud",
+                type="germinal_cloud",
+                state="condensing",
+                composition={},
+                can_form_stars=True,
+            ),
         ]
         process = Stars(universe)
 
