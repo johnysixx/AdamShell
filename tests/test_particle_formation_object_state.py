@@ -128,13 +128,13 @@ class ParticleFormationObjectStateTests(
         self.assertEqual(
             process.elementary_particles[
                 "up_quark"
-            ]["state"],
+            ].state,
             "available",
         )
         self.assertNotEqual(
             process.interactions[
                 "strong_interaction"
-            ]["effect"],
+            ].effect,
             "changed",
         )
 

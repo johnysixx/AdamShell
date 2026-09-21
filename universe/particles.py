@@ -1,5 +1,9 @@
-﻿from copy import deepcopy
-
+from universe.particle_objects import (
+    CompositeParticle,
+    ElementaryParticle,
+    ParticleField,
+    ParticleInteraction,
+)
 from universe.particle_state import (
     ParticleFormationState,
 )
@@ -27,14 +31,25 @@ class Particles:
             "name": self.name,
             "type": self.type,
             "state": self.state,
-            "elementary_particles": deepcopy(
-                self.elementary_particles
-            ),
-            "composite_particles": deepcopy(
-                self.composite_particles
-            ),
-            "fields": deepcopy(self.fields),
-            "interactions": deepcopy(self.interactions),
+            "elementary_particles": {
+                name: particle.to_dict()
+                for name, particle
+                in self.elementary_particles.items()
+            },
+            "composite_particles": {
+                name: particle.to_dict()
+                for name, particle
+                in self.composite_particles.items()
+            },
+            "fields": {
+                name: field.to_dict()
+                for name, field in self.fields.items()
+            },
+            "interactions": {
+                name: interaction.to_dict()
+                for name, interaction
+                in self.interactions.items()
+            },
             "particle_state": (
                 self.particle_state.to_dict()
             ),
@@ -121,93 +136,136 @@ class Particles:
         self.particle_state.higgs_available = True
 
     def form_fields(self):
-        self.fields["higgs_field"] = {
-            "name": "higgs_field",
-            "type": "field",
-            "state": "active",
-            "role": "mass_mechanism",
-            "related_particle": "higgs_boson"
-        }
+        self.fields["higgs_field"] = ParticleField(
+            name="higgs_field",
+            type="field",
+            state="active",
+            role="mass_mechanism",
+            related_particle="higgs_boson",
+        )
 
-        self.fields["gravity_field"] = {
-            "name": "gravity_field",
-            "type": "symbolic_field",
-            "state": "active",
-            "role": "spacetime_curvature",
-            "note": "graviton is not modeled as confirmed particle here"
-        }
+        self.fields["gravity_field"] = ParticleField(
+            name="gravity_field",
+            type="symbolic_field",
+            state="active",
+            role="spacetime_curvature",
+            note=(
+                "graviton is not modeled as confirmed "
+                "particle here"
+            ),
+        )
 
     def add_elementary_particle(self, name, particle_family, electric_charge, role):
-        self.elementary_particles[name] = {
-            "name": name,
-            "type": "elementary_particle",
-            "family": particle_family,
-            "electric_charge": electric_charge,
-            "role": role,
-            "state": "available",
-            "origin": "early_universe_particle_formation"
-        }
+        self.elementary_particles[name] = ElementaryParticle(
+            name=name,
+            type="elementary_particle",
+            family=particle_family,
+            electric_charge=electric_charge,
+            role=role,
+            state="available",
+            origin="early_universe_particle_formation",
+        )
 
     def form_nucleons(self):
-        self.composite_particles["proton"] = {
-            "name": "proton",
-            "type": "composite_particle",
-            "family": "baryon",
-            "state": "formed",
-            "composition": ["up_quark", "up_quark", "down_quark"],
-            "electric_charge": "+1",
-            "future_use": ["atomic_nuclei", "elements"]
-        }
+        self.composite_particles["proton"] = CompositeParticle(
+            name="proton",
+            type="composite_particle",
+            family="baryon",
+            state="formed",
+            composition=(
+                "up_quark",
+                "up_quark",
+                "down_quark",
+            ),
+            electric_charge="+1",
+            future_use=(
+                "atomic_nuclei",
+                "elements",
+            ),
+        )
 
-        self.composite_particles["neutron"] = {
-            "name": "neutron",
-            "type": "composite_particle",
-            "family": "baryon",
-            "state": "formed",
-            "composition": ["up_quark", "down_quark", "down_quark"],
-            "electric_charge": "0",
-            "future_use": ["atomic_nuclei", "isotopes"]
-        }
+        self.composite_particles["neutron"] = CompositeParticle(
+            name="neutron",
+            type="composite_particle",
+            family="baryon",
+            state="formed",
+            composition=(
+                "up_quark",
+                "down_quark",
+                "down_quark",
+            ),
+            electric_charge="0",
+            future_use=(
+                "atomic_nuclei",
+                "isotopes",
+            ),
+        )
 
         self.particle_state.protons_formed = True
         self.particle_state.neutrons_formed = True
         self.particle_state.nucleons_formed = True
 
     def define_interactions(self):
-        self.interactions["strong_interaction"] = {
-            "name": "strong_interaction",
-            "mediator": "gluon",
-            "acts_on": ["quarks"],
-            "effect": "binds quarks into protons and neutrons"
-        }
+        self.interactions["strong_interaction"] = (
+            ParticleInteraction(
+                name="strong_interaction",
+                mediator="gluon",
+                acts_on=("quarks",),
+                effect=(
+                    "binds quarks into protons and neutrons"
+                ),
+            )
+        )
 
-        self.interactions["electromagnetic_interaction"] = {
-            "name": "electromagnetic_interaction",
-            "mediator": "photon",
-            "acts_on": ["charged_particles"],
-            "effect": "relates charged particles and light"
-        }
+        self.interactions[
+            "electromagnetic_interaction"
+        ] = ParticleInteraction(
+            name="electromagnetic_interaction",
+            mediator="photon",
+            acts_on=("charged_particles",),
+            effect="relates charged particles and light",
+        )
 
-        self.interactions["weak_interaction"] = {
-            "name": "weak_interaction",
-            "mediators": ["w_boson_minus", "w_boson_plus", "z_boson"],
-            "acts_on": ["quarks", "leptons", "neutrinos"],
-            "effect": "allows particle transformation and beta decay"
-        }
+        self.interactions["weak_interaction"] = (
+            ParticleInteraction(
+                name="weak_interaction",
+                mediators=(
+                    "w_boson_minus",
+                    "w_boson_plus",
+                    "z_boson",
+                ),
+                acts_on=(
+                    "quarks",
+                    "leptons",
+                    "neutrinos",
+                ),
+                effect=(
+                    "allows particle transformation and "
+                    "beta decay"
+                ),
+            )
+        )
 
-        self.interactions["higgs_mechanism"] = {
-            "name": "higgs_mechanism",
-            "field": "higgs_field",
-            "particle": "higgs_boson",
-            "acts_on": ["massive_particles"],
-            "effect": "allows particles to acquire mass"
-        }
+        self.interactions["higgs_mechanism"] = (
+            ParticleInteraction(
+                name="higgs_mechanism",
+                field="higgs_field",
+                particle="higgs_boson",
+                acts_on=("massive_particles",),
+                effect="allows particles to acquire mass",
+            )
+        )
 
-        self.interactions["beta_decay_pattern"] = {
-            "name": "beta_decay_pattern",
-            "example": "neutron -> proton + electron + electron_antineutrino",
-            "interaction": "weak_interaction"
-        }
+        self.interactions["beta_decay_pattern"] = (
+            ParticleInteraction(
+                name="beta_decay_pattern",
+                example=(
+                    "neutron -> proton + electron + "
+                    "electron_antineutrino"
+                ),
+                interaction="weak_interaction",
+            )
+        )
 
     def record_history(self):
         history = self.universe.world.setdefault("cosmic_history", [])
