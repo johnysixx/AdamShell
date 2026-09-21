@@ -511,9 +511,7 @@ class CatPerception:
                 distance=None,
             )
 
-        door_position = door.get(
-            'position'
-        )
+        door_position = door.position.to_dict()
 
         distance = (
             self._distance(

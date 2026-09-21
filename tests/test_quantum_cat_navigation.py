@@ -214,10 +214,8 @@ class QuantumCatNavigationTests(
         )
 
         self.assertEqual(
-            route.route_steps[-1].to_dict(),
-            space.bar_front_door[
-                "position"
-            ]
+            route.route_steps[-1],
+            space.bar_front_door.position
         )
 
         self.assertEqual(

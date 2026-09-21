@@ -7,6 +7,24 @@ from quantum.geometry_engine import QuantumGeometryEngine
 from navigation import NavigationEngine
 
 @dataclass(slots=True, frozen=True)
+class QuantumLandmark:
+    name: str
+    position: SpatialVector3
+
+    def __post_init__(self):
+        if not isinstance(self.position, SpatialVector3):
+            raise TypeError(
+                "Quantum landmark position must be a SpatialVector3 object."
+            )
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "position": self.position.to_dict(),
+        }
+
+
+@dataclass(slots=True, frozen=True)
 class QuantumStaircase:
     id: str
     origin: SpatialVector3
@@ -49,7 +67,10 @@ class QuantumUniverseSpace:
         self.reconfiguration_chance = 0.15
         self.staircases = []
         self.cat_routes = []
-        self.bar_front_door = {'name': 'bar_front_door', 'position': {'x': 0.0, 'y': 0.0, 'z': 0.0}}
+        self.bar_front_door = QuantumLandmark(
+            name='bar_front_door',
+            position=SpatialVector3.zero(),
+        )
         self.reconfigure(cause='initialization')
 
     @staticmethod
@@ -181,7 +202,7 @@ class QuantumUniverseSpace:
         return planned
 
     def plan_cat_route_to_bar(self, cat_id, start_position, step_size=None):
-        return self.plan_direct_cat_route(cat_id=cat_id, start_position=start_position, destination_position=self.bar_front_door['position'], destination='bar_front_door', step_size=step_size)
+        return self.plan_direct_cat_route(cat_id=cat_id, start_position=start_position, destination_position=self.bar_front_door.position.to_dict(), destination='bar_front_door', step_size=step_size)
 
     def create_cat_route(self, cat_id, route_steps, start_position, destination='bar_front_door'):
         route = QuantumCatRoute(cat_id=cat_id, route_steps=route_steps, start_position=start_position, destination=destination)
@@ -232,4 +253,4 @@ class QuantumUniverseSpace:
 
     @property
     def public_state(self):
-        return {'name': self.name, 'type': self.type, 'configuration_id': self.configuration_id, 'configuration_seed': self.configuration_seed, 'reconfiguration_count': self.reconfiguration_count, 'staircase_count': len(self.staircases), 'active_cat_route_count': len(self.get_active_cat_routes()), 'active_cat_routes': [route.public_state for route in self.get_active_cat_routes()], 'quantum_die_box': self.quantum_die_box.public_state, 'bar_front_door': dict(self.bar_front_door), 'geometry_engine': self.geometry_engine.public_state}
+        return {'name': self.name, 'type': self.type, 'configuration_id': self.configuration_id, 'configuration_seed': self.configuration_seed, 'reconfiguration_count': self.reconfiguration_count, 'staircase_count': len(self.staircases), 'active_cat_route_count': len(self.get_active_cat_routes()), 'active_cat_routes': [route.public_state for route in self.get_active_cat_routes()], 'quantum_die_box': self.quantum_die_box.public_state, 'bar_front_door': self.bar_front_door.to_dict(), 'geometry_engine': self.geometry_engine.public_state}
