@@ -117,6 +117,66 @@ class LemonadeBatchRecord:
         }
 
 
+@dataclass(frozen=True, slots=True)
+class CronenbergProcessingRecord:
+    batch: int
+    cronenbergs: tuple[str, ...]
+    lemonade_amount: float
+    lemonade_profile: LemonadeProfile | None = None
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "batch",
+            int(self.batch),
+        )
+        object.__setattr__(
+            self,
+            "cronenbergs",
+            tuple(
+                str(name)
+                for name in self.cronenbergs
+            ),
+        )
+        object.__setattr__(
+            self,
+            "lemonade_amount",
+            float(self.lemonade_amount),
+        )
+
+        if (
+            self.lemonade_profile is not None
+            and not isinstance(
+                self.lemonade_profile,
+                LemonadeProfile,
+            )
+        ):
+            raise TypeError(
+                "Cronenberg processing profile must be "
+                "a LemonadeProfile object."
+            )
+
+    def to_dict(self):
+        snapshot = {
+            "batch": self.batch,
+            "cronenbergs": list(
+                self.cronenbergs
+            ),
+            "lemonade_amount": (
+                self.lemonade_amount
+            ),
+        }
+
+        if self.lemonade_profile is not None:
+            snapshot[
+                "lemonade_profile"
+            ] = (
+                self.lemonade_profile.to_dict()
+            )
+
+        return snapshot
+
+
 class LemonadeBatchProfile:
 
     TRAIT_NAMES = LemonadeTraitProfile.TRAIT_NAMES

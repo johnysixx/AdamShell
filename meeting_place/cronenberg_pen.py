@@ -1,5 +1,8 @@
-﻿from universe.logger import UniverseLogger
-from .lemonade_profile import LemonadeBatchProfile
+from universe.logger import UniverseLogger
+from .lemonade_profile import (
+    CronenbergProcessingRecord,
+    LemonadeBatchProfile,
+)
 
 
 class CronenbergPen:
@@ -79,12 +82,18 @@ class CronenbergPen:
         self.total_lemonade_produced += lemonade_amount
         self.processing_count += 1
 
-        self.processing_history.append({
-            "batch": self.processing_count,
-            "cronenbergs": batch_names,
-            "lemonade_amount": lemonade_amount,
-            "lemonade_profile": batch_profile
-        })
+        processing_record = (
+            CronenbergProcessingRecord(
+                batch=self.processing_count,
+                cronenbergs=tuple(batch_names),
+                lemonade_amount=lemonade_amount,
+                lemonade_profile=batch_profile,
+            )
+        )
+
+        self.processing_history.append(
+            processing_record
+        )
 
         meeting_place = getattr(self.universe, "meeting_place", None)
         if meeting_place is not None:
@@ -100,11 +109,17 @@ class CronenbergPen:
             meeting_place.lemonade_signs.sync_with_reservoir(
                 meeting_place.lemonade_reservoir
             )
-            meeting_place.cronenberg_processing_history.append({
-                "batch": meeting_place.cronenberg_processing_count,
-                "cronenbergs": batch_names,
-                "lemonade_amount": lemonade_amount
-            })
+            meeting_place.cronenberg_processing_history.append(
+                CronenbergProcessingRecord(
+                    batch=(
+                        meeting_place
+                        .cronenberg_processing_count
+                    ),
+                    cronenbergs=tuple(batch_names),
+                    lemonade_amount=lemonade_amount,
+                    lemonade_profile=batch_profile,
+                )
+            )
 
         UniverseLogger.event(
             f"CRONENBERG LEMONADE PRODUCED: "
