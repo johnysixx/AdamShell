@@ -1,3 +1,4 @@
+from copy import deepcopy
 from dataclasses import dataclass, field
 
 
@@ -6,6 +7,13 @@ def _default_permissions():
         "can_administer": ["god"],
         "can_modify": ["god"],
     }
+
+
+def _snapshot_entity(entity):
+    to_dict = getattr(entity, "to_dict", None)
+    if callable(to_dict):
+        return to_dict()
+    return deepcopy(entity)
 
 
 @dataclass(slots=True)
@@ -43,10 +51,22 @@ class EdenState:
                 name: list(entities)
                 for name, entities in self.permissions.items()
             },
-            "entities": list(self.entities),
-            "plants": list(self.plants),
-            "trees": list(self.trees),
-            "animals": list(self.animals),
+            "entities": [
+                _snapshot_entity(entity)
+                for entity in self.entities
+            ],
+            "plants": [
+                _snapshot_entity(plant)
+                for plant in self.plants
+            ],
+            "trees": [
+                _snapshot_entity(tree)
+                for tree in self.trees
+            ],
+            "animals": [
+                _snapshot_entity(animal)
+                for animal in self.animals
+            ],
             "rules": list(self.rules),
             "observer": self.observer,
             "relations": list(self.relations),

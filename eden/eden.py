@@ -5,6 +5,7 @@ from eden.creation_objects import (
     CreationLight,
 )
 from eden.eden_state import EdenState
+from eden.living_objects import EdenAnimal, EdenFruitTree, EdenPlant
 from universe.logger import UniverseLogger
 
 
@@ -209,29 +210,9 @@ class Eden:
     def day_1(self):
         UniverseLogger.event("DAY 1: PLANTS")
 
-        grass =  {
-            "name": "grass",
-            "type": "plant",
-            "state": "alive",
-            "edible": True,
-            "forbidden": False,
-        }
-
-        herb ={
-            "name": "herb",
-            "type": "plant",
-            "state": "alive",
-            "edible": True,
-            "forbidden": False,
-        }
-
-        fruit_tree = {
-            "name": "fruit_tree",
-            "type": "tree",
-            "state": "alive",
-            "fruit": True,
-            "forbidden": False,
-        }
+        grass = EdenPlant(name="grass")
+        herb = EdenPlant(name="herb")
+        fruit_tree = EdenFruitTree()
 
         self.plants.append(grass)
         self.plants.append(herb)
@@ -254,29 +235,18 @@ class Eden:
     def day_2(self):
         UniverseLogger.event("DAY 2: ANIMALS")
 
-        bird = {
-            "name": "bird",
-            "type": "animal",
-            "kind": "air",
-            "state": "alive",
-            "forbidden": False
-        }
-
-        fish = {
-            "name": "fish",
-            "type": "animal",
-            "kind": "water",
-            "state": "alive",
-            "forbidden": False
-        }
-
-        beast = {
-            "name": "beast",
-            "type": "animal",
-            "kind": "land",
-            "state": "alive",
-            "forbidden": False
-        }
+        bird = EdenAnimal(
+            name="bird",
+            kind="air",
+        )
+        fish = EdenAnimal(
+            name="fish",
+            kind="water",
+        )
+        beast = EdenAnimal(
+            name="beast",
+            kind="land",
+        )
         self.animals.append(bird)
         self.animals.append(fish)
         self.animals.append(beast)
