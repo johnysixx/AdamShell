@@ -1,3 +1,9 @@
+from eden.creation_objects import (
+    CreationDarkness,
+    CreationDayPhase,
+    CreationDayRecord,
+    CreationLight,
+)
 from eden.eden_state import EdenState
 from universe.logger import UniverseLogger
 
@@ -153,52 +159,43 @@ class Eden:
         self.universe.enable_physics("space")
         self.universe.enable_physics("energy")
 
-        self.universe.world["light"] = {
-        "intensity": 1.0,
-        "state": "primordial",
-        "speed": 299792458,
-        "constant": True
-        }
+        light = CreationLight()
+        self.universe.world["light"] = light
 
-        self.universe.world["time"] = {
-            "tick": 0,
-            "flow": 1.0,
-            "state": "linear"
-        }
+        self.universe.world["time"] = (
+            self.universe.physics["time"]
+        )
 
         self.universe.physics["time_dilation"] = True
 
         UniverseLogger.event("EDEN PHYSICS ESTABLISHED")
 
         UniverseLogger.event("God separated the light from the darkness")
-        self.universe.world["light"]["name"] = "day"
+        light.name_as_day()
 
-        self.universe.physics["darkness"] = {
-            "name": "night",
-            "state": "primordial"
-        }
+        self.universe.physics["darkness"] = CreationDarkness()
 
         UniverseLogger.event("God called the darkness night")
 
-        self.universe.world["light"]["good"] = True
+        light.mark_good()
         UniverseLogger.event("God saw that the light was good")
 
-        self.universe.world["evening"] =  {
-            "day": 0,
-            "state": "evening"
-        }
+        self.universe.world["evening"] = CreationDayPhase(
+            day=0,
+            state="evening",
+        )
         UniverseLogger.event("And there was evening")
-        self.universe.world["morning"] = {
-            "day": 0,
-            "state": "morning"
-        }
+        self.universe.world["morning"] = CreationDayPhase(
+            day=0,
+            state="morning",
+        )
 
         UniverseLogger.event("And there was morning")
-        self.universe.world["creation_day"] = {
-            "day": 0,
-            "name":"first day of the creation",
-            "complete": True
-        }
+        self.universe.world["creation_day"] = CreationDayRecord(
+            day=0,
+            name="first day of the creation",
+            complete=True,
+        )
         UniverseLogger.event("and the first day on the Earth begins")
 
 
