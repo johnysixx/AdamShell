@@ -1,6 +1,8 @@
 from library.god_book import GodBook
+from core.entity.departure_state import EntityDepartureIntent
 from core.entity.social_entity import _entity_attr_setdefault
 from core.entity.social_entity import SocialEntity
+from gods.god_actor_state import GodCreationLimits, GodDivineAttributes
 from gods.gods_state import GodsState
 from universe.pre_cosmic_rules import GOD_INITIAL_ENERGY_J
 from universe.logger import UniverseLogger
@@ -50,7 +52,32 @@ class Gods:
         self.universe.world['gods_state'] = self.gods_state
 
     def create_god(self, name, role='god_entity'):
-        god = SocialEntity.from_mapping({'name': name, 'type': 'god', 'role': role, 'state': 'present', 'active': True, 'forbidden': False, 'existence_pct': 100.0, 'native_world': 'gods_layer', 'existence_by_world': {'gods_layer': 100.0, 'idea_universe': 100.0, 'root_universe': 0.0, 'eden': 0.0}, 'departure_intent': {'wants_to_leave': False}, 'creative_will': 0.0, 'energy_j': GOD_INITIAL_ENERGY_J, 'creation_capacity': 0.0, 'divine_attributes': {'aseity': True, 'eternity': True, 'transcendence': True, 'immanence': True, 'creative_authority': 'potential', 'sovereignty': 'potential', 'providence': 'potential', 'omniscience': 'potential', 'omnipotence': 'potential', 'omnipresence': 'potential', 'immutability': 'limited_by_story_state', 'simplicity': 'symbolic', 'perfect_goodness': 'not_assumed'}, 'creation_limits': {'limited_by_existence_pct': True, 'limited_by_creative_will': True, 'limited_by_current_reality_rules': True}, 'permissions': self.permissions, 'created_entities': [], 'administers': [], 'book_created': False})
+        god = SocialEntity(
+            name=name,
+            type='god',
+            role=role,
+            state='present',
+            active=True,
+            forbidden=False,
+            existence_pct=100.0,
+            native_world='gods_layer',
+            existence_by_world={
+                'gods_layer': 100.0,
+                'idea_universe': 100.0,
+                'root_universe': 0.0,
+                'eden': 0.0,
+            },
+            departure_intent=EntityDepartureIntent(),
+            creative_will=0.0,
+            energy_j=GOD_INITIAL_ENERGY_J,
+            creation_capacity=0.0,
+            divine_attributes=GodDivineAttributes(),
+            creation_limits=GodCreationLimits(),
+            permissions=self.permissions,
+            created_entities=[],
+            administers=[],
+            book_created=False,
+        )
         self.gods.append(god)
         self.write_to_world()
         UniverseLogger.event(f'GOD CREATED: {name}')

@@ -1,7 +1,9 @@
+from core.entity.departure_state import EntityDepartureIntent
 from core.entity.social_entity import SocialEntity
 from universe.pre_cosmic_rules import IDEA_ENTITY_INITIAL_ENERGY_J, IDEA_ENTITY_ARCHETYPE_EXISTENCE_THRESHOLD_PCT
 from universe.logger import UniverseLogger
 from core.entity.serpent_d20 import SerpentD20
+from idea_entities.idea_actor_state import IdeaPrePhysicalAttributes
 from idea_entities.idea_entities_state import IdeaEntitiesState
 from idea_entities.prefysical_fire_origin import PrefysicalFireOrigin
 
@@ -79,7 +81,28 @@ class IdeaEntities:
     def create_idea_entity(self, name, role='primordial_idea_entity', active=False, existence_pct=0.0, native_world='idea_universe', existence_by_world=None):
         if existence_by_world is None:
             existence_by_world = {'idea_universe': existence_pct, 'root_universe': 0.0, 'eden': 0.0}
-        idea_entity = SocialEntity.from_mapping({'name': name, 'type': 'idea_entity', 'role': role, 'state': 'created', 'active': active, 'forbidden': False, 'existence_pct': existence_pct, 'native_world': native_world, 'existence_by_world': existence_by_world, 'departure_intent': {'wants_to_leave': False}, 'will': 0.0, 'energy_j': IDEA_ENTITY_INITIAL_ENERGY_J, 'idea_capacity': 0.0, 'archetype_manifestation_possible': False, 'archetype_manifestation_state': 'not_enough_existence', 'archetype_manifestation_threshold_pct': IDEA_ENTITY_ARCHETYPE_EXISTENCE_THRESHOLD_PCT, 'pre_physical_attributes': {'can_exist_before_form': True, 'can_influence': True, 'can_become_process': True, 'can_hold_symbolic_energy': True, 'can_hold_will': True}, 'permissions': self.permissions})
+        idea_entity = SocialEntity(
+            name=name,
+            type='idea_entity',
+            role=role,
+            state='created',
+            active=active,
+            forbidden=False,
+            existence_pct=existence_pct,
+            native_world=native_world,
+            existence_by_world=existence_by_world,
+            departure_intent=EntityDepartureIntent(),
+            will=0.0,
+            energy_j=IDEA_ENTITY_INITIAL_ENERGY_J,
+            idea_capacity=0.0,
+            archetype_manifestation_possible=False,
+            archetype_manifestation_state='not_enough_existence',
+            archetype_manifestation_threshold_pct=(
+                IDEA_ENTITY_ARCHETYPE_EXISTENCE_THRESHOLD_PCT
+            ),
+            pre_physical_attributes=IdeaPrePhysicalAttributes(),
+            permissions=self.permissions,
+        )
         self.idea_entities.append(idea_entity)
         self.write_to_world()
         UniverseLogger.event(f'IDEA ENTITY CREATED: {name}')
