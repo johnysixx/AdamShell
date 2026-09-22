@@ -49,7 +49,7 @@ class QuantumCatRouteObjectStateTests(unittest.TestCase):
                 route_steps=[
                     SpatialVector3(x=1.0, y=0.0, z=0.0)
                 ],
-                start_position=SpatialVector3(x=0.0, y=0.0, z=0.0),
+                start_position={"x": 0.0, "y": 0.0, "z": 0.0},
             )
 
     def test_detour_is_object_state(self):

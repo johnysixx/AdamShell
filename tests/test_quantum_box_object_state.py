@@ -266,7 +266,7 @@ class QuantumBoxObjectStateTests(
         box = QuantumBox()
 
         with self.assertRaises(TypeError):
-            box.position = SpatialVector3(x=1.0, y=2.0, z=3.0)
+            box.position = {"x": 1.0, "y": 2.0, "z": 3.0}
 
         position = SpatialVector3(
             x=1.0,

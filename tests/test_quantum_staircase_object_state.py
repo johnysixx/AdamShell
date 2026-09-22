@@ -40,7 +40,7 @@ class QuantumStaircaseObjectStateTests(unittest.TestCase):
             QuantumStaircase(
                 id="legacy_destination",
                 origin=SpatialVector3.zero(),
-                destination=SpatialVector3(x=1.0, y=2.0, z=3.0),
+                destination={"x": 1.0, "y": 2.0, "z": 3.0},
                 orientation="down",
                 length=1.0,
             )
