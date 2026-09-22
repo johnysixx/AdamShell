@@ -1,7 +1,10 @@
 import unittest
 
 from universe.energy_gate import EnergyGate
-from universe.energy_gate_state import EnergyGateState
+from universe.energy_gate_state import (
+    EnergyGateCollectionEvent,
+    EnergyGateState,
+)
 from universe.universe import Universe
 
 
@@ -49,6 +52,17 @@ class EnergyGateObjectStateTests(unittest.TestCase):
         self.assertEqual(state.idea_energy_j, 4.0)
         self.assertEqual(state.energy_ratio, 0.4)
         self.assertEqual(len(gate.events), 1)
+
+        event = gate.events[0]
+
+        self.assertIsInstance(
+            event,
+            EnergyGateCollectionEvent,
+        )
+        self.assertEqual(
+            event.source,
+            "idea",
+        )
         self.assertEqual(
             result["events"][0]["source"],
             "idea",
@@ -67,7 +81,38 @@ class EnergyGateObjectStateTests(unittest.TestCase):
         result["events"][0]["source"] = "changed"
 
         self.assertEqual(gate.gate_state.idea_energy_j, 4.0)
-        self.assertEqual(gate.events[0]["source"], "idea")
+        self.assertEqual(gate.events[0].source, "idea")
+
+    def test_collection_event_is_object_only(self):
+        event = EnergyGateCollectionEvent(
+            source="idea",
+            amount_j=4.0,
+            total_idea_energy_j=4.0,
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    event,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(TypeError):
+            _ = event["source"]
+
+        snapshot = event.to_dict()
+        snapshot["source"] = "changed"
+
+        self.assertEqual(
+            event.source,
+            "idea",
+        )
 
     def test_threshold_updates_closed_and_open_state(self):
         universe = Universe()

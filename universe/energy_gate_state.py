@@ -1,6 +1,42 @@
 from dataclasses import dataclass
 
 
+@dataclass(slots=True, frozen=True)
+class EnergyGateCollectionEvent:
+
+    source: str
+    amount_j: float
+    total_idea_energy_j: float
+    name: str = "idea_energy_collected"
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "source",
+            str(self.source),
+        )
+        object.__setattr__(
+            self,
+            "amount_j",
+            float(self.amount_j),
+        )
+        object.__setattr__(
+            self,
+            "total_idea_energy_j",
+            float(self.total_idea_energy_j),
+        )
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "source": self.source,
+            "amount_j": self.amount_j,
+            "total_idea_energy_j": (
+                self.total_idea_energy_j
+            ),
+        }
+
+
 @dataclass(slots=True)
 class EnergyGateState:
 

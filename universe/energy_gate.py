@@ -1,6 +1,7 @@
-﻿from copy import deepcopy
-
-from universe.energy_gate_state import EnergyGateState
+from universe.energy_gate_state import (
+    EnergyGateCollectionEvent,
+    EnergyGateState,
+)
 
 
 HBAR_J_S = 1.054_571_817e-34
@@ -39,7 +40,10 @@ class EnergyGate:
             "type": self.type,
             "state": self.state,
             "gate_state": self.gate_state.to_dict(),
-            "events": deepcopy(self.events),
+            "events": [
+                event.to_dict()
+                for event in self.events
+            ],
         }
 
     def _refresh_public_state(self):
@@ -70,12 +74,13 @@ class EnergyGate:
     ):
         self.idea_energy_j += amount_j
 
-        self.events.append({
-            "name": "idea_energy_collected",
-            "source": source,
-            "amount_j": amount_j,
-            "total_idea_energy_j": self.idea_energy_j,
-        })
+        self.events.append(
+            EnergyGateCollectionEvent(
+                source=source,
+                amount_j=amount_j,
+                total_idea_energy_j=self.idea_energy_j,
+            )
+        )
 
         self._update_state_unprotected()
 
