@@ -30,6 +30,82 @@ class QuantumCatRouteDetour:
         }
 
 
+@dataclass(slots=True, frozen=True)
+class QuantumCatRouteEncounter:
+    result: str
+    encountered: bool | None = None
+    cat: str | None = None
+    cronenberg: str | None = None
+    blocked_by: str | None = None
+    position: SpatialVector3 | None = None
+    size_ratio: float | None = None
+    escape_chance: float | None = None
+    detour: SpatialVector3 | None = None
+    destination: str | None = None
+    cat_growth: float | None = None
+    strength_gain: float | None = None
+    subscriber_count: int | None = None
+
+    def __post_init__(self):
+        for field_name in (
+            "position",
+            "detour",
+        ):
+            value = getattr(
+                self,
+                field_name,
+            )
+
+            if (
+                value is not None
+                and not isinstance(
+                    value,
+                    SpatialVector3,
+                )
+            ):
+                raise TypeError(
+                    f"Quantum cat route encounter {field_name} "
+                    "must be a SpatialVector3 object."
+                )
+
+    def to_dict(self):
+        snapshot = {
+            "result": self.result,
+        }
+
+        for field_name in (
+            "encountered",
+            "cat",
+            "cronenberg",
+            "blocked_by",
+            "size_ratio",
+            "escape_chance",
+            "destination",
+            "cat_growth",
+            "strength_gain",
+            "subscriber_count",
+        ):
+            value = getattr(
+                self,
+                field_name,
+            )
+
+            if value is not None:
+                snapshot[field_name] = value
+
+        if self.position is not None:
+            snapshot["position"] = (
+                self.position.to_dict()
+            )
+
+        if self.detour is not None:
+            snapshot["detour"] = (
+                self.detour.to_dict()
+            )
+
+        return snapshot
+
+
 class QuantumCatRoute:
 
     def __init__(
@@ -184,8 +260,17 @@ class QuantumCatRoute:
         self,
         encounter
     ):
+        if not isinstance(
+            encounter,
+            QuantumCatRouteEncounter,
+        ):
+            raise TypeError(
+                "Quantum cat route encounter must be "
+                "a QuantumCatRouteEncounter object."
+            )
+
         self.encounters.append(
-            dict(encounter)
+            encounter
         )
 
         return encounter
@@ -218,9 +303,10 @@ class QuantumCatRoute:
                 detour.to_dict()
                 for detour in self.detours
             ],
-            "encounters": list(
-                self.encounters
-            ),
+            "encounters": [
+                encounter.to_dict()
+                for encounter in self.encounters
+            ],
             "state": self.state,
             "observation_active": self.observation_active,
         }

@@ -4,6 +4,7 @@ from core.entity.components import SpatialVector3
 from core.entity.quantum_cat_route import (
     QuantumCatRoute,
     QuantumCatRouteDetour,
+    QuantumCatRouteEncounter,
 )
 
 
@@ -72,6 +73,75 @@ class QuantumCatRouteObjectStateTests(unittest.TestCase):
             route.make_minimal_detour(
                 {"x": 1.0, "y": 0.0, "z": 0.0}
             )
+
+
+    def test_encounter_is_object_state(self):
+        route = self.create_route()
+        position = SpatialVector3(
+            x=1.0,
+            y=0.0,
+            z=0.0,
+        )
+        encounter = QuantumCatRouteEncounter(
+            result="cat_route_paradox",
+            cat="route_cat",
+            blocked_by="cronenberg",
+            position=position,
+        )
+
+        recorded = route.record_encounter(
+            encounter
+        )
+
+        self.assertIs(
+            recorded,
+            encounter,
+        )
+        self.assertIs(
+            route.encounters[0],
+            encounter,
+        )
+        self.assertFalse(
+            hasattr(
+                encounter,
+                "get",
+            )
+        )
+
+        with self.assertRaises(TypeError):
+            _ = encounter["result"]
+
+        snapshot = route.public_state
+        snapshot["encounters"][0][
+            "position"
+        ]["x"] = 99.0
+
+        self.assertEqual(
+            encounter.position.x,
+            1.0,
+        )
+
+    def test_route_rejects_mapping_encounter(self):
+        route = self.create_route()
+
+        with self.assertRaises(TypeError):
+            route.record_encounter(
+                {
+                    "result": "legacy",
+                }
+            )
+
+    def test_encounter_rejects_mapping_spatial_state(self):
+        with self.assertRaises(TypeError):
+            QuantumCatRouteEncounter(
+                result="legacy",
+                position={
+                    "x": 1.0,
+                    "y": 2.0,
+                    "z": 3.0,
+                },
+            )
+
 
     def test_public_state_is_detached_serialization(self):
         route = self.create_route()

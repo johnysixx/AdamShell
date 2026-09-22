@@ -1,7 +1,10 @@
 import random
 import uuid
 from dataclasses import dataclass
-from core.entity.quantum_cat_route import QuantumCatRoute
+from core.entity.quantum_cat_route import (
+    QuantumCatRoute,
+    QuantumCatRouteEncounter,
+)
 from core.entity.components import SpatialVector3
 from quantum.geometry_engine import QuantumGeometryEngine
 from navigation import NavigationEngine
@@ -239,7 +242,14 @@ class QuantumUniverseSpace:
                     link_metadata = {'cat': cat_id, 'position': cronenberg_position.to_dict(), 'source_operation': 'repeated_detour_paradox'}
                     cronenberg.quantum_link_system.add_link(target_id=manifested_cronenberg.id, link_type='manifested_consequence', strength=1.0, created_tick=getattr(universe, 'universe_tick', None), metadata=link_metadata)
                     manifested_cronenberg.quantum_link_system.add_link(target_id=cronenberg.id, link_type='causal_paradox', strength=1.0, created_tick=getattr(universe, 'universe_tick', None), metadata=link_metadata)
-                route.record_encounter({'result': 'cat_route_paradox', 'cat': cat_id, 'blocked_by': cronenberg.name, 'position': cronenberg_position.to_dict()})
+                route.record_encounter(
+                    QuantumCatRouteEncounter(
+                        result='cat_route_paradox',
+                        cat=cat_id,
+                        blocked_by=cronenberg.name,
+                        position=cronenberg_position,
+                    )
+                )
                 return {'result': 'cat_route_paradox_created_cronenberg', 'cat': cat_id, 'blocked_by': cronenberg.name, 'quantum_error': quantum_error}
             encounter = encounter_system.resolve(cat=cat, cronenberg=cronenberg, route=route, universe=universe, rng=rng)
             if encounter.get('result') == 'cat_avoids_cronenberg':

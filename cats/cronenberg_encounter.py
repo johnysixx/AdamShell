@@ -1,6 +1,9 @@
 import random
 
 from core.entity.components import SpatialVector3
+from core.entity.quantum_cat_route import (
+    QuantumCatRouteEncounter,
+)
 from core.entity.cronenberg_system.origin import (
     CronenbergOrigin
 )
@@ -85,7 +88,17 @@ class CatCronenbergEncounter:
                 "destination": route.destination
             }
 
-            route.record_encounter(event)
+            route.record_encounter(
+                QuantumCatRouteEncounter(
+                    result="cat_avoids_cronenberg",
+                    encountered=True,
+                    cat=cat_name,
+                    cronenberg=cronenberg.name,
+                    size_ratio=size_ratio,
+                    detour=detour,
+                    destination=route.destination,
+                )
+            )
             self.history.append(event)
 
             UniverseLogger.event(
@@ -154,7 +167,17 @@ class CatCronenbergEncounter:
                 "destination": route.destination
             }
 
-            route.record_encounter(event)
+            route.record_encounter(
+                QuantumCatRouteEncounter(
+                    result="cronenberg_escaped",
+                    encountered=True,
+                    cat=cat_name,
+                    cronenberg=cronenberg.name,
+                    size_ratio=size_ratio,
+                    escape_chance=escape_chance,
+                    destination=route.destination,
+                )
+            )
             self.history.append(event)
 
             UniverseLogger.event(
@@ -277,7 +300,22 @@ class CatCronenbergEncounter:
             )
         }
 
-        route.record_encounter(event)
+        route.record_encounter(
+            QuantumCatRouteEncounter(
+                result="cronenberg_hunted",
+                encountered=True,
+                cat=cat_name,
+                cronenberg=cronenberg.name,
+                size_ratio=size_ratio,
+                escape_chance=escape_chance,
+                destination=route.destination,
+                cat_growth=cat_growth,
+                strength_gain=strength_gain,
+                subscriber_count=event_result[
+                    "subscriber_count"
+                ],
+            )
+        )
         self.history.append(event)
 
         UniverseLogger.event(
