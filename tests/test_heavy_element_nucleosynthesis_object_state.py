@@ -1,5 +1,6 @@
 import unittest
 
+from universe.chemical_objects import ChemicalElement
 from universe.cosmic_objects import StellarMaterialCloud
 from universe.heavy_element_nucleosynthesis import (
     HeavyElementNucleosynthesis,
@@ -16,12 +17,15 @@ class HeavyElementNucleosynthesisObjectStateTests(unittest.TestCase):
         universe = Universe()
 
         universe.world["elements_up_to_iron"] = {
-            "iron": {
-                "name": "iron",
-                "type": "element",
-                "atomic_number": 26,
-                "state": "forged",
-            }
+            "iron": ChemicalElement(
+                name="iron",
+                symbol="Fe",
+                atomic_number=26,
+                official=True,
+                discovered=True,
+                state="forged",
+                origin="stellar_nucleosynthesis",
+            )
         }
 
         universe.world["enriched_clouds"] = [
@@ -109,9 +113,74 @@ class HeavyElementNucleosynthesisObjectStateTests(unittest.TestCase):
 
         self.assertTrue(process.process_state.heavy_elements_forged)
         self.assertEqual(
-            process.heavy_elements["gold"]["atomic_number"],
+            process.heavy_elements["gold"].atomic_number,
             79,
         )
+
+    def test_heavy_elements_are_chemical_objects(self):
+        universe, process, result = self._forged_process()
+
+        gold = process.heavy_elements["gold"]
+
+        self.assertIsInstance(gold, ChemicalElement)
+        self.assertEqual(
+            (gold.symbol, gold.atomic_number),
+            ("Au", 79),
+        )
+        self.assertEqual(
+            gold.origin,
+            "post_iron_nucleosynthesis",
+        )
+        self.assertEqual(
+            gold.requires,
+            (
+                "iron_seed",
+                "supernova_enrichment",
+                "neutron_capture",
+            ),
+        )
+        self.assertIs(
+            universe.world["heavy_elements"]["gold"],
+            gold,
+        )
+        self.assertIs(
+            universe.world["enriched_clouds"][0]
+            .composition["gold"],
+            gold,
+        )
+        self.assertIsInstance(
+            result["heavy_elements"]["gold"],
+            dict,
+        )
+        self.assertFalse(hasattr(gold, "get"))
+
+        with self.assertRaises(TypeError):
+            _ = gold["atomic_number"]
+
+    def test_rejects_legacy_iron_dict(self):
+        universe = Universe()
+
+        universe.world["elements_up_to_iron"] = {
+            "iron": {
+                "name": "iron",
+                "atomic_number": 26,
+            }
+        }
+
+        universe.world["enriched_clouds"] = [
+            StellarMaterialCloud(
+                name="enriched_cloud",
+                type="enriched_stellar_cloud",
+                state="expanding",
+                composition={},
+                can_form_stellar_systems=True,
+            )
+        ]
+
+        with self.assertRaises(TypeError):
+            HeavyElementNucleosynthesis(
+                universe
+            ).forge_heavy_elements()
 
     def test_failure_preserves_object_state(self):
         universe = Universe()

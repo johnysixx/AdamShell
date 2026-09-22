@@ -1,9 +1,35 @@
-from copy import deepcopy
-
+from universe.chemical_objects import ChemicalElement
 from universe.cosmic_objects import StellarMaterialCloud
+from universe.primordial_objects import PrimordialCosmicComponent
 from universe.heavy_element_nucleosynthesis_state import (
     HeavyElementNucleosynthesisState,
 )
+
+
+HEAVY_ELEMENT_SPECS = (
+    ("cobalt", "Co", 27), ("nickel", "Ni", 28),
+    ("copper", "Cu", 29), ("zinc", "Zn", 30),
+    ("silver", "Ag", 47), ("tin", "Sn", 50),
+    ("iodine", "I", 53), ("gold", "Au", 79),
+    ("platinum", "Pt", 78), ("lead", "Pb", 82),
+    ("uranium", "U", 92),
+)
+
+
+def _public_heavy_element_snapshot(element):
+    if not isinstance(element, ChemicalElement):
+        raise TypeError(
+            "heavy_elements must contain ChemicalElement objects"
+        )
+
+    return {
+        "name": element.name,
+        "type": "element",
+        "atomic_number": element.atomic_number,
+        "state": element.state,
+        "origin": element.origin,
+        "requires": list(element.requires),
+    }
 
 
 class HeavyElementNucleosynthesis:
@@ -25,7 +51,10 @@ class HeavyElementNucleosynthesis:
             "name": self.name,
             "type": self.type,
             "state": self.state,
-            "heavy_elements": deepcopy(self.heavy_elements),
+            "heavy_elements": {
+                name: _public_heavy_element_snapshot(element)
+                for name, element in self.heavy_elements.items()
+            },
             "process_state": self.process_state.to_dict(),
         }
 
@@ -52,6 +81,27 @@ class HeavyElementNucleosynthesis:
             self.write_to_world()
             return self.public_state
 
+        for element in elements_up_to_iron.values():
+            if not isinstance(
+                element,
+                (
+                    PrimordialCosmicComponent,
+                    ChemicalElement,
+                ),
+            ):
+                raise TypeError(
+                    "elements_up_to_iron must contain "
+                    "primordial or ChemicalElement objects"
+                )
+
+        if not isinstance(
+            elements_up_to_iron["iron"],
+            ChemicalElement,
+        ):
+            raise TypeError(
+                "iron seed must be a ChemicalElement object"
+            )
+
         if not enriched_clouds:
             self.state = "failed"
 
@@ -68,17 +118,12 @@ class HeavyElementNucleosynthesis:
         self.process_state.supernova_enrichment_available = True
         self.process_state.neutron_capture_possible = True
 
-        self.add_heavy_element("cobalt", 27)
-        self.add_heavy_element("nickel", 28)
-        self.add_heavy_element("copper", 29)
-        self.add_heavy_element("zinc", 30)
-        self.add_heavy_element("silver", 47)
-        self.add_heavy_element("tin", 50)
-        self.add_heavy_element("iodine", 53)
-        self.add_heavy_element("gold", 79)
-        self.add_heavy_element("platinum", 78)
-        self.add_heavy_element("lead", 82)
-        self.add_heavy_element("uranium", 92)
+        for name, symbol, atomic_number in HEAVY_ELEMENT_SPECS:
+            self.add_heavy_element(
+                name,
+                symbol,
+                atomic_number,
+            )
 
         self.process_state.heavy_elements_forged = True
 
@@ -93,19 +138,26 @@ class HeavyElementNucleosynthesis:
 
         return self.public_state
 
-    def add_heavy_element(self, name, atomic_number):
-        self.heavy_elements[name] = {
-            "name": name,
-            "type": "element",
-            "atomic_number": atomic_number,
-            "state": "forged",
-            "origin": "post_iron_nucleosynthesis",
-            "requires": [
+    def add_heavy_element(
+        self,
+        name,
+        symbol,
+        atomic_number,
+    ):
+        self.heavy_elements[name] = ChemicalElement(
+            name=name,
+            symbol=symbol,
+            atomic_number=atomic_number,
+            official=True,
+            discovered=True,
+            state="forged",
+            origin="post_iron_nucleosynthesis",
+            requires=(
                 "iron_seed",
                 "supernova_enrichment",
                 "neutron_capture",
-            ],
-        }
+            ),
+        )
 
     def update_enriched_clouds(self, enriched_clouds):
         for cloud in enriched_clouds:

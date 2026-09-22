@@ -1,10 +1,48 @@
-from copy import deepcopy
-
+from universe.chemical_objects import ChemicalElement
 from universe.stellar_objects import PrimordialStar
 from universe.primordial_objects import PrimordialCosmicComponent
 from universe.stellar_nucleosynthesis_state import (
     StellarNucleosynthesisState,
 )
+
+
+STELLAR_ELEMENT_SPECS = (
+    ("beryllium", "Be", 4), ("boron", "B", 5),
+    ("carbon", "C", 6), ("nitrogen", "N", 7),
+    ("oxygen", "O", 8), ("fluorine", "F", 9),
+    ("neon", "Ne", 10), ("sodium", "Na", 11),
+    ("magnesium", "Mg", 12), ("aluminium", "Al", 13),
+    ("silicon", "Si", 14), ("phosphorus", "P", 15),
+    ("sulfur", "S", 16), ("chlorine", "Cl", 17),
+    ("argon", "Ar", 18), ("potassium", "K", 19),
+    ("calcium", "Ca", 20), ("scandium", "Sc", 21),
+    ("titanium", "Ti", 22), ("vanadium", "V", 23),
+    ("chromium", "Cr", 24), ("manganese", "Mn", 25),
+    ("iron", "Fe", 26),
+)
+
+
+def _public_element_snapshot(element):
+    if isinstance(element, PrimordialCosmicComponent):
+        return element.to_dict()
+
+    if not isinstance(element, ChemicalElement):
+        raise TypeError(
+            "elements_up_to_iron must contain primordial "
+            "or ChemicalElement objects"
+        )
+
+    snapshot = {
+        "name": element.name,
+        "type": "element",
+        "atomic_number": element.atomic_number,
+        "state": element.state,
+    }
+
+    if element.origin is not None:
+        snapshot["origin"] = element.origin
+
+    return snapshot
 
 
 class StellarNucleosynthesis:
@@ -26,9 +64,10 @@ class StellarNucleosynthesis:
             "name": self.name,
             "type": self.type,
             "state": self.state,
-            "elements_up_to_iron": deepcopy(
-                self.elements_up_to_iron
-            ),
+            "elements_up_to_iron": {
+                name: _public_element_snapshot(element)
+                for name, element in self.elements_up_to_iron.items()
+            },
             "stellar_nucleosynthesis_state": (
                 self.stellar_nucleosynthesis_state.to_dict()
             ),
@@ -87,29 +126,12 @@ class StellarNucleosynthesis:
             if element.type == "element":
                 self.elements_up_to_iron[element_name] = element
 
-        self.add_stellar_element("beryllium", 4)
-        self.add_stellar_element("boron", 5)
-        self.add_stellar_element("carbon", 6)
-        self.add_stellar_element("nitrogen", 7)
-        self.add_stellar_element("oxygen", 8)
-        self.add_stellar_element("fluorine", 9)
-        self.add_stellar_element("neon", 10)
-        self.add_stellar_element("sodium", 11)
-        self.add_stellar_element("magnesium", 12)
-        self.add_stellar_element("aluminium", 13)
-        self.add_stellar_element("silicon", 14)
-        self.add_stellar_element("phosphorus", 15)
-        self.add_stellar_element("sulfur", 16)
-        self.add_stellar_element("chlorine", 17)
-        self.add_stellar_element("argon", 18)
-        self.add_stellar_element("potassium", 19)
-        self.add_stellar_element("calcium", 20)
-        self.add_stellar_element("scandium", 21)
-        self.add_stellar_element("titanium", 22)
-        self.add_stellar_element("vanadium", 23)
-        self.add_stellar_element("chromium", 24)
-        self.add_stellar_element("manganese", 25)
-        self.add_stellar_element("iron", 26)
+        for name, symbol, atomic_number in STELLAR_ELEMENT_SPECS:
+            self.add_stellar_element(
+                name,
+                symbol,
+                atomic_number,
+            )
 
         self.stellar_nucleosynthesis_state.elements_up_to_iron_forged = True
         self.stellar_nucleosynthesis_state.iron_limit_reached = True
@@ -126,14 +148,21 @@ class StellarNucleosynthesis:
 
         return self.public_state
 
-    def add_stellar_element(self, name, atomic_number):
-        self.elements_up_to_iron[name] = {
-            "name": name,
-            "type": "element",
-            "atomic_number": atomic_number,
-            "state": "forged",
-            "origin": "stellar_nucleosynthesis"
-        }
+    def add_stellar_element(
+        self,
+        name,
+        symbol,
+        atomic_number,
+    ):
+        self.elements_up_to_iron[name] = ChemicalElement(
+            name=name,
+            symbol=symbol,
+            atomic_number=atomic_number,
+            official=True,
+            discovered=True,
+            state="forged",
+            origin="stellar_nucleosynthesis",
+        )
 
     def record_history(self):
         history = self.universe.world.setdefault("cosmic_history", [])

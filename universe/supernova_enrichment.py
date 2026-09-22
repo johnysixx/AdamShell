@@ -1,4 +1,6 @@
+from universe.chemical_objects import ChemicalElement
 from universe.cosmic_objects import StellarMaterialCloud
+from universe.primordial_objects import PrimordialCosmicComponent
 from universe.stellar_objects import PrimordialStar, Supernova
 from universe.supernova_enrichment_state import (
     SupernovaEnrichmentState,
@@ -92,6 +94,27 @@ class SupernovaEnrichment:
             )
             self.write_to_world()
             return self.public_state
+
+        for element in elements.values():
+            if not isinstance(
+                element,
+                (
+                    PrimordialCosmicComponent,
+                    ChemicalElement,
+                ),
+            ):
+                raise TypeError(
+                    "elements_up_to_iron must contain "
+                    "primordial or ChemicalElement objects"
+                )
+
+        if not isinstance(
+            elements["iron"],
+            ChemicalElement,
+        ):
+            raise TypeError(
+                "iron must be a ChemicalElement object"
+            )
 
         self.supernova_enrichment_state.iron_available = (
             True

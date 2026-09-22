@@ -1,5 +1,6 @@
 import unittest
 
+from universe.chemical_objects import ChemicalElement
 from universe.cosmic_objects import StellarMaterialCloud
 from universe.stellar_nucleosynthesis import StellarNucleosynthesis
 from universe.stellar_nucleosynthesis_state import (
@@ -100,8 +101,32 @@ class StellarNucleosynthesisObjectStateTests(unittest.TestCase):
             len(process.elements_up_to_iron),
         )
         self.assertEqual(
-            process.elements_up_to_iron["iron"]["atomic_number"],
+            process.elements_up_to_iron["iron"].atomic_number,
             26,
+        )
+
+    def test_forged_elements_are_chemical_objects(self):
+        _, process, result = self._forged_process()
+
+        iron = process.elements_up_to_iron["iron"]
+
+        self.assertIsInstance(iron, ChemicalElement)
+        self.assertEqual(
+            (iron.symbol, iron.atomic_number),
+            ("Fe", 26),
+        )
+        self.assertEqual(
+            iron.origin,
+            "stellar_nucleosynthesis",
+        )
+        self.assertFalse(hasattr(iron, "get"))
+
+        with self.assertRaises(TypeError):
+            _ = iron["atomic_number"]
+
+        self.assertIsInstance(
+            result["elements_up_to_iron"]["iron"],
+            dict,
         )
 
     def test_failure_updates_object_state(self):

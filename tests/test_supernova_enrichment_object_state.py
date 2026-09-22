@@ -1,6 +1,8 @@
 import unittest
 
+from universe.chemical_objects import ChemicalElement
 from universe.cosmic_objects import StellarMaterialCloud
+from universe.primordial_objects import PrimordialCosmicComponent
 from universe.heavy_element_nucleosynthesis import (
     HeavyElementNucleosynthesis,
 )
@@ -58,6 +60,30 @@ class SupernovaEnrichmentObjectStateTests(
             can_create_heavy_elements=True,
         )
 
+    def _primordial_element(self, name):
+        return PrimordialCosmicComponent(
+            name=name,
+            type="element",
+            state="formed",
+            origin="big_bang_nucleosynthesis",
+        )
+
+    def _forged_element(
+        self,
+        name,
+        symbol,
+        atomic_number,
+    ):
+        return ChemicalElement(
+            name=name,
+            symbol=symbol,
+            atomic_number=atomic_number,
+            official=True,
+            discovered=True,
+            state="forged",
+            origin="stellar_nucleosynthesis",
+        )
+
     def _enriched_process(self):
         universe = Universe()
 
@@ -65,14 +91,14 @@ class SupernovaEnrichmentObjectStateTests(
             self._star()
         ]
         universe.world["elements_up_to_iron"] = {
-            "hydrogen": {
-                "name": "hydrogen",
-                "atomic_number": 1,
-            },
-            "iron": {
-                "name": "iron",
-                "atomic_number": 26,
-            },
+            "hydrogen": self._primordial_element(
+                "hydrogen"
+            ),
+            "iron": self._forged_element(
+                "iron",
+                "Fe",
+                26,
+            ),
         }
 
         process = SupernovaEnrichment(universe)
@@ -107,10 +133,11 @@ class SupernovaEnrichmentObjectStateTests(
             self._star()
         ]
         universe.world["elements_up_to_iron"] = {
-            "iron": {
-                "name": "iron",
-                "atomic_number": 26,
-            }
+            "iron": self._forged_element(
+                "iron",
+                "Fe",
+                26,
+            )
         }
 
         process = SupernovaEnrichment(universe)
@@ -186,10 +213,11 @@ class SupernovaEnrichmentObjectStateTests(
         source_star = self._star("source_star")
         universe.world["first_stars"] = [source_star]
         universe.world["elements_up_to_iron"] = {
-            "iron": {
-                "name": "iron",
-                "atomic_number": 26,
-            }
+            "iron": self._forged_element(
+                "iron",
+                "Fe",
+                26,
+            )
         }
 
         process = SupernovaEnrichment(universe)
@@ -293,13 +321,13 @@ class SupernovaEnrichmentObjectStateTests(
         )
         self.assertEqual(
             process.enriched_clouds[0]
-            .composition["iron"]["atomic_number"],
+            .composition["iron"].atomic_number,
             26,
         )
         self.assertEqual(
             universe.world[
                 "elements_up_to_iron"
-            ]["iron"]["atomic_number"],
+            ]["iron"].atomic_number,
             26,
         )
 
@@ -350,6 +378,35 @@ class SupernovaEnrichmentObjectStateTests(
             ]
         )
 
+    def test_rejects_legacy_element_dict(self):
+        universe = Universe()
+
+        universe.world["first_stars"] = [
+            self._star()
+        ]
+
+        universe.world["elements_up_to_iron"] = {
+            "iron": {
+                "name": "iron",
+                "atomic_number": 26,
+            }
+        }
+
+        result = SupernovaEnrichment(
+            universe
+        ).enrich_space()
+
+        self.assertEqual(
+            result["type"],
+            "quantum_error",
+        )
+        self.assertIn(
+            "ChemicalElement",
+            result[
+                "cronenberg"
+            ].origin.error_message,
+        )
+
     def test_downstream_heavy_element_process_works(
         self
     ):
@@ -377,10 +434,11 @@ class SupernovaEnrichmentObjectStateTests(
             self._star()
         ]
         universe.world["elements_up_to_iron"] = {
-            "iron": {
-                "name": "iron",
-                "atomic_number": 26,
-            }
+            "iron": self._forged_element(
+                "iron",
+                "Fe",
+                26,
+            )
         }
 
         process = SupernovaEnrichment(universe)

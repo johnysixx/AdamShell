@@ -13,6 +13,8 @@ class ChemicalElement:
     state: str
     future_use: tuple[str, ...] = field(default_factory=tuple)
     temporary_systematic_name: bool = False
+    origin: str | None = None
+    requires: tuple[str, ...] = field(default_factory=tuple)
 
     def __post_init__(self):
         if self.atomic_number <= 0:
@@ -22,6 +24,11 @@ class ChemicalElement:
             self,
             "future_use",
             tuple(self.future_use),
+        )
+        object.__setattr__(
+            self,
+            "requires",
+            tuple(self.requires),
         )
 
     @property
@@ -47,6 +54,10 @@ class ChemicalElement:
 
         if self.temporary_systematic_name:
             snapshot["temporary_systematic_name"] = True
+        if self.origin is not None:
+            snapshot["origin"] = self.origin
+        if self.requires:
+            snapshot["requires"] = list(self.requires)
 
         return snapshot
 
