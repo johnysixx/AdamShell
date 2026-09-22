@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 import unittest
 from universe.universe import Universe
 from cats.cats import Cats
@@ -12,8 +13,8 @@ class CatOlfactionTests(unittest.TestCase):
         self.cats = Cats(self.universe)
         self.observer = self.cats.create_cat(name='observer', color='black', fur_length='short')
         self.other = self.cats.create_cat(name='pazuzu', color='black', fur_length='short')
-        self.observer.position = {'x': 0.0, 'y': 0.0, 'z': 0.0}
-        self.other.position = {'x': 2.0, 'y': 0.0, 'z': 0.0}
+        self.observer.position = SpatialVector3(x=0.0, y=0.0, z=0.0)
+        self.other.position = SpatialVector3(x=2.0, y=0.0, z=0.0)
         self.universe.entities.append(self.observer)
         self.universe.entities.append(self.other)
 
@@ -46,7 +47,7 @@ class CatOlfactionTests(unittest.TestCase):
     def test_ozone_can_be_detected_without_understanding_it(self):
         fake_cronenberg = type('FakeCronenberg', (), {})()
         fake_cronenberg.id = 'cronenberg_test'
-        fake_cronenberg.position = {'x': 3.0, 'y': 0.0, 'z': 0.0}
+        fake_cronenberg.position = SpatialVector3(x=3.0, y=0.0, z=0.0)
         fake_cronenberg.aroma = AromaProfile(identity='cronenberg', base_components={'ozone': 1.0, 'ionized_air': 0.85, 'electrical': 0.75})
         self.universe.cronenbergs.append(fake_cronenberg)
         result = CatOlfaction.sniff(self.observer, self.universe)
@@ -57,7 +58,7 @@ class CatOlfactionTests(unittest.TestCase):
     def test_experienced_cat_recognizes_cronenberg_ozone(self):
         fake_cronenberg = type('FakeCronenberg', (), {})()
         fake_cronenberg.id = 'cronenberg_test'
-        fake_cronenberg.position = {'x': 3.0, 'y': 0.0, 'z': 0.0}
+        fake_cronenberg.position = SpatialVector3(x=3.0, y=0.0, z=0.0)
         fake_cronenberg.aroma = AromaProfile(identity='cronenberg', base_components={'ozone': 1.0, 'ionized_air': 0.85, 'electrical': 0.75})
         self.universe.cronenbergs.append(fake_cronenberg)
         self.cats.learn_aroma(cat=self.observer, identity='cronenberg', components=fake_cronenberg.aroma.current(), source='direct_cronenberg_encounter')
@@ -68,7 +69,7 @@ class CatOlfactionTests(unittest.TestCase):
 
     def test_known_cat_is_not_confused_with_other_cat(self):
         garfield = self.cats.create_cat(name='garfield', color='orange', fur_length='short')
-        garfield.position = {'x': 3.0, 'y': 0.0, 'z': 0.0}
+        garfield.position = SpatialVector3(x=3.0, y=0.0, z=0.0)
         self.universe.entities.append(garfield)
         self.cats.learn_cat_aroma(observer=self.observer, observed_cat=self.other)
         result = CatOlfaction.sniff(self.observer, self.universe)

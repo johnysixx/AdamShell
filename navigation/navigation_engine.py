@@ -1,4 +1,5 @@
 import math
+from core.entity.components import SpatialVector3, require_spatial_vector
 
 
 class NavigationEngine:
@@ -72,22 +73,12 @@ class NavigationEngine:
             )
 
             route_steps = [
-                {
-                    axis: (
-                        start[axis]
-                        + (
-                            destination[axis]
-                            - start[axis]
-                        )
-                        * index
-                        / step_count
-                    )
-                    for axis in self.AXES
-                }
-                for index in range(
-                    1,
-                    step_count + 1
+                SpatialVector3(
+                    x=start.x + (destination.x - start.x) * index / step_count,
+                    y=start.y + (destination.y - start.y) * index / step_count,
+                    z=start.z + (destination.z - start.z) * index / step_count,
                 )
+                for index in range(1, step_count + 1)
             ]
 
         self.route_count += 1
@@ -95,16 +86,14 @@ class NavigationEngine:
         return {
             "name": "direct_route_planned",
             "route_number": self.route_count,
-            "start_position": start,
-            "destination_position": (
-                destination
-            ),
+            "start_position": start.to_dict(),
+            "destination_position": destination.to_dict(),
             "distance": distance,
             "step_size": step_size,
             "step_count": len(
                 route_steps
             ),
-            "route_steps": route_steps
+            "route_steps": [step.to_dict() for step in route_steps]
         }
 
     def nearest_target(
@@ -168,54 +157,15 @@ class NavigationEngine:
         first_position,
         second_position
     ):
-        first = self._normalize_position(
-            first_position
-        )
+        first = self._normalize_position(first_position)
+        second = self._normalize_position(second_position)
+        return first.distance_to(second)
 
-        second = self._normalize_position(
-            second_position
-        )
-
-        return math.sqrt(
-            sum(
-                (
-                    second[axis]
-                    - first[axis]
-                ) ** 2
-                for axis in self.AXES
-            )
-        )
-
-    def _normalize_position(
-        self,
-        position
-    ):
-        if not isinstance(
+    def _normalize_position(self, position):
+        return require_spatial_vector(
             position,
-            dict
-        ):
-            raise TypeError(
-                "Navigation position must be a dictionary."
-            )
-
-        missing_axes = [
-            axis
-            for axis in self.AXES
-            if axis not in position
-        ]
-
-        if missing_axes:
-            raise ValueError(
-                "Navigation position is missing axes: "
-                + ", ".join(missing_axes)
-            )
-
-        return {
-            axis: float(
-                position[axis]
-            )
-            for axis in self.AXES
-        }
+            field_name="navigation position",
+        )
 
     @property
     def public_state(self):

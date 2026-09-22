@@ -582,9 +582,7 @@ class CatMind:
                             target=CatScentSearchTarget(
                                 identity=identity,
                                 layer=cat.current_layer,
-                                from_position=dict(
-                                    cat.position or {}
-                                ),
+                                from_position=cat.position,
                                 trail_direction=deepcopy(
                                     direction
                                 ),

@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 import unittest
 
 from universe.universe import Universe
@@ -86,11 +87,7 @@ class CatScentTrailDirectionObjectTests(
         CatKnowledge.remember_scent_place(
             cat=self.cat,
             layer='quantum_layer',
-            position={
-                'x': 1.0,
-                'y': 0.0,
-                'z': 0.0,
-            },
+            position=SpatialVector3(x=1.0, y=0.0, z=0.0),
             source_id='trace_a',
             recognized_identity=(
                 'cat:pazuzu'
@@ -103,11 +100,7 @@ class CatScentTrailDirectionObjectTests(
         CatKnowledge.remember_scent_place(
             cat=self.cat,
             layer='quantum_layer',
-            position={
-                'x': 4.0,
-                'y': 0.0,
-                'z': 0.0,
-            },
+            position=SpatialVector3(x=4.0, y=0.0, z=0.0),
             source_id='trace_b',
             recognized_identity=(
                 'cat:pazuzu'
@@ -144,11 +137,7 @@ class CatScentTrailDirectionObjectTests(
 
         self.assertEqual(
             result.unit_vector,
-            {
-                'x': 1.0,
-                'y': 0.0,
-                'z': 0.0,
-            },
+            SpatialVector3(x=1.0, y=0.0, z=0.0),
         )
 
     def test_owner_rejects_mapping_direction(

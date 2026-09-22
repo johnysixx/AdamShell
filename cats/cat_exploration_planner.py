@@ -1,4 +1,5 @@
 from copy import deepcopy
+from core.entity.components import SpatialVector3, require_spatial_vector
 
 from .cat_exploration_state import (
     CatAfterArrivalCandidate,
@@ -34,16 +35,8 @@ class CatExplorationPlanner:
     }
 
     DEFAULT_LAYER_POSITIONS = {
-        "quantum_layer": {
-            "x": 0.0,
-            "y": 0.0,
-            "z": 0.0
-        },
-        "meeting_place": {
-            "x": 0.0,
-            "y": 0.0,
-            "z": 0.0
-        }
+        "quantum_layer": SpatialVector3.zero(),
+        "meeting_place": SpatialVector3.zero(),
     }
 
     @classmethod
@@ -101,9 +94,7 @@ class CatExplorationPlanner:
         return CatExplorationPlan(
             selected=True,
             layer=winner.layer,
-            position=deepcopy(
-                winner.position
-            ),
+            position=winner.position,
             score=winner.score,
             reasons=list(
                 winner.reasons
@@ -213,9 +204,7 @@ class CatExplorationPlanner:
             selected=True,
             identity=winner.identity,
             layer=winner.layer,
-            position=deepcopy(
-                winner.position
-            ),
+            position=winner.position,
             source_id=winner.source_id,
             score=winner.score,
             candidates=deepcopy(
@@ -370,17 +359,10 @@ class CatExplorationPlanner:
 
         Nezakl?d? nov? mezivrstvov? p?r.
         """
-        current = dict(
-            getattr(
-                cat,
-                "position",
-                {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                }
-            )
-        )
+        current = getattr(cat, "position", None)
+        if current is None:
+            current = SpatialVector3.zero()
+        current = require_spatial_vector(current, field_name="cat continuation origin")
 
         traits = cat.personality.traits
 
@@ -418,15 +400,8 @@ class CatExplorationPlanner:
                 "position"
             )
 
-            if isinstance(
-                position,
-                dict
-            ):
-                visited_positions.append(
-                    cls._position(
-                        position
-                    )
-                )
+            if isinstance(position, dict):
+                visited_positions.append(cls._position_from_snapshot(position))
 
         # Vzd?lenost dal?? etapy je vlastnost
         # ko?ky, ne pevn? teleport.
@@ -451,56 +426,16 @@ class CatExplorationPlanner:
         for index, direction in enumerate(
             directions
         ):
-            position = {
-                "x": (
-                    float(
-                        current.get(
-                            "x",
-                            0.0
-                        )
-                    )
-                    + direction[0]
-                    * distance
-                ),
-                "y": (
-                    float(
-                        current.get(
-                            "y",
-                            0.0
-                        )
-                    )
-                    + direction[1]
-                    * distance
-                ),
-                "z": (
-                    float(
-                        current.get(
-                            "z",
-                            0.0
-                        )
-                    )
-                    + direction[2]
-                    * distance
-                )
-            }
+            position = current.translated(
+                dx=direction[0] * distance,
+                dy=direction[1] * distance,
+                dz=direction[2] * distance,
+            )
 
             revisit_penalty = 0.0
 
             for visited in visited_positions:
-                difference = (
-                    abs(
-                        position["x"]
-                        - visited["x"]
-                    )
-                    + abs(
-                        position["y"]
-                        - visited["y"]
-                    )
-                    + abs(
-                        position["z"]
-                        - visited["z"]
-                    )
-                )
+                difference = position.manhattan_distance_to(visited)
 
                 if difference < 1.0:
                     revisit_penalty += 0.40
@@ -544,9 +479,7 @@ class CatExplorationPlanner:
         return CatContinuationPlan(
             selected=True,
             layer="quantum_layer",
-            position=deepcopy(
-                winner.position
-            ),
+            position=winner.position,
             score=winner.score,
             reason=(
                 "continue_quantum_exploration"
@@ -605,9 +538,7 @@ class CatExplorationPlanner:
             candidates.append(
                 CatExplorationCandidate(
                     layer=layer,
-                    position=deepcopy(
-                        position
-                    ),
+                    position=position,
                     source="default_layer",
                 )
             )
@@ -687,15 +618,16 @@ class CatExplorationPlanner:
                     location
                 )
 
-            position = cls._position(
-                details.get(
-                    "resolved_position",
-                    details.get(
-                        "position",
-                        location
-                    )
-                )
+            raw_position = details.get(
+                "resolved_position",
+                details.get("position", location),
             )
+            if isinstance(raw_position, SpatialVector3):
+                position = raw_position
+            elif isinstance(raw_position, dict):
+                position = cls._position_from_snapshot(raw_position)
+            else:
+                position = SpatialVector3.zero()
 
             for layer in layers:
                 candidates.append(
@@ -745,7 +677,7 @@ class CatExplorationPlanner:
                 layer is None
                 or not isinstance(
                     position,
-                    dict
+                    SpatialVector3
                 )
             ):
                 continue
@@ -929,16 +861,7 @@ class CatExplorationPlanner:
                     "CatExplorationCandidate objects."
                 )
 
-            key = (
-                candidate.layer,
-                tuple(
-                    sorted(
-                        candidate
-                        .position
-                        .items()
-                    )
-                )
-            )
+            key = (candidate.layer, candidate.position)
 
             if key not in merged:
                 merged[key] = deepcopy(
@@ -974,36 +897,11 @@ class CatExplorationPlanner:
         )
 
     @staticmethod
-    def _position(
-        value
-    ):
-        if not isinstance(
-            value,
-            dict
-        ):
-            return {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-            }
+    def _position(value):
+        return require_spatial_vector(value, field_name="cat exploration position")
 
-        return {
-            "x": float(
-                value.get(
-                    "x",
-                    0.0
-                )
-            ),
-            "y": float(
-                value.get(
-                    "y",
-                    0.0
-                )
-            ),
-            "z": float(
-                value.get(
-                    "z",
-                    0.0
-                )
-            )
-        }
+    @staticmethod
+    def _position_from_snapshot(value):
+        if not isinstance(value, dict):
+            raise TypeError("Cat exploration snapshot position must be a dictionary.")
+        return SpatialVector3(x=value["x"], y=value["y"], z=value["z"])

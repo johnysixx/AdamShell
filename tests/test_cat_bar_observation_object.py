@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 import unittest
 
 from universe.universe import Universe
@@ -25,11 +26,7 @@ class CatBarObservationObjectTests(
             fur_length="short",
         )
 
-        self.cat.position = {
-            "x": 0.0,
-            "y": 0.0,
-            "z": 0.0,
-        }
+        self.cat.position = SpatialVector3(x=0.0, y=0.0, z=0.0)
 
         self.perception = CatPerception(
             self.cats

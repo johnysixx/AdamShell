@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 import unittest
 
 from universe.universe import Universe
@@ -31,11 +32,7 @@ class CatExplorationPlannerTests(
             "meeting_place"
         )
 
-        self.cat.position = {
-            "x": 1.0,
-            "y": 2.0,
-            "z": 3.0
-        }
+        self.cat.position = SpatialVector3(x=1.0, y=2.0, z=3.0)
 
     def test_default_target_from_meeting_place_is_quantum(
         self
@@ -62,11 +59,7 @@ class CatExplorationPlannerTests(
     ):
         self.cat.exploration_goal = CatExplorationGoal(
             layer="eden",
-            position={
-                "x": 9.0,
-                "y": 8.0,
-                "z": 7.0
-            },
+            position=SpatialVector3(x=9.0, y=8.0, z=7.0),
         )
 
         result = (
@@ -84,11 +77,7 @@ class CatExplorationPlannerTests(
 
         self.assertEqual(
             result.position,
-            {
-                "x": 9.0,
-                "y": 8.0,
-                "z": 7.0
-            }
+            SpatialVector3(x=9.0, y=8.0, z=7.0)
         )
 
     def test_positive_memory_makes_layer_attractive(

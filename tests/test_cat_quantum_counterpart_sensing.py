@@ -26,7 +26,7 @@ class CatQuantumCounterpartSensingTests(unittest.TestCase):
         self.source.position = SpatialVector3(x=2.0, y=0.0, z=0.0)
         self.target.position = SpatialVector3(x=9.0, y=4.0, z=0.0)
         self.source.pair_with(self.target)
-        self.cat.position = {'x': 2.0, 'y': 0.0, 'z': 0.0}
+        self.cat.position = SpatialVector3(x=2.0, y=0.0, z=0.0)
         self.cat.memory.remember(event_type='quantum_box_observed', universe_tick=0, location='quantum_layer', participants=[self.source.id], details={'box_id': self.source.id})
 
     def observations(self):
@@ -105,7 +105,7 @@ class CatQuantumCounterpartSensingTests(unittest.TestCase):
         self.assertTrue(result['executed'])
         before_candidates = CatMind.consider(cat=self.cat, observations=self.observations())
         before = next((candidate for candidate in before_candidates if candidate.type == 'travel_through_known_quantum_box'))
-        self.cat.memory.remember(event_type='quantum_box_layer_transfer_failed', universe_tick=1, location=dict(self.cat.position), participants=[self.source.id, self.target.id], details={'source_layer': 'quantum_layer', 'target_layer': 'meeting_place', 'reason': 'test_quantum_failure', 'cronenberg_id': 'test_cronenberg'})
+        self.cat.memory.remember(event_type='quantum_box_layer_transfer_failed', universe_tick=1, location=self.cat.position.to_dict(), participants=[self.source.id, self.target.id], details={'source_layer': 'quantum_layer', 'target_layer': 'meeting_place', 'reason': 'test_quantum_failure', 'cronenberg_id': 'test_cronenberg'})
         after_candidates = CatMind.consider(cat=self.cat, observations=self.observations())
         after = next((candidate for candidate in after_candidates if candidate.type == 'travel_through_known_quantum_box'))
         self.assertLess(after.score, before.score)

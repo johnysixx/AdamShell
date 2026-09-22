@@ -1,5 +1,4 @@
 from copy import deepcopy
-import math
 from universe.aroma_profile import AromaProfile
 from cats.cat_knowledge import CatKnowledge
 from cats.cat_olfaction_state import (
@@ -80,6 +79,8 @@ class CatOlfaction:
         if not isinstance(profile, AromaProfile):
             return None
         position = cls._position(cls._get(entity, 'position'))
+        if position is None:
+            return None
         distance = cls._distance(cat_position, position)
         if distance > radius:
             return None
@@ -95,9 +96,7 @@ class CatOlfaction:
                 entity
             ),
             actual_identity=identity,
-            position=deepcopy(
-                position
-            ),
+            position=position,
             distance=distance,
             components=perceived,
             raw_components=components,
@@ -150,12 +149,16 @@ class CatOlfaction:
 
     @staticmethod
     def _position(position):
-        if isinstance(position, SpatialVector3):
-            return position.to_dict()
-        if not isinstance(position, dict):
-            return {'x': 0.0, 'y': 0.0, 'z': 0.0}
-        return {'x': float(position.get('x', 0.0)), 'y': float(position.get('y', 0.0)), 'z': float(position.get('z', 0.0))}
+        if position is None:
+            return None
+        if not isinstance(position, SpatialVector3):
+            return None
+        return position
 
     @staticmethod
     def _distance(first, second):
-        return math.sqrt((first['x'] - second['x']) ** 2 + (first['y'] - second['y']) ** 2 + (first['z'] - second['z']) ** 2)
+        if not isinstance(first, SpatialVector3):
+            raise TypeError("Cat olfaction origin must be a SpatialVector3 object.")
+        if not isinstance(second, SpatialVector3):
+            raise TypeError("Cat olfaction target must be a SpatialVector3 object.")
+        return first.distance_to(second)

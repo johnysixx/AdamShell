@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 import unittest
 
 from universe.universe import Universe
@@ -39,11 +40,7 @@ class StableCatExplorationBoxPairTests(
                 "meeting_place"
             )
 
-            cat.position = {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-            }
+            cat.position = SpatialVector3(x=0.0, y=0.0, z=0.0)
 
             cat.idea_energy = (
                 QUANTUM_BOX_ENERGY_COST_J
@@ -58,11 +55,7 @@ class StableCatExplorationBoxPairTests(
                 destination_layer=(
                     "quantum_layer"
                 ),
-                destination_position={
-                    "x": 8.0,
-                    "y": 2.0,
-                    "z": -1.0
-                }
+                destination_position=SpatialVector3(x=8.0, y=2.0, z=-1.0)
             )
         )
 

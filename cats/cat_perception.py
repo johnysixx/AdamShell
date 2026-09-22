@@ -1,6 +1,5 @@
 from cats.cat import Cat
 from core.entity.components import SpatialVector3
-import math
 from copy import deepcopy
 
 from cats.cat_quantum_observation_state import (
@@ -129,7 +128,7 @@ class CatPerception:
                         None,
                     ),
                     box_position=(
-                        box.position.to_dict()
+                        box.position
                         if isinstance(
                             getattr(box, 'position', None),
                             SpatialVector3,
@@ -137,7 +136,7 @@ class CatPerception:
                         else None
                     ),
                     counterpart_position=(
-                        counterpart_box.position.to_dict()
+                        counterpart_box.position
                         if isinstance(
                             getattr(counterpart_box, 'position', None),
                             SpatialVector3,
@@ -185,7 +184,7 @@ class CatPerception:
                 counterpart_observation = None
         observations = CatPerceptionState(
             cat=cat.name,
-            position=deepcopy(position),
+            position=position,
             vision_radius=radius,
             bar_known=bar_observation.known,
             bar_visible=bar_observation.visible,
@@ -292,9 +291,7 @@ class CatPerception:
                 CatNearbyCatObservation(
                     name=candidate.name,
                     distance=distance,
-                    position=deepcopy(
-                        candidate_position
-                    ),
+                    position=candidate_position,
                 )
             )
 
@@ -311,8 +308,7 @@ class CatPerception:
             cronenberg_position = getattr(cronenberg, 'position', None)
             if not isinstance(cronenberg_position, SpatialVector3):
                 continue
-            cronenberg_position_snapshot = cronenberg_position.to_dict()
-            distance = self._distance(position, cronenberg_position_snapshot)
+            distance = self._distance(position, cronenberg_position)
             if distance > radius:
                 continue
             observed.append(
@@ -331,9 +327,7 @@ class CatPerception:
                         )
                     ),
                     distance=distance,
-                    position=deepcopy(
-                        cronenberg_position
-                    ),
+                    position=cronenberg_position,
                 )
             )
 
@@ -368,9 +362,7 @@ class CatPerception:
                     name=item.name,
                     size=item.size,
                     distance=item.distance,
-                    position=deepcopy(
-                        item.position
-                    ),
+                    position=item.position,
                     size_ratio=size_ratio,
                 )
             )
@@ -392,12 +384,9 @@ class CatPerception:
             box_position = getattr(box, 'position', None)
             if box_position is None:
                 continue
-            box_position_snapshot = (
-                box_position.to_dict()
-                if isinstance(box_position, SpatialVector3)
-                else box_position
-            )
-            distance = self._distance(position, box_position_snapshot)
+            if not isinstance(box_position, SpatialVector3):
+                continue
+            distance = self._distance(position, box_position)
             if distance > radius:
                 continue
             cat_observation = getattr(box, 'cat_observation_state', None)
@@ -423,9 +412,7 @@ class CatPerception:
                     )
                 ),
                 distance=distance,
-                position=deepcopy(
-                    box_position_snapshot
-                ),
+                position=box_position,
             )
 
             if explored:
@@ -511,14 +498,14 @@ class CatPerception:
                 distance=None,
             )
 
-        door_position = door.position.to_dict()
+        door_position = door.position
 
         distance = (
             self._distance(
                 position,
                 door_position,
             )
-            if door_position is not None
+            if isinstance(door_position, SpatialVector3)
             else None
         )
 
@@ -579,7 +566,11 @@ class CatPerception:
     def _distance(self, first, second):
         if first is None or second is None:
             return float('inf')
-        return math.sqrt((float(first.get('x', 0.0)) - float(second.get('x', 0.0))) ** 2 + (float(first.get('y', 0.0)) - float(second.get('y', 0.0))) ** 2 + (float(first.get('z', 0.0)) - float(second.get('z', 0.0))) ** 2)
+        if not isinstance(first, SpatialVector3):
+            raise TypeError('Cat perception origin must be a SpatialVector3 object.')
+        if not isinstance(second, SpatialVector3):
+            raise TypeError('Cat perception target must be a SpatialVector3 object.')
+        return first.distance_to(second)
 
     def _record(self, event):
         self.history.append(deepcopy(event))

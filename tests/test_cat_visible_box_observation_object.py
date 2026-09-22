@@ -31,11 +31,7 @@ class CatVisibleBoxObservationObjectTests(
             "quantum_layer"
         )
 
-        self.cat.position = {
-            "x": 0.0,
-            "y": 0.0,
-            "z": 0.0,
-        }
+        self.cat.position = SpatialVector3(x=0.0, y=0.0, z=0.0)
 
         self.box = (
             self.universe

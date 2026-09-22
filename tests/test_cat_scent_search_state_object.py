@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 import unittest
 
 from cats.cat_scent_direction_state import (
@@ -40,22 +41,16 @@ class CatScentSearchStateObjectTests(
             'quantum_layer'
         )
 
-        self.cat.position = {
-            'x': 3.0,
-            'y': 0.0,
-            'z': 0.0,
-        }
+        self.cat.position = SpatialVector3(x=3.0, y=0.0, z=0.0)
 
         self.cat.known_scent_follow = (
             CatKnownScentFollowState(
                 arrived=True,
                 identity='cat:pazuzu',
-                destination=dict(
-                    self.cat.position
-                ),
+                destination=self.cat.position,
                 trail_direction=CatScentTrailDirection(
                     inferred=True,
-                    unit_vector={'x': 1.0, 'y': 0.0, 'z': 0.0},
+                    unit_vector=SpatialVector3(x=1.0, y=0.0, z=0.0),
                     confidence=0.8,
                 ),
             )
@@ -74,12 +69,10 @@ class CatScentSearchStateObjectTests(
             target=CatScentSearchTarget(
                 identity='cat:pazuzu',
                 layer='quantum_layer',
-                from_position=dict(
-                    self.cat.position
-                ),
+                from_position=self.cat.position,
                 trail_direction=CatScentTrailDirection(
                     inferred=True,
-                    unit_vector={'x': 1.0, 'y': 0.0, 'z': 0.0},
+                    unit_vector=SpatialVector3(x=1.0, y=0.0, z=0.0),
                     confidence=0.8,
                 ),
                 attempt=1,

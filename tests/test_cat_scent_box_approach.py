@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 import unittest
 
 from cats.cat_scent_navigation_state import (
@@ -20,11 +21,11 @@ class CatScentBoxApproachTests(unittest.TestCase):
         self.creator = self.cats.create_cat(name='creator', color='black', fur_length='short')
         self.tracker = self.cats.create_cat(name='tracker', color='gray', fur_length='short')
         self.creator.current_layer = 'meeting_place'
-        self.creator.position = {'x': 3.0, 'y': 0.0, 'z': 0.0}
+        self.creator.position = SpatialVector3(x=3.0, y=0.0, z=0.0)
         self.creator.idea_energy = QUANTUM_BOX_ENERGY_COST_J * 10.0
         self.tracker.current_layer = 'meeting_place'
-        self.tracker.position = {'x': 0.0, 'y': 0.0, 'z': 0.0}
-        creation = self.universe.cat_box_transfer.create_exploration_pair(cat=self.creator, destination_layer='quantum_layer', destination_position={'x': 8.0, 'y': 0.0, 'z': 0.0}, source_position={'x': 3.0, 'y': 0.0, 'z': 0.0})
+        self.tracker.position = SpatialVector3(x=0.0, y=0.0, z=0.0)
+        creation = self.universe.cat_box_transfer.create_exploration_pair(cat=self.creator, destination_layer='quantum_layer', destination_position=SpatialVector3(x=8.0, y=0.0, z=0.0), source_position=SpatialVector3(x=3.0, y=0.0, z=0.0))
         self.source = creation['source_box']
         self.target = creation['target_box']
         self.tracker.mind.current_intention = CatIntentionCandidate(
@@ -49,7 +50,10 @@ class CatScentBoxApproachTests(unittest.TestCase):
         first = self.cats.execute_cat_intention(self.tracker)
         self.assertEqual(first['name'], 'cat_following_scent_to_box')
         self.assertEqual(self.tracker.current_layer, 'meeting_place')
-        self.assertEqual(self.tracker.position, {'x': 0.0, 'y': 0.0, 'z': 0.0})
+        self.assertEqual(
+            self.tracker.position,
+            SpatialVector3(x=0.0, y=0.0, z=0.0)
+        )
         self.assertIsNotNone(self.tracker.mind.current_intention)
         self.assertTrue(self.tracker.scent_box_follow.active)
         last = first
@@ -64,7 +68,7 @@ class CatScentBoxApproachTests(unittest.TestCase):
         self.assertTrue(self.tracker.scent_box_follow.arrived_at_box)
 
     def test_cat_already_at_box_transfers_immediately(self):
-        self.tracker.position = self.source.position.to_dict()
+        self.tracker.position = self.source.position
         result = self.cats.execute_cat_intention(self.tracker)
         self.assertEqual(result['name'], 'cat_followed_scent_through_box')
         self.assertTrue(result['transfer']['transferred'])

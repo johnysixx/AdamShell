@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from core.entity.components import SpatialVector3, require_optional_spatial_vector
 from cats.cat_scent_direction_state import (
     CatScentTrailDirection,
 )
@@ -32,7 +33,7 @@ class CatIntentionCandidate:
 class CatKnownScentTarget:
     identity: str | None = None
     layer: str | None = None
-    position: object = None
+    position: SpatialVector3 | None = None
     source_id: object = None
 
     age_ticks: int | None = None
@@ -43,6 +44,7 @@ class CatKnownScentTarget:
     ) = None
 
     def __post_init__(self):
+        self.position = require_optional_spatial_vector(self.position, field_name="known scent target position")
         if (
             self.trail_direction is not None
             and not isinstance(
@@ -59,7 +61,7 @@ class CatKnownScentTarget:
 class CatScentSearchTarget:
     identity: str | None = None
     layer: str | None = None
-    from_position: object = None
+    from_position: SpatialVector3 | None = None
     trail_direction: (
         CatScentTrailDirection | None
     ) = None
@@ -68,6 +70,7 @@ class CatScentSearchTarget:
     search_distance: float = 1.0
 
     def __post_init__(self):
+        self.from_position = require_optional_spatial_vector(self.from_position, field_name="scent search source position")
         if (
             self.trail_direction is not None
             and not isinstance(
@@ -99,8 +102,11 @@ class CatQuantumBoxTravelTarget:
     source_layer: str | None = None
     target_layer: str | None = None
 
-    target_position: object = None
+    target_position: SpatialVector3 | None = None
 
+
+    def __post_init__(self):
+        self.target_position = require_optional_spatial_vector(self.target_position, field_name="quantum box travel target position")
 
 
 @dataclass(slots=True)
@@ -118,9 +124,12 @@ class CatExploreBoxTarget:
 @dataclass(slots=True)
 class CatExplorationPairTarget:
     layer: str | None = None
-    position: object = None
+    position: SpatialVector3 | None = None
     energy_cost: float = 0.0
 
+
+    def __post_init__(self):
+        self.position = require_optional_spatial_vector(self.position, field_name="exploration pair target position")
 
 
 @dataclass(slots=True)

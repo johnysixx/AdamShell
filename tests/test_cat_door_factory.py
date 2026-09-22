@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 import unittest
 
 from cats.cat_door import CatDoor
@@ -294,34 +295,18 @@ class CatDoorFactoryTests(
             name="positioned_door",
             source_layer="layer_a",
             target_layer="layer_b",
-            source_position={
-                "x": 5.0,
-                "y": 1.0,
-                "z": 0.0
-            },
-            target_position={
-                "x": 2.0,
-                "y": 3.0,
-                "z": 0.0
-            }
+            source_position=SpatialVector3(x=5.0, y=1.0, z=0.0),
+            target_position=SpatialVector3(x=2.0, y=3.0, z=0.0)
         )
 
         self.assertEqual(
             door.source_position,
-            {
-                "x": 5.0,
-                "y": 1.0,
-                "z": 0.0
-            }
+            SpatialVector3(x=5.0, y=1.0, z=0.0)
         )
 
         self.assertEqual(
             door.target_position,
-            {
-                "x": 2.0,
-                "y": 3.0,
-                "z": 0.0
-            }
+            SpatialVector3(x=2.0, y=3.0, z=0.0)
         )
 
         self.assertEqual(
@@ -344,16 +329,8 @@ class CatDoorFactoryTests(
             target_layer="layer_a",
             source_location="outside_front_door",
             target_location="inside_front_door",
-            source_position={
-                "x": 1.0,
-                "y": 0.0,
-                "z": 0.0
-            },
-            target_position={
-                "x": 1.2,
-                "y": 0.0,
-                "z": 0.0
-            }
+            source_position=SpatialVector3(x=1.0, y=0.0, z=0.0),
+            target_position=SpatialVector3(x=1.2, y=0.0, z=0.0)
         )
 
         self.assertEqual(

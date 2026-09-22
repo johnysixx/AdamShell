@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 import unittest
 
 from core.entity.components import (

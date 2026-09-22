@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 import unittest
 
 from cats.cat_box_exploration_state import (
@@ -17,11 +18,7 @@ class CatBoxExplorationStateObjectTests(
             arrived=False,
             box_id='box_alpha',
             route_id='route_alpha',
-            destination={
-                'x': 1.0,
-                'y': 2.0,
-                'z': 0.0,
-            },
+            destination=SpatialVector3(x=1.0, y=2.0, z=0.0),
             observed=False,
         )
 

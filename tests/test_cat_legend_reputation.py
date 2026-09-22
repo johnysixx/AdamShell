@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 import unittest
 from universe.universe import Universe
 from cats.cats import Cats
@@ -12,12 +13,12 @@ class CatLegendReputationTests(unittest.TestCase):
         self.cats = Cats(self.universe)
         self.storyteller = self.cats.create_cat(name='pazuzu', color='black', fur_length='short')
         self.listener = self.cats.create_cat(name='garfield', color='orange', fur_length='short')
-        place = CatKnowledge.remember_place(self.storyteller, 'quantum_layer', {'x': 9.0, 'y': 1.0, 'z': 0.0})
+        place = CatKnowledge.remember_place(self.storyteller, 'quantum_layer', SpatialVector3(x=9.0, y=1.0, z=0.0))
         self.legend = CatKnowledge.publish_legend(self.universe, self.storyteller, place)
         CatKnowledge.hear_legend(self.listener, self.storyteller, self.legend)
 
     def test_verified_legend_increases_trust(self):
-        place = CatKnowledge.remember_place(self.listener, 'quantum_layer', {'x': 9.0, 'y': 1.0, 'z': 0.0})
+        place = CatKnowledge.remember_place(self.listener, 'quantum_layer', SpatialVector3(x=9.0, y=1.0, z=0.0))
         CatKnowledge.verify_heard_legend(self.listener, place)
         trust = self.listener.relationships['pazuzu'].trust
         self.assertAlmostEqual(trust, 0.6)

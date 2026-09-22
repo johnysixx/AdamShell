@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 import unittest
 
 from cats.cat_scent_direction_state import (
@@ -20,7 +21,7 @@ class CatScentSearchTests(unittest.TestCase):
         self.cats = Cats(self.universe)
         self.cat = self.cats.create_cat(name='tracker', color='black', fur_length='short')
         self.cat.current_layer = 'quantum_layer'
-        self.cat.position = {'x': 3.0, 'y': 0.0, 'z': 0.0}
+        self.cat.position = SpatialVector3(x=3.0, y=0.0, z=0.0)
         traits = self.cat.personality.traits
         traits.curiosity = 1.0
         traits.courage = 1.0
@@ -30,14 +31,10 @@ class CatScentSearchTests(unittest.TestCase):
                 arrived=True,
                 identity='cat:pazuzu',
                 source_id='latest_trace',
-                destination={
-                    'x': 3.0,
-                    'y': 0.0,
-                    'z': 0.0,
-                },
+                destination=SpatialVector3(x=3.0, y=0.0, z=0.0),
                 trail_direction=CatScentTrailDirection(
                     inferred=True,
-                    unit_vector={'x': 1.0, 'y': 0.0, 'z': 0.0},
+                    unit_vector=SpatialVector3(x=1.0, y=0.0, z=0.0),
                     confidence=0.8,
                 ),
             )
@@ -58,21 +55,24 @@ class CatScentSearchTests(unittest.TestCase):
         self.cat.mind.current_intention = intention
         first = self.cats.execute_cat_intention(self.cat)
         self.assertEqual(first['name'], 'cat_searching_for_scent')
-        self.assertEqual(self.cat.position, {'x': 3.0, 'y': 0.0, 'z': 0.0})
+        self.assertEqual(
+            self.cat.position,
+            SpatialVector3(x=3.0, y=0.0, z=0.0)
+        )
         result = first
         for _ in range(10):
             result = self.cats.execute_cat_intention(self.cat)
             if result['name'] == 'cat_completed_scent_search_step':
                 break
         self.assertEqual(result['name'], 'cat_completed_scent_search_step')
-        self.assertGreater(self.cat.position['x'], 3.0)
+        self.assertGreater(self.cat.position.x, 3.0)
         self.assertEqual(self.cat.scent_search.attempts, 1)
         self.assertIsNone(self.cat.mind.current_intention)
 
     def test_search_stops_when_target_scent_is_reacquired(self):
         pazuzu = self.cats.create_cat(name='pazuzu', color='black', fur_length='short')
         pazuzu.current_layer = 'quantum_layer'
-        pazuzu.position = {'x': 17.5, 'y': 0.0, 'z': 0.0}
+        pazuzu.position = SpatialVector3(x=17.5, y=0.0, z=0.0)
         self.universe.entities.append(self.cat)
         self.universe.entities.append(pazuzu)
         self.cats.learn_cat_aroma(observer=self.cat, observed_cat=pazuzu)

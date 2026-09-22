@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 import unittest
 
 from universe.universe import Universe
@@ -31,11 +32,7 @@ class CatExplorationPairTargetObjectTests(
         target = (
             CatExplorationPairTarget(
                 layer='quantum_layer',
-                position={
-                    'x': 8.0,
-                    'y': 2.0,
-                    'z': 0.0,
-                },
+                position=SpatialVector3(x=8.0, y=2.0, z=0.0),
                 energy_cost=200.0,
             )
         )
@@ -47,11 +44,7 @@ class CatExplorationPairTargetObjectTests(
 
         self.assertEqual(
             target.position,
-            {
-                'x': 8.0,
-                'y': 2.0,
-                'z': 0.0,
-            },
+            SpatialVector3(x=8.0, y=2.0, z=0.0),
         )
 
         self.assertEqual(

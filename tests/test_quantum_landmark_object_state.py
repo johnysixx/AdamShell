@@ -23,7 +23,7 @@ class QuantumLandmarkObjectStateTests(unittest.TestCase):
         with self.assertRaises(TypeError):
             QuantumLandmark(
                 name="legacy_landmark",
-                position={"x": 1.0, "y": 2.0, "z": 3.0},
+                position=SpatialVector3(x=1.0, y=2.0, z=3.0),
             )
 
     def test_to_dict_returns_detached_position_snapshot(self):

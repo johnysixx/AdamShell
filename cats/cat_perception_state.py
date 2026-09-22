@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from core.entity.components import SpatialVector3, require_optional_spatial_vector, require_spatial_vector
 
 from .cat_exploration_state import (
     CatExplorationPlan
@@ -29,15 +30,23 @@ class CatCronenbergObservation:
     name: str
     size: float
     distance: float
-    position: object
+    position: SpatialVector3
     size_ratio: float | None = None
+
+
+    def __post_init__(self):
+        self.position = require_spatial_vector(self.position, field_name="cronenberg observation position")
 
 
 @dataclass(slots=True)
 class CatNearbyCatObservation:
     name: str
     distance: float
-    position: object
+    position: SpatialVector3
+
+
+    def __post_init__(self):
+        self.position = require_spatial_vector(self.position, field_name="nearby cat observation position")
 
 
 @dataclass(slots=True)
@@ -48,13 +57,17 @@ class CatVisibleBoxObservation:
     occupancy_state: str
     occupant_identity_visible: bool
     distance: float
-    position: object
+    position: SpatialVector3
 
     state: object | None = None
     collapsed: bool | None = None
     recognized_as_quantum_box: bool | None = None
     paired: bool | None = None
     counterpart_known: bool | None = None
+
+
+    def __post_init__(self):
+        self.position = require_spatial_vector(self.position, field_name="visible box observation position")
 
 
 @dataclass(slots=True)
@@ -68,14 +81,19 @@ class CatScentTransferCandidate:
     source_layer: str | None = None
     target_layer: str | None = None
 
-    box_position: object = None
-    counterpart_position: object = None
+    box_position: SpatialVector3 | None = None
+    counterpart_position: SpatialVector3 | None = None
+
+
+    def __post_init__(self):
+        self.box_position = require_optional_spatial_vector(self.box_position, field_name="scent transfer box position")
+        self.counterpart_position = require_optional_spatial_vector(self.counterpart_position, field_name="scent transfer counterpart position")
 
 
 @dataclass(slots=True)
 class CatPerceptionState:
     cat: str | None = None
-    position: object = None
+    position: SpatialVector3 | None = None
     vision_radius: float = 0.0
 
     bar_known: bool = False
@@ -127,7 +145,7 @@ class CatPerceptionState:
     can_create_exploration_pair: bool = False
     exploration_pair_energy_cost: float = 0.0
     exploration_destination_layer: str | None = None
-    exploration_destination_position: object = None
+    exploration_destination_position: SpatialVector3 | None = None
     exploration_plan: CatExplorationPlan = field(
         default_factory=CatExplorationPlan
     )
@@ -153,3 +171,7 @@ class CatPerceptionState:
     )
 
     observed: bool = True
+
+    def __post_init__(self):
+        self.position = require_optional_spatial_vector(self.position, field_name="cat perception position")
+        self.exploration_destination_position = require_optional_spatial_vector(self.exploration_destination_position, field_name="cat exploration destination position")

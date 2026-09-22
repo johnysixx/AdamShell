@@ -1,6 +1,7 @@
 from cats.cat_components import CatFamily, MaternalCare, MaternalCareReceived, SiblingPlay, SiblingRivalry, ParentalTeaching, FamilyBonding, CatGroupMembership, CatCulture, CatGroupRoles, CatMeowInvitations, CatNorms, CatNeeds, CatEmergencyNursing, CatTerritories, CatSocialMemories, CatBonds, CatHumanBonds
 from cats.cat_knowledge_objects import CatKnowledgeState
 from core.entity.social_entity import SocialMixin
+from core.entity.components import SpatialVector3
 
 from cats.cat_distribution_state import CatDistributionState
 from cats.cat_parentage_state import CatParentageState
@@ -72,7 +73,7 @@ class Cat(SocialMixin):
         self.pet_count = 0
         self.meow_count = 0
         self.needs = CatNeeds(hunger=0.0, thirst=0.0, fatigue=0.0, safety=0.0, social=0.0, curiosity=0.0, dominant=None, tick=0)
-        self.position = None
+        self._position = None
         self.location = None
         self.current_layer = 'quantum_layer'
         self.world_key = None
@@ -106,6 +107,43 @@ class Cat(SocialMixin):
         self.cat_d20 = None
         self.cat_d20_box = None
         self.type = 'cat'
+
+    @property
+    def position(self):
+        return self._position
+
+    @position.setter
+    def position(self, value):
+        if value is not None and not isinstance(value, SpatialVector3):
+            raise TypeError(
+                "Cat position must be a SpatialVector3 object or None."
+            )
+        self._position = value
+
+    @position.deleter
+    def position(self):
+        self._position = None
+
+    def move_to(self, position):
+        if not isinstance(position, SpatialVector3):
+            raise TypeError(
+                "Cat movement requires a SpatialVector3 object."
+            )
+        previous = self.position
+        self.position = position
+        return {
+            "name": "cat_position_changed",
+            "cat": self.name,
+            "previous_position": (
+                None if previous is None else previous.to_dict()
+            ),
+            "position": position.to_dict(),
+        }
+
+    def clear_position(self):
+        previous = self.position
+        self.position = None
+        return previous
 
     def _entity_name(self, entity):
         return getattr(entity, 'name', None)

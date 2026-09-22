@@ -18,7 +18,7 @@ class CatIntentionExecutorTests(unittest.TestCase):
         self.universe.enable_quantum_layer()
         self.cats = Cats(self.universe)
         self.cat = self.cats.create_cat(name='autonomous_cat', color='black', fur_length='short')
-        self.cat.position = {'x': 0.0, 'y': 0.0, 'z': 0.0}
+        self.cat.position = SpatialVector3(x=0.0, y=0.0, z=0.0)
 
     def set_intention(self, intention_type, target=None):
         self.cat.mind.current_intention = CatIntentionCandidate(
@@ -111,7 +111,7 @@ class CatIntentionExecutorTests(unittest.TestCase):
         self.assertEqual(captured['navigation_target'], 'wizard')
 
     def test_visit_recipient_starts_direct_route_in_same_layer(self):
-        recipient = SocialEntity.from_mapping({'id': 'wizard', 'type': 'idea_entity', 'needs_cat': False, 'current_layer': 'idea_universe', 'position': {'x': 4.0, 'y': 3.0, 'z': 0.0}})
+        recipient = SocialEntity.from_mapping({'id': 'wizard', 'type': 'idea_entity', 'needs_cat': False, 'current_layer': 'idea_universe', 'position': SpatialVector3(x=4.0, y=3.0, z=0.0)})
         self.universe.cat_recipient_registry.register(recipient)
         self.cat.current_layer = 'idea_universe'
         self.set_intention('visit_recipient', target=CatVisitRecipientTarget(recipient_id='wizard'))
@@ -124,7 +124,7 @@ class CatIntentionExecutorTests(unittest.TestCase):
 
     def test_approach_cat_starts_direct_route(self):
         target_cat = self.cats.create_cat(name='target_cat', color='white', fur_length='short')
-        target_cat.position = {'x': 4.0, 'y': 0.0, 'z': 0.0}
+        target_cat.position = SpatialVector3(x=4.0, y=0.0, z=0.0)
         target_cat.current_layer = self.cat.current_layer
         self.set_intention('approach_cat', target=CatApproachCatTarget(cat_name='target_cat'))
         result = self.cats.execute_cat_intention(self.cat)
@@ -137,7 +137,7 @@ class CatIntentionExecutorTests(unittest.TestCase):
 
     def test_approach_cat_completes_when_already_near(self):
         target_cat = self.cats.create_cat(name='target_cat', color='white', fur_length='short')
-        target_cat.position = {'x': 0.0, 'y': 0.0, 'z': 0.0}
+        target_cat.position = SpatialVector3(x=0.0, y=0.0, z=0.0)
         target_cat.current_layer = self.cat.current_layer
         self.set_intention('approach_cat', target=CatApproachCatTarget(cat_name='target_cat'))
         result = self.cats.execute_cat_intention(self.cat)

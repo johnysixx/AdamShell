@@ -1,4 +1,5 @@
 from copy import deepcopy
+from core.entity.components import require_optional_spatial_vector
 
 class CatGroupMigrationSystem:
 
@@ -6,6 +7,7 @@ class CatGroupMigrationSystem:
         self.group_system = group_system
 
     def migrate(self, group_id, cats, layer, location, position=None, reason='group_migration'):
+        position = require_optional_spatial_vector(position, field_name="cat group migration position")
         group = self.group_system._group(group_id)
         if getattr(group, 'dissolved', False):
             return {'name': 'cat_group_migration_denied', 'group_id': group_id, 'reason': 'group_dissolved', 'migrated': False}
@@ -18,12 +20,12 @@ class CatGroupMigrationSystem:
             member.current_layer = layer
             member.location = location
             if position is not None:
-                member.position = dict(position)
+                member.move_to(position)
             member.state = 'migrating_with_group'
         group.current_layer = layer
         group.current_location = location
         group.migration_count += 1
-        event = {'name': 'cat_group_migrated', 'group_id': group_id, 'from_layer': old_layer, 'from_location': old_location, 'to_layer': layer, 'to_location': location, 'position': dict(position) if position is not None else None, 'reason': reason, 'members': [member.name for member in members], 'migrated': True}
+        event = {'name': 'cat_group_migrated', 'group_id': group_id, 'from_layer': old_layer, 'from_location': old_location, 'to_layer': layer, 'to_location': location, 'position': position.to_dict() if position is not None else None, 'reason': reason, 'members': [member.name for member in members], 'migrated': True}
         group.history.append(deepcopy(event))
         for member in members:
             member.social_interactions.append(deepcopy(event))

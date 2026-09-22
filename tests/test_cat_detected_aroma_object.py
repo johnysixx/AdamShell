@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 import unittest
 
 from universe.universe import Universe
@@ -32,17 +33,9 @@ class CatDetectedAromaObjectTests(
             fur_length="short",
         )
 
-        self.observer.position = {
-            "x": 0.0,
-            "y": 0.0,
-            "z": 0.0,
-        }
+        self.observer.position = SpatialVector3(x=0.0, y=0.0, z=0.0)
 
-        self.other.position = {
-            "x": 2.0,
-            "y": 0.0,
-            "z": 0.0,
-        }
+        self.other.position = SpatialVector3(x=2.0, y=0.0, z=0.0)
 
         self.universe.entities.append(
             self.other

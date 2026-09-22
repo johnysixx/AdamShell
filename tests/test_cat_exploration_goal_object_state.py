@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 import unittest
 from types import SimpleNamespace
 
@@ -18,11 +19,7 @@ class CatExplorationGoalObjectStateTests(
     ):
         goal = CatExplorationGoal(
             layer='quantum_layer',
-            position={
-                'x': 1.0,
-                'y': 2.0,
-                'z': 3.0,
-            },
+            position=SpatialVector3(x=1.0, y=2.0, z=3.0),
         )
 
         self.assertEqual(
@@ -32,11 +29,7 @@ class CatExplorationGoalObjectStateTests(
 
         self.assertEqual(
             goal.position,
-            {
-                'x': 1.0,
-                'y': 2.0,
-                'z': 3.0,
-            },
+            SpatialVector3(x=1.0, y=2.0, z=3.0),
         )
 
         self.assertFalse(

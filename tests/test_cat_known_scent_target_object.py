@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 import unittest
 
 from cats.cat_scent_direction_state import (
@@ -39,11 +40,7 @@ class CatKnownScentTargetObjectTests(
         target = CatKnownScentTarget(
             identity="cat:pazuzu",
             layer="quantum_layer",
-            position={
-                "x": 1.0,
-                "y": 0.0,
-                "z": 0.0,
-            },
+            position=SpatialVector3(x=1.0, y=0.0, z=0.0),
             source_id="trace",
             age_ticks=5,
             freshness=0.9,
@@ -83,11 +80,7 @@ class CatKnownScentTargetObjectTests(
             CatKnowledge
         )
 
-        self.cat.position = {
-            "x": 0.0,
-            "y": 0.0,
-            "z": 0.0,
-        }
+        self.cat.position = SpatialVector3(x=0.0, y=0.0, z=0.0)
 
         self.cat.current_layer = (
             "quantum_layer"
@@ -96,11 +89,7 @@ class CatKnownScentTargetObjectTests(
         CatKnowledge.remember_scent_place(
             cat=self.cat,
             layer="quantum_layer",
-            position={
-                "x": 2.0,
-                "y": 0.0,
-                "z": 0.0,
-            },
+            position=SpatialVector3(x=2.0, y=0.0, z=0.0),
             source_id="trace_latest",
             recognized_identity=(
                 "cat:pazuzu"

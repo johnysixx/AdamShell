@@ -17,16 +17,49 @@ class SpatialVector3:
         return cls()
 
     def distance_to(self, other):
-        if not isinstance(other, SpatialVector3):
-            raise TypeError(
-                "Spatial distance requires a SpatialVector3 object."
-            )
-
+        other = require_spatial_vector(
+            other,
+            field_name="distance target",
+        )
         return (
             (other.x - self.x) ** 2
             + (other.y - self.y) ** 2
             + (other.z - self.z) ** 2
         ) ** 0.5
+
+    def manhattan_distance_to(self, other):
+        other = require_spatial_vector(
+            other,
+            field_name="Manhattan-distance target",
+        )
+        return (
+            abs(other.x - self.x)
+            + abs(other.y - self.y)
+            + abs(other.z - self.z)
+        )
+
+    def is_close_to(self, other, tolerance=1e-09):
+        other = require_spatial_vector(
+            other,
+            field_name="comparison position",
+        )
+        tolerance = float(tolerance)
+        if tolerance < 0.0:
+            raise ValueError(
+                "Spatial comparison tolerance must not be negative."
+            )
+        return (
+            abs(other.x - self.x) <= tolerance
+            and abs(other.y - self.y) <= tolerance
+            and abs(other.z - self.z) <= tolerance
+        )
+
+    def translated(self, *, dx=0.0, dy=0.0, dz=0.0):
+        return SpatialVector3(
+            x=self.x + float(dx),
+            y=self.y + float(dy),
+            z=self.z + float(dz),
+        )
 
     def to_dict(self):
         return {
@@ -34,6 +67,23 @@ class SpatialVector3:
             "y": self.y,
             "z": self.z,
         }
+
+
+def require_spatial_vector(value, field_name="position"):
+    if not isinstance(value, SpatialVector3):
+        raise TypeError(
+            f"Spatial {field_name} must be a SpatialVector3 object."
+        )
+    return value
+
+
+def require_optional_spatial_vector(value, field_name="position"):
+    if value is None:
+        return None
+    return require_spatial_vector(
+        value,
+        field_name=field_name,
+    )
 
 
 class SpatialComponent:
@@ -67,11 +117,10 @@ class SpatialComponent:
 
     @staticmethod
     def _require_vector(value, field_name):
-        if not isinstance(value, SpatialVector3):
-            raise TypeError(
-                f"Spatial {field_name} must be a SpatialVector3 object."
-            )
-        return value
+        return require_spatial_vector(
+            value,
+            field_name=field_name,
+        )
 
     def set_position(self, position):
         self._position = self._require_vector(

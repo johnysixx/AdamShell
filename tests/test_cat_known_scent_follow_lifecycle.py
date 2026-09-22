@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 import unittest
 
 from cats.cat_scent_direction_state import (
@@ -18,7 +19,7 @@ class CatKnownScentFollowLifecycleTests(unittest.TestCase):
         self.cats = Cats(self.universe)
         self.cat = self.cats.create_cat(name='tracker', color='black', fur_length='short')
         self.cat.current_layer = 'quantum_layer'
-        self.cat.position = {'x': 0.0, 'y': 0.0, 'z': 0.0}
+        self.cat.position = SpatialVector3(x=0.0, y=0.0, z=0.0)
         self.cat.mind.current_intention = CatIntentionCandidate(
 
             type='follow_known_scent',
@@ -26,15 +27,11 @@ class CatKnownScentFollowLifecycleTests(unittest.TestCase):
             target=CatKnownScentTarget(
                 identity='cat:pazuzu',
                 layer='quantum_layer',
-                position={
-                    'x': 3.0,
-                    'y': 0.0,
-                    'z': 0.0,
-                },
+                position=SpatialVector3(x=3.0, y=0.0, z=0.0),
                 source_id='trace_latest',
                 trail_direction=CatScentTrailDirection(
                     inferred=True,
-                    unit_vector={'x': 1.0, 'y': 0.0, 'z': 0.0},
+                    unit_vector=SpatialVector3(x=1.0, y=0.0, z=0.0),
                     confidence=0.8,
                 ),
             ),
@@ -55,7 +52,10 @@ class CatKnownScentFollowLifecycleTests(unittest.TestCase):
             if result['name'] == 'cat_reached_known_scent':
                 break
         self.assertEqual(result['name'], 'cat_reached_known_scent')
-        self.assertEqual(self.cat.position, {'x': 3.0, 'y': 0.0, 'z': 0.0})
+        self.assertEqual(
+            self.cat.position,
+            SpatialVector3(x=3.0, y=0.0, z=0.0)
+        )
         self.assertTrue(self.cat.known_scent_follow.arrived)
         self.assertFalse(self.cat.known_scent_follow.active)
         self.assertIsNone(self.cat.mind.current_intention)

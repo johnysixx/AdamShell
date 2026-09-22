@@ -1,5 +1,6 @@
 from copy import deepcopy
 from dataclasses import dataclass, field
+from core.entity.components import SpatialVector3
 
 from core.entity.component_object import ComponentObject
 
@@ -1047,10 +1048,9 @@ class CatD20State:
 
         return result
 
-@dataclass(slots=True)
-class BarPosition:
-    x: float
-    y: float
+@dataclass(slots=True, frozen=True)
+class BarPosition(SpatialVector3):
+    z: float = 0.0
 
 
 @dataclass(slots=True)

@@ -15,7 +15,7 @@ class CatPersonalityCronenbergEncounterTests(unittest.TestCase):
     def setUp(self):
         self.universe = Universe()
         self.universe.enable_quantum_layer()
-        result = self.universe.manifest_cat(name='hunter', source='test', position={'x': 0.0, 'y': 0.0, 'z': 0.0})
+        result = self.universe.manifest_cat(name='hunter', source='test', position=SpatialVector3(x=0.0, y=0.0, z=0.0))
         self.cat = result['cat']
 
     def create_cronenberg(self, size):
@@ -25,7 +25,7 @@ class CatPersonalityCronenbergEncounterTests(unittest.TestCase):
         return cronenberg
 
     def create_route(self, cronenberg):
-        result = self.universe.quantum_space.plan_direct_cat_route(cat_id=self.cat.name, start_position={'x': 0.0, 'y': 0.0, 'z': 0.0}, destination_position=cronenberg.position.to_dict(), destination=cronenberg.id, step_size=1.0)
+        result = self.universe.quantum_space.plan_direct_cat_route(cat_id=self.cat.name, start_position=SpatialVector3(x=0.0, y=0.0, z=0.0), destination_position=cronenberg.position, destination=cronenberg.id, step_size=1.0)
         return result['route']
 
     def traits(self):

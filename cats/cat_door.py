@@ -1,4 +1,5 @@
 from cats.cat import Cat
+from core.entity.components import require_optional_spatial_vector
 
 class CatDoor:
 
@@ -58,16 +59,13 @@ class CatDoor:
             else None
         )
 
-        self.source_position = (
-            dict(source_position)
-            if source_position is not None
-            else None
+        self.source_position = require_optional_spatial_vector(
+            source_position,
+            field_name="cat door source position",
         )
-
-        self.target_position = (
-            dict(target_position)
-            if target_position is not None
-            else None
+        self.target_position = require_optional_spatial_vector(
+            target_position,
+            field_name="cat door target position",
         )
 
         self.active = True
@@ -212,9 +210,7 @@ class CatDoor:
             )
 
         if self.target_position is not None:
-            cat.position = dict(
-                self.target_position
-            )
+            cat.move_to(self.target_position)
 
         cat.state = (
             "traveled_through_cat_door"
@@ -233,12 +229,12 @@ class CatDoor:
                 self.target_location
             ),
             "source_position": (
-                dict(self.source_position)
+                self.source_position.to_dict()
                 if self.source_position is not None
                 else None
             ),
             "target_position": (
-                dict(self.target_position)
+                self.target_position.to_dict()
                 if self.target_position is not None
                 else None
             ),
@@ -272,12 +268,12 @@ class CatDoor:
                 self.target_location
             ),
             "source_position": (
-                dict(self.source_position)
+                self.source_position.to_dict()
                 if self.source_position is not None
                 else None
             ),
             "target_position": (
-                dict(self.target_position)
+                self.target_position.to_dict()
                 if self.target_position is not None
                 else None
             ),

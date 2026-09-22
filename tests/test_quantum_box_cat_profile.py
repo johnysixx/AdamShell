@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 import unittest
 from universe.universe import Universe
 
@@ -8,7 +9,7 @@ class QuantumBoxCatProfileTests(unittest.TestCase):
         self.universe.enable_quantum_layer()
 
     def test_quantum_box_cat_is_juvenile_and_knows_meow(self):
-        result = self.universe.manifest_cat(name='box_kitten', source='quantum_box_spontaneous_collapse', position={'x': 5.0, 'y': 2.0, 'z': -1.0})
+        result = self.universe.manifest_cat(name='box_kitten', source='quantum_box_spontaneous_collapse', position=SpatialVector3(x=5.0, y=2.0, z=-1.0))
         cat = result['cat']
         self.assertEqual(cat.age_days, 98)
         self.assertEqual(cat.developmental_stage, 'juvenile')

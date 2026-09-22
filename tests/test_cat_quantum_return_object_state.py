@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 import unittest
 
 from universe.universe import Universe
@@ -34,11 +35,7 @@ class CatQuantumReturnObjectStateTests(
             route_id='route_test',
             remote_box_id='remote_box',
             anchor_box_id='anchor_box',
-            destination={
-                'x': 1.0,
-                'y': 2.0,
-                'z': 3.0,
-            },
+            destination=SpatialVector3(x=1.0, y=2.0, z=3.0),
         )
 
         self.assertTrue(

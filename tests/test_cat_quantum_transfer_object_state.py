@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 import unittest
 
 from universe.universe import Universe
@@ -86,11 +87,7 @@ class CatQuantumTransferObjectStateTests(
 
         returned = state.collapse(
             resolved_layer='quantum_layer',
-            resolved_position={
-                'x': 1.0,
-                'y': 2.0,
-                'z': 3.0,
-            },
+            resolved_position=SpatialVector3(x=1.0, y=2.0, z=3.0),
             target_box_consumed=True,
         )
 

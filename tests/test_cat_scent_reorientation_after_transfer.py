@@ -20,12 +20,12 @@ class CatScentReorientationAfterTransferTests(unittest.TestCase):
         self.creator = self.cats.create_cat(name='creator', color='black', fur_length='short')
         self.tracker = self.cats.create_cat(name='tracker', color='gray', fur_length='short')
         self.creator.current_layer = 'meeting_place'
-        self.creator.position = {'x': 3.0, 'y': 0.0, 'z': 0.0}
+        self.creator.position = SpatialVector3(x=3.0, y=0.0, z=0.0)
         self.creator.idea_energy = QUANTUM_BOX_ENERGY_COST_J * 10.0
         self.tracker.current_layer = 'meeting_place'
-        self.tracker.position = {'x': 0.0, 'y': 0.0, 'z': 0.0}
+        self.tracker.position = SpatialVector3(x=0.0, y=0.0, z=0.0)
         self.cats.learn_cat_aroma(observer=self.tracker, observed_cat=self.creator)
-        creation = self.universe.cat_box_transfer.create_exploration_pair(cat=self.creator, destination_layer='quantum_layer', destination_position={'x': 8.0, 'y': 0.0, 'z': 0.0}, source_position={'x': 3.0, 'y': 0.0, 'z': 0.0})
+        creation = self.universe.cat_box_transfer.create_exploration_pair(cat=self.creator, destination_layer='quantum_layer', destination_position=SpatialVector3(x=8.0, y=0.0, z=0.0), source_position=SpatialVector3(x=3.0, y=0.0, z=0.0))
         self.source = creation['source_box']
         self.target = creation['target_box']
         self.trail_box = self.universe.create_quantum_box(layer='quantum_layer')
@@ -100,7 +100,7 @@ class CatScentReorientationAfterTransferTests(unittest.TestCase):
         self.assertEqual(decision['target'].identity, 'cat:creator')
         self.assertEqual(decision['target'].layer, 'quantum_layer')
         self.assertEqual(decision['target'].source_id, self.trail_box.id)
-        self.assertEqual(decision['target'].position, self.trail_box.position.to_dict())
+        self.assertEqual(decision['target'].position, self.trail_box.position)
         self.assertEqual(self.tracker.mind.current_intention.type, 'follow_known_scent')
 if __name__ == '__main__':
     unittest.main()

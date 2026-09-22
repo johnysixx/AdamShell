@@ -17,7 +17,7 @@ class CatCrossLayerScentNavigationTests(unittest.TestCase):
         self.pazuzu = self.cats.create_cat(name='pazuzu', color='black', fur_length='short')
         self.tracker = self.cats.create_cat(name='tracker', color='gray', fur_length='short')
         self.tracker.current_layer = 'meeting_place'
-        self.tracker.position = {'x': 0.0, 'y': 0.0, 'z': 0.0}
+        self.tracker.position = SpatialVector3(x=0.0, y=0.0, z=0.0)
         self.source = self.universe.create_quantum_box(layer='meeting_place')
         self.target = self.universe.create_quantum_box(layer='quantum_layer')
         self.source.position = SpatialVector3(x=1.0, y=0.0, z=0.0)

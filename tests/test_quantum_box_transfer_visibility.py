@@ -16,7 +16,7 @@ class QuantumBoxTransferVisibilityTests(unittest.TestCase):
         self.target = self.universe.create_quantum_box(layer='quantum_layer')
         self.source.position = SpatialVector3(x=0.0, y=0.0, z=0.0)
         self.target.position = SpatialVector3(x=1.0, y=0.0, z=0.0)
-        self.observer_cat.position = {'x': 0.5, 'y': 0.0, 'z': 0.0}
+        self.observer_cat.position = SpatialVector3(x=0.5, y=0.0, z=0.0)
         self.universe.cat_box_transfer.pair_boxes(self.source, self.target)
         self.source.begin_cat_transfer(cat=self.traveller, target_box=self.target, tick=0)
 

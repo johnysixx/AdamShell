@@ -14,7 +14,7 @@ class CatThoughtCycleTests(unittest.TestCase):
         self.universe.enable_quantum_layer()
         self.cats = Cats(self.universe)
         self.cat = self.cats.create_cat(name='autonomous_cat', color='black', fur_length='short')
-        self.cat.position = {'x': 1.0, 'y': 0.0, 'z': 0.0}
+        self.cat.position = SpatialVector3(x=1.0, y=0.0, z=0.0)
 
     def test_cat_can_think_and_start_bar_route(self):
         result = self.cats.think_and_act(cat=self.cat)
@@ -50,7 +50,7 @@ class CatThoughtCycleTests(unittest.TestCase):
         source.position = SpatialVector3(x=1.0, y=0.0, z=0.0)
         target.position = SpatialVector3(x=9.0, y=4.0, z=0.0)
         source.pair_with(target)
-        self.cat.position = source.position.to_dict()
+        self.cat.position = source.position
         self.cat.memory.remember(event_type='quantum_box_observed', universe_tick=0, location='quantum_layer', participants=[source.id], details={'box_id': source.id})
         first_cycle = self.cats.think_and_act(cat=self.cat)
         self.assertTrue(first_cycle['completed'])
@@ -65,6 +65,6 @@ class CatThoughtCycleTests(unittest.TestCase):
         self.assertEqual(second_cycle['decision']['intention'], 'travel_through_known_quantum_box')
         self.assertTrue(second_cycle['execution']['executed'])
         self.assertEqual(self.cat.current_layer, target.current_layer)
-        self.assertEqual(self.cat.position, target.position.to_dict())
+        self.assertEqual(self.cat.position, target.position)
 if __name__ == '__main__':
     unittest.main()

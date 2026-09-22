@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 import unittest
 
 from universe.universe import Universe
@@ -28,11 +29,7 @@ class CatAutonomousNeedsMovementSocialTests(
             fur_length="short"
         )
 
-        cat.position = {
-            "x": x,
-            "y": y,
-            "z": 0.0
-        }
+        cat.position = SpatialVector3(x=x, y=y, z=0.0)
 
         cat.current_layer = (
             "physical_world"
@@ -100,9 +97,7 @@ class CatAutonomousNeedsMovementSocialTests(
 
         cat.needs.curiosity = 1.0
 
-        before = dict(
-            cat.position
-        )
+        before = cat.position.to_dict()
 
         self.cats.tick()
 

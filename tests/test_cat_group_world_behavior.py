@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 import unittest
 from universe.universe import Universe
 from cats.cats import Cats
@@ -39,7 +40,7 @@ class CatGroupWorldBehaviorTests(unittest.TestCase):
     def test_group_can_migrate_together(self):
         group_id = self._group(self.members[:3], 'first')
         migration = CatGroupMigrationSystem(self.groups)
-        result = migration.migrate(group_id, self.cats.cats, layer='meeting_place', location='back_room', position={'x': 2.0, 'y': 1.0, 'z': 0.0})
+        result = migration.migrate(group_id, self.cats.cats, layer='meeting_place', location='back_room', position=SpatialVector3(x=2.0, y=1.0, z=0.0))
         self.assertTrue(result['migrated'])
         for cat in self.members[:3]:
             self.assertEqual(cat.location, 'back_room')

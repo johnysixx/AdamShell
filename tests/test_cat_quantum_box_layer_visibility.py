@@ -15,7 +15,7 @@ class CatQuantumBoxLayerVisibilityTests(unittest.TestCase):
         self.pazuzu = self.cats.create_cat(name='pazuzu', color='black', fur_length='short')
         self.observer = self.cats.create_cat(name='observer', color='gray', fur_length='short')
         self.observer.current_layer = 'meeting_place'
-        self.observer.position = {'x': 0.0, 'y': 0.0, 'z': 0.0}
+        self.observer.position = SpatialVector3(x=0.0, y=0.0, z=0.0)
         self.source = self.universe.create_quantum_box(layer='meeting_place')
         self.target = self.universe.create_quantum_box(layer='quantum_layer')
         self.source.position = SpatialVector3(x=1.0, y=0.0, z=0.0)

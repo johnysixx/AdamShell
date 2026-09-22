@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 import unittest
 
 from cats.cat_quantum_observation_state import (
@@ -49,11 +50,7 @@ class CatQuantumCounterpartObservationObjectTests(
             CatQuantumCounterpartObservation(
                 source_box_id='source',
                 counterpart_box_id='target',
-                counterpart_position={
-                    'x': 1.0,
-                    'y': 2.0,
-                    'z': 0.0,
-                },
+                counterpart_position=SpatialVector3(x=1.0, y=2.0, z=0.0),
                 pair_currently_valid=True,
             )
         )

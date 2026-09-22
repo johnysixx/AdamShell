@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 import unittest
 
 from navigation import NavigationEngine
@@ -13,16 +14,8 @@ class NavigationEngineTests(
         )
 
         result = engine.direct_route(
-            {
-                "x": 6.0,
-                "y": 0.0,
-                "z": 0.0
-            },
-            {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-            }
+            SpatialVector3(x=6.0, y=0.0, z=0.0),
+            SpatialVector3(x=0.0, y=0.0, z=0.0)
         )
 
         self.assertAlmostEqual(
@@ -69,16 +62,8 @@ class NavigationEngineTests(
         engine = NavigationEngine()
 
         result = engine.direct_route(
-            {
-                "x": 1.0,
-                "y": 2.0,
-                "z": 3.0
-            },
-            {
-                "x": 1.0,
-                "y": 2.0,
-                "z": 3.0
-            }
+            SpatialVector3(x=1.0, y=2.0, z=3.0),
+            SpatialVector3(x=1.0, y=2.0, z=3.0)
         )
 
         self.assertEqual(

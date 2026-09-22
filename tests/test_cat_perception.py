@@ -10,29 +10,29 @@ class CatPerceptionTests(unittest.TestCase):
         self.universe.enable_quantum_layer()
         self.cats = Cats(self.universe)
         self.cat = self.cats.create_cat(name='observer', color='black', fur_length='short')
-        self.cat.position = {'x': 1.0, 'y': 0.0, 'z': 0.0}
+        self.cat.position = SpatialVector3(x=1.0, y=0.0, z=0.0)
 
     def create_other_cat(self, name, position):
         cat = self.cats.create_cat(name=name, color='gray', fur_length='short')
-        cat.position = dict(position)
+        cat.position = position
         return cat
 
     def create_cronenberg(self, size, position):
         cronenberg = self.universe.create_cronenberg_from_quantum_error(error=RuntimeError('Perception test.'), source_component='test', source_operation='cat_perception')
         cronenberg.size = float(size)
-        cronenberg.position = SpatialVector3(**position)
+        cronenberg.position = position
         return cronenberg
 
     def test_cat_sees_nearby_cat_only(self):
-        near = self.create_other_cat('near', {'x': 2.0, 'y': 0.0, 'z': 0.0})
-        self.create_other_cat('far', {'x': 20.0, 'y': 0.0, 'z': 0.0})
+        near = self.create_other_cat('near', SpatialVector3(x=2.0, y=0.0, z=0.0))
+        self.create_other_cat('far', SpatialVector3(x=20.0, y=0.0, z=0.0))
         result = self.cats.observe_cat(self.cat)
         self.assertIn(near.name, result.nearby_cats)
         self.assertNotIn('far', result.nearby_cats)
 
     def test_cat_distinguishes_huntable_cronenberg(self):
-        small = self.create_cronenberg(size=0.8, position={'x': 2.0, 'y': 0.0, 'z': 0.0})
-        large = self.create_cronenberg(size=2.0, position={'x': 3.0, 'y': 0.0, 'z': 0.0})
+        small = self.create_cronenberg(size=0.8, position=SpatialVector3(x=2.0, y=0.0, z=0.0))
+        large = self.create_cronenberg(size=2.0, position=SpatialVector3(x=3.0, y=0.0, z=0.0))
         result = self.cats.observe_cat(self.cat)
         self.assertIn(small.id, result.huntable_cronenbergs)
         self.assertNotIn(large.id, result.huntable_cronenbergs)

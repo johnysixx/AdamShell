@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 import unittest
 from universe.universe import Universe
 from cats.cats import Cats
@@ -13,11 +14,11 @@ class CatQuantumExplorationContinuationTests(unittest.TestCase):
         self.cats = Cats(self.universe)
         self.cat = self.cats.create_cat(name='curious_explorer', color='black', fur_length='short')
         self.cat.current_layer = 'meeting_place'
-        self.cat.position = {'x': 0.0, 'y': 0.0, 'z': 0.0}
+        self.cat.position = SpatialVector3(x=0.0, y=0.0, z=0.0)
         self.cat.idea_energy = QUANTUM_BOX_ENERGY_COST_J * 10.0
         self.cat.exploration_goal = CatExplorationGoal(
             layer='quantum_layer',
-            position={'x': 4.0, 'y': 0.0, 'z': 0.0},
+            position=SpatialVector3(x=4.0, y=0.0, z=0.0),
         )
         traits = self.cat.personality.traits
         traits.curiosity = 1.0
@@ -55,9 +56,9 @@ class CatQuantumExplorationContinuationTests(unittest.TestCase):
         self.assertIn(pair['remote_box_id'], [box.id for box in self.universe.quantum_boxes])
 
     def test_second_goal_is_different(self):
-        first_goal = dict(self.cat.exploration_goal.position)
+        first_goal = self.cat.exploration_goal.position.to_dict()
         self.reach_first_goal()
-        second_goal = dict(self.cat.quantum_exploration.destination)
+        second_goal = self.cat.quantum_exploration.destination.to_dict()
         self.assertNotEqual(first_goal, second_goal)
 if __name__ == '__main__':
     unittest.main()

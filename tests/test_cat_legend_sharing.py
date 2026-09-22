@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 import unittest
 from universe.universe import Universe
 from cats.cats import Cats
@@ -14,7 +15,7 @@ class CatLegendSharingTests(unittest.TestCase):
         relationship = CatRelationship.create()
         relationship.trust = 1.0
         self.storyteller.relationships[self.listener.name] = relationship
-        place = CatKnowledge.remember_place(self.storyteller, 'quantum_layer', {'x': 7.0, 'y': 2.0, 'z': 0.0})
+        place = CatKnowledge.remember_place(self.storyteller, 'quantum_layer', SpatialVector3(x=7.0, y=2.0, z=0.0))
         self.legend = CatKnowledge.publish_legend(self.universe, self.storyteller, place)
 
     def test_cat_can_choose_legend_for_listener(self):

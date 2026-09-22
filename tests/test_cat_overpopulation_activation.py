@@ -74,11 +74,7 @@ class CatOverpopulationActivationTests(
         created = universe.manifest_cat(
             name="accepting_cat",
             source="test",
-            position={
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-            }
+            position=SpatialVector3(x=0.0, y=0.0, z=0.0)
         )
 
         cat = created["cat"]
@@ -148,11 +144,7 @@ class CatOverpopulationActivationTests(
         created = universe.manifest_cat(
             name="declining_cat",
             source="test",
-            position={
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-            }
+            position=SpatialVector3(x=0.0, y=0.0, z=0.0)
         )
 
         cat = created["cat"]

@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 import unittest
 from universe.universe import Universe
 from cats.cats import Cats
@@ -12,7 +13,7 @@ class CatLegendTrustTests(unittest.TestCase):
         self.cats = Cats(self.universe)
         self.storyteller = self.cats.create_cat(name='pazuzu', color='black', fur_length='short')
         self.listener = self.cats.create_cat(name='garfield', color='orange', fur_length='short')
-        place = CatKnowledge.remember_place(self.storyteller, 'quantum_layer', {'x': 12.0, 'y': 3.0, 'z': 0.0})
+        place = CatKnowledge.remember_place(self.storyteller, 'quantum_layer', SpatialVector3(x=12.0, y=3.0, z=0.0))
         self.legend = CatKnowledge.publish_legend(self.universe, self.storyteller, place)
 
     def test_heard_legend_is_not_fact(self):
@@ -45,7 +46,7 @@ class CatLegendTrustTests(unittest.TestCase):
 
     def test_personal_visit_verifies_legend(self):
         CatKnowledge.hear_legend(self.listener, self.storyteller, self.legend)
-        place = CatKnowledge.remember_place(self.listener, 'quantum_layer', {'x': 12.0, 'y': 3.0, 'z': 0.0})
+        place = CatKnowledge.remember_place(self.listener, 'quantum_layer', SpatialVector3(x=12.0, y=3.0, z=0.0))
         verified = CatKnowledge.verify_heard_legend(self.listener, place)
         self.assertEqual(len(verified), 1)
         self.assertTrue(self.listener.knowledge.heard_legends[0].verified)

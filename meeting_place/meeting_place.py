@@ -12,6 +12,7 @@ from meeting_place.bar_objects import (
 )
 import random
 from cats.cat import Cat
+from core.entity.components import SpatialVector3
 from universe.logger import UniverseLogger
 from .bartender import Bartender
 from .how_to_mix_drinks import HowToMixDrinks
@@ -448,7 +449,7 @@ class MeetingPlace:
         existing = next((cat for cat in getattr(getattr(self.universe, 'cats_layer', None), 'cats', []) if getattr(cat, 'name', None) == name), None)
         if existing is not None:
             return {'name': 'cat_d20_already_present', 'cat': existing, 'box': getattr(self, 'cat_d20_box', None), 'created': False}
-        manifestation = self.universe.manifest_cat(name=name, source='cat_d20_arrival', position={'x': 0.0, 'y': 0.0, 'z': 0.0}, color='black', fur_length='short', pattern='solid', eye_color='gold', sex='female')
+        manifestation = self.universe.manifest_cat(name=name, source='cat_d20_arrival', position=SpatialVector3.zero(), color='black', fur_length='short', pattern='solid', eye_color='gold', sex='female')
         cat = manifestation['cat']
         if not hasattr(self, 'cat_d20_secret_history'):
             self.cat_d20_secret_history = []

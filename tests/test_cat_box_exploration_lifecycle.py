@@ -17,7 +17,7 @@ class CatBoxExplorationLifecycleTests(unittest.TestCase):
         self.cats = Cats(self.universe)
         self.cat = self.cats.create_cat(name='explorer', color='black', fur_length='short')
         self.cat.current_layer = 'quantum_layer'
-        self.cat.position = {'x': 0.0, 'y': 0.0, 'z': 0.0}
+        self.cat.position = SpatialVector3(x=0.0, y=0.0, z=0.0)
         self.box = self.universe.create_quantum_box()
         self.box.current_layer = 'quantum_layer'
         self.box.position = SpatialVector3(x=3.0, y=0.0, z=0.0)
@@ -38,14 +38,17 @@ class CatBoxExplorationLifecycleTests(unittest.TestCase):
         )
         first = self.cats.execute_cat_intention(self.cat)
         self.assertEqual(first['name'], 'cat_approaching_box_to_explore')
-        self.assertEqual(self.cat.position, {'x': 0.0, 'y': 0.0, 'z': 0.0})
+        self.assertEqual(
+            self.cat.position,
+            SpatialVector3(x=0.0, y=0.0, z=0.0)
+        )
         result = first
         for _ in range(10):
             result = self.cats.execute_cat_intention(self.cat)
             if result['name'] == 'cat_explored_quantum_box':
                 break
         self.assertEqual(result['name'], 'cat_explored_quantum_box')
-        self.assertEqual(self.cat.position, self.box.position.to_dict())
+        self.assertEqual(self.cat.position, self.box.position)
         self.assertIsInstance(
             self.cat.box_exploration,
             CatBoxExplorationState,

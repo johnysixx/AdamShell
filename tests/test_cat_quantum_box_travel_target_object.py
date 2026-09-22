@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 import unittest
 
 from universe.universe import Universe
@@ -33,11 +34,7 @@ class CatQuantumBoxTravelTargetObjectTests(
             counterpart_box_id='counterpart',
             source_layer='quantum_layer',
             target_layer='meeting_place',
-            target_position={
-                'x': 1.0,
-                'y': 2.0,
-                'z': 0.0,
-            },
+            target_position=SpatialVector3(x=1.0, y=2.0, z=0.0),
         )
 
         self.assertFalse(

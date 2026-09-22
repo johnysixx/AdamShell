@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 import unittest
 
 from cats.cat_scent_direction_state import (
@@ -41,11 +42,7 @@ class CatKnownScentFollowStateObjectTests(
             'quantum_layer'
         )
 
-        self.cat.position = {
-            'x': 0.0,
-            'y': 0.0,
-            'z': 0.0,
-        }
+        self.cat.position = SpatialVector3(x=0.0, y=0.0, z=0.0)
 
     def test_state_has_no_mapping_api(self):
         state = CatKnownScentFollowState(
@@ -91,11 +88,7 @@ class CatKnownScentFollowStateObjectTests(
                 target=CatKnownScentTarget(
                     identity='cat:pazuzu',
                     layer='quantum_layer',
-                    position={
-                        'x': 3.0,
-                        'y': 0.0,
-                        'z': 0.0,
-                    },
+                    position=SpatialVector3(x=3.0, y=0.0, z=0.0),
                     source_id='trace_latest',
                     trail_direction=CatScentTrailDirection(
                         inferred=True,
@@ -126,11 +119,7 @@ class CatKnownScentFollowStateObjectTests(
     def test_finished_follow_remains_object_state(
         self
     ):
-        self.cat.position = {
-            'x': 3.0,
-            'y': 0.0,
-            'z': 0.0,
-        }
+        self.cat.position = SpatialVector3(x=3.0, y=0.0, z=0.0)
 
         self.cat.mind.current_intention = (
             CatIntentionCandidate(
@@ -138,9 +127,7 @@ class CatKnownScentFollowStateObjectTests(
                 target=CatKnownScentTarget(
                     identity='cat:pazuzu',
                     layer='quantum_layer',
-                    position=dict(
-                        self.cat.position
-                    ),
+                    position=self.cat.position,
                     source_id='trace_latest',
                     trail_direction=CatScentTrailDirection(
                         inferred=True,

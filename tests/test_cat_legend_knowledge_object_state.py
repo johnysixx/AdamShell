@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 import unittest
 
 from cats.cat_knowledge import CatKnowledge
@@ -40,11 +41,7 @@ class CatLegendKnowledgeObjectStateTests(
             CatKnowledge.remember_place(
                 self.storyteller,
                 'quantum_layer',
-                {
-                    'x': 3.0,
-                    'y': 4.0,
-                    'z': 0.0,
-                },
+                SpatialVector3(x=3.0, y=4.0, z=0.0),
             )
         )
 
@@ -101,11 +98,7 @@ class CatLegendKnowledgeObjectStateTests(
             CatKnowledge.remember_place(
                 self.listener,
                 'quantum_layer',
-                {
-                    'x': 3.0,
-                    'y': 4.0,
-                    'z': 0.0,
-                },
+                SpatialVector3(x=3.0, y=4.0, z=0.0),
             )
         )
 

@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 from core.entity.social_entity import SocialEntity
 import unittest
 from universe.universe import Universe
@@ -77,9 +78,9 @@ class CatSocialInteractionTests(unittest.TestCase):
     def _social_pair(self):
         first = self.cats.create_cat(name='first_cat', color='black', fur_length='short')
         second = self.cats.create_cat(name='second_cat', color='white', fur_length='short')
-        position = {'x': 1.0, 'y': 2.0, 'z': 0.0}
-        first.position = dict(position)
-        second.position = dict(position)
+        position = SpatialVector3(x=1.0, y=2.0, z=0.0)
+        first.position = position
+        second.position = position
         first.current_layer = 'quantum_layer'
         second.current_layer = 'quantum_layer'
         return (first, second)

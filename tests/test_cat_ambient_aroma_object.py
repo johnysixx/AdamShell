@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 import unittest
 
 from multiverse import UniverseRegistry
@@ -41,11 +42,7 @@ class CatAmbientAromaObjectTests(
             "meeting_place"
         )
 
-        self.cat.position = {
-            "x": 0.0,
-            "y": 0.0,
-            "z": 0.0,
-        }
+        self.cat.position = SpatialVector3(x=0.0, y=0.0, z=0.0)
 
         ambient = (
             self.meeting_place

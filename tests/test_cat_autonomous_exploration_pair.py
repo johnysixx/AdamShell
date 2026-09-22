@@ -16,7 +16,7 @@ class CatAutonomousExplorationPairTests(unittest.TestCase):
         self.cats = Cats(self.universe)
         self.cat = self.cats.create_cat(name='explorer', color='black', fur_length='short')
         self.cat.current_layer = 'meeting_place'
-        self.cat.position = {'x': 3.0, 'y': 1.0, 'z': 0.0}
+        self.cat.position = SpatialVector3(x=3.0, y=1.0, z=0.0)
         self.cat.idea_energy = QUANTUM_BOX_ENERGY_COST_J * 10.0
         self.cat.personality.traits.curiosity = 1.0
 

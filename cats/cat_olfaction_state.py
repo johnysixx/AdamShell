@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from core.entity.components import SpatialVector3, require_spatial_vector
 
 
 @dataclass(slots=True)
@@ -23,7 +24,7 @@ class CatAromaRecognition:
 class CatDetectedAroma:
     entity_id: object
     actual_identity: str | None
-    position: object
+    position: SpatialVector3
     distance: float
 
     components: dict
@@ -32,6 +33,8 @@ class CatDetectedAroma:
     perceived_intensity: float
     recognition: CatAromaRecognition
 
+    def __post_init__(self):
+        self.position = require_spatial_vector(self.position, field_name="detected aroma position")
 
 
 @dataclass(slots=True)

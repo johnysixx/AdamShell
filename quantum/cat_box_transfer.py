@@ -1,7 +1,8 @@
 from copy import deepcopy
+import math
 
 from universe.aroma_profile import AromaProfile
-from core.entity.components import SpatialVector3
+from core.entity.components import SpatialVector3, require_optional_spatial_vector, require_spatial_vector
 
 from cats.cat_exploration_planner import (
     CatExplorationPlanner
@@ -14,7 +15,6 @@ from cats.cat_access_rules import CatAccessRules
 from universe.aroma_residue import (
     AromaResidue
 )
-import math
 
 from universe.dark_sector import (
     QUANTUM_BOX_ENERGY_COST_J,
@@ -100,13 +100,7 @@ class CatQuantumBoxTransfer:
 
         P?r mohou vyu??vat i jin? ko?ky.
         """
-        if not isinstance(
-            cat,
-            (
-                Cat,
-                dict
-            )
-        ):
+        if not isinstance(cat, Cat):
             return self._failure(
                 cat,
                 "invalid_cat"
@@ -158,23 +152,17 @@ class CatQuantumBoxTransfer:
             )
         )
 
-        source_position_snapshot = (
-            source_position
-            or cat.position
-            or {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0,
-            }
+        source_position_snapshot = require_optional_spatial_vector(
+            source_position,
+            field_name="exploration pair source position",
         )
-        source_box.position = SpatialVector3(
-            x=source_position_snapshot["x"],
-            y=source_position_snapshot["y"],
-            z=source_position_snapshot["z"],
-        )
+        if source_position_snapshot is None:
+            source_position_snapshot = cat.position if cat.position is not None else SpatialVector3.zero()
+        source_box.position = source_position_snapshot
 
-        exploration_destination_position = dict(
-            destination_position
+        exploration_destination_position = require_spatial_vector(
+            destination_position,
+            field_name="exploration destination position",
         )
 
         # P?i vstupu do Quantum Layer nen?
@@ -183,11 +171,7 @@ class CatQuantumBoxTransfer:
         if destination_layer == "quantum_layer":
             target_box.position = source_box.position
         else:
-            target_box.position = SpatialVector3(
-                x=exploration_destination_position["x"],
-                y=exploration_destination_position["y"],
-                z=exploration_destination_position["z"],
-            )
+            target_box.position = exploration_destination_position
 
         self.pair_boxes(
             source_box,
@@ -221,9 +205,7 @@ class CatQuantumBoxTransfer:
             "remote_box_id": target_box.id,
             "anchor_layer": source_layer,
             "remote_layer": destination_layer,
-            "exploration_destination_position": dict(
-                exploration_destination_position
-            ),
+            "exploration_destination_position": exploration_destination_position,
             "creation_energy_j": energy_cost,
             "remaining_energy_j": energy_cost,
             "currently_in_use": False,
@@ -337,15 +319,13 @@ class CatQuantumBoxTransfer:
                 cat_name
             )
 
-        target_position = target_box.position.to_dict()
+        target_position = target_box.position
 
         target_layer = (
             target_box.current_layer
         )
 
-        cat.position = (
-            target_position
-        )
+        cat.move_to(target_position)
 
         cat.current_layer = (
             target_layer
@@ -485,7 +465,7 @@ class CatQuantumBoxTransfer:
                     self.universe
                     .universe_tick
                 ),
-                location=target_position,
+                location=target_position.to_dict(),
                 participants=[
                     source_box.id,
                     target_box.id
@@ -915,7 +895,7 @@ class CatQuantumBoxTransfer:
             "quantum_box_transfer_superposition"
         )
 
-        target_position = target_box.position.to_dict()
+        target_position = target_box.position
 
         target_layer = (
             target_box.current_layer
@@ -1005,7 +985,7 @@ class CatQuantumBoxTransfer:
             clear_source=False
         )
 
-        cat.position = target_position
+        cat.move_to(target_position)
         cat.current_layer = target_layer
         cat.state = (
             "materialized_at_consumed_"
@@ -1036,7 +1016,7 @@ class CatQuantumBoxTransfer:
                 universe_tick=(
                     self.universe.universe_tick
                 ),
-                location=target_position,
+                location=target_position.to_dict(),
                 participants=[
                     source_box.id,
                     target_box.id
@@ -1128,20 +1108,13 @@ class CatQuantumBoxTransfer:
 
         counterpart.current_layer = cat.current_layer
 
-        counterpart_position_snapshot = (
-            position
-            or cat.position
-            or {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0,
-            }
+        counterpart_position_snapshot = require_optional_spatial_vector(
+            position,
+            field_name="return counterpart position",
         )
-        counterpart.position = SpatialVector3(
-            x=counterpart_position_snapshot["x"],
-            y=counterpart_position_snapshot["y"],
-            z=counterpart_position_snapshot["z"],
-        )
+        if counterpart_position_snapshot is None:
+            counterpart_position_snapshot = cat.position if cat.position is not None else SpatialVector3.zero()
+        counterpart.position = counterpart_position_snapshot
 
         pair_event = self.pair_boxes(
             source_box,
@@ -1234,10 +1207,9 @@ class CatQuantumBoxTransfer:
                 "started": False
             }
 
-        destination = dict(
-            pair[
-                "exploration_destination_position"
-            ]
+        destination = require_spatial_vector(
+            pair["exploration_destination_position"],
+            field_name="stable pair exploration destination",
         )
 
         stabilized = self.stabilize_direct_trail(
@@ -1266,8 +1238,9 @@ class CatQuantumBoxTransfer:
             quantum_space
             .plan_direct_cat_route(
                 cat_id=cat.name,
-                start_position=dict(
-                    cat.position
+                start_position=require_spatial_vector(
+                    cat.position,
+                    field_name="cat exploration start position",
                 ),
                 destination_position=destination,
                 destination=(
@@ -1306,10 +1279,8 @@ class CatQuantumBoxTransfer:
             "cat": cat.name,
             "pair_id": pair_id,
             "route_id": route.route_id,
-            "start_position": dict(
-                cat.position
-            ),
-            "destination": destination,
+            "start_position": cat.position.to_dict(),
+            "destination": destination.to_dict(),
             "step_count": len(
                 route.route_steps
             ),
@@ -1405,11 +1376,6 @@ class CatQuantumBoxTransfer:
             "position"
         )
 
-        if position is not None:
-            cat.position = dict(
-                position
-            )
-
         arrival_resolution = None
 
         if result.get(
@@ -1454,11 +1420,7 @@ class CatQuantumBoxTransfer:
             "cat": cat.name,
             "pair_id": exploration.pair_id,
             "route_id": exploration.route_id,
-            "position": (
-                dict(position)
-                if position is not None
-                else None
-            ),
+            "position": position,
             "result": result.get(
                 "result"
             ),
@@ -1555,16 +1517,12 @@ class CatQuantumBoxTransfer:
                     self.universe
                     .universe_tick
                 ),
-                location=dict(
-                    cat.position
-                ),
+                location=cat.position.to_dict(),
                 details={
                     "target_layer": (
                         cat.current_layer
                     ),
-                    "position": dict(
-                        cat.position
-                    ),
+                    "position": cat.position.to_dict(),
                     "pair_id": exploration.pair_id
                 }
             )
@@ -1573,8 +1531,9 @@ class CatQuantumBoxTransfer:
             CatKnowledge.remember_place(
                 cat=cat,
                 layer=cat.current_layer,
-                position=dict(
-                    cat.position
+                position=require_spatial_vector(
+                    cat.position,
+                    field_name="exploration arrival position",
                 ),
                 source=(
                     "direct_quantum_exploration"
@@ -1696,9 +1655,7 @@ class CatQuantumBoxTransfer:
             ),
             "cat": cat.name,
             "pair_id": exploration.pair_id,
-            "position": dict(
-                cat.position
-            ),
+            "position": cat.position.to_dict(),
             "memory": remembered,
             "known_place": known_place,
             "verified_legends": (
@@ -1796,8 +1753,9 @@ class CatQuantumBoxTransfer:
                 "continued": False
             }
 
-        destination = dict(
-            plan.position
+        destination = require_spatial_vector(
+            plan.position,
+            field_name="continuation destination",
         )
 
         stabilized = self.stabilize_direct_trail(
@@ -1813,8 +1771,9 @@ class CatQuantumBoxTransfer:
             quantum_space
             .plan_direct_cat_route(
                 cat_id=cat.name,
-                start_position=dict(
-                    cat.position
+                start_position=require_spatial_vector(
+                    cat.position,
+                    field_name="cat continuation start position",
                 ),
                 destination_position=(
                     destination
@@ -1858,10 +1817,8 @@ class CatQuantumBoxTransfer:
             "pair_id": pair_id,
             "stage": stage,
             "route_id": route.route_id,
-            "start_position": dict(
-                cat.position
-            ),
-            "destination": destination,
+            "start_position": cat.position.to_dict(),
+            "destination": destination.to_dict(),
             "return_pair_preserved": True,
             "created_new_pair": False,
             "continued": True
@@ -1945,7 +1902,7 @@ class CatQuantumBoxTransfer:
                 "started": False
             }
 
-        destination = remote_box.position.to_dict()
+        destination = remote_box.position
 
         stabilized = self.stabilize_direct_trail(
             cat=cat,
@@ -1956,8 +1913,9 @@ class CatQuantumBoxTransfer:
             quantum_space
             .plan_direct_cat_route(
                 cat_id=cat.name,
-                start_position=dict(
-                    cat.position
+                start_position=require_spatial_vector(
+                    cat.position,
+                    field_name="cat return start position",
                 ),
                 destination_position=(
                     destination
@@ -2000,7 +1958,7 @@ class CatQuantumBoxTransfer:
             "cat": cat.name,
             "pair_id": pair_id,
             "route_id": route.route_id,
-            "destination": destination,
+            "destination": destination.to_dict(),
             "started": True
         }
 
@@ -2060,11 +2018,6 @@ class CatQuantumBoxTransfer:
             "position"
         )
 
-        if position is not None:
-            cat.position = dict(
-                position
-            )
-
         transfer_result = None
 
         if result.get(
@@ -2100,11 +2053,7 @@ class CatQuantumBoxTransfer:
             ),
             "cat": cat.name,
             "pair_id": returning.pair_id,
-            "position": (
-                dict(position)
-                if position is not None
-                else None
-            ),
+            "position": position,
             "arrived_at_box": result.get(
                 "arrived",
                 False
@@ -2126,41 +2075,23 @@ class CatQuantumBoxTransfer:
         cat,
         destination
     ):
-        start = dict(
-            (
-                cat.position
-                or {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                }
-            )
+        start = require_spatial_vector(
+            cat.position,
+            field_name="cat trail start position",
         )
-
-        end = dict(
-            destination
+        end = require_spatial_vector(
+            destination,
+            field_name="cat trail destination",
         )
-
-        distance = math.dist(
-            (
-                start.get("x", 0.0),
-                start.get("y", 0.0),
-                start.get("z", 0.0)
-            ),
-            (
-                end.get("x", 0.0),
-                end.get("y", 0.0),
-                end.get("z", 0.0)
-            )
-        )
+        distance = start.distance_to(end)
 
         event = {
             "name": (
                 "cat_stabilized_direct_quantum_path"
             ),
             "cat": cat.name,
-            "start": start,
-            "destination": end,
+            "start": start.to_dict(),
+            "destination": end.to_dict(),
             "distance": distance,
             "path_kind": "most_direct_possible",
             "stability": 1.0,

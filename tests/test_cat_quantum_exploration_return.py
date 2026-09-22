@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 import unittest
 from universe.universe import Universe
 from cats.cats import Cats
@@ -15,11 +16,11 @@ class CatQuantumExplorationReturnTests(unittest.TestCase):
         self.cats = Cats(self.universe)
         self.cat = self.cats.create_cat(name='returning_explorer', color='black', fur_length='short')
         self.cat.current_layer = 'meeting_place'
-        self.cat.position = {'x': 0.0, 'y': 0.0, 'z': 0.0}
+        self.cat.position = SpatialVector3(x=0.0, y=0.0, z=0.0)
         self.cat.idea_energy = QUANTUM_BOX_ENERGY_COST_J * 10.0
         self.cat.exploration_goal = CatExplorationGoal(
             layer='quantum_layer',
-            position={'x': 4.0, 'y': 0.0, 'z': 0.0},
+            position=SpatialVector3(x=4.0, y=0.0, z=0.0),
         )
         traits = self.cat.personality.traits
         traits.curiosity = 0.0

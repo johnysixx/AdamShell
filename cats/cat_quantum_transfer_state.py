@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from core.entity.components import SpatialVector3, require_optional_spatial_vector
 
 
 @dataclass(slots=True)
@@ -14,7 +15,7 @@ class CatQuantumTransferState:
     cat_is_here: bool = False
     cat_is_not_here: bool = False
     resolved_layer: str | None = None
-    resolved_position: object = None
+    resolved_position: SpatialVector3 | None = None
     target_box_consumed: bool | None = None
     stable_pair_id: str | None = None
 
@@ -30,9 +31,7 @@ class CatQuantumTransferState:
         self.cat_is_here = True
         self.cat_is_not_here = False
         self.resolved_layer = resolved_layer
-        self.resolved_position = (
-            resolved_position
-        )
+        self.resolved_position = require_optional_spatial_vector(resolved_position, field_name="quantum transfer resolved position")
         self.target_box_consumed = bool(
             target_box_consumed
         )

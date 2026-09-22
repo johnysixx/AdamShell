@@ -15,11 +15,7 @@ class QuantumCatNavigationTests(
         cat_result = universe.manifest_cat(
             name="hunter",
             source="test",
-            position={
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-            }
+            position=SpatialVector3(x=0.0, y=0.0, z=0.0)
         )
 
         cat = cat_result["cat"]
@@ -121,11 +117,7 @@ class QuantumCatNavigationTests(
         cat_result = universe.manifest_cat(
             name="small_hunter",
             source="test",
-            position={
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-            }
+            position=SpatialVector3(x=0.0, y=0.0, z=0.0)
         )
 
         cat = cat_result["cat"]
@@ -182,11 +174,7 @@ class QuantumCatNavigationTests(
 
         result = space.plan_cat_route_to_bar(
             cat_id="test_cat",
-            start_position={
-                "x": 6.0,
-                "y": 0.0,
-                "z": 0.0
-            },
+            start_position=SpatialVector3(x=6.0, y=0.0, z=0.0),
             step_size=2.0
         )
 
@@ -236,16 +224,8 @@ class QuantumCatNavigationTests(
 
         result = space.plan_direct_cat_route(
             cat_id="hunter_cat",
-            start_position={
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-            },
-            destination_position={
-                "x": 3.0,
-                "y": 4.0,
-                "z": 0.0
-            },
+            start_position=SpatialVector3(x=0.0, y=0.0, z=0.0),
+            destination_position=SpatialVector3(x=3.0, y=4.0, z=0.0),
             destination="cronenberg_target",
             step_size=2.0
         )

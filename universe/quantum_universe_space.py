@@ -154,29 +154,30 @@ class QuantumUniverseSpace:
         return memory.remember(event_type=event_type, universe_tick=getattr(universe, 'universe_tick', None), location=route.current_position.to_dict(), participants=[], details=route_details)
 
     def plan_direct_cat_route(self, cat_id, start_position, destination_position, destination, step_size=None):
-        plan = self.navigation_engine.direct_route(start_position=start_position, destination_position=destination_position, step_size=step_size)
-        route_steps = [
-            SpatialVector3(
-                x=step['x'],
-                y=step['y'],
-                z=step['z'],
-            )
-            for step in plan['route_steps']
-        ]
-        route_start_position = SpatialVector3(
-            x=start_position['x'],
-            y=start_position['y'],
-            z=start_position['z'],
+        if not isinstance(start_position, SpatialVector3):
+            raise TypeError('Cat route start_position must be a SpatialVector3 object.')
+        if not isinstance(destination_position, SpatialVector3):
+            raise TypeError('Cat route destination_position must be a SpatialVector3 object.')
+        plan = self.navigation_engine.direct_route(
+            start_position=start_position,
+            destination_position=destination_position,
+            step_size=step_size,
         )
-        route = self.create_cat_route(cat_id=cat_id, route_steps=route_steps, start_position=route_start_position, destination=destination)
+        route_steps = [SpatialVector3(x=step['x'], y=step['y'], z=step['z']) for step in plan['route_steps']]
+        route = self.create_cat_route(
+            cat_id=cat_id,
+            route_steps=route_steps,
+            start_position=start_position,
+            destination=destination,
+        )
         return {'name': 'cat_direct_route_planned', 'cat_id': cat_id, 'destination': destination, 'plan': plan, 'route': route}
 
     @staticmethod
-    def _cronenberg_position_snapshot(cronenberg):
+    def _cronenberg_position(cronenberg):
         position = getattr(cronenberg, 'position', None)
         if not isinstance(position, SpatialVector3):
             return None
-        return position.to_dict()
+        return position
 
     def plan_cat_route_to_nearest_huntable_cronenberg(self, cat, cronenbergs, start_position=None, step_size=None, max_size_ratio=1.2):
         cat_id = getattr(cat, 'name', None)
@@ -189,7 +190,7 @@ class QuantumUniverseSpace:
         nearest = self.navigation_engine.nearest_target(
             start_position,
             huntable,
-            position_getter=self._cronenberg_position_snapshot,
+            position_getter=self._cronenberg_position,
         )
         if nearest is None:
             return {'name': 'cat_hunt_route_not_planned', 'result': 'no_huntable_cronenberg', 'cat_id': cat_id}
@@ -202,7 +203,7 @@ class QuantumUniverseSpace:
         return planned
 
     def plan_cat_route_to_bar(self, cat_id, start_position, step_size=None):
-        return self.plan_direct_cat_route(cat_id=cat_id, start_position=start_position, destination_position=self.bar_front_door.position.to_dict(), destination='bar_front_door', step_size=step_size)
+        return self.plan_direct_cat_route(cat_id=cat_id, start_position=start_position, destination_position=self.bar_front_door.position, destination='bar_front_door', step_size=step_size)
 
     def create_cat_route(self, cat_id, route_steps, start_position, destination='bar_front_door'):
         route = QuantumCatRoute(cat_id=cat_id, route_steps=route_steps, start_position=start_position, destination=destination)
@@ -246,6 +247,8 @@ class QuantumUniverseSpace:
                 return encounter
         previous_position = route.current_position.to_dict()
         position = route.advance()
+        if position is not None:
+            cat.move_to(position)
         self._remember_cat_route_event(cat=cat, route=route, universe=universe, event_type='route_step', details={'previous_position': previous_position, 'position': position.to_dict() if position is not None else None})
         if route.has_arrived:
             self._remember_cat_route_event(cat=cat, route=route, universe=universe, event_type='route_arrived', details={'arrival_position': route.current_position.to_dict()})

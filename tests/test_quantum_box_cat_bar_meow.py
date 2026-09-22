@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 import unittest
 from multiverse import UniverseRegistry
 from universe.universe import Universe
@@ -13,7 +14,7 @@ class QuantumBoxCatBarMeowTests(unittest.TestCase):
         root_transition, self.layers, idea_universe = UniverseBootstrap(registry, self.universe).run()
         EntityBootstrap(self.universe, idea_universe, root_transition).run()
         self.bar = self.layers.get('meeting')
-        manifestation = self.universe.manifest_cat(name='quantum_kitten', source='quantum_box_opened', position={'x': 10.0, 'y': 5.0, 'z': -2.0})
+        manifestation = self.universe.manifest_cat(name='quantum_kitten', source='quantum_box_opened', position=SpatialVector3(x=10.0, y=5.0, z=-2.0))
         self.cat = manifestation['cat']
 
     def test_cat_meows_at_bouncer_before_entry(self):

@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 import unittest
 
 from cats.cat_perception_state import (
@@ -19,16 +20,8 @@ class CatScentTransferCandidateObjectTests(
             similarity=0.95,
             source_layer='meeting_place',
             target_layer='quantum_layer',
-            box_position={
-                'x': 0.0,
-                'y': 0.0,
-                'z': 0.0,
-            },
-            counterpart_position={
-                'x': 1.0,
-                'y': 0.0,
-                'z': 0.0,
-            },
+            box_position=SpatialVector3(x=0.0, y=0.0, z=0.0),
+            counterpart_position=SpatialVector3(x=1.0, y=0.0, z=0.0),
         )
 
         self.assertFalse(

@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 import unittest
 
 from universe.universe import Universe
@@ -45,11 +46,7 @@ class CatQuantumExplorationObjectStateTests(
             active=True,
             pair_id='pair_test',
             route_id='route_test',
-            destination={
-                'x': 1.0,
-                'y': 2.0,
-                'z': 3.0,
-            },
+            destination=SpatialVector3(x=1.0, y=2.0, z=3.0),
         )
 
         self.assertTrue(

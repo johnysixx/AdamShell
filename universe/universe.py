@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 from core.entity.social_entity import _entity_attr_setdefault
 from lifecycle import LifeCycleSystem
 from cats.cat_lifecycle import CatLifeCycleHandler
@@ -305,7 +306,7 @@ class Universe:
         result = box.collapse_state(cause='opened', observer=observer, tick=self.quantum_state.tick_count, rng=rng)
         self.statistics.record_quantum_collapse()
         if result == 'cat':
-            manifestation = self.manifest_cat(name=f'cat_from_{box.id}', source='quantum_box_opened', position=box.position.to_dict())
+            manifestation = self.manifest_cat(name=f'cat_from_{box.id}', source='quantum_box_opened', position=box.position)
             event = manifestation['event']
             event['collapse_cause'] = 'opened'
             event['box_id'] = box.id
@@ -328,12 +329,16 @@ class Universe:
         if cat is None:
             return None
         if position is not None:
-            cat.position = dict(position)
+            if not isinstance(position, SpatialVector3):
+                raise TypeError(
+                    "Manifested cat position must be a SpatialVector3 object."
+                )
+            cat.move_to(position)
         if source in {'quantum_box_opened', 'quantum_box_spontaneous_collapse'}:
             self._prepare_quantum_box_cat(cat=cat, source=source)
         entity = self.create_entity(name=name, profile=cat)
         entity.cat_data = cat
-        event = {'name': 'cat_manifested', 'cat': name, 'source': source, 'position': dict(position) if position is not None else None, 'tick': self.quantum_state.tick_count}
+        event = {'name': 'cat_manifested', 'cat': name, 'source': source, 'position': position.to_dict() if position is not None else None, 'tick': self.quantum_state.tick_count}
         self.quantum_events.append(event)
         self.statistics.record_cat_created()
         UniverseLogger.event(f'CAT MANIFESTED: {name} FROM={source}')
@@ -421,7 +426,7 @@ class Universe:
             result = box.collapse_state(cause='spontaneous', observer=None, tick=self.quantum_state.tick_count)
             self.statistics.record_quantum_collapse()
             if result == 'cat':
-                manifestation = self.manifest_cat(name=f'cat_from_{box.id}', source='quantum_box_spontaneous_collapse', position=box.position.to_dict())
+                manifestation = self.manifest_cat(name=f'cat_from_{box.id}', source='quantum_box_spontaneous_collapse', position=box.position)
                 event = manifestation['event']
                 event['collapse_cause'] = 'spontaneous'
                 event['box_id'] = box.id

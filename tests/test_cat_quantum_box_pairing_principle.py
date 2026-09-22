@@ -16,7 +16,7 @@ class CatQuantumBoxPairingPrincipleTests(unittest.TestCase):
         self.cats = Cats(self.universe)
         self.cat = self.cats.create_cat(name='observer', color='black', fur_length='short')
         self.cat.current_layer = 'quantum_layer'
-        self.cat.position = {'x': 0.0, 'y': 0.0, 'z': 0.0}
+        self.cat.position = SpatialVector3(x=0.0, y=0.0, z=0.0)
         self.box = self.universe.create_quantum_box()
         self.box.current_layer = 'quantum_layer'
         self.box.position = SpatialVector3(x=3.0, y=0.0, z=0.0)

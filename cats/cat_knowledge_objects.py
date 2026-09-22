@@ -1,5 +1,6 @@
 from copy import deepcopy
 from dataclasses import dataclass, field
+from core.entity.components import SpatialVector3, require_optional_spatial_vector, require_spatial_vector
 
 
 @dataclass(slots=True)
@@ -7,7 +8,7 @@ class CatKnownPlace:
 
     place_id: str
     layer: str
-    position: dict
+    position: SpatialVector3
     discovered_by: str
     first_source: str
     last_source: str
@@ -26,6 +27,9 @@ class CatKnownPlace:
     )
 
     safety: float | None = None
+
+    def __post_init__(self):
+        self.position = require_spatial_vector(self.position, field_name="cat known place position")
 
     def record_visit(
         self,
@@ -77,7 +81,7 @@ class CatScentPlaceMemory:
 
     place_id: str
     layer: str
-    position: dict
+    position: SpatialVector3
     source_id: str
     identity: str
 
@@ -93,6 +97,9 @@ class CatScentPlaceMemory:
 
     first_seen_tick: int | None = None
     last_seen_tick: int | None = None
+
+    def __post_init__(self):
+        self.position = require_spatial_vector(self.position, field_name="cat scent memory position")
 
     def record_observation(
         self,
@@ -143,7 +150,7 @@ class CatHeardLegend:
     claim_type: str | None
     place_id: str | None
     layer: str | None
-    position: dict | None
+    position: SpatialVector3 | None
 
     storyteller: str
 
@@ -163,6 +170,9 @@ class CatHeardLegend:
     trust_after_contradiction: (
         float | None
     ) = None
+
+    def __post_init__(self):
+        self.position = require_optional_spatial_vector(self.position, field_name="heard legend position")
 
     def record_hearing(
         self,

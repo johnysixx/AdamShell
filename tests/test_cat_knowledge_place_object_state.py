@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 import unittest
 
 from cats.cat_knowledge import CatKnowledge
@@ -35,11 +36,7 @@ class CatKnowledgePlaceObjectStateTests(
             CatKnowledge.remember_place(
                 cat=self.cat,
                 layer='quantum_layer',
-                position={
-                    'x': 1.0,
-                    'y': 2.0,
-                    'z': 3.0,
-                },
+                position=SpatialVector3(x=1.0, y=2.0, z=3.0),
             )
         )
 
@@ -61,11 +58,7 @@ class CatKnowledgePlaceObjectStateTests(
             .remember_scent_place(
                 cat=self.cat,
                 layer='quantum_layer',
-                position={
-                    'x': 4.0,
-                    'y': 0.0,
-                    'z': 0.0,
-                },
+                position=SpatialVector3(x=4.0, y=0.0, z=0.0),
                 source_id='trace',
                 recognized_identity=(
                     'cat:pazuzu'

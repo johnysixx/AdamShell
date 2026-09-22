@@ -14,8 +14,8 @@ class AromaResidueTests(unittest.TestCase):
         self.cats = Cats(self.universe)
         self.pazuzu = self.cats.create_cat(name='pazuzu', color='black', fur_length='short')
         self.observer = self.cats.create_cat(name='observer', color='gray', fur_length='short')
-        self.pazuzu.position = {'x': 0.0, 'y': 0.0, 'z': 0.0}
-        self.observer.position = {'x': 0.0, 'y': 0.0, 'z': 0.0}
+        self.pazuzu.position = SpatialVector3(x=0.0, y=0.0, z=0.0)
+        self.observer.position = SpatialVector3(x=0.0, y=0.0, z=0.0)
 
     def test_aroma_can_transfer_to_object(self):
         box = self.universe.create_quantum_box()

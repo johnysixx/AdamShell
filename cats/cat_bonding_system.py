@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 from copy import deepcopy
 
 from cats.cat import Cat
@@ -459,56 +460,11 @@ class CatBondingSystem:
         first,
         second
     ):
-        if (
-            not isinstance(
-                first,
-                dict
-            )
-            or not isinstance(
-                second,
-                dict
-            )
-        ):
+        if not isinstance(first, SpatialVector3):
             return False
-
-        return (
-            self._number(
-                first.get(
-                    "x",
-                    0.0
-                )
-            )
-            == self._number(
-                second.get(
-                    "x",
-                    0.0
-                )
-            )
-            and self._number(
-                first.get(
-                    "y",
-                    0.0
-                )
-            )
-            == self._number(
-                second.get(
-                    "y",
-                    0.0
-                )
-            )
-            and self._number(
-                first.get(
-                    "z",
-                    0.0
-                )
-            )
-            == self._number(
-                second.get(
-                    "z",
-                    0.0
-                )
-            )
-        )
+        if not isinstance(second, SpatialVector3):
+            return False
+        return first.is_close_to(second, tolerance=1e-09)
 
     def _number(
         self,

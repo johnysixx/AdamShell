@@ -26,11 +26,7 @@ class CatCronenbergObservationObjectTests(
             fur_length="short",
         )
 
-        self.cat.position = {
-            "x": 0.0,
-            "y": 0.0,
-            "z": 0.0,
-        }
+        self.cat.position = SpatialVector3(x=0.0, y=0.0, z=0.0)
 
     def create_cronenberg(
         self,

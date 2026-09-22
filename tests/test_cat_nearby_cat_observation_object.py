@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 import unittest
 
 from universe.universe import Universe
@@ -25,11 +26,7 @@ class CatNearbyCatObservationObjectTests(
             fur_length="short",
         )
 
-        self.observer.position = {
-            "x": 0.0,
-            "y": 0.0,
-            "z": 0.0,
-        }
+        self.observer.position = SpatialVector3(x=0.0, y=0.0, z=0.0)
 
     def create_cat(
         self,
@@ -42,11 +39,7 @@ class CatNearbyCatObservationObjectTests(
             fur_length="short",
         )
 
-        cat.position = {
-            "x": float(x),
-            "y": 0.0,
-            "z": 0.0,
-        }
+        cat.position = SpatialVector3(x=float(x), y=0.0, z=0.0)
 
         return cat
 
@@ -126,7 +119,7 @@ class CatNearbyCatObservationObjectTests(
             nearby.position,
         )
 
-        self.assertIsNot(
+        self.assertIs(
             detail.position,
             nearby.position,
         )

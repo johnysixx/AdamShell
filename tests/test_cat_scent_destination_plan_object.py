@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 import unittest
 
 from universe.universe import Universe
@@ -37,11 +38,7 @@ class CatScentDestinationPlanObjectTests(
         CatKnowledge.remember_scent_place(
             cat=self.cat,
             layer="quantum_layer",
-            position={
-                "x": 5.0,
-                "y": 0.0,
-                "z": 0.0,
-            },
+            position=SpatialVector3(x=5.0, y=0.0, z=0.0),
             source_id="test_trace",
             recognized_identity="cat:pazuzu",
             components={

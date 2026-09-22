@@ -32,11 +32,7 @@ class CatQuantumBoxTransferTests(
             "meeting_place"
         )
 
-        self.cat.position = {
-            "x": 1.0,
-            "y": 1.0,
-            "z": 1.0
-        }
+        self.cat.position = SpatialVector3(x=1.0, y=1.0, z=1.0)
 
         self.source = (
             self.universe.create_quantum_box(
@@ -112,7 +108,7 @@ class CatQuantumBoxTransferTests(
 
         self.assertEqual(
             self.cat.position,
-            self.target.position.to_dict()
+            self.target.position
         )
 
         self.assertIsInstance(
@@ -236,7 +232,7 @@ class CatQuantumBoxTransferTests(
         )
 
         self.assertEqual(
-            counterpart.position.to_dict(),
+            counterpart.position,
             self.cat.position
         )
 
@@ -284,11 +280,7 @@ class CatQuantumBoxTransferTests(
             .cat_box_transfer
             .stabilize_direct_trail(
                 self.cat,
-                {
-                    "x": 10.0,
-                    "y": 0.0,
-                    "z": 0.0
-                }
+                SpatialVector3(x=10.0, y=0.0, z=0.0)
             )
         )
 

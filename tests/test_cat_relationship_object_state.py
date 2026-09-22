@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 import unittest
 
 from cats.cat_social_objects import CatRelationship
@@ -23,14 +24,8 @@ class CatRelationshipObjectStateTests(
             color="white",
             fur_length="short",
         )
-        self.first.position = {
-            "x": 0.0,
-            "y": 0.0,
-            "z": 0.0,
-        }
-        self.second.position = dict(
-            self.first.position
-        )
+        self.first.position = SpatialVector3(x=0.0, y=0.0, z=0.0)
+        self.second.position = self.first.position
         self.system = CatSocialSystem(
             self.cats
         )

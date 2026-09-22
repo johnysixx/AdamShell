@@ -1,3 +1,4 @@
+from core.entity.components import SpatialVector3
 import unittest
 from universe.universe import Universe
 from cats.cats import Cats
@@ -18,7 +19,7 @@ class CatsAutonomousTickTests(unittest.TestCase):
 
     def test_positioned_cat_runs_thought_cycle(self):
         cat = self.cats.create_cat(name='cat', color='black', fur_length='short')
-        cat.position = {'x': 0.0, 'y': 0.0, 'z': 0.0}
+        cat.position = SpatialVector3(x=0.0, y=0.0, z=0.0)
         report = self.cats.tick()
         self.assertTrue(report['ok'])
         self.assertGreaterEqual(cat.mind.decision_count, 1)
@@ -28,8 +29,8 @@ class CatsAutonomousTickTests(unittest.TestCase):
     def test_one_broken_cat_does_not_stop_other_cats(self):
         broken = self.cats.create_cat(name='broken', color='black', fur_length='short')
         healthy = self.cats.create_cat(name='healthy', color='white', fur_length='short')
-        broken.position = {'x': 0.0, 'y': 0.0, 'z': 0.0}
-        healthy.position = {'x': 1.0, 'y': 0.0, 'z': 0.0}
+        broken.position = SpatialVector3(x=0.0, y=0.0, z=0.0)
+        healthy.position = SpatialVector3(x=1.0, y=0.0, z=0.0)
         original = self.cats._tick_cat_autonomously
 
         def sometimes_broken(cat):

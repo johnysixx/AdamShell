@@ -1,5 +1,6 @@
 from cats.cat import Cat
 from copy import deepcopy
+from core.entity.components import SpatialVector3, require_spatial_vector
 
 from cats.cat_scent_direction_state import (
     CatScentTrailDirection,
@@ -79,9 +80,7 @@ class CatKnowledge:
                     normalized_position,
                 ),
                 layer=str(layer),
-                position=deepcopy(
-                    normalized_position
-                ),
+                position=normalized_position,
                 discovered_by=cat.name,
                 first_source=source,
                 last_source=source,
@@ -591,9 +590,7 @@ class CatKnowledge:
             memory = CatScentPlaceMemory(
                 place_id=place_id,
                 layer=layer,
-                position=deepcopy(
-                    position
-                ),
+                position=position,
                 source_id=source_id,
                 identity=identity,
                 confidence=(
@@ -640,7 +637,7 @@ class CatKnowledge:
                 else None
             )
             position = item.position
-            if not isinstance(position, dict):
+            if not isinstance(position, SpatialVector3):
                 continue
             remembered.append(cls.remember_scent_place(cat=cat, layer=current_layer, position=position, source_id=item.entity_id, recognized_identity=identity, components=item.raw_components, perceived_intensity=item.perceived_intensity, universe_tick=universe_tick))
         ambient = olfaction.ambient_aroma
@@ -660,10 +657,7 @@ class CatKnowledge:
                 cls.remember_scent_place(
                     cat=cat,
                     layer=current_layer,
-                    position=(
-                        cat.position
-                        or {}
-                    ),
+                    position=cat.position,
                     source_id='ambient',
                     recognized_identity=identity,
                     components=(
@@ -699,7 +693,7 @@ class CatKnowledge:
             and memory.layer == layer
             and isinstance(
                 memory.position,
-                dict,
+                SpatialVector3,
             )
             and memory.last_seen_tick
             is not None
@@ -740,33 +734,12 @@ class CatKnowledge:
         start = older.position
         end = newest.position
 
-        vector = {
-            axis: (
-                float(
-                    end.get(
-                        axis,
-                        0.0,
-                    )
-                )
-                - float(
-                    start.get(
-                        axis,
-                        0.0,
-                    )
-                )
-            )
-            for axis in (
-                'x',
-                'y',
-                'z',
-            )
-        }
-
-        distance = (
-            vector['x'] ** 2
-            + vector['y'] ** 2
-            + vector['z'] ** 2
-        ) ** 0.5
+        vector = SpatialVector3(
+            x=end.x - start.x,
+            y=end.y - start.y,
+            z=end.z - start.z,
+        )
+        distance = SpatialVector3.zero().distance_to(vector)
 
         if distance <= 0.0:
             return CatScentTrailDirection(
@@ -789,17 +762,11 @@ class CatKnowledge:
                 reason='scent_order_not_temporal',
             )
 
-        unit_vector = {
-            axis: (
-                vector[axis]
-                / distance
-            )
-            for axis in (
-                'x',
-                'y',
-                'z',
-            )
-        }
+        unit_vector = SpatialVector3(
+            x=vector.x / distance,
+            y=vector.y / distance,
+            z=vector.z / distance,
+        )
 
         current_tick = knowledge.scent_clock_tick
 
@@ -840,12 +807,8 @@ class CatKnowledge:
             inferred=True,
             identity=identity,
             layer=layer,
-            from_position=deepcopy(
-                start
-            ),
-            to_position=deepcopy(
-                end
-            ),
+            from_position=start,
+            to_position=end,
             vector=vector,
             unit_vector=unit_vector,
             distance=distance,
@@ -1113,11 +1076,9 @@ class CatKnowledge:
 
     @staticmethod
     def _position(position):
-        if not isinstance(position, dict):
-            return {'x': 0.0, 'y': 0.0, 'z': 0.0}
-        return {'x': float(position.get('x', 0.0)), 'y': float(position.get('y', 0.0)), 'z': float(position.get('z', 0.0))}
+        return require_spatial_vector(position, field_name="cat knowledge position")
 
     @classmethod
     def _place_id(cls, layer, position):
         position = cls._position(position)
-        return f"{layer}:{position['x']:.2f}:{position['y']:.2f}:{position['z']:.2f}"
+        return f"{layer}:{position.x:.2f}:{position.y:.2f}:{position.z:.2f}"
