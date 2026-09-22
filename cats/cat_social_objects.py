@@ -1,3 +1,5 @@
+﻿from dataclasses import dataclass
+from copy import deepcopy
 from core.entity.component_object import ComponentObject
 
 
@@ -64,5 +66,74 @@ class CatRelationship(ComponentObject):
         return cls()
 
 
+@dataclass(slots=True, frozen=True)
+class CatGroupKnowledgeTransmission:
+    type: str
+    source: str | None = None
+    group: str | None = None
+    source_group: str | None = None
+    target_group: str | None = None
+
+    def to_dict(self):
+        snapshot = {
+            "type": self.type,
+        }
+
+        for field_name in (
+            "source",
+            "group",
+            "source_group",
+            "target_group",
+        ):
+            value = getattr(
+                self,
+                field_name,
+            )
+
+            if value is not None:
+                snapshot[field_name] = value
+
+        return snapshot
+
+
 class CatGroupKnowledgeRecord(ComponentObject):
-    pass
+
+    def __init__(self, **values):
+        transmission_path = list(
+            values.get(
+                "transmission_path",
+                [],
+            )
+        )
+
+        for transmission in transmission_path:
+            if not isinstance(
+                transmission,
+                CatGroupKnowledgeTransmission,
+            ):
+                raise TypeError(
+                    "Cat group knowledge transmission path "
+                    "must contain "
+                    "CatGroupKnowledgeTransmission objects."
+                )
+
+        values["transmission_path"] = (
+            transmission_path
+        )
+
+        super().__init__(
+            **values
+        )
+
+    def to_dict(self):
+        snapshot = deepcopy(
+            super().to_dict()
+        )
+
+        snapshot["transmission_path"] = [
+            transmission.to_dict()
+            for transmission
+            in self.transmission_path
+        ]
+
+        return snapshot

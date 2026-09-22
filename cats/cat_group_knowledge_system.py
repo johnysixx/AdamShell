@@ -1,5 +1,8 @@
-from copy import deepcopy
-from cats.cat_social_objects import CatGroupKnowledgeRecord
+﻿from copy import deepcopy
+from cats.cat_social_objects import (
+    CatGroupKnowledgeRecord,
+    CatGroupKnowledgeTransmission,
+)
 
 class CatGroupKnowledgeSystem:
 
@@ -12,7 +15,13 @@ class CatGroupKnowledgeSystem:
             return {'name': 'cat_group_knowledge_contribution_denied', 'reason': 'cat_not_group_member', 'contributed': False}
         confidence = self._clamp(confidence)
         existing = group.knowledge.get(knowledge_id)
-        record = CatGroupKnowledgeRecord(**{'knowledge_id': knowledge_id, 'category': category, 'content': deepcopy(content), 'origin_cat': cat.name, 'origin_group': group_id, 'source_type': source_type, 'confidence': confidence, 'verified': bool(verified), 'verification_count': 1 if verified else 0, 'contradiction_count': 0, 'transmission_path': [{'type': source_type, 'source': cat.name, 'group': group_id}]})
+        record = CatGroupKnowledgeRecord(**{'knowledge_id': knowledge_id, 'category': category, 'content': deepcopy(content), 'origin_cat': cat.name, 'origin_group': group_id, 'source_type': source_type, 'confidence': confidence, 'verified': bool(verified), 'verification_count': 1 if verified else 0, 'contradiction_count': 0, 'transmission_path': [
+            CatGroupKnowledgeTransmission(
+                type=source_type,
+                source=cat.name,
+                group=group_id,
+            )
+        ]})
         if existing is not None:
             record.verification_count += int(getattr(existing, 'verification_count', 0))
             record.contradiction_count += int(getattr(existing, 'contradiction_count', 0))
@@ -43,7 +52,13 @@ class CatGroupKnowledgeSystem:
         copied = deepcopy(record)
         copied.confidence = self._clamp(float(getattr(copied, 'confidence', 0.0)) * 0.88)
         copied.verified = False
-        copied.transmission_path.append({'type': transmission, 'source_group': source_group_id, 'target_group': target_group_id})
+        copied.transmission_path.append(
+            CatGroupKnowledgeTransmission(
+                type=transmission,
+                source_group=source_group_id,
+                target_group=target_group_id,
+            )
+        )
         existing = target.knowledge.get(knowledge_id)
         if existing is None:
             target.knowledge[knowledge_id] = copied
