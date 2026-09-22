@@ -1,7 +1,8 @@
-import unittest
+﻿import unittest
 
 from core.entity.cronenberg_system.quantum_links import (
     CronenbergQuantumLink,
+    CronenbergQuantumLinkHistoryEvent,
     CronenbergQuantumLinks,
 )
 from universe.universe import Universe
@@ -27,6 +28,26 @@ class CronenbergQuantumLinkObjectStateTests(
 
         with self.assertRaises(TypeError):
             _ = value["target_id"]
+
+    def _assert_history_event_object_only(
+        self,
+        value,
+    ):
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    value,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(TypeError):
+            _ = value["event"]
 
     def test_live_link_has_no_mapping_api(
         self
@@ -137,10 +158,79 @@ class CronenbergQuantumLinkObjectStateTests(
             .metadata["route"]["step"],
             3
         )
+        history_event = links.history[0]
+
+        self.assertIsInstance(
+            history_event,
+            CronenbergQuantumLinkHistoryEvent,
+        )
+        self._assert_history_event_object_only(
+            history_event
+        )
         self.assertEqual(
-            links.history[0]["link"]
-            ["metadata"]["route"]["step"],
+            history_event.metadata[
+                "route"
+            ]["step"],
             3
+        )
+
+    def test_history_stores_object_event(
+        self
+    ):
+        links = CronenbergQuantumLinks(
+            owner_id="source"
+        )
+
+        links.add_link(
+            target_id="target",
+            link_type="causal_paradox",
+            strength=0.5,
+            metadata={
+                "route": {
+                    "step": 1
+                }
+            },
+        )
+
+        history_event = links.history[0]
+
+        self.assertIsInstance(
+            history_event,
+            CronenbergQuantumLinkHistoryEvent,
+        )
+        self._assert_history_event_object_only(
+            history_event
+        )
+        self.assertEqual(
+            history_event.event,
+            "link_created",
+        )
+        self.assertEqual(
+            history_event.target_id,
+            "target",
+        )
+
+        links.links[0].strengthen(
+            0.9
+        )
+
+        self.assertEqual(
+            history_event.strength,
+            0.5,
+        )
+
+        public_state = links.public_state
+        public_state["history"][0][
+            "link"
+        ]["metadata"]["route"][
+            "step"
+        ] = 99
+
+        self.assertEqual(
+            history_event.metadata[
+                "route"
+            ]["step"],
+            1,
         )
 
     def test_counterpart_creation_uses_link_objects(

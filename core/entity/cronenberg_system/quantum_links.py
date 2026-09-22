@@ -39,6 +39,86 @@ class CronenbergQuantumLink:
         }
 
 
+@dataclass(slots=True, frozen=True)
+class CronenbergQuantumLinkHistoryEvent:
+
+    event: str
+    target_id: str
+    link_type: str
+    strength: float
+    created_tick: int | None = None
+    metadata: dict = field(
+        default_factory=dict
+    )
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "event",
+            str(self.event),
+        )
+        object.__setattr__(
+            self,
+            "target_id",
+            str(self.target_id),
+        )
+        object.__setattr__(
+            self,
+            "link_type",
+            str(self.link_type),
+        )
+        object.__setattr__(
+            self,
+            "strength",
+            float(self.strength),
+        )
+        object.__setattr__(
+            self,
+            "metadata",
+            deepcopy(self.metadata),
+        )
+
+    @classmethod
+    def link_created(
+        cls,
+        link,
+    ):
+        if not isinstance(
+            link,
+            CronenbergQuantumLink,
+        ):
+            raise TypeError(
+                "Cronenberg quantum link history "
+                "event requires a "
+                "CronenbergQuantumLink object."
+            )
+
+        return cls(
+            event="link_created",
+            target_id=link.target_id,
+            link_type=link.link_type,
+            strength=link.strength,
+            created_tick=link.created_tick,
+            metadata=link.metadata,
+        )
+
+    def to_dict(self):
+        return {
+            "event": self.event,
+            "link": {
+                "target_id": self.target_id,
+                "link_type": self.link_type,
+                "strength": self.strength,
+                "created_tick": (
+                    self.created_tick
+                ),
+                "metadata": deepcopy(
+                    self.metadata
+                ),
+            },
+        }
+
+
 class CronenbergQuantumLinks:
 
     def __init__(self, owner_id):
@@ -85,10 +165,11 @@ class CronenbergQuantumLinks:
 
         self.links.append(link)
 
-        self.history.append({
-            "event": "link_created",
-            "link": link.to_dict()
-        })
+        self.history.append(
+            CronenbergQuantumLinkHistoryEvent.link_created(
+                link
+            )
+        )
 
         return link.to_dict()
 
@@ -117,7 +198,8 @@ class CronenbergQuantumLinks:
             "owner_id": self.owner_id,
             "link_count": len(self.links),
             "links": self.snapshot(),
-            "history": deepcopy(
-                self.history
-            )
+            "history": [
+                event.to_dict()
+                for event in self.history
+            ]
         }
