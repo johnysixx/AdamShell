@@ -3,6 +3,27 @@ from dataclasses import dataclass
 from typing import ClassVar
 
 
+@dataclass(slots=True, frozen=True)
+class CronenbergTraitInfluence:
+    trait: str
+    amount: float
+    reason: str
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "amount",
+            float(self.amount),
+        )
+
+    def to_dict(self):
+        return {
+            "trait": self.trait,
+            "amount": self.amount,
+            "reason": self.reason,
+        }
+
+
 @dataclass(slots=True)
 class CronenbergTraitValues:
 
@@ -144,11 +165,13 @@ class CronenbergTraits:
             amount,
         )
 
-        self.birth_influences.append({
-            "trait": trait_name,
-            "amount": float(amount),
-            "reason": reason
-        })
+        self.birth_influences.append(
+            CronenbergTraitInfluence(
+                trait=trait_name,
+                amount=amount,
+                reason=reason,
+            )
+        )
 
     def _apply_error_influence(self):
         influences = {
@@ -317,7 +340,7 @@ class CronenbergTraits:
         return {
             "values": self.snapshot(),
             "birth_influences": [
-                dict(influence)
+                influence.to_dict()
                 for influence
                 in self.birth_influences
             ],

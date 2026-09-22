@@ -2,6 +2,7 @@ import unittest
 from types import SimpleNamespace
 
 from core.entity.cronenberg_system.traits import (
+    CronenbergTraitInfluence,
     CronenbergTraits,
     CronenbergTraitValues,
 )
@@ -99,6 +100,33 @@ class CronenbergTraitObjectStateTests(
             1.35
         )
 
+    def test_birth_influences_are_objects(
+        self
+    ):
+        traits = self._create_traits()
+        influence = traits.birth_influences[0]
+
+        self.assertIsInstance(
+            influence,
+            CronenbergTraitInfluence,
+        )
+        self._assert_object_only(
+            influence,
+            "amount",
+        )
+        self.assertEqual(
+            influence.trait,
+            "stability",
+        )
+        self.assertEqual(
+            influence.amount,
+            -0.15,
+        )
+        self.assertEqual(
+            influence.reason,
+            "error_type:RuntimeError",
+        )
+
     def test_value_for_replaces_mapping_get(
         self
     ):
@@ -148,9 +176,7 @@ class CronenbergTraitObjectStateTests(
             1.0
         )
         self.assertEqual(
-            traits.birth_influences[0][
-                "amount"
-            ],
+            traits.birth_influences[0].amount,
             -0.15
         )
 
