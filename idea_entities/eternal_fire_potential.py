@@ -1,6 +1,12 @@
 from copy import deepcopy
 from dataclasses import dataclass, field
 
+from idea_entities.eternal_fire_objects import (
+    EternalFireFuel,
+    EternalFireFuelConsumption,
+    EternalFireMeaning,
+)
+
 
 @dataclass(slots=True)
 class EternalFirePotential:
@@ -18,13 +24,59 @@ class EternalFirePotential:
     ignited_at_idea_tick: object = None
     ignited_at_logical_step: object = None
     flame_state: object = None
-    fuel: dict = field(default_factory=dict)
     heat_energy_j: float = 0.0
     origin_roll_id: object = None
-    meaning: object = None
     guardian: object = None
     fuel_seekers: list = field(default_factory=list)
-    fuel_consumed_last_step: object = None
+    _fuel: EternalFireFuel = field(
+        default_factory=EternalFireFuel,
+        repr=False,
+    )
+    _meaning: EternalFireMeaning | None = field(
+        default=None,
+        repr=False,
+    )
+    _fuel_consumed_last_step: EternalFireFuelConsumption | None = field(
+        default=None,
+        repr=False,
+    )
+
+    @property
+    def fuel(self):
+        return self._fuel
+
+    def set_fuel(self, fuel):
+        if not isinstance(fuel, EternalFireFuel):
+            raise TypeError(
+                "Eternal fire fuel must be an EternalFireFuel object"
+            )
+        self._fuel = fuel
+
+    @property
+    def meaning(self):
+        return self._meaning
+
+    def set_meaning(self, meaning):
+        if not isinstance(meaning, EternalFireMeaning):
+            raise TypeError(
+                "Eternal fire meaning must be an EternalFireMeaning object"
+            )
+        self._meaning = meaning
+
+    @property
+    def fuel_consumed_last_step(self):
+        return self._fuel_consumed_last_step
+
+    def record_fuel_consumption(self, consumption):
+        if not isinstance(
+            consumption,
+            EternalFireFuelConsumption,
+        ):
+            raise TypeError(
+                "Fuel consumption must be an "
+                "EternalFireFuelConsumption object"
+            )
+        self._fuel_consumed_last_step = consumption
 
     def to_dict(self):
         public_state = {
@@ -47,13 +99,13 @@ class EternalFirePotential:
                     self.ignited_at_logical_step
                 ),
                 "flame_state": self.flame_state,
-                "fuel": deepcopy(self.fuel),
+                "fuel": self.fuel.to_dict(),
                 "heat_energy_j": self.heat_energy_j,
                 "origin_roll_id": self.origin_roll_id,
             })
 
         if self.meaning is not None:
-            public_state["meaning"] = deepcopy(self.meaning)
+            public_state["meaning"] = self.meaning.to_dict()
 
         if self.guardian is not None:
             public_state["guardian"] = self.guardian
@@ -64,8 +116,8 @@ class EternalFirePotential:
             )
 
         if self.fuel_consumed_last_step is not None:
-            public_state["fuel_consumed_last_step"] = deepcopy(
-                self.fuel_consumed_last_step
+            public_state["fuel_consumed_last_step"] = (
+                self.fuel_consumed_last_step.to_dict()
             )
 
         return public_state

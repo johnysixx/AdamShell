@@ -3,6 +3,11 @@ import unittest
 from core.entity.serpent_d20 import SerpentD20
 from core.eternal_flame.eternal_flame import EternalFlame
 from idea_entities import IdeaEntities
+from idea_entities.eternal_fire_objects import (
+    EternalFireFuel,
+    EternalFireFuelConsumption,
+    EternalFireMeaning,
+)
 from idea_entities.eternal_fire_potential import (
     EternalFirePotential,
 )
@@ -170,7 +175,7 @@ class EternalFirePotentialObjectStateTests(unittest.TestCase):
         self.assertEqual(fire.state, "burning")
         self.assertEqual(fire.type, "idea_focal_point")
         self.assertEqual(fire.flame_state, "small")
-        self.assertEqual(fire.fuel["wood_sticks"], 2.0)
+        self.assertEqual(fire.fuel.wood_sticks, 2.0)
         self.assertTrue(boundary["actualized"])
         self.assertEqual(boundary["state"], "burning")
         self.assertEqual(boundary["fuel"]["wood_sticks"], 2.0)
@@ -185,7 +190,7 @@ class EternalFirePotentialObjectStateTests(unittest.TestCase):
             "eternal_fire"
         ]
 
-        self.assertTrue(fire.meaning["requires_fuel"])
+        self.assertTrue(fire.meaning.requires_fuel)
         self.assertEqual(
             fire.guardian,
             "pazuzu_masculine_principle",
@@ -210,9 +215,9 @@ class EternalFirePotentialObjectStateTests(unittest.TestCase):
             "eternal_fire"
         ]
 
-        self.assertEqual(fire.fuel["dry_grass"], 0.0)
+        self.assertEqual(fire.fuel.dry_grass, 0.0)
         self.assertEqual(
-            fire.fuel_consumed_last_step["dry_grass"],
+            fire.fuel_consumed_last_step.dry_grass,
             1.0,
         )
         self.assertEqual(boundary["fuel"]["dry_grass"], 0.0)
@@ -244,8 +249,12 @@ class EternalFirePotentialObjectStateTests(unittest.TestCase):
     def test_to_dict_is_deeply_detached(self):
         fire = EternalFirePotential()
         fire.actualized = True
-        fire.fuel = {"wood_sticks": 2.0}
-        fire.meaning = {"requires_fuel": True}
+        fire.set_fuel(
+            EternalFireFuel(wood_sticks=2.0)
+        )
+        fire.set_meaning(
+            EternalFireMeaning()
+        )
         fire.interactions.append({"name": "watched"})
 
         snapshot = fire.to_dict()
@@ -253,12 +262,54 @@ class EternalFirePotentialObjectStateTests(unittest.TestCase):
         snapshot["meaning"]["requires_fuel"] = False
         snapshot["interactions"][0]["name"] = "changed"
 
-        self.assertEqual(fire.fuel["wood_sticks"], 2.0)
-        self.assertTrue(fire.meaning["requires_fuel"])
+        self.assertEqual(fire.fuel.wood_sticks, 2.0)
+        self.assertTrue(fire.meaning.requires_fuel)
         self.assertEqual(
             fire.interactions[0]["name"],
             "watched",
         )
+
+    def test_fire_substate_is_object_only(self):
+        universe, idea_entities, origin = self._system()
+        origin.attempt_ignition(rng=FixedRng(20))
+        origin.understand_fire_significance()
+        origin.advance_fire()
+
+        fire = idea_entities.eternal_fire
+
+        self.assertIsInstance(fire.fuel, EternalFireFuel)
+        self.assertIsInstance(fire.meaning, EternalFireMeaning)
+        self.assertIsInstance(
+            fire.fuel_consumed_last_step,
+            EternalFireFuelConsumption,
+        )
+
+        for value in (
+            fire.fuel,
+            fire.meaning,
+            fire.fuel_consumed_last_step,
+        ):
+            self.assertFalse(hasattr(value, "get"))
+            self.assertFalse(hasattr(value, "items"))
+
+        with self.assertRaises(TypeError):
+            _ = fire.fuel["dry_grass"]
+        with self.assertRaises(TypeError):
+            _ = fire.meaning["requires_fuel"]
+        with self.assertRaises(TypeError):
+            _ = fire.fuel_consumed_last_step["dry_grass"]
+
+    def test_fire_rejects_legacy_substate_dicts(self):
+        fire = EternalFirePotential()
+
+        with self.assertRaises(TypeError):
+            fire.set_fuel({"wood_sticks": 2.0})
+
+        with self.assertRaises(TypeError):
+            fire.set_meaning({"requires_fuel": True})
+
+        with self.assertRaises(TypeError):
+            fire.record_fuel_consumption({"dry_grass": 1.0})
 
     def test_origin_rejects_old_mapping_state(self):
         with self.assertRaises(TypeError):

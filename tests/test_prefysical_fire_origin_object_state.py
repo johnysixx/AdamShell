@@ -141,7 +141,7 @@ class PrefysicalFireOriginObjectStateTests(unittest.TestCase):
         origin.attempt_ignition(rng=FixedRng(20))
 
         self.assertEqual(
-            idea_entities.eternal_fire.fuel["wood_sticks"],
+            idea_entities.eternal_fire.fuel.wood_sticks,
             float(origin.materials.wood_sticks),
         )
         self.assertEqual(

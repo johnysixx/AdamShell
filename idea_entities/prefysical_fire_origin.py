@@ -1,5 +1,9 @@
 from copy import deepcopy
 
+from idea_entities.eternal_fire_objects import (
+    EternalFireFuel,
+    EternalFireMeaning,
+)
 from idea_entities.eternal_fire_potential import EternalFirePotential
 from idea_entities.prefysical_fire_state import (
     PrefysicalFireEnergyConversion,
@@ -282,9 +286,7 @@ class PrefysicalFireOrigin:
 
                 "flame_state": "small",
 
-                "fuel": deepcopy(
-                    self.eternal_fire.fuel
-                ),
+                "fuel": self.eternal_fire.fuel.to_dict(),
 
                 "heat_energy_j": (
                     self.eternal_fire.heat_energy_j
@@ -343,17 +345,9 @@ class PrefysicalFireOrigin:
 
         self.fire_significance_understood = True
 
-        self.eternal_fire.meaning = {
-            "warmth": True,
-            "must_be_preserved": True,
-            "requires_fuel": True,
-
-            "understood_by": [
-                "pazuzu_masculine_principle",
-                "lilith",
-                "serpent"
-            ]
-        }
+        self.eternal_fire.set_meaning(
+            EternalFireMeaning()
+        )
 
         # ----------------------------------------------------
         # Roles now emerge from understanding the fire.
@@ -389,9 +383,7 @@ class PrefysicalFireOrigin:
                 "understood"
             ),
             details={
-                "meaning": deepcopy(
-                    self.eternal_fire.meaning
-                ),
+                "meaning": self.eternal_fire.meaning.to_dict(),
 
                 "fire_guardian": (
                     "pazuzu_masculine_principle"
@@ -425,107 +417,20 @@ class PrefysicalFireOrigin:
             )
 
         fuel = self.eternal_fire.fuel
-
-        if not fuel:
-            fuel = {
-                "dry_grass": 0.0,
-                "wood_sticks": 0.0
-            }
-            self.eternal_fire.fuel = fuel
-
-        consumed = {
-            "dry_grass": 0.0,
-            "wood_sticks": 0.0
-        }
-
-        # Tinder goes first.
-        if (
-            float(
-                fuel.get(
-                    "dry_grass",
-                    0.0
-                )
-            )
-            > 0.0
-        ):
-            consumed[
-                "dry_grass"
-            ] = min(
-                1.0,
-                float(
-                    fuel[
-                        "dry_grass"
-                    ]
-                )
-            )
-
-            fuel[
-                "dry_grass"
-            ] -= consumed[
-                "dry_grass"
-            ]
-
-        # Then the sticks are consumed gradually.
-        elif (
-            float(
-                fuel.get(
-                    "wood_sticks",
-                    0.0
-                )
-            )
-            > 0.0
-        ):
-            consumed[
-                "wood_sticks"
-            ] = min(
-                self.WOOD_CONSUMPTION_PER_STEP,
-                float(
-                    fuel[
-                        "wood_sticks"
-                    ]
-                )
-            )
-
-            fuel[
-                "wood_sticks"
-            ] -= consumed[
-                "wood_sticks"
-            ]
-
-        remaining = (
-            float(
-                fuel.get(
-                    "dry_grass",
-                    0.0
-                )
-            )
-            +
-            float(
-                fuel.get(
-                    "wood_sticks",
-                    0.0
-                )
-            )
+        consumed = fuel.consume_next(
+            wood_step=self.WOOD_CONSUMPTION_PER_STEP
         )
 
-        if remaining <= 0.0:
+        if fuel.total <= 0.0:
             self.eternal_fire.flame_state = "embers"
 
-        elif (
-            float(
-                fuel.get(
-                    "wood_sticks",
-                    0.0
-                )
-            )
-            < 1.0
-        ):
+        elif fuel.wood_sticks < 1.0:
             self.eternal_fire.flame_state = "small_weakening"
 
         else:
             self.eternal_fire.flame_state = "small"
 
-        self.eternal_fire.fuel_consumed_last_step = deepcopy(
+        self.eternal_fire.record_fuel_consumption(
             consumed
         )
 
@@ -537,13 +442,9 @@ class PrefysicalFireOrigin:
                 "consumes_fuel"
             ),
             details={
-                "consumed": deepcopy(
-                    consumed
-                ),
+                "consumed": consumed.to_dict(),
 
-                "remaining_fuel": deepcopy(
-                    fuel
-                ),
+                "remaining_fuel": fuel.to_dict(),
 
                 "flame_state": (
                     self.eternal_fire.flame_state
@@ -651,17 +552,17 @@ class PrefysicalFireOrigin:
 
         self.eternal_fire.flame_state = "small"
 
-        self.eternal_fire.fuel = {
-            "dry_grass": 1.0,
-
-            "wood_sticks": float(
-                self.materials.wood_sticks
-            ),
-
-            "wood_added_by": (
-                "pazuzu_masculine_principle"
+        self.eternal_fire.set_fuel(
+            EternalFireFuel(
+                dry_grass=1.0,
+                wood_sticks=float(
+                    self.materials.wood_sticks
+                ),
+                wood_added_by=(
+                    "pazuzu_masculine_principle"
+                ),
             )
-        }
+        )
 
         # All friction heat generated by all attempts
         # becomes the initial heat of the fire.
