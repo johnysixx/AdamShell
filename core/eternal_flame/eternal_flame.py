@@ -1,4 +1,8 @@
-from copy import deepcopy
+from core.eternal_flame.eternal_flame_objects import (
+    EternalFlameHistoryRecord,
+    EternalFlameSourceIdea,
+)
+
 
 class EternalFlame:
 
@@ -15,31 +19,49 @@ class EternalFlame:
 
     def ignite(self, source_idea, tick=None, keeper=None):
         if self.ignited:
-            event = {'name': 'eternal_flame_already_burns', 'state': self.state, 'tick': tick}
-            self.history.append(event)
-            return deepcopy(event)
-        required_attributes = (
-            'name',
-            'type',
-            'state',
+            record = EternalFlameHistoryRecord.already_burning(
+                state=self.state,
+                tick=tick,
+            )
+            self.history.append(record)
+            return record.to_dict()
+
+        captured_source = EternalFlameSourceIdea.capture(
+            source_idea
         )
-        if isinstance(source_idea, dict) or not all(
-            hasattr(source_idea, attribute)
-            for attribute in required_attributes
-        ):
-            raise TypeError('Eternal Flame requires an idea source.')
-        if getattr(source_idea, 'name', None) != 'eternal_fire':
-            raise ValueError('Invalid idea source for Eternal Flame.')
-        self.source_idea = {'name': getattr(source_idea, 'name', None), 'type': getattr(source_idea, 'type', None), 'state': getattr(source_idea, 'state', None)}
+
+        self.source_idea = captured_source
         self.ignited = True
         self.state = 'burning'
         self.ignited_at_tick = tick
         self.keeper = keeper
         self.continuity_intact = True
-        event = {'name': 'eternal_flame_ignited', 'source_idea': deepcopy(self.source_idea), 'keeper': keeper, 'tick': tick}
-        self.history.append(event)
-        return deepcopy(event)
+
+        record = EternalFlameHistoryRecord.ignited(
+            source_idea=captured_source,
+            keeper=keeper,
+            tick=tick,
+        )
+        self.history.append(record)
+        return record.to_dict()
 
     @property
     def public_state(self):
-        return {'name': self.name, 'type': self.type, 'state': self.state, 'ignited': self.ignited, 'ignited_at_tick': self.ignited_at_tick, 'source_idea': deepcopy(self.source_idea), 'keeper': self.keeper, 'continuity_intact': self.continuity_intact, 'history': deepcopy(self.history)}
+        return {
+            'name': self.name,
+            'type': self.type,
+            'state': self.state,
+            'ignited': self.ignited,
+            'ignited_at_tick': self.ignited_at_tick,
+            'source_idea': (
+                None
+                if self.source_idea is None
+                else self.source_idea.to_dict()
+            ),
+            'keeper': self.keeper,
+            'continuity_intact': self.continuity_intact,
+            'history': [
+                record.to_dict()
+                for record in self.history
+            ],
+        }

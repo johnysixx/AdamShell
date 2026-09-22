@@ -2,6 +2,10 @@ import unittest
 
 from core.entity.serpent_d20 import SerpentD20
 from core.eternal_flame.eternal_flame import EternalFlame
+from core.eternal_flame.eternal_flame_objects import (
+    EternalFlameHistoryRecord,
+    EternalFlameSourceIdea,
+)
 from idea_entities import IdeaEntities
 from idea_entities.eternal_fire_objects import (
     EternalFireFuel,
@@ -339,6 +343,46 @@ class EternalFirePotentialObjectStateTests(unittest.TestCase):
                 "type": "idea_focal_point",
                 "state": "burning",
             },
+        )
+        self.assertIsInstance(
+            flame.source_idea,
+            EternalFlameSourceIdea,
+        )
+        self.assertIsInstance(
+            flame.history[0],
+            EternalFlameHistoryRecord,
+        )
+        self.assertFalse(hasattr(flame.source_idea, "get"))
+        self.assertFalse(hasattr(flame.history[0], "get"))
+
+        with self.assertRaises(TypeError):
+            _ = flame.source_idea["name"]
+
+        with self.assertRaises(TypeError):
+            _ = flame.history[0]["name"]
+
+        boundary = flame.public_state
+        boundary["source_idea"]["state"] = "changed"
+        boundary["history"][0]["source_idea"]["state"] = "changed"
+
+        self.assertEqual(flame.source_idea.state, "burning")
+        self.assertEqual(
+            flame.history[0].source_idea.state,
+            "burning",
+        )
+
+        second = flame.ignite(
+            fire,
+            tick=2,
+            keeper="pazuzu",
+        )
+        self.assertEqual(
+            second["name"],
+            "eternal_flame_already_burns",
+        )
+        self.assertIsInstance(
+            flame.history[1],
+            EternalFlameHistoryRecord,
         )
 
         with self.assertRaises(TypeError):
