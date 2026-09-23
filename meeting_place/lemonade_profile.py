@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass(frozen=True, slots=True)
@@ -175,6 +175,116 @@ class CronenbergProcessingRecord:
             )
 
         return snapshot
+
+
+@dataclass(frozen=True, slots=True)
+class LemonadeAddedEvent:
+    source: str
+    amount_litres: float
+    remaining_litres: float
+    name: str = field(
+        default="lemonade_added",
+        init=False,
+    )
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "source",
+            str(self.source),
+        )
+        object.__setattr__(
+            self,
+            "amount_litres",
+            float(self.amount_litres),
+        )
+        object.__setattr__(
+            self,
+            "remaining_litres",
+            float(self.remaining_litres),
+        )
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "source": self.source,
+            "amount_litres": self.amount_litres,
+            "remaining_litres": (
+                self.remaining_litres
+            ),
+        }
+
+
+@dataclass(frozen=True, slots=True)
+class LemonadeServedEvent:
+    drinker: str
+    location: str
+    amount_litres: float
+    price: float
+    lemonade_profile: LemonadeProfile | None
+    remaining_litres: float
+    name: str = field(
+        default="free_lemonade_served",
+        init=False,
+    )
+
+    def __post_init__(self):
+        if (
+            self.lemonade_profile is not None
+            and not isinstance(
+                self.lemonade_profile,
+                LemonadeProfile,
+            )
+        ):
+            raise TypeError(
+                "Lemonade served event profile must be "
+                "a LemonadeProfile object."
+            )
+
+        object.__setattr__(
+            self,
+            "drinker",
+            str(self.drinker),
+        )
+        object.__setattr__(
+            self,
+            "location",
+            str(self.location),
+        )
+        object.__setattr__(
+            self,
+            "amount_litres",
+            float(self.amount_litres),
+        )
+        object.__setattr__(
+            self,
+            "price",
+            float(self.price),
+        )
+        object.__setattr__(
+            self,
+            "remaining_litres",
+            float(self.remaining_litres),
+        )
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "drinker": self.drinker,
+            "location": self.location,
+            "amount_litres": (
+                self.amount_litres
+            ),
+            "price": self.price,
+            "lemonade_profile": (
+                self.lemonade_profile.to_dict()
+                if self.lemonade_profile is not None
+                else None
+            ),
+            "remaining_litres": (
+                self.remaining_litres
+            ),
+        }
 
 
 class LemonadeBatchProfile:

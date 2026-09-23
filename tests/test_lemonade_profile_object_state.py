@@ -1,10 +1,12 @@
 import unittest
 
 from meeting_place.lemonade_profile import (
+    LemonadeAddedEvent,
     LemonadeBatchProfile,
     LemonadeBatchRecord,
     LemonadeEntangledPair,
     LemonadeProfile,
+    LemonadeServedEvent,
     LemonadeTraitProfile,
 )
 from meeting_place.lemonade_reservoir import (
@@ -161,6 +163,72 @@ class LemonadeProfileObjectStateTests(
         self.assertIs(
             reservoir.batch_history[0].profile,
             profile,
+        )
+
+    def test_reservoir_events_are_object_state(
+        self
+    ):
+        reservoir = LemonadeReservoir()
+
+        profile = self._profile(
+            acidity=1.0,
+            source_names=("first",),
+        )
+
+        added = reservoir.add_lemonade(
+            amount_litres=1.0,
+            source="test_batch",
+            profile=profile,
+        )
+
+        added_event = reservoir.events[0]
+
+        self.assertIsInstance(
+            added_event,
+            LemonadeAddedEvent,
+        )
+
+        self._assert_no_mapping_api(
+            added_event,
+            "source",
+        )
+
+        self.assertEqual(
+            added["source"],
+            "test_batch",
+        )
+
+        served = reservoir.serve(
+            drinker_name="guest",
+            location="bar",
+        )
+
+        served_event = reservoir.events[1]
+
+        self.assertIsInstance(
+            served_event,
+            LemonadeServedEvent,
+        )
+
+        self._assert_no_mapping_api(
+            served_event,
+            "drinker",
+        )
+
+        self.assertIs(
+            served_event.lemonade_profile,
+            profile,
+        )
+
+        served["lemonade_profile"][
+            "traits"
+        ]["acidity"] = 99.0
+
+        self.assertEqual(
+            served_event
+            .lemonade_profile
+            .traits.acidity,
+            1.0,
         )
 
     def test_reservoir_mixes_profiles_through_attributes(

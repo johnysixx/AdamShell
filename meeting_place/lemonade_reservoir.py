@@ -1,7 +1,9 @@
 from universe.logger import UniverseLogger
 from .lemonade_profile import (
+    LemonadeAddedEvent,
     LemonadeBatchRecord,
     LemonadeProfile,
+    LemonadeServedEvent,
     LemonadeTraitProfile,
 )
 
@@ -86,12 +88,11 @@ class LemonadeReservoir:
                 )
             )
 
-        event = {
-            "name": "lemonade_added",
-            "source": source,
-            "amount_litres": amount_litres,
-            "remaining_litres": self.amount_litres,
-        }
+        event = LemonadeAddedEvent(
+            source=source,
+            amount_litres=amount_litres,
+            remaining_litres=self.amount_litres,
+        )
 
         self.events.append(
             event
@@ -108,7 +109,7 @@ class LemonadeReservoir:
             f"{self.amount_litres:.2f} litres"
         )
 
-        return event
+        return event.to_dict()
 
     def _mix_profiles(
         self,
@@ -235,25 +236,18 @@ class LemonadeReservoir:
             self.serving_size_litres
         )
 
-        serving_profile = (
-            self.current_profile.to_dict()
-            if self.current_profile is not None
-            else None
-        )
-
-        event = {
-            "name": "free_lemonade_served",
-            "drinker": drinker_name,
-            "location": location,
-            "amount_litres": (
+        event = LemonadeServedEvent(
+            drinker=drinker_name,
+            location=location,
+            amount_litres=(
                 self.serving_size_litres
             ),
-            "price": 0,
-            "lemonade_profile": serving_profile,
-            "remaining_litres": (
+            price=0,
+            lemonade_profile=self.current_profile,
+            remaining_litres=(
                 self.amount_litres
             ),
-        }
+        )
 
         self.events.append(
             event
@@ -274,7 +268,7 @@ class LemonadeReservoir:
                 "LEMONADE RESERVOIR IS EMPTY"
             )
 
-        return event
+        return event.to_dict()
 
     @property
     def public_state(self):
