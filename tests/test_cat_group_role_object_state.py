@@ -12,7 +12,10 @@ from cats.cat_group_role_specialization_system import (
     CatGroupRoleSpecializationSystem,
 )
 from cats.cat_group_role_state import (
-    CatGroupRoleState
+    CatGroupRoleAssignedEvent,
+    CatGroupRoleReleasedEvent,
+    CatGroupRoleSpecializedEvent,
+    CatGroupRoleState,
 )
 
 
@@ -181,6 +184,167 @@ class CatGroupRoleObjectStateTests(
             state.group_id,
             self.group_id,
         )
+
+    def test_role_assignment_history_uses_object_state(
+        self
+    ):
+        self.cat.personality.traits.courage = 1.0
+        self.cat.group.influence = 1.0
+
+        result = self.roles.assign(
+            self.group_id,
+            self.cat,
+            'guardian',
+        )
+
+        event = (
+            self.cat
+            .group_roles
+            .history[-1]
+        )
+
+        self.assertIsInstance(
+            event,
+            CatGroupRoleAssignedEvent,
+        )
+
+        self.assertEqual(
+            event.role,
+            'guardian',
+        )
+
+        for mapping_method in (
+            'get',
+            'keys',
+            'items',
+            'values',
+        ):
+            self.assertFalse(
+                hasattr(
+                    event,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(TypeError):
+            _ = event['role']
+
+        result['role'] = 'changed'
+
+        self.assertEqual(
+            event.role,
+            'guardian',
+        )
+
+        group_event = (
+            self.groups
+            .groups[self.group_id]
+            .history[-1]
+        )
+
+        self.assertEqual(
+            group_event['role'],
+            'guardian',
+        )
+
+    def test_role_release_history_uses_object_state(
+        self
+    ):
+        self.cat.personality.traits.courage = 1.0
+        self.cat.group.influence = 1.0
+
+        self.roles.assign(
+            self.group_id,
+            self.cat,
+            'guardian',
+        )
+
+        result = self.roles.release(
+            self.group_id,
+            self.cat,
+            'guardian',
+            reason='rotation',
+        )
+
+        event = (
+            self.cat
+            .group_roles
+            .history[-1]
+        )
+
+        self.assertIsInstance(
+            event,
+            CatGroupRoleReleasedEvent,
+        )
+
+        self.assertEqual(
+            event.reason,
+            'rotation',
+        )
+
+        result['reason'] = 'changed'
+
+        self.assertEqual(
+            event.reason,
+            'rotation',
+        )
+
+    def test_specialization_history_uses_object_state(
+        self
+    ):
+        self.cat.personality.traits.courage = 1.0
+        self.cat.group.influence = 1.0
+
+        self.roles.assign(
+            self.group_id,
+            self.cat,
+            'guardian',
+        )
+
+        result = (
+            self.specializations
+            .specialize(
+                self.group_id,
+                self.cat,
+                'guardian',
+                'night_guardian',
+            )
+        )
+
+        event = (
+            self.cat
+            .group_roles
+            .history[-1]
+        )
+
+        self.assertIsInstance(
+            event,
+            CatGroupRoleSpecializedEvent,
+        )
+
+        self.assertEqual(
+            event.specialization,
+            'night_guardian',
+        )
+
+        result[
+            'specialization'
+        ] = 'changed'
+
+        self.assertEqual(
+            event.specialization,
+            'night_guardian',
+        )
+
+    def test_role_history_rejects_mapping_event(
+        self
+    ):
+        with self.assertRaises(TypeError):
+            self.cat.group_roles.record_event(
+                {
+                    'name': 'legacy_mapping',
+                }
+            )
 
     def test_legacy_mapping_record_is_rejected_before_holder_side_effect(
         self

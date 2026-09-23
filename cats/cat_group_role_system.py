@@ -1,6 +1,8 @@
 from copy import deepcopy
 
 from cats.cat_group_role_state import (
+    CatGroupRoleAssignedEvent,
+    CatGroupRoleReleasedEvent,
     CatGroupRoleState,
 )
 
@@ -74,20 +76,48 @@ class CatGroupRoleSystem:
         ] = existing
 
         cat.group_roles.role_events += 1
-        event = {'name': 'cat_group_role_assigned', 'group_id': group_id, 'cat': cat.name, 'role': role, 'score': check['score'], 'assigned': True}
-        cat.group_roles.history.append(deepcopy(event))
-        group.history.append(deepcopy(event))
-        return event
+
+        event = CatGroupRoleAssignedEvent(
+            group_id=group_id,
+            cat=cat.name,
+            role=role,
+            score=check['score'],
+        )
+
+        cat.group_roles.record_event(
+            event
+        )
+
+        snapshot = event.to_dict()
+
+        group.history.append(
+            deepcopy(snapshot)
+        )
+
+        return snapshot
 
     def release(self, group_id, cat, role, reason='role_released'):
         group = self.group_system._group(group_id)
         holders = group.roles.get(role, [])
         if cat.name in holders:
             holders.remove(cat.name)
-        cat.group_roles.active.pop(role, None)
-        event = {'name': 'cat_group_role_released', 'group_id': group_id, 'cat': cat.name, 'role': role, 'reason': reason, 'released': True}
-        cat.group_roles.history.append(deepcopy(event))
-        return event
+        cat.group_roles.active.pop(
+            role,
+            None,
+        )
+
+        event = CatGroupRoleReleasedEvent(
+            group_id=group_id,
+            cat=cat.name,
+            role=role,
+            reason=reason,
+        )
+
+        cat.group_roles.record_event(
+            event
+        )
+
+        return event.to_dict()
 
     def holders(self, group_id, role):
         group = self.group_system._group(group_id)

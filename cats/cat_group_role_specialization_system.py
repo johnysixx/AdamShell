@@ -1,6 +1,7 @@
 from copy import deepcopy
 
 from cats.cat_group_role_state import (
+    CatGroupRoleSpecializedEvent,
     CatGroupRoleState,
 )
 
@@ -88,10 +89,25 @@ class CatGroupRoleSpecializationSystem:
         cat.group_roles.active[
             specialization
         ] = existing
-        event = {'name': 'cat_group_role_specialized', 'group_id': group_id, 'cat': cat.name, 'base_role': base_role, 'specialization': specialization, 'specialized': True}
-        cat.group_roles.history.append(deepcopy(event))
-        group.history.append(deepcopy(event))
-        return event
+
+        event = CatGroupRoleSpecializedEvent(
+            group_id=group_id,
+            cat=cat.name,
+            base_role=base_role,
+            specialization=specialization,
+        )
+
+        cat.group_roles.record_event(
+            event
+        )
+
+        snapshot = event.to_dict()
+
+        group.history.append(
+            deepcopy(snapshot)
+        )
+
+        return snapshot
 
     def specializations(self, group_id, base_role=None):
         group = self.group_system._group(group_id)

@@ -1,5 +1,11 @@
 from core.entity.component_object import ComponentObject
 
+from cats.cat_group_role_state import (
+    CatGroupRoleAssignedEvent,
+    CatGroupRoleReleasedEvent,
+    CatGroupRoleSpecializedEvent,
+)
+
 class CatFamily(ComponentObject):
     pass
 
@@ -28,7 +34,28 @@ class CatCulture(ComponentObject):
     pass
 
 class CatGroupRoles(ComponentObject):
-    pass
+    def record_event(
+        self,
+        event,
+    ):
+        if not isinstance(
+            event,
+            (
+                CatGroupRoleAssignedEvent,
+                CatGroupRoleReleasedEvent,
+                CatGroupRoleSpecializedEvent,
+            ),
+        ):
+            raise TypeError(
+                "Cat group role history requires "
+                "a cat group role event object."
+            )
+
+        self.history.append(
+            event
+        )
+
+        return event
 
 class CatMeowInvitations(ComponentObject):
     pass
