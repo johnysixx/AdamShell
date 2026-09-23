@@ -1,8 +1,72 @@
+from dataclasses import dataclass, field
+
 from cats.cat_adult_vocalization_state import (
     CatAdultVocalizationState
 )
 from cats.cat_learning import CatLearning
 from cats.cat_learning_state import CatLearningState
+
+
+@dataclass(slots=True, frozen=True)
+class AdultVocalizationLearnedEvent:
+    teacher: str
+    student: str
+    vocalization: str
+    day: int
+    learned_count: int
+    total_count: int
+    adult_meowing_complete: bool
+    name: str = field(
+        default='adult_vocalization_learned',
+        init=False,
+    )
+    taught: bool = field(
+        default=True,
+        init=False,
+    )
+
+    def to_dict(self):
+        return {
+            'name': self.name,
+            'teacher': self.teacher,
+            'student': self.student,
+            'vocalization': self.vocalization,
+            'day': self.day,
+            'learned_count': self.learned_count,
+            'total_count': self.total_count,
+            'adult_meowing_complete': (
+                self.adult_meowing_complete
+            ),
+            'taught': self.taught,
+        }
+
+
+@dataclass(slots=True, frozen=True)
+class AdultVocalizationLessonDeniedEvent:
+    teacher: str | None
+    student: str | None
+    vocalization: str
+    day: int
+    reason: str
+    name: str = field(
+        default='adult_vocalization_lesson_denied',
+        init=False,
+    )
+    taught: bool = field(
+        default=False,
+        init=False,
+    )
+
+    def to_dict(self):
+        return {
+            'name': self.name,
+            'teacher': self.teacher,
+            'student': self.student,
+            'vocalization': self.vocalization,
+            'day': self.day,
+            'reason': self.reason,
+            'taught': self.taught,
+        }
 
 class AdultVocalizationResolver:
 
@@ -71,14 +135,37 @@ class AdultVocalizationResolver:
             kitten_skill.teacher = teacher.name
             kitten_skill.learned_on_day = current_day
             kitten_learning.adult_meowing_learned = True
-        lesson = {'name': 'adult_vocalization_learned', 'teacher': teacher.name, 'student': kitten.name, 'vocalization': vocalization, 'day': current_day, 'learned_count': learned_count, 'total_count': total_count, 'adult_meowing_complete': completed}
-        kitten_learning.lessons.append(lesson)
-        event = {**lesson, 'taught': True}
-        self.history.append(event)
-        quantum_events = getattr(self.universe, 'quantum_events', None)
+        event = AdultVocalizationLearnedEvent(
+            teacher=teacher.name,
+            student=kitten.name,
+            vocalization=vocalization,
+            day=current_day,
+            learned_count=learned_count,
+            total_count=total_count,
+            adult_meowing_complete=completed,
+        )
+
+        kitten_learning.lessons.append(
+            event
+        )
+        self.history.append(
+            event
+        )
+
+        snapshot = event.to_dict()
+
+        quantum_events = getattr(
+            self.universe,
+            'quantum_events',
+            None,
+        )
+
         if quantum_events is not None:
-            quantum_events.append(event)
-        return event
+            quantum_events.append(
+                dict(snapshot)
+            )
+
+        return snapshot
 
     def _require_vocalizations(
         self,
@@ -107,7 +194,34 @@ class AdultVocalizationResolver:
             results.append(result)
         return {'name': 'adult_vocalization_repertoire_taught', 'teacher': teacher.name, 'student': kitten.name, 'day': current_day, 'results': results, 'complete': kitten.learning.skills['adult_meowing'].learned}
 
-    def _deny(self, teacher, kitten, vocalization, current_day, reason):
-        event = {'name': 'adult_vocalization_lesson_denied', 'teacher': getattr(teacher, 'name', None), 'student': getattr(kitten, 'name', None), 'vocalization': vocalization, 'day': current_day, 'reason': reason, 'taught': False}
-        self.history.append(event)
-        return event
+    def _deny(
+        self,
+        teacher,
+        kitten,
+        vocalization,
+        current_day,
+        reason,
+    ):
+        event = (
+            AdultVocalizationLessonDeniedEvent(
+                teacher=getattr(
+                    teacher,
+                    'name',
+                    None,
+                ),
+                student=getattr(
+                    kitten,
+                    'name',
+                    None,
+                ),
+                vocalization=vocalization,
+                day=current_day,
+                reason=reason,
+            )
+        )
+
+        self.history.append(
+            event
+        )
+
+        return event.to_dict()

@@ -109,7 +109,24 @@ class CatLearningState:
                 name: skill.to_dict()
                 for name, skill in self.skills.items()
             },
-            "lessons": deepcopy(self.lessons),
+            "lessons": [
+                (
+                    deepcopy(
+                        lesson.to_dict()
+                    )
+                    if callable(
+                        getattr(
+                            lesson,
+                            "to_dict",
+                            None,
+                        )
+                    )
+                    else deepcopy(
+                        lesson
+                    )
+                )
+                for lesson in self.lessons
+            ],
             "family_knowledge": (
                 self.family_knowledge.to_dict()
             ),

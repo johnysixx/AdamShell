@@ -10,6 +10,8 @@ from cats.development_resolver import (
     CatDevelopmentResolver,
 )
 from cats.adult_vocalization_resolver import (
+    AdultVocalizationLearnedEvent,
+    AdultVocalizationLessonDeniedEvent,
     AdultVocalizationResolver,
 )
 
@@ -165,6 +167,146 @@ class CatAdultVocalizationObjectStateTests(
         self.assertEqual(
             state.learned_count(),
             1,
+        )
+
+    def test_successful_lesson_uses_object_state(
+        self
+    ):
+        result = self.resolver.teach(
+            teacher=self.mother,
+            kitten=self.kitten,
+            vocalization='food_request',
+            current_day=60,
+        )
+
+        event = self.resolver.history[-1]
+        lesson = (
+            self.kitten
+            .learning
+            .lessons[-1]
+        )
+
+        self.assertIsInstance(
+            event,
+            AdultVocalizationLearnedEvent,
+        )
+
+        self.assertIs(
+            lesson,
+            event,
+        )
+
+        self.assertEqual(
+            event.vocalization,
+            'food_request',
+        )
+
+        self.assertTrue(
+            event.taught
+        )
+
+        for mapping_method in (
+            'get',
+            'keys',
+            'items',
+            'values',
+        ):
+            self.assertFalse(
+                hasattr(
+                    event,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(TypeError):
+            _ = event['vocalization']
+
+        result['vocalization'] = 'changed'
+
+        self.assertEqual(
+            event.vocalization,
+            'food_request',
+        )
+
+    def test_denied_lesson_history_uses_object_state(
+        self
+    ):
+        self.resolver.teach(
+            teacher=self.mother,
+            kitten=self.kitten,
+            vocalization='food_request',
+            current_day=60,
+        )
+
+        result = self.resolver.teach(
+            teacher=self.mother,
+            kitten=self.kitten,
+            vocalization='food_request',
+            current_day=61,
+        )
+
+        event = self.resolver.history[-1]
+
+        self.assertIsInstance(
+            event,
+            AdultVocalizationLessonDeniedEvent,
+        )
+
+        self.assertEqual(
+            event.reason,
+            'vocalization_already_learned',
+        )
+
+        self.assertFalse(
+            event.taught
+        )
+
+        self.assertEqual(
+            result['reason'],
+            'vocalization_already_learned',
+        )
+
+        with self.assertRaises(TypeError):
+            _ = event['reason']
+
+    def test_learning_snapshot_serializes_lesson_object(
+        self
+    ):
+        self.resolver.teach(
+            teacher=self.mother,
+            kitten=self.kitten,
+            vocalization='food_request',
+            current_day=60,
+        )
+
+        event = (
+            self.kitten
+            .learning
+            .lessons[-1]
+        )
+
+        snapshot = (
+            self.kitten
+            .learning
+            .to_dict()
+        )
+
+        lesson_snapshot = (
+            snapshot['lessons'][-1]
+        )
+
+        self.assertEqual(
+            lesson_snapshot['vocalization'],
+            'food_request',
+        )
+
+        lesson_snapshot[
+            'vocalization'
+        ] = 'changed'
+
+        self.assertEqual(
+            event.vocalization,
+            'food_request',
         )
 
     def test_legacy_mapping_state_is_rejected(
