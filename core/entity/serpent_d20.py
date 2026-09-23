@@ -63,6 +63,131 @@ class SerpentD20PublicRollEvent:
         }
 
 
+@dataclass(slots=True, frozen=True)
+class SerpentResolvedConsequence:
+    consequence: str
+    result: object
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "consequence",
+            str(self.consequence),
+        )
+        object.__setattr__(
+            self,
+            "result",
+            deepcopy(self.result),
+        )
+
+    def to_dict(self):
+        return {
+            "consequence": self.consequence,
+            "result": deepcopy(
+                self.result
+            ),
+        }
+
+
+@dataclass(slots=True)
+class SerpentD20HiddenResolutionEvent:
+    roll_id: str
+    value: int
+    fire_threshold_reached: bool
+    possible_consequences: tuple[str, ...]
+    intensity: str
+    all_effects_triggered: bool
+    resolved_consequences: tuple[
+        SerpentResolvedConsequence,
+        ...
+    ] = ()
+    name: str = field(
+        default=(
+            "serpent_d20_hidden_resolution"
+        ),
+        init=False,
+    )
+    visibility: str = field(
+        default="universe_only",
+        init=False,
+    )
+
+    def __post_init__(self):
+        self.roll_id = str(
+            self.roll_id
+        )
+        self.value = int(
+            self.value
+        )
+        self.fire_threshold_reached = bool(
+            self.fire_threshold_reached
+        )
+        self.possible_consequences = tuple(
+            self.possible_consequences
+        )
+        self.intensity = str(
+            self.intensity
+        )
+        self.all_effects_triggered = bool(
+            self.all_effects_triggered
+        )
+
+        self.set_resolved_consequences(
+            self.resolved_consequences
+        )
+
+    def set_resolved_consequences(
+        self,
+        resolved_consequences,
+    ):
+        resolved = tuple(
+            resolved_consequences
+        )
+
+        if not all(
+            isinstance(
+                item,
+                SerpentResolvedConsequence,
+            )
+            for item in resolved
+        ):
+            raise TypeError(
+                "Resolved Serpent consequences "
+                "must contain "
+                "SerpentResolvedConsequence "
+                "objects."
+            )
+
+        self.resolved_consequences = (
+            resolved
+        )
+
+        return self
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "roll_id": self.roll_id,
+            "value": self.value,
+            "fire_threshold_reached": (
+                self.fire_threshold_reached
+            ),
+            "possible_consequences": list(
+                self.possible_consequences
+            ),
+            "resolved_consequences": [
+                item.to_dict()
+                for item
+                in self.resolved_consequences
+            ],
+            "intensity": self.intensity,
+            "all_effects_triggered": (
+                self.all_effects_triggered
+            ),
+            "visibility": self.visibility,
+        }
+
+
 class SerpentD20:
 
     def __init__(self):
@@ -129,31 +254,34 @@ class SerpentD20:
             rng=rng
         )
 
-        hidden_event = {
-            "name": "serpent_d20_hidden_resolution",
-            "roll_id": roll_id,
-            "value": value,
-            "fire_threshold_reached": (
-                value > self.fire_threshold
-            ),
-            "possible_consequences": list(
-                hidden_plan["selected_effects"]
-            ),
-            "resolved_consequences": [],
-            "intensity": hidden_plan["intensity"],
-            "all_effects_triggered": (
-                hidden_plan[
-                    "all_effects_triggered"
-                ]
-            ),
-            "visibility": "universe_only"
-        }
+        hidden_event = (
+            SerpentD20HiddenResolutionEvent(
+                roll_id=roll_id,
+                value=value,
+                fire_threshold_reached=(
+                    value > self.fire_threshold
+                ),
+                possible_consequences=tuple(
+                    hidden_plan[
+                        "selected_effects"
+                    ]
+                ),
+                intensity=hidden_plan[
+                    "intensity"
+                ],
+                all_effects_triggered=(
+                    hidden_plan[
+                        "all_effects_triggered"
+                    ]
+                ),
+            )
+        )
 
         self.record_public_roll(
             public_event
         )
 
-        self._hidden_history.append(
+        self.record_hidden_resolution(
             hidden_event
         )
 
@@ -182,25 +310,50 @@ class SerpentD20:
 
         return event
 
+    def record_hidden_resolution(
+        self,
+        event,
+    ):
+        if not isinstance(
+            event,
+            SerpentD20HiddenResolutionEvent,
+        ):
+            raise TypeError(
+                "Serpent D20 hidden history "
+                "requires a "
+                "SerpentD20HiddenResolutionEvent "
+                "object."
+            )
+
+        self._hidden_history.append(
+            event
+        )
+
+        return event
+
     def hidden_resolution_for(self, roll_id):
         event = next(
             (
                 item
                 for item in self._hidden_history
-                if item["roll_id"] == roll_id
+                if item.roll_id == roll_id
             ),
             None
         )
 
-        return deepcopy(event)
+        if event is None:
+            return None
+
+        return event.to_dict()
 
     @property
     def last_hidden_resolution(self):
         if not self._hidden_history:
             return None
 
-        return deepcopy(
+        return (
             self._hidden_history[-1]
+            .to_dict()
         )
 
     def record_resolved_consequences(
@@ -208,15 +361,33 @@ class SerpentD20:
         roll_id,
         resolved_consequences
     ):
-        for event in self._hidden_history:
-            if event["roll_id"] != roll_id:
-                continue
+        resolved = tuple(
+            resolved_consequences
+        )
 
-            event["resolved_consequences"] = deepcopy(
-                resolved_consequences
+        if not all(
+            isinstance(
+                item,
+                SerpentResolvedConsequence,
+            )
+            for item in resolved
+        ):
+            raise TypeError(
+                "Resolved Serpent consequences "
+                "must contain "
+                "SerpentResolvedConsequence "
+                "objects."
             )
 
-            return deepcopy(event)
+        for event in self._hidden_history:
+            if event.roll_id != roll_id:
+                continue
+
+            event.set_resolved_consequences(
+                resolved
+            )
+
+            return event.to_dict()
 
         return None
 

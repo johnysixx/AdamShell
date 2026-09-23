@@ -1,6 +1,9 @@
 import uuid
 from copy import deepcopy
 
+from core.entity.serpent_d20 import (
+    SerpentResolvedConsequence,
+)
 from universe.logger import UniverseLogger
 
 
@@ -62,21 +65,30 @@ class SerpentConsequenceExecutor:
 
             result = handler()
 
-            resolved.append({
-                "consequence": consequence,
-                "result": deepcopy(result)
-            })
+            resolved.append(
+                SerpentResolvedConsequence(
+                    consequence=consequence,
+                    result=result,
+                )
+            )
 
         serpent_d20.record_resolved_consequences(
             roll_id=roll_id,
             resolved_consequences=resolved
         )
 
+        resolved_snapshot = [
+            item.to_dict()
+            for item in resolved
+        ]
+
         event = {
             "name": "serpent_consequences_executed",
             "roll_id": roll_id,
             "planned_consequences": planned,
-            "resolved_consequences": resolved,
+            "resolved_consequences": (
+                resolved_snapshot
+            ),
             "unresolved_consequences": unresolved,
             "visibility": "universe_only"
         }
