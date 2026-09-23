@@ -1,5 +1,71 @@
-﻿import random
-from copy import deepcopy
+import random
+from dataclasses import dataclass, field
+
+
+@dataclass(slots=True, frozen=True)
+class SerpentRollResolutionEvent:
+    roll_id: str
+    value: int
+    intensity: str
+    selected_effects: tuple[str, ...]
+    all_effects_triggered: bool
+    name: str = field(
+        default="serpent_roll_resolved",
+        init=False,
+    )
+    visibility: str = field(
+        default="universe_only",
+        init=False,
+    )
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "roll_id",
+            str(self.roll_id),
+        )
+        object.__setattr__(
+            self,
+            "value",
+            int(self.value),
+        )
+        object.__setattr__(
+            self,
+            "intensity",
+            str(self.intensity),
+        )
+        object.__setattr__(
+            self,
+            "selected_effects",
+            tuple(self.selected_effects),
+        )
+        object.__setattr__(
+            self,
+            "all_effects_triggered",
+            bool(self.all_effects_triggered),
+        )
+
+    @property
+    def effect_count(self):
+        return len(
+            self.selected_effects
+        )
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "roll_id": self.roll_id,
+            "value": self.value,
+            "intensity": self.intensity,
+            "effect_count": self.effect_count,
+            "selected_effects": list(
+                self.selected_effects
+            ),
+            "all_effects_triggered": (
+                self.all_effects_triggered
+            ),
+            "visibility": self.visibility,
+        }
 
 
 class SerpentRollResolver:
@@ -70,23 +136,44 @@ class SerpentRollResolver:
             rng=rng
         )
 
-        event = {
-            "name": "serpent_roll_resolved",
-            "roll_id": public_roll["roll_id"],
-            "value": value,
-            "intensity": self._intensity(value),
-            "effect_count": len(selected),
-            "selected_effects": selected,
-            "all_effects_triggered": (
+        event = SerpentRollResolutionEvent(
+            roll_id=public_roll["roll_id"],
+            value=value,
+            intensity=self._intensity(value),
+            selected_effects=tuple(
+                selected
+            ),
+            all_effects_triggered=(
                 set(selected)
                 == set(self.ALL_EFFECTS)
             ),
-            "visibility": "universe_only"
-        }
+        )
 
-        self.history.append(event)
+        self.record_resolution(
+            event
+        )
 
-        return deepcopy(event)
+        return event.to_dict()
+
+    def record_resolution(
+        self,
+        event,
+    ):
+        if not isinstance(
+            event,
+            SerpentRollResolutionEvent,
+        ):
+            raise TypeError(
+                "Serpent roll resolver history "
+                "requires a "
+                "SerpentRollResolutionEvent object."
+            )
+
+        self.history.append(
+            event
+        )
+
+        return event
 
     def _effect_count(
         self,
