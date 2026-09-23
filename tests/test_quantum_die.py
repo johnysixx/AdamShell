@@ -1,5 +1,6 @@
 import unittest
 
+from core.entity.quantum_die import QuantumDieRollEvent
 from universe.universe import Universe
 
 
@@ -21,6 +22,76 @@ class SequenceRng:
 
 
 class QuantumDieTests(unittest.TestCase):
+
+    def test_roll_history_uses_object_state(
+        self
+    ):
+        universe = Universe()
+        rng = SequenceRng(
+            [7]
+        )
+
+        result = universe.quantum_die.roll(
+            rng=rng
+        )
+
+        event = (
+            universe
+            .quantum_die
+            .history[0]
+        )
+
+        self.assertIsInstance(
+            event,
+            QuantumDieRollEvent,
+        )
+
+        self.assertEqual(
+            event.die,
+            "quantum_d20",
+        )
+        self.assertEqual(
+            event.value,
+            7,
+        )
+        self.assertEqual(
+            event.roll_number,
+            1,
+        )
+        self.assertEqual(
+            event.visibility,
+            "universe_only",
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    event,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(TypeError):
+            _ = event["value"]
+
+        snapshot = event.to_dict()
+
+        snapshot["value"] = 99
+
+        self.assertEqual(
+            event.value,
+            7,
+        )
+
+        self.assertEqual(
+            result["value"],
+            7,
+        )
 
     def test_sequence_creates_two_quantum_pairs(self):
         universe = Universe()
