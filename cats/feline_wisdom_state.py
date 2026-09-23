@@ -8,6 +8,170 @@ from cats.feline_awareness_state import (
 )
 
 
+@dataclass(slots=True, frozen=True)
+class MeowFelineAwarenessTransmissionEvent:
+    teacher: str
+    kitten: str
+    day: int
+    transferred: tuple[
+        FelineAwarenessState,
+        ...
+    ]
+    name: str = field(
+        default=(
+            "meow_feline_awareness_transmitted"
+        ),
+        init=False,
+    )
+    ability_methods_transferred: int = field(
+        default=0,
+        init=False,
+    )
+
+    def __post_init__(self):
+        transferred = tuple(
+            self.transferred
+        )
+
+        if not all(
+            isinstance(
+                awareness,
+                FelineAwarenessState,
+            )
+            for awareness in transferred
+        ):
+            raise TypeError(
+                "Transferred feline awareness "
+                "must contain "
+                "FelineAwarenessState objects."
+            )
+
+        object.__setattr__(
+            self,
+            "teacher",
+            str(self.teacher),
+        )
+        object.__setattr__(
+            self,
+            "kitten",
+            str(self.kitten),
+        )
+        object.__setattr__(
+            self,
+            "day",
+            int(self.day),
+        )
+        object.__setattr__(
+            self,
+            "transferred",
+            transferred,
+        )
+
+    @property
+    def transferred_count(self):
+        return len(
+            self.transferred
+        )
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "teacher": self.teacher,
+            "kitten": self.kitten,
+            "day": self.day,
+            "transferred": list(
+                self.transferred
+            ),
+            "transferred_count": (
+                self.transferred_count
+            ),
+            "ability_methods_transferred": (
+                self.ability_methods_transferred
+            ),
+        }
+
+
+@dataclass(slots=True, frozen=True)
+class FelineAbilityAwarenessTransmissionEvent:
+    teacher: str
+    student: str
+    transferred: tuple[
+        FelineAwarenessState,
+        ...
+    ]
+    name: str = field(
+        default=(
+            "meow_ability_awareness_transmitted"
+        ),
+        init=False,
+    )
+    methods_transferred: int = field(
+        default=0,
+        init=False,
+    )
+    transmitted: bool = field(
+        default=True,
+        init=False,
+    )
+
+    def __post_init__(self):
+        transferred = tuple(
+            self.transferred
+        )
+
+        if not all(
+            isinstance(
+                awareness,
+                FelineAwarenessState,
+            )
+            for awareness in transferred
+        ):
+            raise TypeError(
+                "Transferred feline awareness "
+                "must contain "
+                "FelineAwarenessState objects."
+            )
+
+        object.__setattr__(
+            self,
+            "teacher",
+            str(self.teacher),
+        )
+        object.__setattr__(
+            self,
+            "student",
+            str(self.student),
+        )
+        object.__setattr__(
+            self,
+            "transferred",
+            transferred,
+        )
+
+    @property
+    def transferred_count(self):
+        return len(
+            self.transferred
+        )
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "teacher": self.teacher,
+            "student": self.student,
+            "transferred": list(
+                self.transferred
+            ),
+            "transferred_count": (
+                self.transferred_count
+            ),
+            "methods_transferred": (
+                self.methods_transferred
+            ),
+            "transmitted": self.transmitted,
+        }
+
+
 @dataclass(slots=True)
 class FelineWisdomState:
     can_transmit_meow: bool = False
@@ -23,6 +187,30 @@ class FelineWisdomState:
     lesson_history: list = field(
         default_factory=list
     )
+
+    def record_transmission(
+        self,
+        event,
+    ):
+        if not isinstance(
+            event,
+            (
+                MeowFelineAwarenessTransmissionEvent,
+                FelineAbilityAwarenessTransmissionEvent,
+            ),
+        ):
+            raise TypeError(
+                "Feline wisdom transmission "
+                "history requires a feline "
+                "awareness transmission "
+                "event object."
+            )
+
+        self.transmission_history.append(
+            event
+        )
+
+        return event
 
     def set_can_transmit_meow(
         self,

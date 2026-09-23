@@ -1,4 +1,7 @@
 from cats.feline_wisdom import FelineWisdom
+from cats.feline_wisdom_state import (
+    FelineAbilityAwarenessTransmissionEvent,
+)
 from cats.cat_personality import CatPersonality
 from cats.cat_parentage_state import (
     CatParentageState
@@ -40,11 +43,30 @@ class FelineAbilityResolver:
             copied = knowledge.copy_for_transfer()
             student_wisdom.store_awareness(copied)
             transferred.append(copied)
-        event = {'name': 'meow_ability_awareness_transmitted', 'teacher': teacher.name, 'student': student.name, 'transferred': transferred, 'transferred_count': len(transferred), 'methods_transferred': 0, 'transmitted': True}
-        teacher_wisdom.transmission_history.append(event)
-        student_wisdom.transmission_history.append(event)
-        self._record(event)
-        return event
+        event = (
+            FelineAbilityAwarenessTransmissionEvent(
+                teacher=teacher.name,
+                student=student.name,
+                transferred=tuple(
+                    transferred
+                ),
+            )
+        )
+
+        teacher_wisdom.record_transmission(
+            event
+        )
+        student_wisdom.record_transmission(
+            event
+        )
+
+        snapshot = event.to_dict()
+
+        self._record(
+            snapshot
+        )
+
+        return snapshot
 
     def teach_method(self, teacher, student, ability_name, method_name):
         FelineWisdom.ensure_state(teacher)

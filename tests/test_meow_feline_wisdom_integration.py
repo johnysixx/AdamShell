@@ -7,6 +7,10 @@ from universe.universe import Universe
 from cats.cats import Cats
 from cats.development_resolver import CatDevelopmentResolver
 from cats.feline_wisdom import FelineWisdom
+from cats.feline_wisdom_state import (
+    FelineAbilityAwarenessTransmissionEvent,
+    MeowFelineAwarenessTransmissionEvent,
+)
 from cats.meow_knowledge_resolver import MeowKnowledgeResolver
 from cats.feline_ability_resolver import FelineAbilityResolver
 
@@ -51,6 +55,127 @@ class MeowFelineWisdomIntegrationTests(unittest.TestCase):
         self.assertIn('open_human_door', wisdom.awareness)
         self.assertNotIn('open_human_door', wisdom.abilities)
         self.assertEqual(result['ability_methods_transferred'], 0)
+
+    def test_meow_transmission_history_uses_object_state(
+        self
+    ):
+        FelineWisdom.add_awareness(
+            cat=self.mother,
+            knowledge_name=(
+                'open_human_door'
+            ),
+            domain='feline',
+        )
+
+        self.resolver.transmit(
+            mother=self.mother,
+            kitten=self.kitten,
+            current_day=90,
+        )
+
+        teacher_event = (
+            self.mother
+            .feline_wisdom
+            .transmission_history[-1]
+        )
+        kitten_event = (
+            self.kitten
+            .feline_wisdom
+            .transmission_history[-1]
+        )
+
+        self.assertIsInstance(
+            teacher_event,
+            MeowFelineAwarenessTransmissionEvent,
+        )
+
+        self.assertIs(
+            teacher_event,
+            kitten_event,
+        )
+
+        self.assertEqual(
+            teacher_event.transferred_count,
+            1,
+        )
+
+        for mapping_method in (
+            'get',
+            'keys',
+            'items',
+            'values',
+        ):
+            self.assertFalse(
+                hasattr(
+                    teacher_event,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(TypeError):
+            _ = teacher_event['teacher']
+
+    def test_ability_awareness_history_uses_object_state(
+        self
+    ):
+        FelineWisdom.ensure_state(
+            self.mother,
+            can_transmit_meow=True,
+        )
+
+        FelineWisdom.add_awareness(
+            cat=self.mother,
+            knowledge_name=(
+                'open_human_door'
+            ),
+            domain='feline',
+        )
+
+        result = (
+            self.abilities
+            .transmit_meow_awareness(
+                teacher=self.mother,
+                student=self.kitten,
+            )
+        )
+
+        teacher_event = (
+            self.mother
+            .feline_wisdom
+            .transmission_history[-1]
+        )
+        student_event = (
+            self.kitten
+            .feline_wisdom
+            .transmission_history[-1]
+        )
+
+        self.assertIsInstance(
+            teacher_event,
+            FelineAbilityAwarenessTransmissionEvent,
+        )
+
+        self.assertIs(
+            teacher_event,
+            student_event,
+        )
+
+        self.assertEqual(
+            teacher_event.transferred_count,
+            1,
+        )
+
+        result[
+            'transferred_count'
+        ] = 99
+
+        self.assertEqual(
+            teacher_event.transferred_count,
+            1,
+        )
+
+        with self.assertRaises(TypeError):
+            _ = teacher_event['student']
 
     def test_unrelated_natural_cat_cannot_teach_meow(self):
         result = self.resolver.transmit(mother=self.other_cat, kitten=self.kitten, current_day=90)

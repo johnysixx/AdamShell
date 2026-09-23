@@ -117,6 +117,18 @@ class FelineWisdomObjectStateTests(
             stored.can_transmit_meow
         )
 
+    def test_transmission_history_rejects_mapping_event(
+        self
+    ):
+        state = FelineWisdomState()
+
+        with self.assertRaises(TypeError):
+            state.record_transmission(
+                {
+                    "name": "legacy_mapping",
+                }
+            )
+
     def test_legacy_mapping_state_is_rejected(
         self
     ):

@@ -1,6 +1,9 @@
 from dataclasses import dataclass, field
 
 from cats.feline_wisdom import FelineWisdom
+from cats.feline_wisdom_state import (
+    MeowFelineAwarenessTransmissionEvent,
+)
 from cats.cat_learning_state import CatLearningState
 from cats.cat_parentage_state import (
     CatParentageState
@@ -267,9 +270,7 @@ class MeowKnowledgeResolver:
                 transmission_source
             ),
             awareness_transferred=(
-                wisdom_result[
-                    'transferred_count'
-                ]
+                wisdom_result.transferred_count
             ),
         )
 
@@ -334,9 +335,24 @@ class MeowKnowledgeResolver:
             )
             kitten_wisdom.store_awareness(copied)
             transferred.append(copied)
-        event = {'name': 'meow_feline_awareness_transmitted', 'teacher': teacher.name, 'kitten': kitten.name, 'day': current_day, 'transferred': transferred, 'transferred_count': len(transferred), 'ability_methods_transferred': 0}
-        teacher_wisdom.transmission_history.append(event)
-        kitten_wisdom.transmission_history.append(event)
+        event = (
+            MeowFelineAwarenessTransmissionEvent(
+                teacher=teacher.name,
+                kitten=kitten.name,
+                day=current_day,
+                transferred=tuple(
+                    transferred
+                ),
+            )
+        )
+
+        teacher_wisdom.record_transmission(
+            event
+        )
+        kitten_wisdom.record_transmission(
+            event
+        )
+
         return event
 
     def _complete_skill(self, kitten, skill_name, teacher_name, current_day):
