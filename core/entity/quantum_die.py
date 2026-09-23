@@ -78,7 +78,7 @@ class QuantumDie:
 
         if self.resolver is not None:
             resolution = self.resolver.resolve(
-                roll_event=roll_snapshot,
+                roll_event=event,
                 source="quantum_die_roll"
             )
 
@@ -87,6 +87,8 @@ class QuantumDie:
         )
 
         if resolution is not None:
-            result["resolution"] = resolution
+            result["resolution"] = (
+                resolution.to_dict()
+            )
 
         return result

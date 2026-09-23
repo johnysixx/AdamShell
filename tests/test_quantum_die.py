@@ -1,6 +1,10 @@
 import unittest
 
 from core.entity.quantum_die import QuantumDieRollEvent
+from quantum.quantum_die_resolver import (
+    QuantumDieResolution,
+    QuantumDieResolutionEvent,
+)
 from universe.universe import Universe
 
 
@@ -92,6 +96,114 @@ class QuantumDieTests(unittest.TestCase):
             result["value"],
             7,
         )
+
+    def test_resolver_history_uses_object_state(
+        self
+    ):
+        universe = Universe()
+        rng = SequenceRng(
+            [7]
+        )
+
+        result = universe.quantum_die.roll(
+            rng=rng
+        )
+
+        event = (
+            universe
+            .quantum_die_resolver
+            .history[0]
+        )
+
+        self.assertIsInstance(
+            event,
+            QuantumDieResolutionEvent,
+        )
+
+        self.assertIsInstance(
+            event.resolution,
+            QuantumDieResolution,
+        )
+
+        self.assertEqual(
+            event.value,
+            7,
+        )
+
+        self.assertEqual(
+            event.resolution.result,
+            "single_cronenberg_manifested",
+        )
+
+        for value, key in (
+            (
+                event,
+                "value",
+            ),
+            (
+                event.resolution,
+                "result",
+            ),
+        ):
+            for mapping_method in (
+                "get",
+                "keys",
+                "items",
+                "values",
+            ):
+                self.assertFalse(
+                    hasattr(
+                        value,
+                        mapping_method,
+                    )
+                )
+
+            with self.assertRaises(
+                TypeError
+            ):
+                _ = value[key]
+
+        snapshot = event.to_dict()
+
+        snapshot[
+            "resolution"
+        ][
+            "result"
+        ] = "changed"
+
+        self.assertEqual(
+            event.resolution.result,
+            "single_cronenberg_manifested",
+        )
+
+        self.assertEqual(
+            result[
+                "resolution"
+            ][
+                "resolution"
+            ][
+                "result"
+            ],
+            "single_cronenberg_manifested",
+        )
+
+    def test_resolver_rejects_mapping_roll_event(
+        self
+    ):
+        universe = Universe()
+
+        with self.assertRaises(TypeError):
+            (
+                universe
+                .quantum_die_resolver
+                .resolve(
+                    {
+                        "die": "quantum_d20",
+                        "value": 7,
+                        "roll_number": 1,
+                    }
+                )
+            )
 
     def test_sequence_creates_two_quantum_pairs(self):
         universe = Universe()
