@@ -3,7 +3,11 @@ from universe.energy_gate import (
     SPEED_OF_LIGHT_M_S,
 )
 from universe.pre_cosmic_rules import IDEA_DIMENSIONS
-from universe.dark_sector_state import DarkSectorState
+from universe.dark_sector_state import (
+    DarkMatterCondensationEvent,
+    DarkSectorEnergyReceivedEvent,
+    DarkSectorState,
+)
 
 
 QUANTUM_BOX_ENERGY_COST_J = (
@@ -93,13 +97,12 @@ class DarkSector:
     ):
         self.dark_energy_j += energy_j
 
-        event = {
-            "name": "empty_quantum_box_energy_received",
-            "box_id": box_id,
-            "energy_j": energy_j,
-            "dark_energy_total_j": self.dark_energy_j,
-            "threshold_progress": self.threshold_progress
-        }
+        event = DarkSectorEnergyReceivedEvent(
+            box_id=box_id,
+            energy_j=energy_j,
+            dark_energy_total_j=self.dark_energy_j,
+            threshold_progress=self.threshold_progress,
+        )
 
         self.events.append(event)
 
@@ -129,19 +132,18 @@ class DarkSector:
         self.dark_energy_j -= consumed_energy_j
         self.dark_matter_kg += produced_dark_matter_kg
 
-        event = {
-            "name": "dark_matter_naturally_condensed",
-            "consumed_energy_j": consumed_energy_j,
-            "produced_dark_matter_kg": (
+        event = DarkMatterCondensationEvent(
+            consumed_energy_j=consumed_energy_j,
+            produced_dark_matter_kg=(
                 produced_dark_matter_kg
             ),
-            "dark_energy_remaining_j": (
+            dark_energy_remaining_j=(
                 self.dark_energy_j
             ),
-            "dark_matter_total_kg": (
+            dark_matter_total_kg=(
                 self.dark_matter_kg
-            )
-        }
+            ),
+        )
 
         self.events.append(event)
 

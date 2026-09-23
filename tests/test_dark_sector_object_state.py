@@ -1,7 +1,11 @@
 import unittest
 
 from universe.dark_sector import DarkSector
-from universe.dark_sector_state import DarkSectorState
+from universe.dark_sector_state import (
+    DarkMatterCondensationEvent,
+    DarkSectorEnergyReceivedEvent,
+    DarkSectorState,
+)
 from universe.universe import Universe
 
 
@@ -65,8 +69,22 @@ class DarkSectorObjectStateTests(unittest.TestCase):
 
         self.assertIs(sector.dark_sector_state, state)
         self.assertEqual(state.dark_energy_j, 2.0)
-        self.assertIsInstance(event, dict)
-        self.assertIs(sector.events[0], event)
+        self.assertIsInstance(
+            event,
+            DarkSectorEnergyReceivedEvent,
+        )
+        self.assertIs(
+            sector.events[0],
+            event,
+        )
+        self.assertEqual(
+            event.box_id,
+            "empty_box",
+        )
+        self.assertEqual(
+            event.energy_j,
+            2.0,
+        )
 
     def test_public_state_is_detached_dict_boundary(self):
         sector = DarkSector()
@@ -100,7 +118,46 @@ class DarkSectorObjectStateTests(unittest.TestCase):
         self.assertIs(sector.dark_sector_state, state)
         self.assertEqual(state.dark_energy_j, 0.0)
         self.assertGreater(state.dark_matter_kg, 0.0)
-        self.assertIsInstance(event, dict)
+        self.assertIsInstance(
+            event,
+            DarkMatterCondensationEvent,
+        )
+        self.assertEqual(
+            event.dark_energy_remaining_j,
+            0.0,
+        )
+
+    def test_dark_sector_events_are_object_only(self):
+        sector = DarkSector()
+
+        event = sector.receive_empty_box_energy(
+            box_id="empty_box",
+            energy_j=2.0,
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    event,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(TypeError):
+            _ = event["energy_j"]
+
+        snapshot = event.to_dict()
+        snapshot["energy_j"] = 999.0
+
+        self.assertEqual(
+            event.energy_j,
+            2.0,
+        )
 
     def test_invalid_energy_remains_validation_error(self):
         universe = Universe()
@@ -144,8 +201,18 @@ class DarkSectorObjectStateTests(unittest.TestCase):
             energy_j=1.0,
         )
 
-        self.assertEqual(result["energy_j"], 1.0)
-        self.assertEqual(sector.dark_energy_j, 1.0)
+        self.assertIsInstance(
+            result,
+            DarkSectorEnergyReceivedEvent,
+        )
+        self.assertEqual(
+            result.energy_j,
+            1.0,
+        )
+        self.assertEqual(
+            sector.dark_energy_j,
+            1.0,
+        )
 
     def test_to_dict_is_detached_boundary(self):
         state = DarkSectorState(quantum_threshold_j=10.0)
