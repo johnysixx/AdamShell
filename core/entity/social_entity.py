@@ -1,6 +1,30 @@
 from dataclasses import dataclass
 
 
+@dataclass(slots=True, frozen=True)
+class SocialInteractionRecord:
+    interaction_type: str
+    actor: str
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "interaction_type",
+            str(self.interaction_type),
+        )
+        object.__setattr__(
+            self,
+            "actor",
+            str(self.actor),
+        )
+
+    def to_dict(self):
+        return {
+            "type": self.interaction_type,
+            "actor": self.actor,
+        }
+
+
 @dataclass
 class SocialRelationship:
     affinity: float = 0.0
@@ -84,10 +108,12 @@ class SocialMixin:
         affinity_before = relation.record_pet(affinity_gain)
         cat.next_social_target = actor_name
         cat.social_attention_bias = relation.affinity
-        cat.last_social_interaction = {
-            'type': 'pet',
-            'actor': actor_name,
-        }
+        cat.last_social_interaction = (
+            SocialInteractionRecord(
+                interaction_type='pet',
+                actor=actor_name,
+            )
+        )
         return {
             'name': 'cat_petted',
             'cat': cat_name,
@@ -107,10 +133,12 @@ class SocialMixin:
         affinity_before = relation.record_pet(affinity_gain)
         self.next_social_target = actor_name
         self.social_attention_bias = relation.affinity
-        self.last_social_interaction = {
-            'type': 'pet',
-            'actor': actor_name,
-        }
+        self.last_social_interaction = (
+            SocialInteractionRecord(
+                interaction_type='pet',
+                actor=actor_name,
+            )
+        )
         return {
             'name': 'cat_petted',
             'cat': getattr(self, 'name', None),

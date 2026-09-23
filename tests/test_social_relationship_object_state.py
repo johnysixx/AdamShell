@@ -1,3 +1,4 @@
+from core.entity.social_entity import SocialInteractionRecord
 import unittest
 
 from core.entity.social_entity import SocialRelationship
@@ -30,6 +31,62 @@ class SocialRelationshipObjectStateTests(unittest.TestCase):
         self.assertEqual(relation.pet_count, 1)
         self.assertGreater(relation.affinity, 0.0)
         self.assertEqual(relation.last_interaction, 'pet')
+
+    def test_last_social_interaction_is_object_state(
+        self
+    ):
+        event = self.actor.pet_cat(
+            self.cat
+        )
+
+        interaction = (
+            self.cat
+            .last_social_interaction
+        )
+
+        self.assertIsInstance(
+            interaction,
+            SocialInteractionRecord,
+        )
+
+        self.assertEqual(
+            interaction.interaction_type,
+            'pet',
+        )
+
+        self.assertEqual(
+            interaction.actor,
+            'lilith',
+        )
+
+        for mapping_method in (
+            'get',
+            'keys',
+            'items',
+            'values',
+        ):
+            self.assertFalse(
+                hasattr(
+                    interaction,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(TypeError):
+            _ = interaction['actor']
+
+        snapshot = interaction.to_dict()
+        snapshot['actor'] = 'changed'
+
+        self.assertEqual(
+            interaction.actor,
+            'lilith',
+        )
+
+        self.assertEqual(
+            event['actor'],
+            'lilith',
+        )
 
     def test_repeated_petting_mutates_relationship_through_attributes(self):
         self.actor.pet_cat(self.cat)
