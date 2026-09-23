@@ -3,7 +3,10 @@ import unittest
 from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat_knowledge import CatKnowledge
-from cats.cat_social_objects import CatRelationship
+from cats.cat_social_objects import (
+    CatRelationship,
+    CatRelationshipTrustEvent,
+)
 from cats.cat_exploration_planner import CatExplorationPlanner
 
 class CatLegendReputationTests(unittest.TestCase):
@@ -33,7 +36,10 @@ class CatLegendReputationTests(unittest.TestCase):
         CatKnowledge.contradict_heard_legend(self.listener, self.legend.legend_id)
         history = self.listener.relationships['pazuzu'].trust_history
         self.assertEqual(len(history), 1)
-        self.assertEqual(history[0]['reason'], 'personal_observation_contradicted')
+        self.assertEqual(
+            history[0].reason,
+            'personal_observation_contradicted',
+        )
 
     def test_trust_is_clamped_to_zero_and_one(self):
         for _ in range(20):
@@ -54,10 +60,18 @@ class CatLegendReputationTests(unittest.TestCase):
         record = CatRelationship.create()
         record.trust = 0.8
         record.meet_count = 4
-        record.trust_history = [{'reason': 'past_observation'}]
+        record.trust_history = [
+            CatRelationshipTrustEvent(
+                reason='past_observation'
+            )
+        ]
         legacy = CatRelationship.create()
         legacy.trust = 0.6
-        legacy.trust_history = [{'reason': 'earlier_observation'}]
+        legacy.trust_history = [
+            CatRelationshipTrustEvent(
+                reason='earlier_observation'
+            )
+        ]
         legacy.custom_note = 'preserve_me'
 
         for name, relation, expected in (
@@ -66,7 +80,7 @@ class CatLegendReputationTests(unittest.TestCase):
         ):
             self.listener.relationships[name] = relation
             history = relation.trust_history
-            prior_event = dict(history[0])
+            prior_event = history[0]
             first = CatKnowledge.adjust_storyteller_trust(
                 self.listener, name, 0.1, 'confirmed',
                 legend_id=self.legend.legend_id,
@@ -83,11 +97,11 @@ class CatLegendReputationTests(unittest.TestCase):
                 CatKnowledge._trust_in_cat(self.listener, name), expected,
             )
             self.assertEqual(len(history), 3)
-            self.assertEqual(history[0], prior_event)
-            self.assertEqual(history[1], first)
-            self.assertEqual(history[2], second)
+            self.assertIs(history[0], prior_event)
+            self.assertEqual(history[1].to_dict(), first)
+            self.assertEqual(history[2].to_dict(), second)
             second['current'] = -1.0
-            self.assertAlmostEqual(history[2]['current'], expected)
+            self.assertAlmostEqual(history[2].current, expected)
 
         self.assertEqual(record.meet_count, 4)
         self.assertEqual(legacy.custom_note, 'preserve_me')

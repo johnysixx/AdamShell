@@ -5,7 +5,11 @@ from core.entity.components import SpatialVector3, require_spatial_vector
 from cats.cat_scent_direction_state import (
     CatScentTrailDirection,
 )
-from cats.cat_social_objects import CatLegend, CatRelationship
+from cats.cat_social_objects import (
+    CatLegend,
+    CatRelationship,
+    CatRelationshipTrustEvent,
+)
 from cats.cat_olfaction_state import (
     CatAromaMatch,
     CatAromaRecognition,
@@ -936,19 +940,19 @@ class CatKnowledge:
 
         relation.trust = current
 
-        event = {
-            'previous': previous,
-            'current': current,
-            'delta': current - previous,
-            'reason': reason,
-            'legend_id': legend_id,
-        }
-
-        relation.trust_history.append(
-            deepcopy(event)
+        event = CatRelationshipTrustEvent(
+            previous=previous,
+            current=current,
+            delta=current - previous,
+            reason=reason,
+            legend_id=legend_id,
         )
 
-        return deepcopy(event)
+        relation.trust_history.append(
+            event
+        )
+
+        return event.to_dict()
 
     @classmethod
     def contradict_heard_legend(

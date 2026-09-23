@@ -1,4 +1,4 @@
-﻿from dataclasses import dataclass
+from dataclasses import dataclass
 from copy import deepcopy
 from core.entity.component_object import ComponentObject
 
@@ -33,7 +33,77 @@ class CatBond(ComponentObject):
     pass
 
 
+@dataclass(slots=True, frozen=True)
+class CatRelationshipTrustEvent:
+    reason: str
+    previous: float | None = None
+    current: float | None = None
+    delta: float | None = None
+    legend_id: str | None = None
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "reason",
+            str(self.reason),
+        )
+
+        for field_name in (
+            "previous",
+            "current",
+            "delta",
+        ):
+            value = getattr(
+                self,
+                field_name,
+            )
+
+            if value is not None:
+                object.__setattr__(
+                    self,
+                    field_name,
+                    float(value),
+                )
+
+    def to_dict(self):
+        return {
+            "previous": self.previous,
+            "current": self.current,
+            "delta": self.delta,
+            "reason": self.reason,
+            "legend_id": self.legend_id,
+        }
+
+
 class CatRelationship(ComponentObject):
+
+    @property
+    def trust_history(self):
+        return self._trust_history
+
+    @trust_history.setter
+    def trust_history(self, value):
+        if value is None:
+            value = []
+
+        if not isinstance(value, list):
+            raise TypeError(
+                "Cat relationship trust history "
+                "must be a list."
+            )
+
+        for event in value:
+            if not isinstance(
+                event,
+                CatRelationshipTrustEvent,
+            ):
+                raise TypeError(
+                    "Cat relationship trust history "
+                    "must contain "
+                    "CatRelationshipTrustEvent objects."
+                )
+
+        self._trust_history = value
 
     def __init__(
         self,
@@ -64,6 +134,24 @@ class CatRelationship(ComponentObject):
     @classmethod
     def create(cls):
         return cls()
+
+    def to_dict(self):
+        snapshot = deepcopy(
+            super().to_dict()
+        )
+
+        snapshot.pop(
+            "_trust_history",
+            None,
+        )
+
+        snapshot["trust_history"] = [
+            event.to_dict()
+            for event
+            in self.trust_history
+        ]
+
+        return snapshot
 
 
 @dataclass(slots=True, frozen=True)

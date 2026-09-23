@@ -2,7 +2,10 @@ import unittest
 from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat_group_system import CatGroupSystem
-from cats.cat_social_objects import CatRelationship
+from cats.cat_social_objects import (
+    CatRelationship,
+    CatRelationshipTrustEvent,
+)
 from cats.cat_group_territory_state import (
     CatGroupTerritoryState,
 )
@@ -121,7 +124,7 @@ class CatGroupSystemTests(unittest.TestCase):
         relation.trust = 0.8
         relation.shared_scent = 0.3
         relation.meet_count = 4
-        history = [{'reason': 'past_meeting'}]
+        history = [CatRelationshipTrustEvent(reason='past_meeting')]
         relation.trust_history = history
         legacy = CatRelationship.create()
         legacy.trust = 0.7

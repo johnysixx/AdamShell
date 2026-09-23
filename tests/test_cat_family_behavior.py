@@ -2,7 +2,10 @@ import unittest
 
 from universe.universe import Universe
 from cats.cats import Cats
-from cats.cat_social_objects import CatRelationship
+from cats.cat_social_objects import (
+    CatRelationship,
+    CatRelationshipTrustEvent,
+)
 from cats.cat_family_system import (
     CatFamilySystem
 )
@@ -353,7 +356,7 @@ class CatFamilyBehaviorTests(
         relation.tension = 0.4
         relation.affiliation = 0.6
         relation.meet_count = 4
-        history = [{'reason': 'past_meeting'}]
+        history = [CatRelationshipTrustEvent(reason='past_meeting')]
         relation.trust_history = history
         legacy = CatRelationship.create()
         legacy.trust = 0.7
@@ -391,7 +394,7 @@ class CatFamilyBehaviorTests(
         relation.affiliation = 0.3
         relation.tension = 0.1
         relation.meet_count = 4
-        history = [{'reason': 'past_meeting'}]
+        history = [CatRelationshipTrustEvent(reason='past_meeting')]
         relation.trust_history = history
         legacy = CatRelationship.create()
         legacy.trust = 0.7

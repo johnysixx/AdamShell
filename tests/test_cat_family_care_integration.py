@@ -4,7 +4,10 @@ from cats.cats import Cats
 from cats.cat_family_system import CatFamilySystem
 from cats.cat_maternal_care_system import CatMaternalCareSystem
 from cats.cat_sibling_play_system import CatSiblingPlaySystem
-from cats.cat_social_objects import CatRelationship
+from cats.cat_social_objects import (
+    CatRelationship,
+    CatRelationshipTrustEvent,
+)
 
 class CatFamilyCareIntegrationTests(unittest.TestCase):
 
@@ -80,7 +83,7 @@ class CatFamilyCareIntegrationTests(unittest.TestCase):
         relation.familiarity = 0.2
         relation.shared_scent = 0.3
         relation.meet_count = 4
-        history = [{'reason': 'past_meeting'}]
+        history = [CatRelationshipTrustEvent(reason='past_meeting')]
         relation.trust_history = history
         legacy = CatRelationship.create()
         legacy.trust = 0.7

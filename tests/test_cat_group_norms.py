@@ -8,7 +8,10 @@ from cats.cat_group_norm_system import CatGroupNormSystem
 from cats.cat_group_taboo_system import CatGroupTabooSystem
 from cats.cat_group_sanction_system import CatGroupSanctionSystem
 from cats.cat_culture_objects import CatViolation
-from cats.cat_social_objects import CatRelationship
+from cats.cat_social_objects import (
+    CatRelationship,
+    CatRelationshipTrustEvent,
+)
 from cats.cat_group_norm_institution_system import CatGroupNormInstitutionSystem
 
 class CatGroupNormTests(unittest.TestCase):
@@ -106,7 +109,7 @@ class CatGroupNormTests(unittest.TestCase):
             (self.first, self.second, CatRelationship.create()),
             (self.second, self.first, CatRelationship.create()),
         ):
-            history = [{'kind': 'shared_rest'}]
+            history = [CatRelationshipTrustEvent(reason='shared_rest')]
             relation.affiliation = 0.4
             relation.trust = 0.8
             relation.trust_history = history
@@ -131,7 +134,14 @@ class CatGroupNormTests(unittest.TestCase):
             self.assertAlmostEqual(relation.affiliation, 0.35)
             self.assertAlmostEqual(cat.norms.trust_penalties, 0.237)
             self.assertIs(relation.trust_history, history)
-            self.assertEqual(history, [{'kind': 'shared_rest'}])
+            self.assertEqual(
+                history,
+                [
+                    CatRelationshipTrustEvent(
+                        reason='shared_rest'
+                    )
+                ],
+            )
             self.assertEqual(relation.meet_count, 3)
 
 

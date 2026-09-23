@@ -7,7 +7,10 @@ from cats.cat_group_bonding_system import CatGroupBondingSystem
 from cats.cat_group_lifecycle_system import CatGroupLifecycleSystem
 from cats.cat_group_migration_system import CatGroupMigrationSystem
 from cats.cat_group_conflict_system import CatGroupConflictSystem
-from cats.cat_social_objects import CatRelationship
+from cats.cat_social_objects import (
+    CatRelationship,
+    CatRelationshipTrustEvent,
+)
 from cats.cat_group_split_system import CatGroupSplitSystem
 
 class CatGroupWorldBehaviorTests(unittest.TestCase):
@@ -89,7 +92,7 @@ class CatGroupWorldBehaviorTests(unittest.TestCase):
                 (members[0], members[1], object_relation, (0.98, 1.0)),
                 (members[1], members[0], CatRelationship.create(), (0.08, 0.16)),
             ):
-                history = [{'kind': 'shared_rest'}]
+                history = [CatRelationshipTrustEvent(reason='shared_rest')]
                 relation.trust = 0.75
                 relation.affiliation = 0.4
                 relation.trust_history = history
@@ -106,7 +109,14 @@ class CatGroupWorldBehaviorTests(unittest.TestCase):
                 self.assertEqual(relation.trust, 0.75)
                 self.assertEqual(relation.affiliation, 0.4)
                 self.assertIs(relation.trust_history, history)
-                self.assertEqual(history, [{'kind': 'shared_rest'}])
+                self.assertEqual(
+                    history,
+                    [
+                        CatRelationshipTrustEvent(
+                            reason='shared_rest'
+                        )
+                    ],
+                )
                 self.assertEqual(relation.meet_count, 3)
 
     def _assert_decisive_conflict(self, first_wins):
