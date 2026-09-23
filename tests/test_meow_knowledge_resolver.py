@@ -2,7 +2,12 @@ import unittest
 from universe.universe import Universe
 from cats.cats import Cats
 from cats.development_resolver import CatDevelopmentResolver
-from cats.meow_knowledge_resolver import MeowKnowledgeResolver
+from cats.meow_knowledge_resolver import (
+    MeowKnowledgeLesson,
+    MeowKnowledgeTransmittedEvent,
+    MeowKnowledgeTransmissionDeniedEvent,
+    MeowKnowledgeResolver,
+)
 
 class MeowKnowledgeResolverTests(unittest.TestCase):
 
@@ -72,7 +77,164 @@ class MeowKnowledgeResolverTests(unittest.TestCase):
         self.assertTrue(result['learning_complete'])
         self.assertTrue(learning.complete)
         self.assertFalse(learning.teaching_required)
-        self.assertEqual(learning.lessons[-1]['name'], 'mother_spoke_meow')
+        self.assertEqual(
+            learning.lessons[-1].name,
+            'mother_spoke_meow',
+        )
+
+    def test_successful_transmission_uses_object_state(
+        self
+    ):
+        self.complete_required_experiences()
+
+        result = self.meow.transmit(
+            mother=self.mother,
+            kitten=self.kitten,
+            current_day=75,
+        )
+
+        event = self.meow.history[-1]
+        lesson = (
+            self.kitten
+            .learning
+            .lessons[-1]
+        )
+
+        self.assertIsInstance(
+            event,
+            MeowKnowledgeTransmittedEvent,
+        )
+
+        self.assertIsInstance(
+            lesson,
+            MeowKnowledgeLesson,
+        )
+
+        self.assertEqual(
+            event.teacher_role,
+            'biological_mother',
+        )
+
+        self.assertEqual(
+            lesson.name,
+            'mother_spoke_meow',
+        )
+
+        for value, key in (
+            (
+                event,
+                'teacher_role',
+            ),
+            (
+                lesson,
+                'name',
+            ),
+        ):
+            for mapping_method in (
+                'get',
+                'keys',
+                'items',
+                'values',
+            ):
+                self.assertFalse(
+                    hasattr(
+                        value,
+                        mapping_method,
+                    )
+                )
+
+            with self.assertRaises(TypeError):
+                _ = value[key]
+
+        result[
+            'teacher_role'
+        ] = 'changed'
+
+        self.assertEqual(
+            event.teacher_role,
+            'biological_mother',
+        )
+
+    def test_denied_transmission_history_uses_object_state(
+        self
+    ):
+        result = self.meow.transmit(
+            mother=self.mother,
+            kitten=self.kitten,
+            current_day=30,
+        )
+
+        event = self.meow.history[-1]
+
+        self.assertIsInstance(
+            event,
+            MeowKnowledgeTransmissionDeniedEvent,
+        )
+
+        self.assertEqual(
+            event.reason,
+            'required_experiences_missing',
+        )
+
+        self.assertIn(
+            'hunting',
+            event.missing_experiences,
+        )
+
+        self.assertFalse(
+            event.transmitted
+        )
+
+        result['reason'] = 'changed'
+
+        self.assertEqual(
+            event.reason,
+            'required_experiences_missing',
+        )
+
+        with self.assertRaises(TypeError):
+            _ = event['reason']
+
+    def test_learning_snapshot_serializes_meow_lesson_object(
+        self
+    ):
+        self.complete_required_experiences()
+
+        self.meow.transmit(
+            mother=self.mother,
+            kitten=self.kitten,
+            current_day=75,
+        )
+
+        lesson = (
+            self.kitten
+            .learning
+            .lessons[-1]
+        )
+
+        snapshot = (
+            self.kitten
+            .learning
+            .to_dict()
+        )
+
+        lesson_snapshot = (
+            snapshot['lessons'][-1]
+        )
+
+        self.assertEqual(
+            lesson_snapshot['name'],
+            'mother_spoke_meow',
+        )
+
+        lesson_snapshot[
+            'name'
+        ] = 'changed'
+
+        self.assertEqual(
+            lesson.name,
+            'mother_spoke_meow',
+        )
 
     def test_meow_cannot_be_transmitted_twice(self):
         self.complete_required_experiences()
