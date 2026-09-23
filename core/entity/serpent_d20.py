@@ -1,8 +1,66 @@
 import random
 import uuid
 from copy import deepcopy
+from dataclasses import dataclass, field
 
 from quantum.serpent_roll_resolver import SerpentRollResolver
+
+
+@dataclass(slots=True, frozen=True)
+class SerpentD20PublicRollEvent:
+    roll_id: str
+    roller: str
+    die: str
+    value: int
+    roll_number: int
+    universe_tick: int | None = None
+    name: str = field(
+        default="serpent_d20_rolled",
+        init=False,
+    )
+    visibility: str = field(
+        default="public",
+        init=False,
+    )
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "roll_id",
+            str(self.roll_id),
+        )
+        object.__setattr__(
+            self,
+            "roller",
+            str(self.roller),
+        )
+        object.__setattr__(
+            self,
+            "die",
+            str(self.die),
+        )
+        object.__setattr__(
+            self,
+            "value",
+            int(self.value),
+        )
+        object.__setattr__(
+            self,
+            "roll_number",
+            int(self.roll_number),
+        )
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "roll_id": self.roll_id,
+            "roller": self.roller,
+            "die": self.die,
+            "value": self.value,
+            "roll_number": self.roll_number,
+            "universe_tick": self.universe_tick,
+            "visibility": self.visibility,
+        }
 
 
 class SerpentD20:
@@ -53,19 +111,21 @@ class SerpentD20:
             self.sides
         )
 
-        public_event = {
-            "name": "serpent_d20_rolled",
-            "roll_id": roll_id,
-            "roller": self.owner,
-            "die": self.name,
-            "value": value,
-            "roll_number": self.roll_count,
-            "universe_tick": universe_tick,
-            "visibility": "public"
-        }
+        public_event = SerpentD20PublicRollEvent(
+            roll_id=roll_id,
+            roller=self.owner,
+            die=self.name,
+            value=value,
+            roll_number=self.roll_count,
+            universe_tick=universe_tick,
+        )
+
+        public_snapshot = (
+            public_event.to_dict()
+        )
 
         hidden_plan = self.roll_resolver.resolve(
-            public_roll=public_event,
+            public_roll=public_snapshot,
             rng=rng
         )
 
@@ -89,7 +149,7 @@ class SerpentD20:
             "visibility": "universe_only"
         }
 
-        self.public_history.append(
+        self.record_public_roll(
             public_event
         )
 
@@ -98,7 +158,29 @@ class SerpentD20:
         )
 
         # Volající dostane pouze veřejnou událost.
-        return deepcopy(public_event)
+        return deepcopy(
+            public_snapshot
+        )
+
+    def record_public_roll(
+        self,
+        event,
+    ):
+        if not isinstance(
+            event,
+            SerpentD20PublicRollEvent,
+        ):
+            raise TypeError(
+                "Serpent D20 public history "
+                "requires a "
+                "SerpentD20PublicRollEvent object."
+            )
+
+        self.public_history.append(
+            event
+        )
+
+        return event
 
     def hidden_resolution_for(self, roll_id):
         event = next(
@@ -147,8 +229,8 @@ class SerpentD20:
             "location": self.location,
             "sides": self.sides,
             "roll_count": self.roll_count,
-            "public_history": deepcopy(
-                self.public_history
-            )
+            "public_history": [
+                event.to_dict()
+                for event in self.public_history
+            ]
         }
-
