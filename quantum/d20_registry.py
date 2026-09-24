@@ -1,6 +1,174 @@
 import random
+from copy import deepcopy
+from dataclasses import dataclass
+from types import MappingProxyType
 
 from universe.logger import UniverseLogger
+
+
+def _freeze_rotation_payload(value):
+    if isinstance(value, dict):
+        return MappingProxyType({
+            key: _freeze_rotation_payload(item)
+            for key, item in value.items()
+        })
+
+    if isinstance(
+        value,
+        (
+            list,
+            tuple,
+        ),
+    ):
+        return tuple(
+            _freeze_rotation_payload(item)
+            for item in value
+        )
+
+    if isinstance(value, set):
+        return frozenset(
+            _freeze_rotation_payload(item)
+            for item in value
+        )
+
+    return deepcopy(value)
+
+
+def _thaw_rotation_payload(value):
+    if isinstance(
+        value,
+        MappingProxyType,
+    ):
+        return {
+            key: _thaw_rotation_payload(item)
+            for key, item in value.items()
+        }
+
+    if isinstance(value, tuple):
+        return [
+            _thaw_rotation_payload(item)
+            for item in value
+        ]
+
+    if isinstance(value, frozenset):
+        return [
+            _thaw_rotation_payload(item)
+            for item in value
+        ]
+
+    return deepcopy(value)
+
+
+@dataclass(slots=True, frozen=True)
+class D20RotationEvent:
+
+    scope: str
+    rotated_count: int
+    artifact_names: tuple[str, ...]
+    results: tuple[object, ...]
+    layer: str | None = None
+
+    def __post_init__(self):
+        scope = str(
+            self.scope
+        )
+
+        if scope not in {
+            "random",
+            "all",
+            "layer",
+        }:
+            raise ValueError(
+                "Unsupported d20 rotation scope."
+            )
+
+        object.__setattr__(
+            self,
+            "scope",
+            scope,
+        )
+
+        object.__setattr__(
+            self,
+            "rotated_count",
+            int(
+                self.rotated_count
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "artifact_names",
+            tuple(
+                str(name)
+                for name
+                in self.artifact_names
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "results",
+            tuple(
+                _freeze_rotation_payload(
+                    result
+                )
+                for result
+                in self.results
+            ),
+        )
+
+        if self.layer is not None:
+            object.__setattr__(
+                self,
+                "layer",
+                str(self.layer),
+            )
+
+        if (
+            self.rotated_count
+            != len(self.results)
+        ):
+            raise ValueError(
+                "D20 rotation count must match "
+                "the result count."
+            )
+
+        if (
+            self.rotated_count
+            != len(
+                self.artifact_names
+            )
+        ):
+            raise ValueError(
+                "D20 rotation count must match "
+                "the artifact name count."
+            )
+
+    def to_dict(self):
+        snapshot = {
+            "scope": self.scope,
+            "rotated_count": (
+                self.rotated_count
+            ),
+            "artifact_names": list(
+                self.artifact_names
+            ),
+            "results": [
+                _thaw_rotation_payload(
+                    result
+                )
+                for result
+                in self.results
+            ],
+        }
+
+        if self.layer is not None:
+            snapshot[
+                "layer"
+            ] = self.layer
+
+        return snapshot
 
 
 class D20Registry:
@@ -54,18 +222,24 @@ class D20Registry:
             rng=rng
         )
 
-        event = {
-            "scope": "random",
-            "rotated_count": 1,
-            "artifact_names": [
-                self._artifact_name(artifact)
-            ],
-            "results": [result]
-        }
+        event = D20RotationEvent(
+            scope="random",
+            rotated_count=1,
+            artifact_names=(
+                self._artifact_name(
+                    artifact
+                ),
+            ),
+            results=(
+                result,
+            ),
+        )
 
-        self.rotation_history.append(event)
+        self.record_rotation(
+            event
+        )
 
-        return event
+        return event.to_dict()
 
     def rotate_all(self, rng=None):
         results = []
@@ -83,16 +257,24 @@ class D20Registry:
                 )
             )
 
-        event = {
-            "scope": "all",
-            "rotated_count": len(results),
-            "artifact_names": artifact_names,
-            "results": results
-        }
+        event = D20RotationEvent(
+            scope="all",
+            rotated_count=len(
+                results
+            ),
+            artifact_names=tuple(
+                artifact_names
+            ),
+            results=tuple(
+                results
+            ),
+        )
 
-        self.rotation_history.append(event)
+        self.record_rotation(
+            event
+        )
 
-        return event
+        return event.to_dict()
 
     def rotate_layer(
         self,
@@ -118,18 +300,46 @@ class D20Registry:
             for artifact in matches
         ]
 
-        event = {
-            "scope": "layer",
-            "layer": layer,
-            "rotated_count": len(results),
-            "artifact_names": [
-                self._artifact_name(artifact)
-                for artifact in matches
-            ],
-            "results": results
-        }
+        event = D20RotationEvent(
+            scope="layer",
+            layer=layer,
+            rotated_count=len(
+                results
+            ),
+            artifact_names=tuple(
+                self._artifact_name(
+                    artifact
+                )
+                for artifact
+                in matches
+            ),
+            results=tuple(
+                results
+            ),
+        )
 
-        self.rotation_history.append(event)
+        self.record_rotation(
+            event
+        )
+
+        return event.to_dict()
+
+    def record_rotation(
+        self,
+        event,
+    ):
+        if not isinstance(
+            event,
+            D20RotationEvent,
+        ):
+            raise TypeError(
+                "D20 rotation history requires "
+                "a D20RotationEvent object."
+            )
+
+        self.rotation_history.append(
+            event
+        )
 
         return event
 
