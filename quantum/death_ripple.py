@@ -1,4 +1,50 @@
 import random
+from dataclasses import dataclass
+
+
+
+
+@dataclass(slots=True, frozen=True)
+class QuantumDeathRippleEvent:
+    event_name: str | None
+    predator: str | None
+    prey: str | None
+    result_scope: str | None
+    rotated_count: int
+
+    def __post_init__(self):
+        for field_name in (
+            "event_name",
+            "predator",
+            "prey",
+            "result_scope",
+        ):
+            value = getattr(
+                self,
+                field_name,
+            )
+
+            if value is not None:
+                object.__setattr__(
+                    self,
+                    field_name,
+                    str(value),
+                )
+
+        object.__setattr__(
+            self,
+            "rotated_count",
+            int(self.rotated_count),
+        )
+
+    def to_dict(self):
+        return {
+            "event_name": self.event_name,
+            "predator": self.predator,
+            "prey": self.prey,
+            "result_scope": self.result_scope,
+            "rotated_count": self.rotated_count,
+        }
 
 
 class QuantumDeathRipple:
@@ -59,26 +105,28 @@ class QuantumDeathRipple:
                 )
             )
 
-        record = {
-            "event_name": event.get("name"),
-            "predator": event.get(
+        record = QuantumDeathRippleEvent(
+            event_name=event.get("name"),
+            predator=event.get(
                 "payload",
                 {}
             ).get("predator"),
-            "prey": event.get(
+            prey=event.get(
                 "payload",
                 {}
             ).get("prey"),
-            "result_scope": result.get(
+            result_scope=result.get(
                 "scope"
             ),
-            "rotated_count": result.get(
+            rotated_count=result.get(
                 "rotated_count",
                 0
-            )
-        }
+            ),
+        )
 
-        self.history.append(record)
+        self.record_event(
+            record
+        )
 
         return {
             "scope": result.get("scope"),
@@ -88,13 +136,34 @@ class QuantumDeathRipple:
             )
         }
 
+    def record_event(
+        self,
+        event,
+    ):
+        if not isinstance(
+            event,
+            QuantumDeathRippleEvent,
+        ):
+            raise TypeError(
+                "Quantum death ripple history "
+                "requires a "
+                "QuantumDeathRippleEvent object."
+            )
+
+        self.history.append(
+            event
+        )
+
+        return event
+
     @property
     def public_state(self):
         return {
             "event_count": len(
                 self.history
             ),
-            "history": list(
-                self.history
-            )
+            "history": [
+                event.to_dict()
+                for event in self.history
+            ]
         }
