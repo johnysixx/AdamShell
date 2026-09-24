@@ -4,6 +4,8 @@ from universe.universe import Universe
 from cats.cats import Cats
 from cats.duplicate_consumption_energy import (
     DuplicateConsumptionEnergy,
+    DuplicateConsumptionEnergyResolvedEvent,
+    DuplicateConsumptionEnergyStoredEvent,
 )
 from cats.duplicate_consumption_energy_state import (
     DuplicateConsumptionEnergyState,
@@ -132,7 +134,7 @@ class DuplicateConsumptionEnergyObjectStateTests(
             ],
         )
 
-    def test_store_event_remains_transient_dict(
+    def test_store_history_uses_object_state(
         self
     ):
         self.energy.store(
@@ -142,23 +144,106 @@ class DuplicateConsumptionEnergyObjectStateTests(
         )
 
         event = (
-            self.energy.history[
-                -1
-            ]
+            self.energy.history[-1]
         )
 
         self.assertIsInstance(
             event,
-            dict,
+            DuplicateConsumptionEnergyStoredEvent,
         )
 
         self.assertEqual(
-            event["name"],
+            event.name,
             (
                 "duplicate_consumption_"
                 "energy_stored"
             ),
         )
+
+        self.assertEqual(
+            event.amount,
+            1.0,
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    event,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(TypeError):
+            _ = event["energy_id"]
+
+    def test_resolution_history_uses_object_state(
+        self
+    ):
+        state = self.energy.store(
+            cat=self.cat,
+            source="cat_milk",
+            day=1,
+        )
+
+        result = (
+            self.energy.resolve_next(
+                cat_d20_value=1
+            )
+        )
+
+        event = (
+            self.energy.history[-1]
+        )
+
+        self.assertIsInstance(
+            event,
+            DuplicateConsumptionEnergyResolvedEvent,
+        )
+
+        self.assertEqual(
+            event.energy_id,
+            state.energy_id,
+        )
+
+        self.assertEqual(
+            event.cat_d20_value,
+            1,
+        )
+
+        self.assertEqual(
+            event.resolution,
+            result["resolution"],
+        )
+
+        result[
+            "resolution"
+        ] = "changed"
+
+        self.assertNotEqual(
+            event.resolution,
+            "changed",
+        )
+
+        with self.assertRaises(TypeError):
+            _ = event["resolution"]
+
+    def test_history_rejects_mapping_event(
+        self
+    ):
+        with self.assertRaises(TypeError):
+            self.energy._record(
+                {
+                    "name": (
+                        "duplicate_consumption_"
+                        "energy_stored"
+                    ),
+                }
+            )
 
     def test_legacy_mapping_record_is_rejected(
         self
