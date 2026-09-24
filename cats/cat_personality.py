@@ -1,4 +1,7 @@
-﻿from cats.cat_personality_state import CatPersonalityState
+from cats.cat_personality_state import (
+    CatPersonalityState,
+    CatPersonalityTraitAdjustedEvent,
+)
 
 
 class CatPersonality:
@@ -92,27 +95,27 @@ class CatPersonality:
             current,
         )
 
-        event = {
-            "name": (
-                "cat_personality_trait_adjusted"
-            ),
-            "cat": cat.name,
-            "trait": trait,
-            "source": source,
-            "day": day,
-            "previous": previous,
-            "requested_change": amount,
-            "applied_change": applied,
-            "value": current,
-            "metadata": dict(
-                metadata or {}
-            ),
-        }
+        event = (
+            CatPersonalityTraitAdjustedEvent(
+                cat=cat.name,
+                trait=trait,
+                source=source,
+                day=day,
+                previous=previous,
+                requested_change=amount,
+                applied_change=applied,
+                value=current,
+                metadata=metadata or {},
+            )
+        )
 
         personality.experiences_processed += 1
-        personality.history.append(event)
 
-        return event
+        personality.record_event(
+            event
+        )
+
+        return event.to_dict()
 
     @classmethod
     def apply_experience(
