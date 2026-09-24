@@ -1,8 +1,194 @@
-from copy import deepcopy
+from dataclasses import dataclass, field
 
 from cats.cat_meow_bar_access_state import (
     CatMeowBarAccessState,
 )
+
+@dataclass(slots=True, frozen=True)
+class CatBarGuidanceAccessSnapshot:
+
+    source: str
+    inviting_cat: str
+    invitation_id: str
+    permanent: bool = False
+
+    @classmethod
+    def from_state(
+        cls,
+        state,
+    ):
+        if not isinstance(
+            state,
+            CatMeowBarAccessState,
+        ):
+            raise TypeError(
+                "Bar guidance access requires "
+                "CatMeowBarAccessState."
+            )
+
+        return cls(
+            source=state.source,
+            inviting_cat=state.inviting_cat,
+            invitation_id=state.invitation_id,
+            permanent=state.permanent,
+        )
+
+    def to_state(self):
+        return CatMeowBarAccessState(
+            source=self.source,
+            inviting_cat=self.inviting_cat,
+            invitation_id=self.invitation_id,
+            permanent=self.permanent,
+        )
+
+
+@dataclass(slots=True, frozen=True)
+class CatBarGuidanceAdmissionSnapshot:
+
+    human: str
+    inviting_cat: str
+    invitation_id: str
+    cat_present: bool
+    entered_together: bool
+    permanent_access: bool
+    entered: bool
+
+    name: str = field(
+        default="cat_invited_human_entered",
+        init=False,
+    )
+
+    @classmethod
+    def from_boundary(
+        cls,
+        payload,
+    ):
+        if not isinstance(
+            payload,
+            dict,
+        ):
+            raise TypeError(
+                "Bar guidance admission boundary "
+                "must be dict."
+            )
+
+        return cls(
+            human=payload["human"],
+            inviting_cat=payload[
+                "inviting_cat"
+            ],
+            invitation_id=payload[
+                "invitation_id"
+            ],
+            cat_present=payload[
+                "cat_present"
+            ],
+            entered_together=payload[
+                "entered_together"
+            ],
+            permanent_access=payload[
+                "permanent_access"
+            ],
+            entered=payload["entered"],
+        )
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "human": self.human,
+            "inviting_cat":
+                self.inviting_cat,
+            "invitation_id":
+                self.invitation_id,
+            "cat_present":
+                self.cat_present,
+            "entered_together":
+                self.entered_together,
+            "permanent_access":
+                self.permanent_access,
+            "entered": self.entered,
+        }
+
+
+@dataclass(slots=True, frozen=True)
+class CatGuidedHumanToBarEvent:
+
+    cat: str
+    human: str
+    invitation_id: str
+    access: CatBarGuidanceAccessSnapshot
+    admission: CatBarGuidanceAdmissionSnapshot
+
+    name: str = field(
+        default="cat_guided_human_to_bar",
+        init=False,
+    )
+
+    guided: bool = field(
+        default=True,
+        init=False,
+    )
+
+    permanent_access: bool = field(
+        default=False,
+        init=False,
+    )
+
+    def __post_init__(self):
+        if not isinstance(
+            self.access,
+            CatBarGuidanceAccessSnapshot,
+        ):
+            raise TypeError(
+                "Bar guidance event access "
+                "requires "
+                "CatBarGuidanceAccessSnapshot."
+            )
+
+        if not isinstance(
+            self.admission,
+            CatBarGuidanceAdmissionSnapshot,
+        ):
+            raise TypeError(
+                "Bar guidance event admission "
+                "requires "
+                "CatBarGuidanceAdmissionSnapshot."
+            )
+
+    def to_dict(
+        self,
+        access_state=None,
+    ):
+        access = (
+            self.access.to_state()
+            if access_state is None
+            else access_state
+        )
+
+        if not isinstance(
+            access,
+            CatMeowBarAccessState,
+        ):
+            raise TypeError(
+                "Bar guidance boundary access "
+                "requires "
+                "CatMeowBarAccessState."
+            )
+
+        return {
+            "name": self.name,
+            "cat": self.cat,
+            "human": self.human,
+            "invitation_id":
+                self.invitation_id,
+            "access": access,
+            "admission_result":
+                self.admission.to_dict(),
+            "guided": self.guided,
+            "permanent_access":
+                self.permanent_access,
+        }
+
 
 class CatBarGuidanceSystem:
 
@@ -44,9 +230,54 @@ class CatBarGuidanceSystem:
         self.invitation_system.mark_used(invitation_id)
         cat.meow_invitations.understood += 1
         cat.meow_invitations.guided_to_bar += 1
-        event = {'name': 'cat_guided_human_to_bar', 'cat': cat.name, 'human': self._name(human), 'invitation_id': invitation_id, 'access': temporary_access, 'admission_result': deepcopy(admission_result), 'guided': True, 'permanent_access': False}
-        self.history.append(deepcopy(event))
-        cat.meow_invitations.history.append(deepcopy(event))
+        event = CatGuidedHumanToBarEvent(
+            cat=cat.name,
+            human=self._name(human),
+            invitation_id=invitation_id,
+            access=(
+                CatBarGuidanceAccessSnapshot
+                .from_state(
+                    temporary_access
+                )
+            ),
+            admission=(
+                CatBarGuidanceAdmissionSnapshot
+                .from_boundary(
+                    admission_result
+                )
+            ),
+        )
+
+        self.record_event(
+            event
+        )
+
+        cat.meow_invitations.history.append(
+            event.to_dict()
+        )
+
+        return event.to_dict(
+            access_state=temporary_access
+        )
+
+    def record_event(
+        self,
+        event,
+    ):
+        if not isinstance(
+            event,
+            CatGuidedHumanToBarEvent,
+        ):
+            raise TypeError(
+                "Cat bar guidance history "
+                "requires a "
+                "CatGuidedHumanToBarEvent object."
+            )
+
+        self.history.append(
+            event
+        )
+
         return event
 
     def _failed(self, cat, human, reason):
