@@ -1,6 +1,7 @@
 from cats.cat import Cat
 from core.entity.components import SpatialVector3
 from copy import deepcopy
+from dataclasses import dataclass, field
 
 from cats.cat_quantum_observation_state import (
     CatQuantumCounterpartObservation,
@@ -19,6 +20,57 @@ from .cat_perception_state import (
 )
 
 from cats.cat_perception_state import CatScentTransferCandidate
+
+@dataclass(slots=True, frozen=True)
+class CatEnvironmentObservedEvent:
+
+    cat: str
+    observations: CatPerceptionState
+
+    name: str = field(
+        default="cat_environment_observed",
+        init=False,
+    )
+
+    observed: bool = field(
+        default=True,
+        init=False,
+    )
+
+    def __post_init__(self):
+        if not isinstance(
+            self.observations,
+            CatPerceptionState,
+        ):
+            raise TypeError(
+                "Cat perception history requires "
+                "CatPerceptionState observations."
+            )
+
+        object.__setattr__(
+            self,
+            "cat",
+            str(self.cat),
+        )
+
+        object.__setattr__(
+            self,
+            "observations",
+            deepcopy(
+                self.observations
+            ),
+        )
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "cat": self.cat,
+            "observations": deepcopy(
+                self.observations
+            ),
+            "observed": self.observed,
+        }
+
 
 class CatPerception:
     DEFAULT_VISION_RADIUS = 8.0
@@ -269,11 +321,29 @@ class CatPerception:
                 smelled_cronenbergs
             ),
         )
-        event = {'name': 'cat_environment_observed', 'cat': cat.name, 'observations': deepcopy(observations), 'observed': True}
+        event = CatEnvironmentObservedEvent(
+            cat=cat.name,
+            observations=observations,
+        )
+
         mind = cat.mind
-        mind.last_observations = deepcopy(observations)
-        getattr(mind, 'observation_history', []).append(deepcopy(event))
-        self._record(event)
+
+        mind.last_observations = deepcopy(
+            observations
+        )
+
+        getattr(
+            mind,
+            'observation_history',
+            [],
+        ).append(
+            event.to_dict()
+        )
+
+        self._record(
+            event
+        )
+
         return observations
 
     def _observe_nearby_cats(self, cat, position, radius):
@@ -572,11 +642,48 @@ class CatPerception:
             raise TypeError('Cat perception target must be a SpatialVector3 object.')
         return first.distance_to(second)
 
+    def record_event(
+        self,
+        event,
+    ):
+        if not isinstance(
+            event,
+            CatEnvironmentObservedEvent,
+        ):
+            raise TypeError(
+                "Cat perception history requires "
+                "a CatEnvironmentObservedEvent object."
+            )
+
+        self.history.append(
+            event
+        )
+
+        return event
+
     def _record(self, event):
-        self.history.append(deepcopy(event))
-        quantum_events = getattr(self.universe, 'quantum_events', None)
+        self.record_event(
+            event
+        )
+
+        quantum_events = getattr(
+            self.universe,
+            'quantum_events',
+            None,
+        )
+
         if quantum_events is not None:
-            quantum_events.append(deepcopy(event))
-        emit_event = getattr(self.cats_layer, 'emit_event', None)
+            quantum_events.append(
+                event.to_dict()
+            )
+
+        emit_event = getattr(
+            self.cats_layer,
+            'emit_event',
+            None,
+        )
+
         if emit_event is not None:
-            emit_event(deepcopy(event))
+            emit_event(
+                event.to_dict()
+            )
