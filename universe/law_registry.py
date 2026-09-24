@@ -1,6 +1,167 @@
-﻿from copy import deepcopy
+from copy import deepcopy
+from dataclasses import dataclass, field
+from types import MappingProxyType
 
 from universe.logger import UniverseLogger
+
+
+class _FrozenList(tuple):
+    pass
+
+
+class _FrozenSet(frozenset):
+    pass
+
+
+def _freeze_law_payload(value):
+    if isinstance(value, dict):
+        return MappingProxyType({
+            key: _freeze_law_payload(item)
+            for key, item in value.items()
+        })
+
+    if isinstance(value, list):
+        return _FrozenList(
+            _freeze_law_payload(item)
+            for item in value
+        )
+
+    if isinstance(value, tuple):
+        return tuple(
+            _freeze_law_payload(item)
+            for item in value
+        )
+
+    if isinstance(value, set):
+        return _FrozenSet(
+            _freeze_law_payload(item)
+            for item in value
+        )
+
+    if isinstance(value, frozenset):
+        return frozenset(
+            _freeze_law_payload(item)
+            for item in value
+        )
+
+    return deepcopy(value)
+
+
+def _thaw_law_payload(value):
+    if isinstance(
+        value,
+        MappingProxyType,
+    ):
+        return {
+            key: _thaw_law_payload(item)
+            for key, item in value.items()
+        }
+
+    if isinstance(value, _FrozenList):
+        return [
+            _thaw_law_payload(item)
+            for item in value
+        ]
+
+    if isinstance(value, tuple):
+        return tuple(
+            _thaw_law_payload(item)
+            for item in value
+        )
+
+    if isinstance(value, _FrozenSet):
+        return {
+            _thaw_law_payload(item)
+            for item in value
+        }
+
+    if isinstance(value, frozenset):
+        return frozenset(
+            _thaw_law_payload(item)
+            for item in value
+        )
+
+    return deepcopy(value)
+
+
+@dataclass(slots=True, frozen=True)
+class LawNotFoundEvent:
+
+    law: str
+    name: str = field(
+        default="law_not_found",
+        init=False,
+    )
+    executed: bool = field(
+        default=False,
+        init=False,
+    )
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "law",
+            str(self.law),
+        )
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "law": self.law,
+            "executed": self.executed,
+        }
+
+
+@dataclass(slots=True, frozen=True)
+class LawTriggeredEvent:
+
+    law: str
+    context: object
+    result: object
+    name: str = field(
+        default="law_triggered",
+        init=False,
+    )
+    executed: bool = field(
+        default=True,
+        init=False,
+    )
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "law",
+            str(self.law),
+        )
+
+        object.__setattr__(
+            self,
+            "context",
+            _freeze_law_payload(
+                self.context
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "result",
+            _freeze_law_payload(
+                self.result
+            ),
+        )
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "law": self.law,
+            "executed": self.executed,
+            "context": _thaw_law_payload(
+                self.context
+            ),
+            "result": _thaw_law_payload(
+                self.result
+            ),
+        }
 
 
 class LawRegistry:
@@ -68,17 +229,15 @@ class LawRegistry:
         law = self.get(name)
 
         if law is None:
-            event = {
-                "name": "law_not_found",
-                "law": name,
-                "executed": False
-            }
+            event = LawNotFoundEvent(
+                law=name,
+            )
 
-            self.trigger_history.append(
+            self.record_trigger(
                 event
             )
 
-            return deepcopy(event)
+            return event.to_dict()
 
         context = dict(context or {})
 
@@ -86,15 +245,13 @@ class LawRegistry:
             context=context
         )
 
-        event = {
-            "name": "law_triggered",
-            "law": name,
-            "executed": True,
-            "context": deepcopy(context),
-            "result": deepcopy(result)
-        }
+        event = LawTriggeredEvent(
+            law=name,
+            context=context,
+            result=result,
+        )
 
-        self.trigger_history.append(
+        self.record_trigger(
             event
         )
 
@@ -102,7 +259,29 @@ class LawRegistry:
             f"LAW TRIGGERED: {name}"
         )
 
-        return deepcopy(event)
+        return event.to_dict()
+
+    def record_trigger(
+        self,
+        event,
+    ):
+        if not isinstance(
+            event,
+            (
+                LawNotFoundEvent,
+                LawTriggeredEvent,
+            ),
+        ):
+            raise TypeError(
+                "Law trigger history requires "
+                "a law trigger event object."
+            )
+
+        self.trigger_history.append(
+            event
+        )
+
+        return event
 
     def _normalize_name(self, name):
         if not isinstance(name, str):
