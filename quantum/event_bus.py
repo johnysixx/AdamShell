@@ -1,4 +1,46 @@
-﻿from universe.logger import UniverseLogger
+from copy import deepcopy
+from dataclasses import dataclass, field
+from types import MappingProxyType
+
+from universe.logger import UniverseLogger
+
+
+@dataclass(slots=True, frozen=True)
+class QuantumEvent:
+
+    name: str
+    payload: object = field(
+        default_factory=dict
+    )
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "name",
+            str(self.name),
+        )
+
+        object.__setattr__(
+            self,
+            "payload",
+            MappingProxyType(
+                deepcopy(
+                    dict(
+                        self.payload
+                    )
+                )
+            ),
+        )
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "payload": deepcopy(
+                dict(
+                    self.payload
+                )
+            ),
+        }
 
 
 class QuantumEventBus:
@@ -57,12 +99,18 @@ class QuantumEventBus:
         event_name,
         **payload
     ):
-        event = {
-            "name": event_name,
-            "payload": dict(payload)
-        }
+        event = QuantumEvent(
+            name=event_name,
+            payload=payload,
+        )
 
-        self.event_history.append(event)
+        self.record_event(
+            event
+        )
+
+        event_snapshot = (
+            event.to_dict()
+        )
 
         results = []
 
@@ -73,14 +121,35 @@ class QuantumEventBus:
             )
         ):
             results.append(
-                handler(event)
+                handler(
+                    event_snapshot
+                )
             )
 
         return {
-            "event": event,
+            "event": event_snapshot,
             "subscriber_count": len(results),
             "results": results
         }
+
+    def record_event(
+        self,
+        event,
+    ):
+        if not isinstance(
+            event,
+            QuantumEvent,
+        ):
+            raise TypeError(
+                "Quantum event history requires "
+                "a QuantumEvent object."
+            )
+
+        self.event_history.append(
+            event
+        )
+
+        return event
 
     @property
     def public_state(self):
