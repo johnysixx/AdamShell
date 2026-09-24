@@ -1,8 +1,137 @@
-from copy import deepcopy
+from dataclasses import dataclass, field
 
 from core.entity.cronenberg_system.quantum_state import (
     CronenbergQuantumState
 )
+
+
+@dataclass(slots=True, frozen=True)
+class CronenbergPairSpin:
+
+    participant_id: str
+    spin: float
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "participant_id",
+            str(self.participant_id),
+        )
+
+        object.__setattr__(
+            self,
+            "spin",
+            float(self.spin),
+        )
+
+
+@dataclass(slots=True, frozen=True)
+class CronenbergQuantumPairEncounteredEvent:
+
+    pair_id: str
+    location: object
+    participants: tuple[str, str]
+    spins: tuple[
+        CronenbergPairSpin,
+        CronenbergPairSpin,
+    ]
+    universe_tick: int | None = None
+
+    name: str = field(
+        default=(
+            "cronenberg_quantum_pair_encountered"
+        ),
+        init=False,
+    )
+
+    encountered: bool = field(
+        default=True,
+        init=False,
+    )
+
+    resolution: None = field(
+        default=None,
+        init=False,
+    )
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "pair_id",
+            str(self.pair_id),
+        )
+
+        participants = tuple(
+            str(participant)
+            for participant
+            in self.participants
+        )
+
+        if len(participants) != 2:
+            raise ValueError(
+                "Cronenberg pair encounter requires "
+                "exactly two participants."
+            )
+
+        object.__setattr__(
+            self,
+            "participants",
+            participants,
+        )
+
+        spins = tuple(
+            self.spins
+        )
+
+        if (
+            len(spins) != 2
+            or not all(
+                isinstance(
+                    spin,
+                    CronenbergPairSpin,
+                )
+                for spin in spins
+            )
+        ):
+            raise TypeError(
+                "Cronenberg pair encounter spins "
+                "require two CronenbergPairSpin "
+                "objects."
+            )
+
+        object.__setattr__(
+            self,
+            "spins",
+            spins,
+        )
+
+        if self.universe_tick is not None:
+            object.__setattr__(
+                self,
+                "universe_tick",
+                int(self.universe_tick),
+            )
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "encountered": self.encountered,
+            "pair_id": self.pair_id,
+            "location": self.location,
+            "participants": list(
+                self.participants
+            ),
+            "spins": {
+                spin.participant_id:
+                    spin.spin
+                for spin
+                in self.spins
+            },
+            "universe_tick": (
+                self.universe_tick
+            ),
+            "resolution": self.resolution,
+        }
 
 
 class CronenbergPairEncounter:
@@ -91,28 +220,54 @@ class CronenbergPairEncounter:
                 reason="different_location"
             )
 
-        event = {
-            "name": "cronenberg_quantum_pair_encountered",
-            "encountered": True,
-            "pair_id": first_pair_id,
-            "location": first.location,
-            "participants": [
-                first.id,
-                second.id
-            ],
-            "spins": {
-                first.id: first_state.spin,
-                second.id: second_state.spin
-            },
-            "universe_tick": universe_tick,
-            "resolution": None
-        }
+        event = (
+            CronenbergQuantumPairEncounteredEvent(
+                pair_id=first_pair_id,
+                location=first.location,
+                participants=(
+                    first.id,
+                    second.id,
+                ),
+                spins=(
+                    CronenbergPairSpin(
+                        participant_id=first.id,
+                        spin=first_state.spin,
+                    ),
+                    CronenbergPairSpin(
+                        participant_id=second.id,
+                        spin=second_state.spin,
+                    ),
+                ),
+                universe_tick=universe_tick,
+            )
+        )
+
+        self.record_event(
+            event
+        )
+
+        return event.to_dict()
+
+    def record_event(
+        self,
+        event,
+    ):
+        if not isinstance(
+            event,
+            CronenbergQuantumPairEncounteredEvent,
+        ):
+            raise TypeError(
+                "Cronenberg pair encounter history "
+                "requires a "
+                "CronenbergQuantumPairEncounteredEvent "
+                "object."
+            )
 
         self.history.append(
             event
         )
 
-        return deepcopy(event)
+        return event
 
     def _not_encountered(self, reason):
         return {
