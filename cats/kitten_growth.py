@@ -1,4 +1,8 @@
-from cats.kitten_growth_state import KittenGrowthState
+from cats.kitten_growth_state import (
+    KittenGrowthAlreadyProcessedEvent,
+    KittenGrowthAppliedEvent,
+    KittenGrowthState,
+)
 from cats.duplicate_consumption_energy import DuplicateConsumptionEnergy
 
 class KittenGrowth:
@@ -89,19 +93,75 @@ class KittenGrowth:
         kitten.strength = new_strength
         growth.size_gained += size_gain
         growth.strength_gained += strength_gain
-        event = {'name': 'kitten_growth_applied', 'kitten': kitten.name, 'source': source, 'day': day, 'previous_size': previous_size, 'size_gain': size_gain, 'size': new_size, 'previous_strength': previous_strength, 'strength_gain': strength_gain, 'strength': new_strength, 'cronenberg_mass': cronenberg_mass, 'metadata': dict(metadata), 'grew': True}
-        growth.history.append(event)
-        self._record(event)
-        return event
+        event = KittenGrowthAppliedEvent(
+            kitten=kitten.name,
+            source=source,
+            day=day,
+            previous_size=previous_size,
+            size_gain=size_gain,
+            size=new_size,
+            previous_strength=previous_strength,
+            strength_gain=strength_gain,
+            strength=new_strength,
+            cronenberg_mass=cronenberg_mass,
+            metadata=metadata,
+        )
+
+        growth.record_event(
+            event
+        )
+
+        self._record(
+            event
+        )
+
+        return event.to_dict()
 
     def _duplicate_event(self, kitten, source, day, amount=1.0):
         stored_energy = self.duplicate_energy.store(cat=kitten, source=source, day=day, amount=amount)
-        event = {'name': 'kitten_growth_already_processed', 'kitten': kitten.name, 'source': source, 'day': day, 'amount_not_absorbed': float(amount), 'stored_energy': stored_energy, 'energy_conserved': True, 'grew': False}
-        self._record(event)
-        return event
+        event = (
+            KittenGrowthAlreadyProcessedEvent(
+                kitten=kitten.name,
+                source=source,
+                day=day,
+                amount_not_absorbed=amount,
+                stored_energy=stored_energy,
+            )
+        )
 
-    def _record(self, event):
-        self.history.append(event)
-        quantum_events = getattr(self.universe, 'quantum_events', None)
+        self._record(
+            event
+        )
+
+        return event.to_dict()
+
+    def _record(
+        self,
+        event,
+    ):
+        if not isinstance(
+            event,
+            (
+                KittenGrowthAppliedEvent,
+                KittenGrowthAlreadyProcessedEvent,
+            ),
+        ):
+            raise TypeError(
+                "Kitten growth history requires "
+                "a kitten growth event object."
+            )
+
+        self.history.append(
+            event
+        )
+
+        quantum_events = getattr(
+            self.universe,
+            'quantum_events',
+            None,
+        )
+
         if quantum_events is not None:
-            quantum_events.append(event)
+            quantum_events.append(
+                event.to_dict()
+            )
