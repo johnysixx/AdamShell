@@ -1,4 +1,97 @@
+from dataclasses import dataclass
+
 from universe.logger import UniverseLogger
+
+
+@dataclass(slots=True, frozen=True)
+class CatEstrousCycleEvent:
+    name: str
+    cat: str
+    day: int | None
+    phase: str
+    estrus_active: bool
+    phase_changed: bool
+    cycle_day: int | None = None
+    reason: str | None = None
+
+    def __post_init__(self):
+        allowed_names = {
+            "cat_estrous_cycle_advanced",
+            "cat_estrus_ended_after_ovulation",
+            "cat_estrus_started",
+            "cat_interestrus_started",
+            "cat_estrous_cycle_inactive",
+        }
+
+        if self.name not in allowed_names:
+            raise ValueError(
+                "Unsupported cat estrous cycle "
+                "event name."
+            )
+
+        object.__setattr__(
+            self,
+            "cat",
+            str(self.cat),
+        )
+        object.__setattr__(
+            self,
+            "phase",
+            str(self.phase),
+        )
+        object.__setattr__(
+            self,
+            "estrus_active",
+            bool(self.estrus_active),
+        )
+        object.__setattr__(
+            self,
+            "phase_changed",
+            bool(self.phase_changed),
+        )
+
+        if self.day is not None:
+            object.__setattr__(
+                self,
+                "day",
+                int(self.day),
+            )
+
+        if self.cycle_day is not None:
+            object.__setattr__(
+                self,
+                "cycle_day",
+                int(self.cycle_day),
+            )
+
+        if self.reason is not None:
+            object.__setattr__(
+                self,
+                "reason",
+                str(self.reason),
+            )
+
+    def to_dict(self):
+        snapshot = {
+            "name": self.name,
+            "cat": self.cat,
+            "day": self.day,
+            "phase": self.phase,
+            "estrus_active": self.estrus_active,
+            "phase_changed": self.phase_changed,
+        }
+
+        if self.cycle_day is not None:
+            snapshot[
+                "cycle_day"
+            ] = self.cycle_day
+
+        if self.reason is not None:
+            snapshot[
+                "reason"
+            ] = self.reason
+
+        return snapshot
 
 
 class CatEstrousCycleResolver:
@@ -71,23 +164,25 @@ class CatEstrousCycleResolver:
                     day=day
                 )
 
-        event = {
-            "name": (
-                "cat_estrous_cycle_advanced"
+        event = CatEstrousCycleEvent(
+            name="cat_estrous_cycle_advanced",
+            cat=cat.name,
+            day=day,
+            phase=phase,
+            cycle_day=(
+                reproduction.estrous_cycle_day
             ),
-            "cat": cat.name,
-            "day": day,
-            "phase": phase,
-            "cycle_day": reproduction.estrous_cycle_day,
-            "estrus_active": reproduction.estrus_active,
-            "phase_changed": False
-        }
+            estrus_active=(
+                reproduction.estrus_active
+            ),
+            phase_changed=False,
+        )
 
-        self.history.append(
+        self.record_event(
             event
         )
 
-        return event
+        return event.to_dict()
 
     def activate_estrus(
         self,
@@ -123,22 +218,22 @@ class CatEstrousCycleResolver:
 
         reproduction.estrous_cycle_day = 0
 
-        event = {
-            "name": (
+        event = CatEstrousCycleEvent(
+            name=(
                 "cat_estrus_ended_after_ovulation"
             ),
-            "cat": cat.name,
-            "day": day,
-            "phase": "diestrus",
-            "estrus_active": False,
-            "phase_changed": True
-        }
+            cat=cat.name,
+            day=day,
+            phase="diestrus",
+            estrus_active=False,
+            phase_changed=True,
+        )
 
-        self.history.append(
+        self.record_event(
             event
         )
 
-        return event
+        return event.to_dict()
 
     def _start_estrus(
         self,
@@ -153,17 +248,17 @@ class CatEstrousCycleResolver:
 
         reproduction.estrous_cycle_day = 0
 
-        event = {
-            "name": "cat_estrus_started",
-            "cat": cat.name,
-            "day": day,
-            "phase": "estrus",
-            "cycle_day": 0,
-            "estrus_active": True,
-            "phase_changed": True
-        }
+        event = CatEstrousCycleEvent(
+            name="cat_estrus_started",
+            cat=cat.name,
+            day=day,
+            phase="estrus",
+            cycle_day=0,
+            estrus_active=True,
+            phase_changed=True,
+        )
 
-        self.history.append(
+        self.record_event(
             event
         )
 
@@ -171,7 +266,7 @@ class CatEstrousCycleResolver:
             f"CAT ESTRUS STARTED: {cat.name}"
         )
 
-        return event
+        return event.to_dict()
 
     def _start_interestrus(
         self,
@@ -196,23 +291,21 @@ class CatEstrousCycleResolver:
             reproduction.estrous_cycles_completed
         ) + 1
 
-        event = {
-            "name": (
-                "cat_interestrus_started"
-            ),
-            "cat": cat.name,
-            "day": day,
-            "phase": "interestrus",
-            "cycle_day": 0,
-            "estrus_active": False,
-            "phase_changed": True
-        }
+        event = CatEstrousCycleEvent(
+            name="cat_interestrus_started",
+            cat=cat.name,
+            day=day,
+            phase="interestrus",
+            cycle_day=0,
+            estrus_active=False,
+            phase_changed=True,
+        )
 
-        self.history.append(
+        self.record_event(
             event
         )
 
-        return event
+        return event.to_dict()
 
     def _set_inactive(
         self,
@@ -228,17 +321,34 @@ class CatEstrousCycleResolver:
 
         reproduction.estrous_cycle_day = 0
 
-        event = {
-            "name": (
-                "cat_estrous_cycle_inactive"
-            ),
-            "cat": cat.name,
-            "day": day,
-            "phase": "inactive",
-            "estrus_active": False,
-            "reason": reason,
-            "phase_changed": False
-        }
+        event = CatEstrousCycleEvent(
+            name="cat_estrous_cycle_inactive",
+            cat=cat.name,
+            day=day,
+            phase="inactive",
+            estrus_active=False,
+            reason=reason,
+            phase_changed=False,
+        )
+
+        self.record_event(
+            event
+        )
+
+        return event.to_dict()
+
+    def record_event(
+        self,
+        event,
+    ):
+        if not isinstance(
+            event,
+            CatEstrousCycleEvent,
+        ):
+            raise TypeError(
+                "Estrous cycle history requires "
+                "a CatEstrousCycleEvent object."
+            )
 
         self.history.append(
             event
