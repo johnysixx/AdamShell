@@ -1,4 +1,6 @@
 from copy import deepcopy
+from dataclasses import dataclass, field
+from types import MappingProxyType
 
 from idea_entities.eternal_fire_objects import (
     EternalFireFuel,
@@ -11,6 +13,238 @@ from idea_entities.prefysical_fire_state import (
     PrefysicalFireRoles,
 )
 from universe.logger import UniverseLogger
+
+
+class _FrozenPrefysicalFireList(tuple):
+    pass
+
+
+class _FrozenPrefysicalFireSet(frozenset):
+    pass
+
+
+def _freeze_prefysical_fire_payload(
+    value
+):
+    if isinstance(
+        value,
+        dict
+    ):
+        return MappingProxyType(
+            {
+                key: (
+                    _freeze_prefysical_fire_payload(
+                        item
+                    )
+                )
+                for key, item
+                in value.items()
+            }
+        )
+
+    if isinstance(
+        value,
+        list
+    ):
+        return _FrozenPrefysicalFireList(
+            _freeze_prefysical_fire_payload(
+                item
+            )
+            for item in value
+        )
+
+    if isinstance(
+        value,
+        tuple
+    ):
+        return tuple(
+            _freeze_prefysical_fire_payload(
+                item
+            )
+            for item in value
+        )
+
+    if isinstance(
+        value,
+        set
+    ):
+        return _FrozenPrefysicalFireSet(
+            _freeze_prefysical_fire_payload(
+                item
+            )
+            for item in value
+        )
+
+    return value
+
+
+def _thaw_prefysical_fire_payload(
+    value
+):
+    if isinstance(
+        value,
+        MappingProxyType
+    ):
+        return {
+            key: (
+                _thaw_prefysical_fire_payload(
+                    item
+                )
+            )
+            for key, item
+            in value.items()
+        }
+
+    if isinstance(
+        value,
+        _FrozenPrefysicalFireList
+    ):
+        return [
+            _thaw_prefysical_fire_payload(
+                item
+            )
+            for item in value
+        ]
+
+    if isinstance(
+        value,
+        tuple
+    ):
+        return tuple(
+            _thaw_prefysical_fire_payload(
+                item
+            )
+            for item in value
+        )
+
+    if isinstance(
+        value,
+        _FrozenPrefysicalFireSet
+    ):
+        return {
+            _thaw_prefysical_fire_payload(
+                item
+            )
+            for item in value
+        }
+
+    if isinstance(
+        value,
+        frozenset
+    ):
+        return frozenset(
+            _thaw_prefysical_fire_payload(
+                item
+            )
+            for item in value
+        )
+
+    return value
+
+
+@dataclass(
+    slots=True,
+    frozen=True
+)
+class PrefysicalFireEvent:
+
+    name: str
+    layer: str
+    logical_step: int
+    participants: tuple[str, ...]
+    details: object
+
+    location: object = field(
+        default=None,
+        init=False,
+    )
+
+    universe_tick: object = field(
+        default=None,
+        init=False,
+    )
+
+    ordering_kind: str = field(
+        default="logical_precedence",
+        init=False,
+    )
+
+    def __post_init__(
+        self
+    ):
+        object.__setattr__(
+            self,
+            "name",
+            str(
+                self.name
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "layer",
+            str(
+                self.layer
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "logical_step",
+            int(
+                self.logical_step
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "participants",
+            tuple(
+                str(item)
+                for item
+                in self.participants
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "details",
+            _freeze_prefysical_fire_payload(
+                self.details
+            ),
+        )
+
+    def __deepcopy__(
+        self,
+        memo
+    ):
+        return self
+
+    def to_dict(
+        self
+    ):
+        return {
+            "name": self.name,
+            "layer": self.layer,
+            "location": self.location,
+            "universe_tick": (
+                self.universe_tick
+            ),
+            "logical_step": (
+                self.logical_step
+            ),
+            "ordering_kind": (
+                self.ordering_kind
+            ),
+            "participants": list(
+                self.participants
+            ),
+            "details": (
+                _thaw_prefysical_fire_payload(
+                    self.details
+                )
+            ),
+        }
 
 
 class PrefysicalFireOrigin:
@@ -619,6 +853,25 @@ class PrefysicalFireOrigin:
 
         return masculine
 
+    def record_event(
+        self,
+        event
+    ):
+        if not isinstance(
+            event,
+            PrefysicalFireEvent
+        ):
+            raise TypeError(
+                "Prefysical fire history requires "
+                "a PrefysicalFireEvent object."
+            )
+
+        self.history.append(
+            event
+        )
+
+        return event
+
     def _event(
         self,
         name,
@@ -627,39 +880,23 @@ class PrefysicalFireOrigin:
     ):
         self.logical_step += 1
 
-        event = {
-            "name": name,
-
-            "layer": self.layer,
-
-            # Day 0 remains outside physical spacetime.
-            "location": None,
-            "universe_tick": None,
-
-            "logical_step": (
-                self.logical_step
-            ),
-
-            "ordering_kind": (
-                "logical_precedence"
-            ),
-
-            "participants": list(
+        event = PrefysicalFireEvent(
+            name=name,
+            layer=self.layer,
+            logical_step=self.logical_step,
+            participants=tuple(
                 self.participants
             ),
-
-            "details": deepcopy(
+            details=(
                 details or {}
-            )
-        }
+            ),
+        )
 
-        self.history.append(
+        self.record_event(
             event
         )
 
-        return deepcopy(
-            event
-        )
+        return event.to_dict()
 
     @property
     def public_state(
@@ -711,7 +948,8 @@ class PrefysicalFireOrigin:
 
             "state": self.state,
 
-            "history": deepcopy(
-                self.history
-            )
+            "history": [
+                event.to_dict()
+                for event in self.history
+            ]
         }
