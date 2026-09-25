@@ -1,9 +1,116 @@
 import random
+from dataclasses import dataclass
 
 from meeting_place.bar_objects import (
     DiceBoxState,
 )
 from universe.logger import UniverseLogger
+
+
+@dataclass(
+    slots=True,
+    frozen=True
+)
+class DiceBoxRotationEvent:
+
+    name: str
+    die: str
+    sides: int
+    face_value: int
+    percentile_tens: int | None
+    raw_value: int
+    value: int
+    is_percentile: bool
+    location: str
+    removed_from_box: bool
+    visibility: str
+    rotated: bool
+
+    @classmethod
+    def from_event(
+        cls,
+        event
+    ):
+        return cls(
+            name=str(
+                event["name"]
+            ),
+            die=str(
+                event["die"]
+            ),
+            sides=int(
+                event["sides"]
+            ),
+            face_value=int(
+                event["face_value"]
+            ),
+            percentile_tens=(
+                None
+                if event[
+                    "percentile_tens"
+                ] is None
+                else int(
+                    event[
+                        "percentile_tens"
+                    ]
+                )
+            ),
+            raw_value=int(
+                event["raw_value"]
+            ),
+            value=int(
+                event["value"]
+            ),
+            is_percentile=bool(
+                event["is_percentile"]
+            ),
+            location=str(
+                event["location"]
+            ),
+            removed_from_box=bool(
+                event[
+                    "removed_from_box"
+                ]
+            ),
+            visibility=str(
+                event["visibility"]
+            ),
+            rotated=bool(
+                event["rotated"]
+            ),
+        )
+
+    def __deepcopy__(
+        self,
+        memo
+    ):
+        return self
+
+    def to_dict(
+        self
+    ):
+        return {
+            "name": self.name,
+            "die": self.die,
+            "sides": self.sides,
+            "face_value":
+                self.face_value,
+            "percentile_tens":
+                self.percentile_tens,
+            "raw_value":
+                self.raw_value,
+            "value": self.value,
+            "is_percentile":
+                self.is_percentile,
+            "location":
+                self.location,
+            "removed_from_box":
+                self.removed_from_box,
+            "visibility":
+                self.visibility,
+            "rotated":
+                self.rotated,
+        }
 
 
 class DiceBox:
@@ -185,10 +292,20 @@ class DiceBox:
             "rotated": True
         }
 
-    def _record_rotation(
+    def record_rotation(
         self,
-        event
+        rotation
     ):
+        if not isinstance(
+            rotation,
+            DiceBoxRotationEvent
+        ):
+            raise TypeError(
+                "Dice box rotation history "
+                "requires a "
+                "DiceBoxRotationEvent object."
+            )
+
         if not hasattr(
             self,
             "rotation_history"
@@ -196,12 +313,29 @@ class DiceBox:
             self.rotation_history = []
 
         self.rotation_history.append(
-            dict(event)
+            rotation
+        )
+
+        return rotation
+
+    def _record_rotation(
+        self,
+        event
+    ):
+        rotation = (
+            DiceBoxRotationEvent
+            .from_event(event)
+        )
+
+        self.record_rotation(
+            rotation
         )
 
         self.state.record_rotation(
             event
         )
+
+        return rotation
 
     def rotate_random_die(
         self,
