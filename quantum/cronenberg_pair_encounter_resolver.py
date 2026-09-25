@@ -1,7 +1,301 @@
 import random
 from copy import deepcopy
+from dataclasses import dataclass, field
+from types import MappingProxyType
 
 from universe.logger import UniverseLogger
+
+
+class _FrozenCronenbergPairList(tuple):
+    pass
+
+
+class _FrozenCronenbergPairSet(frozenset):
+    pass
+
+
+def _freeze_cronenberg_pair_payload(
+    value
+):
+    if isinstance(
+        value,
+        dict
+    ):
+        return MappingProxyType(
+            {
+                key: (
+                    _freeze_cronenberg_pair_payload(
+                        item
+                    )
+                )
+                for key, item
+                in value.items()
+            }
+        )
+
+    if isinstance(
+        value,
+        list
+    ):
+        return _FrozenCronenbergPairList(
+            _freeze_cronenberg_pair_payload(
+                item
+            )
+            for item in value
+        )
+
+    if isinstance(
+        value,
+        tuple
+    ):
+        return tuple(
+            _freeze_cronenberg_pair_payload(
+                item
+            )
+            for item in value
+        )
+
+    if isinstance(
+        value,
+        set
+    ):
+        return _FrozenCronenbergPairSet(
+            _freeze_cronenberg_pair_payload(
+                item
+            )
+            for item in value
+        )
+
+    return value
+
+
+def _thaw_cronenberg_pair_payload(
+    value
+):
+    if isinstance(
+        value,
+        MappingProxyType
+    ):
+        return {
+            key: (
+                _thaw_cronenberg_pair_payload(
+                    item
+                )
+            )
+            for key, item
+            in value.items()
+        }
+
+    if isinstance(
+        value,
+        _FrozenCronenbergPairList
+    ):
+        return [
+            _thaw_cronenberg_pair_payload(
+                item
+            )
+            for item in value
+        ]
+
+    if isinstance(
+        value,
+        tuple
+    ):
+        return tuple(
+            _thaw_cronenberg_pair_payload(
+                item
+            )
+            for item in value
+        )
+
+    if isinstance(
+        value,
+        _FrozenCronenbergPairSet
+    ):
+        return {
+            _thaw_cronenberg_pair_payload(
+                item
+            )
+            for item in value
+        }
+
+    if isinstance(
+        value,
+        frozenset
+    ):
+        return frozenset(
+            _thaw_cronenberg_pair_payload(
+                item
+            )
+            for item in value
+        )
+
+    return value
+
+
+@dataclass(
+    slots=True,
+    frozen=True
+)
+class CronenbergPairResolvedEffect:
+
+    effect: str
+    result: object
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "effect",
+            str(
+                self.effect
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "result",
+            _freeze_cronenberg_pair_payload(
+                self.result
+            ),
+        )
+
+    def __deepcopy__(
+        self,
+        memo
+    ):
+        return self
+
+    def to_dict(self):
+        return {
+            "effect": self.effect,
+            "result": deepcopy(
+                _thaw_cronenberg_pair_payload(
+                    self.result
+                )
+            ),
+        }
+
+
+@dataclass(
+    slots=True,
+    frozen=True
+)
+class CronenbergPairEncounterResolvedEvent:
+
+    pair_id: str
+    participants: tuple[str, ...]
+    location: object
+    selected_effects: tuple[str, ...]
+    resolved_effects: tuple[
+        CronenbergPairResolvedEffect,
+        ...,
+    ]
+    skipped_effects: tuple[str, ...]
+    universe_tick: object = None
+
+    name: str = field(
+        default=(
+            "cronenberg_quantum_pair_"
+            "encounter_resolved"
+        ),
+        init=False,
+    )
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "pair_id",
+            str(
+                self.pair_id
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "participants",
+            tuple(
+                str(item)
+                for item
+                in self.participants
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "selected_effects",
+            tuple(
+                str(item)
+                for item
+                in self.selected_effects
+            ),
+        )
+
+        resolved = tuple(
+            self.resolved_effects
+        )
+
+        if not all(
+            isinstance(
+                item,
+                CronenbergPairResolvedEffect,
+            )
+            for item
+            in resolved
+        ):
+            raise TypeError(
+                "Cronenberg pair resolution "
+                "history requires "
+                "CronenbergPairResolvedEffect "
+                "objects."
+            )
+
+        object.__setattr__(
+            self,
+            "resolved_effects",
+            resolved,
+        )
+
+        object.__setattr__(
+            self,
+            "skipped_effects",
+            tuple(
+                str(item)
+                for item
+                in self.skipped_effects
+            ),
+        )
+
+    def __deepcopy__(
+        self,
+        memo
+    ):
+        return self
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "pair_id": self.pair_id,
+            "participants": list(
+                self.participants
+            ),
+            "location": deepcopy(
+                self.location
+            ),
+            "selected_effects": list(
+                self.selected_effects
+            ),
+            "resolved_effects": [
+                item.to_dict()
+                for item
+                in self.resolved_effects
+            ],
+            "skipped_effects": list(
+                self.skipped_effects
+            ),
+            "universe_tick": (
+                self.universe_tick
+            ),
+        }
 
 
 class CronenbergPairEncounterResolver:
@@ -97,10 +391,12 @@ class CronenbergPairEncounterResolver:
             else:
                 continue
 
-            resolved_effects.append({
-                "effect": effect,
-                "result": deepcopy(result)
-            })
+            resolved_effects.append(
+                CronenbergPairResolvedEffect(
+                    effect=effect,
+                    result=result,
+                )
+            )
 
             if effect in {
                 "quantum_merge",
@@ -113,34 +409,72 @@ class CronenbergPairEncounterResolver:
                 )
                 break
 
-        resolution = {
-            "name": (
-                "cronenberg_quantum_pair_encounter_resolved"
-            ),
-            "pair_id": encounter_event["pair_id"],
-            "participants": list(
-                encounter_event["participants"]
-            ),
-            "location": encounter_event["location"],
-            "selected_effects": selected_effects,
-            "resolved_effects": resolved_effects,
-            "skipped_effects": skipped_effects,
-            "universe_tick": encounter_event.get(
-                "universe_tick"
+        resolution = (
+            CronenbergPairEncounterResolvedEvent(
+                pair_id=(
+                    encounter_event[
+                        "pair_id"
+                    ]
+                ),
+                participants=tuple(
+                    encounter_event[
+                        "participants"
+                    ]
+                ),
+                location=(
+                    encounter_event[
+                        "location"
+                    ]
+                ),
+                selected_effects=tuple(
+                    selected_effects
+                ),
+                resolved_effects=tuple(
+                    resolved_effects
+                ),
+                skipped_effects=tuple(
+                    skipped_effects
+                ),
+                universe_tick=(
+                    encounter_event.get(
+                        "universe_tick"
+                    )
+                ),
             )
-        }
+        )
 
-        self.history.append(
+        self.record_resolution(
             resolution
         )
 
         UniverseLogger.event(
             "CRONENBERG QUANTUM PAIR ENCOUNTER "
-            f"RESOLVED: {encounter_event['pair_id']} "
+            f"RESOLVED: {resolution.pair_id} "
             f"EFFECTS={selected_effects}"
         )
 
-        return deepcopy(resolution)
+        return resolution.to_dict()
+
+    def record_resolution(
+        self,
+        event
+    ):
+        if not isinstance(
+            event,
+            CronenbergPairEncounterResolvedEvent
+        ):
+            raise TypeError(
+                "Cronenberg pair resolution "
+                "history requires a "
+                "CronenbergPairEncounterResolvedEvent "
+                "object."
+            )
+
+        self.history.append(
+            event
+        )
+
+        return event
 
     def _select_effects(self, rng):
         roll = rng.random()
