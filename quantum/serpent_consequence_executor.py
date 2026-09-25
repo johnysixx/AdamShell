@@ -1,10 +1,147 @@
 import uuid
 from copy import deepcopy
+from dataclasses import dataclass, field
 
 from core.entity.serpent_d20 import (
     SerpentResolvedConsequence,
 )
 from universe.logger import UniverseLogger
+
+
+@dataclass(slots=True, frozen=True)
+class SerpentUnresolvedConsequence:
+
+    consequence: str
+    reason: str = "handler_not_implemented"
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "consequence",
+            str(self.consequence),
+        )
+
+        object.__setattr__(
+            self,
+            "reason",
+            str(self.reason),
+        )
+
+    def to_dict(self):
+        return {
+            "consequence": self.consequence,
+            "reason": self.reason,
+        }
+
+
+@dataclass(slots=True, frozen=True)
+class SerpentConsequencesExecutedEvent:
+
+    roll_id: str
+    planned_consequences: tuple[str, ...]
+    resolved_consequences: tuple[
+        SerpentResolvedConsequence,
+        ...,
+    ]
+    unresolved_consequences: tuple[
+        SerpentUnresolvedConsequence,
+        ...,
+    ]
+
+    name: str = field(
+        default="serpent_consequences_executed",
+        init=False,
+    )
+
+    visibility: str = field(
+        default="universe_only",
+        init=False,
+    )
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "roll_id",
+            str(self.roll_id),
+        )
+
+        object.__setattr__(
+            self,
+            "planned_consequences",
+            tuple(
+                str(consequence)
+                for consequence
+                in self.planned_consequences
+            ),
+        )
+
+        resolved = tuple(
+            self.resolved_consequences
+        )
+
+        if not all(
+            isinstance(
+                consequence,
+                SerpentResolvedConsequence,
+            )
+            for consequence
+            in resolved
+        ):
+            raise TypeError(
+                "Resolved serpent consequences "
+                "require "
+                "SerpentResolvedConsequence objects."
+            )
+
+        object.__setattr__(
+            self,
+            "resolved_consequences",
+            resolved,
+        )
+
+        unresolved = tuple(
+            self.unresolved_consequences
+        )
+
+        if not all(
+            isinstance(
+                consequence,
+                SerpentUnresolvedConsequence,
+            )
+            for consequence
+            in unresolved
+        ):
+            raise TypeError(
+                "Unresolved serpent consequences "
+                "require "
+                "SerpentUnresolvedConsequence objects."
+            )
+
+        object.__setattr__(
+            self,
+            "unresolved_consequences",
+            unresolved,
+        )
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "roll_id": self.roll_id,
+            "planned_consequences": list(
+                self.planned_consequences
+            ),
+            "resolved_consequences": [
+                consequence.to_dict()
+                for consequence
+                in self.resolved_consequences
+            ],
+            "unresolved_consequences": [
+                consequence.to_dict()
+                for consequence
+                in self.unresolved_consequences
+            ],
+            "visibility": self.visibility,
+        }
 
 
 class SerpentConsequenceExecutor:
@@ -57,10 +194,11 @@ class SerpentConsequenceExecutor:
             )
 
             if handler is None:
-                unresolved.append({
-                    "consequence": consequence,
-                    "reason": "handler_not_implemented"
-                })
+                unresolved.append(
+                    SerpentUnresolvedConsequence(
+                        consequence=consequence,
+                    )
+                )
                 continue
 
             result = handler()
@@ -77,23 +215,20 @@ class SerpentConsequenceExecutor:
             resolved_consequences=resolved
         )
 
-        resolved_snapshot = [
-            item.to_dict()
-            for item in resolved
-        ]
-
-        event = {
-            "name": "serpent_consequences_executed",
-            "roll_id": roll_id,
-            "planned_consequences": planned,
-            "resolved_consequences": (
-                resolved_snapshot
+        event = SerpentConsequencesExecutedEvent(
+            roll_id=roll_id,
+            planned_consequences=tuple(
+                planned
             ),
-            "unresolved_consequences": unresolved,
-            "visibility": "universe_only"
-        }
+            resolved_consequences=tuple(
+                resolved
+            ),
+            unresolved_consequences=tuple(
+                unresolved
+            ),
+        )
 
-        self.execution_history.append(
+        self.record_execution(
             event
         )
 
@@ -102,7 +237,27 @@ class SerpentConsequenceExecutor:
             f"{roll_id}"
         )
 
-        return deepcopy(event)
+        return event.to_dict()
+
+    def record_execution(
+        self,
+        event,
+    ):
+        if not isinstance(
+            event,
+            SerpentConsequencesExecutedEvent,
+        ):
+            raise TypeError(
+                "Serpent execution history requires "
+                "a SerpentConsequencesExecutedEvent "
+                "object."
+            )
+
+        self.execution_history.append(
+            event
+        )
+
+        return event
 
     def _execute_quantum_tick(self):
         return self.universe.tick_quantum()
