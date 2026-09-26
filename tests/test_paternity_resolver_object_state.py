@@ -1,5 +1,6 @@
 import unittest
 
+from cats.mating_contact import CatMatingContact
 from cats.paternity_resolver import (
     KittenFatherSelectedEvent,
     MultipleSirePaternityResolver,
@@ -41,21 +42,30 @@ class PaternityResolverObjectStateTests(
         )
 
         self.contacts = [
-            {
-                "successful": True,
-                "_male_ref": self.first,
-                "male_name": "father_one",
-            },
-            {
-                "successful": True,
-                "_male_ref": self.first,
-                "male_name": "father_one",
-            },
-            {
-                "successful": True,
-                "_male_ref": self.second,
-                "male_name": "father_two",
-            },
+            CatMatingContact(
+                contact_number=1,
+                female="mother",
+                male="father_one",
+                successful=True,
+                day=0,
+                male_ref=self.first,
+            ),
+            CatMatingContact(
+                contact_number=2,
+                female="mother",
+                male="father_one",
+                successful=True,
+                day=0,
+                male_ref=self.first,
+            ),
+            CatMatingContact(
+                contact_number=3,
+                female="mother",
+                male="father_two",
+                successful=True,
+                day=0,
+                male_ref=self.second,
+            ),
         ]
 
     def test_history_uses_object_state(
@@ -142,6 +152,20 @@ class PaternityResolverObjectStateTests(
                         "kitten_father_selected"
                     ),
                 }
+            )
+
+
+    def test_selection_rejects_mapping_contacts(
+        self
+    ):
+        with self.assertRaises(TypeError):
+            self.resolver.select_father(
+                [
+                    {
+                        "successful": True,
+                    },
+                ],
+                rng=FirstChoiceRng(),
             )
 
 

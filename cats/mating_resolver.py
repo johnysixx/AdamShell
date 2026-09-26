@@ -5,6 +5,11 @@ from cats.ovulation_resolver import CatOvulationResolver
 from cats.reproduction import CatReproduction
 from cats.kitten_embryo_resolver import KittenEmbryoResolver
 from cats.paternity_resolver import MultipleSirePaternityResolver
+from cats.mating_contact import (
+    CatMatingContact,
+    CatMatingContactRecordedEvent,
+    CatMatingHistoryEvent,
+)
 
 class CatMatingResolver:
 
@@ -36,13 +41,68 @@ class CatMatingResolver:
             reproduction.mating_contacts = []
             reproduction.potential_fathers = []
         contact_number = len(reproduction.mating_contacts) + 1
-        contact = {'name': 'cat_mating_contact', 'contact_number': contact_number, 'female': female.name, 'male': male.name, 'male_name': male.name, 'successful': True, 'day': current_day, '_male_ref': male}
+        contact = CatMatingContact(
+            contact_number=(
+                contact_number
+            ),
+            female=female.name,
+            male=male.name,
+            successful=True,
+            day=current_day,
+            male_ref=male,
+        )
         reproduction.mating_contacts.append(contact)
         stimulation = self.ovulation_resolver.record_stimulation(female=female, male=male, amount=1, day=current_day)
         if male.name not in reproduction.potential_fathers:
             reproduction.potential_fathers.append(male.name)
-        event = {'name': 'cat_mating_contact_recorded', 'female': female.name, 'male': male.name, 'day': current_day, 'contact_number': contact_number, 'mating_window_open': True, 'potential_fathers': list(reproduction.potential_fathers), 'pregnancy_started': False, 'ovulation_stimulation': stimulation['stimulation'], 'ovulation_threshold': stimulation['threshold'], 'ovulation_threshold_reached': stimulation['threshold_reached']}
-        self.history.append(event)
+        event = (
+            CatMatingContactRecordedEvent(
+                contact=contact,
+                potential_fathers=tuple(
+                    reproduction
+                    .potential_fathers
+                ),
+                ovulation_stimulation=(
+                    stimulation[
+                        "stimulation"
+                    ]
+                ),
+                ovulation_threshold=(
+                    stimulation[
+                        "threshold"
+                    ]
+                ),
+                ovulation_threshold_reached=(
+                    stimulation[
+                        "threshold_reached"
+                    ]
+                ),
+            )
+        )
+
+        self._record_history_event(
+            event
+        )
+
+        return event.to_dict()
+
+    def _record_history_event(
+        self,
+        event
+    ):
+        if not isinstance(
+            event,
+            CatMatingHistoryEvent
+        ):
+            raise TypeError(
+                "Cat mating history requires "
+                "a CatMatingHistoryEvent object."
+            )
+
+        self.history.append(
+            event
+        )
+
         return event
 
     def close_mating_window(self, female, current_day=0, gestation_days=None, embryo_count=None, rng=None):

@@ -1,4 +1,4 @@
-﻿from copy import deepcopy
+from copy import deepcopy
 from dataclasses import dataclass, field
 
 
@@ -68,7 +68,11 @@ class CatReproductionState:
             "estrous_cycles_completed": self.estrous_cycles_completed,
             "mating_window_open": self.mating_window_open,
             "mating_window_started_day": self.mating_window_started_day,
-            "mating_contacts": deepcopy(self.mating_contacts),
+            "mating_contacts": [
+                contact.to_dict()
+                for contact
+                in self.mating_contacts
+            ],
             "potential_fathers": list(self.potential_fathers),
             "ovulation_stimulation": self.ovulation_stimulation,
             "ovulation_threshold": self.ovulation_threshold,

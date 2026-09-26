@@ -1,6 +1,7 @@
-﻿import unittest
+import unittest
 
 from cats import Cats
+from cats.mating_contact import CatMatingContact
 from cats.cat_reproduction_state import CatReproductionState
 from cats.development_resolver import CatDevelopmentResolver
 from cats.reproduction import CatReproduction
@@ -78,10 +79,16 @@ class CatReproductionObjectStateTests(unittest.TestCase):
     def test_to_dict_returns_detached_boundary(self):
         state = CatReproductionState("female")
         state.potential_fathers.append("tom")
-        state.mating_contacts.append({
-            "male": "tom",
-            "successful": True,
-        })
+        state.mating_contacts.append(
+            CatMatingContact(
+                contact_number=1,
+                female="queen",
+                male="tom",
+                successful=True,
+                day=0,
+                male_ref=object(),
+            )
+        )
 
         snapshot = state.to_dict()
 
@@ -95,7 +102,7 @@ class CatReproductionObjectStateTests(unittest.TestCase):
             ["tom"],
         )
         self.assertTrue(
-            state.mating_contacts[0]["successful"]
+            state.mating_contacts[0].successful
         )
 
     def test_cats_layer_creates_object_state(self):
