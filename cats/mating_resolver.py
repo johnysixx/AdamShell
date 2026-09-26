@@ -9,6 +9,7 @@ from cats.mating_contact import (
     CatMatingContact,
     CatMatingContactRecordedEvent,
     CatMatingHistoryEvent,
+    CatMatingWindowClosedWithoutOvulationEvent,
 )
 
 class CatMatingResolver:
@@ -117,8 +118,19 @@ class CatMatingResolver:
         contacts = reproduction.mating_contacts
         if not contacts:
             raise ValueError('Ovulation requires at least one successful mating contact.')
-        ovulation = self.ovulation_resolver.resolve(female, day=current_day)
-        if not ovulation['ovulation_induced']:
+        ovulation = (
+            self.ovulation_resolver.resolve(
+                female,
+                day=current_day
+            )
+        )
+
+        ovulation_event = (
+            self.ovulation_resolver
+            .history[-1]
+        )
+
+        if not ovulation_event.ovulation_induced:
             reproduction.estrus_active = False
             reproduction.estrous_phase = 'interestrus'
             reproduction.estrous_cycle_day = 0
@@ -128,9 +140,24 @@ class CatMatingResolver:
             reproduction.potential_fathers = []
             reproduction.pregnant = False
             reproduction.embryos = []
-            event = {'name': 'cat_mating_window_closed_without_ovulation', 'mother': female.name, 'mating_contact_count': len(contacts), 'ovulation': ovulation, 'ovulation_induced': False, 'pregnancy_started': False, 'embryos_attempted': 0, 'viable_embryo_count': 0, 'nonviable_embryo_count': 0, 'started': False}
-            self.history.append(event)
-            return event
+
+            event = (
+                CatMatingWindowClosedWithoutOvulationEvent(
+                    mother=female.name,
+                    mating_contact_count=len(
+                        contacts
+                    ),
+                    ovulation=(
+                        ovulation_event
+                    ),
+                )
+            )
+
+            self._record_history_event(
+                event
+            )
+
+            return event.to_dict()
         rng = rng or random
         gestation_days = CatReproduction.GESTATION_DAYS_DEFAULT if gestation_days is None else int(gestation_days)
         if not CatReproduction.GESTATION_DAYS_MIN <= gestation_days <= CatReproduction.GESTATION_DAYS_MAX:

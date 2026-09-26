@@ -1,5 +1,9 @@
 from dataclasses import dataclass, field
 
+from cats.ovulation_resolver import (
+    CatInducedOvulationResolvedEvent,
+)
+
 
 @dataclass(slots=True, frozen=True)
 class CatMatingContact:
@@ -223,4 +227,117 @@ class CatMatingContactRecordedEvent(
             "ovulation_threshold_reached": (
                 self.ovulation_threshold_reached
             ),
+        }
+
+@dataclass(slots=True, frozen=True)
+class CatMatingWindowClosedWithoutOvulationEvent(
+    CatMatingHistoryEvent
+):
+
+    mother: str
+    mating_contact_count: int
+
+    ovulation: (
+        CatInducedOvulationResolvedEvent
+    )
+
+    name: str = field(
+        default=(
+            "cat_mating_window_"
+            "closed_without_ovulation"
+        ),
+        init=False,
+    )
+
+    ovulation_induced: bool = field(
+        default=False,
+        init=False,
+    )
+
+    pregnancy_started: bool = field(
+        default=False,
+        init=False,
+    )
+
+    embryos_attempted: int = field(
+        default=0,
+        init=False,
+    )
+
+    viable_embryo_count: int = field(
+        default=0,
+        init=False,
+    )
+
+    nonviable_embryo_count: int = field(
+        default=0,
+        init=False,
+    )
+
+    started: bool = field(
+        default=False,
+        init=False,
+    )
+
+    def __post_init__(self):
+        if not isinstance(
+            self.ovulation,
+            CatInducedOvulationResolvedEvent,
+        ):
+            raise TypeError(
+                "Mating-window closure "
+                "requires a "
+                "CatInducedOvulationResolvedEvent "
+                "object."
+            )
+
+        if self.ovulation.ovulation_induced:
+            raise ValueError(
+                "Mating-window closure without "
+                "ovulation cannot contain an "
+                "induced ovulation event."
+            )
+
+        object.__setattr__(
+            self,
+            "mother",
+            str(
+                self.mother
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "mating_contact_count",
+            int(
+                self.mating_contact_count
+            ),
+        )
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "mother": self.mother,
+            "mating_contact_count": (
+                self.mating_contact_count
+            ),
+            "ovulation": (
+                self.ovulation.to_dict()
+            ),
+            "ovulation_induced": (
+                self.ovulation_induced
+            ),
+            "pregnancy_started": (
+                self.pregnancy_started
+            ),
+            "embryos_attempted": (
+                self.embryos_attempted
+            ),
+            "viable_embryo_count": (
+                self.viable_embryo_count
+            ),
+            "nonviable_embryo_count": (
+                self.nonviable_embryo_count
+            ),
+            "started": self.started,
         }
