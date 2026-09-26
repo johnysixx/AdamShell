@@ -1,5 +1,5 @@
 import random
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from meeting_place.bar_objects import (
     DiceBoxState,
@@ -113,6 +113,86 @@ class DiceBoxRotationEvent:
         }
 
 
+@dataclass(
+    slots=True,
+    frozen=True
+)
+class DiceBoxAllRotationEvent:
+
+    results: tuple[
+        DiceBoxRotationEvent,
+        ...,
+    ]
+
+    name: str = field(
+        default="dice_box_all_rotation",
+        init=False,
+    )
+
+    visibility: str = field(
+        default="secret_bar_dice_event",
+        init=False,
+    )
+
+    def __post_init__(
+        self
+    ):
+        results = tuple(
+            self.results
+        )
+
+        if not all(
+            isinstance(
+                result,
+                DiceBoxRotationEvent
+            )
+            for result in results
+        ):
+            raise TypeError(
+                "Dice box all-rotation event "
+                "requires DiceBoxRotationEvent "
+                "objects."
+            )
+
+        object.__setattr__(
+            self,
+            "results",
+            results,
+        )
+
+    @property
+    def rotated_count(
+        self
+    ):
+        return len(
+            self.results
+        )
+
+    def __deepcopy__(
+        self,
+        memo
+    ):
+        return self
+
+    def to_dict(
+        self
+    ):
+        return {
+            "name": self.name,
+            "rotated_count": (
+                self.rotated_count
+            ),
+            "results": [
+                result.to_dict()
+                for result
+                in self.results
+            ],
+            "visibility": (
+                self.visibility
+            ),
+        }
+
+
 class DiceBox:
 
     def __init__(self):
@@ -169,6 +249,7 @@ class DiceBox:
         rng = rng or random
 
         results = []
+        rotation_events = []
 
         for die_name in list(
             self.contents
@@ -182,41 +263,20 @@ class DiceBox:
                 result
             )
 
-            self._record_rotation(
-                result
-            )
-
-        event = {
-            "name": "dice_box_all_rotation",
-            "rotated_count": len(
-                results
-            ),
-            "results": results,
-            "visibility": (
-                "secret_bar_dice_event"
-            )
-        }
-
-        if not hasattr(
-            self,
-            "all_rotation_history"
-        ):
-            self.all_rotation_history = []
-
-        self.all_rotation_history.append(
-            {
-                "name": event["name"],
-                "rotated_count": (
-                    event["rotated_count"]
-                ),
-                "results": [
-                    dict(result)
-                    for result in results
-                ],
-                "visibility": (
-                    event["visibility"]
+            rotation_events.append(
+                self._record_rotation(
+                    result
                 )
-            }
+            )
+
+        event = DiceBoxAllRotationEvent(
+            results=tuple(
+                rotation_events
+            )
+        )
+
+        self.record_all_rotation(
+            event
         )
 
         self.state.record_all_rotation(
@@ -226,6 +286,32 @@ class DiceBox:
         UniverseLogger.event(
             "ALL DICE SECRETLY ROTATE "
             "INSIDE THE BAR DICE BOX"
+        )
+
+        return event.to_dict()
+
+    def record_all_rotation(
+        self,
+        event
+    ):
+        if not isinstance(
+            event,
+            DiceBoxAllRotationEvent
+        ):
+            raise TypeError(
+                "Dice box all-rotation history "
+                "requires a "
+                "DiceBoxAllRotationEvent object."
+            )
+
+        if not hasattr(
+            self,
+            "all_rotation_history"
+        ):
+            self.all_rotation_history = []
+
+        self.all_rotation_history.append(
+            event
         )
 
         return event
