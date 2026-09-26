@@ -87,7 +87,16 @@ class CatReproductionState:
             "father_names": list(self.father_names),
             "mating_contact": deepcopy(self.mating_contact),
             "embryos": deepcopy(self.embryos),
-            "litters": deepcopy(self.litters),
-            "last_litter": deepcopy(self.last_litter),
+            "litters": [
+                litter.to_dict()
+                for litter
+                in self.litters
+            ],
+            "last_litter": (
+                self.last_litter.to_dict()
+                if self.last_litter
+                is not None
+                else None
+            ),
             "litters_born": self.litters_born,
         }

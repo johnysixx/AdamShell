@@ -1,7 +1,10 @@
 from cats.cat_family_system import CatFamilySystem
 from cats.physical_biology_gate import PhysicalBiologyGate
 from cats.development_resolver import CatDevelopmentResolver
-from cats.cat_birth_objects import CatLitter
+from cats.cat_birth_objects import (
+    CatKittenBirthResult,
+    CatLitter,
+)
 
 class KittenBirthResolver:
 
@@ -34,7 +37,16 @@ class KittenBirthResolver:
             profile = dict(embryo.profile)
             manifestation = self.universe.manifest_cat(name=kitten_name, source='kitten_birth_resolver', color=profile['color'], fur_length=profile['fur_length'], pattern=profile['pattern'], eye_color=profile['eye_color'], sex=profile['sex'])
             if manifestation is None:
-                birth_results.append({'embryo_id': embryo.id, 'kitten': None, 'born': False, 'reason': 'manifest_cat_failed'})
+                birth_results.append(
+                    CatKittenBirthResult(
+                        embryo_id=embryo.id,
+                        kitten=None,
+                        born=False,
+                        reason=(
+                            "manifest_cat_failed"
+                        ),
+                    )
+                )
                 continue
             kitten = manifestation['cat']
             kitten.state = 'newborn'
@@ -51,14 +63,56 @@ class KittenBirthResolver:
                 if trait not in kitten.special_traits:
                     kitten.special_traits.append(trait)
             kittens.append(kitten)
-            birth_results.append({'embryo_id': embryo.id, 'kitten': kitten_name, 'father': embryo.father_name, 'genetic_status': embryo.genetic_status, 'rare': embryo.rare, 'born': True})
+            birth_results.append(
+                CatKittenBirthResult(
+                    embryo_id=embryo.id,
+                    kitten=kitten_name,
+                    father=(
+                        embryo.father_name
+                    ),
+                    genetic_status=(
+                        embryo.genetic_status
+                    ),
+                    rare=embryo.rare,
+                    born=True,
+                )
+            )
         self.family_system.register_birth(mother=mother, kittens=kittens)
         father_names = []
         for kitten in kittens:
             father_name = kitten.father_name
             if father_name not in father_names:
                 father_names.append(father_name)
-        litter = CatLitter(**{'name': 'cat_litter_born', 'litter_number': litter_number, 'mother': mother.name, 'father_names': father_names, 'multiple_sires': len(father_names) > 1, 'embryos_present': len(embryos), 'kittens_born': len(kittens), 'kitten_names': [kitten.name for kitten in kittens], 'birth_results': birth_results, 'pregnancy_day': pregnancy_day, 'gestation_days': gestation_days, 'birth_day': current_day, 'born': True})
+        litter = CatLitter(
+            litter_number=(
+                litter_number
+            ),
+            mother=mother.name,
+            father_names=tuple(
+                father_names
+            ),
+            embryos_present=len(
+                embryos
+            ),
+            kittens_born=len(
+                kittens
+            ),
+            kitten_names=tuple(
+                kitten.name
+                for kitten
+                in kittens
+            ),
+            birth_results=tuple(
+                birth_results
+            ),
+            pregnancy_day=(
+                pregnancy_day
+            ),
+            gestation_days=(
+                gestation_days
+            ),
+            birth_day=current_day,
+        )
         reproduction.pregnant = False
         reproduction.pregnancy_day = None
         reproduction.gestation_days = None
@@ -74,7 +128,9 @@ class KittenBirthResolver:
         reproduction.last_litter = litter
         reproduction.litters.append(litter)
         self.history.append(litter)
-        self.universe.quantum_events.append(litter)
+        self.universe.quantum_events.append(
+            litter.to_dict()
+        )
         return {**litter.to_dict(), 'kittens': kittens}
 
     def _next_kitten_name(self):

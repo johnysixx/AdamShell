@@ -105,7 +105,14 @@ class KittenBirthResolverTests(unittest.TestCase):
         self.assertIsNone(reproduction.pregnancy_day)
         self.assertEqual(reproduction.embryos, [])
         self.assertEqual(reproduction.litters_born, 1)
-        self.assertEqual(reproduction.last_litter.kitten_names, result['kitten_names'])
+        self.assertEqual(
+            reproduction.last_litter.kitten_names,
+            tuple(
+                result[
+                    "kitten_names"
+                ]
+            ),
+        )
         self.assertEqual(len(reproduction.litters), 1)
 if __name__ == '__main__':
     unittest.main()

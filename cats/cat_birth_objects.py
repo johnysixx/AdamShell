@@ -1,3 +1,4 @@
+from dataclasses import dataclass, field
 from dataclasses import dataclass, replace
 from types import MappingProxyType
 from typing import Mapping
@@ -407,5 +408,393 @@ class KittenEmbryo(ComponentObject):
     pass
 
 
-class CatLitter(ComponentObject):
-    pass
+@dataclass(slots=True, frozen=True)
+class CatKittenBirthResult:
+
+    embryo_id: str
+    kitten: str | None
+    born: bool
+
+    father: str | None = None
+    genetic_status: str | None = None
+    rare: bool | None = None
+    reason: str | None = None
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "embryo_id",
+            str(
+                self.embryo_id
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "born",
+            bool(
+                self.born
+            ),
+        )
+
+        if self.kitten is not None:
+            object.__setattr__(
+                self,
+                "kitten",
+                str(
+                    self.kitten
+                ),
+            )
+
+        if self.father is not None:
+            object.__setattr__(
+                self,
+                "father",
+                str(
+                    self.father
+                ),
+            )
+
+        if self.genetic_status is not None:
+            object.__setattr__(
+                self,
+                "genetic_status",
+                str(
+                    self.genetic_status
+                ),
+            )
+
+        if self.rare is not None:
+            object.__setattr__(
+                self,
+                "rare",
+                bool(
+                    self.rare
+                ),
+            )
+
+        if self.reason is not None:
+            object.__setattr__(
+                self,
+                "reason",
+                str(
+                    self.reason
+                ),
+            )
+
+        if self.born:
+            if self.kitten is None:
+                raise ValueError(
+                    "Successful kitten birth "
+                    "requires a kitten name."
+                )
+
+            if self.father is None:
+                raise ValueError(
+                    "Successful kitten birth "
+                    "requires a father."
+                )
+
+            if self.genetic_status is None:
+                raise ValueError(
+                    "Successful kitten birth "
+                    "requires genetic status."
+                )
+
+            if self.rare is None:
+                raise ValueError(
+                    "Successful kitten birth "
+                    "requires rare state."
+                )
+
+            if self.reason is not None:
+                raise ValueError(
+                    "Successful kitten birth "
+                    "cannot contain a failure reason."
+                )
+
+        else:
+            if self.kitten is not None:
+                raise ValueError(
+                    "Failed kitten birth "
+                    "cannot contain a kitten name."
+                )
+
+            if self.reason is None:
+                raise ValueError(
+                    "Failed kitten birth "
+                    "requires a reason."
+                )
+
+            if (
+                self.father is not None
+                or self.genetic_status is not None
+                or self.rare is not None
+            ):
+                raise ValueError(
+                    "Failed kitten birth "
+                    "cannot contain successful "
+                    "birth details."
+                )
+
+    def __deepcopy__(
+        self,
+        memo
+    ):
+        return self
+
+    def to_dict(self):
+        if not self.born:
+            return {
+                "embryo_id": (
+                    self.embryo_id
+                ),
+                "kitten": None,
+                "born": False,
+                "reason": (
+                    self.reason
+                ),
+            }
+
+        return {
+            "embryo_id": (
+                self.embryo_id
+            ),
+            "kitten": self.kitten,
+            "father": self.father,
+            "genetic_status": (
+                self.genetic_status
+            ),
+            "rare": self.rare,
+            "born": True,
+        }
+
+
+@dataclass(slots=True, frozen=True)
+class CatLitter:
+
+    litter_number: int
+    mother: str
+
+    father_names: tuple[
+        str,
+        ...,
+    ]
+
+    embryos_present: int
+    kittens_born: int
+
+    kitten_names: tuple[
+        str,
+        ...,
+    ]
+
+    birth_results: tuple[
+        CatKittenBirthResult,
+        ...,
+    ]
+
+    pregnancy_day: int
+    gestation_days: int
+    birth_day: int | None
+
+    name: str = field(
+        default="cat_litter_born",
+        init=False,
+    )
+
+    born: bool = field(
+        default=True,
+        init=False,
+    )
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "litter_number",
+            int(
+                self.litter_number
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "mother",
+            str(
+                self.mother
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "father_names",
+            tuple(
+                str(name)
+                for name
+                in self.father_names
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "embryos_present",
+            int(
+                self.embryos_present
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "kittens_born",
+            int(
+                self.kittens_born
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "kitten_names",
+            tuple(
+                str(name)
+                for name
+                in self.kitten_names
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "birth_results",
+            tuple(
+                self.birth_results
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "pregnancy_day",
+            int(
+                self.pregnancy_day
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "gestation_days",
+            int(
+                self.gestation_days
+            ),
+        )
+
+        if self.birth_day is not None:
+            object.__setattr__(
+                self,
+                "birth_day",
+                int(
+                    self.birth_day
+                ),
+            )
+
+        if not all(
+            isinstance(
+                result,
+                CatKittenBirthResult,
+            )
+            for result
+            in self.birth_results
+        ):
+            raise TypeError(
+                "Cat litter birth results "
+                "must contain "
+                "CatKittenBirthResult objects."
+            )
+
+        if (
+            self.embryos_present
+            != len(
+                self.birth_results
+            )
+        ):
+            raise ValueError(
+                "Cat litter embryo count "
+                "must match birth results."
+            )
+
+        if (
+            self.kittens_born
+            != len(
+                self.kitten_names
+            )
+        ):
+            raise ValueError(
+                "Cat litter kitten count "
+                "must match kitten names."
+            )
+
+        born_result_names = tuple(
+            result.kitten
+            for result
+            in self.birth_results
+            if result.born
+        )
+
+        if (
+            born_result_names
+            != self.kitten_names
+        ):
+            raise ValueError(
+                "Cat litter kitten names "
+                "must match successful "
+                "birth results."
+            )
+
+    @property
+    def multiple_sires(self):
+        return (
+            len(
+                self.father_names
+            )
+            > 1
+        )
+
+    def __deepcopy__(
+        self,
+        memo
+    ):
+        return self
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "litter_number": (
+                self.litter_number
+            ),
+            "mother": self.mother,
+            "father_names": list(
+                self.father_names
+            ),
+            "multiple_sires": (
+                self.multiple_sires
+            ),
+            "embryos_present": (
+                self.embryos_present
+            ),
+            "kittens_born": (
+                self.kittens_born
+            ),
+            "kitten_names": list(
+                self.kitten_names
+            ),
+            "birth_results": [
+                result.to_dict()
+                for result
+                in self.birth_results
+            ],
+            "pregnancy_day": (
+                self.pregnancy_day
+            ),
+            "gestation_days": (
+                self.gestation_days
+            ),
+            "birth_day": self.birth_day,
+            "born": self.born,
+        }
