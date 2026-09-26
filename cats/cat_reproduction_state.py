@@ -1,5 +1,6 @@
-from copy import deepcopy
 from dataclasses import dataclass, field
+
+from cats.mating_contact import CatMatingContact
 
 
 @dataclass(slots=True)
@@ -21,7 +22,7 @@ class CatReproductionState:
 
     mating_window_open: bool = False
     mating_window_started_day: int | None = None
-    mating_contacts: list = field(default_factory=list)
+    mating_contacts: list[CatMatingContact] = field(default_factory=list)
     potential_fathers: list = field(default_factory=list)
 
     ovulation_stimulation: int = 0
@@ -37,7 +38,6 @@ class CatReproductionState:
     mother_name: str | None = None
     father_name: str | None = None
     father_names: list = field(default_factory=list)
-    mating_contact: object | None = None
 
     embryos: list = field(default_factory=list)
     litters: list = field(default_factory=list)
@@ -85,7 +85,6 @@ class CatReproductionState:
             "mother_name": self.mother_name,
             "father_name": self.father_name,
             "father_names": list(self.father_names),
-            "mating_contact": deepcopy(self.mating_contact),
             "embryos": [
                 embryo.to_dict()
                 for embryo
