@@ -1,3 +1,4 @@
+from copy import deepcopy
 from dataclasses import dataclass, field
 from dataclasses import dataclass, replace
 from types import MappingProxyType
@@ -404,8 +405,113 @@ class CatBirthPercentileResult:
         }
 
 
-class KittenEmbryo(ComponentObject):
-    pass
+@dataclass(slots=True)
+class KittenEmbryo:
+
+    id: str
+    mother_name: str
+    father_name: str
+
+    genotype: object
+    phenotype: object
+
+    profile: CatBirthProfile
+    viability: object
+
+    genetic_status: str
+    rare: bool
+
+    special_traits: tuple[
+        str,
+        ...,
+    ] = field(
+        default_factory=tuple
+    )
+
+    type: str = field(
+        default="kitten_embryo",
+        init=False,
+    )
+
+    state: str = field(
+        default="gestating",
+        init=False,
+    )
+
+    def __post_init__(self):
+        if not isinstance(
+            self.profile,
+            CatBirthProfile,
+        ):
+            raise TypeError(
+                "Kitten embryo profile must "
+                "be a CatBirthProfile object."
+            )
+
+        if not hasattr(
+            self.viability,
+            "to_dict",
+        ):
+            raise TypeError(
+                "Kitten embryo viability must "
+                "be a typed viability object."
+            )
+
+        self.id = str(
+            self.id
+        )
+
+        self.mother_name = str(
+            self.mother_name
+        )
+
+        self.father_name = str(
+            self.father_name
+        )
+
+        self.genetic_status = str(
+            self.genetic_status
+        )
+
+        self.rare = bool(
+            self.rare
+        )
+
+        self.special_traits = tuple(
+            str(trait)
+            for trait
+            in self.special_traits
+        )
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "type": self.type,
+            "state": self.state,
+            "mother_name": (
+                self.mother_name
+            ),
+            "father_name": (
+                self.father_name
+            ),
+            "genotype": self.genotype,
+            "phenotype": deepcopy(
+                self.phenotype
+            ),
+            "profile": (
+                self.profile.to_dict()
+            ),
+            "viability": (
+                self.viability.to_dict()
+            ),
+            "genetic_status": (
+                self.genetic_status
+            ),
+            "rare": self.rare,
+            "special_traits": list(
+                self.special_traits
+            ),
+        }
 
 
 @dataclass(slots=True, frozen=True)

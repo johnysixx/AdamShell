@@ -47,8 +47,8 @@ class KittenBirthResolver:
         birth_results = []
         for embryo in embryos:
             kitten_name = self._next_kitten_name()
-            profile = dict(embryo.profile)
-            manifestation = self.universe.manifest_cat(name=kitten_name, source='kitten_birth_resolver', color=profile['color'], fur_length=profile['fur_length'], pattern=profile['pattern'], eye_color=profile['eye_color'], sex=profile['sex'])
+            profile = embryo.profile
+            manifestation = self.universe.manifest_cat(name=kitten_name, source='kitten_birth_resolver', color=profile.color, fur_length=profile.fur_length, pattern=profile.pattern, eye_color=profile.eye_color, sex=profile.sex)
             if manifestation is None:
                 birth_results.append(
                     CatKittenBirthResult(

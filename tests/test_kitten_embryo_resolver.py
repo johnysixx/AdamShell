@@ -125,12 +125,12 @@ class KittenEmbryoResolverTests(
         )
 
         self.assertEqual(
-            embryo.profile["sex"],
+            embryo.profile.sex,
             "male"
         )
 
         self.assertEqual(
-            embryo.profile["color"],
+            embryo.profile.color,
             "tortoiseshell"
         )
 

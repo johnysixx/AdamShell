@@ -389,17 +389,56 @@ class KittenEmbryoResolver:
                 'event': event_snapshot,
                 'viable': False,
             }
-        phenotype = CatPhenotypeResolver.resolve(genotype)
-        embryo = KittenEmbryo(**{'id': embryo_id, 'type': 'kitten_embryo', 'state': 'gestating', 'mother_name': mother.name, 'father_name': father.name, 'genotype': genotype, 'phenotype': phenotype, 'profile': dict(phenotype['profile']), 'viability': viability, 'genetic_status': viability['status'], 'rare': viability['rare'], 'special_traits': list(viability['special_traits'])})
+        phenotype = CatPhenotypeResolver.resolve(
+            genotype
+        )
+
+        viability_snapshot = (
+            KittenGeneticViabilitySnapshot
+            .from_boundary(
+                viability
+            )
+        )
+
+        profile = CatBirthProfile(
+            **phenotype[
+                "profile"
+            ]
+        )
+
+        embryo = KittenEmbryo(
+            id=embryo_id,
+            mother_name=mother.name,
+            father_name=father.name,
+            genotype=genotype,
+            phenotype=phenotype,
+            profile=profile,
+            viability=(
+                viability_snapshot
+            ),
+            genetic_status=(
+                viability_snapshot.status
+            ),
+            rare=(
+                viability_snapshot.rare
+            ),
+            special_traits=(
+                viability_snapshot
+                .special_traits
+            ),
+        )
+
         event = KittenEmbryoCreatedEvent(
             embryo_id=embryo_id,
             mother=mother.name,
             father=father.name,
-            genetic_status=viability['status'],
-            rare=viability['rare'],
-            profile=CatBirthProfile(
-                **phenotype['profile']
+            genetic_status=(
+                viability_snapshot.status
             ),
+            rare=(
+                viability_snapshot.rare
+            ),
+            profile=profile,
         )
 
         self.record_event(
