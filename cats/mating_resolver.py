@@ -11,6 +11,11 @@ from cats.mating_contact import (
     CatMatingHistoryEvent,
     CatMatingWindowClosedWithoutOvulationEvent,
 )
+from cats.mating_pregnancy_event import (
+    CatPregnancyEmbryoResult,
+    CatPregnancyPaternityResult,
+    CatPregnancyStartedEvent,
+)
 
 class CatMatingResolver:
 
@@ -167,20 +172,93 @@ class CatMatingResolver:
             raise ValueError('Embryo count must be at least one.')
         embryo_results = []
         paternity_results = []
-        for _ in range(embryo_count):
-            paternity = self.paternity_resolver.select_father(mating_contacts=contacts, rng=rng)
-            father = paternity['father']
-            embryo_result = self.embryo_resolver.create_embryo(mother=female, father=father, rng=rng)
-            embryo_results.append(embryo_result)
-            paternity_results.append({'embryo_id': embryo_result['embryo'].id if embryo_result['embryo'] is not None else embryo_result['event']['embryo_id'], 'father': father.name, 'selection': paternity['event']})
-        viable_embryos = [result['embryo'] for result in embryo_results if result['viable']]
-        nonviable_results = [result for result in embryo_results if not result['viable']]
-        current_day = int(current_day)
+
+        for _ in range(
+            embryo_count
+        ):
+            paternity = (
+                self.paternity_resolver
+                .select_father(
+                    mating_contacts=contacts,
+                    rng=rng
+                )
+            )
+
+            paternity_event = (
+                self.paternity_resolver
+                .history[-1]
+            )
+
+            father = paternity[
+                "father"
+            ]
+
+            embryo_boundary = (
+                self.embryo_resolver
+                .create_embryo(
+                    mother=female,
+                    father=father,
+                    rng=rng
+                )
+            )
+
+            embryo_event = (
+                self.embryo_resolver
+                .history[-1]
+            )
+
+            embryo_result = (
+                CatPregnancyEmbryoResult
+                .from_boundary(
+                    embryo_boundary,
+                    embryo_event,
+                )
+            )
+
+            embryo_results.append(
+                embryo_result
+            )
+
+            paternity_results.append(
+                CatPregnancyPaternityResult(
+                    embryo_id=(
+                        embryo_result
+                        .embryo_id
+                    ),
+                    selection=(
+                        paternity_event
+                    ),
+                )
+            )
+
+        viable_embryos = [
+            result.embryo
+            for result
+            in embryo_results
+            if result.viable
+        ]
+
+        current_day = int(
+            current_day
+        )
+
         father_names = []
-        for result in paternity_results:
-            father_name = result['father']
-            if father_name not in father_names:
-                father_names.append(father_name)
+
+        for result in (
+            paternity_results
+        ):
+            father_name = (
+                result.father
+            )
+
+            if (
+                father_name
+                not in father_names
+            ):
+                father_names.append(
+                    father_name
+                )
+
         reproduction.estrus_active = False
         reproduction.estrous_phase = 'diestrus'
         reproduction.estrous_cycle_day = 0
@@ -188,20 +266,60 @@ class CatMatingResolver:
         reproduction.pregnant = True
         reproduction.pregnancy_day = 0
         reproduction.gestation_days = gestation_days
-        reproduction.expected_birth_day = current_day + gestation_days
+        reproduction.expected_birth_day = (
+            current_day
+            + gestation_days
+        )
         reproduction.mother_name = female.name
         reproduction.father_name = (
             father_names[0]
             if len(father_names) == 1
             else None
         )
-        reproduction.father_names = father_names
-        reproduction.embryos = viable_embryos
-        event = {'name': 'cat_pregnancy_started', 'mother': female.name, 'father_names': father_names, 'multiple_sires': len(father_names) > 1, 'ovulation': ovulation, 'ovulation_induced': True, 'mating_contact_count': len(contacts), 'paternity_results': paternity_results, 'gestation_days': gestation_days, 'pregnancy_day': 0, 'started_on_day': current_day, 'expected_birth_day': current_day + gestation_days, 'embryos_attempted': embryo_count, 'viable_embryo_count': len(viable_embryos), 'nonviable_embryo_count': len(nonviable_results), 'embryo_results': embryo_results, 'started': True}
-        self.history.append(event)
-        if hasattr(self.universe, 'quantum_events'):
-            self.universe.quantum_events.append(event)
-        return event
+        reproduction.father_names = (
+            father_names
+        )
+        reproduction.embryos = (
+            viable_embryos
+        )
+
+        event = (
+            CatPregnancyStartedEvent(
+                mother=female.name,
+                ovulation=(
+                    ovulation_event
+                ),
+                mating_contact_count=len(
+                    contacts
+                ),
+                paternity_results=tuple(
+                    paternity_results
+                ),
+                gestation_days=(
+                    gestation_days
+                ),
+                started_on_day=(
+                    current_day
+                ),
+                embryo_results=tuple(
+                    embryo_results
+                ),
+            )
+        )
+
+        self._record_history_event(
+            event
+        )
+
+        if hasattr(
+            self.universe,
+            'quantum_events'
+        ):
+            self.universe.quantum_events.append(
+                event.to_dict()
+            )
+
+        return event.to_dict()
 
     def advance_pregnancy(self, female, days=1):
         biology = self.biology_gate.require_physical_world(operation='advance_cat_pregnancy', cat=female)
