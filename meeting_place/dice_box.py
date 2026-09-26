@@ -193,6 +193,153 @@ class DiceBoxAllRotationEvent:
         }
 
 
+@dataclass(
+    slots=True,
+    frozen=True
+)
+class DiceBoxPercentilePairRotationEvent:
+
+    tens: DiceBoxRotationEvent
+    units: DiceBoxRotationEvent
+    percentile_units: int
+    value: int
+    location: str
+
+    name: str = field(
+        default=(
+            "dice_box_percentile_pair_rotated"
+        ),
+        init=False,
+    )
+
+    minimum: int = field(
+        default=1,
+        init=False,
+    )
+
+    maximum: int = field(
+        default=100,
+        init=False,
+    )
+
+    removed_from_box: bool = field(
+        default=False,
+        init=False,
+    )
+
+    visibility: str = field(
+        default="secret_bar_dice_event",
+        init=False,
+    )
+
+    rotated: bool = field(
+        default=True,
+        init=False,
+    )
+
+    def __post_init__(
+        self
+    ):
+        if not isinstance(
+            self.tens,
+            DiceBoxRotationEvent
+        ):
+            raise TypeError(
+                "Percentile tens must be a "
+                "DiceBoxRotationEvent object."
+            )
+
+        if not isinstance(
+            self.units,
+            DiceBoxRotationEvent
+        ):
+            raise TypeError(
+                "Percentile units must be a "
+                "DiceBoxRotationEvent object."
+            )
+
+        if self.tens.die != "d10_percentile":
+            raise ValueError(
+                "Percentile tens require "
+                "d10_percentile."
+            )
+
+        if self.units.die != "d10":
+            raise ValueError(
+                "Percentile units require d10."
+            )
+
+        object.__setattr__(
+            self,
+            "percentile_units",
+            int(
+                self.percentile_units
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "value",
+            int(
+                self.value
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "location",
+            str(
+                self.location
+            ),
+        )
+
+    @property
+    def dice(
+        self
+    ):
+        return (
+            "d10_percentile",
+            "d10",
+        )
+
+    def __deepcopy__(
+        self,
+        memo
+    ):
+        return self
+
+    def to_dict(
+        self
+    ):
+        units = self.units.to_dict()
+
+        units[
+            "percentile_units"
+        ] = self.percentile_units
+
+        return {
+            "name": self.name,
+            "dice": list(
+                self.dice
+            ),
+            "tens": (
+                self.tens.to_dict()
+            ),
+            "units": units,
+            "value": self.value,
+            "minimum": self.minimum,
+            "maximum": self.maximum,
+            "location": self.location,
+            "removed_from_box": (
+                self.removed_from_box
+            ),
+            "visibility": (
+                self.visibility
+            ),
+            "rotated": self.rotated,
+        }
+
+
 class DiceBox:
 
     def __init__(self):
@@ -495,46 +642,30 @@ class DiceBox:
         if percentile_value == 0:
             percentile_value = 100
 
-        self._record_rotation(
-            tens
+        tens_rotation = (
+            self._record_rotation(
+                tens
+            )
         )
 
-        self._record_rotation(
-            units_die
+        units_rotation = (
+            self._record_rotation(
+                units_die
+            )
         )
 
-        event = {
-            "name": (
-                "dice_box_percentile_pair_rotated"
-            ),
-            "dice": [
-                "d10_percentile",
-                "d10"
-            ],
-            "tens": dict(tens),
-            "units": {
-                **dict(units_die),
-                "percentile_units": units
-            },
-            "value": percentile_value,
-            "minimum": 1,
-            "maximum": 100,
-            "location": self.location,
-            "removed_from_box": False,
-            "visibility": (
-                "secret_bar_dice_event"
-            ),
-            "rotated": True
-        }
+        event = (
+            DiceBoxPercentilePairRotationEvent(
+                tens=tens_rotation,
+                units=units_rotation,
+                percentile_units=units,
+                value=percentile_value,
+                location=self.location,
+            )
+        )
 
-        if not hasattr(
-            self,
-            "percentile_history"
-        ):
-            self.percentile_history = []
-
-        self.percentile_history.append(
-            dict(event)
+        self.record_percentile_rotation(
+            event
         )
 
         self.state.record_percentile_rotation(
@@ -544,6 +675,33 @@ class DiceBox:
         UniverseLogger.event(
             "PERCENTILE DICE SECRETLY ROTATE "
             "INSIDE THE BAR DICE BOX"
+        )
+
+        return event.to_dict()
+
+    def record_percentile_rotation(
+        self,
+        event
+    ):
+        if not isinstance(
+            event,
+            DiceBoxPercentilePairRotationEvent
+        ):
+            raise TypeError(
+                "Dice box percentile history "
+                "requires a "
+                "DiceBoxPercentilePairRotationEvent "
+                "object."
+            )
+
+        if not hasattr(
+            self,
+            "percentile_history"
+        ):
+            self.percentile_history = []
+
+        self.percentile_history.append(
+            event
         )
 
         return event
