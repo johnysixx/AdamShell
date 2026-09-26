@@ -2,6 +2,7 @@ from cats.cat_family_system import CatFamilySystem
 from cats.physical_biology_gate import PhysicalBiologyGate
 from cats.development_resolver import CatDevelopmentResolver
 from cats.cat_birth_objects import (
+    CatKittenBirthDeniedResult,
     CatKittenBirthResult,
     CatLitter,
 )
@@ -27,7 +28,19 @@ class KittenBirthResolver:
         pregnancy_day = int(reproduction.pregnancy_day)
         gestation_days = int(reproduction.gestation_days)
         if pregnancy_day < gestation_days:
-            return {'name': 'kitten_birth_denied', 'reason': 'gestation_not_complete', 'mother': mother.name, 'pregnancy_day': pregnancy_day, 'gestation_days': gestation_days, 'born': False}
+            result = (
+                CatKittenBirthDeniedResult(
+                    mother=mother.name,
+                    pregnancy_day=(
+                        pregnancy_day
+                    ),
+                    gestation_days=(
+                        gestation_days
+                    ),
+                )
+            )
+
+            return result.to_dict()
         embryos = list(reproduction.embryos)
         litter_number = int(reproduction.litters_born) + 1
         kittens = []

@@ -409,6 +409,83 @@ class KittenEmbryo(ComponentObject):
 
 
 @dataclass(slots=True, frozen=True)
+class CatKittenBirthDeniedResult:
+
+    mother: str
+    pregnancy_day: int
+    gestation_days: int
+
+    name: str = field(
+        default="kitten_birth_denied",
+        init=False,
+    )
+
+    reason: str = field(
+        default="gestation_not_complete",
+        init=False,
+    )
+
+    born: bool = field(
+        default=False,
+        init=False,
+    )
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "mother",
+            str(
+                self.mother
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "pregnancy_day",
+            int(
+                self.pregnancy_day
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "gestation_days",
+            int(
+                self.gestation_days
+            ),
+        )
+
+        if (
+            self.pregnancy_day
+            >= self.gestation_days
+        ):
+            raise ValueError(
+                "Birth can only be denied "
+                "for incomplete gestation."
+            )
+
+    def __deepcopy__(
+        self,
+        memo
+    ):
+        return self
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "reason": self.reason,
+            "mother": self.mother,
+            "pregnancy_day": (
+                self.pregnancy_day
+            ),
+            "gestation_days": (
+                self.gestation_days
+            ),
+            "born": self.born,
+        }
+
+
+@dataclass(slots=True, frozen=True)
 class CatKittenBirthResult:
 
     embryo_id: str
