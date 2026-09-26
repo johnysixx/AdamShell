@@ -23,7 +23,7 @@ class CatReproductionState:
     mating_window_open: bool = False
     mating_window_started_day: int | None = None
     mating_contacts: list[CatMatingContact] = field(default_factory=list)
-    potential_fathers: list = field(default_factory=list)
+    potential_fathers: list[str] = field(default_factory=list)
 
     ovulation_stimulation: int = 0
     ovulation_threshold: int = 4
@@ -36,8 +36,6 @@ class CatReproductionState:
     expected_birth_day: int | None = None
 
     mother_name: str | None = None
-    father_name: str | None = None
-    father_names: list = field(default_factory=list)
 
     embryos: list = field(default_factory=list)
     litters: list = field(default_factory=list)
@@ -83,8 +81,6 @@ class CatReproductionState:
             "gestation_days": self.gestation_days,
             "expected_birth_day": self.expected_birth_day,
             "mother_name": self.mother_name,
-            "father_name": self.father_name,
-            "father_names": list(self.father_names),
             "embryos": [
                 embryo.to_dict()
                 for embryo

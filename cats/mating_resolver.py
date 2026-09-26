@@ -272,14 +272,6 @@ class CatMatingResolver:
             + gestation_days
         )
         reproduction.mother_name = female.name
-        reproduction.father_name = (
-            father_names[0]
-            if len(father_names) == 1
-            else None
-        )
-        reproduction.father_names = (
-            father_names
-        )
         reproduction.embryos = (
             viable_embryos
         )

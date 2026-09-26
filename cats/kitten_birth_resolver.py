@@ -134,8 +134,6 @@ class KittenBirthResolver:
         reproduction.estrus_active = False
         reproduction.mating_contacts = []
         reproduction.potential_fathers = []
-        reproduction.father_name = None
-        reproduction.father_names = []
         reproduction.embryos = []
         reproduction.litters_born = litter_number
         reproduction.last_litter = litter

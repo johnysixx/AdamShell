@@ -38,7 +38,8 @@ class CatReproductionObjectStateTests(unittest.TestCase):
         self.assertFalse(state.pregnant)
         self.assertEqual(state.embryos, [])
         self.assertEqual(state.litters, [])
-        self.assertEqual(state.father_names, [])
+        self.assertFalse(hasattr(state, "father_name"))
+        self.assertFalse(hasattr(state, "father_names"))
 
     def test_neutered_state_is_not_fertile(self):
         state = CatReproductionState(
