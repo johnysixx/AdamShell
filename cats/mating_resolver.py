@@ -12,6 +12,7 @@ from cats.mating_contact import (
     CatMatingWindowClosedWithoutOvulationEvent,
 )
 from cats.mating_pregnancy_event import (
+    CatPregnancyAdvancedEvent,
     CatPregnancyEmbryoResult,
     CatPregnancyPaternityResult,
     CatPregnancyStartedEvent,
@@ -332,10 +333,27 @@ class CatMatingResolver:
         if days < 1:
             raise ValueError('Pregnancy advance must be at least one day.')
         reproduction.pregnancy_day += days
-        ready_for_birth = reproduction.pregnancy_day >= reproduction.gestation_days
-        event = {'name': 'cat_pregnancy_advanced', 'mother': female.name, 'days_advanced': days, 'pregnancy_day': reproduction.pregnancy_day, 'gestation_days': reproduction.gestation_days, 'ready_for_birth': ready_for_birth, 'advanced': True}
-        self.history.append(event)
-        return event
+
+        event = (
+            CatPregnancyAdvancedEvent(
+                mother=female.name,
+                days_advanced=days,
+                pregnancy_day=(
+                    reproduction
+                    .pregnancy_day
+                ),
+                gestation_days=(
+                    reproduction
+                    .gestation_days
+                ),
+            )
+        )
+
+        self._record_history_event(
+            event
+        )
+
+        return event.to_dict()
 
     @staticmethod
     def _validate_pair(female, male):

@@ -676,3 +676,88 @@ class CatPregnancyStartedEvent(
             ],
             "started": self.started,
         }
+
+@dataclass(slots=True, frozen=True)
+class CatPregnancyAdvancedEvent(
+    CatMatingHistoryEvent
+):
+
+    mother: str
+    days_advanced: int
+    pregnancy_day: int
+    gestation_days: int
+
+    name: str = field(
+        default="cat_pregnancy_advanced",
+        init=False,
+    )
+
+    advanced: bool = field(
+        default=True,
+        init=False,
+    )
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "mother",
+            str(
+                self.mother
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "days_advanced",
+            int(
+                self.days_advanced
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "pregnancy_day",
+            int(
+                self.pregnancy_day
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "gestation_days",
+            int(
+                self.gestation_days
+            ),
+        )
+
+    @property
+    def ready_for_birth(self):
+        return (
+            self.pregnancy_day
+            >= self.gestation_days
+        )
+
+    def __deepcopy__(
+        self,
+        memo
+    ):
+        return self
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "mother": self.mother,
+            "days_advanced": (
+                self.days_advanced
+            ),
+            "pregnancy_day": (
+                self.pregnancy_day
+            ),
+            "gestation_days": (
+                self.gestation_days
+            ),
+            "ready_for_birth": (
+                self.ready_for_birth
+            ),
+            "advanced": self.advanced,
+        }
