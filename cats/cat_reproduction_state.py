@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 
-from cats.cat_birth_objects import CatLitter
+from cats.cat_birth_objects import CatLitter, KittenEmbryo
 
 from cats.mating_contact import CatMatingContact
 
@@ -39,7 +39,7 @@ class CatReproductionState:
 
     mother_name: str | None = None
 
-    embryos: list = field(default_factory=list)
+    embryos: list[KittenEmbryo] = field(default_factory=list)
     litters: list[CatLitter] = field(default_factory=list)
     last_litter: CatLitter | None = None
     litters_born: int = 0
