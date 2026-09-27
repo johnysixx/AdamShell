@@ -3,6 +3,9 @@ from copy import deepcopy
 from universe.big_bang_state import (
     BigBangCosmicState,
 )
+from universe.big_bang_process_state import (
+    BigBangProcessState,
+)
 from universe.primordial_objects import PrimordialCosmicComponent
 
 
@@ -12,7 +15,7 @@ class BigBang:
         self.universe = universe
         self.name = "big_bang"
         self.type = "cosmic_origin_process"
-        self.state = "ready"
+        self.state = BigBangProcessState.READY
 
         self.phases = []
 
@@ -22,11 +25,28 @@ class BigBang:
 
         self.public_state = self._build_public_state()
 
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, state):
+        if not isinstance(
+            state,
+            BigBangProcessState,
+        ):
+            raise TypeError(
+                "Big Bang process state must use "
+                "BigBangProcessState."
+            )
+
+        self._state = state
+
     def _build_public_state(self):
         return {
             "name": self.name,
             "type": self.type,
-            "state": self.state,
+            "state": self.state.value,
             "phases": deepcopy(self.phases),
             "primordial_elements": {
                 name: component.to_dict()
@@ -53,7 +73,7 @@ class BigBang:
         return self.public_state
 
     def begin(self):
-        self.state = "in_progress"
+        self.state = BigBangProcessState.IN_PROGRESS
         self.record_phase(
             name="primordial_void",
             description="Before form, stars, worlds, or drink foundations, the universe begins as primordial potential."
@@ -141,7 +161,7 @@ class BigBang:
         print("LIGHT SEPARATED FROM DARKNESS")
 
     def complete(self):
-        self.state = "completed"
+        self.state = BigBangProcessState.COMPLETED
         self.record_phase(
             name="big_bang_completed",
             description="The origin process is complete. The universe now contains spacetime, primordial plasma, and light elements."
