@@ -2,6 +2,9 @@ from core.actualization import PotentialBlueprint
 from core.actualization.cycle_state import (
     ActualizationCycleState,
 )
+from core.actualization.potential_state import (
+    PotentialState,
+)
 
 
 class HistoryRecord:
@@ -24,13 +27,13 @@ class HistoryRecord:
         self.actualized = [
             potential.public_state
             for potential in potentials
-            if potential.state == "actualized"
+            if potential.state is PotentialState.ACTUALIZED
         ]
 
         self.unrealized = [
             potential.public_state
             for potential in potentials
-            if potential.state == "unrealized"
+            if potential.state is PotentialState.UNREALIZED
         ]
 
         self.potential_blueprints = [
