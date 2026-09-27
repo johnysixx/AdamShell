@@ -10,6 +10,9 @@ from cats.duplicate_consumption_energy import (
 from cats.duplicate_consumption_energy_state import (
     DuplicateConsumptionEnergyState,
 )
+from cats.duplicate_consumption_energy_resolution import (
+    DuplicateConsumptionEnergyResolution,
+)
 
 
 class DuplicateConsumptionEnergyObjectStateTests(
@@ -122,9 +125,15 @@ class DuplicateConsumptionEnergyObjectStateTests(
             1,
         )
 
-        self.assertEqual(
+        self.assertIs(
             state.resolution,
+            DuplicateConsumptionEnergyResolution
+            .CRONENBERG_MANIFESTED,
+        )
+
+        self.assertEqual(
             result["resolution"],
+            "cronenberg_manifested",
         )
 
         self.assertEqual(
@@ -215,22 +224,71 @@ class DuplicateConsumptionEnergyObjectStateTests(
             1,
         )
 
-        self.assertEqual(
+        self.assertIs(
             event.resolution,
+            DuplicateConsumptionEnergyResolution
+            .CRONENBERG_MANIFESTED,
+        )
+
+        self.assertEqual(
             result["resolution"],
+            "cronenberg_manifested",
         )
 
         result[
             "resolution"
         ] = "changed"
 
-        self.assertNotEqual(
+        self.assertIs(
             event.resolution,
-            "changed",
+            DuplicateConsumptionEnergyResolution
+            .CRONENBERG_MANIFESTED,
         )
 
         with self.assertRaises(TypeError):
             _ = event["resolution"]
+
+    def test_state_rejects_string_resolution(
+        self
+    ):
+        with self.assertRaises(TypeError):
+            DuplicateConsumptionEnergyState(
+                energy_id="energy_1",
+                cat=self.cat.name,
+                source="cat_milk",
+                day=1,
+                amount=1.0,
+                energy_kind="duplicate_consumption",
+                resolution="cronenberg_manifested",
+            )
+
+        state = DuplicateConsumptionEnergyState(
+            energy_id="energy_1",
+            cat=self.cat.name,
+            source="cat_milk",
+            day=1,
+            amount=1.0,
+            energy_kind="duplicate_consumption",
+        )
+
+        with self.assertRaises(TypeError):
+            state.resolve(
+                resolution="cronenberg_manifested",
+                cat_d20_value=1,
+            )
+
+    def test_resolved_event_rejects_string_resolution(
+        self
+    ):
+        with self.assertRaises(TypeError):
+            DuplicateConsumptionEnergyResolvedEvent(
+                energy_id="energy_1",
+                cat=self.cat.name,
+                source="cat_milk",
+                amount=1.0,
+                cat_d20_value=1,
+                resolution="cronenberg_manifested",
+            )
 
     def test_history_rejects_mapping_event(
         self

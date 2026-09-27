@@ -3,6 +3,9 @@ from dataclasses import dataclass, field
 from cats.duplicate_consumption_energy_state import (
     DuplicateConsumptionEnergyState,
 )
+from cats.duplicate_consumption_energy_resolution import (
+    DuplicateConsumptionEnergyResolution,
+)
 
 
 @dataclass(slots=True, frozen=True)
@@ -23,7 +26,10 @@ class DuplicateConsumptionEnergyStoredEvent:
         default=False,
         init=False,
     )
-    resolution: str | None = field(
+    resolution: (
+        DuplicateConsumptionEnergyResolution
+        | None
+    ) = field(
         default=None,
         init=False,
     )
@@ -88,7 +94,7 @@ class DuplicateConsumptionEnergyResolvedEvent:
     source: str
     amount: float
     cat_d20_value: int
-    resolution: str
+    resolution: DuplicateConsumptionEnergyResolution
     resolved_entity_id: str | None = None
     original_cronenberg_id: str | None = None
     counterpart_id: str | None = None
@@ -134,11 +140,15 @@ class DuplicateConsumptionEnergyResolvedEvent:
             "cat_d20_value",
             int(self.cat_d20_value),
         )
-        object.__setattr__(
-            self,
-            "resolution",
-            str(self.resolution),
-        )
+        if not isinstance(
+            self.resolution,
+            DuplicateConsumptionEnergyResolution,
+        ):
+            raise TypeError(
+                "Duplicate consumption energy resolved "
+                "event resolution must use "
+                "DuplicateConsumptionEnergyResolution."
+            )
 
     def to_dict(self):
         return {
@@ -150,7 +160,7 @@ class DuplicateConsumptionEnergyResolvedEvent:
             "cat_d20_value": (
                 self.cat_d20_value
             ),
-            "resolution": self.resolution,
+            "resolution": self.resolution.value,
             "resolved_entity_id": (
                 self.resolved_entity_id
             ),
@@ -435,8 +445,8 @@ class DuplicateConsumptionEnergy:
 
         return {
             "resolution": (
-                "cronenberg_quantum_"
-                "counterpart_created"
+                DuplicateConsumptionEnergyResolution
+                .CRONENBERG_QUANTUM_COUNTERPART_CREATED
             ),
             "resolved_entity_id": (
                 counterpart.id
@@ -468,7 +478,8 @@ class DuplicateConsumptionEnergy:
 
         return {
             "resolution": (
-                "cronenberg_manifested"
+                DuplicateConsumptionEnergyResolution
+                .CRONENBERG_MANIFESTED
             ),
             "resolved_entity_id": (
                 cronenberg.id
