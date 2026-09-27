@@ -5,6 +5,9 @@ from cats.cats import Cats
 from cats.cat_distribution_state import (
     CatDistributionState,
 )
+from cats.cat_distribution_status import (
+    CatDistributionStatus,
+)
 from cats.cat_distribution_system import (
     CatDistributionSystem,
 )
@@ -92,15 +95,23 @@ class CatDistributionObjectStateTests(
             state.recipient
         )
 
-        self.assertEqual(
+        self.assertIs(
             state.status,
-            'unassigned',
+            CatDistributionStatus.UNASSIGNED,
         )
 
         self.assertEqual(
             state.suggested_layer,
             'idea_universe',
         )
+
+    def test_string_status_is_rejected(
+        self
+    ):
+        with self.assertRaises(TypeError):
+            CatDistributionState(
+                status="assigned",
+            )
 
     def test_legacy_mapping_is_rejected(
         self

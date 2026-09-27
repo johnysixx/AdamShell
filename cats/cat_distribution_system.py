@@ -1,6 +1,9 @@
 from cats.cat import Cat
 
 from cats.cat_distribution_state import CatDistributionState
+from cats.cat_distribution_status import (
+    CatDistributionStatus,
+)
 
 class CatDistributionSystem:
 
@@ -30,15 +33,15 @@ class CatDistributionSystem:
             recipient_id = getattr(recipient, 'id', None) or getattr(recipient, 'world_key', None) or getattr(recipient, 'name', None)
             cat.recipient = recipient_id
             distribution.recipient = recipient_id
-            distribution.status = 'assigned'
+            distribution.status = CatDistributionStatus.ASSIGNED
             distribution.suggested_layer = None
             recipient.needs_cat = False
-            return {'name': 'cat_assigned_to_recipient', 'cat': cat.name, 'recipient': recipient_id, 'status': 'assigned', 'distributed': True}
+            return {'name': 'cat_assigned_to_recipient', 'cat': cat.name, 'recipient': recipient_id, 'status': distribution.status.value, 'distributed': True}
         suggested_layer = 'idea_universe'
         distribution.recipient = None
-        distribution.status = 'unassigned'
+        distribution.status = CatDistributionStatus.UNASSIGNED
         distribution.suggested_layer = suggested_layer
-        return {'name': 'cat_distribution_suggested', 'cat': cat.name, 'status': 'unassigned', 'suggested_layer': suggested_layer, 'distributed': False}
+        return {'name': 'cat_distribution_suggested', 'cat': cat.name, 'status': distribution.status.value, 'suggested_layer': suggested_layer, 'distributed': False}
 
     def _find_waiting_recipient(self):
         if self.recipient_registry is None:

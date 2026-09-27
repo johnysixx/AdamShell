@@ -1,6 +1,9 @@
 from core.entity.social_entity import SocialEntity
 import unittest
 from cats.cat_distribution_system import CatDistributionSystem
+from cats.cat_distribution_status import (
+    CatDistributionStatus,
+)
 from cats.cats import Cats
 from universe.universe import Universe
 from universe.cat_recipient_registry import CatRecipientRegistry
@@ -53,7 +56,10 @@ class CatDistributionSystemTests(unittest.TestCase):
         self.assertEqual(result['status'], 'assigned')
         self.assertEqual(result['recipient'], 'alice')
         self.assertEqual(cat.recipient, 'alice')
-        self.assertEqual(cat.distribution.status, 'assigned')
+        self.assertIs(
+            cat.distribution.status,
+            CatDistributionStatus.ASSIGNED,
+        )
         self.assertEqual(cat.distribution.recipient, 'alice')
         self.assertIn(cat, meeting_entities)
         self.assertEqual(cat.current_layer, 'meeting_place')
