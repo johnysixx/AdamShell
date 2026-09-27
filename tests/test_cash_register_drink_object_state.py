@@ -3,6 +3,7 @@ from types import SimpleNamespace
 
 from meeting_place.bar_objects import BarDrink
 from meeting_place.bar_payment_state import BarPaymentState
+from meeting_place.bar_payment_kind import BarPaymentKind
 from meeting_place.cash_register import CashRegister
 
 
@@ -17,7 +18,7 @@ class CashRegisterDrinkObjectStateTests(unittest.TestCase):
         self.payment = BarPaymentState(
             name="idea_entity_basic_drink_payment",
             entity=self.guest.name,
-            payment_kind="energy",
+            payment_kind=BarPaymentKind.ENERGY,
             energy_paid_j=1.25,
         )
 

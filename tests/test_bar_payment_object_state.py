@@ -3,6 +3,7 @@ from types import SimpleNamespace
 
 from meeting_place.bar_objects import BarDrink
 from meeting_place.bar_payment_state import BarPaymentState
+from meeting_place.bar_payment_kind import BarPaymentKind
 from meeting_place.bar_receipt_state import BarReceiptState
 from meeting_place.cash_register import CashRegister
 from meeting_place.meeting_place import MeetingPlace
@@ -88,7 +89,10 @@ class BarPaymentObjectStateTests(unittest.TestCase):
         payment = self.rules.apply_basic_drink_payment(guest)
 
         self.assertIsInstance(payment, BarPaymentState)
-        self.assertEqual(payment.payment_kind, "unsupported")
+        self.assertIs(
+            payment.payment_kind,
+            BarPaymentKind.UNSUPPORTED,
+        )
         self.assertEqual(guest.energy_j, 12.0)
         self.assertEqual(payment.to_dict(), {
             "name": "basic_drink_payment_not_available",
@@ -96,6 +100,14 @@ class BarPaymentObjectStateTests(unittest.TestCase):
             "entity_type": "human",
             "payment_kind": "unsupported",
         })
+
+    def test_string_payment_kind_is_rejected(self):
+        with self.assertRaises(TypeError):
+            BarPaymentState(
+                name="invalid_payment",
+                entity="guest",
+                payment_kind="energy",
+            )
 
     def test_unsupported_guest_does_not_credit_bar_or_receive_receipt(self):
         universe = Universe()

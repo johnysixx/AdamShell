@@ -1,6 +1,7 @@
 from universe.pre_cosmic_rules import REALITY_PAYMENT_RATIO, WILL_GAIN_PER_ENERGY_SERVING, captured_by_bar
 from core.entity.existence_energy import existence_pct_to_energy_j
 from meeting_place.bar_payment_state import BarPaymentState
+from meeting_place.bar_payment_kind import BarPaymentKind
 IDEA_ENTITY_ENERGY_EXISTENCE_COST_PERCENT = REALITY_PAYMENT_RATIO * 100
 GOD_ENERGY_CREATIVE_WILL_GAIN = 0.3
 GOD_ENTROPY_EXISTENCE_GAIN_PERCENT = 1.0
@@ -14,7 +15,7 @@ class BarServiceRules:
             return BarPaymentState(
                 name='god_basic_drink_payment',
                 entity=entity_name,
-                payment_kind='god_rule',
+                payment_kind=BarPaymentKind.GOD_RULE,
                 existence_paid_pct=0.0,
                 energy_paid_j=0.0,
             )
@@ -25,7 +26,7 @@ class BarServiceRules:
             return BarPaymentState(
                 name='idea_entity_basic_drink_payment',
                 entity=entity_name,
-                payment_kind='energy',
+                payment_kind=BarPaymentKind.ENERGY,
                 energy_paid_j=energy_paid_j,
                 existence_paid_pct=0.0,
             )
@@ -37,7 +38,7 @@ class BarServiceRules:
             return BarPaymentState(
                 name='root_entity_basic_drink_payment',
                 entity=entity_name,
-                payment_kind='root_existence',
+                payment_kind=BarPaymentKind.ROOT_EXISTENCE,
                 existence_paid_pct=existence_paid_pct,
                 energy_paid_j=0.0,
             )
@@ -55,7 +56,7 @@ class BarServiceRules:
             return BarPaymentState(
                 name='physical_entity_basic_drink_payment',
                 entity=entity_name,
-                payment_kind='reality_exchange',
+                payment_kind=BarPaymentKind.REALITY_EXCHANGE,
                 existence_paid_pct=existence_paid_pct,
                 idea_existence_gain_pct=idea_gain_pct,
                 existence_converted_to_energy_pct=converted_pct,
@@ -66,7 +67,7 @@ class BarServiceRules:
             name='basic_drink_payment_not_available',
             entity=entity_name,
             entity_type=entity_type,
-            payment_kind='unsupported',
+            payment_kind=BarPaymentKind.UNSUPPORTED,
         )
 
     def apply_energy_drink(self, entity):

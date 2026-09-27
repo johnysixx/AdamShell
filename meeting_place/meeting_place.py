@@ -27,6 +27,7 @@ from .cat_d20_adapter import CatD20Adapter
 from .fridge import BarFridge
 from .reservoirs import BarEnergyReservoir, BarEntropyReservoir
 from .service_rules import BarServiceRules
+from .bar_payment_kind import BarPaymentKind
 from .back_room import BackRoom
 from .glass_shelf import GlassShelf
 from .bottle_shelf import BottleShelf
@@ -785,7 +786,7 @@ class MeetingPlace:
         if not stock.available:
             raise ValueError('Basic drink is currently unavailable.')
         payment = self.service_rules.apply_basic_drink_payment(entity)
-        if payment.payment_kind == 'unsupported':
+        if payment.payment_kind is BarPaymentKind.UNSUPPORTED:
             raise ValueError('Entity type cannot pay for a basic drink.')
         bar_energy_j = float(payment.bar_energy_j or 0.0)
         if bar_energy_j > 0.0:

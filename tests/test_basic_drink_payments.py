@@ -2,6 +2,7 @@ from core.entity.social_entity import SocialEntity
 import unittest
 from meeting_place.service_rules import BarServiceRules
 from meeting_place.bar_payment_state import BarPaymentState
+from meeting_place.bar_payment_kind import BarPaymentKind
 
 class BasicDrinkPaymentTests(unittest.TestCase):
 
@@ -13,7 +14,10 @@ class BasicDrinkPaymentTests(unittest.TestCase):
         result = self.rules.apply_basic_drink_payment(god)
         self.assertIsInstance(result, BarPaymentState)
         self.assertEqual(god.existence_pct, 100.0)
-        self.assertEqual(result.payment_kind, 'god_rule')
+        self.assertIs(
+            result.payment_kind,
+            BarPaymentKind.GOD_RULE,
+        )
 
     def test_idea_entity_pays_small_energy_cost_for_basic_drink(self):
         entity = SocialEntity.from_mapping({'name': 'serpent', 'type': 'idea_entity', 'energy_j': 10.0})

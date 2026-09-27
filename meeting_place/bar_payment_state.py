@@ -1,11 +1,15 @@
 from dataclasses import dataclass
 
+from meeting_place.bar_payment_kind import (
+    BarPaymentKind,
+)
+
 
 @dataclass(slots=True)
 class BarPaymentState:
     name: str
     entity: str | None
-    payment_kind: str
+    payment_kind: BarPaymentKind
     existence_paid_pct: float | None = None
     energy_paid_j: float | None = None
     idea_existence_gain_pct: float | None = None
@@ -14,11 +18,21 @@ class BarPaymentState:
     bar_energy_j: float | None = None
     entity_type: str | None = None
 
+    def __post_init__(self):
+        if not isinstance(
+            self.payment_kind,
+            BarPaymentKind,
+        ):
+            raise TypeError(
+                "Bar payment kind must use "
+                "BarPaymentKind."
+            )
+
     def to_dict(self):
         result = {
             "name": self.name,
             "entity": self.entity,
-            "payment_kind": self.payment_kind,
+            "payment_kind": self.payment_kind.value,
         }
 
         for name, value in (
@@ -35,7 +49,10 @@ class BarPaymentState:
             if value is not None:
                 result[name] = value
 
-        if self.entity_type is not None or self.payment_kind == "unsupported":
+        if (
+            self.entity_type is not None
+            or self.payment_kind is BarPaymentKind.UNSUPPORTED
+        ):
             result["entity_type"] = self.entity_type
 
         return result
