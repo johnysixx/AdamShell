@@ -3,6 +3,9 @@ from types import SimpleNamespace
 
 from core.entity.components import SpatialVector3
 from core.entity.quantum_die_box import QuantumDieBox
+from core.entity.quantum_die_box_state import (
+    QuantumDieBoxState,
+)
 
 
 class QuantumDieBoxPositionObjectStateTests(unittest.TestCase):
@@ -57,9 +60,31 @@ class QuantumDieBoxPositionObjectStateTests(unittest.TestCase):
 
         self.assertIs(moved, position)
         self.assertIs(self.box.position, position)
-        self.assertEqual(
+        self.assertIs(
             self.box.state,
-            "position_resolved",
+            QuantumDieBoxState.POSITION_RESOLVED,
+        )
+
+    def test_state_requires_quantum_die_box_state(
+        self
+    ):
+        self.assertIs(
+            self.box.state,
+            (
+                QuantumDieBoxState
+                .QUANTUM_POSITION_UNRESOLVED
+            ),
+        )
+
+        with self.assertRaises(TypeError):
+            self.box.state = "position_resolved"
+
+    def test_public_state_serializes_state_value(
+        self
+    ):
+        self.assertEqual(
+            self.box.public_state["state"],
+            "quantum_position_unresolved",
         )
 
     def test_public_state_is_detached_dict(self):

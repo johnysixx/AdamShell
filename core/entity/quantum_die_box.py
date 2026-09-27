@@ -1,4 +1,7 @@
 from core.entity.components import SpatialVector3
+from core.entity.quantum_die_box_state import (
+    QuantumDieBoxState,
+)
 
 
 class QuantumDieBox:
@@ -12,7 +15,27 @@ class QuantumDieBox:
 
         self._position = SpatialVector3.zero()
 
-        self.state = "quantum_position_unresolved"
+        self.state = (
+            QuantumDieBoxState
+            .QUANTUM_POSITION_UNRESOLVED
+        )
+
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, state):
+        if not isinstance(
+            state,
+            QuantumDieBoxState,
+        ):
+            raise TypeError(
+                "Quantum die box state must use "
+                "QuantumDieBoxState."
+            )
+
+        self._state = state
 
     @property
     def position(self):
@@ -28,7 +51,9 @@ class QuantumDieBox:
 
     def move_to(self, position):
         self.position = position
-        self.state = "position_resolved"
+        self.state = (
+            QuantumDieBoxState.POSITION_RESOLVED
+        )
         return self.position
 
     @property
@@ -38,6 +63,6 @@ class QuantumDieBox:
             "type": self.type,
             "edge_length": self.edge_length,
             "position": self.position.to_dict(),
-            "state": self.state,
+            "state": self.state.value,
             "contains": self.quantum_die.name
         }
