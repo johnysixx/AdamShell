@@ -4,6 +4,9 @@ from quantum.serpent_roll_resolver import (
     SerpentRollResolutionEvent,
     SerpentRollResolver,
 )
+from quantum.serpent_roll_intensity import (
+    SerpentRollIntensity,
+)
 
 
 class FixedResolverRng:
@@ -83,6 +86,16 @@ class SerpentRollResolverObjectStateTests(
             7,
         )
 
+        self.assertIs(
+            event.intensity,
+            SerpentRollIntensity.MODERATE,
+        )
+
+        self.assertEqual(
+            result["intensity"],
+            "moderate",
+        )
+
         self.assertEqual(
             event.effect_count,
             1,
@@ -126,6 +139,18 @@ class SerpentRollResolverObjectStateTests(
             "changed",
             event.selected_effects,
         )
+
+    def test_string_intensity_is_rejected(
+        self
+    ):
+        with self.assertRaises(TypeError):
+            SerpentRollResolutionEvent(
+                roll_id="invalid",
+                value=7,
+                intensity="moderate",
+                selected_effects=(),
+                all_effects_triggered=False,
+            )
 
     def test_history_rejects_mapping_event(
         self

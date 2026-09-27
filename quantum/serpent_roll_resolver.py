@@ -1,12 +1,16 @@
 import random
 from dataclasses import dataclass, field
 
+from quantum.serpent_roll_intensity import (
+    SerpentRollIntensity,
+)
+
 
 @dataclass(slots=True, frozen=True)
 class SerpentRollResolutionEvent:
     roll_id: str
     value: int
-    intensity: str
+    intensity: SerpentRollIntensity
     selected_effects: tuple[str, ...]
     all_effects_triggered: bool
     name: str = field(
@@ -29,11 +33,14 @@ class SerpentRollResolutionEvent:
             "value",
             int(self.value),
         )
-        object.__setattr__(
-            self,
-            "intensity",
-            str(self.intensity),
-        )
+        if not isinstance(
+            self.intensity,
+            SerpentRollIntensity,
+        ):
+            raise TypeError(
+                "Serpent roll intensity must use "
+                "SerpentRollIntensity."
+            )
         object.__setattr__(
             self,
             "selected_effects",
@@ -56,7 +63,7 @@ class SerpentRollResolutionEvent:
             "name": self.name,
             "roll_id": self.roll_id,
             "value": self.value,
-            "intensity": self.intensity,
+            "intensity": self.intensity.value,
             "effect_count": self.effect_count,
             "selected_effects": list(
                 self.selected_effects
@@ -349,18 +356,18 @@ class SerpentRollResolver:
 
     def _intensity(self, value):
         if value <= 5:
-            return "low"
+            return SerpentRollIntensity.LOW
 
         if value <= 10:
-            return "moderate"
+            return SerpentRollIntensity.MODERATE
 
         if value <= 14:
-            return "high"
+            return SerpentRollIntensity.HIGH
 
         if value <= 19:
-            return "severe"
+            return SerpentRollIntensity.SEVERE
 
-        return "unbounded"
+        return SerpentRollIntensity.UNBOUNDED
 
     @property
     def public_state(self):
