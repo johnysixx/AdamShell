@@ -1,13 +1,16 @@
+from .cycle_state import ActualizationCycleState
+
+
 class ActualizationCycle:
 
     def __init__(self, cycle_id):
         self.cycle_id = cycle_id
-        self.state = "open"
+        self.state = ActualizationCycleState.OPEN
 
         self.potentials = []
 
     def add_potential(self, potential):
-        if self.state != "open":
+        if self.state is not ActualizationCycleState.OPEN:
             return False
 
         if potential.cycle_id != self.cycle_id:
@@ -38,6 +41,23 @@ class ActualizationCycle:
         return added
 
     @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, state):
+        if not isinstance(
+            state,
+            ActualizationCycleState,
+        ):
+            raise TypeError(
+                "Actualization cycle state must use "
+                "ActualizationCycleState."
+            )
+
+        self._state = state
+
+    @property
     def open_potentials(self):
         return [
             potential
@@ -54,7 +74,7 @@ class ActualizationCycle:
         ]
 
     def resolve(self, actualizer=None):
-        if self.state != "open":
+        if self.state is not ActualizationCycleState.OPEN:
             return []
 
         if actualizer is None:
@@ -72,7 +92,7 @@ class ActualizationCycle:
         for potential in self.open_potentials:
             potential.mark_unrealized()
 
-        self.state = "resolved"
+        self.state = ActualizationCycleState.RESOLVED
 
         return events
 
@@ -80,7 +100,7 @@ class ActualizationCycle:
     def public_state(self):
         return {
             "cycle_id": self.cycle_id,
-            "state": self.state,
+            "state": self.state.value,
             "potential_count": len(
                 self.potentials
             ),

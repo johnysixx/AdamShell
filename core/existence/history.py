@@ -1,4 +1,7 @@
 from core.actualization import PotentialBlueprint
+from core.actualization.cycle_state import (
+    ActualizationCycleState,
+)
 
 
 class HistoryRecord:
@@ -72,7 +75,10 @@ class History:
         parent_branch_id=None,
         created_by=None
     ):
-        if cycle.state != "resolved":
+        if (
+            cycle.state
+            is not ActualizationCycleState.RESOLVED
+        ):
             raise ValueError(
                 "Only a resolved cycle "
                 "can become history."
