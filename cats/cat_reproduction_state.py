@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 
 from cats.cat_birth_objects import CatLitter, KittenEmbryo
+from cats.cat_estrous_phase import CatEstrousPhase
 
 from cats.mating_contact import CatMatingContact
 
@@ -15,7 +16,7 @@ class CatReproductionState:
     developmental_stage: str | None = None
     reproductive_maturity: bool = False
 
-    estrous_phase: str = "inactive"
+    estrous_phase: CatEstrousPhase = CatEstrousPhase.INACTIVE
     estrus_active: bool = False
     estrous_cycle_day: int = 0
     estrus_duration_days: int = 7
@@ -60,7 +61,7 @@ class CatReproductionState:
             "fertile": self.fertile,
             "developmental_stage": self.developmental_stage,
             "reproductive_maturity": self.reproductive_maturity,
-            "estrous_phase": self.estrous_phase,
+            "estrous_phase": self.estrous_phase.value,
             "estrus_active": self.estrus_active,
             "estrous_cycle_day": self.estrous_cycle_day,
             "estrus_duration_days": self.estrus_duration_days,

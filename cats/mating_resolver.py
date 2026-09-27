@@ -1,3 +1,4 @@
+from cats.cat_estrous_phase import CatEstrousPhase
 import random
 from cats.physical_biology_gate import PhysicalBiologyGate
 from cats.estrous_cycle_resolver import CatEstrousCycleResolver
@@ -138,7 +139,7 @@ class CatMatingResolver:
 
         if not ovulation_event.ovulation_induced:
             reproduction.estrus_active = False
-            reproduction.estrous_phase = 'interestrus'
+            reproduction.estrous_phase = CatEstrousPhase.INTERESTRUS
             reproduction.estrous_cycle_day = 0
             reproduction.mating_window_open = False
             reproduction.mating_window_started_day = None
@@ -261,7 +262,7 @@ class CatMatingResolver:
                 )
 
         reproduction.estrus_active = False
-        reproduction.estrous_phase = 'diestrus'
+        reproduction.estrous_phase = CatEstrousPhase.DIESTRUS
         reproduction.estrous_cycle_day = 0
         reproduction.mating_window_open = False
         reproduction.pregnant = True

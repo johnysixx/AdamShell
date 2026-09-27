@@ -1,3 +1,4 @@
+from cats.cat_estrous_phase import CatEstrousPhase
 import unittest
 from universe.universe import Universe
 from cats import Cats
@@ -25,7 +26,7 @@ class PhysicalCatBiologyGateTests(unittest.TestCase):
     def test_mating_after_physical_world_is_allowed(self):
         self.universe.start_big_bang()
         self.female.reproduction.estrus_active = True
-        self.female.reproduction.estrous_phase = 'estrus'
+        self.female.reproduction.estrous_phase = CatEstrousPhase.ESTRUS
         result = self.resolver.mate(self.female, self.male)
         self.assertEqual(result['name'], 'cat_mating_contact_recorded')
         self.assertTrue(self.female.reproduction.mating_window_open)

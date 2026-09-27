@@ -1,3 +1,4 @@
+from cats.cat_estrous_phase import CatEstrousPhase
 import unittest
 from universe.universe import Universe
 from cats import Cats
@@ -51,7 +52,7 @@ class LifeCycleSystemTests(unittest.TestCase):
         mating = CatMatingResolver(self.universe)
         mother.reproduction.ovulation_threshold = 1
         mother.reproduction.estrus_active = True
-        mother.reproduction.estrous_phase = 'estrus'
+        mother.reproduction.estrous_phase = CatEstrousPhase.ESTRUS
         mating.mate(mother, father)
         mating.close_mating_window(mother, embryo_count=1, rng=FirstChoiceRng())
         self.universe.tick_universe()
@@ -64,7 +65,7 @@ class LifeCycleSystemTests(unittest.TestCase):
         mating = CatMatingResolver(self.universe)
         mother.reproduction.ovulation_threshold = 1
         mother.reproduction.estrus_active = True
-        mother.reproduction.estrous_phase = 'estrus'
+        mother.reproduction.estrous_phase = CatEstrousPhase.ESTRUS
         mating.mate(mother, father)
         mating.close_mating_window(mother, embryo_count=2, rng=FirstChoiceRng())
         mother.reproduction.pregnancy_day = 64

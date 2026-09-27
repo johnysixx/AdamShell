@@ -1,3 +1,4 @@
+from cats.cat_estrous_phase import CatEstrousPhase
 import unittest
 from universe.universe import Universe
 from cats import Cats
@@ -20,7 +21,7 @@ class CatInducedOvulationTests(unittest.TestCase):
         self.female = self.cats.create_cat(name='female', color='black', fur_length='short', sex='female')
         self.male = self.cats.create_cat(name='male', color='black', fur_length='short', sex='male')
         self.female.reproduction.estrus_active = True
-        self.female.reproduction.estrous_phase = 'estrus'
+        self.female.reproduction.estrous_phase = CatEstrousPhase.ESTRUS
         self.mating = CatMatingResolver(self.universe)
 
     def test_one_contact_does_not_induce_ovulation(self):
@@ -41,7 +42,7 @@ class CatInducedOvulationTests(unittest.TestCase):
         self.assertFalse(result['ovulation_induced'])
         self.assertEqual(result['ovulation']['reason'], 'insufficient_stimulation')
         self.assertFalse(reproduction.pregnant)
-        self.assertEqual(reproduction.estrous_phase, 'interestrus')
+        self.assertIs(reproduction.estrous_phase, CatEstrousPhase.INTERESTRUS)
         self.assertEqual(reproduction.embryos, [])
 
     def test_threshold_stimulation_starts_pregnancy(self):

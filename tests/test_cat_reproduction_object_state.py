@@ -1,3 +1,4 @@
+from cats.cat_estrous_phase import CatEstrousPhase
 import unittest
 
 from cats import Cats
@@ -33,7 +34,10 @@ class CatReproductionObjectStateTests(unittest.TestCase):
         self.assertFalse(state.neutered)
         self.assertTrue(state.fertile)
         self.assertFalse(state.reproductive_maturity)
-        self.assertEqual(state.estrous_phase, "inactive")
+        self.assertIs(
+            state.estrous_phase,
+            CatEstrousPhase.INACTIVE,
+        )
         self.assertFalse(state.estrus_active)
         self.assertFalse(state.pregnant)
         self.assertEqual(state.embryos, [])

@@ -1,5 +1,7 @@
 import unittest
 
+from cats.cat_estrous_phase import CatEstrousPhase
+
 from universe.universe import Universe
 from cats import Cats
 from cats.estrous_cycle_resolver import (
@@ -58,9 +60,9 @@ class CatEstrousCycleObjectStateTests(
             event.name,
             "cat_estrus_started",
         )
-        self.assertEqual(
+        self.assertIs(
             event.phase,
-            "estrus",
+            CatEstrousPhase.ESTRUS,
         )
         self.assertEqual(
             event.cycle_day,
@@ -85,9 +87,9 @@ class CatEstrousCycleObjectStateTests(
 
         result["phase"] = "changed"
 
-        self.assertEqual(
+        self.assertIs(
             event.phase,
-            "estrus",
+            CatEstrousPhase.ESTRUS,
         )
 
     def test_inactive_boundary_shape_is_preserved(
@@ -129,6 +131,20 @@ class CatEstrousCycleObjectStateTests(
             result["reason"],
             "neutered",
         )
+
+    def test_event_rejects_string_phase(
+        self
+    ):
+        with self.assertRaises(TypeError):
+            CatEstrousCycleEvent(
+                name="cat_estrus_started",
+                cat="female",
+                day=1,
+                phase="estrus",
+                estrus_active=True,
+                phase_changed=True,
+                cycle_day=0,
+            )
 
     def test_history_rejects_mapping_event(
         self

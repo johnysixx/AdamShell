@@ -1,3 +1,4 @@
+from cats.cat_estrous_phase import CatEstrousPhase
 from dataclasses import dataclass
 
 from universe.logger import UniverseLogger
@@ -8,7 +9,7 @@ class CatEstrousCycleEvent:
     name: str
     cat: str
     day: int | None
-    phase: str
+    phase: CatEstrousPhase
     estrus_active: bool
     phase_changed: bool
     cycle_day: int | None = None
@@ -34,11 +35,14 @@ class CatEstrousCycleEvent:
             "cat",
             str(self.cat),
         )
-        object.__setattr__(
-            self,
-            "phase",
-            str(self.phase),
-        )
+        if not isinstance(
+            self.phase,
+            CatEstrousPhase,
+        ):
+            raise TypeError(
+                "Cat estrous cycle event phase "
+                "must be a CatEstrousPhase object."
+            )
         object.__setattr__(
             self,
             "estrus_active",
@@ -76,7 +80,7 @@ class CatEstrousCycleEvent:
             "name": self.name,
             "cat": self.cat,
             "day": self.day,
-            "phase": self.phase,
+            "phase": self.phase.value,
             "estrus_active": self.estrus_active,
             "phase_changed": self.phase_changed,
         }
@@ -126,7 +130,7 @@ class CatEstrousCycleResolver:
 
         phase = reproduction.estrous_phase
 
-        if phase == "inactive":
+        if phase is CatEstrousPhase.INACTIVE:
             return self._start_estrus(
                 cat=cat,
                 day=day
@@ -136,7 +140,7 @@ class CatEstrousCycleResolver:
             reproduction.estrous_cycle_day
         ) + 1
 
-        if phase == "estrus":
+        if phase is CatEstrousPhase.ESTRUS:
             duration = int(
                 reproduction.estrus_duration_days
             )
@@ -150,7 +154,7 @@ class CatEstrousCycleResolver:
                     day=day
                 )
 
-        elif phase == "interestrus":
+        elif phase is CatEstrousPhase.INTERESTRUS:
             duration = int(
                 reproduction.interestrus_duration_days
             )
@@ -212,7 +216,7 @@ class CatEstrousCycleResolver:
     ):
         reproduction = cat.reproduction
 
-        reproduction.estrous_phase = "diestrus"
+        reproduction.estrous_phase = CatEstrousPhase.DIESTRUS
 
         reproduction.estrus_active = False
 
@@ -224,7 +228,7 @@ class CatEstrousCycleResolver:
             ),
             cat=cat.name,
             day=day,
-            phase="diestrus",
+            phase=CatEstrousPhase.DIESTRUS,
             estrus_active=False,
             phase_changed=True,
         )
@@ -242,7 +246,7 @@ class CatEstrousCycleResolver:
     ):
         reproduction = cat.reproduction
 
-        reproduction.estrous_phase = "estrus"
+        reproduction.estrous_phase = CatEstrousPhase.ESTRUS
 
         reproduction.estrus_active = True
 
@@ -252,7 +256,7 @@ class CatEstrousCycleResolver:
             name="cat_estrus_started",
             cat=cat.name,
             day=day,
-            phase="estrus",
+            phase=CatEstrousPhase.ESTRUS,
             cycle_day=0,
             estrus_active=True,
             phase_changed=True,
@@ -275,7 +279,7 @@ class CatEstrousCycleResolver:
     ):
         reproduction = cat.reproduction
 
-        reproduction.estrous_phase = "interestrus"
+        reproduction.estrous_phase = CatEstrousPhase.INTERESTRUS
 
         reproduction.estrus_active = False
 
@@ -295,7 +299,7 @@ class CatEstrousCycleResolver:
             name="cat_interestrus_started",
             cat=cat.name,
             day=day,
-            phase="interestrus",
+            phase=CatEstrousPhase.INTERESTRUS,
             cycle_day=0,
             estrus_active=False,
             phase_changed=True,
@@ -315,7 +319,7 @@ class CatEstrousCycleResolver:
     ):
         reproduction = cat.reproduction
 
-        reproduction.estrous_phase = "inactive"
+        reproduction.estrous_phase = CatEstrousPhase.INACTIVE
 
         reproduction.estrus_active = False
 
@@ -325,7 +329,7 @@ class CatEstrousCycleResolver:
             name="cat_estrous_cycle_inactive",
             cat=cat.name,
             day=day,
-            phase="inactive",
+            phase=CatEstrousPhase.INACTIVE,
             estrus_active=False,
             reason=reason,
             phase_changed=False,

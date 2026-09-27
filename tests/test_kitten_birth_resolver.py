@@ -1,3 +1,4 @@
+from cats.cat_estrous_phase import CatEstrousPhase
 import unittest
 from universe.universe import Universe
 from cats import Cats
@@ -36,7 +37,7 @@ class KittenBirthResolverTests(unittest.TestCase):
     def _start_pregnancy(self, embryo_count=4):
         rng = AlternatingFatherRng()
         self.mother.reproduction.estrus_active = True
-        self.mother.reproduction.estrous_phase = 'estrus'
+        self.mother.reproduction.estrous_phase = CatEstrousPhase.ESTRUS
         self.mating.mate(self.mother, self.father_one)
         self.mating.mate(self.mother, self.father_two)
         return self.mating.close_mating_window(self.mother, current_day=10, embryo_count=embryo_count, rng=rng)

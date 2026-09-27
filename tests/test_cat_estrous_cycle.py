@@ -1,3 +1,4 @@
+from cats.cat_estrous_phase import CatEstrousPhase
 import unittest
 
 from universe.universe import Universe
@@ -58,9 +59,9 @@ class CatEstrousCycleTests(
             "cat_estrus_started"
         )
 
-        self.assertEqual(
+        self.assertIs(
             reproduction.estrous_phase,
-            "estrus"
+            CatEstrousPhase.ESTRUS,
         )
 
         self.assertTrue(
@@ -93,7 +94,7 @@ class CatEstrousCycleTests(
     def test_interestrus_returns_to_estrus(self):
         reproduction = self.female.reproduction
 
-        reproduction.estrous_phase = "interestrus"
+        reproduction.estrous_phase = CatEstrousPhase.INTERESTRUS
         reproduction.estrus_active = False
         reproduction.estrous_cycle_day = 0
 
@@ -120,7 +121,7 @@ class CatEstrousCycleTests(
 
         reproduction.estrus_active = False
 
-        reproduction.estrous_phase = "interestrus"
+        reproduction.estrous_phase = CatEstrousPhase.INTERESTRUS
 
         mating = CatMatingResolver(
             self.universe
@@ -184,7 +185,7 @@ class CatEstrousCycleTests(
         reproduction = self.female.reproduction
 
         reproduction.pregnant = True
-        reproduction.estrous_phase = "diestrus"
+        reproduction.estrous_phase = CatEstrousPhase.DIESTRUS
         reproduction.estrus_active = False
 
         result = self.cycle.tick_day(

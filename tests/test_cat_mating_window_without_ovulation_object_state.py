@@ -1,3 +1,4 @@
+from cats.cat_estrous_phase import CatEstrousPhase
 import unittest
 
 from cats import Cats
@@ -45,7 +46,7 @@ class CatMatingWindowWithoutOvulationObjectStateTests(
 
         self.female.reproduction.ovulation_threshold = 4
         self.female.reproduction.estrus_active = True
-        self.female.reproduction.estrous_phase = "estrus"
+        self.female.reproduction.estrous_phase = CatEstrousPhase.ESTRUS
 
         self.resolver = (
             CatMatingResolver(

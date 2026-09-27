@@ -1,3 +1,4 @@
+from cats.cat_estrous_phase import CatEstrousPhase
 import unittest
 from universe.universe import Universe
 from cats import Cats
@@ -33,7 +34,7 @@ class CatMatingResolverTests(unittest.TestCase):
         self.female.reproduction.ovulation_threshold = 1
         self.resolver = CatMatingResolver(self.universe)
         self.female.reproduction.estrus_active = True
-        self.female.reproduction.estrous_phase = 'estrus'
+        self.female.reproduction.estrous_phase = CatEstrousPhase.ESTRUS
 
     def test_first_contact_opens_window_without_pregnancy(self):
         event = self.resolver.mate(self.female, self.first_male, current_day=10)
