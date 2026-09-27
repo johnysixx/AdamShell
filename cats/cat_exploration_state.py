@@ -1,4 +1,8 @@
 from dataclasses import dataclass, field
+
+from .cat_after_arrival_action import (
+    CatAfterArrivalAction,
+)
 from core.entity.components import SpatialVector3, require_optional_spatial_vector, require_spatial_vector
 
 
@@ -33,18 +37,28 @@ class CatContinuationPlan:
 
 @dataclass(slots=True)
 class CatAfterArrivalCandidate:
-    action: str
+    action: CatAfterArrivalAction
     score: float
     reasons: list = field(
         default_factory=list
     )
+
+    def __post_init__(self):
+        if not isinstance(
+            self.action,
+            CatAfterArrivalAction,
+        ):
+            raise TypeError(
+                "Cat after-arrival candidate action "
+                "must use CatAfterArrivalAction."
+            )
 
 
 @dataclass(slots=True)
 class CatAfterArrivalDecision:
     selected: bool = False
 
-    action: str | None = None
+    action: CatAfterArrivalAction | None = None
     score: float | None = None
 
     reasons: list = field(
@@ -56,6 +70,19 @@ class CatAfterArrivalDecision:
     )
 
     quantum_roll: int | None = None
+
+    def __post_init__(self):
+        if (
+            self.action is not None
+            and not isinstance(
+                self.action,
+                CatAfterArrivalAction,
+            )
+        ):
+            raise TypeError(
+                "Cat after-arrival decision action "
+                "must use CatAfterArrivalAction."
+            )
 
 
 @dataclass(slots=True)

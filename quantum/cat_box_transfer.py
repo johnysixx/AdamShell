@@ -7,6 +7,9 @@ from core.entity.components import SpatialVector3, require_optional_spatial_vect
 from cats.cat_exploration_planner import (
     CatExplorationPlanner
 )
+from cats.cat_after_arrival_action import (
+    CatAfterArrivalAction,
+)
 from cats.cat_knowledge import (
     CatKnowledge
 )
@@ -1583,13 +1586,13 @@ class CatQuantumBoxTransfer:
         return_plan = None
         continuation_plan = None
 
-        if action == "rest_at_destination":
+        if action is CatAfterArrivalAction.REST_AT_DESTINATION:
             cat.state = (
                 "resting_at_quantum_"
                 "exploration_goal"
             )
 
-        elif action == "continue_exploration":
+        elif action is CatAfterArrivalAction.CONTINUE_EXPLORATION:
             if hasattr(
                 cat,
                 "exploration_goal"
@@ -1620,7 +1623,7 @@ class CatQuantumBoxTransfer:
 
         elif (
             action
-            == "return_via_exploration_pair"
+            is CatAfterArrivalAction.RETURN_VIA_EXPLORATION_PAIR
         ):
             return_plan = (
                 self.start_quantum_return_route(
@@ -1641,11 +1644,11 @@ class CatQuantumBoxTransfer:
 
         if (
             action
-            != "return_via_exploration_pair"
+            is not CatAfterArrivalAction.RETURN_VIA_EXPLORATION_PAIR
         ):
             return_plan = None
 
-        if action != "continue_exploration":
+        if action is not CatAfterArrivalAction.CONTINUE_EXPLORATION:
             continuation_plan = None
 
         event = {
@@ -1663,7 +1666,7 @@ class CatQuantumBoxTransfer:
             ),
             "legend": legend,
             "decision": decision,
-            "action": action,
+            "action": action.value,
             "return_plan": return_plan,
             "continuation_plan": (
                 continuation_plan

@@ -13,6 +13,9 @@ from .cat_exploration_state import (
 )
 
 
+from .cat_after_arrival_action import (
+    CatAfterArrivalAction,
+)
 from .cat_exploration_goal import CatExplorationGoal
 
 class CatExplorationPlanner:
@@ -269,7 +272,7 @@ class CatExplorationPlanner:
 
         candidates = [
             CatAfterArrivalCandidate(
-                action="continue_exploration",
+                action=CatAfterArrivalAction.CONTINUE_EXPLORATION,
                 score=min(
                     1.0,
                     continue_score
@@ -281,7 +284,7 @@ class CatExplorationPlanner:
                 ],
             ),
             CatAfterArrivalCandidate(
-                action="rest_at_destination",
+                action=CatAfterArrivalAction.REST_AT_DESTINATION,
                 score=min(
                     1.0,
                     rest_score
@@ -293,7 +296,8 @@ class CatExplorationPlanner:
             ),
             CatAfterArrivalCandidate(
                 action=(
-                    "return_via_exploration_pair"
+                    CatAfterArrivalAction
+                    .RETURN_VIA_EXPLORATION_PAIR
                 ),
                 score=min(
                     1.0,

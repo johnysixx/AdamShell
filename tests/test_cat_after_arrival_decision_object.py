@@ -5,6 +5,9 @@ from cats.cats import Cats
 from cats.cat_exploration_planner import (
     CatExplorationPlanner
 )
+from cats.cat_after_arrival_action import (
+    CatAfterArrivalAction,
+)
 from cats.cat_exploration_state import (
     CatAfterArrivalCandidate,
     CatAfterArrivalDecision,
@@ -68,6 +71,42 @@ class CatAfterArrivalDecisionObjectTests(
                 "__getitem__",
             )
         )
+
+    def test_after_arrival_action_is_enum(
+        self
+    ):
+        decision = self.decision()
+
+        self.assertIsInstance(
+            decision.action,
+            CatAfterArrivalAction,
+        )
+
+        self.assertTrue(
+            all(
+                isinstance(
+                    candidate.action,
+                    CatAfterArrivalAction,
+                )
+                for candidate
+                in decision.finalists
+            )
+        )
+
+    def test_string_actions_are_rejected(
+        self
+    ):
+        with self.assertRaises(TypeError):
+            CatAfterArrivalCandidate(
+                action="continue_exploration",
+                score=1.0,
+            )
+
+        with self.assertRaises(TypeError):
+            CatAfterArrivalDecision(
+                selected=True,
+                action="continue_exploration",
+            )
 
     def test_after_arrival_finalists_are_objects(
         self
