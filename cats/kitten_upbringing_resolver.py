@@ -3,6 +3,9 @@ from cats.kitten_upbringing_state import (
     KittenCronenbergExperienceState,
     KittenUpbringingState,
 )
+from cats.kitten_upbringing_phase import (
+    KittenUpbringingPhase,
+)
 from cats.cat_maternal_care_system import CatMaternalCareSystem
 from cats.adult_vocalization_resolver import AdultVocalizationResolver
 from cats.meow_knowledge_resolver import MeowKnowledgeResolver
@@ -53,25 +56,40 @@ class KittenUpbringingResolver:
             father_event = self._father_food_delivery(kitten=kitten, father=father, age_days=age_days, current_day=current_day)
             if father_event is not None:
                 events.append(father_event)
-            phase = 'complete_maternal_care'
+            phase = (
+                KittenUpbringingPhase
+                .COMPLETE_MATERNAL_CARE
+            )
         elif age_days <= self.EARLY_LEARNING_LAST_DAY:
             events.extend(self._provide_reduced_care(kitten=kitten, mother=mother, age_days=age_days, current_day=current_day))
             events.extend(self._run_early_lessons(kitten=kitten, mother=mother, age_days=age_days, current_day=current_day))
-            phase = 'early_socialization'
+            phase = (
+                KittenUpbringingPhase
+                .EARLY_SOCIALIZATION
+            )
         else:
             events.extend(self._run_hunting_upbringing(kitten=kitten, mother=mother, father=father, age_days=age_days, current_day=current_day))
             events.extend(self._run_late_education(kitten=kitten, mother=mother, cats=cats, age_days=age_days, current_day=current_day))
             if age_days <= self.LIVE_PREY_PRACTICE_LAST_DAY:
-                phase = 'live_prey_training'
+                phase = (
+                    KittenUpbringingPhase
+                    .LIVE_PREY_TRAINING
+                )
             elif age_days == self.FIRST_TRAINING_KILL_DAY:
-                phase = 'first_training_kill'
+                phase = (
+                    KittenUpbringingPhase
+                    .FIRST_TRAINING_KILL
+                )
             else:
-                phase = 'family_hunting'
+                phase = (
+                    KittenUpbringingPhase
+                    .FAMILY_HUNTING
+                )
         upbringing.phase = phase
         upbringing.last_processed_age = age_days
         upbringing.last_processed_day = current_day
         upbringing.days_processed += 1
-        event = {'name': 'kitten_upbringing_day_completed', 'kitten': kitten.name, 'age_days': age_days, 'day': current_day, 'phase': phase, 'mother': getattr(mother, 'name', None) if mother is not None else None, 'father': getattr(father, 'name', None) if father is not None else None, 'events': events, 'event_count': len(events), 'processed': True}
+        event = {'name': 'kitten_upbringing_day_completed', 'kitten': kitten.name, 'age_days': age_days, 'day': current_day, 'phase': phase.value, 'mother': getattr(mother, 'name', None) if mother is not None else None, 'father': getattr(father, 'name', None) if father is not None else None, 'events': events, 'event_count': len(events), 'processed': True}
         self._record(kitten, event)
         return event
 

@@ -1,5 +1,9 @@
 from dataclasses import dataclass, field
 
+from cats.kitten_upbringing_phase import (
+    KittenUpbringingPhase,
+)
+
 
 @dataclass(slots=True)
 class KittenCareState:
@@ -22,7 +26,9 @@ class KittenCronenbergExperienceState:
 
 @dataclass(slots=True)
 class KittenUpbringingState:
-    phase: str = 'complete_maternal_care'
+    phase: KittenUpbringingPhase = (
+        KittenUpbringingPhase.COMPLETE_MATERNAL_CARE
+    )
     days_processed: int = 0
     last_processed_age: int | None = None
     last_processed_day: int | None = None
@@ -35,3 +41,13 @@ class KittenUpbringingState:
     history: list = field(
         default_factory=list
     )
+
+    def __post_init__(self):
+        if not isinstance(
+            self.phase,
+            KittenUpbringingPhase,
+        ):
+            raise TypeError(
+                "Kitten upbringing phase must use "
+                "KittenUpbringingPhase."
+            )

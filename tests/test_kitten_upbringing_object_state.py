@@ -13,6 +13,9 @@ from cats.kitten_upbringing_state import (
     KittenCronenbergExperienceState,
     KittenUpbringingState,
 )
+from cats.kitten_upbringing_phase import (
+    KittenUpbringingPhase,
+)
 
 
 class KittenUpbringingObjectStateTests(
@@ -154,9 +157,9 @@ class KittenUpbringingObjectStateTests(
             state,
         )
 
-        self.assertEqual(
+        self.assertIs(
             state.phase,
-            'early_socialization',
+            KittenUpbringingPhase.EARLY_SOCIALIZATION,
         )
 
         self.assertTrue(
@@ -168,6 +171,14 @@ class KittenUpbringingObjectStateTests(
             .dead_deliveries,
             1,
         )
+
+    def test_string_phase_is_rejected(
+        self
+    ):
+        with self.assertRaises(TypeError):
+            KittenUpbringingState(
+                phase="complete_maternal_care",
+            )
 
     def test_legacy_mapping_state_is_rejected(
         self
