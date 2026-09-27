@@ -69,13 +69,45 @@ class CatReproductionObjectStateTests(unittest.TestCase):
         first = CatReproductionState("female")
         second = CatReproductionState("female")
 
-        first.potential_fathers.append("tom")
-        first.embryos.append("embryo")
-        first.litters.append("litter")
+        self.assertIsNot(
+            first.potential_fathers,
+            second.potential_fathers,
+        )
+        self.assertIsNot(
+            first.embryos,
+            second.embryos,
+        )
+        self.assertIsNot(
+            first.litters,
+            second.litters,
+        )
 
-        self.assertEqual(second.potential_fathers, [])
-        self.assertEqual(second.embryos, [])
-        self.assertEqual(second.litters, [])
+        first.potential_fathers.append("tom")
+
+        self.assertEqual(
+            first.potential_fathers,
+            ["tom"],
+        )
+        self.assertEqual(
+            second.potential_fathers,
+            [],
+        )
+        self.assertEqual(
+            first.embryos,
+            [],
+        )
+        self.assertEqual(
+            second.embryos,
+            [],
+        )
+        self.assertEqual(
+            first.litters,
+            [],
+        )
+        self.assertEqual(
+            second.litters,
+            [],
+        )
 
     def test_to_dict_returns_detached_boundary(self):
         state = CatReproductionState("female")
