@@ -24,6 +24,7 @@ from .cat_quantum_exploration_state import CatQuantumExplorationState
 from .cat_navigation_offer_state import CatNavigationOfferState
 
 from .cat_navigation_decision_state import CatNavigationDecisionState
+from .cat_navigation_decision import CatNavigationDecision
 
 class Cats:
 
@@ -362,7 +363,12 @@ class Cats:
         rng = rng or random
         decision_roll = float(rng.random())
         accepted = decision_roll < acceptance_chance
-        decision = {'name': 'cat_navigation_offer_decided', 'cat': cat.name, 'route_id': offer.route_id, 'destination': offer.destination, 'suggested_intent': offer.suggested_intent, 'decision_roll': decision_roll, 'acceptance_chance': acceptance_chance, 'decision': 'accepted' if accepted else 'declined', 'decided': True}
+        decision_value = (
+            CatNavigationDecision.ACCEPTED
+            if accepted
+            else CatNavigationDecision.DECLINED
+        )
+        decision = {'name': 'cat_navigation_offer_decided', 'cat': cat.name, 'route_id': offer.route_id, 'destination': offer.destination, 'suggested_intent': offer.suggested_intent, 'decision_roll': decision_roll, 'acceptance_chance': acceptance_chance, 'decision': decision_value.value, 'decided': True}
 
         cat.last_navigation_decision = (
             CatNavigationDecisionState(
@@ -375,11 +381,7 @@ class Cats:
                 acceptance_chance=(
                     acceptance_chance
                 ),
-                decision=(
-                    'accepted'
-                    if accepted
-                    else 'declined'
-                ),
+                decision=decision_value,
                 decided=True,
             )
         )

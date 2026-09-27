@@ -8,6 +8,9 @@ from cats.cat_navigation_offer_state import (
 from cats.cat_navigation_decision_state import (
     CatNavigationDecisionState,
 )
+from cats.cat_navigation_decision import (
+    CatNavigationDecision,
+)
 
 
 class FixedRng:
@@ -54,7 +57,7 @@ class CatNavigationDecisionObjectStateTests(
             suggested_intent='return_to_bar',
             decision_roll=0.25,
             acceptance_chance=0.7,
-            decision='accepted',
+            decision=CatNavigationDecision.ACCEPTED,
             decided=True,
         )
 
@@ -62,9 +65,9 @@ class CatNavigationDecisionObjectStateTests(
             state.decided
         )
 
-        self.assertEqual(
+        self.assertIs(
             state.decision,
-            'accepted',
+            CatNavigationDecision.ACCEPTED,
         )
 
         self.assertFalse(
@@ -135,9 +138,9 @@ class CatNavigationDecisionObjectStateTests(
             0.7,
         )
 
-        self.assertEqual(
+        self.assertIs(
             state.decision,
-            'accepted',
+            CatNavigationDecision.ACCEPTED,
         )
 
         self.assertTrue(
@@ -153,6 +156,15 @@ class CatNavigationDecisionObjectStateTests(
             result['decision'],
             'accepted',
         )
+
+    def test_string_decision_is_rejected(
+        self
+    ):
+        with self.assertRaises(TypeError):
+            CatNavigationDecisionState(
+                decision="accepted",
+                decided=True,
+            )
 
     def test_legacy_mapping_state_is_rejected(
         self
