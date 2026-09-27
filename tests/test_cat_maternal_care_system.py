@@ -6,6 +6,9 @@ from cats.cat_maternal_care_system import CatMaternalCareSystem
 from cats.cat_maternal_kitten_care_state import (
     CatMaternalKittenCareState
 )
+from cats.maternal_care_phase import (
+    MaternalCarePhase,
+)
 
 class CatMaternalCareSystemTests(unittest.TestCase):
 
@@ -54,6 +57,10 @@ class CatMaternalCareSystemTests(unittest.TestCase):
         self.assertEqual(self.kitten.maternal_care_received.mother, self.mother.name)
         self.assertEqual(self.kitten.maternal_care_received.nursing_events, 1)
         self.assertEqual(self.kitten.maternal_care_received.warming_events, 1)
+        self.assertIs(
+            self.kitten.maternal_care_received.last_phase,
+            MaternalCarePhase.NEONATAL,
+        )
         kitten_state = (
             self.mother
             .maternal_care
@@ -74,6 +81,12 @@ class CatMaternalCareSystemTests(unittest.TestCase):
             kitten_state.last_care_day,
             20,
         )
+
+    def test_received_state_rejects_string_phase(self):
+        with self.assertRaises(TypeError):
+            self.kitten.maternal_care_received.last_phase = (
+                "neonatal_maternal_care"
+            )
 
     def test_non_mother_cannot_provide_maternal_care(self):
         stranger = self.cats.create_cat(name='stranger', color='white', fur_length='short')

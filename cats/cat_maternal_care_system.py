@@ -2,6 +2,9 @@ from copy import deepcopy
 from cats.cat_maternal_kitten_care_state import (
     CatMaternalKittenCareState,
 )
+from cats.maternal_care_phase import (
+    MaternalCarePhase,
+)
 from cats.cat import Cat
 from cats.cat_family_system import CatFamilySystem
 from cats.cat_parentage_state import (
@@ -20,12 +23,12 @@ class CatMaternalCareSystem:
     def care_phase(self, age_days):
         age_days = max(0, int(age_days))
         if age_days <= self.NEONATAL_END_DAY:
-            return 'neonatal_maternal_care'
+            return MaternalCarePhase.NEONATAL
         if age_days <= self.COMPLETE_CARE_END_DAY:
-            return 'complete_maternal_care'
+            return MaternalCarePhase.COMPLETE
         if age_days <= self.WEANING_END_DAY:
-            return 'reduced_maternal_care'
-        return 'maternal_independence'
+            return MaternalCarePhase.REDUCED
+        return MaternalCarePhase.INDEPENDENCE
 
     def evaluate(self, mother, kitten, age_days):
         self._require_cat(mother)
@@ -42,7 +45,7 @@ class CatMaternalCareSystem:
             == mother.name
         )
         phase = self.care_phase(age_days)
-        return {'mother': mother.name, 'kitten': kitten.name, 'biological_child': biological_child, 'phase': phase, 'nursing': biological_child and phase != 'maternal_independence', 'cleaning': biological_child, 'warming': biological_child and phase == 'neonatal_maternal_care', 'protection': biological_child, 'retrieval': biological_child and phase in {'neonatal_maternal_care', 'complete_maternal_care'}, 'active': biological_child and phase != 'maternal_independence'}
+        return {'mother': mother.name, 'kitten': kitten.name, 'biological_child': biological_child, 'phase': phase, 'nursing': biological_child and phase is not MaternalCarePhase.INDEPENDENCE, 'cleaning': biological_child, 'warming': biological_child and phase is MaternalCarePhase.NEONATAL, 'protection': biological_child, 'retrieval': biological_child and phase in {MaternalCarePhase.NEONATAL, MaternalCarePhase.COMPLETE}, 'active': biological_child and phase is not MaternalCarePhase.INDEPENDENCE}
 
     def provide_care(self, mother, kitten, age_days, current_day=None):
         assessment = self.evaluate(mother, kitten, age_days)
@@ -62,7 +65,7 @@ class CatMaternalCareSystem:
             actions.append('retrieval')
         event = {'name': 'cat_maternal_care', 'mother': mother.name, 'kitten': kitten.name, 'age_days': int(age_days), 'day': current_day, 'phase': phase, 'actions': list(actions), 'provided': True}
         self._record(mother, kitten, event)
-        return event
+        return self._event_snapshot(event)
 
     def record_upbringing_care(self, mother, kitten, events, age_days, current_day=None):
         """
@@ -87,8 +90,14 @@ class CatMaternalCareSystem:
             if action is not None and action not in actions:
                 actions.append(action)
         sync_event = {'name': 'maternal_upbringing_care_synced', 'mother': mother.name, 'kitten': kitten.name, 'age_days': int(age_days), 'day': current_day, 'phase': assessment['phase'], 'actions': actions, 'synced': True}
-        self._record_state_only(mother=mother, kitten=kitten, event=sync_event)
-        return sync_event
+        self._record_state_only(
+            mother=mother,
+            kitten=kitten,
+            event=sync_event,
+        )
+        return self._event_snapshot(
+            sync_event
+        )
 
     def provide_foster_care(
         self,
@@ -156,7 +165,7 @@ class CatMaternalCareSystem:
 
         if (
             phase
-            != "maternal_independence"
+            is not MaternalCarePhase.INDEPENDENCE
         ):
             actions.append(
                 "nursing"
@@ -168,7 +177,7 @@ class CatMaternalCareSystem:
 
         if (
             phase
-            == "neonatal_maternal_care"
+            is MaternalCarePhase.NEONATAL
         ):
             actions.append(
                 "warming"
@@ -179,8 +188,8 @@ class CatMaternalCareSystem:
         )
 
         if phase in {
-            "neonatal_maternal_care",
-            "complete_maternal_care"
+            MaternalCarePhase.NEONATAL,
+            MaternalCarePhase.COMPLETE,
         }:
             actions.append(
                 "retrieval"
@@ -211,7 +220,7 @@ class CatMaternalCareSystem:
             event
         )
 
-        return event
+        return self._event_snapshot(event)
 
     def record_foster_upbringing_care(
         self,
@@ -314,7 +323,7 @@ class CatMaternalCareSystem:
             append_interactions=False
         )
 
-        return event
+        return self._event_snapshot(event)
 
     def _record_foster(
         self,
@@ -335,7 +344,7 @@ class CatMaternalCareSystem:
 
         state.active = (
             event["phase"]
-            != "maternal_independence"
+            is not MaternalCarePhase.INDEPENDENCE
         )
 
         state.care_events += 1
@@ -412,11 +421,11 @@ class CatMaternalCareSystem:
         if append_interactions:
 
             foster_mother.social_interactions.append(
-                deepcopy(event)
+                self._event_snapshot(event)
             )
 
             kitten.social_interactions.append(
-                deepcopy(event)
+                self._event_snapshot(event)
             )
 
         emit_event = getattr(
@@ -429,7 +438,7 @@ class CatMaternalCareSystem:
             emit_event
         ):
             emit_event(
-                deepcopy(event)
+                self._event_snapshot(event)
             )
 
     def protect_from_threat(self, mother, kitten, threat, current_day=None):
@@ -462,7 +471,10 @@ class CatMaternalCareSystem:
             state,
             kitten.name,
         )
-        state.active = event['phase'] != 'maternal_independence'
+        state.active = (
+            event['phase']
+            is not MaternalCarePhase.INDEPENDENCE
+        )
         state.care_events += 1
         kitten_state.record(
             event['day'],
@@ -481,7 +493,10 @@ class CatMaternalCareSystem:
 
     def _record(self, mother, kitten, event):
         state = mother.maternal_care
-        state.active = event['phase'] != 'maternal_independence'
+        state.active = (
+            event['phase']
+            is not MaternalCarePhase.INDEPENDENCE
+        )
         kitten_state = self._kitten_state(
             state,
             kitten.name,
@@ -499,11 +514,40 @@ class CatMaternalCareSystem:
         action_counters = {'nursing': 'nursing_events', 'cleaning': 'cleaning_events', 'warming': 'warming_events', 'protection': 'protection_events', 'retrieval': 'retrieval_events'}
         for action in event['actions']:
             setattr(received, action_counters[action], getattr(received, action_counters[action]) + 1)
-        mother.social_interactions.append(deepcopy(event))
-        kitten.social_interactions.append(deepcopy(event))
-        emit_event = getattr(self.cats_layer, 'emit_event', None)
+        mother.social_interactions.append(
+            self._event_snapshot(event)
+        )
+        kitten.social_interactions.append(
+            self._event_snapshot(event)
+        )
+        emit_event = getattr(
+            self.cats_layer,
+            'emit_event',
+            None,
+        )
         if callable(emit_event):
-            emit_event(deepcopy(event))
+            emit_event(
+                self._event_snapshot(event)
+            )
+
+    @staticmethod
+    def _event_snapshot(event):
+        snapshot = deepcopy(event)
+        phase = snapshot.get("phase")
+
+        if phase is not None:
+            if not isinstance(
+                phase,
+                MaternalCarePhase,
+            ):
+                raise TypeError(
+                    "Maternal care event phase "
+                    "must use MaternalCarePhase."
+                )
+
+            snapshot["phase"] = phase.value
+
+        return snapshot
 
     def _kitten_state(
         self,

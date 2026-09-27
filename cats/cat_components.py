@@ -1,5 +1,9 @@
 from core.entity.component_object import ComponentObject
 
+from cats.maternal_care_phase import (
+    MaternalCarePhase,
+)
+
 from cats.cat_group_role_state import (
     CatGroupRoleAssignedEvent,
     CatGroupRoleReleasedEvent,
@@ -13,7 +17,26 @@ class MaternalCare(ComponentObject):
     pass
 
 class MaternalCareReceived(ComponentObject):
-    pass
+    last_phase: MaternalCarePhase | None
+
+    def __setattr__(self, key, value):
+        if (
+            key == "last_phase"
+            and value is not None
+            and not isinstance(
+                value,
+                MaternalCarePhase,
+            )
+        ):
+            raise TypeError(
+                "Maternal care received phase "
+                "must use MaternalCarePhase."
+            )
+
+        super().__setattr__(
+            key,
+            value,
+        )
 
 class SiblingPlay(ComponentObject):
     pass

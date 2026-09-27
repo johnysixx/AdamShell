@@ -11,6 +11,9 @@ from cats.cat_maternal_care_system import (
 from cats.cat_maternal_kitten_care_state import (
     CatMaternalKittenCareState
 )
+from cats.maternal_care_phase import (
+    MaternalCarePhase,
+)
 
 
 class CatMaternalKittenCareObjectStateTests(
@@ -105,7 +108,7 @@ class CatMaternalKittenCareObjectStateTests(
         returned = state.record(
             day=7,
             phase=(
-                'neonatal_maternal_care'
+                MaternalCarePhase.NEONATAL
             ),
         )
 
@@ -126,8 +129,21 @@ class CatMaternalKittenCareObjectStateTests(
 
         self.assertEqual(
             state.last_phase,
-            'neonatal_maternal_care',
+            MaternalCarePhase.NEONATAL,
         )
+
+    def test_string_phase_is_rejected(
+        self
+    ):
+        state = (
+            CatMaternalKittenCareState()
+        )
+
+        with self.assertRaises(TypeError):
+            state.record(
+                day=7,
+                phase="neonatal_maternal_care",
+            )
 
     def test_registry_keeps_same_record(
         self
@@ -180,7 +196,7 @@ class CatMaternalKittenCareObjectStateTests(
 
         self.assertEqual(
             stored.last_phase,
-            'neonatal_maternal_care',
+            MaternalCarePhase.NEONATAL,
         )
 
     def test_legacy_mapping_record_is_rejected(
