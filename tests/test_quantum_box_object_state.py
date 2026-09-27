@@ -2,6 +2,9 @@ import unittest
 from types import SimpleNamespace
 
 from core.entity.components import SpatialVector3
+from core.entity.cat_quantum_transfer_phase import (
+    CatQuantumTransferPhase,
+)
 from core.entity.quantum_box import (
     QuantumBox,
     QuantumBoxCatTransferState,
@@ -185,9 +188,9 @@ class QuantumBoxObjectStateTests(
         )
 
         self.assertFalse(transfer.active)
-        self.assertEqual(
+        self.assertIs(
             transfer.state,
-            'completed'
+            CatQuantumTransferPhase.COMPLETED,
         )
         self.assertEqual(
             transfer.source_box_id,
@@ -204,6 +207,21 @@ class QuantumBoxObjectStateTests(
         self.assertIsNone(
             transfer.target_box_id
         )
+
+        snapshot = transfer.to_dict()
+
+        self.assertEqual(
+            snapshot["state"],
+            "completed",
+        )
+
+    def test_cat_transfer_rejects_string_phase(
+        self
+    ):
+        with self.assertRaises(TypeError):
+            QuantumBoxCatTransferState(
+                state="inactive",
+            )
 
     def test_energy_consumption_is_object_state(
         self

@@ -5,6 +5,9 @@ from dataclasses import dataclass, field
 from core.actualization.possibility import Possibility
 from core.actualization.potential import Potential
 from core.entity.components import SpatialVector3
+from core.entity.cat_quantum_transfer_phase import (
+    CatQuantumTransferPhase,
+)
 
 
 @dataclass(slots=True)
@@ -41,13 +44,23 @@ class QuantumBoxCounterpartState:
 @dataclass(slots=True)
 class QuantumBoxCatTransferState:
     active: bool = False
-    state: str = 'inactive'
+    state: CatQuantumTransferPhase = CatQuantumTransferPhase.INACTIVE
     cat_name: str | None = None
     source_box_id: str | None = None
     target_box_id: str | None = None
     source_layer: str | None = None
     target_layer: str | None = None
     started_tick: int | None = None
+
+    def __post_init__(self):
+        if not isinstance(
+            self.state,
+            CatQuantumTransferPhase,
+        ):
+            raise TypeError(
+                "Quantum box cat transfer state "
+                "must use CatQuantumTransferPhase."
+            )
 
     def begin(
         self,
@@ -60,7 +73,7 @@ class QuantumBoxCatTransferState:
     ):
         self.active = True
         self.state = (
-            'cat_transfer_superposition'
+            CatQuantumTransferPhase.SUPERPOSITION
         )
         self.cat_name = cat_name
         self.source_box_id = source_box_id
@@ -75,7 +88,7 @@ class QuantumBoxCatTransferState:
         clear_source=True
     ):
         self.active = False
-        self.state = 'completed'
+        self.state = CatQuantumTransferPhase.COMPLETED
         self.cat_name = None
         self.target_box_id = None
         self.target_layer = None
@@ -90,7 +103,7 @@ class QuantumBoxCatTransferState:
     def to_dict(self):
         return {
             'active': self.active,
-            'state': self.state,
+            'state': self.state.value,
             'cat_name': self.cat_name,
             'source_box_id':
                 self.source_box_id,
@@ -264,7 +277,7 @@ class QuantumBox:
         return bool(
             self.cat_transfer.active
             and self.cat_transfer.state
-            == 'cat_transfer_superposition'
+            is CatQuantumTransferPhase.SUPERPOSITION
         )
 
     def is_visible_to(self, observer):

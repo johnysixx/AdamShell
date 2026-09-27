@@ -3,6 +3,9 @@ import unittest
 from universe.universe import Universe
 from cats.cats import Cats
 from core.entity.components import SpatialVector3
+from core.entity.cat_quantum_transfer_phase import (
+    CatQuantumTransferPhase,
+)
 from universe.dark_sector import (
     QUANTUM_BOX_ENERGY_COST_J
 )
@@ -120,9 +123,9 @@ class CatQuantumBoxTransferTests(
             self.cat.quantum_transfer.active
         )
 
-        self.assertEqual(
+        self.assertIs(
             self.cat.quantum_transfer.state,
-            'collapsed',
+            CatQuantumTransferPhase.COLLAPSED,
         )
 
         self.assertTrue(

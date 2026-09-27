@@ -1,4 +1,7 @@
 from core.entity.components import SpatialVector3
+from core.entity.cat_quantum_transfer_phase import (
+    CatQuantumTransferPhase,
+)
 import unittest
 
 from universe.universe import Universe
@@ -31,7 +34,7 @@ class CatQuantumTransferObjectStateTests(
     ):
         state = CatQuantumTransferState(
             active=True,
-            state='cat_transfer_superposition',
+            state=CatQuantumTransferPhase.SUPERPOSITION,
             cat_name='transfer_state_cat',
             source_box_id='source',
             target_box_id='target',
@@ -80,7 +83,7 @@ class CatQuantumTransferObjectStateTests(
     ):
         state = CatQuantumTransferState(
             active=True,
-            state='cat_transfer_superposition',
+            state=CatQuantumTransferPhase.SUPERPOSITION,
             cat_is_here=True,
             cat_is_not_here=True,
         )
@@ -100,9 +103,9 @@ class CatQuantumTransferObjectStateTests(
             state.active
         )
 
-        self.assertEqual(
+        self.assertIs(
             state.state,
-            'collapsed',
+            CatQuantumTransferPhase.COLLAPSED,
         )
 
         self.assertTrue(
@@ -121,6 +124,14 @@ class CatQuantumTransferObjectStateTests(
         self.assertTrue(
             state.target_box_consumed
         )
+
+    def test_string_phase_is_rejected(
+        self
+    ):
+        with self.assertRaises(TypeError):
+            CatQuantumTransferState(
+                state="cat_transfer_superposition",
+            )
 
     def test_legacy_mapping_state_is_rejected(
         self

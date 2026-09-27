@@ -1,11 +1,14 @@
 from dataclasses import dataclass
 from core.entity.components import SpatialVector3, require_optional_spatial_vector
+from core.entity.cat_quantum_transfer_phase import (
+    CatQuantumTransferPhase,
+)
 
 
 @dataclass(slots=True)
 class CatQuantumTransferState:
     active: bool = False
-    state: str = 'inactive'
+    state: CatQuantumTransferPhase = CatQuantumTransferPhase.INACTIVE
     cat_name: str | None = None
     source_box_id: str | None = None
     target_box_id: str | None = None
@@ -19,6 +22,16 @@ class CatQuantumTransferState:
     target_box_consumed: bool | None = None
     stable_pair_id: str | None = None
 
+    def __post_init__(self):
+        if not isinstance(
+            self.state,
+            CatQuantumTransferPhase,
+        ):
+            raise TypeError(
+                "Cat quantum transfer state "
+                "must use CatQuantumTransferPhase."
+            )
+
     def collapse(
         self,
         resolved_layer,
@@ -27,7 +40,7 @@ class CatQuantumTransferState:
         stable_pair_id=None,
     ):
         self.active = False
-        self.state = 'collapsed'
+        self.state = CatQuantumTransferPhase.COLLAPSED
         self.cat_is_here = True
         self.cat_is_not_here = False
         self.resolved_layer = resolved_layer
