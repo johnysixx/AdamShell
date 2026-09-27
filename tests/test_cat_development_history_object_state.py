@@ -1,5 +1,7 @@
 import unittest
 
+from cats.cat_development_stage import CatDevelopmentStage
+
 from universe.universe import Universe
 from cats import Cats
 from cats.development_resolver import (
@@ -163,11 +165,11 @@ class CatDevelopmentHistoryObjectStateTests(
             "stage"
         ] = "changed"
 
-        self.assertEqual(
+        self.assertIs(
             event
             .transitions[0]
             .stage,
-            "socializing_kitten",
+            CatDevelopmentStage.SOCIALIZING_KITTEN,
         )
 
         self.assertEqual(

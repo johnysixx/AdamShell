@@ -1,3 +1,4 @@
+from cats.cat_development_stage import CatDevelopmentStage
 from dataclasses import dataclass, field
 
 from cats.physical_biology_gate import (
@@ -16,7 +17,7 @@ from cats.cat_parentage_state import (
 class CatDevelopmentStageTransition:
 
     day: int
-    stage: str
+    stage: CatDevelopmentStage
 
     def __post_init__(self):
         object.__setattr__(
@@ -25,16 +26,19 @@ class CatDevelopmentStageTransition:
             int(self.day),
         )
 
-        object.__setattr__(
-            self,
-            "stage",
-            str(self.stage),
-        )
+        if not isinstance(
+            self.stage,
+            CatDevelopmentStage,
+        ):
+            raise TypeError(
+                "Development transition stage "
+                "must be a CatDevelopmentStage object."
+            )
 
     def to_dict(self):
         return {
             "day": self.day,
-            "stage": self.stage,
+            "stage": self.stage.value,
         }
 
 
@@ -56,8 +60,8 @@ class NewbornCatDevelopmentInitializedEvent:
         init=False,
     )
 
-    stage: str = field(
-        default="newborn",
+    stage: CatDevelopmentStage = field(
+        default=CatDevelopmentStage.NEWBORN,
         init=False,
     )
 
@@ -85,7 +89,7 @@ class NewbornCatDevelopmentInitializedEvent:
             "name": self.name,
             "cat": self.cat,
             "age_days": self.age_days,
-            "stage": self.stage,
+            "stage": self.stage.value,
             "fertile": self.fertile,
             "birth_day": self.birth_day,
         }
@@ -98,8 +102,8 @@ class CatAgeAdvancedEvent:
     days_advanced: int
     previous_age_days: int
     age_days: int
-    previous_stage: str
-    stage: str
+    previous_stage: CatDevelopmentStage
+    stage: CatDevelopmentStage
     transitions: tuple[
         CatDevelopmentStageTransition,
         ...,
@@ -135,17 +139,18 @@ class CatAgeAdvancedEvent:
                 ),
             )
 
-        object.__setattr__(
-            self,
+        for field_name in (
             "previous_stage",
-            str(self.previous_stage),
-        )
-
-        object.__setattr__(
-            self,
             "stage",
-            str(self.stage),
-        )
+        ):
+            if not isinstance(
+                getattr(self, field_name),
+                CatDevelopmentStage,
+            ):
+                raise TypeError(
+                    "Cat age event stages must be "
+                    "CatDevelopmentStage objects."
+                )
 
         transitions = tuple(
             self.transitions
@@ -204,9 +209,9 @@ class CatAgeAdvancedEvent:
             ),
             "age_days": self.age_days,
             "previous_stage": (
-                self.previous_stage
+                self.previous_stage.value
             ),
-            "stage": self.stage,
+            "stage": self.stage.value,
             "stage_changed": (
                 self.stage_changed
             ),
@@ -228,12 +233,30 @@ class CatDevelopmentResolver:
     ADULTHOOD_DAY = 365
 
     STAGES = (
-        (0, "newborn"),
-        (14, "socializing_kitten"),
-        (49, "playful_kitten"),
-        (98, "juvenile"),
-        (180, "adolescent"),
-        (365, "adult")
+        (
+            0,
+            CatDevelopmentStage.NEWBORN,
+        ),
+        (
+            14,
+            CatDevelopmentStage.SOCIALIZING_KITTEN,
+        ),
+        (
+            49,
+            CatDevelopmentStage.PLAYFUL_KITTEN,
+        ),
+        (
+            98,
+            CatDevelopmentStage.JUVENILE,
+        ),
+        (
+            180,
+            CatDevelopmentStage.ADOLESCENT,
+        ),
+        (
+            365,
+            CatDevelopmentStage.ADULT,
+        ),
     )
 
     def __init__(
@@ -269,7 +292,7 @@ class CatDevelopmentResolver:
         cat.age_days = 0
         cat.birth_day = birth_day
         cat.developmental_stage = (
-            "newborn"
+            CatDevelopmentStage.NEWBORN
         )
 
         parentage = (
@@ -287,7 +310,9 @@ class CatDevelopmentResolver:
             )
         )
 
-        reproduction.developmental_stage = "newborn"
+        reproduction.developmental_stage = (
+            CatDevelopmentStage.NEWBORN
+        )
 
         reproduction.reproductive_maturity = False
 
@@ -429,7 +454,7 @@ class CatDevelopmentResolver:
                 "Cat age cannot be negative."
             )
 
-        stage = "newborn"
+        stage = CatDevelopmentStage.NEWBORN
 
         for minimum_age, candidate in (
             cls.STAGES

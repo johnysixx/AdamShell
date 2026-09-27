@@ -1,3 +1,4 @@
+from cats.development_resolver import CatDevelopmentResolver
 import unittest
 
 from multiverse import UniverseRegistry
@@ -76,7 +77,10 @@ class CatEmergencyLactationSystemTests(
         )
 
         kitten.age_days = age_days
-        kitten.developmental_stage = "kitten"
+        kitten.developmental_stage = (
+            CatDevelopmentResolver
+            .stage_for_age(age_days)
+        )
 
         kitten.mother_name = (
             "missing_mother"

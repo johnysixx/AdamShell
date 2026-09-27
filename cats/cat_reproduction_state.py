@@ -1,3 +1,4 @@
+from cats.cat_development_stage import CatDevelopmentStage
 from dataclasses import dataclass, field
 
 from cats.cat_birth_objects import CatLitter, KittenEmbryo
@@ -13,7 +14,7 @@ class CatReproductionState:
     neutered: bool = False
     fertile: bool = field(init=False)
 
-    developmental_stage: str | None = None
+    developmental_stage: CatDevelopmentStage | None = None
     reproductive_maturity: bool = False
 
     estrous_phase: CatEstrousPhase = CatEstrousPhase.INACTIVE
@@ -59,7 +60,12 @@ class CatReproductionState:
             "sex": self.sex,
             "neutered": self.neutered,
             "fertile": self.fertile,
-            "developmental_stage": self.developmental_stage,
+            "developmental_stage": (
+                self.developmental_stage.value
+                if self.developmental_stage
+                is not None
+                else None
+            ),
             "reproductive_maturity": self.reproductive_maturity,
             "estrous_phase": self.estrous_phase.value,
             "estrus_active": self.estrus_active,

@@ -1,3 +1,4 @@
+from cats.cat_development_stage import CatDevelopmentStage
 from cats.cat_components import CatFamily, MaternalCare, MaternalCareReceived, SiblingPlay, SiblingRivalry, ParentalTeaching, FamilyBonding, CatGroupMembership, CatCulture, CatGroupRoles, CatMeowInvitations, CatNorms, CatNeeds, CatEmergencyNursing, CatTerritories, CatSocialMemories, CatBonds, CatHumanBonds
 from cats.cat_knowledge_objects import CatKnowledgeState
 from core.entity.social_entity import SocialMixin
@@ -93,7 +94,7 @@ class Cat(SocialMixin):
         self.box_exploration = None
         self.exploration_goal = None
         self.birth_day = None
-        self.developmental_stage = None
+        self.developmental_stage: CatDevelopmentStage | None = None
         self.mother_name = None
         self.birth_profile = None
         self.rolled_birth_profile = None

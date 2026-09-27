@@ -1,5 +1,7 @@
 from core.entity.components import SpatialVector3
 import unittest
+
+from cats.cat_development_stage import CatDevelopmentStage
 from universe.universe import Universe
 
 class QuantumBoxCatProfileTests(unittest.TestCase):
@@ -12,7 +14,7 @@ class QuantumBoxCatProfileTests(unittest.TestCase):
         result = self.universe.manifest_cat(name='box_kitten', source='quantum_box_spontaneous_collapse', position=SpatialVector3(x=5.0, y=2.0, z=-1.0))
         cat = result['cat']
         self.assertEqual(cat.age_days, 98)
-        self.assertEqual(cat.developmental_stage, 'juvenile')
+        self.assertIs(cat.developmental_stage, CatDevelopmentStage.JUVENILE)
         self.assertTrue(cat.quantum_box_origin['manifested_from_box'])
         self.assertTrue(cat.learning.meow_knowledge.learned)
         self.assertTrue(cat.learning.meow_knowledge.can_speak)

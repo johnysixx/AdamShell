@@ -1,6 +1,8 @@
 from cats.cat_estrous_phase import CatEstrousPhase
 import unittest
 
+from cats.cat_development_stage import CatDevelopmentStage
+
 from cats import Cats
 from cats.mating_contact import CatMatingContact
 from cats.cat_reproduction_state import CatReproductionState
@@ -179,9 +181,9 @@ class CatReproductionObjectStateTests(unittest.TestCase):
         )
 
         self.assertIs(kitten.reproduction, state)
-        self.assertEqual(
+        self.assertIs(
             state.developmental_stage,
-            "newborn",
+            CatDevelopmentStage.NEWBORN,
         )
         self.assertFalse(state.reproductive_maturity)
         self.assertFalse(state.fertile)

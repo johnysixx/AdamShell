@@ -11,6 +11,7 @@ from core.entity.quantum_die import QuantumDie
 from core.entity.quantum_die_box import QuantumDieBox
 from universe.quantum_universe_space import QuantumUniverseSpace
 from universe.big_bang import BigBang
+from cats.cat_development_stage import CatDevelopmentStage
 from core.entity.quantum_box import QuantumBox
 from universe.universe_statistics import UniverseStatistics
 from universe.cronenberg_population_statistics import CronenbergPopulationStatistics
@@ -347,7 +348,13 @@ class Universe:
     def _prepare_quantum_box_cat(self, cat, source):
         learning = cat.learning
         cat.age_days = 98
-        cat.developmental_stage = 'juvenile'
+        cat.developmental_stage = (
+            CatDevelopmentStage.JUVENILE
+        )
+
+        cat.reproduction.developmental_stage = (
+            CatDevelopmentStage.JUVENILE
+        )
         cat.quantum_box_origin = {'manifested_from_box': True, 'source': source, 'born_in_quantum_layer': True}
         traits = _entity_attr_setdefault(cat, 'special_traits', [])
         for trait in ('quantum_box_cat', 'juvenile_quantum_cat', 'sees_direct_path_to_bar'):

@@ -1,5 +1,7 @@
 from cats.cat_estrous_phase import CatEstrousPhase
 import unittest
+
+from cats.cat_development_stage import CatDevelopmentStage
 from universe.universe import Universe
 from cats import Cats
 from cats.mating_resolver import CatMatingResolver
@@ -72,7 +74,7 @@ class KittenBirthResolverTests(unittest.TestCase):
         reproduction = kitten.reproduction
         self.assertEqual(kitten.age_days, 0)
         self.assertEqual(kitten.birth_day, 75)
-        self.assertEqual(kitten.developmental_stage, 'newborn')
+        self.assertIs(kitten.developmental_stage, CatDevelopmentStage.NEWBORN)
         self.assertFalse(reproduction.fertile)
         self.assertFalse(reproduction.reproductive_maturity)
 
