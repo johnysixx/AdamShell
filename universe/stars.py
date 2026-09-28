@@ -1,6 +1,9 @@
 from universe.cosmic_objects import StellarMaterialCloud
 from universe.stellar_objects import PrimordialStar
 from universe.stellar_state import StellarFormationState
+from universe.stars_process_state import (
+    StarsProcessState,
+)
 
 
 class Stars:
@@ -9,7 +12,7 @@ class Stars:
         self.universe = universe
         self.name = "stars"
         self.type = "stellar_layer"
-        self.state = "ready"
+        self.state = StarsProcessState.READY
 
         self.stars = []
 
@@ -17,11 +20,28 @@ class Stars:
 
         self.public_state = self._build_public_state()
 
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, state):
+        if not isinstance(
+            state,
+            StarsProcessState,
+        ):
+            raise TypeError(
+                "Stars process state must use "
+                "StarsProcessState."
+            )
+
+        self._state = state
+
     def _build_public_state(self):
         return {
             "name": self.name,
             "type": self.type,
-            "state": self.state,
+            "state": self.state.value,
             "stars": [star.to_dict() for star in self.stars],
             "stellar_state": self.stellar_state.to_dict(),
         }
@@ -55,13 +75,13 @@ class Stars:
         ]
 
         if not star_forming_clouds:
-            self.state = "failed"
+            self.state = StarsProcessState.FAILED
 
             print("STAR FORMATION FAILED: no germinal clouds ready")
             self.write_to_world()
             return self.public_state
 
-        self.state = "formed"
+        self.state = StarsProcessState.FORMED
 
         self.stars.append(
             PrimordialStar(
