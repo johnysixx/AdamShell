@@ -7,6 +7,9 @@ from universe.particle_objects import (
 from universe.particle_state import (
     ParticleFormationState,
 )
+from universe.particles_process_state import (
+    ParticlesProcessState,
+)
 
 
 class Particles:
@@ -15,7 +18,7 @@ class Particles:
         self.universe = universe
         self.name = "particles"
         self.type = "particle_layer"
-        self.state = "ready"
+        self.state = ParticlesProcessState.READY
 
         self.elementary_particles = {}
         self.composite_particles = {}
@@ -26,11 +29,28 @@ class Particles:
 
         self.public_state = self._build_public_state()
 
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, state):
+        if not isinstance(
+            state,
+            ParticlesProcessState,
+        ):
+            raise TypeError(
+                "Particles process state must use "
+                "ParticlesProcessState."
+            )
+
+        self._state = state
+
     def _build_public_state(self):
         return {
             "name": self.name,
             "type": self.type,
-            "state": self.state,
+            "state": self.state.value,
             "elementary_particles": {
                 name: particle.to_dict()
                 for name, particle
@@ -71,7 +91,7 @@ class Particles:
         )
 
     def _form_particles_unprotected(self):
-        self.state = "formed"
+        self.state = ParticlesProcessState.FORMED
 
         self.form_quarks()
         self.form_leptons()
