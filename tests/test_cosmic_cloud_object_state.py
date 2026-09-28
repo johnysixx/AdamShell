@@ -4,6 +4,9 @@ from universe.cosmic_cloud_state import (
     CosmicCloudFormationState,
 )
 from universe.cosmic_clouds import CosmicClouds
+from universe.cosmic_clouds_process_state import (
+    CosmicCloudsProcessState,
+)
 from universe.cosmic_objects import StellarMaterialCloud
 from universe.primordial_objects import PrimordialCosmicComponent
 from universe.stars import Stars
@@ -190,7 +193,10 @@ class CosmicCloudObjectStateTests(unittest.TestCase):
 
         result = process.form_germinal_clouds()
 
-        self.assertEqual(process.state, "failed")
+        self.assertIs(
+            process.state,
+            CosmicCloudsProcessState.FAILED,
+        )
         self.assertFalse(
             process.cosmic_cloud_state.hydrogen_available
         )
@@ -214,7 +220,10 @@ class CosmicCloudObjectStateTests(unittest.TestCase):
 
         result = process.form_germinal_clouds()
 
-        self.assertEqual(process.state, "failed")
+        self.assertIs(
+            process.state,
+            CosmicCloudsProcessState.FAILED,
+        )
         self.assertTrue(
             process.cosmic_cloud_state.hydrogen_available
         )

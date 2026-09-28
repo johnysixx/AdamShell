@@ -1,6 +1,9 @@
 from universe.cosmic_cloud_state import (
     CosmicCloudFormationState,
 )
+from universe.cosmic_clouds_process_state import (
+    CosmicCloudsProcessState,
+)
 from universe.cosmic_objects import StellarMaterialCloud
 from universe.primordial_objects import PrimordialCosmicComponent
 
@@ -11,7 +14,7 @@ class CosmicClouds:
         self.universe = universe
         self.name = "cosmic_clouds"
         self.type = "cosmic_structure_layer"
-        self.state = "ready"
+        self.state = CosmicCloudsProcessState.READY
 
         self.clouds = []
 
@@ -21,11 +24,28 @@ class CosmicClouds:
 
         self.public_state = self._build_public_state()
 
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, state):
+        if not isinstance(
+            state,
+            CosmicCloudsProcessState,
+        ):
+            raise TypeError(
+                "Cosmic clouds process state must use "
+                "CosmicCloudsProcessState."
+            )
+
+        self._state = state
+
     def _build_public_state(self):
         return {
             "name": self.name,
             "type": self.type,
-            "state": self.state,
+            "state": self.state.value,
             "clouds": [
                 cloud.to_dict()
                 for cloud in self.clouds
@@ -57,7 +77,7 @@ class CosmicClouds:
         )
 
         if "hydrogen" not in primordial_elements:
-            self.state = "failed"
+            self.state = CosmicCloudsProcessState.FAILED
 
             print(
                 "COSMIC CLOUD FORMATION FAILED: "
@@ -80,7 +100,7 @@ class CosmicClouds:
         self.cosmic_cloud_state.hydrogen_available = True
 
         if "helium" not in primordial_elements:
-            self.state = "failed"
+            self.state = CosmicCloudsProcessState.FAILED
 
             print(
                 "COSMIC CLOUD FORMATION FAILED: "
@@ -101,7 +121,7 @@ class CosmicClouds:
             )
 
         self.cosmic_cloud_state.helium_available = True
-        self.state = "formed"
+        self.state = CosmicCloudsProcessState.FORMED
 
         self.clouds.append(
             StellarMaterialCloud(
