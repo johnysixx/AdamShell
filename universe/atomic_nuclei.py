@@ -2,6 +2,9 @@ from universe.nuclear_objects import AtomicNucleus
 from universe.nuclear_state import (
     NuclearFormationState,
 )
+from universe.atomic_nuclei_process_state import (
+    AtomicNucleiProcessState,
+)
 
 
 class AtomicNuclei:
@@ -10,7 +13,7 @@ class AtomicNuclei:
         self.universe = universe
         self.name = "atomic_nuclei"
         self.type = "nuclear_layer"
-        self.state = "ready"
+        self.state = AtomicNucleiProcessState.READY
 
         self.nuclei = {}
 
@@ -18,11 +21,28 @@ class AtomicNuclei:
 
         self.public_state = self._build_public_state()
 
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, state):
+        if not isinstance(
+            state,
+            AtomicNucleiProcessState,
+        ):
+            raise TypeError(
+                "Atomic nuclei process state must use "
+                "AtomicNucleiProcessState."
+            )
+
+        self._state = state
+
     def _build_public_state(self):
         return {
             "name": self.name,
             "type": self.type,
-            "state": self.state,
+            "state": self.state.value,
             "nuclei": {
                 name: nucleus.to_dict()
                 for name, nucleus in self.nuclei.items()
@@ -48,7 +68,7 @@ class AtomicNuclei:
         )
 
     def _form_light_nuclei_unprotected(self):
-        self.state = "formed"
+        self.state = AtomicNucleiProcessState.FORMED
 
         self.add_nucleus(
             name="hydrogen_nucleus",
