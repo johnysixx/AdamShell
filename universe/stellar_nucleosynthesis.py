@@ -4,6 +4,9 @@ from universe.primordial_objects import PrimordialCosmicComponent
 from universe.stellar_nucleosynthesis_state import (
     StellarNucleosynthesisState,
 )
+from universe.stellar_nucleosynthesis_process_state import (
+    StellarNucleosynthesisProcessState,
+)
 
 
 STELLAR_ELEMENT_SPECS = (
@@ -51,7 +54,9 @@ class StellarNucleosynthesis:
         self.universe = universe
         self.name = "stellar_nucleosynthesis"
         self.type = "stellar_element_process"
-        self.state = "ready"
+        self.state = (
+            StellarNucleosynthesisProcessState.READY
+        )
 
         self.elements_up_to_iron = {}
 
@@ -59,11 +64,29 @@ class StellarNucleosynthesis:
 
         self.public_state = self._build_public_state()
 
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, state):
+        if not isinstance(
+            state,
+            StellarNucleosynthesisProcessState,
+        ):
+            raise TypeError(
+                "Stellar nucleosynthesis process state "
+                "must use "
+                "StellarNucleosynthesisProcessState."
+            )
+
+        self._state = state
+
     def _build_public_state(self):
         return {
             "name": self.name,
             "type": self.type,
-            "state": self.state,
+            "state": self.state.value,
             "elements_up_to_iron": {
                 name: _public_element_snapshot(element)
                 for name, element in self.elements_up_to_iron.items()
@@ -81,7 +104,9 @@ class StellarNucleosynthesis:
         first_stars = self.universe.world.get("first_stars", [])
 
         if not first_stars:
-            self.state = "failed"
+            self.state = (
+                StellarNucleosynthesisProcessState.FAILED
+            )
             self.stellar_nucleosynthesis_state.failed = True
 
             print("STELLAR NUCLEOSYNTHESIS FAILED: no stars available")
@@ -95,7 +120,9 @@ class StellarNucleosynthesis:
                 )
 
         if not stellar_state.stellar_fusion_possible:
-            self.state = "failed"
+            self.state = (
+                StellarNucleosynthesisProcessState.FAILED
+            )
             self.stellar_nucleosynthesis_state.failed = True
 
             print(
@@ -105,7 +132,9 @@ class StellarNucleosynthesis:
             self.write_to_world()
             return self.public_state
 
-        self.state = "forged"
+        self.state = (
+            StellarNucleosynthesisProcessState.FORGED
+        )
         self.stellar_nucleosynthesis_state.stellar_fusion_active = True
 
         primordial_elements = self.universe.world.get(
