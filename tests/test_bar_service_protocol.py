@@ -9,6 +9,7 @@ from meeting_place.bar_service_protocol import (
     BarServiceProtocol
 )
 from meeting_place.bar_objects import BarPosition
+from meeting_place.bartender_state import BartenderState
 
 
 class BarServiceProtocolTests(
@@ -27,7 +28,7 @@ class BarServiceProtocolTests(
     ):
         bartender = SimpleNamespace(
             name="bartender",
-            state="created",
+            state=BartenderState.PRESENT,
             position=None,
         )
 
@@ -39,9 +40,9 @@ class BarServiceProtocolTests(
             result
         )
 
-        self.assertEqual(
+        self.assertIs(
             bartender.state,
-            "behind_bar"
+            BartenderState.BEHIND_BAR,
         )
 
         self.assertIsNotNone(
@@ -78,7 +79,7 @@ class BarServiceProtocolTests(
     ):
         bartender = SimpleNamespace(
             name="bartender",
-            state="created",
+            state=BartenderState.PRESENT,
             position=None,
         )
 

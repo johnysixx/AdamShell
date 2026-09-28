@@ -1,4 +1,5 @@
 from meeting_place.bar_objects import BarPosition
+from meeting_place.bartender_state import BartenderState
 
 
 class BarServiceProtocol:
@@ -40,7 +41,7 @@ class BarServiceProtocol:
         if not reachable:
             return False
         bartender.position = BarPosition(x=target.x, y=target.y)
-        bartender.state = "behind_bar"
+        bartender.state = BartenderState.BEHIND_BAR
         return True
 
     def place_bartender(self, bartender):
@@ -52,5 +53,5 @@ class BarServiceProtocol:
         if service.kind != "service_floor":
             return False
         bartender.position = BarPosition(x=service.x, y=service.y)
-        bartender.state = "behind_bar"
+        bartender.state = BartenderState.BEHIND_BAR
         return True

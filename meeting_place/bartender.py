@@ -3,6 +3,9 @@ from universe.logger import UniverseLogger
 from meeting_place.bar_incident_state import (
     BarIncidentState,
 )
+from meeting_place.bartender_state import (
+    BartenderState,
+)
 from .bar_objects import (
     BarDrink,
     BarInventoryItem,
@@ -17,7 +20,7 @@ class Bartender(SocialMixin):
     def __init__(self, story_book, name='bartender', mix_book=None, on_cocktail_approved=None):
         self.name = name
         self.type = 'bar_observer'
-        self.state = 'present'
+        self.state = BartenderState.PRESENT
         self.story_book = story_book
         self.mix_book = mix_book
         self.on_cocktail_approved = on_cocktail_approved
@@ -34,6 +37,22 @@ class Bartender(SocialMixin):
         self.glasses_clean = False
         self.bar_counter_clean = False
         UniverseLogger.boot('BARTENDER CREATED')
+
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, state):
+        if not isinstance(
+            state,
+            BartenderState,
+        ):
+            raise TypeError(
+                "Bartender state must use BartenderState."
+            )
+
+        self._state = state
 
     def answer_about_lemonade_origin(self):
         answer = 'When life gives you lemons, make lemonade.'
