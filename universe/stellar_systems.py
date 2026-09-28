@@ -7,6 +7,9 @@ from universe.stellar_system_objects import (
 from universe.stellar_system_state import (
     StellarSystemFormationState,
 )
+from universe.stellar_systems_process_state import (
+    StellarSystemsProcessState,
+)
 
 
 class StellarSystems:
@@ -15,7 +18,7 @@ class StellarSystems:
         self.universe = universe
         self.name = "stellar_systems"
         self.type = "stellar_system_layer"
-        self.state = "ready"
+        self.state = StellarSystemsProcessState.READY
 
         self.systems = []
 
@@ -23,11 +26,28 @@ class StellarSystems:
 
         self.public_state = self._build_public_state()
 
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, state):
+        if not isinstance(
+            state,
+            StellarSystemsProcessState,
+        ):
+            raise TypeError(
+                "Stellar systems process state must use "
+                "StellarSystemsProcessState."
+            )
+
+        self._state = state
+
     def _build_public_state(self):
         return {
             "name": self.name,
             "type": self.type,
-            "state": self.state,
+            "state": self.state.value,
             "systems": [
                 system.to_dict()
                 for system in self.systems
@@ -66,7 +86,7 @@ class StellarSystems:
         ]
 
         if not system_forming_clouds:
-            self.state = "failed"
+            self.state = StellarSystemsProcessState.FAILED
 
             print("STELLAR SYSTEM FORMATION FAILED: no enriched clouds available")
             self.write_to_world()
@@ -76,7 +96,7 @@ class StellarSystems:
         composition = source_cloud.composition
         available_elements = tuple(composition.keys())
 
-        self.state = "formed"
+        self.state = StellarSystemsProcessState.FORMED
 
         solar_disk = ProtoplanetaryDisk(
             name="solar_protoplanetary_disk",

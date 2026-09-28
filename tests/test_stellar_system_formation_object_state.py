@@ -11,6 +11,9 @@ from universe.stellar_system_state import (
     StellarSystemFormationState,
 )
 from universe.stellar_systems import StellarSystems
+from universe.stellar_systems_process_state import (
+    StellarSystemsProcessState,
+)
 from universe.universe import Universe
 
 
@@ -206,7 +209,10 @@ class StellarSystemFormationObjectStateTests(
 
         result = process.form_stellar_systems()
 
-        self.assertEqual(process.state, "failed")
+        self.assertIs(
+            process.state,
+            StellarSystemsProcessState.FAILED,
+        )
         self.assertFalse(
             process.system_state.stellar_systems_formed
         )
