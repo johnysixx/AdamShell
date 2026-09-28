@@ -4,6 +4,9 @@ from universe.biochemical_objects import (
 from universe.biochemical_state import (
     BiochemicalFoundationState,
 )
+from universe.biochemical_foundations_process_state import (
+    BiochemicalFoundationsProcessState,
+)
 from universe.planetary_material_objects import (
     AvailablePlanetaryMaterial,
 )
@@ -15,18 +18,38 @@ class BiochemicalFoundations:
         self.universe = universe
         self.name = "biochemical_foundations"
         self.type = "biochemical_foundation_layer"
-        self.state = "ready"
+        self.state = (
+            BiochemicalFoundationsProcessState.READY
+        )
 
         self.compounds = {}
 
         self.biochemical_state = BiochemicalFoundationState()
         self.public_state = self._build_public_state()
 
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, state):
+        if not isinstance(
+            state,
+            BiochemicalFoundationsProcessState,
+        ):
+            raise TypeError(
+                "Biochemical foundations process state "
+                "must use "
+                "BiochemicalFoundationsProcessState."
+            )
+
+        self._state = state
+
     def _build_public_state(self):
         return {
             "name": self.name,
             "type": self.type,
-            "state": self.state,
+            "state": self.state.value,
             "compounds": {
                 name: compound.to_dict()
                 for name, compound in self.compounds.items()
@@ -53,7 +76,9 @@ class BiochemicalFoundations:
         materials = self.universe.world.get("available_planetary_materials", {})
 
         if "water" not in materials or "organic_molecules" not in materials:
-            self.state = "failed"
+            self.state = (
+                BiochemicalFoundationsProcessState.FAILED
+            )
 
             print("BIOCHEMICAL FOUNDATION FAILED: missing water or organic molecules")
             self.write_to_world()
@@ -67,7 +92,9 @@ class BiochemicalFoundations:
                     "AvailablePlanetaryMaterial objects"
                 )
 
-        self.state = "formed"
+        self.state = (
+            BiochemicalFoundationsProcessState.FORMED
+        )
 
         self.add_compound(
             name="sugars",

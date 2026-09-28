@@ -3,6 +3,9 @@ import unittest
 from universe.biochemical_foundations import (
     BiochemicalFoundations,
 )
+from universe.biochemical_foundations_process_state import (
+    BiochemicalFoundationsProcessState,
+)
 from universe.biochemical_objects import (
     BiochemicalCompound,
 )
@@ -161,7 +164,10 @@ class BiochemicalFoundationObjectStateTests(
 
         result = process.form_biochemical_foundations()
 
-        self.assertEqual(process.state, "failed")
+        self.assertIs(
+            process.state,
+            BiochemicalFoundationsProcessState.FAILED,
+        )
         self.assertFalse(
             process.biochemical_state.sugars_possible
         )
