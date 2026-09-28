@@ -2,6 +2,9 @@ from universe.chemical_objects import Isotope
 from universe.isotope_state import (
     IsotopeFormationState,
 )
+from universe.isotopes_process_state import (
+    IsotopesProcessState,
+)
 from universe.periodic_table import PeriodicTable
 
 
@@ -11,7 +14,7 @@ class Isotopes:
         self.universe = universe
         self.name = "isotopes"
         self.type = "isotope_layer"
-        self.state = "ready"
+        self.state = IsotopesProcessState.READY
 
         self.periodic_table = PeriodicTable(universe)
         self.isotopes = {}
@@ -20,11 +23,28 @@ class Isotopes:
 
         self.public_state = self._build_public_state()
 
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, state):
+        if not isinstance(
+            state,
+            IsotopesProcessState,
+        ):
+            raise TypeError(
+                "Isotopes process state must use "
+                "IsotopesProcessState."
+            )
+
+        self._state = state
+
     def _build_public_state(self):
         return {
             "name": self.name,
             "type": self.type,
-            "state": self.state,
+            "state": self.state.value,
             "isotopes": {
                 name: isotope.to_dict()
                 for name, isotope in self.isotopes.items()
@@ -62,7 +82,7 @@ class Isotopes:
         self.create_isotope(90, 232, "radioactive", ["geological_time"])
         self.create_isotope(92, 238, "radioactive", ["geological_time"])
 
-        self.state = "formed"
+        self.state = IsotopesProcessState.FORMED
 
         self.isotope_state.reference_isotopes_available = True
         (
