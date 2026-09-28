@@ -1,6 +1,9 @@
 from copy import deepcopy
 
 from universe.decay_state import RadioactiveDecayState
+from universe.radioactive_decay_process_state import (
+    RadioactiveDecayProcessState,
+)
 from universe.isotopes import Isotopes
 
 
@@ -10,7 +13,7 @@ class RadioactiveDecay:
         self.universe = universe
         self.name = "radioactive_decay"
         self.type = "decay_time_layer"
-        self.state = "ready"
+        self.state = RadioactiveDecayProcessState.READY
 
         self.isotopes_layer = Isotopes(universe)
         self.decay_patterns = {}
@@ -19,11 +22,28 @@ class RadioactiveDecay:
 
         self.public_state = self._build_public_state()
 
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, state):
+        if not isinstance(
+            state,
+            RadioactiveDecayProcessState,
+        ):
+            raise TypeError(
+                "Radioactive decay process state must use "
+                "RadioactiveDecayProcessState."
+            )
+
+        self._state = state
+
     def _build_public_state(self):
         return {
             "name": self.name,
             "type": self.type,
-            "state": self.state,
+            "state": self.state.value,
             "decay_patterns": deepcopy(self.decay_patterns),
             "decay_state": self.decay_state.to_dict(),
         }
@@ -78,7 +98,7 @@ class RadioactiveDecay:
             use="uranium_lead_dating"
         )
 
-        self.state = "defined"
+        self.state = RadioactiveDecayProcessState.DEFINED
 
         self.decay_state.radioactive_decay_available = True
         self.decay_state.radiocarbon_time_available = True
