@@ -5,6 +5,9 @@ from universe.planetary_material_objects import (
 from universe.planetary_material_state import (
     PlanetaryMaterialState,
 )
+from universe.planetary_materials_process_state import (
+    PlanetaryMaterialsProcessState,
+)
 
 
 class PlanetaryMaterials:
@@ -13,7 +16,7 @@ class PlanetaryMaterials:
         self.universe = universe
         self.name = "planetary_materials"
         self.type = "planetary_material_layer"
-        self.state = "ready"
+        self.state = PlanetaryMaterialsProcessState.READY
 
         self.available_materials = {}
 
@@ -21,11 +24,28 @@ class PlanetaryMaterials:
 
         self.public_state = self._build_public_state()
 
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, state):
+        if not isinstance(
+            state,
+            PlanetaryMaterialsProcessState,
+        ):
+            raise TypeError(
+                "Planetary materials process state must use "
+                "PlanetaryMaterialsProcessState."
+            )
+
+        self._state = state
+
     def _build_public_state(self):
         return {
             "name": self.name,
             "type": self.type,
-            "state": self.state,
+            "state": self.state.value,
             "available_materials": {
                 name: material.to_dict()
                 for name, material in self.available_materials.items()
@@ -54,13 +74,15 @@ class PlanetaryMaterials:
         possible_materials = self.universe.world.get("planetary_materials", {})
 
         if not planetary_state.earth_formed:
-            self.state = "failed"
+            self.state = PlanetaryMaterialsProcessState.FAILED
 
             print("PLANETARY MATERIALIZATION FAILED: Earth has not formed yet")
             self.write_to_world()
             return self.public_state
 
-        self.state = "materialized"
+        self.state = (
+            PlanetaryMaterialsProcessState.MATERIALIZED
+        )
 
         if planetary_state.water_possible:
             self.make_available("water", possible_materials)

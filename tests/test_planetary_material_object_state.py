@@ -12,6 +12,9 @@ from universe.planetary_material_state import (
     PlanetaryMaterialState,
 )
 from universe.planetary_materials import PlanetaryMaterials
+from universe.planetary_materials_process_state import (
+    PlanetaryMaterialsProcessState,
+)
 from universe.universe import Universe
 
 
@@ -269,7 +272,10 @@ class PlanetaryMaterialObjectStateTests(
 
         result = process.materialize()
 
-        self.assertEqual(process.state, "failed")
+        self.assertIs(
+            process.state,
+            PlanetaryMaterialsProcessState.FAILED,
+        )
         self.assertFalse(
             process.material_state.water_available
         )
