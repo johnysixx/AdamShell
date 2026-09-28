@@ -2,6 +2,9 @@ from universe.energy_gate_state import (
     EnergyGateCollectionEvent,
     EnergyGateState,
 )
+from universe.energy_gate_process_state import (
+    EnergyGateProcessState,
+)
 
 
 HBAR_J_S = 1.054_571_817e-34
@@ -19,7 +22,7 @@ class EnergyGate:
         self.universe = universe
         self.name = "energy_gate"
         self.type = "pre_physical_threshold"
-        self.state = "closed"
+        self.state = EnergyGateProcessState.CLOSED
 
         self.threshold_j = threshold_j or PLANCK_ENERGY_THRESHOLD_J
         self.idea_energy_j = 0.0
@@ -34,11 +37,28 @@ class EnergyGate:
 
         self.write_to_world()
 
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, state):
+        if not isinstance(
+            state,
+            EnergyGateProcessState,
+        ):
+            raise TypeError(
+                "Energy gate process state must use "
+                "EnergyGateProcessState."
+            )
+
+        self._state = state
+
     def _build_public_state(self):
         return {
             "name": self.name,
             "type": self.type,
-            "state": self.state,
+            "state": self.state.value,
             "gate_state": self.gate_state.to_dict(),
             "events": [
                 event.to_dict()
@@ -116,12 +136,12 @@ class EnergyGate:
         self.gate_state.energy_ratio = energy_ratio
 
         if self.idea_energy_j >= self.threshold_j:
-            self.state = "open"
+            self.state = EnergyGateProcessState.OPEN
             self.gate_state.threshold_reached = True
             self.gate_state.physical_seed_created = True
             self.gate_state.big_bang_allowed = True
         else:
-            self.state = "closed"
+            self.state = EnergyGateProcessState.CLOSED
             self.gate_state.threshold_reached = False
             self.gate_state.physical_seed_created = False
             self.gate_state.big_bang_allowed = False

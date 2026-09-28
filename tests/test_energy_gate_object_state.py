@@ -5,6 +5,9 @@ from universe.energy_gate_state import (
     EnergyGateCollectionEvent,
     EnergyGateState,
 )
+from universe.energy_gate_process_state import (
+    EnergyGateProcessState,
+)
 from universe.universe import Universe
 
 
@@ -120,13 +123,19 @@ class EnergyGateObjectStateTests(unittest.TestCase):
 
         gate.collect_energy("first", 4.0)
 
-        self.assertEqual(gate.state, "closed")
+        self.assertIs(
+            gate.state,
+            EnergyGateProcessState.CLOSED,
+        )
         self.assertFalse(gate.gate_state.threshold_reached)
         self.assertFalse(gate.gate_state.big_bang_allowed)
 
         gate.collect_energy("second", 6.0)
 
-        self.assertEqual(gate.state, "open")
+        self.assertIs(
+            gate.state,
+            EnergyGateProcessState.OPEN,
+        )
         self.assertTrue(gate.gate_state.threshold_reached)
         self.assertTrue(
             gate.gate_state.physical_seed_created
