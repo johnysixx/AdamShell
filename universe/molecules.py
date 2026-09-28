@@ -1,5 +1,8 @@
 from universe.chemical_objects import ChemicalMolecule
 from universe.molecule_state import MoleculeFormationState
+from universe.molecules_process_state import (
+    MoleculesProcessState,
+)
 from universe.periodic_table import PeriodicTable
 
 
@@ -9,7 +12,7 @@ class Molecules:
         self.universe = universe
         self.name = "molecules"
         self.type = "molecular_layer"
-        self.state = "ready"
+        self.state = MoleculesProcessState.READY
 
         self.periodic_table = PeriodicTable(universe)
 
@@ -19,11 +22,28 @@ class Molecules:
 
         self.public_state = self._build_public_state()
 
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, state):
+        if not isinstance(
+            state,
+            MoleculesProcessState,
+        ):
+            raise TypeError(
+                "Molecules process state must use "
+                "MoleculesProcessState."
+            )
+
+        self._state = state
+
     def _build_public_state(self):
         return {
             "name": self.name,
             "type": self.type,
-            "state": self.state,
+            "state": self.state.value,
             "molecules": {
                 name: molecule.to_dict()
                 for name, molecule in self.molecules.items()
@@ -99,7 +119,7 @@ class Molecules:
             meaning="ethyl alcohol molecule"
         )
 
-        self.state = "formed"
+        self.state = MoleculesProcessState.FORMED
 
         self.molecule_state.simple_molecules_available = True
         self.molecule_state.organic_molecules_available = True
