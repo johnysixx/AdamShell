@@ -6,6 +6,9 @@ from universe.planetary_material_objects import PlanetaryMaterial
 from universe.planet_state import PlanetFormationState
 from universe.planetary_materials import PlanetaryMaterials
 from universe.planets import Planets
+from universe.planets_process_state import (
+    PlanetsProcessState,
+)
 from universe.stellar_system_objects import (
     ProtoplanetaryDisk,
     SecondGenerationStar,
@@ -271,7 +274,10 @@ class PlanetFormationObjectStateTests(
 
         result = process.form_planets()
 
-        self.assertEqual(process.state, "failed")
+        self.assertIs(
+            process.state,
+            PlanetsProcessState.FAILED,
+        )
         self.assertFalse(
             process.planetary_state.planets_formed
         )
@@ -291,7 +297,10 @@ class PlanetFormationObjectStateTests(
 
         result = process.form_planets()
 
-        self.assertEqual(process.state, "failed")
+        self.assertIs(
+            process.state,
+            PlanetsProcessState.FAILED,
+        )
         self.assertFalse(
             process.planetary_state.planets_formed
         )

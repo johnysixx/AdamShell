@@ -1,6 +1,9 @@
 from universe.planet_objects import EarthPlanet, Planet
 from universe.planetary_material_objects import PlanetaryMaterial
 from universe.planet_state import PlanetFormationState
+from universe.planets_process_state import (
+    PlanetsProcessState,
+)
 from universe.stellar_system_objects import StellarSystem
 
 
@@ -10,7 +13,7 @@ class Planets:
         self.universe = universe
         self.name = "planets"
         self.type = "planetary_layer"
-        self.state = "ready"
+        self.state = PlanetsProcessState.READY
 
         self.planets = []
 
@@ -47,11 +50,28 @@ class Planets:
 
         self.public_state = self._build_public_state()
 
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, state):
+        if not isinstance(
+            state,
+            PlanetsProcessState,
+        ):
+            raise TypeError(
+                "Planets process state must use "
+                "PlanetsProcessState."
+            )
+
+        self._state = state
+
     def _build_public_state(self):
         return {
             "name": self.name,
             "type": self.type,
-            "state": self.state,
+            "state": self.state.value,
             "planets": [
                 planet.to_dict()
                 for planet in self.planets
@@ -80,7 +100,7 @@ class Planets:
         solar_system = self.universe.world.get("solar_system")
 
         if solar_system is None:
-            self.state = "failed"
+            self.state = PlanetsProcessState.FAILED
 
             print("PLANET FORMATION FAILED: no solar system available")
             self.write_to_world()
@@ -94,7 +114,7 @@ class Planets:
         disk = solar_system.protoplanetary_disk
 
         if not disk.can_form_planets:
-            self.state = "failed"
+            self.state = PlanetsProcessState.FAILED
 
             print("PLANET FORMATION FAILED: protoplanetary disk cannot form planets")
             self.write_to_world()
@@ -102,7 +122,7 @@ class Planets:
 
         available_elements = disk.available_elements
 
-        self.state = "formed"
+        self.state = PlanetsProcessState.FORMED
 
         self.planets.append(
             Planet(
