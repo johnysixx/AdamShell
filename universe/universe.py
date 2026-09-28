@@ -37,6 +37,9 @@ from universe.physics_state import (
 )
 from universe.quantum_state import UniverseQuantumState
 from universe.spacetime import UniverseSpacetimeState
+from universe.universe_lifecycle_state import (
+    UniverseLifecycleState,
+)
 
 class Universe:
 
@@ -88,7 +91,7 @@ class Universe:
         self.big_bang_started = False
         self.physical_universe_started = False
         self.universe_exists = False
-        self.state = 'pre_universe'
+        self.state = UniverseLifecycleState.PRE_UNIVERSE
         self.factory = EntityFactory()
         self.quantum_error_boundary = QuantumErrorBoundary(cronenberg_factory=self.create_cronenberg_from_quantum_error)
         self.life_cycle_system = LifeCycleSystem(self)
@@ -96,6 +99,23 @@ class Universe:
         self.life_cycle_system.register(self.cat_life_cycle_handler)
         UniverseLogger.boot(f'Root reality prepared: {self.id}')
         UniverseLogger.boot('Physical universe has not started yet.')
+
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, state):
+        if not isinstance(
+            state,
+            UniverseLifecycleState,
+        ):
+            raise TypeError(
+                "Universe lifecycle state must use "
+                "UniverseLifecycleState."
+            )
+
+        self._state = state
 
     @property
     def snapshot(self):
@@ -114,7 +134,9 @@ class Universe:
         self.big_bang_started = True
         self.physical_universe_started = True
         self.universe_exists = True
-        self.state = 'physical_universe'
+        self.state = (
+            UniverseLifecycleState.PHYSICAL_UNIVERSE
+        )
         UniverseLogger.boot('PHYSICAL UNIVERSE STARTED')
         UniverseLogger.boot('THE UNIVERSE EXISTS')
         return self.world.get('big_bang')
