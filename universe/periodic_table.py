@@ -2,6 +2,9 @@ from universe.chemical_objects import ChemicalElement
 from universe.periodic_table_state import (
     PeriodicTableRegistryState,
 )
+from universe.periodic_table_process_state import (
+    PeriodicTableProcessState,
+)
 
 
 DIGIT_ROOTS = {
@@ -146,7 +149,7 @@ class PeriodicTable:
         self.universe = universe
         self.name = "periodic_table"
         self.type = "element_registry"
-        self.state = "ready"
+        self.state = PeriodicTableProcessState.READY
 
         self.elements = {}
         self.future_elements = {}
@@ -155,11 +158,28 @@ class PeriodicTable:
 
         self.public_state = self._build_public_state()
 
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, state):
+        if not isinstance(
+            state,
+            PeriodicTableProcessState,
+        ):
+            raise TypeError(
+                "Periodic table process state must use "
+                "PeriodicTableProcessState."
+            )
+
+        self._state = state
+
     def _build_public_state(self):
         return {
             "name": self.name,
             "type": self.type,
-            "state": self.state,
+            "state": self.state.value,
             "registry_state": self.registry_state.to_dict(),
         }
 
@@ -186,7 +206,7 @@ class PeriodicTable:
                 name=name
         )
 
-        self.state = "registered"
+        self.state = PeriodicTableProcessState.REGISTERED
 
         self.registry_state.known_elements_registered = True
         self.registry_state.known_element_count = len(
