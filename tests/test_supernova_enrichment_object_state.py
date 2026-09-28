@@ -13,6 +13,9 @@ from universe.supernova_enrichment import (
 from universe.supernova_enrichment_state import (
     SupernovaEnrichmentState,
 )
+from universe.supernova_enrichment_process_state import (
+    SupernovaEnrichmentProcessState,
+)
 from universe.universe import Universe
 
 
@@ -339,7 +342,10 @@ class SupernovaEnrichmentObjectStateTests(
 
         result = process.enrich_space()
 
-        self.assertEqual(process.state, "failed")
+        self.assertIs(
+            process.state,
+            SupernovaEnrichmentProcessState.FAILED,
+        )
         self.assertFalse(
             process
             .supernova_enrichment_state
@@ -364,7 +370,10 @@ class SupernovaEnrichmentObjectStateTests(
 
         state = process.supernova_enrichment_state
 
-        self.assertEqual(process.state, "failed")
+        self.assertIs(
+            process.state,
+            SupernovaEnrichmentProcessState.FAILED,
+        )
         self.assertTrue(state.stars_available)
         self.assertFalse(state.iron_available)
         self.assertTrue(

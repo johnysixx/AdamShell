@@ -5,6 +5,9 @@ from universe.stellar_objects import PrimordialStar, Supernova
 from universe.supernova_enrichment_state import (
     SupernovaEnrichmentState,
 )
+from universe.supernova_enrichment_process_state import (
+    SupernovaEnrichmentProcessState,
+)
 
 
 class SupernovaEnrichment:
@@ -13,7 +16,7 @@ class SupernovaEnrichment:
         self.universe = universe
         self.name = "supernova_enrichment"
         self.type = "stellar_enrichment_process"
-        self.state = "ready"
+        self.state = SupernovaEnrichmentProcessState.READY
 
         self.supernovae = []
         self.enriched_clouds = []
@@ -24,11 +27,28 @@ class SupernovaEnrichment:
 
         self.public_state = self._build_public_state()
 
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, state):
+        if not isinstance(
+            state,
+            SupernovaEnrichmentProcessState,
+        ):
+            raise TypeError(
+                "Supernova enrichment process state must use "
+                "SupernovaEnrichmentProcessState."
+            )
+
+        self._state = state
+
     def _build_public_state(self):
         return {
             "name": self.name,
             "type": self.type,
-            "state": self.state,
+            "state": self.state.value,
             "supernovae": [
                 supernova.to_dict()
                 for supernova in self.supernovae
@@ -66,7 +86,9 @@ class SupernovaEnrichment:
         )
 
         if not first_stars:
-            self.state = "failed"
+            self.state = (
+                SupernovaEnrichmentProcessState.FAILED
+            )
 
             print(
                 "SUPERNOVA ENRICHMENT FAILED: "
@@ -86,7 +108,9 @@ class SupernovaEnrichment:
         )
 
         if "iron" not in elements:
-            self.state = "failed"
+            self.state = (
+                SupernovaEnrichmentProcessState.FAILED
+            )
 
             print(
                 "SUPERNOVA ENRICHMENT FAILED: "
@@ -119,7 +143,9 @@ class SupernovaEnrichment:
         self.supernova_enrichment_state.iron_available = (
             True
         )
-        self.state = "enriched"
+        self.state = (
+            SupernovaEnrichmentProcessState.ENRICHED
+        )
 
         first_supernova = Supernova(
             name="first_supernova",
