@@ -1,6 +1,9 @@
 from copy import deepcopy
 
 from universe.atomic_time_state import AtomicTimeState
+from universe.atomic_time_process_state import (
+    AtomicTimeProcessState,
+)
 from universe.isotopes import Isotopes
 
 
@@ -10,7 +13,7 @@ class AtomicTime:
         self.universe = universe
         self.name = "atomic_time"
         self.type = "precision_time_layer"
-        self.state = "ready"
+        self.state = AtomicTimeProcessState.READY
 
         self.isotopes_layer = Isotopes(universe)
 
@@ -19,6 +22,23 @@ class AtomicTime:
         self.atomic_time_state = AtomicTimeState()
 
         self.public_state = self._build_public_state()
+
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, state):
+        if not isinstance(
+            state,
+            AtomicTimeProcessState,
+        ):
+            raise TypeError(
+                "Atomic time process state must use "
+                "AtomicTimeProcessState."
+            )
+
+        self._state = state
 
     def _build_public_state(self):
         time_standards = deepcopy(self.time_standards)
@@ -31,7 +51,7 @@ class AtomicTime:
         return {
             "name": self.name,
             "type": self.type,
-            "state": self.state,
+            "state": self.state.value,
             "time_standards": time_standards,
             "atomic_time_state": self.atomic_time_state.to_dict(),
         }
@@ -57,7 +77,7 @@ class AtomicTime:
         isotopes = self.universe.world.get("known_isotopes", {})
 
         if "caesium_133" not in isotopes:
-            self.state = "failed"
+            self.state = AtomicTimeProcessState.FAILED
             print("ATOMIC TIME FAILED: caesium-133 is missing")
             self.write_to_world()
             return self.public_state
@@ -77,7 +97,7 @@ class AtomicTime:
             "future_use": ["clocks", "calendars", "simulation_time", "cosmic_history"]
         }
 
-        self.state = "defined"
+        self.state = AtomicTimeProcessState.DEFINED
 
         self.atomic_time_state.caesium_133_available = True
         self.atomic_time_state.si_second_defined = True
