@@ -4,6 +4,9 @@ from universe.primordial_objects import PrimordialCosmicComponent
 from universe.heavy_element_nucleosynthesis_state import (
     HeavyElementNucleosynthesisState,
 )
+from universe.heavy_element_nucleosynthesis_process_state import (
+    HeavyElementNucleosynthesisProcessState,
+)
 
 
 HEAVY_ELEMENT_SPECS = (
@@ -38,7 +41,9 @@ class HeavyElementNucleosynthesis:
         self.universe = universe
         self.name = "heavy_element_nucleosynthesis"
         self.type = "post_iron_element_process"
-        self.state = "ready"
+        self.state = (
+            HeavyElementNucleosynthesisProcessState.READY
+        )
 
         self.heavy_elements = {}
 
@@ -46,11 +51,29 @@ class HeavyElementNucleosynthesis:
 
         self.public_state = self._build_public_state()
 
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, state):
+        if not isinstance(
+            state,
+            HeavyElementNucleosynthesisProcessState,
+        ):
+            raise TypeError(
+                "Heavy element nucleosynthesis process state "
+                "must use "
+                "HeavyElementNucleosynthesisProcessState."
+            )
+
+        self._state = state
+
     def _build_public_state(self):
         return {
             "name": self.name,
             "type": self.type,
-            "state": self.state,
+            "state": self.state.value,
             "heavy_elements": {
                 name: _public_heavy_element_snapshot(element)
                 for name, element in self.heavy_elements.items()
@@ -72,7 +95,9 @@ class HeavyElementNucleosynthesis:
         )
 
         if "iron" not in elements_up_to_iron:
-            self.state = "failed"
+            self.state = (
+                HeavyElementNucleosynthesisProcessState.FAILED
+            )
 
             print(
                 "HEAVY ELEMENT NUCLEOSYNTHESIS FAILED: "
@@ -103,7 +128,9 @@ class HeavyElementNucleosynthesis:
             )
 
         if not enriched_clouds:
-            self.state = "failed"
+            self.state = (
+                HeavyElementNucleosynthesisProcessState.FAILED
+            )
 
             print(
                 "HEAVY ELEMENT NUCLEOSYNTHESIS FAILED: "
@@ -112,7 +139,9 @@ class HeavyElementNucleosynthesis:
             self.write_to_world()
             return self.public_state
 
-        self.state = "forged"
+        self.state = (
+            HeavyElementNucleosynthesisProcessState.FORGED
+        )
 
         self.process_state.iron_seed_available = True
         self.process_state.supernova_enrichment_available = True

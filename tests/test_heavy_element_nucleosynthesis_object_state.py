@@ -8,6 +8,9 @@ from universe.heavy_element_nucleosynthesis import (
 from universe.heavy_element_nucleosynthesis_state import (
     HeavyElementNucleosynthesisState,
 )
+from universe.heavy_element_nucleosynthesis_process_state import (
+    HeavyElementNucleosynthesisProcessState,
+)
 from universe.universe import Universe
 
 
@@ -188,7 +191,10 @@ class HeavyElementNucleosynthesisObjectStateTests(unittest.TestCase):
 
         result = process.forge_heavy_elements()
 
-        self.assertEqual(process.state, "failed")
+        self.assertIs(
+            process.state,
+            HeavyElementNucleosynthesisProcessState.FAILED,
+        )
         self.assertFalse(process.process_state.iron_seed_available)
         self.assertFalse(process.process_state.heavy_elements_forged)
         self.assertEqual(
