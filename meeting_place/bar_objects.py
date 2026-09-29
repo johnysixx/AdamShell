@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from core.entity.components import SpatialVector3
 
 from core.entity.component_object import ComponentObject
+from meeting_place.lemon_tree_state import LemonTreeState
 
 
 class BarObject(ComponentObject):
@@ -682,7 +683,29 @@ class MilkBowl(
 
 
 class LemonTree(BarObject):
-    pass
+
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, state):
+        if not isinstance(
+            state,
+            LemonTreeState,
+        ):
+            raise TypeError(
+                "Lemon tree state must use "
+                "LemonTreeState."
+            )
+
+        self._state = state
+
+    def to_dict(self):
+        result = super().to_dict()
+        result.pop("_state", None)
+        result["state"] = self.state.value
+        return result
 
 
 class BackRoomAccess(BarObject):

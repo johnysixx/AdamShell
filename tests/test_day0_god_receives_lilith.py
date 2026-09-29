@@ -2,6 +2,7 @@ import unittest
 from multiverse import UniverseRegistry
 from universe.universe import Universe
 from meeting_place.meeting_place import MeetingPlace
+from meeting_place.lemon_tree_state import LemonTreeState
 from library import Library
 from gods import Gods
 from idea_entities import IdeaEntities
@@ -20,7 +21,10 @@ class Day0GodReceivesLilithTests(unittest.TestCase):
         tree = self.scene.bar_yard.lemon_tree
         self.assertEqual(tree.lemons, 0)
         self.assertFalse(tree.has_lemons)
-        self.assertEqual(tree.state, 'stripped')
+        self.assertIs(
+            tree.state,
+            LemonTreeState.STRIPPED,
+        )
         self.assertEqual(tree.months_since_stripped, 0)
 
     def test_bar_has_six_lemons_before_second_attempt(self):

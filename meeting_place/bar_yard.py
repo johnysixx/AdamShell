@@ -1,4 +1,5 @@
 from .bar_objects import LemonTree
+from .lemon_tree_state import LemonTreeState
 
 class BarYard:
 
@@ -15,7 +16,7 @@ class BarYard:
             fruit="lemon",
             lemons=7,
             has_lemons=True,
-            state="fruiting",
+            state=LemonTreeState.FRUITING,
             months_since_stripped=None,
             flowers=0,
             flowering_after_months=1,
@@ -46,7 +47,7 @@ class BarYard:
 
             tree.has_lemons = False
 
-            tree.state = "stripped"
+            tree.state = LemonTreeState.STRIPPED
 
             tree.months_since_stripped = 0
 
@@ -67,7 +68,7 @@ class BarYard:
         if tree.months_since_stripped is None:
             return {
                 "name": "lemon_tree_month_passed",
-                "state": tree.state,
+                "state": tree.state.value,
                 "changed": False
             }
 
@@ -81,7 +82,7 @@ class BarYard:
             month
             == tree.flowering_after_months
         ):
-            tree.state = "flowering"
+            tree.state = LemonTreeState.FLOWERING
 
             tree.flowers = 12
 
@@ -99,7 +100,7 @@ class BarYard:
 
             tree.has_lemons = True
 
-            tree.state = "fruiting"
+            tree.state = LemonTreeState.FRUITING
 
             tree.flowers = 0
 
@@ -113,6 +114,6 @@ class BarYard:
         return {
             "name": "lemon_tree_month_passed",
             "month": month,
-            "state": tree.state,
+            "state": tree.state.value,
             "events": events
         }
