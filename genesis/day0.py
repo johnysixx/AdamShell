@@ -1,6 +1,9 @@
 from copy import deepcopy
 
 from genesis.day0_state import GenesisDay0State
+from idea_entities.prefysical_fire_origin_state import (
+    PrefysicalFireOriginState,
+)
 
 
 class GenesisDay0:
@@ -132,7 +135,7 @@ class GenesisDay0:
 
         if (
             self.fire_origin.state
-            == "prepared"
+            is PrefysicalFireOriginState.PREPARED
         ):
             self.begin_fire_origin()
 

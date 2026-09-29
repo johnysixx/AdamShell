@@ -12,6 +12,9 @@ from idea_entities.prefysical_fire_state import (
     PrefysicalFireMaterials,
     PrefysicalFireRoles,
 )
+from idea_entities.prefysical_fire_origin_state import (
+    PrefysicalFireOriginState,
+)
 from universe.logger import UniverseLogger
 
 
@@ -323,14 +326,34 @@ class PrefysicalFireOrigin:
 
         self.roles = PrefysicalFireRoles()
 
-        self.state = "prepared"
+        self.state = PrefysicalFireOriginState.PREPARED
         self.history = []
+
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, state):
+        if not isinstance(
+            state,
+            PrefysicalFireOriginState,
+        ):
+            raise TypeError(
+                "Prefysical fire origin state must use "
+                "PrefysicalFireOriginState."
+            )
+
+        self._state = state
 
     def begin(
         self,
         universe_tick=None
     ):
-        if self.state != "prepared":
+        if (
+            self.state
+            is not PrefysicalFireOriginState.PREPARED
+        ):
             return self._event(
                 name=(
                     "prefysical_fire_origin_"
@@ -347,7 +370,9 @@ class PrefysicalFireOrigin:
         self.thinking_prompt_given = True
         self.friction_active = True
 
-        self.state = "seeking_warmth"
+        self.state = (
+            PrefysicalFireOriginState.SEEKING_WARMTH
+        )
 
         event = self._event(
             name=(
@@ -606,7 +631,8 @@ class PrefysicalFireOrigin:
         ]
 
         self.state = (
-            "fire_guarded_fuel_search_active"
+            PrefysicalFireOriginState
+            .FIRE_GUARDED_FUEL_SEARCH_ACTIVE
         )
 
         self._refresh_eternal_fire_boundary()
@@ -809,7 +835,9 @@ class PrefysicalFireOrigin:
         ]
 
         self.friction_active = False
-        self.state = "fire_burning"
+        self.state = (
+            PrefysicalFireOriginState.FIRE_BURNING
+        )
         self._refresh_eternal_fire_boundary()
 
     def _refresh_eternal_fire_boundary(
@@ -946,7 +974,7 @@ class PrefysicalFireOrigin:
 
             "roles": self.roles.to_dict(),
 
-            "state": self.state,
+            "state": self.state.value,
 
             "history": [
                 event.to_dict()
