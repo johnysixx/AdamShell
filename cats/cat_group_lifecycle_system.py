@@ -1,5 +1,8 @@
 from copy import deepcopy
 from cats.cat_group_bonding_system import CatGroupBondingSystem
+from cats.cat_group_lifecycle_state import (
+    CatGroupLifecycleState,
+)
 
 class CatGroupLifecycleSystem:
 
@@ -17,19 +20,19 @@ class CatGroupLifecycleSystem:
         member_count = len(members)
         previous = group.state
         if member_count == 0:
-            state = 'dissolved'
+            state = CatGroupLifecycleState.DISSOLVED
         elif member_count == 1:
-            state = 'forming'
+            state = CatGroupLifecycleState.FORMING
         elif cohesion['cohesion'] >= 0.65:
-            state = 'stable'
+            state = CatGroupLifecycleState.STABLE
         elif group.conflict_count > 0 and cohesion['cohesion'] < 0.3:
-            state = 'strained'
+            state = CatGroupLifecycleState.STRAINED
         else:
-            state = 'growing'
+            state = CatGroupLifecycleState.GROWING
         group.state = state
-        if state == 'dissolved':
+        if state is CatGroupLifecycleState.DISSOLVED:
             group.dissolved = True
-        event = {'name': 'cat_group_lifecycle_advanced', 'group_id': group_id, 'previous_state': previous, 'state': state, 'age_ticks': group.age_ticks, 'member_count': member_count, 'cohesion': cohesion['cohesion'], 'advanced': True}
+        event = {'name': 'cat_group_lifecycle_advanced', 'group_id': group_id, 'previous_state': previous.value, 'state': state.value, 'age_ticks': group.age_ticks, 'member_count': member_count, 'cohesion': cohesion['cohesion'], 'advanced': True}
         group.history.append(deepcopy(event))
         return event
 
@@ -43,7 +46,7 @@ class CatGroupLifecycleSystem:
             cat.group.shared_scent = 0.0
             cat.group.accepted_members = []
         group.members = []
-        group.state = 'dissolved'
+        group.state = CatGroupLifecycleState.DISSOLVED
         group.dissolved = True
         event = {'name': 'cat_group_dissolved', 'group_id': group_id, 'reason': reason, 'former_members': [cat.name for cat in members], 'dissolved': True}
         group.history.append(deepcopy(event))

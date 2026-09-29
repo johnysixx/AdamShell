@@ -2,6 +2,9 @@ from copy import deepcopy
 from uuid import uuid4
 from cats.cat import Cat
 from cats.cat_group import CatGroup
+from cats.cat_group_lifecycle_state import (
+    CatGroupLifecycleState,
+)
 from cats.cat_social_objects import CatRelationship
 from cats.cat_territory_system import CatTerritorySystem
 from cats.cat_group_territory_state import (
@@ -22,7 +25,7 @@ class CatGroupSystem:
         if founder.group.member:
             return {'name': 'cat_group_creation_denied', 'cat': founder.name, 'reason': 'already_group_member', 'created': False}
         group_id = 'cat_group_' + uuid4().hex[:8]
-        group = CatGroup(**{'id': group_id, 'name': name if name is not None else group_id, 'founder': founder.name, 'members': [founder.name], 'shared_scent_strength': 0.0, 'territories': {}, 'threat_events': 0, 'state': 'forming', 'age_ticks': 0, 'migration_count': 0, 'conflict_count': 0, 'split_count': 0, 'parent_group': None, 'daughter_groups': [], 'dissolved': False, 'group_memory': {}, 'diplomacy': {}, 'alliances': [], 'knowledge': {}, 'culture': {'traits': {}, 'traditions': {}, 'preferences': {}, 'history': []}, 'myths': {}, 'myth_lineages': {}, 'innovations': {}, 'innovation_tree': {}, 'roles': {}, 'rituals': {}, 'ritual_lineages': {}, 'institutions': {}, 'role_specializations': {}, 'norms': {}, 'taboos': {}, 'norm_violations': [], 'sanction_history': [], 'succession_history': [], 'institution_conflicts': {}, 'cultural_parent_group': None, 'cultural_children': [], 'federations': [], 'current_layer': founder.current_layer, 'current_location': founder.location, 'history': []})
+        group = CatGroup(**{'id': group_id, 'name': name if name is not None else group_id, 'founder': founder.name, 'members': [founder.name], 'shared_scent_strength': 0.0, 'territories': {}, 'threat_events': 0, 'state': CatGroupLifecycleState.FORMING, 'age_ticks': 0, 'migration_count': 0, 'conflict_count': 0, 'split_count': 0, 'parent_group': None, 'daughter_groups': [], 'dissolved': False, 'group_memory': {}, 'diplomacy': {}, 'alliances': [], 'knowledge': {}, 'culture': {'traits': {}, 'traditions': {}, 'preferences': {}, 'history': []}, 'myths': {}, 'myth_lineages': {}, 'innovations': {}, 'innovation_tree': {}, 'roles': {}, 'rituals': {}, 'ritual_lineages': {}, 'institutions': {}, 'role_specializations': {}, 'norms': {}, 'taboos': {}, 'norm_violations': [], 'sanction_history': [], 'succession_history': [], 'institution_conflicts': {}, 'cultural_parent_group': None, 'cultural_children': [], 'federations': [], 'current_layer': founder.current_layer, 'current_location': founder.location, 'history': []})
         self.groups[group_id] = group
         self._set_membership(founder, group_id, joined_order=1)
         event = {'name': 'cat_group_created', 'group_id': group_id, 'group_name': group.name, 'founder': founder.name, 'created': True}

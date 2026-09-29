@@ -10,6 +10,9 @@ from cats.cat_group_hierarchy_system import (
 from cats.cat_group_memory_system import (
     CatGroupMemorySystem
 )
+from cats.cat_group_lifecycle_state import (
+    CatGroupLifecycleState,
+)
 from cats.cat_social_objects import (
     CatRelationship
 )
@@ -181,7 +184,9 @@ class CatGroupConflictSystem:
                 else second
             )
 
-            loser_group.state = "strained"
+            loser_group.state = (
+                CatGroupLifecycleState.STRAINED
+            )
 
         event = {
             "name": "cat_inter_group_conflict",

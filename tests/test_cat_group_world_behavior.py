@@ -5,6 +5,9 @@ from cats.cats import Cats
 from cats.cat_group_system import CatGroupSystem
 from cats.cat_group_bonding_system import CatGroupBondingSystem
 from cats.cat_group_lifecycle_system import CatGroupLifecycleSystem
+from cats.cat_group_lifecycle_state import (
+    CatGroupLifecycleState,
+)
 from cats.cat_group_migration_system import CatGroupMigrationSystem
 from cats.cat_group_conflict_system import CatGroupConflictSystem
 from cats.cat_social_objects import (
@@ -145,7 +148,10 @@ class CatGroupWorldBehaviorTests(unittest.TestCase):
             result['outcome'],
             'first_group_prevailed' if first_wins else 'second_group_prevailed',
         )
-        self.assertEqual(loser.state, 'strained')
+        self.assertIs(
+            loser.state,
+            CatGroupLifecycleState.STRAINED,
+        )
         self.assertEqual(winner.state, winner_state)
         for group in (winner, loser):
             self.assertEqual(group.conflict_count, 1)
@@ -173,7 +179,10 @@ class CatGroupWorldBehaviorTests(unittest.TestCase):
         lifecycle = CatGroupLifecycleSystem(self.groups)
         result = lifecycle.dissolve(group_id, self.cats.cats, reason='members_disperse')
         self.assertTrue(result['dissolved'])
-        self.assertEqual(self.groups.groups[group_id].state, 'dissolved')
+        self.assertIs(
+            self.groups.groups[group_id].state,
+            CatGroupLifecycleState.DISSOLVED,
+        )
         for cat in self.members[:2]:
             self.assertFalse(cat.group.member)
 if __name__ == '__main__':
