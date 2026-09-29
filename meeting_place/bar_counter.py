@@ -21,6 +21,9 @@ class BarStoryBook:
 from .red_button import RedButton
 from .cash_register import CashRegister
 from .bar_objects import BarCloth, MilkBowl
+from .bar_serving_vessel_fill_state import (
+    BarServingVesselFillState,
+)
 
 
 class BarCounter:
@@ -50,7 +53,7 @@ class BarCounter:
         self.milk_bowl = MilkBowl(
             name="milk_bowl",
             type="bar_serving_object",
-            state="empty",
+            fill_state=BarServingVesselFillState.EMPTY,
             location="under_bar_counter_next_to_bar_cloth",
             intended_use="serving_milk_to_cats",
             contains=None

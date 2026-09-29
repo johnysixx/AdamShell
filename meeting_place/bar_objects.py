@@ -3,6 +3,9 @@ from dataclasses import dataclass, field
 from core.entity.components import SpatialVector3
 
 from core.entity.component_object import ComponentObject
+from meeting_place.bar_serving_vessel_fill_state import (
+    BarServingVesselFillState,
+)
 from meeting_place.lemon_tree_state import LemonTreeState
 
 
@@ -657,18 +660,60 @@ class BarDrinkWager:
 
 class BarServingVessel:
 
+    def __init__(
+        self,
+        *,
+        fill_state=BarServingVesselFillState.EMPTY,
+        **values
+    ):
+        self.fill_state = fill_state
+        super().__init__(**values)
+
+    @property
+    def fill_state(self):
+        return getattr(
+            self,
+            "_fill_state",
+            BarServingVesselFillState.EMPTY,
+        )
+
+    @fill_state.setter
+    def fill_state(self, fill_state):
+        if not isinstance(
+            fill_state,
+            BarServingVesselFillState,
+        ):
+            raise TypeError(
+                "Bar serving vessel fill state must use "
+                "BarServingVesselFillState."
+            )
+
+        self._fill_state = fill_state
+
     def fill(
         self,
         contents
     ):
-        self.state = "filled"
+        self.fill_state = (
+            BarServingVesselFillState.FILLED
+        )
         self.contains = contents
         return self
 
     def empty(self):
-        self.state = "empty"
+        self.fill_state = (
+            BarServingVesselFillState.EMPTY
+        )
         self.contains = None
         return self
+
+    def to_dict(self):
+        result = super().to_dict()
+        result.pop("_fill_state", None)
+        result["fill_state"] = (
+            self.fill_state.value
+        )
+        return result
 
 
 class BarCloth(BarObject):
@@ -1131,6 +1176,7 @@ class BarGlass(BarServingVessel):
             "type": self.type,
             "owner": self.owner,
             "state": self.state,
+            "fill_state": self.fill_state.value,
             "dirt": self.dirt,
             "location": self.location,
         }

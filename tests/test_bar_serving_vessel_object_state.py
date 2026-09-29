@@ -6,6 +6,9 @@ from meeting_place.bar_objects import (
     BarGlass,
     MilkBowl,
 )
+from meeting_place.bar_serving_vessel_fill_state import (
+    BarServingVesselFillState,
+)
 from meeting_place.bartender import Bartender
 
 
@@ -35,7 +38,11 @@ class BarServingVesselObjectStateTests(
         )
         self.assertEqual(
             glass.state,
-            "filled"
+            "clean"
+        )
+        self.assertIs(
+            glass.fill_state,
+            BarServingVesselFillState.FILLED,
         )
         self.assertEqual(
             glass.contains,
@@ -55,7 +62,11 @@ class BarServingVesselObjectStateTests(
 
         self.assertEqual(
             glass.state,
-            "empty"
+            "clean"
+        )
+        self.assertIs(
+            glass.fill_state,
+            BarServingVesselFillState.EMPTY,
         )
         self.assertIsNone(
             glass.contains
@@ -67,7 +78,7 @@ class BarServingVesselObjectStateTests(
         bowl = MilkBowl(
             name="milk_bowl",
             type="bar_serving_object",
-            state="empty",
+            fill_state=BarServingVesselFillState.EMPTY,
             contains=None,
         )
 
@@ -79,9 +90,9 @@ class BarServingVesselObjectStateTests(
             result,
             bowl
         )
-        self.assertEqual(
-            bowl.state,
-            "filled"
+        self.assertIs(
+            bowl.fill_state,
+            BarServingVesselFillState.FILLED,
         )
         self.assertEqual(
             bowl.contains,
@@ -124,7 +135,11 @@ class BarServingVesselObjectStateTests(
         )
         self.assertEqual(
             glass.state,
-            "filled"
+            "clean"
+        )
+        self.assertIs(
+            glass.fill_state,
+            BarServingVesselFillState.FILLED,
         )
 
         self.assertEqual(

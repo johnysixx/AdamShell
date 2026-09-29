@@ -3,6 +3,9 @@ from types import SimpleNamespace
 
 from meeting_place.bar_counter import BarCounter
 from meeting_place.bar_objects import BarDrink, BarGlass
+from meeting_place.bar_serving_vessel_fill_state import (
+    BarServingVesselFillState,
+)
 from meeting_place.bartender import Bartender
 from meeting_place.fridge import BarFridge
 
@@ -27,6 +30,10 @@ class BartenderServingObjectStateTests(unittest.TestCase):
         self.assertEqual(self.bartender.event_memory, [])
         self.assertEqual(self.glass.state, "clean")
         self.assertIsNone(self.glass.contains)
+        self.assertIs(
+            self.glass.fill_state,
+            BarServingVesselFillState.EMPTY,
+        )
 
     def test_invalid_drinks_leave_service_state_unchanged(self):
         for method_name in ("pour_drink", "serve_without_order"):
@@ -63,7 +70,11 @@ class BartenderServingObjectStateTests(unittest.TestCase):
         )
 
         self.assertIs(result, self.glass)
-        self.assertEqual(self.glass.state, "filled")
+        self.assertEqual(self.glass.state, "clean")
+        self.assertIs(
+            self.glass.fill_state,
+            BarServingVesselFillState.FILLED,
+        )
         self.assertEqual(self.glass.contains, "rum")
         self.assertEqual(self.bartender.regular_drinks, {})
         self.assertEqual(self.bartender.event_memory, [
@@ -77,7 +88,10 @@ class BartenderServingObjectStateTests(unittest.TestCase):
         result = self.bartender.serve_without_order("cat", milk, bowl)
 
         self.assertIs(result, bowl)
-        self.assertEqual(bowl.state, "filled")
+        self.assertIs(
+            bowl.fill_state,
+            BarServingVesselFillState.FILLED,
+        )
         self.assertEqual(bowl.contains, "milk")
         self.assertEqual(milk.state, "cold")
         self.assertEqual(self.bartender.regular_drinks, {})
