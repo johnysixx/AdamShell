@@ -3,6 +3,9 @@ import unittest
 from universe.universe import Universe
 from multiverse import UniverseRegistry
 from idea_universe import IdeaUniverse
+from idea_universe.primordial_idea_star_state import (
+    PrimordialIdeaStarState,
+)
 from gods.gods import Gods
 from universe.bootstraps.idea_genesis_bootstrap import (
     IdeaGenesisBootstrap
@@ -68,23 +71,23 @@ class PrimordialIdeaStarTests(unittest.TestCase):
 
         star = PrimordialIdeaStar()
 
-        self.assertEqual(
+        self.assertIs(
             star.state,
-            "created"
+            PrimordialIdeaStarState.CREATED,
         )
 
         star.ignite()
 
-        self.assertEqual(
+        self.assertIs(
             star.state,
-            "burning"
+            PrimordialIdeaStarState.BURNING,
         )
 
         remnant = star.explode()
 
-        self.assertEqual(
+        self.assertIs(
             star.state,
-            "exploded"
+            PrimordialIdeaStarState.EXPLODED,
         )
 
         self.assertEqual(
@@ -240,9 +243,9 @@ class PrimordialIdeaStarTests(unittest.TestCase):
         )
 
         for star in result["stars"]:
-            self.assertEqual(
+            self.assertIs(
                 star.state,
-                "exploded"
+                PrimordialIdeaStarState.EXPLODED,
             )
 
     def test_primordial_star_remnant_contains_elemental_potentials(
