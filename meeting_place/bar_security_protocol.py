@@ -7,6 +7,9 @@ from meeting_place.bar_objects import (
 from meeting_place.bar_incident_state import (
     BarIncidentState,
 )
+from meeting_place.bouncer_state import (
+    BouncerState,
+)
 
 class BarSecurityProtocol:
 
@@ -48,7 +51,9 @@ class BarSecurityProtocol:
         pressed = self.bartender.respond_to_red_button_alarm(red_button)
         if not pressed:
             return False
-        self.bouncer.state = 'responding_inside_bar'
+        self.bouncer.state = (
+            BouncerState.RESPONDING_INSIDE_BAR
+        )
         self.bouncer.position = 'inside_bar'
         return True
 

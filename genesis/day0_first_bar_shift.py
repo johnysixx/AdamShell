@@ -31,6 +31,9 @@ from meeting_place.bar_objects import (
 )
 from core.entity.social_entity import _entity_attr_setdefault
 from meeting_place.bar_yard import BarYard
+from meeting_place.bouncer_state import (
+    BouncerState,
+)
 from cats.cat_birth_resolver import CatBirthResolver
 
 class Day0FirstBarShift:
@@ -1601,7 +1604,9 @@ class Day0FirstBarShift:
         locations = ['outside_bar', 'inside_bar']
         bouncer.locations = list(locations)
         bouncer.location = 'dual_presence'
-        bouncer.state = 'inside_and_outside_bar'
+        bouncer.state = (
+            BouncerState.INSIDE_AND_OUTSIDE_BAR
+        )
         bouncer.guards_entrance = True
         bouncer.present_in_bar = True
         event = {'name': 'bouncer_enters_bar_with_garfield', 'bouncer': 'bouncer', 'with': 'garfield', 'locations': list(locations), 'still_guards_entrance': True, 'present_inside': True, 'purpose': 'discuss_wager_judging'}

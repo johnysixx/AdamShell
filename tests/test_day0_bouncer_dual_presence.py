@@ -3,6 +3,9 @@ import unittest
 from multiverse import UniverseRegistry
 from universe.universe import Universe
 from meeting_place.meeting_place import MeetingPlace
+from meeting_place.bouncer_state import (
+    BouncerState,
+)
 from library import Library
 from gods import Gods
 from idea_entities import IdeaEntities
@@ -69,6 +72,13 @@ class Day0BouncerDualPresenceTests(
         self
     ):
         self.scene.advance_to_bouncer_knows_wager()
+
+        self.assertIs(
+            self._get(
+                "state"
+            ),
+            BouncerState.INSIDE_AND_OUTSIDE_BAR,
+        )
 
         self.assertEqual(
             self._get(

@@ -6,6 +6,9 @@ from universe.dark_sector import DarkSector
 from meeting_place.bar_counter import BarCounter
 from meeting_place.bartender import Bartender
 from meeting_place.bouncer import Bouncer
+from meeting_place.bouncer_state import (
+    BouncerState,
+)
 from meeting_place.bar_blacklist import BarBlacklist
 from meeting_place.bar_incident_book import BarIncidentBook
 from meeting_place.bar_incident_state import (
@@ -45,7 +48,10 @@ class BarSecurityProtocolTests(unittest.TestCase):
         service = self.geometry.find_cell(name='bar_service_floor')
         result = self.protocol.handle_guest_entry(guest, service)
         self.assertTrue(result)
-        self.assertEqual(self.bouncer.state, 'responding_inside_bar')
+        self.assertIs(
+            self.bouncer.state,
+            BouncerState.RESPONDING_INSIDE_BAR,
+        )
         self.assertEqual(self.bouncer.position, 'inside_bar')
 
     def test_bouncer_ejects_guest_and_bans_reentry(self):
@@ -291,7 +297,10 @@ class BarSecurityProtocolTests(unittest.TestCase):
         self.bar_counter.red_button.activate_alarm()
         pressed = self.protocol.handle_bartender_red_button_press(reason='generic_security_call')
         self.assertTrue(pressed)
-        self.assertEqual(self.bouncer.state, 'responding_inside_bar')
+        self.assertIs(
+            self.bouncer.state,
+            BouncerState.RESPONDING_INSIDE_BAR,
+        )
         self.assertEqual(self.bouncer.position, 'inside_bar')
         self.assertEqual(self.blacklist.denied_identities, [])
 
@@ -300,7 +309,10 @@ class BarSecurityProtocolTests(unittest.TestCase):
         result = self.protocol.handle_bartender_red_button_press(reason='cat_alarm_clear')
         self.assertTrue(result)
         self.assertFalse(self.bar_counter.red_button.alarm_active)
-        self.assertEqual(self.bouncer.state, 'standing_outside_bar')
+        self.assertIs(
+            self.bouncer.state,
+            BouncerState.STANDING_OUTSIDE_BAR,
+        )
         self.assertEqual(self.bouncer.position, 'outside_bar')
         self.assertEqual(self.blacklist.denied_identities, [])
 
@@ -308,7 +320,10 @@ class BarSecurityProtocolTests(unittest.TestCase):
         incident = BarIncidentState(category='disturbance', reason='unknown_disturbance', offender=None, blacklist_after=False)
         result = self.protocol.handle_security_incident(incident)
         self.assertTrue(result)
-        self.assertEqual(self.bouncer.state, 'responding_inside_bar')
+        self.assertIs(
+            self.bouncer.state,
+            BouncerState.RESPONDING_INSIDE_BAR,
+        )
         self.assertEqual(self.bouncer.position, 'inside_bar')
         self.assertEqual(self.blacklist.denied_identities, [])
 
@@ -321,7 +336,10 @@ class BarSecurityProtocolTests(unittest.TestCase):
         self.assertTrue(result)
         self.assertEqual(len(incident_book.incidents), 1)
         self.assertEqual(incident_book.incidents[0].reason, 'unknown_disturbance')
-        self.assertEqual(self.bouncer.state, 'responding_inside_bar')
+        self.assertIs(
+            self.bouncer.state,
+            BouncerState.RESPONDING_INSIDE_BAR,
+        )
 
     def test_unauthorized_area_incident_is_recorded_with_offender(self):
         guest = SocialEntity.from_mapping({'name': 'guest_1', 'type': 'guest', 'state': 'behind_bar', 'position': {'x': 4000, 'y': 0}, 'existence_pct': 100.0, 'energy_j': 100.0})

@@ -4,13 +4,31 @@ from cats.cat_meow_bar_access_state import (
     CatMeowBarAccessState,
 )
 from .bar_objects import BarOrigin, BouncerPrincipleAttributes, CatEntryPolicy
+from .bouncer_state import BouncerState
 
 class Bouncer(SocialMixin):
+
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, state):
+        if not isinstance(
+            state,
+            BouncerState,
+        ):
+            raise TypeError(
+                "Bouncer state must use "
+                "BouncerState."
+            )
+
+        self._state = state
 
     def __init__(self, blacklist):
         self.name = 'bouncer'
         self.type = 'bar_guard'
-        self.state = 'standing_outside_bar'
+        self.state = BouncerState.STANDING_OUTSIDE_BAR
         self.origin = BarOrigin(layer='meeting_place', event='bouncer appeared at the bar entrance')
         self.principle_attributes = BouncerPrincipleAttributes(principle='masculine_principle', domain=['boundary', 'protection', 'threshold', 'entry_control'])
         self.position = 'outside_bar'
