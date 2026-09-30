@@ -14,6 +14,9 @@ from .cat_intention_executor import CatIntentionExecutor
 from .cat_perception import CatPerception
 from universe.aroma_profile import AromaProfile
 from universe.aroma_foundations import AromaMixture
+from core.entity.quantum_cat_route_state import (
+    QuantumCatRouteState,
+)
 from .cat_knowledge import CatKnowledge
 from .cat_need_system import CatNeedSystem
 
@@ -287,7 +290,7 @@ class Cats:
         offer.accepted = True
         cat.intent = offer.suggested_intent
         cat.active_route_id = route.route_id
-        route.state = 'ready'
+        route.state = QuantumCatRouteState.READY
         event = {'name': 'cat_navigation_offer_accepted', 'cat': cat.name, 'intent': cat.intent, 'route_id': route.route_id, 'destination': route.destination, 'accepted': True}
         self.emit_event(event)
         return {**event, 'route': route}

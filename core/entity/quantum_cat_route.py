@@ -2,6 +2,9 @@ import uuid
 from dataclasses import dataclass
 
 from core.entity.components import SpatialVector3
+from core.entity.quantum_cat_route_state import (
+    QuantumCatRouteState,
+)
 
 
 @dataclass(slots=True, frozen=True)
@@ -108,6 +111,23 @@ class QuantumCatRouteEncounter:
 
 class QuantumCatRoute:
 
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, state):
+        if not isinstance(
+            state,
+            QuantumCatRouteState,
+        ):
+            raise TypeError(
+                "Quantum cat route state must use "
+                "QuantumCatRouteState."
+            )
+
+        self._state = state
+
     def __init__(
         self,
         cat_id,
@@ -144,7 +164,7 @@ class QuantumCatRoute:
 
         self.memory_started = False
 
-        self.state = "observed"
+        self.state = QuantumCatRouteState.OBSERVED
         self.observation_active = True
 
     @staticmethod
@@ -196,7 +216,7 @@ class QuantumCatRoute:
         next_position = self.next_position
 
         if next_position is None:
-            self.state = "arrived"
+            self.state = QuantumCatRouteState.ARRIVED
             self.stop_observation()
             return None
 
@@ -204,10 +224,10 @@ class QuantumCatRoute:
         self.current_step_index += 1
 
         if self.has_arrived:
-            self.state = "arrived"
+            self.state = QuantumCatRouteState.ARRIVED
             self.stop_observation()
         else:
-            self.state = "travelling"
+            self.state = QuantumCatRouteState.TRAVELLING
 
         return self.current_position
 
@@ -252,7 +272,9 @@ class QuantumCatRoute:
         )
 
         self.current_position = detour_position
-        self.state = "avoiding_obstacle"
+        self.state = (
+            QuantumCatRouteState.AVOIDING_OBSTACLE
+        )
 
         return detour_position
 
@@ -277,7 +299,7 @@ class QuantumCatRoute:
 
     def stop_observation(self):
         self.observation_active = False
-        self.state = "released"
+        self.state = QuantumCatRouteState.RELEASED
 
     @property
     def public_state(self):
@@ -307,6 +329,6 @@ class QuantumCatRoute:
                 encounter.to_dict()
                 for encounter in self.encounters
             ],
-            "state": self.state,
+            "state": self.state.value,
             "observation_active": self.observation_active,
         }

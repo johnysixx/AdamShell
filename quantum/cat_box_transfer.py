@@ -3,6 +3,9 @@ import math
 
 from universe.aroma_profile import AromaProfile
 from core.entity.components import SpatialVector3, require_optional_spatial_vector, require_spatial_vector
+from core.entity.quantum_cat_route_state import (
+    QuantumCatRouteState,
+)
 
 from cats.cat_exploration_planner import (
     CatExplorationPlanner
@@ -1255,7 +1258,7 @@ class CatQuantumBoxTransfer:
         )
 
         route = planned["route"]
-        route.state = "ready"
+        route.state = QuantumCatRouteState.READY
 
         cat.active_route_id = (
             route.route_id
@@ -1789,7 +1792,7 @@ class CatQuantumBoxTransfer:
         )
 
         route = planned["route"]
-        route.state = "ready"
+        route.state = QuantumCatRouteState.READY
 
         cat.active_route_id = (
             route.route_id
@@ -1931,7 +1934,7 @@ class CatQuantumBoxTransfer:
         )
 
         route = planned["route"]
-        route.state = "ready"
+        route.state = QuantumCatRouteState.READY
 
         cat.active_route_id = (
             route.route_id

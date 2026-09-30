@@ -152,7 +152,7 @@ class QuantumUniverseSpace:
         memory = self._get_cat_memory(cat)
         if memory is None:
             return None
-        route_details = {'route_id': route.route_id, 'destination': route.destination, 'start_position': route.start_position.to_dict(), 'current_position': route.current_position.to_dict(), 'current_step_index': route.current_step_index, 'next_position': None if route.next_position is None else route.next_position.to_dict(), 'route_state': route.state, 'has_arrived': route.has_arrived}
+        route_details = {'route_id': route.route_id, 'destination': route.destination, 'start_position': route.start_position.to_dict(), 'current_position': route.current_position.to_dict(), 'current_step_index': route.current_step_index, 'next_position': None if route.next_position is None else route.next_position.to_dict(), 'route_state': route.state.value, 'has_arrived': route.has_arrived}
         route_details.update(details or {})
         return memory.remember(event_type=event_type, universe_tick=getattr(universe, 'universe_tick', None), location=route.current_position.to_dict(), participants=[], details=route_details)
 

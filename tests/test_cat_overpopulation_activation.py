@@ -1,5 +1,8 @@
 import unittest
 from core.entity.components import SpatialVector3
+from core.entity.quantum_cat_route_state import (
+    QuantumCatRouteState,
+)
 
 from universe.universe import Universe
 
@@ -124,9 +127,9 @@ class CatOverpopulationActivationTests(
             result["route"].route_id
         )
 
-        self.assertEqual(
+        self.assertIs(
             result["route"].state,
-            "ready"
+            QuantumCatRouteState.READY,
         )
 
         self.assertIsInstance(
@@ -192,9 +195,9 @@ class CatOverpopulationActivationTests(
             result["route"].observation_active
         )
 
-        self.assertEqual(
+        self.assertIs(
             result["route"].state,
-            "released"
+            QuantumCatRouteState.RELEASED,
         )
 
         self.assertIsInstance(

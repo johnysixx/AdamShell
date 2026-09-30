@@ -6,6 +6,9 @@ from core.entity.quantum_cat_route import (
     QuantumCatRouteDetour,
     QuantumCatRouteEncounter,
 )
+from core.entity.quantum_cat_route_state import (
+    QuantumCatRouteState,
+)
 
 
 class QuantumCatRouteObjectStateTests(unittest.TestCase):
@@ -19,6 +22,85 @@ class QuantumCatRouteObjectStateTests(unittest.TestCase):
             ],
             start_position=SpatialVector3.zero(),
             destination="target",
+        )
+
+    def test_route_starts_observed_as_enum(self):
+        route = self.create_route()
+
+        self.assertIs(
+            route.state,
+            QuantumCatRouteState.OBSERVED,
+        )
+
+        self.assertEqual(
+            route.public_state["state"],
+            "observed",
+        )
+
+    def test_string_state_is_rejected(self):
+        route = self.create_route()
+
+        with self.assertRaises(TypeError):
+            route.state = "ready"
+
+    def test_detour_sets_enum_state(self):
+        route = self.create_route()
+
+        route.make_minimal_detour(
+            SpatialVector3(
+                x=1.0,
+                y=0.0,
+                z=0.0,
+            )
+        )
+
+        self.assertIs(
+            route.state,
+            QuantumCatRouteState.AVOIDING_OBSTACLE,
+        )
+
+        self.assertEqual(
+            route.public_state["state"],
+            "avoiding_obstacle",
+        )
+
+    def test_advance_uses_enum_lifecycle(self):
+        route = self.create_route()
+
+        route.state = QuantumCatRouteState.READY
+
+        route.advance()
+
+        self.assertIs(
+            route.state,
+            QuantumCatRouteState.TRAVELLING,
+        )
+
+        route.advance()
+
+        self.assertIs(
+            route.state,
+            QuantumCatRouteState.RELEASED,
+        )
+
+        self.assertFalse(
+            route.observation_active
+        )
+
+    def test_state_values_define_domain_names(self):
+        self.assertEqual(
+            {
+                state.value
+                for state in QuantumCatRouteState
+            },
+            {
+                "observed",
+                "ready",
+                "travelling",
+                "arrived",
+                "avoiding_obstacle",
+                "released",
+            },
         )
 
     def test_route_positions_are_spatial_vectors(self):
