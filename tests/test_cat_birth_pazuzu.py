@@ -1,5 +1,9 @@
 import unittest
 
+from cats.cat_genetics_validation_status import (
+    CatGeneticsValidationStatus,
+)
+
 from multiverse import UniverseRegistry
 from universe.universe import Universe
 from universe.bootstraps.universe_bootstrap import (
@@ -94,7 +98,10 @@ class CatBirthPazuzuTests(
                 profile=profile,
                 validation=CatGeneticsValidation(
                     valid=True,
-                    status="standard_genetics",
+                    status=(
+                    CatGeneticsValidationStatus
+                    .STANDARD_GENETICS
+                ),
                     reason=None,
                     karyotype="XX",
                 ),

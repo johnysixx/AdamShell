@@ -5,6 +5,9 @@ from types import MappingProxyType
 from typing import Mapping
 
 from core.entity.component_object import ComponentObject
+from cats.cat_genetics_validation_status import (
+    CatGeneticsValidationStatus,
+)
 
 
 @dataclass(frozen=True)
@@ -108,16 +111,27 @@ class CatCanonicalBirthResolution:
 @dataclass(frozen=True)
 class CatGeneticsValidation:
     valid: bool
-    status: str
+    status: CatGeneticsValidationStatus
     reason: str | None
     karyotype: str
     conflicting_trait: str | None = None
     reroll_die: str | None = None
 
+    def __post_init__(self):
+        if not isinstance(
+            self.status,
+            CatGeneticsValidationStatus,
+        ):
+            raise TypeError(
+                "Cat genetics validation status "
+                "must use "
+                "CatGeneticsValidationStatus."
+            )
+
     def to_dict(self):
         return {
             "valid": self.valid,
-            "status": self.status,
+            "status": self.status.value,
             "reason": self.reason,
             "karyotype": self.karyotype,
             "conflicting_trait": self.conflicting_trait,

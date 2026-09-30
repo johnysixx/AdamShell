@@ -1,5 +1,9 @@
 import unittest
 
+from cats.cat_genetics_validation_status import (
+    CatGeneticsValidationStatus,
+)
+
 from universe.universe import Universe
 from multiverse import UniverseRegistry
 from idea_universe import IdeaUniverse
@@ -113,7 +117,10 @@ class Day0BarArrivalTests(unittest.TestCase):
                 profile=profile,
                 validation=CatGeneticsValidation(
                     valid=True,
-                    status="standard_genetics",
+                    status=(
+                    CatGeneticsValidationStatus
+                    .STANDARD_GENETICS
+                ),
                     reason=None,
                     karyotype="XX",
                 ),

@@ -1,5 +1,9 @@
 import unittest
 
+from cats.cat_genetics_validation_status import (
+    CatGeneticsValidationStatus,
+)
+
 from multiverse import UniverseRegistry
 from universe.universe import Universe
 from universe.bootstraps.universe_bootstrap import (
@@ -65,9 +69,12 @@ class CatBirthGeneticsObjectStateTests(unittest.TestCase):
         )
         self.assertTrue(validation.valid)
         self.assertEqual(validation.karyotype, "XX")
-        self.assertEqual(
+        self.assertIs(
             validation.status,
-            "standard_genetics",
+            (
+                CatGeneticsValidationStatus
+                .STANDARD_GENETICS
+            ),
         )
 
         with self.assertRaises(TypeError):
@@ -154,7 +161,10 @@ class CatBirthGeneticsObjectStateTests(unittest.TestCase):
             profile=profile,
             validation=CatGeneticsValidation(
                 valid=True,
-                status="standard_genetics",
+                status=(
+                    CatGeneticsValidationStatus
+                    .STANDARD_GENETICS
+                ),
                 reason=None,
                 karyotype="XX",
             ),
@@ -168,9 +178,12 @@ class CatBirthGeneticsObjectStateTests(unittest.TestCase):
         )
 
         self.assertEqual(result.profile.color, "white")
-        self.assertEqual(
+        self.assertIs(
             result.validation.status,
-            "standard_genetics",
+            (
+                CatGeneticsValidationStatus
+                .STANDARD_GENETICS
+            ),
         )
         self.assertEqual(result.conflict_history, ())
 

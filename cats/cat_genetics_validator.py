@@ -2,6 +2,9 @@ from .cat_birth_objects import (
     CatBirthProfile,
     CatGeneticsValidation,
 )
+from .cat_genetics_validation_status import (
+    CatGeneticsValidationStatus,
+)
 
 
 class CatGeneticsValidator:
@@ -70,7 +73,10 @@ class CatGeneticsValidator:
         if not requires_two_x_color_mosaic:
             return CatGeneticsValidation(
                 valid=True,
-                status="standard_genetics",
+                status=(
+                    CatGeneticsValidationStatus
+                    .STANDARD_GENETICS
+                ),
                 reason=None,
                 karyotype=karyotype,
             )
@@ -82,9 +88,13 @@ class CatGeneticsValidator:
             return CatGeneticsValidation(
                 valid=True,
                 status=(
-                    "rare_genetic_exception"
+                    CatGeneticsValidationStatus
+                    .RARE_GENETIC_EXCEPTION
                     if sex == "male"
-                    else "standard_genetics"
+                    else (
+                        CatGeneticsValidationStatus
+                        .STANDARD_GENETICS
+                    )
                 ),
                 reason=(
                     "male_multicolor_requires_extra_x"
@@ -101,7 +111,8 @@ class CatGeneticsValidator:
             return CatGeneticsValidation(
                 valid=False,
                 status=(
-                    "impossible_for_declared_genotype"
+                    CatGeneticsValidationStatus
+                    .IMPOSSIBLE_FOR_DECLARED_GENOTYPE
                 ),
                 reason=(
                     "xy_male_cannot_form_standard_"
@@ -114,7 +125,10 @@ class CatGeneticsValidator:
 
         return CatGeneticsValidation(
             valid=False,
-            status="unsupported_genetic_model",
+            status=(
+                CatGeneticsValidationStatus
+                .UNSUPPORTED_GENETIC_MODEL
+            ),
             reason=(
                 "multicolor_profile_requires_"
                 "compatible_x_chromosome_model"
