@@ -1,3 +1,8 @@
+from meeting_place.dark_matter_door_sign_state import (
+    DarkMatterDoorSignState,
+)
+
+
 class DarkMatterDoorSign:
 
     def __init__(self):
@@ -47,9 +52,13 @@ class DarkMatterDoorSign:
     @property
     def state(self):
         if not self.dark_matter_available:
-            return "coming_soon_inside"
+            return (
+                DarkMatterDoorSignState.COMING_SOON_INSIDE
+            )
 
-        return "available_outside"
+        return (
+            DarkMatterDoorSignState.AVAILABLE_OUTSIDE
+        )
 
     @property
     def public_state(self):
@@ -57,7 +66,7 @@ class DarkMatterDoorSign:
             "name": self.name,
             "type": self.type,
             "location": self.location,
-            "state": self.state,
+            "state": self.state.value,
             "message": self.message,
             "tank_installed": self.has_tank,
             "dark_matter_available": (
