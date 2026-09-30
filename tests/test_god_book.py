@@ -1,6 +1,9 @@
 import unittest
 from universe.universe import Universe
 from gods.gods import Gods
+from library.god_book_library_status import (
+    GodBookLibraryStatus,
+)
 
 class GodBookTests(unittest.TestCase):
 
@@ -24,7 +27,10 @@ class GodBookTests(unittest.TestCase):
         self.assertEqual(god.role, 'librarian')
         self.assertTrue(library.god_present)
         self.assertEqual(library.door['god_sign'], 'GOD IS: IN')
-        self.assertEqual(god.book.library_status, 'shelved')
+        self.assertIs(
+            god.book.library_status,
+            GodBookLibraryStatus.SHELVED,
+        )
         self.assertIn(god.book, library.catalog)
 
     def test_god_places_his_book_on_library_shelf_and_catalogs_it(self):
@@ -40,7 +46,10 @@ class GodBookTests(unittest.TestCase):
         self.assertTrue(result)
         self.assertIn(god.book, library.books)
         self.assertEqual(god.book.location, 'library_shelf')
-        self.assertEqual(god.book.library_status, 'shelved')
+        self.assertIs(
+            god.book.library_status,
+            GodBookLibraryStatus.SHELVED,
+        )
         self.assertIsNone(god.book.holder)
         self.assertIn(god.book, library.catalog)
 
@@ -56,7 +65,10 @@ class GodBookTests(unittest.TestCase):
         library.shelve_book(god.book)
         checked_out = library.check_out_for_edit(book=god.book, editor=god)
         self.assertTrue(checked_out)
-        self.assertEqual(god.book.library_status, 'checked_out_for_edit')
+        self.assertIs(
+            god.book.library_status,
+            GodBookLibraryStatus.CHECKED_OUT_FOR_EDIT,
+        )
         self.assertIs(god.book.holder, god)
         self.assertEqual(god.book.location, 'with_god')
         library.return_book(god.book)
@@ -81,9 +93,15 @@ class GodBookTests(unittest.TestCase):
         self.assertTrue(written)
         self.assertEqual(god.book.entries[-1]['event'], 'first_library_day')
         self.assertIs(god.book.holder, god)
-        self.assertEqual(god.book.library_status, 'checked_out_for_edit')
+        self.assertIs(
+            god.book.library_status,
+            GodBookLibraryStatus.CHECKED_OUT_FOR_EDIT,
+        )
         library.return_book(god.book)
-        self.assertEqual(god.book.library_status, 'shelved')
+        self.assertIs(
+            god.book.library_status,
+            GodBookLibraryStatus.SHELVED,
+        )
 
     def test_god_can_transfer_energy_into_book_only_while_editing_it(self):
         from library import Library

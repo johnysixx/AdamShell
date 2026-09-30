@@ -1,3 +1,8 @@
+from library.god_book_library_status import (
+    GodBookLibraryStatus,
+)
+
+
 class GodBook:
 
     def __init__(
@@ -13,16 +18,40 @@ class GodBook:
         self.energy_j = 0.0
 
         self.location = "with_author"
-        self.library_status = None
+        self.library_status = (
+            GodBookLibraryStatus.UNREGISTERED
+        )
         self.holder = None
 
         self.entries = []
+
+    @property
+    def library_status(self):
+        return self._library_status
+
+    @library_status.setter
+    def library_status(
+        self,
+        status
+    ):
+        if not isinstance(
+            status,
+            GodBookLibraryStatus,
+        ):
+            raise TypeError(
+                "God book library status must use "
+                "GodBookLibraryStatus."
+            )
+
+        self._library_status = status
 
     def shelve(
         self
     ):
         self.location = "library_shelf"
-        self.library_status = "shelved"
+        self.library_status = (
+            GodBookLibraryStatus.SHELVED
+        )
         self.holder = None
 
     def check_out_for_edit(
@@ -30,7 +59,7 @@ class GodBook:
         holder
     ):
         self.library_status = (
-            "checked_out_for_edit"
+            GodBookLibraryStatus.CHECKED_OUT_FOR_EDIT
         )
         self.holder = holder
         self.location = "with_god"
@@ -67,7 +96,7 @@ class GodBook:
     ):
         return (
             self.library_status
-            == "checked_out_for_edit"
+            is GodBookLibraryStatus.CHECKED_OUT_FOR_EDIT
             and self.holder is holder
         )
 

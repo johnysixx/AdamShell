@@ -3,6 +3,9 @@ import unittest
 from universe.universe import Universe
 from gods.gods import Gods
 from library import Library
+from library.god_book_library_status import (
+    GodBookLibraryStatus,
+)
 
 
 class LibraryPresenceTests(unittest.TestCase):
@@ -318,9 +321,9 @@ class LibraryPresenceTests(unittest.TestCase):
             "GOD IS: IN"
         )
 
-        self.assertEqual(
+        self.assertIs(
             god.book.library_status,
-            "shelved"
+            GodBookLibraryStatus.SHELVED,
         )
 
         self.assertIn(

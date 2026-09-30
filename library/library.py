@@ -1,4 +1,7 @@
 from library.library_state import LibraryState
+from library.god_book_library_status import (
+    GodBookLibraryStatus,
+)
 from universe.logger import UniverseLogger
 
 
@@ -224,7 +227,7 @@ class Library:
                     "library_status",
                     None
                 )
-                == "checked_out_for_edit"
+                is GodBookLibraryStatus.CHECKED_OUT_FOR_EDIT
                 and getattr(
                     book,
                     "holder",
@@ -294,7 +297,7 @@ class Library:
             book,
             "library_status",
             None
-        ) != "shelved":
+        ) is not GodBookLibraryStatus.SHELVED:
             raise RuntimeError(
                 "Book is not available on the shelf."
             )
@@ -343,7 +346,7 @@ class Library:
             book,
             "library_status",
             None
-        ) != "checked_out_for_edit":
+        ) is not GodBookLibraryStatus.CHECKED_OUT_FOR_EDIT:
             raise RuntimeError(
                 "Book must be checked out for edit before writing."
             )
@@ -383,7 +386,7 @@ class Library:
             book,
             "library_status",
             None
-        ) != "checked_out_for_edit":
+        ) is not GodBookLibraryStatus.CHECKED_OUT_FOR_EDIT:
             raise RuntimeError(
                 "Book must be checked out for edit before receiving energy."
             )
