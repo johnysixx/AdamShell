@@ -4,6 +4,9 @@ from meeting_place.bar_objects import (
     DrinkRecipe,
     RecipeIngredientRequirement,
 )
+from meeting_place.drink_recipe_status import (
+    DrinkRecipeStatus,
+)
 
 
 class HowToMixDrinks:
@@ -130,7 +133,9 @@ class HowToMixDrinks:
             name=name,
             origin=
                 "created_by_bartender",
-            status="testing",
+            initial_status=(
+                DrinkRecipeStatus.TESTING
+            ),
             ingredients=list(
                 ingredients
             ),

@@ -6,6 +6,9 @@ from meeting_place.bar_incident_state import (
 from meeting_place.bartender_state import (
     BartenderState,
 )
+from meeting_place.drink_recipe_status import (
+    DrinkRecipeStatus,
+)
 from .bar_objects import (
     BarDrink,
     BarInventoryItem,
@@ -168,7 +171,9 @@ class Bartender(SocialMixin):
             recipe = DrinkRecipe(
                 name=drink,
                 origin='created_by_bartender',
-                status='testing',
+                initial_status=(
+                    DrinkRecipeStatus.TESTING
+                ),
                 ingredients=list(ingredients),
             )
         event = {'kind': 'created_cocktail', 'drink': drink}
@@ -196,7 +201,7 @@ class Bartender(SocialMixin):
         recipe = self.mix_book.recipes.get(drink)
         if recipe is None:
             return False
-        if recipe.status != 'testing':
+        if recipe.status is not DrinkRecipeStatus.TESTING:
             return False
         UniverseLogger.event(f'BARTENDER OFFERS COCKTAIL TASTING: {drink} TO {guest}')
         return True
@@ -209,12 +214,12 @@ class Bartender(SocialMixin):
         recipe = self.mix_book.recipes.get(drink)
         if recipe is None:
             raise ValueError('Unknown cocktail recipe.')
-        if recipe.status != 'testing':
+        if recipe.status is not DrinkRecipeStatus.TESTING:
             raise ValueError('Cocktail is not in testing.')
         tasting = self.mix_book.record_tasting(drink=drink, guest=guest, liked=liked, comment=comment)
         recipe = self.mix_book.recipes[drink]
         if len(recipe.tastings) == 5:
-            if recipe.status == 'approved':
+            if recipe.status is DrinkRecipeStatus.APPROVED:
                 result_event = {'kind': 'cocktail_approved', 'drink': drink, 'votes_for': recipe.votes_for, 'votes_against': recipe.votes_against}
                 if self.on_cocktail_approved is not None:
                     self.on_cocktail_approved(recipe)

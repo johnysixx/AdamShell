@@ -4,6 +4,9 @@ from meeting_place.bar_menu_sign import (
     BarMenuSign
 )
 from meeting_place.bar_objects import BarMenuItem, DrinkRecipe
+from meeting_place.drink_recipe_status import (
+    DrinkRecipeStatus,
+)
 
 
 class BarMenuSignTests(unittest.TestCase):
@@ -25,8 +28,11 @@ class BarMenuSignTests(unittest.TestCase):
             name=name,
             origin="test_recipe",
             ingredients=list(ingredients),
-            status=status,
-            approved=status == "approved",
+            initial_status=status,
+            approved=(
+                status
+                is DrinkRecipeStatus.APPROVED
+            ),
         )
 
     def test_sign_shows_regular_menu_and_new_drinks(
@@ -39,7 +45,7 @@ class BarMenuSignTests(unittest.TestCase):
         new_drinks = {
             "singularity": self._new_drink(
                 ingredients=("raspberry_rum", "lemonade"),
-                status="approved",
+                status=DrinkRecipeStatus.APPROVED,
             )
         }
 
@@ -93,7 +99,7 @@ class BarMenuSignTests(unittest.TestCase):
         )
 
         new_drinks["singularity"] = self._new_drink(
-            status="approved"
+            status=DrinkRecipeStatus.APPROVED
         )
 
         self.assertIn(
@@ -111,7 +117,7 @@ class BarMenuSignTests(unittest.TestCase):
 
         new_drinks = {
             "singularity": self._new_drink(
-                status="approved"
+                status=DrinkRecipeStatus.APPROVED
             )
         }
 
@@ -147,7 +153,7 @@ class BarMenuSignTests(unittest.TestCase):
                     "raspberry_rum",
                     "lemonade",
                 ),
-                status="approved",
+                status=DrinkRecipeStatus.APPROVED,
             )
         }
 
@@ -196,7 +202,7 @@ class BarMenuSignTests(unittest.TestCase):
                     "raspberry_rum",
                     "lemonade",
                 ),
-                status="approved",
+                status=DrinkRecipeStatus.APPROVED,
             )
         }
 
@@ -362,7 +368,7 @@ class BarMenuSignTests(unittest.TestCase):
                         "raspberry_rum",
                         "lemonade",
                     ),
-                    status="approved",
+                    status=DrinkRecipeStatus.APPROVED,
                 )
             }
         )
@@ -412,7 +418,7 @@ class BarMenuSignTests(unittest.TestCase):
             },
             new_drinks={
                 "singularity": self._new_drink(
-                    status="approved"
+                    status=DrinkRecipeStatus.APPROVED
                 )
             }
         )
@@ -477,7 +483,7 @@ class BarMenuSignTests(unittest.TestCase):
             },
             new_drinks={
                 "singularity": self._new_drink(
-                    status="approved"
+                    status=DrinkRecipeStatus.APPROVED
                 )
             }
         )

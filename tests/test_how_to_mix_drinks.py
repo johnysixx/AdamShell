@@ -3,6 +3,9 @@ import unittest
 from meeting_place.bar_counter import BarCounter
 from meeting_place.bartender import Bartender
 from meeting_place.bar_objects import RecipeTasting
+from meeting_place.drink_recipe_status import (
+    DrinkRecipeStatus,
+)
 from meeting_place.how_to_mix_drinks import (
     HowToMixDrinks
 )
@@ -44,9 +47,9 @@ class HowToMixDrinksTests(unittest.TestCase):
             "created_by_bartender"
         )
 
-        self.assertEqual(
+        self.assertIs(
             recipe.status,
-            "testing"
+            DrinkRecipeStatus.TESTING,
         )
 
         self.assertEqual(
@@ -143,9 +146,9 @@ class HowToMixDrinksTests(unittest.TestCase):
             0
         )
 
-        self.assertEqual(
+        self.assertIs(
             recipe.status,
-            "testing"
+            DrinkRecipeStatus.TESTING,
         )
 
         self.assertFalse(
@@ -404,9 +407,9 @@ class HowToMixDrinksTests(unittest.TestCase):
             recipe.approved
         )
 
-        self.assertEqual(
+        self.assertIs(
             recipe.status,
-            "approved"
+            DrinkRecipeStatus.APPROVED,
         )
 
         self.assertIn(
@@ -489,9 +492,9 @@ class HowToMixDrinksTests(unittest.TestCase):
             recipe.approved
         )
 
-        self.assertEqual(
+        self.assertIs(
             recipe.status,
-            "rejected"
+            DrinkRecipeStatus.REJECTED,
         )
 
         self.assertIn(
@@ -781,9 +784,9 @@ class HowToMixDrinksTests(unittest.TestCase):
             "singularity"
         ]
 
-        self.assertEqual(
+        self.assertIs(
             recipe.status,
-            "rejected"
+            DrinkRecipeStatus.REJECTED,
         )
 
         self.assertFalse(
@@ -865,9 +868,9 @@ class HowToMixDrinksTests(unittest.TestCase):
             "singularity"
         ]
 
-        self.assertEqual(
+        self.assertIs(
             recipe.status,
-            "rejected"
+            DrinkRecipeStatus.REJECTED,
         )
 
         self.assertFalse(
@@ -1031,9 +1034,9 @@ class HowToMixDrinksTests(unittest.TestCase):
             "singularity"
         ]
 
-        self.assertEqual(
+        self.assertIs(
             recipe.status,
-            "rejected"
+            DrinkRecipeStatus.REJECTED,
         )
 
         self.assertFalse(

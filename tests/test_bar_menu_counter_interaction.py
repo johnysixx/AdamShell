@@ -4,6 +4,9 @@ from universe.universe import Universe
 from multiverse import UniverseRegistry
 from meeting_place.meeting_place import MeetingPlace
 from meeting_place.bar_objects import DrinkRecipe
+from meeting_place.drink_recipe_status import (
+    DrinkRecipeStatus,
+)
 
 
 class BarMenuCounterInteractionTests(unittest.TestCase):
@@ -23,7 +26,7 @@ class BarMenuCounterInteractionTests(unittest.TestCase):
         ] = DrinkRecipe(
             name="singularity",
             origin="test_recipe",
-            status="approved",
+            initial_status=DrinkRecipeStatus.APPROVED,
             approved=True,
             ingredients=[
                 "raspberry_rum",
@@ -70,7 +73,7 @@ class BarMenuCounterInteractionTests(unittest.TestCase):
         ] = DrinkRecipe(
             name="singularity",
             origin="test_recipe",
-            status="approved",
+            initial_status=DrinkRecipeStatus.APPROVED,
             approved=True,
             ingredients=[],
         )
@@ -108,7 +111,7 @@ class BarMenuCounterInteractionTests(unittest.TestCase):
         ] = DrinkRecipe(
             name="singularity",
             origin="test_recipe",
-            status="approved",
+            initial_status=DrinkRecipeStatus.APPROVED,
             approved=True,
             ingredients=[],
         )

@@ -1,4 +1,7 @@
 from meeting_place.bar_objects import BarDrink, BarMenuItem, DrinkRecipe
+from meeting_place.drink_recipe_status import (
+    DrinkRecipeStatus,
+)
 import unittest
 
 from universe.universe import Universe
@@ -142,7 +145,7 @@ class BarMenuSignIntegrationTests(unittest.TestCase):
             universe
         )
 
-        recipe = DrinkRecipe(name="singularity", origin="test_recipe", status="approved", approved=True, ingredients=["raspberry_rum", "lemonade"])
+        recipe = DrinkRecipe(name="singularity", origin="test_recipe", initial_status=DrinkRecipeStatus.APPROVED, approved=True, ingredients=["raspberry_rum", "lemonade"])
 
         meeting_place.add_approved_cocktail(
             recipe
@@ -225,7 +228,7 @@ class BarMenuSignIntegrationTests(unittest.TestCase):
             universe
         )
 
-        recipe = DrinkRecipe(name="singularity", origin="test_recipe", status="approved", approved=True, ingredients=[])
+        recipe = DrinkRecipe(name="singularity", origin="test_recipe", initial_status=DrinkRecipeStatus.APPROVED, approved=True, ingredients=[])
 
         meeting_place.add_approved_cocktail(
             recipe
@@ -275,7 +278,7 @@ class BarMenuSignIntegrationTests(unittest.TestCase):
         ):
             meeting_place.tick()
 
-        recipe = DrinkRecipe(name="singularity", origin="test_recipe", status="approved", approved=True, ingredients=[])
+        recipe = DrinkRecipe(name="singularity", origin="test_recipe", initial_status=DrinkRecipeStatus.APPROVED, approved=True, ingredients=[])
 
         meeting_place.add_approved_cocktail(
             recipe
@@ -320,7 +323,7 @@ class BarMenuSignIntegrationTests(unittest.TestCase):
             universe
         )
 
-        recipe = DrinkRecipe(name="singularity", origin="test_recipe", status="approved", approved=True, ingredients=[])
+        recipe = DrinkRecipe(name="singularity", origin="test_recipe", initial_status=DrinkRecipeStatus.APPROVED, approved=True, ingredients=[])
 
         meeting_place.add_approved_cocktail(
             recipe

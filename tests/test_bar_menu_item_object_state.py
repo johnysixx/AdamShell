@@ -2,6 +2,9 @@ import unittest
 
 from meeting_place.bar_menu_sign import BarMenuSign
 from meeting_place.bar_objects import BarDrink, BarMenuItem, DrinkRecipe
+from meeting_place.drink_recipe_status import (
+    DrinkRecipeStatus,
+)
 from meeting_place.meeting_place import MeetingPlace
 from multiverse import UniverseRegistry
 from universe.universe import Universe
@@ -56,7 +59,9 @@ class BarMenuItemObjectStateTests(unittest.TestCase):
             name="singularity",
             origin="test_recipe",
             ingredients=["raspberry_rum", "lemonade"],
-            status="approved",
+            initial_status=(
+                DrinkRecipeStatus.APPROVED
+            ),
             approved=True,
         )
         bar.add_approved_cocktail(recipe)

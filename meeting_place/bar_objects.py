@@ -1,5 +1,5 @@
 from copy import deepcopy
-from dataclasses import dataclass, field
+from dataclasses import InitVar, dataclass, field
 from core.entity.components import SpatialVector3
 
 from core.entity.component_object import ComponentObject
@@ -7,6 +7,9 @@ from meeting_place.bar_serving_vessel_fill_state import (
     BarServingVesselFillState,
 )
 from meeting_place.lemon_tree_state import LemonTreeState
+from meeting_place.drink_recipe_status import (
+    DrinkRecipeStatus,
+)
 
 
 class BarObject(ComponentObject):
@@ -1880,7 +1883,14 @@ class DrinkRecipe:
     )
 
     price_basis: str | None = None
-    status: str | None = None
+    initial_status: InitVar[
+        DrinkRecipeStatus | None
+    ] = None
+    _status: DrinkRecipeStatus | None = field(
+        default=None,
+        init=False,
+        repr=False,
+    )
 
     tastings: list[RecipeTasting] = field(
         default_factory=list
@@ -1892,6 +1902,35 @@ class DrinkRecipe:
     menu_added_day: int | None = None
     revision: int | None = None
     revision_reason: str | None = None
+
+    def __post_init__(
+        self,
+        initial_status
+    ):
+        self.status = initial_status
+
+    @property
+    def status(self):
+        return self._status
+
+    @status.setter
+    def status(
+        self,
+        status
+    ):
+        if (
+            status is not None
+            and not isinstance(
+                status,
+                DrinkRecipeStatus,
+            )
+        ):
+            raise TypeError(
+                "Drink recipe status must use "
+                "DrinkRecipeStatus or None."
+            )
+
+        self._status = status
 
     def reveal(
         self,
@@ -1943,13 +1982,13 @@ class DrinkRecipe:
             if self.votes_for >= 4:
                 self.approved = True
                 self.status = (
-                    "approved"
+                    DrinkRecipeStatus.APPROVED
                 )
 
             else:
                 self.approved = False
                 self.status = (
-                    "rejected"
+                    DrinkRecipeStatus.REJECTED
                 )
 
         return tasting
@@ -2008,7 +2047,7 @@ class DrinkRecipe:
         if self.status is not None:
             result[
                 "status"
-            ] = self.status
+            ] = self.status.value
 
         if self.tastings:
             result[

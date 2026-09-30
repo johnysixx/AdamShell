@@ -1,6 +1,9 @@
 from meeting_place.cat_invited_guest_state import (
     CatInvitedGuestState,
 )
+from meeting_place.drink_recipe_status import (
+    DrinkRecipeStatus,
+)
 from meeting_place.bar_incident_state import (
     BarIncidentState,
 )
@@ -732,7 +735,11 @@ class MeetingPlace:
     def add_approved_cocktail(self, recipe):
         if not isinstance(recipe, DrinkRecipe):
             raise ValueError('Approved cocktail requires DrinkRecipe.')
-        if recipe.status != 'approved' or not recipe.approved:
+        if (
+            recipe.status
+            is not DrinkRecipeStatus.APPROVED
+            or not recipe.approved
+        ):
             raise ValueError('Cocktail is not approved.')
         drink_name = recipe.name
         if not drink_name:
