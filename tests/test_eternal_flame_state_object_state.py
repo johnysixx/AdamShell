@@ -7,6 +7,9 @@ from core.eternal_flame.eternal_flame_state import (
 from idea_entities.eternal_fire_potential import (
     EternalFirePotential,
 )
+from idea_entities.eternal_fire_potential_state import (
+    EternalFirePotentialState,
+)
 
 
 class EternalFlameStateObjectStateTests(
@@ -16,7 +19,7 @@ class EternalFlameStateObjectStateTests(
     def _burning_idea(self):
         fire = EternalFirePotential()
         fire.type = "idea_focal_point"
-        fire.state = "burning"
+        fire.state = EternalFirePotentialState.BURNING
         fire.actualized = True
         return fire
 

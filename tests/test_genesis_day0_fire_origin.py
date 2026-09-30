@@ -4,6 +4,9 @@ from multiverse import UniverseRegistry
 from universe.universe import Universe
 from idea_entities import IdeaEntities
 from genesis.day0 import GenesisDay0
+from idea_entities.eternal_fire_potential_state import (
+    EternalFirePotentialState,
+)
 
 
 class FixedRng:
@@ -102,9 +105,9 @@ class GenesisDay0FireOriginTests(
             fire.actualized
         )
 
-        self.assertEqual(
+        self.assertIs(
             fire.state,
-            "unignited"
+            EternalFirePotentialState.UNIGNITED,
         )
 
         self.assertEqual(
@@ -192,9 +195,9 @@ class GenesisDay0FireOriginTests(
             fire.actualized
         )
 
-        self.assertEqual(
+        self.assertIs(
             fire.state,
-            "burning"
+            EternalFirePotentialState.BURNING,
         )
 
         self.assertEqual(

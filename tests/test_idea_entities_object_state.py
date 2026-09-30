@@ -2,6 +2,9 @@ import unittest
 
 from idea_entities import IdeaEntities
 from idea_entities.idea_entities_state import IdeaEntitiesState
+from idea_entities.eternal_fire_potential_state import (
+    EternalFirePotentialState,
+)
 from universe.universe import Universe
 
 
@@ -159,9 +162,9 @@ class IdeaEntitiesObjectStateTests(unittest.TestCase):
 
         self.assertEqual(layer.events, [])
         self.assertTrue(layer.permissions["can_influence"])
-        self.assertEqual(
+        self.assertIs(
             layer.eternal_fire.state,
-            "unignited",
+            EternalFirePotentialState.UNIGNITED,
         )
 
     def test_to_dict_is_deeply_detached(self):
@@ -181,7 +184,10 @@ class IdeaEntitiesObjectStateTests(unittest.TestCase):
             "history",
         )
         self.assertTrue(state.permissions["can_influence"])
-        self.assertEqual(state.eternal_fire.state, "unignited")
+        self.assertIs(
+            state.eternal_fire.state,
+            EternalFirePotentialState.UNIGNITED,
+        )
 
 
 if __name__ == "__main__":

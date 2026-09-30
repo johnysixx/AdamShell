@@ -7,6 +7,9 @@ from idea_entities.eternal_fire_objects import (
     EternalFireMeaning,
 )
 from idea_entities.eternal_fire_potential import EternalFirePotential
+from idea_entities.eternal_fire_potential_state import (
+    EternalFirePotentialState,
+)
 from idea_entities.prefysical_fire_state import (
     PrefysicalFireEnergyConversion,
     PrefysicalFireMaterials,
@@ -414,7 +417,7 @@ class PrefysicalFireOrigin:
     ):
         if (
             self.eternal_fire.state
-            == "burning"
+            is EternalFirePotentialState.BURNING
         ):
             return self._event(
                 name=(
@@ -580,7 +583,7 @@ class PrefysicalFireOrigin:
     ):
         if (
             self.eternal_fire.state
-            != "burning"
+            is not EternalFirePotentialState.BURNING
         ):
             raise RuntimeError(
                 "Fire cannot be understood "
@@ -670,7 +673,7 @@ class PrefysicalFireOrigin:
     ):
         if (
             self.eternal_fire.state
-            != "burning"
+            is not EternalFirePotentialState.BURNING
         ):
             raise RuntimeError(
                 "Eternal fire is not burning."
@@ -783,7 +786,9 @@ class PrefysicalFireOrigin:
         self,
         public_roll
     ):
-        self.eternal_fire.state = "burning"
+        self.eternal_fire.state = (
+            EternalFirePotentialState.BURNING
+        )
 
         self.eternal_fire.actualized = True
 

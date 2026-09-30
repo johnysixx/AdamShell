@@ -15,6 +15,9 @@ from idea_entities.eternal_fire_objects import (
 from idea_entities.eternal_fire_potential import (
     EternalFirePotential,
 )
+from idea_entities.eternal_fire_potential_state import (
+    EternalFirePotentialState,
+)
 from idea_entities.prefysical_fire_origin import (
     PrefysicalFireOrigin,
 )
@@ -83,7 +86,10 @@ class EternalFirePotentialObjectStateTests(unittest.TestCase):
 
         self.assertEqual(fire.name, "eternal_fire")
         self.assertEqual(fire.type, "idea_fire_potential")
-        self.assertEqual(fire.state, "unignited")
+        self.assertIs(
+            fire.state,
+            EternalFirePotentialState.UNIGNITED,
+        )
         self.assertFalse(fire.actualized)
         self.assertIsNone(fire.physical_time)
         self.assertIsNone(fire.physical_location)
@@ -132,9 +138,9 @@ class EternalFirePotentialObjectStateTests(unittest.TestCase):
         boundary["state"] = "changed"
         boundary["interactions"].append("changed")
 
-        self.assertEqual(
+        self.assertIs(
             idea_entities.eternal_fire.state,
-            "unignited",
+            EternalFirePotentialState.UNIGNITED,
         )
         self.assertEqual(
             idea_entities.eternal_fire.interactions,
@@ -152,7 +158,10 @@ class EternalFirePotentialObjectStateTests(unittest.TestCase):
         self.assertEqual(result["result"], "fire_not_ignited")
         self.assertIs(idea_entities.eternal_fire, fire)
         self.assertFalse(fire.actualized)
-        self.assertEqual(fire.state, "unignited")
+        self.assertIs(
+            fire.state,
+            EternalFirePotentialState.UNIGNITED,
+        )
         self.assertFalse(
             universe.world["idea_entities"][
                 "eternal_fire"
@@ -176,7 +185,10 @@ class EternalFirePotentialObjectStateTests(unittest.TestCase):
         )
         self.assertIs(idea_entities.eternal_fire, fire)
         self.assertTrue(fire.actualized)
-        self.assertEqual(fire.state, "burning")
+        self.assertIs(
+            fire.state,
+            EternalFirePotentialState.BURNING,
+        )
         self.assertEqual(fire.type, "idea_focal_point")
         self.assertEqual(fire.flame_state, "small")
         self.assertEqual(fire.fuel.wood_sticks, 2.0)
@@ -315,6 +327,24 @@ class EternalFirePotentialObjectStateTests(unittest.TestCase):
         with self.assertRaises(TypeError):
             fire.record_fuel_consumption({"dry_grass": 1.0})
 
+    def test_string_state_is_rejected(self):
+        fire = EternalFirePotential()
+
+        with self.assertRaises(TypeError):
+            fire.state = "burning"
+
+    def test_state_values_define_domain_names(self):
+        self.assertEqual(
+            {
+                state.value
+                for state in EternalFirePotentialState
+            },
+            {
+                "unignited",
+                "burning",
+            },
+        )
+
     def test_origin_rejects_old_mapping_state(self):
         with self.assertRaises(TypeError):
             PrefysicalFireOrigin(
@@ -325,7 +355,7 @@ class EternalFirePotentialObjectStateTests(unittest.TestCase):
     def test_eternal_flame_accepts_object_and_rejects_mapping(self):
         fire = EternalFirePotential()
         fire.type = "idea_focal_point"
-        fire.state = "burning"
+        fire.state = EternalFirePotentialState.BURNING
         fire.actualized = True
         flame = EternalFlame()
 

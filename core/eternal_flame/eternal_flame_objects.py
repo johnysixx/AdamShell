@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from enum import Enum
 
 
 @dataclass(frozen=True, slots=True)
@@ -32,10 +33,21 @@ class EternalFlameSourceIdea:
         if source_idea.name != "eternal_fire":
             raise ValueError("Invalid idea source for Eternal Flame.")
 
+        source_state = source_idea.state
+
+        if not isinstance(
+            source_state,
+            Enum,
+        ):
+            raise TypeError(
+                "Eternal Flame source state must "
+                "be enum-backed."
+            )
+
         return cls(
             name=source_idea.name,
             type=source_idea.type,
-            state=source_idea.state,
+            state=source_state.value,
         )
 
     def to_dict(self):

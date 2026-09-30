@@ -6,6 +6,9 @@ from idea_entities.eternal_fire_objects import (
     EternalFireFuelConsumption,
     EternalFireMeaning,
 )
+from idea_entities.eternal_fire_potential_state import (
+    EternalFirePotentialState,
+)
 
 
 @dataclass(slots=True)
@@ -13,7 +16,11 @@ class EternalFirePotential:
 
     name: str = "eternal_fire"
     type: str = "idea_fire_potential"
-    state: str = "unignited"
+    _state: EternalFirePotentialState = field(
+        default=EternalFirePotentialState.UNIGNITED,
+        init=False,
+        repr=False,
+    )
     actualized: bool = False
     physical_time: object = None
     physical_location: object = None
@@ -40,6 +47,23 @@ class EternalFirePotential:
         default=None,
         repr=False,
     )
+
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, state):
+        if not isinstance(
+            state,
+            EternalFirePotentialState,
+        ):
+            raise TypeError(
+                "Eternal fire potential state must use "
+                "EternalFirePotentialState."
+            )
+
+        self._state = state
 
     @property
     def fuel(self):
@@ -82,7 +106,7 @@ class EternalFirePotential:
         public_state = {
             "name": self.name,
             "type": self.type,
-            "state": self.state,
+            "state": self.state.value,
             "actualized": self.actualized,
             "physical_time": self.physical_time,
             "physical_location": self.physical_location,
