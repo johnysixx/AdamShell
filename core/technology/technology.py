@@ -1,10 +1,4 @@
-from .states import (
-    TECHNOLOGY_DISCOVERED,
-    TECHNOLOGY_ANNOUNCED,
-    TECHNOLOGY_INFRASTRUCTURE,
-    TECHNOLOGY_ACTIVE,
-    TECHNOLOGY_STATES
-)
+from .technology_state import TechnologyState
 
 
 class Technology:
@@ -16,24 +10,54 @@ class Technology:
         self.name = name
 
         self.state = (
-            TECHNOLOGY_DISCOVERED
+            TechnologyState.DISCOVERED
         )
 
-    def set_state(self, state):
+    @property
+    def state(self):
+        return self._state
 
-        if state not in TECHNOLOGY_STATES:
-            raise ValueError(
-                f"Unknown technology state: {state}"
+    @state.setter
+    def state(
+        self,
+        state
+    ):
+        if not isinstance(
+            state,
+            TechnologyState,
+        ):
+            raise TypeError(
+                "Technology state must use "
+                "TechnologyState."
             )
 
+        self._state = state
+
+    def set_state(
+        self,
+        state
+    ):
+        if not isinstance(
+            state,
+            TechnologyState,
+        ):
+            raise TypeError(
+                "Technology state must use "
+                "TechnologyState."
+            )
+
+        states = tuple(
+            TechnologyState
+        )
+
         current_index = (
-            TECHNOLOGY_STATES.index(
+            states.index(
                 self.state
             )
         )
 
         target_index = (
-            TECHNOLOGY_STATES.index(
+            states.index(
                 state
             )
         )
@@ -53,18 +77,22 @@ class Technology:
 
     def advance(self):
 
+        states = tuple(
+            TechnologyState
+        )
+
         current_index = (
-            TECHNOLOGY_STATES.index(
+            states.index(
                 self.state
             )
         )
 
         if current_index >= (
-            len(TECHNOLOGY_STATES) - 1
+            len(states) - 1
         ):
             return False
 
-        self.state = TECHNOLOGY_STATES[
+        self.state = states[
             current_index + 1
         ]
 
@@ -74,33 +102,33 @@ class Technology:
     def is_discovered(self):
         return (
             self.state
-            == TECHNOLOGY_DISCOVERED
+            is TechnologyState.DISCOVERED
         )
 
     @property
     def is_announced(self):
         return (
             self.state
-            == TECHNOLOGY_ANNOUNCED
+            is TechnologyState.ANNOUNCED
         )
 
     @property
     def has_infrastructure(self):
         return (
             self.state
-            == TECHNOLOGY_INFRASTRUCTURE
+            is TechnologyState.INFRASTRUCTURE
         )
 
     @property
     def is_active(self):
         return (
             self.state
-            == TECHNOLOGY_ACTIVE
+            is TechnologyState.ACTIVE
         )
 
     @property
     def public_state(self):
         return {
             "name": self.name,
-            "state": self.state
+            "state": self.state.value
         }
