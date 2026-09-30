@@ -7,6 +7,9 @@ from core.transitions.root_transition import (
 from core.transitions.root_transition_state import (
     RootTransitionState,
 )
+from core.transitions.root_transition_status import (
+    RootTransitionStatus,
+)
 
 
 class RootTransitionObjectStateTests(unittest.TestCase):
@@ -45,11 +48,33 @@ class RootTransitionObjectStateTests(unittest.TestCase):
         state = RootTransitionState()
 
         self.assertEqual(state.target, "root_universe")
-        self.assertEqual(state.status, "created")
+        self.assertIs(
+            state.status,
+            RootTransitionStatus.CREATED,
+        )
         self.assertIsNone(state.creator)
         self.assertEqual(state.existence_cost_pct, 25.0)
         self.assertEqual(state.energy_cost_j, 1000.0)
         self.assertFalse(state.can_enter)
+
+    def test_string_status_is_rejected(self):
+        state = RootTransitionState()
+
+        with self.assertRaises(TypeError):
+            state.status = "used"
+
+    def test_status_values_define_domain(self):
+        self.assertEqual(
+            {
+                status.value
+                for status
+                in RootTransitionStatus
+            },
+            {
+                "created",
+                "used",
+            },
+        )
 
     def test_creation_rejects_invalid_entities(self):
         transition = RootTransition()
@@ -82,7 +107,10 @@ class RootTransitionObjectStateTests(unittest.TestCase):
             RootTransitionState,
         )
         self.assertEqual(state.target, "root_universe")
-        self.assertEqual(state.status, "created")
+        self.assertIs(
+            state.status,
+            RootTransitionStatus.CREATED,
+        )
         self.assertEqual(state.creator, "serpent")
         self.assertEqual(state.existence_cost_pct, 25.0)
         self.assertEqual(state.energy_cost_j, 1000.0)
@@ -139,7 +167,10 @@ class RootTransitionObjectStateTests(unittest.TestCase):
 
         self.assertTrue(entered)
         self.assertIs(entity.root_transition, state)
-        self.assertEqual(state.status, "used")
+        self.assertIs(
+            state.status,
+            RootTransitionStatus.USED,
+        )
         self.assertTrue(state.can_enter)
         self.assertEqual(
             entity.current_layer,
@@ -172,7 +203,10 @@ class RootTransitionObjectStateTests(unittest.TestCase):
         snapshot["creator"] = "changed"
         snapshot["can_enter"] = True
 
-        self.assertEqual(state.status, "created")
+        self.assertIs(
+            state.status,
+            RootTransitionStatus.CREATED,
+        )
         self.assertEqual(state.creator, "serpent")
         self.assertFalse(state.can_enter)
 

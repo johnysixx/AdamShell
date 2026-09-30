@@ -1,6 +1,9 @@
 ﻿from core.transitions.root_transition_state import (
     RootTransitionState,
 )
+from core.transitions.root_transition_status import (
+    RootTransitionStatus,
+)
 
 
 class RootTransition:
@@ -42,7 +45,6 @@ class RootTransition:
 
         entity.root_transition = RootTransitionState(
             target="root_universe",
-            status="created",
             creator=getattr(entity, "name", None),
             existence_cost_pct=self.existence_cost_pct,
             energy_cost_j=self.energy_cost_j,
@@ -66,7 +68,7 @@ class RootTransition:
 
         transition_exists = (
             transition.status
-            == "created"
+            is RootTransitionStatus.CREATED
         )
         existence_restored = (
             getattr(entity, "existence_pct", 0.0)
@@ -101,7 +103,9 @@ class RootTransition:
 
         transition = entity.root_transition
         transition.can_enter = True
-        transition.status = "used"
+        transition.status = (
+            RootTransitionStatus.USED
+        )
 
         entity.current_layer = "root_universe"
         entity.root_presence = True
