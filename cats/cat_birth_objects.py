@@ -8,6 +8,7 @@ from core.entity.component_object import ComponentObject
 from cats.cat_genetics_validation_status import (
     CatGeneticsValidationStatus,
 )
+from cats.genotype import CatGenotype
 
 
 @dataclass(frozen=True)
@@ -52,6 +53,92 @@ class CatBirthProfile:
             "pattern": self.pattern,
             "eye_color": self.eye_color,
             "sex": self.sex,
+        }
+
+
+@dataclass(slots=True, frozen=True)
+class CatPhenotypeResult:
+
+    profile: CatBirthProfile
+    base_color: str
+    diluted: bool
+    white_spotted: bool
+    colorpoint: bool
+    genotype: CatGenotype
+
+    name: str = field(
+        default="cat_phenotype_resolved",
+        init=False,
+    )
+
+    resolved: bool = field(
+        default=True,
+        init=False,
+    )
+
+    def __post_init__(self):
+        if not isinstance(
+            self.profile,
+            CatBirthProfile,
+        ):
+            raise TypeError(
+                "Cat phenotype requires "
+                "a CatBirthProfile object."
+            )
+
+        if not isinstance(
+            self.genotype,
+            CatGenotype,
+        ):
+            raise TypeError(
+                "Cat phenotype requires "
+                "a CatGenotype object."
+            )
+
+        object.__setattr__(
+            self,
+            "base_color",
+            str(self.base_color),
+        )
+
+        object.__setattr__(
+            self,
+            "diluted",
+            bool(self.diluted),
+        )
+
+        object.__setattr__(
+            self,
+            "white_spotted",
+            bool(self.white_spotted),
+        )
+
+        object.__setattr__(
+            self,
+            "colorpoint",
+            bool(self.colorpoint),
+        )
+
+    def __deepcopy__(
+        self,
+        memo,
+    ):
+        return self
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "profile": (
+                self.profile.to_dict()
+            ),
+            "base_color": self.base_color,
+            "diluted": self.diluted,
+            "white_spotted": (
+                self.white_spotted
+            ),
+            "colorpoint": self.colorpoint,
+            "genotype": self.genotype,
+            "resolved": self.resolved,
         }
 
 
@@ -427,7 +514,7 @@ class KittenEmbryo:
     father_name: str
 
     genotype: object
-    phenotype: object
+    phenotype: CatPhenotypeResult
 
     profile: CatBirthProfile
     viability: object
@@ -454,12 +541,30 @@ class KittenEmbryo:
 
     def __post_init__(self):
         if not isinstance(
+            self.phenotype,
+            CatPhenotypeResult,
+        ):
+            raise TypeError(
+                "Kitten embryo phenotype must "
+                "be a CatPhenotypeResult object."
+            )
+
+        if not isinstance(
             self.profile,
             CatBirthProfile,
         ):
             raise TypeError(
                 "Kitten embryo profile must "
                 "be a CatBirthProfile object."
+            )
+
+        if (
+            self.profile
+            is not self.phenotype.profile
+        ):
+            raise ValueError(
+                "Kitten embryo profile must "
+                "reuse phenotype profile."
             )
 
         if not hasattr(
@@ -509,8 +614,8 @@ class KittenEmbryo:
                 self.father_name
             ),
             "genotype": self.genotype,
-            "phenotype": deepcopy(
-                self.phenotype
+            "phenotype": (
+                self.phenotype.to_dict()
             ),
             "profile": (
                 self.profile.to_dict()

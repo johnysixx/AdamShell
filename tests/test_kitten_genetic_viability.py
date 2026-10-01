@@ -179,12 +179,12 @@ class KittenGeneticViabilityTests(
         )
 
         self.assertEqual(
-            phenotype["profile"]["color"],
+            phenotype.profile.color,
             "tortoiseshell"
         )
 
         self.assertEqual(
-            phenotype["profile"]["sex"],
+            phenotype.profile.sex,
             "male"
         )
 
@@ -229,17 +229,17 @@ class KittenGeneticViabilityTests(
         )
 
         self.assertEqual(
-            phenotype["profile"]["color"],
+            phenotype.profile.color,
             "calico"
         )
 
         self.assertEqual(
-            phenotype["profile"]["pattern"],
+            phenotype.profile.pattern,
             "tricolor"
         )
 
         self.assertEqual(
-            phenotype["profile"]["sex"],
+            phenotype.profile.sex,
             "male"
         )
 

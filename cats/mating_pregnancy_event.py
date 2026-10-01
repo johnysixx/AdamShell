@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 
 from cats.cat_birth_objects import (
-    CatBirthProfile,
+    CatPhenotypeResult,
 )
 
 from cats.kitten_embryo_resolver import (
@@ -24,120 +24,6 @@ from cats.ovulation_resolver import (
 from cats.paternity_resolver import (
     KittenFatherSelectedEvent,
 )
-
-
-@dataclass(slots=True, frozen=True)
-class CatPregnancyPhenotypeSnapshot:
-
-    profile: CatBirthProfile
-    base_color: str
-    diluted: bool
-    white_spotted: bool
-    colorpoint: bool
-    genotype: object
-
-    name: str = field(
-        default="cat_phenotype_resolved",
-        init=False,
-    )
-
-    resolved: bool = field(
-        default=True,
-        init=False,
-    )
-
-    def __post_init__(self):
-        if not isinstance(
-            self.profile,
-            CatBirthProfile,
-        ):
-            raise TypeError(
-                "Pregnancy phenotype "
-                "requires a CatBirthProfile."
-            )
-
-        object.__setattr__(
-            self,
-            "base_color",
-            str(
-                self.base_color
-            ),
-        )
-
-        object.__setattr__(
-            self,
-            "diluted",
-            bool(
-                self.diluted
-            ),
-        )
-
-        object.__setattr__(
-            self,
-            "white_spotted",
-            bool(
-                self.white_spotted
-            ),
-        )
-
-        object.__setattr__(
-            self,
-            "colorpoint",
-            bool(
-                self.colorpoint
-            ),
-        )
-
-    @classmethod
-    def from_boundary(
-        cls,
-        payload,
-        profile
-    ):
-        return cls(
-            profile=profile,
-            base_color=payload[
-                "base_color"
-            ],
-            diluted=payload[
-                "diluted"
-            ],
-            white_spotted=payload[
-                "white_spotted"
-            ],
-            colorpoint=payload[
-                "colorpoint"
-            ],
-            genotype=payload[
-                "genotype"
-            ],
-        )
-
-    def __deepcopy__(
-        self,
-        memo
-    ):
-        return self
-
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "profile": (
-                self.profile.to_dict()
-            ),
-            "base_color": (
-                self.base_color
-            ),
-            "diluted": self.diluted,
-            "white_spotted": (
-                self.white_spotted
-            ),
-            "colorpoint": (
-                self.colorpoint
-            ),
-            "genotype": self.genotype,
-            "resolved": self.resolved,
-        }
 
 
 @dataclass(slots=True, frozen=True)
@@ -197,7 +83,7 @@ class CatPregnancyEmbryoResult:
     )
 
     phenotype: (
-        CatPregnancyPhenotypeSnapshot
+        CatPhenotypeResult
         | None
     )
 
@@ -240,11 +126,20 @@ class CatPregnancyEmbryoResult:
 
             if not isinstance(
                 self.phenotype,
-                CatPregnancyPhenotypeSnapshot,
+                CatPhenotypeResult,
             ):
                 raise TypeError(
                     "Viable pregnancy embryo "
                     "requires a typed phenotype."
+                )
+
+            if (
+                self.phenotype.profile
+                is not self.event.profile
+            ):
+                raise ValueError(
+                    "Pregnancy phenotype profile "
+                    "must reuse embryo event profile."
                 )
 
             if self.cronenberg is not None:
@@ -305,17 +200,9 @@ class CatPregnancyEmbryoResult:
                 "viability"
             ]
 
-            phenotype = (
-                CatPregnancyPhenotypeSnapshot
-                .from_boundary(
-                    payload[
-                        "phenotype"
-                    ],
-                    profile=(
-                        event.profile
-                    ),
-                )
-            )
+            phenotype = payload[
+                "phenotype"
+            ]
 
         elif isinstance(
             event,

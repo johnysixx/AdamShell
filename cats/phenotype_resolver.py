@@ -1,4 +1,8 @@
 from cats.genotype import CatGenotype
+from cats.cat_birth_objects import (
+    CatBirthProfile,
+    CatPhenotypeResult,
+)
 
 
 class CatPhenotypeResolver:
@@ -109,28 +113,24 @@ class CatPhenotypeResolver:
             else "green"
         )
 
-        profile = {
-            "color": color,
-            "fur_length": fur_length,
-            "pattern": pattern,
-            "eye_color": eye_color,
-            "sex": sex
-        }
+        profile = CatBirthProfile(
+            color=color,
+            fur_length=fur_length,
+            pattern=pattern,
+            eye_color=eye_color,
+            sex=sex,
+        )
 
-        return {
-            "name": (
-                "cat_phenotype_resolved"
-            ),
-            "profile": profile,
-            "base_color": base_color,
-            "diluted": diluted,
-            "white_spotted": (
+        return CatPhenotypeResult(
+            profile=profile,
+            base_color=base_color,
+            diluted=diluted,
+            white_spotted=(
                 white_spotted
             ),
-            "colorpoint": colorpoint,
-            "genotype": genotype,
-            "resolved": True
-        }
+            colorpoint=colorpoint,
+            genotype=genotype,
+        )
 
     @classmethod
     def _resolve_base_color(

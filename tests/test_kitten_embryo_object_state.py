@@ -2,6 +2,7 @@ import unittest
 
 from cats.cat_birth_objects import (
     CatBirthProfile,
+    CatPhenotypeResult,
     KittenEmbryo,
 )
 
@@ -49,17 +50,21 @@ class KittenEmbryoObjectStateTests(
             )
         )
 
+        phenotype = CatPhenotypeResult(
+            profile=profile,
+            base_color="black",
+            diluted=False,
+            white_spotted=False,
+            colorpoint=False,
+            genotype=genotype,
+        )
+
         return KittenEmbryo(
             id="embryo_0001",
             mother_name="mother",
             father_name="father",
             genotype=genotype,
-            phenotype={
-                "profile": (
-                    profile.to_dict()
-                ),
-                "base_color": "black",
-            },
+            phenotype=phenotype,
             profile=profile,
             viability=viability,
             genetic_status="standard",
@@ -120,6 +125,16 @@ class KittenEmbryoObjectStateTests(
         self.assertIsInstance(
             embryo.viability,
             KittenGeneticViabilityResult,
+        )
+
+        self.assertIsInstance(
+            embryo.phenotype,
+            CatPhenotypeResult,
+        )
+
+        self.assertIs(
+            embryo.profile,
+            embryo.phenotype.profile,
         )
 
         self.assertEqual(
@@ -186,11 +201,10 @@ class KittenEmbryoObjectStateTests(
         )
 
         self.assertEqual(
-            embryo.phenotype[
-                "profile"
-            ][
-                "color"
-            ],
+            embryo
+            .phenotype
+            .profile
+            .color,
             "black",
         )
 

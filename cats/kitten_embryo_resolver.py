@@ -183,11 +183,7 @@ class KittenEmbryoResolver:
             genotype
         )
 
-        profile = CatBirthProfile(
-            **phenotype[
-                "profile"
-            ]
-        )
+        profile = phenotype.profile
 
         embryo = KittenEmbryo(
             id=embryo_id,

@@ -4,6 +4,10 @@ from cats.genotype import (
     CatAutosomalGenotype,
     CatGenotype,
 )
+from cats.cat_birth_objects import (
+    CatBirthProfile,
+    CatPhenotypeResult,
+)
 from cats.phenotype_resolver import (
     CatPhenotypeResolver
 )
@@ -53,16 +57,63 @@ class CatPhenotypeResolverTests(
             )
         )
 
-        self.assertEqual(
-            result["profile"],
-            {
-                "color": "black",
-                "fur_length": "short",
-                "pattern": "solid",
-                "eye_color": "green",
-                "sex": "female"
-            }
+        self.assertIsInstance(
+            result,
+            CatPhenotypeResult,
         )
+
+        self.assertIsInstance(
+            result.profile,
+            CatBirthProfile,
+        )
+
+        self.assertEqual(
+            result.profile.color,
+            "black",
+        )
+
+        self.assertEqual(
+            result.profile.fur_length,
+            "short",
+        )
+
+        self.assertEqual(
+            result.profile.pattern,
+            "solid",
+        )
+
+        self.assertEqual(
+            result.profile.eye_color,
+            "green",
+        )
+
+        self.assertEqual(
+            result.profile.sex,
+            "female",
+        )
+
+        self.assertIs(
+            result.genotype,
+            genotype,
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    result,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(TypeError):
+            _ = result[
+                "profile"
+            ]
 
     def test_dilute_black_cat_is_blue(self):
         genotype = self._genotype(
@@ -78,12 +129,12 @@ class CatPhenotypeResolverTests(
         )
 
         self.assertEqual(
-            result["profile"]["color"],
+            result.profile.color,
             "blue"
         )
 
         self.assertTrue(
-            result["diluted"]
+            result.diluted
         )
 
     def test_chocolate_and_cinnamon_are_resolved(self):
@@ -104,12 +155,12 @@ class CatPhenotypeResolverTests(
         )
 
         self.assertEqual(
-            chocolate["profile"]["color"],
+            chocolate.profile.color,
             "chocolate"
         )
 
         self.assertEqual(
-            cinnamon["profile"]["color"],
+            cinnamon.profile.color,
             "cinnamon"
         )
 
@@ -133,12 +184,12 @@ class CatPhenotypeResolverTests(
         )
 
         self.assertEqual(
-            lilac["profile"]["color"],
+            lilac.profile.color,
             "lilac"
         )
 
         self.assertEqual(
-            fawn["profile"]["color"],
+            fawn.profile.color,
             "fawn"
         )
 
@@ -156,12 +207,12 @@ class CatPhenotypeResolverTests(
         )
 
         self.assertEqual(
-            result["profile"]["color"],
+            result.profile.color,
             "orange"
         )
 
         self.assertEqual(
-            result["profile"]["pattern"],
+            result.profile.pattern,
             "tabby"
         )
 
@@ -178,7 +229,7 @@ class CatPhenotypeResolverTests(
         )
 
         self.assertEqual(
-            result["profile"]["color"],
+            result.profile.color,
             "tortoiseshell"
         )
 
@@ -196,7 +247,7 @@ class CatPhenotypeResolverTests(
         )
 
         self.assertEqual(
-            result["profile"]["color"],
+            result.profile.color,
             "blue_tortoiseshell"
         )
 
@@ -214,12 +265,12 @@ class CatPhenotypeResolverTests(
         )
 
         self.assertEqual(
-            result["profile"]["color"],
+            result.profile.color,
             "calico"
         )
 
         self.assertEqual(
-            result["profile"]["pattern"],
+            result.profile.pattern,
             "tricolor"
         )
 
@@ -235,7 +286,7 @@ class CatPhenotypeResolverTests(
         )
 
         self.assertEqual(
-            result["profile"]["pattern"],
+            result.profile.pattern,
             "tabby"
         )
 
@@ -251,7 +302,7 @@ class CatPhenotypeResolverTests(
         )
 
         self.assertEqual(
-            result["profile"]["fur_length"],
+            result.profile.fur_length,
             "long"
         )
 
@@ -267,16 +318,16 @@ class CatPhenotypeResolverTests(
         )
 
         self.assertTrue(
-            result["colorpoint"]
+            result.colorpoint
         )
 
         self.assertEqual(
-            result["profile"]["pattern"],
+            result.profile.pattern,
             "pointed"
         )
 
         self.assertEqual(
-            result["profile"]["eye_color"],
+            result.profile.eye_color,
             "blue"
         )
 
