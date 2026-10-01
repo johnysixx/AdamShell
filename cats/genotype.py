@@ -7,13 +7,6 @@ class CatParentalContribution:
     from_mother: str | None
     from_father: str | None
 
-    def to_dict(self):
-        return {
-            "from_mother": self.from_mother,
-            "from_father": self.from_father,
-        }
-
-
 @dataclass(slots=True, frozen=True)
 class CatAutosomalInheritanceRecord:
     black: CatParentalContribution
@@ -118,41 +111,6 @@ class CatInheritanceRecord:
                 "autosomal_loci inheritance must be a "
                 "CatAutosomalInheritanceRecord object."
             )
-
-    def to_dict(self):
-        return {
-            "sex_chromosomes": (
-                self.sex_chromosomes.to_dict()
-            ),
-            "orange_locus": self.orange_locus.to_dict(),
-            "autosomal_loci": {
-                "black": (
-                    self.autosomal_loci
-                    .black.to_dict()
-                ),
-                "dilution": (
-                    self.autosomal_loci
-                    .dilution.to_dict()
-                ),
-                "agouti": (
-                    self.autosomal_loci
-                    .agouti.to_dict()
-                ),
-                "white_spotting": (
-                    self.autosomal_loci
-                    .white_spotting.to_dict()
-                ),
-                "colorpoint": (
-                    self.autosomal_loci
-                    .colorpoint.to_dict()
-                ),
-                "longhair": (
-                    self.autosomal_loci
-                    .longhair.to_dict()
-                ),
-            },
-        }
-
 
 @dataclass(slots=True)
 class CatGenotype:
@@ -666,44 +624,3 @@ class CatGenotype:
                 )
 
         return True
-
-    def to_dict(self):
-        return {
-            "sex": self.sex,
-            "sex_chromosomes": tuple(
-                self.sex_chromosomes
-            ),
-            "orange_locus": tuple(
-                self.orange_locus
-            ),
-            "autosomal_loci": {
-                "black": tuple(
-                    self.autosomal_loci.black
-                ),
-                "dilution": tuple(
-                    self.autosomal_loci.dilution
-                ),
-                "agouti": tuple(
-                    self.autosomal_loci.agouti
-                ),
-                "white_spotting": tuple(
-                    self.autosomal_loci
-                    .white_spotting
-                ),
-                "colorpoint": tuple(
-                    self.autosomal_loci.colorpoint
-                ),
-                "longhair": tuple(
-                    self.autosomal_loci.longhair
-                ),
-            },
-            "lethal_mutations": list(
-                self.lethal_mutations
-            ),
-            "origin": self.origin,
-            "inheritance_record": (
-                self.inheritance_record.to_dict()
-                if self.inheritance_record is not None
-                else None
-            ),
-        }

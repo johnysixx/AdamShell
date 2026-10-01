@@ -143,7 +143,25 @@ class CatGenotypeObjectStateTests(unittest.TestCase):
             ]
 
     def test_legacy_mapping_genotype_is_rejected(self):
-        legacy = self.mother.to_dict()
+        legacy = {
+            "sex": "female",
+            "sex_chromosomes": (
+                "X",
+                "X",
+            ),
+            "orange_locus": (
+                "O",
+                "o",
+            ),
+            "autosomal_loci": {
+                "black": (
+                    "B",
+                    "B",
+                ),
+            },
+            "lethal_mutations": (),
+            "origin": "founder",
+        }
 
         with self.assertRaises(TypeError):
             CatGenotype.validate(legacy)
@@ -160,29 +178,31 @@ class CatGenotypeObjectStateTests(unittest.TestCase):
             "invalid_genotype",
         )
 
-    def test_to_dict_is_detached_snapshot(self):
-        snapshot = self.mother.to_dict()
-        snapshot["sex"] = "male"
-        snapshot["autosomal_loci"]["black"] = (
-            "b",
-            "b",
-        )
-        snapshot["lethal_mutations"].append(
-            "test_mutation"
+    def test_genetics_domain_objects_have_no_serialization_api(self):
+        kitten = CatGenotype.inherit(
+            self.mother,
+            self.father,
+            rng=FirstChoiceRng(),
         )
 
-        self.assertEqual(
-            self.mother.sex,
-            "female",
+        domain_objects = (
+            self.mother,
+            self.mother.autosomal_loci,
+            kitten.inheritance_record,
+            kitten.inheritance_record.sex_chromosomes,
+            kitten.inheritance_record.orange_locus,
+            kitten.inheritance_record.autosomal_loci,
+            kitten.inheritance_record.autosomal_loci.black,
         )
-        self.assertEqual(
-            self.mother.autosomal_loci.black,
-            ("B", "B"),
-        )
-        self.assertEqual(
-            self.mother.lethal_mutations,
-            (),
-        )
+
+        for domain_object in domain_objects:
+            self.assertFalse(
+                hasattr(
+                    domain_object,
+                    "to_dict",
+                ),
+                type(domain_object).__name__,
+            )
 
 
 if __name__ == "__main__":
