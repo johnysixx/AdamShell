@@ -1,6 +1,7 @@
 import unittest
 
 from cats.genotype import (
+    CatAutosomalInheritanceRecord,
     CatGenotype,
     CatInheritanceRecord,
     CatParentalContribution,
@@ -59,11 +60,45 @@ class CatGenotypeObjectStateTests(unittest.TestCase):
             CatParentalContribution,
         )
         self.assertIsInstance(
-            kitten.inheritance_record.autosomal_loci[
-                "black"
-            ],
+            kitten.inheritance_record.autosomal_loci,
+            CatAutosomalInheritanceRecord,
+        )
+        self.assertIsInstance(
+            kitten.inheritance_record.autosomal_loci.black,
             CatParentalContribution,
         )
+
+    def test_autosomal_inheritance_has_no_mapping_api(self):
+        kitten = CatGenotype.inherit(
+            self.mother,
+            self.father,
+            rng=FirstChoiceRng(),
+        )
+
+        autosomal = (
+            kitten.inheritance_record
+            .autosomal_loci
+        )
+
+        for name in (
+            "get",
+            "keys",
+            "items",
+            "values",
+            "__getitem__",
+        ):
+            self.assertFalse(
+                hasattr(
+                    autosomal,
+                    name,
+                ),
+                name,
+            )
+
+        with self.assertRaises(TypeError):
+            _ = autosomal[
+                "black"
+            ]
 
     def test_legacy_mapping_genotype_is_rejected(self):
         legacy = self.mother.to_dict()

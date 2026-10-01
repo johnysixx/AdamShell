@@ -14,11 +14,43 @@ class CatParentalContribution:
         }
 
 
+@dataclass(slots=True, frozen=True)
+class CatAutosomalInheritanceRecord:
+    black: CatParentalContribution
+    dilution: CatParentalContribution
+    agouti: CatParentalContribution
+    white_spotting: CatParentalContribution
+    colorpoint: CatParentalContribution
+    longhair: CatParentalContribution
+
+    def __post_init__(self):
+        for field_name in (
+            "black",
+            "dilution",
+            "agouti",
+            "white_spotting",
+            "colorpoint",
+            "longhair",
+        ):
+            if not isinstance(
+                getattr(
+                    self,
+                    field_name,
+                ),
+                CatParentalContribution,
+            ):
+                raise TypeError(
+                    "Autosomal inheritance loci "
+                    "must contain "
+                    "CatParentalContribution objects."
+                )
+
+
 @dataclass(slots=True)
 class CatInheritanceRecord:
     sex_chromosomes: CatParentalContribution
     orange_locus: CatParentalContribution
-    autosomal_loci: dict[str, CatParentalContribution]
+    autosomal_loci: CatAutosomalInheritanceRecord
 
     def __post_init__(self):
         if not isinstance(
@@ -39,22 +71,14 @@ class CatInheritanceRecord:
                 "a CatParentalContribution object."
             )
 
-        if not isinstance(self.autosomal_loci, dict):
+        if not isinstance(
+            self.autosomal_loci,
+            CatAutosomalInheritanceRecord,
+        ):
             raise TypeError(
-                "autosomal_loci inheritance must be a locus map."
+                "autosomal_loci inheritance must be a "
+                "CatAutosomalInheritanceRecord object."
             )
-
-        self.autosomal_loci = dict(self.autosomal_loci)
-
-        for contribution in self.autosomal_loci.values():
-            if not isinstance(
-                contribution,
-                CatParentalContribution,
-            ):
-                raise TypeError(
-                    "autosomal_loci inheritance values must be "
-                    "CatParentalContribution objects."
-                )
 
     def to_dict(self):
         return {
@@ -63,9 +87,30 @@ class CatInheritanceRecord:
             ),
             "orange_locus": self.orange_locus.to_dict(),
             "autosomal_loci": {
-                locus: contribution.to_dict()
-                for locus, contribution
-                in self.autosomal_loci.items()
+                "black": (
+                    self.autosomal_loci
+                    .black.to_dict()
+                ),
+                "dilution": (
+                    self.autosomal_loci
+                    .dilution.to_dict()
+                ),
+                "agouti": (
+                    self.autosomal_loci
+                    .agouti.to_dict()
+                ),
+                "white_spotting": (
+                    self.autosomal_loci
+                    .white_spotting.to_dict()
+                ),
+                "colorpoint": (
+                    self.autosomal_loci
+                    .colorpoint.to_dict()
+                ),
+                "longhair": (
+                    self.autosomal_loci
+                    .longhair.to_dict()
+                ),
             },
         }
 
@@ -370,7 +415,38 @@ class CatGenotype:
                         )
                     ),
                     autosomal_loci=(
-                        inheritance_record
+                        CatAutosomalInheritanceRecord(
+                            black=(
+                                inheritance_record[
+                                    "black"
+                                ]
+                            ),
+                            dilution=(
+                                inheritance_record[
+                                    "dilution"
+                                ]
+                            ),
+                            agouti=(
+                                inheritance_record[
+                                    "agouti"
+                                ]
+                            ),
+                            white_spotting=(
+                                inheritance_record[
+                                    "white_spotting"
+                                ]
+                            ),
+                            colorpoint=(
+                                inheritance_record[
+                                    "colorpoint"
+                                ]
+                            ),
+                            longhair=(
+                                inheritance_record[
+                                    "longhair"
+                                ]
+                            ),
+                        )
                     ),
                 )
             ),

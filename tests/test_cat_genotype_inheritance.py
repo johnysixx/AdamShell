@@ -179,7 +179,7 @@ class CatGenotypeInheritanceTests(
 
         record = (
             kitten.inheritance_record
-            .autosomal_loci["longhair"]
+            .autosomal_loci.longhair
         )
 
         self.assertEqual(
