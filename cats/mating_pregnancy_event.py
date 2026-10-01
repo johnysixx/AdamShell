@@ -6,8 +6,11 @@ from cats.cat_birth_objects import (
 
 from cats.kitten_embryo_resolver import (
     KittenEmbryoCreatedEvent,
-    KittenGeneticViabilitySnapshot,
     NonviableKittenEmbryoReplacedByCronenbergEvent,
+)
+
+from cats.kitten_viability_resolver import (
+    KittenGeneticViabilityResult,
 )
 
 from cats.mating_contact import (
@@ -190,7 +193,7 @@ class CatPregnancyEmbryoResult:
     embryo: object | None
 
     viability: (
-        KittenGeneticViabilitySnapshot
+        KittenGeneticViabilityResult
     )
 
     phenotype: (
@@ -208,7 +211,7 @@ class CatPregnancyEmbryoResult:
     def __post_init__(self):
         if not isinstance(
             self.viability,
-            KittenGeneticViabilitySnapshot,
+            KittenGeneticViabilityResult,
         ):
             raise TypeError(
                 "Pregnancy embryo result "
@@ -298,14 +301,9 @@ class CatPregnancyEmbryoResult:
                     "nonviable boundary state."
                 )
 
-            viability = (
-                KittenGeneticViabilitySnapshot
-                .from_boundary(
-                    payload[
-                        "viability"
-                    ]
-                )
-            )
+            viability = payload[
+                "viability"
+            ]
 
             phenotype = (
                 CatPregnancyPhenotypeSnapshot

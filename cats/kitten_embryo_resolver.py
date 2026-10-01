@@ -1,220 +1,15 @@
-from copy import deepcopy
 from dataclasses import dataclass, field
-from types import MappingProxyType
 
 from cats.genotype import CatGenotype
 from cats.phenotype_resolver import CatPhenotypeResolver
-from cats.kitten_viability_resolver import KittenGeneticViabilityResolver
-from cats.cat_birth_objects import CatBirthProfile, KittenEmbryo
-
-
-class _FrozenEmbryoList(tuple):
-    pass
-
-
-class _FrozenEmbryoSet(frozenset):
-    pass
-
-
-def _freeze_embryo_payload(value):
-    if isinstance(value, dict):
-        return MappingProxyType({
-            key: _freeze_embryo_payload(item)
-            for key, item in value.items()
-        })
-
-    if isinstance(value, list):
-        return _FrozenEmbryoList(
-            _freeze_embryo_payload(item)
-            for item in value
-        )
-
-    if isinstance(value, tuple):
-        return tuple(
-            _freeze_embryo_payload(item)
-            for item in value
-        )
-
-    if isinstance(value, set):
-        return _FrozenEmbryoSet(
-            _freeze_embryo_payload(item)
-            for item in value
-        )
-
-    if isinstance(value, frozenset):
-        return frozenset(
-            _freeze_embryo_payload(item)
-            for item in value
-        )
-
-    return deepcopy(value)
-
-
-def _thaw_embryo_payload(value):
-    if isinstance(
-        value,
-        MappingProxyType,
-    ):
-        return {
-            key: _thaw_embryo_payload(item)
-            for key, item in value.items()
-        }
-
-    if isinstance(
-        value,
-        _FrozenEmbryoList,
-    ):
-        return [
-            _thaw_embryo_payload(item)
-            for item in value
-        ]
-
-    if isinstance(value, tuple):
-        return tuple(
-            _thaw_embryo_payload(item)
-            for item in value
-        )
-
-    if isinstance(
-        value,
-        _FrozenEmbryoSet,
-    ):
-        return {
-            _thaw_embryo_payload(item)
-            for item in value
-        }
-
-    if isinstance(value, frozenset):
-        return frozenset(
-            _thaw_embryo_payload(item)
-            for item in value
-        )
-
-    return deepcopy(value)
-
-
-@dataclass(slots=True, frozen=True)
-class KittenGeneticViabilitySnapshot:
-
-    status: str
-    viable: bool
-    rare: bool
-    reason: str | None
-    details: object
-    special_traits: tuple[str, ...]
-    genotype: CatGenotype
-    name: str = field(
-        default=(
-            "kitten_genetic_viability_resolved"
-        ),
-        init=False,
-    )
-
-    def __post_init__(self):
-        if not isinstance(
-            self.genotype,
-            CatGenotype,
-        ):
-            raise TypeError(
-                "Viability snapshot requires "
-                "a CatGenotype object."
-            )
-
-        object.__setattr__(
-            self,
-            "status",
-            str(self.status),
-        )
-
-        object.__setattr__(
-            self,
-            "viable",
-            bool(self.viable),
-        )
-
-        object.__setattr__(
-            self,
-            "rare",
-            bool(self.rare),
-        )
-
-        if self.reason is not None:
-            object.__setattr__(
-                self,
-                "reason",
-                str(self.reason),
-            )
-
-        object.__setattr__(
-            self,
-            "details",
-            _freeze_embryo_payload(
-                self.details
-            ),
-        )
-
-        object.__setattr__(
-            self,
-            "special_traits",
-            tuple(
-                str(trait)
-                for trait
-                in self.special_traits
-            ),
-        )
-
-    @classmethod
-    def from_boundary(
-        cls,
-        payload,
-    ):
-        if not isinstance(
-            payload,
-            dict,
-        ):
-            raise TypeError(
-                "Kitten viability boundary "
-                "payload must be dict."
-            )
-
-        return cls(
-            status=payload["status"],
-            viable=payload["viable"],
-            rare=payload["rare"],
-            reason=payload.get(
-                "reason"
-            ),
-            details=payload.get(
-                "details"
-            ),
-            special_traits=tuple(
-                payload.get(
-                    "special_traits",
-                    (),
-                )
-            ),
-            genotype=payload[
-                "genotype"
-            ],
-        )
-
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "status": self.status,
-            "viable": self.viable,
-            "rare": self.rare,
-            "reason": self.reason,
-            "details": (
-                _thaw_embryo_payload(
-                    self.details
-                )
-            ),
-            "special_traits": list(
-                self.special_traits
-            ),
-            "genotype": self.genotype,
-        }
+from cats.kitten_viability_resolver import (
+    KittenGeneticViabilityResolver,
+    KittenGeneticViabilityResult,
+)
+from cats.cat_birth_objects import (
+    CatBirthProfile,
+    KittenEmbryo,
+)
 
 
 @dataclass(slots=True, frozen=True)
@@ -225,7 +20,7 @@ class NonviableKittenEmbryoReplacedByCronenbergEvent:
     father: str
     genotype: CatGenotype
     viability: (
-        KittenGeneticViabilitySnapshot
+        KittenGeneticViabilityResult
     )
     cronenberg_id: str
     name: str = field(
@@ -256,7 +51,7 @@ class NonviableKittenEmbryoReplacedByCronenbergEvent:
 
         if not isinstance(
             self.viability,
-            KittenGeneticViabilitySnapshot,
+            KittenGeneticViabilityResult,
         ):
             raise TypeError(
                 "Nonviable embryo event "
@@ -352,7 +147,7 @@ class KittenEmbryoResolver:
         embryo_id = f'embryo_{self.embryo_count:04d}'
         genotype = genotype_override if genotype_override is not None else CatGenotype.inherit(mother_genotype=mother.genotype, father_genotype=father.genotype, rng=rng)
         viability = KittenGeneticViabilityResolver.resolve(genotype)
-        if not viability['viable']:
+        if not viability.viable:
             cronenberg = self.universe.create_cronenberg_from_quantum_error(error=RuntimeError(f'Nonviable kitten genotype replaced embryo {embryo_id}.'), source_component='kitten_embryo_resolver', source_operation='nonviable_embryo')
             event = (
                 NonviableKittenEmbryoReplacedByCronenbergEvent(
@@ -360,12 +155,7 @@ class KittenEmbryoResolver:
                     mother=mother.name,
                     father=father.name,
                     genotype=genotype,
-                    viability=(
-                        KittenGeneticViabilitySnapshot
-                        .from_boundary(
-                            viability
-                        )
-                    ),
+                    viability=viability,
                     cronenberg_id=cronenberg.id,
                 )
             )
@@ -393,13 +183,6 @@ class KittenEmbryoResolver:
             genotype
         )
 
-        viability_snapshot = (
-            KittenGeneticViabilitySnapshot
-            .from_boundary(
-                viability
-            )
-        )
-
         profile = CatBirthProfile(
             **phenotype[
                 "profile"
@@ -414,16 +197,16 @@ class KittenEmbryoResolver:
             phenotype=phenotype,
             profile=profile,
             viability=(
-                viability_snapshot
+                viability
             ),
             genetic_status=(
-                viability_snapshot.status
+                viability.status
             ),
             rare=(
-                viability_snapshot.rare
+                viability.rare
             ),
             special_traits=(
-                viability_snapshot
+                viability
                 .special_traits
             ),
         )
@@ -433,10 +216,10 @@ class KittenEmbryoResolver:
             mother=mother.name,
             father=father.name,
             genetic_status=(
-                viability_snapshot.status
+                viability.status
             ),
             rare=(
-                viability_snapshot.rare
+                viability.rare
             ),
             profile=profile,
         )

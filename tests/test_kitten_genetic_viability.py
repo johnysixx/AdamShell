@@ -8,7 +8,8 @@ from cats.phenotype_resolver import (
     CatPhenotypeResolver
 )
 from cats.kitten_viability_resolver import (
-    KittenGeneticViabilityResolver
+    KittenGeneticViabilityResolver,
+    KittenGeneticViabilityResult,
 )
 
 
@@ -53,17 +54,60 @@ class KittenGeneticViabilityTests(
         )
 
         self.assertEqual(
-            result["status"],
+            result.status,
             "standard"
         )
 
         self.assertTrue(
-            result["viable"]
+            result.viable
         )
 
         self.assertFalse(
-            result["rare"]
+            result.rare
         )
+
+    def test_result_is_object_state(self):
+        genotype = (
+            CatGenotype.create_founder(
+                sex="male",
+                autosomal_loci=(
+                    self._autosomal()
+                ),
+            )
+        )
+
+        result = (
+            KittenGeneticViabilityResolver
+            .resolve(genotype)
+        )
+
+        self.assertIsInstance(
+            result,
+            KittenGeneticViabilityResult,
+        )
+
+        self.assertIs(
+            result.genotype,
+            genotype,
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    result,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(TypeError):
+            _ = result[
+                "status"
+            ]
 
     def test_xxy_tortoiseshell_male_is_rare_valid(self):
         genotype = (
@@ -96,23 +140,21 @@ class KittenGeneticViabilityTests(
         )
 
         self.assertEqual(
-            viability["status"],
+            viability.status,
             "rare_valid"
         )
 
         self.assertTrue(
-            viability["viable"]
+            viability.viable
         )
 
         self.assertTrue(
-            viability["rare"]
+            viability.rare
         )
 
         self.assertIn(
             "xxy_male",
-            viability[
-                "special_traits"
-            ]
+            viability.special_traits
         )
 
         self.assertEqual(
@@ -161,7 +203,7 @@ class KittenGeneticViabilityTests(
         )
 
         self.assertEqual(
-            viability["status"],
+            viability.status,
             "rare_valid"
         )
 
@@ -199,16 +241,16 @@ class KittenGeneticViabilityTests(
         )
 
         self.assertEqual(
-            result["status"],
+            result.status,
             "nonviable"
         )
 
         self.assertFalse(
-            result["viable"]
+            result.viable
         )
 
         self.assertEqual(
-            result["reason"],
+            result.reason,
             "lethal_genetic_combination"
         )
 
@@ -233,16 +275,16 @@ class KittenGeneticViabilityTests(
         )
 
         self.assertEqual(
-            result["status"],
+            result.status,
             "nonviable"
         )
 
         self.assertFalse(
-            result["viable"]
+            result.viable
         )
 
         self.assertEqual(
-            result["reason"],
+            result.reason,
             "invalid_genotype"
         )
 

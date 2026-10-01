@@ -172,9 +172,9 @@ class CatGenotypeObjectStateTests(unittest.TestCase):
         result = KittenGeneticViabilityResolver.resolve(
             legacy
         )
-        self.assertFalse(result["viable"])
+        self.assertFalse(result.viable)
         self.assertEqual(
-            result["reason"],
+            result.reason,
             "invalid_genotype",
         )
 

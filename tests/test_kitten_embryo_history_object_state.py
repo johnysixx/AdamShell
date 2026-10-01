@@ -9,8 +9,10 @@ from cats.genotype import CatGenotype
 from cats.kitten_embryo_resolver import (
     KittenEmbryoCreatedEvent,
     KittenEmbryoResolver,
-    KittenGeneticViabilitySnapshot,
     NonviableKittenEmbryoReplacedByCronenbergEvent,
+)
+from cats.kitten_viability_resolver import (
+    KittenGeneticViabilityResult,
 )
 
 
@@ -160,7 +162,7 @@ class KittenEmbryoHistoryObjectStateTests(
 
         self.assertIsInstance(
             event.viability,
-            KittenGeneticViabilitySnapshot,
+            KittenGeneticViabilityResult,
         )
 
         self.assertIs(

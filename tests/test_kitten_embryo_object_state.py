@@ -13,8 +13,8 @@ from cats.genotype import (
     CatGenotype,
 )
 
-from cats.kitten_embryo_resolver import (
-    KittenGeneticViabilitySnapshot,
+from cats.kitten_viability_resolver import (
+    KittenGeneticViabilityResult,
 )
 
 
@@ -38,7 +38,7 @@ class KittenEmbryoObjectStateTests(
         )
 
         viability = (
-            KittenGeneticViabilitySnapshot(
+            KittenGeneticViabilityResult(
                 status="standard",
                 viable=True,
                 rare=False,
@@ -119,7 +119,7 @@ class KittenEmbryoObjectStateTests(
 
         self.assertIsInstance(
             embryo.viability,
-            KittenGeneticViabilitySnapshot,
+            KittenGeneticViabilityResult,
         )
 
         self.assertEqual(
