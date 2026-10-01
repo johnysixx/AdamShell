@@ -1,93 +1,79 @@
-from copy import deepcopy
 from dataclasses import dataclass, field
-from types import MappingProxyType
 
 from cats.genotype import CatGenotype
 
 
-class _FrozenViabilityList(tuple):
-    pass
+@dataclass(slots=True, frozen=True)
+class KittenInvalidGenotypeDetails:
 
+    error: str
 
-class _FrozenViabilitySet(frozenset):
-    pass
-
-
-def _freeze_viability_payload(value):
-    if isinstance(value, dict):
-        return MappingProxyType({
-            key: _freeze_viability_payload(item)
-            for key, item in value.items()
-        })
-
-    if isinstance(value, list):
-        return _FrozenViabilityList(
-            _freeze_viability_payload(item)
-            for item in value
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "error",
+            str(self.error),
         )
 
-    if isinstance(value, tuple):
-        return tuple(
-            _freeze_viability_payload(item)
-            for item in value
+        if not self.error:
+            raise ValueError(
+                "Invalid genotype details require "
+                "an error message."
+            )
+
+
+@dataclass(slots=True, frozen=True)
+class KittenLethalMutationDetails:
+
+    lethal_mutations: tuple[str, ...]
+
+    def __post_init__(self):
+        mutations = tuple(
+            str(mutation)
+            for mutation
+            in self.lethal_mutations
         )
 
-    if isinstance(value, set):
-        return _FrozenViabilitySet(
-            _freeze_viability_payload(item)
-            for item in value
+        if not mutations:
+            raise ValueError(
+                "Lethal mutation details require "
+                "at least one mutation."
+            )
+
+        object.__setattr__(
+            self,
+            "lethal_mutations",
+            mutations,
         )
 
-    if isinstance(value, frozenset):
-        return frozenset(
-            _freeze_viability_payload(item)
-            for item in value
+
+@dataclass(slots=True, frozen=True)
+class KittenXXYGenotypeDetails:
+
+    sex_chromosomes: tuple[str, ...]
+
+    def __post_init__(self):
+        chromosomes = tuple(
+            str(chromosome)
+            for chromosome
+            in self.sex_chromosomes
         )
 
-    return deepcopy(value)
+        if chromosomes != (
+            "X",
+            "X",
+            "Y",
+        ):
+            raise ValueError(
+                "XXY genotype details require "
+                "XXY sex chromosomes."
+            )
 
-
-def _thaw_viability_payload(value):
-    if isinstance(
-        value,
-        MappingProxyType,
-    ):
-        return {
-            key: _thaw_viability_payload(item)
-            for key, item in value.items()
-        }
-
-    if isinstance(
-        value,
-        _FrozenViabilityList,
-    ):
-        return [
-            _thaw_viability_payload(item)
-            for item in value
-        ]
-
-    if isinstance(value, tuple):
-        return tuple(
-            _thaw_viability_payload(item)
-            for item in value
+        object.__setattr__(
+            self,
+            "sex_chromosomes",
+            chromosomes,
         )
-
-    if isinstance(
-        value,
-        _FrozenViabilitySet,
-    ):
-        return {
-            _thaw_viability_payload(item)
-            for item in value
-        }
-
-    if isinstance(value, frozenset):
-        return frozenset(
-            _thaw_viability_payload(item)
-            for item in value
-        )
-
-    return deepcopy(value)
 
 
 @dataclass(slots=True, frozen=True)
@@ -97,7 +83,14 @@ class KittenGeneticViabilityResult:
     viable: bool
     rare: bool
     reason: str | None
-    details: object
+
+    details: (
+        KittenInvalidGenotypeDetails
+        | KittenLethalMutationDetails
+        | KittenXXYGenotypeDetails
+        | None
+    )
+
     special_traits: tuple[str, ...]
     genotype: object
 
@@ -136,14 +129,6 @@ class KittenGeneticViabilityResult:
 
         object.__setattr__(
             self,
-            "details",
-            _freeze_viability_payload(
-                self.details
-            ),
-        )
-
-        object.__setattr__(
-            self,
             "special_traits",
             tuple(
                 str(trait)
@@ -151,6 +136,46 @@ class KittenGeneticViabilityResult:
                 in self.special_traits
             ),
         )
+
+        details_type_by_reason = {
+            "invalid_genotype": (
+                KittenInvalidGenotypeDetails
+            ),
+            "lethal_genetic_combination": (
+                KittenLethalMutationDetails
+            ),
+            "xxy_male": (
+                KittenXXYGenotypeDetails
+            ),
+        }
+
+        if self.reason is None:
+            if self.details is not None:
+                raise TypeError(
+                    "Standard viability result "
+                    "cannot contain details."
+                )
+
+        elif self.reason in details_type_by_reason:
+            expected_type = (
+                details_type_by_reason[
+                    self.reason
+                ]
+            )
+
+            if not isinstance(
+                self.details,
+                expected_type,
+            ):
+                raise TypeError(
+                    "Viability details do not match "
+                    f"reason {self.reason!r}."
+                )
+
+        else:
+            raise ValueError(
+                "Unsupported kitten viability reason."
+            )
 
         if (
             self.reason != "invalid_genotype"
@@ -177,17 +202,47 @@ class KittenGeneticViabilityResult:
             )
 
     def to_dict(self):
+        if self.details is None:
+            details = None
+
+        elif isinstance(
+            self.details,
+            KittenInvalidGenotypeDetails,
+        ):
+            details = self.details.error
+
+        elif isinstance(
+            self.details,
+            KittenLethalMutationDetails,
+        ):
+            details = {
+                "lethal_mutations": list(
+                    self.details.lethal_mutations
+                )
+            }
+
+        elif isinstance(
+            self.details,
+            KittenXXYGenotypeDetails,
+        ):
+            details = {
+                "sex_chromosomes": tuple(
+                    self.details.sex_chromosomes
+                )
+            }
+
+        else:
+            raise TypeError(
+                "Unsupported kitten viability details."
+            )
+
         return {
             "name": self.name,
             "status": self.status,
             "viable": self.viable,
             "rare": self.rare,
             "reason": self.reason,
-            "details": (
-                _thaw_viability_payload(
-                    self.details
-                )
-            ),
+            "details": details,
             "special_traits": list(
                 self.special_traits
             ),
@@ -217,12 +272,16 @@ class KittenGeneticViabilityResolver:
                 viable=False,
                 rare=False,
                 reason="invalid_genotype",
-                details=str(error),
+                details=(
+                    KittenInvalidGenotypeDetails(
+                        error=str(error),
+                    )
+                ),
                 special_traits=(),
                 genotype=genotype,
             )
 
-        lethal_mutations = list(
+        lethal_mutations = tuple(
             genotype.lethal_mutations
         )
 
@@ -234,11 +293,13 @@ class KittenGeneticViabilityResolver:
                 reason=(
                     "lethal_genetic_combination"
                 ),
-                details={
-                    "lethal_mutations": (
-                        lethal_mutations
+                details=(
+                    KittenLethalMutationDetails(
+                        lethal_mutations=(
+                            lethal_mutations
+                        ),
                     )
-                },
+                ),
                 special_traits=(),
                 genotype=genotype,
             )
@@ -278,11 +339,13 @@ class KittenGeneticViabilityResolver:
                 viable=True,
                 rare=True,
                 reason="xxy_male",
-                details={
-                    "sex_chromosomes": (
-                        chromosomes
+                details=(
+                    KittenXXYGenotypeDetails(
+                        sex_chromosomes=(
+                            chromosomes
+                        ),
                     )
-                },
+                ),
                 special_traits=tuple(
                     traits
                 ),

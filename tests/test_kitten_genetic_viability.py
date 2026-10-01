@@ -10,6 +10,9 @@ from cats.phenotype_resolver import (
 from cats.kitten_viability_resolver import (
     KittenGeneticViabilityResolver,
     KittenGeneticViabilityResult,
+    KittenInvalidGenotypeDetails,
+    KittenLethalMutationDetails,
+    KittenXXYGenotypeDetails,
 )
 
 
@@ -64,6 +67,10 @@ class KittenGeneticViabilityTests(
 
         self.assertFalse(
             result.rare
+        )
+
+        self.assertIsNone(
+            result.details
         )
 
     def test_result_is_object_state(self):
@@ -150,6 +157,20 @@ class KittenGeneticViabilityTests(
 
         self.assertTrue(
             viability.rare
+        )
+
+        self.assertIsInstance(
+            viability.details,
+            KittenXXYGenotypeDetails,
+        )
+
+        self.assertEqual(
+            viability.details.sex_chromosomes,
+            (
+                "X",
+                "X",
+                "Y",
+            ),
         )
 
         self.assertIn(
@@ -254,6 +275,49 @@ class KittenGeneticViabilityTests(
             "lethal_genetic_combination"
         )
 
+        self.assertIsInstance(
+            result.details,
+            KittenLethalMutationDetails,
+        )
+
+        self.assertEqual(
+            result.details.lethal_mutations,
+            (
+                "embryonic_lethal",
+            ),
+        )
+
+        with self.assertRaises(TypeError):
+            _ = result.details[
+                "lethal_mutations"
+            ]
+
+        boundary = result.to_dict()
+
+        self.assertEqual(
+            boundary[
+                "details"
+            ][
+                "lethal_mutations"
+            ],
+            [
+                "embryonic_lethal",
+            ],
+        )
+
+        boundary[
+            "details"
+        ][
+            "lethal_mutations"
+        ][0] = "changed"
+
+        self.assertEqual(
+            result.details.lethal_mutations,
+            (
+                "embryonic_lethal",
+            ),
+        )
+
     def test_internally_invalid_genotype_is_nonviable(self):
         genotype = (
             CatGenotype.create_founder(
@@ -286,6 +350,15 @@ class KittenGeneticViabilityTests(
         self.assertEqual(
             result.reason,
             "invalid_genotype"
+        )
+
+        self.assertIsInstance(
+            result.details,
+            KittenInvalidGenotypeDetails,
+        )
+
+        self.assertTrue(
+            result.details.error
         )
 
 

@@ -13,6 +13,7 @@ from cats.kitten_embryo_resolver import (
 )
 from cats.kitten_viability_resolver import (
     KittenGeneticViabilityResult,
+    KittenLethalMutationDetails,
 )
 
 
@@ -175,19 +176,24 @@ class KittenEmbryoHistoryObjectStateTests(
             "nonviable",
         )
 
+        self.assertIsInstance(
+            event.viability.details,
+            KittenLethalMutationDetails,
+        )
+
         self.assertEqual(
-            event.viability.details[
-                "lethal_mutations"
-            ],
+            event.viability
+            .details
+            .lethal_mutations,
             (
                 "embryonic_lethal",
             ),
         )
 
         with self.assertRaises(TypeError):
-            event.viability.details[
+            _ = event.viability.details[
                 "lethal_mutations"
-            ] = ()
+            ]
 
         result[
             "event"
@@ -200,9 +206,9 @@ class KittenEmbryoHistoryObjectStateTests(
         ][0] = "changed"
 
         self.assertEqual(
-            event.viability.details[
-                "lethal_mutations"
-            ],
+            event.viability
+            .details
+            .lethal_mutations,
             (
                 "embryonic_lethal",
             ),

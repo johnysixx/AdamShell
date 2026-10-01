@@ -43,7 +43,7 @@ class KittenEmbryoObjectStateTests(
                 viable=True,
                 rare=False,
                 reason=None,
-                details={},
+                details=None,
                 special_traits=(),
                 genotype=genotype,
             )
