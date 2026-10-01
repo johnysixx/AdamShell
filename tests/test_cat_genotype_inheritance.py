@@ -1,6 +1,9 @@
 import unittest
 
-from cats.genotype import CatGenotype
+from cats.genotype import (
+    CatAutosomalGenotype,
+    CatGenotype,
+)
 
 
 class FirstChoiceRng:
@@ -27,32 +30,16 @@ class CatGenotypeInheritanceTests(
                     "O",
                     "o"
                 ),
-                autosomal_loci={
-                    "black": (
-                        "B",
-                        "b"
-                    ),
-                    "dilution": (
-                        "D",
-                        "d"
-                    ),
-                    "agouti": (
-                        "A",
-                        "a"
-                    ),
-                    "white_spotting": (
-                        "S",
-                        "s"
-                    ),
-                    "colorpoint": (
-                        "C",
-                        "cs"
-                    ),
-                    "longhair": (
-                        "L",
-                        "l"
+                autosomal_loci=(
+                    CatAutosomalGenotype(
+                        black=("B", "b"),
+                        dilution=("D", "d"),
+                        agouti=("A", "a"),
+                        white_spotting=("S", "s"),
+                        colorpoint=("C", "cs"),
+                        longhair=("L", "l"),
                     )
-                }
+                )
             )
         )
 
@@ -62,32 +49,16 @@ class CatGenotypeInheritanceTests(
                 orange_locus=(
                     "o",
                 ),
-                autosomal_loci={
-                    "black": (
-                        "b",
-                        "bl"
-                    ),
-                    "dilution": (
-                        "d",
-                        "d"
-                    ),
-                    "agouti": (
-                        "a",
-                        "a"
-                    ),
-                    "white_spotting": (
-                        "s",
-                        "s"
-                    ),
-                    "colorpoint": (
-                        "cs",
-                        "c"
-                    ),
-                    "longhair": (
-                        "l",
-                        "l"
+                autosomal_loci=(
+                    CatAutosomalGenotype(
+                        black=("b", "bl"),
+                        dilution=("d", "d"),
+                        agouti=("a", "a"),
+                        white_spotting=("s", "s"),
+                        colorpoint=("cs", "c"),
+                        longhair=("l", "l"),
                     )
-                }
+                )
             )
         )
 
@@ -158,9 +129,7 @@ class CatGenotypeInheritanceTests(
         )
 
         self.assertEqual(
-            kitten.autosomal_loci[
-                "black"
-            ],
+            kitten.autosomal_loci.black,
             (
                 "B",
                 "b"
@@ -168,9 +137,7 @@ class CatGenotypeInheritanceTests(
         )
 
         self.assertEqual(
-            kitten.autosomal_loci[
-                "dilution"
-            ],
+            kitten.autosomal_loci.dilution,
             (
                 "D",
                 "d"

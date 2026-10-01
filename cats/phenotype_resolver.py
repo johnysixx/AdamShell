@@ -35,13 +35,13 @@ class CatPhenotypeResolver:
                     orange_alleles
                 ),
                 black_alleles=tuple(
-                    loci["black"]
+                    loci.black
                 )
             )
         )
 
         diluted = cls._is_homozygous(
-            loci["dilution"],
+            loci.dilution,
             "d"
         )
 
@@ -56,17 +56,17 @@ class CatPhenotypeResolver:
 
         white_spotted = (
             "S"
-            in loci["white_spotting"]
+            in loci.white_spotting
         )
 
         pattern = (
             cls._resolve_pattern(
                 color=color,
                 agouti_alleles=tuple(
-                    loci["agouti"]
+                    loci.agouti
                 ),
                 colorpoint_alleles=tuple(
-                    loci["colorpoint"]
+                    loci.colorpoint
                 ),
                 white_spotted=(
                     white_spotted
@@ -91,7 +91,7 @@ class CatPhenotypeResolver:
         fur_length = (
             "long"
             if cls._is_homozygous(
-                loci["longhair"],
+                loci.longhair,
                 "l"
             )
             else "short"
@@ -99,7 +99,7 @@ class CatPhenotypeResolver:
 
         colorpoint = (
             cls._is_colorpoint(
-                loci["colorpoint"]
+                loci.colorpoint
             )
         )
 

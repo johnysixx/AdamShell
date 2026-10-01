@@ -1,6 +1,9 @@
 import unittest
 
-from cats.genotype import CatGenotype
+from cats.genotype import (
+    CatAutosomalGenotype,
+    CatGenotype,
+)
 from cats.phenotype_resolver import (
     CatPhenotypeResolver
 )
@@ -20,31 +23,16 @@ class KittenGeneticViabilityTests(
             "s"
         )
     ):
-        return {
-            "black": (
-                "B",
-                "B"
-            ),
-            "dilution": (
-                "D",
-                "D"
-            ),
-            "agouti": (
-                "a",
-                "a"
-            ),
-            "white_spotting": (
+        return CatAutosomalGenotype(
+            black=("B", "B"),
+            dilution=("D", "D"),
+            agouti=("a", "a"),
+            white_spotting=(
                 white_spotting
             ),
-            "colorpoint": (
-                "C",
-                "C"
-            ),
-            "longhair": (
-                "L",
-                "L"
-            )
-        }
+            colorpoint=("C", "C"),
+            longhair=("L", "L"),
+        )
 
     def test_standard_xy_male_is_standard(self):
         genotype = (

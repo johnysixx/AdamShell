@@ -46,6 +46,45 @@ class CatAutosomalInheritanceRecord:
                 )
 
 
+@dataclass(slots=True, frozen=True)
+class CatAutosomalGenotype:
+    black: tuple[str, str]
+    dilution: tuple[str, str]
+    agouti: tuple[str, str]
+    white_spotting: tuple[str, str]
+    colorpoint: tuple[str, str]
+    longhair: tuple[str, str]
+
+    def __post_init__(self):
+        for field_name in (
+            "black",
+            "dilution",
+            "agouti",
+            "white_spotting",
+            "colorpoint",
+            "longhair",
+        ):
+            alleles = getattr(
+                self,
+                field_name,
+            )
+
+            if not isinstance(
+                alleles,
+                tuple,
+            ):
+                raise TypeError(
+                    f"{field_name} autosomal genotype "
+                    "must use an allele tuple."
+                )
+
+            if len(alleles) != 2:
+                raise ValueError(
+                    f"{field_name} autosomal genotype "
+                    "must contain two alleles."
+                )
+
+
 @dataclass(slots=True)
 class CatInheritanceRecord:
     sex_chromosomes: CatParentalContribution
@@ -120,7 +159,7 @@ class CatGenotype:
     sex: str
     sex_chromosomes: tuple[str, ...]
     orange_locus: tuple[str, ...]
-    autosomal_loci: dict[str, tuple[str, str]]
+    autosomal_loci: CatAutosomalGenotype
     lethal_mutations: tuple[str, ...]
     origin: str
     inheritance_record: CatInheritanceRecord | None = None
@@ -168,16 +207,14 @@ class CatGenotype:
             self.orange_locus
         )
 
-        if not isinstance(self.autosomal_loci, dict):
+        if not isinstance(
+            self.autosomal_loci,
+            CatAutosomalGenotype,
+        ):
             raise TypeError(
-                "autosomal_loci must be a locus map."
+                "autosomal_loci must use a "
+                "CatAutosomalGenotype object."
             )
-
-        self.autosomal_loci = {
-            locus: tuple(alleles)
-            for locus, alleles
-            in self.autosomal_loci.items()
-        }
         self.lethal_mutations = tuple(
             self.lethal_mutations
         )
@@ -243,32 +280,49 @@ class CatGenotype:
                 "female or male."
             )
 
-        default_autosomal = {
-            "black": (
+        default_autosomal = CatAutosomalGenotype(
+            black=(
                 "B",
                 "B",
             ),
-            "dilution": (
+            dilution=(
                 "D",
                 "D",
             ),
-            "agouti": (
+            agouti=(
                 "a",
                 "a",
             ),
-            "white_spotting": (
+            white_spotting=(
                 "s",
                 "s",
             ),
-            "colorpoint": (
+            colorpoint=(
                 "C",
                 "C",
             ),
-            "longhair": (
+            longhair=(
                 "L",
                 "L",
             ),
-        }
+        )
+
+        if autosomal_loci is None:
+            resolved_autosomal = (
+                default_autosomal
+            )
+        elif isinstance(
+            autosomal_loci,
+            CatAutosomalGenotype,
+        ):
+            resolved_autosomal = (
+                autosomal_loci
+            )
+        else:
+            raise TypeError(
+                "Founder autosomal_loci must use "
+                "CatAutosomalGenotype."
+            )
 
         genotype = cls(
             sex=sex,
@@ -277,14 +331,9 @@ class CatGenotype:
                 orange_locus
                 or default_orange
             ),
-            autosomal_loci={
-                locus: tuple(alleles)
-                for locus, alleles
-                in (
-                    autosomal_loci
-                    or default_autosomal
-                ).items()
-            },
+            autosomal_loci=(
+                resolved_autosomal
+            ),
             lethal_mutations=tuple(
                 lethal_mutations or ()
             ),
@@ -352,43 +401,100 @@ class CatGenotype:
                 maternal_x_orange,
             )
 
-        inherited_loci = {}
-        inheritance_record = {}
+        (
+            black,
+            black_inheritance,
+        ) = cls._inherit_autosomal_locus(
+            mother_genotype,
+            father_genotype,
+            "black",
+            rng,
+        )
+        (
+            dilution,
+            dilution_inheritance,
+        ) = cls._inherit_autosomal_locus(
+            mother_genotype,
+            father_genotype,
+            "dilution",
+            rng,
+        )
+        (
+            agouti,
+            agouti_inheritance,
+        ) = cls._inherit_autosomal_locus(
+            mother_genotype,
+            father_genotype,
+            "agouti",
+            rng,
+        )
+        (
+            white_spotting,
+            white_spotting_inheritance,
+        ) = cls._inherit_autosomal_locus(
+            mother_genotype,
+            father_genotype,
+            "white_spotting",
+            rng,
+        )
+        (
+            colorpoint,
+            colorpoint_inheritance,
+        ) = cls._inherit_autosomal_locus(
+            mother_genotype,
+            father_genotype,
+            "colorpoint",
+            rng,
+        )
+        (
+            longhair,
+            longhair_inheritance,
+        ) = cls._inherit_autosomal_locus(
+            mother_genotype,
+            father_genotype,
+            "longhair",
+            rng,
+        )
 
-        for locus in cls.AUTOSOMAL_LOCI:
-            mother_allele = rng.choice(
-                list(
-                    mother_genotype.autosomal_loci[
-                        locus
-                    ]
-                )
+        autosomal_genotype = (
+            CatAutosomalGenotype(
+                black=black,
+                dilution=dilution,
+                agouti=agouti,
+                white_spotting=(
+                    white_spotting
+                ),
+                colorpoint=colorpoint,
+                longhair=longhair,
             )
+        )
 
-            father_allele = rng.choice(
-                list(
-                    father_genotype.autosomal_loci[
-                        locus
-                    ]
-                )
+        autosomal_inheritance = (
+            CatAutosomalInheritanceRecord(
+                black=black_inheritance,
+                dilution=(
+                    dilution_inheritance
+                ),
+                agouti=agouti_inheritance,
+                white_spotting=(
+                    white_spotting_inheritance
+                ),
+                colorpoint=(
+                    colorpoint_inheritance
+                ),
+                longhair=(
+                    longhair_inheritance
+                ),
             )
-
-            inherited_loci[locus] = (
-                mother_allele,
-                father_allele,
-            )
-
-            inheritance_record[locus] = (
-                CatParentalContribution(
-                    from_mother=mother_allele,
-                    from_father=father_allele,
-                )
-            )
+        )
 
         genotype = cls(
             sex=sex,
             sex_chromosomes=sex_chromosomes,
             orange_locus=orange_locus,
-            autosomal_loci=inherited_loci,
+            autosomal_loci=(
+                autosomal_genotype
+            ),
             lethal_mutations=(),
             origin="parental_inheritance",
             inheritance_record=(
@@ -415,38 +521,7 @@ class CatGenotype:
                         )
                     ),
                     autosomal_loci=(
-                        CatAutosomalInheritanceRecord(
-                            black=(
-                                inheritance_record[
-                                    "black"
-                                ]
-                            ),
-                            dilution=(
-                                inheritance_record[
-                                    "dilution"
-                                ]
-                            ),
-                            agouti=(
-                                inheritance_record[
-                                    "agouti"
-                                ]
-                            ),
-                            white_spotting=(
-                                inheritance_record[
-                                    "white_spotting"
-                                ]
-                            ),
-                            colorpoint=(
-                                inheritance_record[
-                                    "colorpoint"
-                                ]
-                            ),
-                            longhair=(
-                                inheritance_record[
-                                    "longhair"
-                                ]
-                            ),
-                        )
+                        autosomal_inheritance
                     ),
                 )
             ),
@@ -454,6 +529,37 @@ class CatGenotype:
 
         cls.validate(genotype)
         return genotype
+
+    @staticmethod
+    def _inherit_autosomal_locus(
+        mother_genotype,
+        father_genotype,
+        locus,
+        rng,
+    ):
+        mother_allele = rng.choice(
+            getattr(
+                mother_genotype.autosomal_loci,
+                locus,
+            )
+        )
+        father_allele = rng.choice(
+            getattr(
+                father_genotype.autosomal_loci,
+                locus,
+            )
+        )
+
+        return (
+            (
+                mother_allele,
+                father_allele,
+            ),
+            CatParentalContribution(
+                from_mother=mother_allele,
+                from_father=father_allele,
+            ),
+        )
 
     @classmethod
     def validate(cls, genotype):
@@ -534,31 +640,22 @@ class CatGenotype:
 
         loci = genotype.autosomal_loci
 
-        missing = (
-            set(cls.AUTOSOMAL_LOCI)
-            - set(loci)
-        )
-
-        if missing:
-            raise ValueError(
-                "Missing autosomal loci: "
-                + ", ".join(
-                    sorted(missing)
-                )
+        if not isinstance(
+            loci,
+            CatAutosomalGenotype,
+        ):
+            raise TypeError(
+                "Genotype autosomal_loci must use "
+                "CatAutosomalGenotype."
             )
 
         for locus, allowed in (
             cls.AUTOSOMAL_LOCI.items()
         ):
-            alleles = tuple(
-                loci[locus]
+            alleles = getattr(
+                loci,
+                locus,
             )
-
-            if len(alleles) != 2:
-                raise ValueError(
-                    f"{locus} must contain "
-                    "two alleles."
-                )
 
             if not set(alleles).issubset(
                 allowed
@@ -580,9 +677,25 @@ class CatGenotype:
                 self.orange_locus
             ),
             "autosomal_loci": {
-                locus: tuple(alleles)
-                for locus, alleles
-                in self.autosomal_loci.items()
+                "black": tuple(
+                    self.autosomal_loci.black
+                ),
+                "dilution": tuple(
+                    self.autosomal_loci.dilution
+                ),
+                "agouti": tuple(
+                    self.autosomal_loci.agouti
+                ),
+                "white_spotting": tuple(
+                    self.autosomal_loci
+                    .white_spotting
+                ),
+                "colorpoint": tuple(
+                    self.autosomal_loci.colorpoint
+                ),
+                "longhair": tuple(
+                    self.autosomal_loci.longhair
+                ),
             },
             "lethal_mutations": list(
                 self.lethal_mutations

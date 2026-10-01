@@ -1,6 +1,7 @@
 import unittest
 
 from cats.genotype import (
+    CatAutosomalGenotype,
     CatAutosomalInheritanceRecord,
     CatGenotype,
     CatInheritanceRecord,
@@ -43,6 +44,47 @@ class CatGenotypeObjectStateTests(unittest.TestCase):
             self.mother.origin,
             "founder",
         )
+        self.assertIsInstance(
+            self.mother.autosomal_loci,
+            CatAutosomalGenotype,
+        )
+
+    def test_autosomal_genotype_has_no_mapping_api(self):
+        autosomal = self.mother.autosomal_loci
+
+        for name in (
+            "get",
+            "keys",
+            "items",
+            "values",
+            "__getitem__",
+        ):
+            self.assertFalse(
+                hasattr(
+                    autosomal,
+                    name,
+                ),
+                name,
+            )
+
+        self.assertEqual(
+            autosomal.black,
+            ("B", "B"),
+        )
+
+        with self.assertRaises(TypeError):
+            _ = autosomal[
+                "black"
+            ]
+
+    def test_mapping_autosomal_genotype_is_rejected(self):
+        with self.assertRaises(TypeError):
+            CatGenotype.create_founder(
+                sex="female",
+                autosomal_loci={
+                    "black": ("B", "B"),
+                },
+            )
 
     def test_inheritance_record_is_object_state(self):
         kitten = CatGenotype.inherit(
@@ -134,7 +176,7 @@ class CatGenotypeObjectStateTests(unittest.TestCase):
             "female",
         )
         self.assertEqual(
-            self.mother.autosomal_loci["black"],
+            self.mother.autosomal_loci.black,
             ("B", "B"),
         )
         self.assertEqual(

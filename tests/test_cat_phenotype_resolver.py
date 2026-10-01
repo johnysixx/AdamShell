@@ -1,6 +1,9 @@
 import unittest
 
-from cats.genotype import CatGenotype
+from cats.genotype import (
+    CatAutosomalGenotype,
+    CatGenotype,
+)
 from cats.phenotype_resolver import (
     CatPhenotypeResolver
 )
@@ -24,16 +27,18 @@ class CatPhenotypeResolverTests(
         return CatGenotype.create_founder(
             sex=sex,
             orange_locus=orange_locus,
-            autosomal_loci={
-                "black": black,
-                "dilution": dilution,
-                "agouti": agouti,
-                "white_spotting": (
-                    white_spotting
-                ),
-                "colorpoint": colorpoint,
-                "longhair": longhair
-            }
+            autosomal_loci=(
+                CatAutosomalGenotype(
+                    black=black,
+                    dilution=dilution,
+                    agouti=agouti,
+                    white_spotting=(
+                        white_spotting
+                    ),
+                    colorpoint=colorpoint,
+                    longhair=longhair,
+                )
+            )
         )
 
     def test_black_shorthaired_female(self):
