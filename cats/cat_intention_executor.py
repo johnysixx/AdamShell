@@ -3,6 +3,9 @@ from core.entity.components import SpatialVector3
 from core.entity.quantum_cat_route_state import (
     QuantumCatRouteState,
 )
+from core.entity.quantum_box_cat_observation import (
+    QuantumBoxCatObservation,
+)
 
 from cats.cat_quantum_observation_state import (
     CatQuantumCounterpartObservation,
@@ -599,7 +602,33 @@ class CatIntentionExecutor:
 
     def _finish_box_exploration(self, cat, intention, box):
         box_id = getattr(box, 'id', None)
-        observation = box.cat_observation_state(cat) if callable(getattr(box, 'cat_observation_state', None)) else {}
+        cat_observation = getattr(
+            box,
+            "cat_observation_state",
+            None,
+        )
+
+        if not callable(
+            cat_observation
+        ):
+            raise TypeError(
+                "Quantum box exploration requires "
+                "cat_observation_state()."
+            )
+
+        observation = cat_observation(
+            cat
+        )
+
+        if not isinstance(
+            observation,
+            QuantumBoxCatObservation,
+        ):
+            raise TypeError(
+                "Quantum box exploration "
+                "observation must use "
+                "QuantumBoxCatObservation."
+            )
         memory = cat.memory
         remembered = None
         if memory is not None:

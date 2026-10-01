@@ -8,6 +8,12 @@ from core.entity.components import SpatialVector3
 from core.entity.cat_quantum_transfer_phase import (
     CatQuantumTransferPhase,
 )
+from core.entity.quantum_box_cat_observation import (
+    QuantumBoxCatObservation,
+)
+from core.entity.quantum_box_occupancy_state import (
+    QuantumBoxOccupancyState,
+)
 
 
 @dataclass(slots=True)
@@ -285,11 +291,43 @@ class QuantumBox:
             return True
         return getattr(observer, 'type', None) == 'cat'
 
-    def cat_observation_state(self, observer):
-        if not self.is_visible_to(observer):
-            return {'visible': False, 'recognized_as_quantum_box': False, 'occupied': None}
-        occupied = self.is_in_cat_transfer_superposition()
-        return {'visible': True, 'recognized_as_quantum_box': True, 'occupied': occupied, 'occupancy_state': 'cat_transfer_occupied' if occupied else 'unoccupied', 'occupant_identity_visible': False}
+    def cat_observation_state(
+        self,
+        observer
+    ):
+        if not self.is_visible_to(
+            observer
+        ):
+            return QuantumBoxCatObservation(
+                visible=False,
+                recognized_as_quantum_box=False,
+                occupied=None,
+                occupancy_state=None,
+                occupant_identity_visible=False,
+            )
+
+        occupied = (
+            self
+            .is_in_cat_transfer_superposition()
+        )
+
+        occupancy_state = (
+            QuantumBoxOccupancyState
+            .CAT_TRANSFER_OCCUPIED
+            if occupied
+            else (
+                QuantumBoxOccupancyState
+                .UNOCCUPIED
+            )
+        )
+
+        return QuantumBoxCatObservation(
+            visible=True,
+            recognized_as_quantum_box=True,
+            occupied=occupied,
+            occupancy_state=occupancy_state,
+            occupant_identity_visible=False,
+        )
 
     def consume_for_cat_transfer(self):
         self.energy.consume_for_cat_transfer()

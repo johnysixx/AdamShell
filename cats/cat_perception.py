@@ -6,6 +6,9 @@ from dataclasses import dataclass, field
 from cats.cat_quantum_observation_state import (
     CatQuantumCounterpartObservation,
 )
+from core.entity.quantum_box_cat_observation import (
+    QuantumBoxCatObservation,
+)
 from universe.dark_sector import QUANTUM_BOX_ENERGY_COST_J
 from .cat_exploration_planner import CatExplorationPlanner
 from .cat_olfaction import CatOlfaction
@@ -459,27 +462,57 @@ class CatPerception:
             distance = self._distance(position, box_position)
             if distance > radius:
                 continue
-            cat_observation = getattr(box, 'cat_observation_state', None)
-            occupancy = cat_observation(cat) if callable(cat_observation) else {'visible': True, 'occupied': False, 'occupancy_state': 'unknown', 'occupant_identity_visible': False}
+            cat_observation = getattr(
+                box,
+                "cat_observation_state",
+                None,
+            )
+
+            if not callable(
+                cat_observation
+            ):
+                raise TypeError(
+                    "Quantum box perception requires "
+                    "cat_observation_state()."
+                )
+
+            occupancy = cat_observation(
+                cat
+            )
+
+            if not isinstance(
+                occupancy,
+                QuantumBoxCatObservation,
+            ):
+                raise TypeError(
+                    "Quantum box cat observation "
+                    "must use "
+                    "QuantumBoxCatObservation."
+                )
+
+            if not occupancy.visible:
+                continue
+
+            if occupancy.occupancy_state is None:
+                raise TypeError(
+                    "Visible quantum box "
+                    "observation requires "
+                    "QuantumBoxOccupancyState."
+                )
+
             explored = self._box_was_explored(cat=cat, box_id=box.id)
             detail = CatVisibleBoxObservation(
                 id=box.id,
                 explored=explored,
                 occupied=bool(
-                    occupancy.get(
-                        'occupied',
-                        False,
-                    )
+                    occupancy.occupied
                 ),
-                occupancy_state=occupancy.get(
-                    'occupancy_state',
-                    'unknown',
+                occupancy_state=(
+                    occupancy.occupancy_state
                 ),
                 occupant_identity_visible=bool(
-                    occupancy.get(
-                        'occupant_identity_visible',
-                        False,
-                    )
+                    occupancy
+                    .occupant_identity_visible
                 ),
                 distance=distance,
                 position=box_position,
@@ -498,10 +531,8 @@ class CatPerception:
                 )
 
                 recognized_as_quantum_box = bool(
-                    occupancy.get(
-                        'recognized_as_quantum_box',
-                        True,
-                    )
+                    occupancy
+                    .recognized_as_quantum_box
                 )
 
                 detail.state = getattr(

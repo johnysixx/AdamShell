@@ -1,5 +1,8 @@
 from dataclasses import dataclass, field
 from core.entity.components import SpatialVector3, require_optional_spatial_vector, require_spatial_vector
+from core.entity.quantum_box_occupancy_state import (
+    QuantumBoxOccupancyState,
+)
 
 from .cat_exploration_state import (
     CatExplorationPlan
@@ -54,7 +57,7 @@ class CatVisibleBoxObservation:
     id: str
     explored: bool
     occupied: bool
-    occupancy_state: str
+    occupancy_state: QuantumBoxOccupancyState
     occupant_identity_visible: bool
     distance: float
     position: SpatialVector3
@@ -67,7 +70,22 @@ class CatVisibleBoxObservation:
 
 
     def __post_init__(self):
-        self.position = require_spatial_vector(self.position, field_name="visible box observation position")
+        if not isinstance(
+            self.occupancy_state,
+            QuantumBoxOccupancyState,
+        ):
+            raise TypeError(
+                "Visible box occupancy state "
+                "must use "
+                "QuantumBoxOccupancyState."
+            )
+
+        self.position = require_spatial_vector(
+            self.position,
+            field_name=(
+                "visible box observation position"
+            ),
+        )
 
 
 @dataclass(slots=True)

@@ -2,6 +2,12 @@ import unittest
 from universe.universe import Universe
 from cats.cats import Cats
 from core.entity.components import SpatialVector3
+from core.entity.quantum_box_cat_observation import (
+    QuantumBoxCatObservation,
+)
+from core.entity.quantum_box_occupancy_state import (
+    QuantumBoxOccupancyState,
+)
 
 class QuantumBoxTransferVisibilityTests(unittest.TestCase):
 
@@ -30,10 +36,30 @@ class QuantumBoxTransferVisibilityTests(unittest.TestCase):
 
     def test_cat_recognizes_occupied_box(self):
         state = self.source.cat_observation_state(self.observer_cat)
-        self.assertTrue(state['visible'])
-        self.assertTrue(state['occupied'])
-        self.assertEqual(state['occupancy_state'], 'cat_transfer_occupied')
-        self.assertFalse(state['occupant_identity_visible'])
+        self.assertIsInstance(
+            state,
+            QuantumBoxCatObservation,
+        )
+
+        self.assertTrue(
+            state.visible
+        )
+
+        self.assertTrue(
+            state.occupied
+        )
+
+        self.assertIs(
+            state.occupancy_state,
+            (
+                QuantumBoxOccupancyState
+                .CAT_TRANSFER_OCCUPIED
+            ),
+        )
+
+        self.assertFalse(
+            state.occupant_identity_visible
+        )
 
     def test_cat_perception_lists_occupied_box(self):
         result = self.cats.observe_cat(self.observer_cat, vision_radius=5.0)

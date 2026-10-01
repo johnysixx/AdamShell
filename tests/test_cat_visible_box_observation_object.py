@@ -1,5 +1,8 @@
 import unittest
 from core.entity.components import SpatialVector3
+from core.entity.quantum_box_occupancy_state import (
+    QuantumBoxOccupancyState,
+)
 
 from universe.universe import Universe
 from cats.cats import Cats
@@ -112,6 +115,11 @@ class CatVisibleBoxObservationObjectTests(
 
         self.assertIsNone(
             detail.counterpart_known
+        )
+
+        self.assertIs(
+            detail.occupancy_state,
+            QuantumBoxOccupancyState.UNOCCUPIED,
         )
 
     def test_box_observation_does_not_expose_route(
