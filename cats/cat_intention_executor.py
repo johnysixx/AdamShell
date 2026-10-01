@@ -492,7 +492,48 @@ class CatIntentionExecutor:
         mind = cat.mind
         mind.previous_intention = deepcopy(intention)
         mind.current_intention = None
-        event = {'name': 'cat_sensed_quantum_counterpart', 'cat': cat.name, 'observation': observation.to_dict(), 'decision_source': 'cat_mind', 'executed': True}
+        event = {
+            'name': (
+                'cat_sensed_quantum_counterpart'
+            ),
+            'cat': cat.name,
+            'observation': {
+                'source_box_id': (
+                    observation.source_box_id
+                ),
+                'counterpart_box_id': (
+                    observation.counterpart_box_id
+                ),
+                'source_layer': (
+                    observation.source_layer
+                ),
+                'counterpart_layer': (
+                    observation.counterpart_layer
+                ),
+                'counterpart_position': (
+                    None
+                    if observation.counterpart_position
+                    is None
+                    else (
+                        observation
+                        .counterpart_position
+                        .to_dict()
+                    )
+                ),
+                'observed_tick': (
+                    observation.observed_tick
+                ),
+                'temporary': (
+                    observation.temporary
+                ),
+                'pair_currently_valid': (
+                    observation
+                    .pair_currently_valid
+                ),
+            },
+            'decision_source': 'cat_mind',
+            'executed': True,
+        }
         mind.active_body_execution = deepcopy(event)
         return self._record(event)
 

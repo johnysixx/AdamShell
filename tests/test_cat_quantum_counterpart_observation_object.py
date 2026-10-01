@@ -43,39 +43,36 @@ class CatQuantumCounterpartObservationObjectTests(
             'target',
         )
 
-    def test_event_serialization_is_explicit(
+    def test_observation_has_no_serialization_api(
         self
     ):
         observation = (
             CatQuantumCounterpartObservation(
                 source_box_id='source',
                 counterpart_box_id='target',
-                counterpart_position=SpatialVector3(x=1.0, y=2.0, z=0.0),
+                counterpart_position=SpatialVector3(
+                    x=1.0,
+                    y=2.0,
+                    z=0.0,
+                ),
                 pair_currently_valid=True,
             )
-        )
-
-        payload = observation.to_dict()
-
-        self.assertIsInstance(
-            payload,
-            dict,
-        )
-
-        self.assertEqual(
-            payload['source_box_id'],
-            'source',
-        )
-
-        self.assertTrue(
-            payload['pair_currently_valid']
         )
 
         self.assertFalse(
             hasattr(
                 observation,
-                '__getitem__',
+                'to_dict',
             )
+        )
+
+        self.assertEqual(
+            observation.source_box_id,
+            'source',
+        )
+
+        self.assertTrue(
+            observation.pair_currently_valid
         )
 
 
