@@ -115,7 +115,7 @@ class KittenGrowth:
             event
         )
 
-        return event.to_dict()
+        return event
 
     def _duplicate_event(self, kitten, source, day, amount=1.0):
         stored_energy = self.duplicate_energy.store(cat=kitten, source=source, day=day, amount=amount)
@@ -133,7 +133,7 @@ class KittenGrowth:
             event
         )
 
-        return event.to_dict()
+        return event
 
     def _record(
         self,

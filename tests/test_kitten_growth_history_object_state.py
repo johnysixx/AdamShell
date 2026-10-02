@@ -56,8 +56,13 @@ class KittenGrowthHistoryObjectStateTests(
         )
 
         self.assertIsInstance(
-            state_event,
+            result,
             KittenGrowthAppliedEvent,
+        )
+
+        self.assertIs(
+            result,
+            state_event,
         )
 
         self.assertIs(
@@ -71,7 +76,7 @@ class KittenGrowthHistoryObjectStateTests(
         )
 
         self.assertTrue(
-            result["grew"]
+            result.grew
         )
 
         for mapping_method in (
@@ -120,7 +125,11 @@ class KittenGrowthHistoryObjectStateTests(
                 "portion_mass"
             ] = 9.0
 
-        result[
+        boundary = (
+            result.to_dict()
+        )
+
+        boundary[
             "metadata"
         ][
             "portion_mass"
@@ -152,8 +161,13 @@ class KittenGrowthHistoryObjectStateTests(
         )
 
         self.assertIsInstance(
-            event,
+            result,
             KittenGrowthAlreadyProcessedEvent,
+        )
+
+        self.assertIs(
+            result,
+            event,
         )
 
         self.assertIsInstance(
@@ -168,7 +182,7 @@ class KittenGrowthHistoryObjectStateTests(
         )
 
         self.assertIs(
-            result["stored_energy"],
+            result.stored_energy,
             event.stored_energy,
         )
 

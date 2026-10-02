@@ -98,7 +98,14 @@ class KittenUpbringingResolver:
         care_names = ('fed_by_mother', 'cleaned_by_mother', 'warmed_by_mother', 'protected_by_mother')
         events = []
         if mother is not None:
-            events.append(self.growth.feed_cat_milk(kitten=kitten, day=current_day, amount=1.0, source=mother.name))
+            events.append(
+                self.growth.feed_cat_milk(
+                    kitten=kitten,
+                    day=current_day,
+                    amount=1.0,
+                    source=mother.name,
+                ).to_dict()
+            )
         for care_name in care_names:
             events.append({'name': care_name, 'kitten': kitten.name, 'mother': teacher_name, 'age_days': age_days, 'day': current_day, 'care': True})
         care = kitten.upbringing.care
@@ -153,7 +160,12 @@ class KittenUpbringingResolver:
         kitten.upbringing.care.left_alone_briefly = True
         if age_days == 14:
             events.append({'name': 'mother_left_kittens_alone_briefly', 'kitten': kitten.name, 'mother': getattr(mother, 'name', None) if mother is not None else None, 'age_days': age_days, 'day': current_day, 'first_time': True})
-            events.append(self.growth.feed_dead_delivery(kitten=kitten, day=current_day))
+            events.append(
+                self.growth.feed_dead_delivery(
+                    kitten=kitten,
+                    day=current_day,
+                ).to_dict()
+            )
             events.append({'name': 'mother_brought_small_dead_cronenberg', 'kitten': kitten.name, 'mother': getattr(mother, 'name', None) if mother is not None else None, 'age_days': age_days, 'day': current_day, 'prey_alive': False, 'purpose': 'food_and_prey_recognition'})
             kitten.upbringing.cronenberg_experience.dead_deliveries += 1
         return events
@@ -213,7 +225,7 @@ class KittenUpbringingResolver:
         previous_progress = float(hunting.progress)
         hunting.progress = max(previous_progress, 0.85)
         growth_event = self.growth.feed_first_kill(kitten=kitten, day=current_day)
-        event = {'name': 'kitten_completed_first_training_kill', 'kitten': kitten.name, 'mother': getattr(mother, 'name', None) if mother is not None else None, 'age_days': age_days, 'day': current_day, 'prey': 'small_live_cronenberg', 'successful': True, 'successful_kills': experience.successful_kills, 'hunting_progress': hunting.progress, 'growth': growth_event}
+        event = {'name': 'kitten_completed_first_training_kill', 'kitten': kitten.name, 'mother': getattr(mother, 'name', None) if mother is not None else None, 'age_days': age_days, 'day': current_day, 'prey': 'small_live_cronenberg', 'successful': True, 'successful_kills': experience.successful_kills, 'hunting_progress': hunting.progress, 'growth': growth_event.to_dict()}
         kitten.learning.lessons.append(event)
         return event
 
@@ -239,7 +251,7 @@ class KittenUpbringingResolver:
         if learned:
             hunting.learned_on_day = current_day
         growth_event = self.growth.feed_family_hunt(kitten=kitten, day=current_day)
-        event = {'name': 'kitten_joined_family_cronenberg_hunt', 'kitten': kitten.name, 'mother': getattr(mother, 'name', None) if mother is not None else None, 'father': getattr(father, 'name', None) if father is not None else None, 'father_joined': father_joined, 'teachers': teacher_names, 'age_days': age_days, 'day': current_day, 'family_hunt_number': family_hunt_number, 'hunting_progress': progress, 'hunting_learned': learned, 'growth': growth_event, 'successful': True}
+        event = {'name': 'kitten_joined_family_cronenberg_hunt', 'kitten': kitten.name, 'mother': getattr(mother, 'name', None) if mother is not None else None, 'father': getattr(father, 'name', None) if father is not None else None, 'father_joined': father_joined, 'teachers': teacher_names, 'age_days': age_days, 'day': current_day, 'family_hunt_number': family_hunt_number, 'hunting_progress': progress, 'hunting_learned': learned, 'growth': growth_event.to_dict(), 'successful': True}
         kitten.learning.lessons.append(event)
         return event
 
@@ -356,7 +368,7 @@ class KittenUpbringingResolver:
         if age_days == 0 or age_days % 5 != 0:
             return None
         growth_event = self.growth.feed_father_delivery(kitten=kitten, day=current_day)
-        event = {'name': 'father_brought_dead_cronenberg', 'kitten': kitten.name, 'father': father.name, 'age_days': age_days, 'day': current_day, 'prey_alive': False, 'purpose': 'family_food', 'growth': growth_event}
+        event = {'name': 'father_brought_dead_cronenberg', 'kitten': kitten.name, 'father': father.name, 'age_days': age_days, 'day': current_day, 'prey_alive': False, 'purpose': 'family_food', 'growth': growth_event.to_dict()}
         kitten.upbringing.cronenberg_experience.father_food_deliveries += 1
         return event
 

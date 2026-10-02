@@ -441,7 +441,7 @@ class MeetingPlace:
         self.bartender.serve_without_order(cat_name, milk, milk_bowl)
         growth_event = None
         if getattr(cat, 'type', None) == 'cat' and hasattr(cat, 'age_days') and (getattr(cat, 'developmental_stage', None) != 'adult'):
-            growth_event = self.kitten_growth.feed_cat_milk(kitten=cat, day=self.tick_count, amount=1.0, source='bartender')
+            growth_event = self.kitten_growth.feed_cat_milk(kitten=cat, day=self.tick_count, amount=1.0, source='bartender').to_dict()
         event = {'name': 'cat_drank_milk_at_bar', 'cat': cat_name, 'milk': 'milk', 'bowl': getattr(milk_bowl, 'name', 'milk_bowl'), 'growth': growth_event, 'served': True, 'tick': self.tick_count}
         self.emit_event(event)
         cat_distribution_system = getattr(self, 'cat_distribution_system', None)

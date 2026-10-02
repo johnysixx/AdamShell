@@ -45,7 +45,7 @@ class KittenGrowthTests(unittest.TestCase):
         self.run_day(1)
         size_after_first = self.kitten.size
         result = self.upbringing.growth.feed_cat_milk(kitten=self.kitten, day=1, amount=1.0, source='mother')
-        self.assertFalse(result['grew'])
+        self.assertFalse(result.grew)
         self.assertEqual(self.kitten.size, size_after_first)
 
     def test_dead_cronenberg_delivery_causes_growth(self):

@@ -67,15 +67,15 @@ class DuplicateConsumptionEnergyTests(
         )
 
         self.assertTrue(
-            first["grew"]
+            first.grew
         )
 
         self.assertFalse(
-            second["grew"]
+            second.grew
         )
 
         self.assertTrue(
-            second["energy_conserved"]
+            second.energy_conserved
         )
 
         self.assertEqual(
