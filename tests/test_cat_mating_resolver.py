@@ -42,7 +42,9 @@ class CatMatingResolverTests(unittest.TestCase):
         self.assertTrue(reproduction.mating_window_open)
         self.assertTrue(reproduction.estrus_active)
         self.assertFalse(reproduction.pregnant)
-        self.assertFalse(event['pregnancy_started'])
+        self.assertFalse(
+            event.pregnancy_started
+        )
 
     def test_window_accepts_multiple_males(self):
         self.resolver.mate(self.female, self.first_male)

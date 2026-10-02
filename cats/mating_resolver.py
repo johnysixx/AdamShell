@@ -9,6 +9,7 @@ from cats.paternity_resolver import MultipleSirePaternityResolver
 from cats.mating_contact import (
     CatMatingContact,
     CatMatingContactRecordedEvent,
+    CatMatingDeniedResult,
     CatMatingHistoryEvent,
     CatMatingWindowClosedWithoutOvulationEvent,
 )
@@ -33,11 +34,15 @@ class CatMatingResolver:
     def mate(self, female, male, current_day=0):
         biology = self.biology_gate.require_physical_world(operation='cat_mating', cat=female)
         if not biology.allowed:
-            return biology.to_dict()
+            return biology
         self._validate_pair(female, male)
         reproduction = female.reproduction
         if not reproduction.estrus_active:
-            return {'name': 'cat_mating_denied', 'female': getattr(female, 'name', None), 'male': getattr(male, 'name', None), 'reason': 'female_not_in_estrus', 'mating_recorded': False}
+            return CatMatingDeniedResult(
+                female=female.name,
+                male=male.name,
+                reason="female_not_in_estrus",
+            )
         reproduction = female.reproduction
         current_day = int(current_day)
         if reproduction.pregnant:
@@ -87,7 +92,7 @@ class CatMatingResolver:
             event
         )
 
-        return event.to_dict()
+        return event
 
     def _record_history_event(
         self,

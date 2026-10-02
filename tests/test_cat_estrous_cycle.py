@@ -133,12 +133,12 @@ class CatEstrousCycleTests(
         )
 
         self.assertEqual(
-            result["reason"],
+            result.reason,
             "female_not_in_estrus"
         )
 
         self.assertFalse(
-            result["mating_recorded"]
+            result.mating_recorded
         )
 
     def test_mating_is_allowed_during_estrus(self):
@@ -156,7 +156,7 @@ class CatEstrousCycleTests(
         )
 
         self.assertEqual(
-            result["name"],
+            result.name,
             "cat_mating_contact_recorded"
         )
 

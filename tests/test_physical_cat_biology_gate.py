@@ -16,9 +16,14 @@ class PhysicalCatBiologyGateTests(unittest.TestCase):
     def test_mating_before_physical_world_creates_cronenberg(self):
         before = self.universe.cronenberg_count
         result = self.resolver.mate(self.female, self.male)
-        self.assertFalse(result['allowed'])
-        self.assertTrue(result['cronenberg_created'])
-        self.assertEqual(result['operation'], 'cat_mating')
+        self.assertFalse(result.allowed)
+        self.assertTrue(
+            result.event.cronenberg_created
+        )
+        self.assertEqual(
+            result.operation,
+            'cat_mating',
+        )
         self.assertEqual(self.universe.cronenberg_count, before + 1)
         self.assertFalse(self.female.reproduction.mating_window_open)
         self.assertFalse(self.female.reproduction.pregnant)
@@ -28,7 +33,10 @@ class PhysicalCatBiologyGateTests(unittest.TestCase):
         self.female.reproduction.estrus_active = True
         self.female.reproduction.estrous_phase = CatEstrousPhase.ESTRUS
         result = self.resolver.mate(self.female, self.male)
-        self.assertEqual(result['name'], 'cat_mating_contact_recorded')
+        self.assertEqual(
+            result.name,
+            'cat_mating_contact_recorded',
+        )
         self.assertTrue(self.female.reproduction.mating_window_open)
         self.assertEqual(self.universe.cronenberg_count, 0)
 if __name__ == '__main__':

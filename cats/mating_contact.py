@@ -96,6 +96,66 @@ class CatMatingContact:
         }
 
 
+@dataclass(slots=True, frozen=True)
+class CatMatingDeniedResult:
+
+    female: str
+    male: str
+    reason: str
+
+    name: str = field(
+        default="cat_mating_denied",
+        init=False,
+    )
+
+    mating_recorded: bool = field(
+        default=False,
+        init=False,
+    )
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "female",
+            str(
+                self.female
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "male",
+            str(
+                self.male
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "reason",
+            str(
+                self.reason
+            ),
+        )
+
+    def __deepcopy__(
+        self,
+        memo
+    ):
+        return self
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "female": self.female,
+            "male": self.male,
+            "reason": self.reason,
+            "mating_recorded": (
+                self.mating_recorded
+            ),
+        }
+
+
 class CatMatingHistoryEvent:
 
     def __deepcopy__(

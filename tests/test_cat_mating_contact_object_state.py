@@ -5,6 +5,7 @@ from cats import Cats
 from cats.mating_contact import (
     CatMatingContact,
     CatMatingContactRecordedEvent,
+    CatMatingDeniedResult,
 )
 from cats.mating_resolver import (
     CatMatingResolver,
@@ -80,8 +81,13 @@ class CatMatingContactObjectStateTests(
         )
 
         self.assertIsInstance(
-            event,
+            result,
             CatMatingContactRecordedEvent,
+        )
+
+        self.assertIs(
+            result,
+            event,
         )
 
         self.assertIs(
@@ -90,7 +96,7 @@ class CatMatingContactObjectStateTests(
         )
 
         self.assertEqual(
-            result,
+            result.to_dict(),
             event.to_dict(),
         )
 
@@ -152,7 +158,11 @@ class CatMatingContactObjectStateTests(
             .history[-1]
         )
 
-        result[
+        boundary = (
+            result.to_dict()
+        )
+
+        boundary[
             "potential_fathers"
         ].append(
             "changed"
@@ -177,6 +187,76 @@ class CatMatingContactObjectStateTests(
 
         self.assertTrue(
             event.contact.successful
+        )
+
+    def test_denied_mating_uses_object_state(
+        self
+    ):
+        self.female.reproduction.estrus_active = False
+        self.female.reproduction.estrous_phase = (
+            CatEstrousPhase.INTERESTRUS
+        )
+
+        result = (
+            self.resolver.mate(
+                self.female,
+                self.male,
+            )
+        )
+
+        self.assertIsInstance(
+            result,
+            CatMatingDeniedResult,
+        )
+
+        self.assertEqual(
+            result.female,
+            "mother",
+        )
+
+        self.assertEqual(
+            result.male,
+            "father",
+        )
+
+        self.assertEqual(
+            result.reason,
+            "female_not_in_estrus",
+        )
+
+        self.assertFalse(
+            result.mating_recorded
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    result,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(TypeError):
+            _ = result[
+                "reason"
+            ]
+
+        self.assertEqual(
+            result.to_dict(),
+            {
+                "name": "cat_mating_denied",
+                "female": "mother",
+                "male": "father",
+                "reason": (
+                    "female_not_in_estrus"
+                ),
+                "mating_recorded": False,
+            },
         )
 
     def test_history_rejects_mapping(

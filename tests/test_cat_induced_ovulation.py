@@ -26,13 +26,13 @@ class CatInducedOvulationTests(unittest.TestCase):
 
     def test_one_contact_does_not_induce_ovulation(self):
         result = self.mating.mate(self.female, self.male)
-        self.assertEqual(result['ovulation_stimulation'], 1)
-        self.assertFalse(result['ovulation_threshold_reached'])
+        self.assertEqual(result.ovulation_stimulation, 1)
+        self.assertFalse(result.ovulation_threshold_reached)
 
     def test_four_contacts_reach_threshold(self):
         results = [self.mating.mate(self.female, self.male) for _ in range(4)]
-        self.assertEqual(results[-1]['ovulation_stimulation'], 4)
-        self.assertTrue(results[-1]['ovulation_threshold_reached'])
+        self.assertEqual(results[-1].ovulation_stimulation, 4)
+        self.assertTrue(results[-1].ovulation_threshold_reached)
 
     def test_insufficient_stimulation_closes_without_pregnancy(self):
         self.mating.mate(self.female, self.male)
@@ -60,7 +60,7 @@ class CatInducedOvulationTests(unittest.TestCase):
         self.mating.mate(self.female, second_male)
         self.mating.mate(self.female, self.male)
         final_contact = self.mating.mate(self.female, second_male)
-        self.assertEqual(final_contact['ovulation_stimulation'], 4)
+        self.assertEqual(final_contact.ovulation_stimulation, 4)
         self.assertEqual(self.female.reproduction.potential_fathers, ['male', 'second_male'])
 if __name__ == '__main__':
     unittest.main()
