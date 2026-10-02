@@ -407,8 +407,15 @@ class FelineAbilityLessonRequestedEvent(
             "ability": self.ability,
             "method": self.method,
             "lesson": (
-                _thaw_feline_teacher_payload(
-                    self.lesson
+                self.lesson.to_dict()
+                if hasattr(
+                    self.lesson,
+                    "to_dict",
+                )
+                else (
+                    _thaw_feline_teacher_payload(
+                        self.lesson
+                    )
                 )
             ),
             "learned": self.learned,
@@ -708,10 +715,7 @@ class FelineTeacherResolver:
                 ability=ability_name,
                 method=selected_method,
                 lesson=lesson,
-                learned=lesson.get(
-                    "learned",
-                    False
-                ),
+                learned=lesson.learned,
             )
         )
 

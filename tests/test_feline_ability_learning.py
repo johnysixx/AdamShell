@@ -42,7 +42,7 @@ class FelineAbilityLearningTests(unittest.TestCase):
 
     def test_pazuzu_teaches_handle_method(self):
         result = self.resolver.teach_method(teacher=self.pazuzu, student=self.kitten, ability_name='open_human_door', method_name='hang_on_handle')
-        self.assertTrue(result['learned'])
+        self.assertTrue(result.learned)
         toward = self.resolver.can_open_human_door(cat=self.kitten, locked=False, opens_toward_cat=True)
         away = self.resolver.can_open_human_door(cat=self.kitten, locked=False, opens_toward_cat=False)
         self.assertTrue(toward['allowed'])

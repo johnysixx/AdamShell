@@ -1,4 +1,10 @@
+from copy import deepcopy
 from dataclasses import dataclass, field
+from types import MappingProxyType
+
+from cats.cat_personality_state import (
+    CatPersonalityExperienceAppliedResult,
+)
 
 from cats.feline_ability_state import (
     FelineAbilityState,
@@ -223,6 +229,227 @@ class FelineAbilityAwarenessTransmissionEvent:
         }
 
 
+@dataclass(slots=True, frozen=True)
+class FelineAbilityLessonDeniedResult:
+    teacher: str
+    student: str
+    reason: str
+
+    name: str = field(
+        default="feline_ability_lesson_denied",
+        init=False,
+    )
+
+    learned: bool = field(
+        default=False,
+        init=False,
+    )
+
+    transmitted: bool = field(
+        default=False,
+        init=False,
+    )
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "teacher",
+            str(self.teacher),
+        )
+        object.__setattr__(
+            self,
+            "student",
+            str(self.student),
+        )
+        object.__setattr__(
+            self,
+            "reason",
+            str(self.reason),
+        )
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "teacher": self.teacher,
+            "student": self.student,
+            "reason": self.reason,
+            "learned": self.learned,
+            "transmitted": self.transmitted,
+        }
+
+
+@dataclass(slots=True, frozen=True)
+class FelineAbilityTeachingCronenbergResult:
+    teacher: str
+    student: str
+    attempted_ability: str
+    reason: str
+    cronenberg_id: object
+
+    name: str = field(
+        default=(
+            "forbidden_teaching_"
+            "created_cronenberg"
+        ),
+        init=False,
+    )
+
+    cronenberg_created: bool = field(
+        default=True,
+        init=False,
+    )
+
+    learned: bool = field(
+        default=False,
+        init=False,
+    )
+
+    transmitted: bool = field(
+        default=False,
+        init=False,
+    )
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "teacher",
+            str(self.teacher),
+        )
+        object.__setattr__(
+            self,
+            "student",
+            str(self.student),
+        )
+        object.__setattr__(
+            self,
+            "attempted_ability",
+            str(self.attempted_ability),
+        )
+        object.__setattr__(
+            self,
+            "reason",
+            str(self.reason),
+        )
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "teacher": self.teacher,
+            "student": self.student,
+            "attempted_ability":
+                self.attempted_ability,
+            "reason": self.reason,
+            "cronenberg_id":
+                self.cronenberg_id,
+            "cronenberg_created":
+                self.cronenberg_created,
+            "learned": self.learned,
+            "transmitted": self.transmitted,
+        }
+
+
+@dataclass(slots=True, frozen=True)
+class FelineAbilityMethodLearnedEvent:
+    teacher: str
+    student: str
+    ability: str
+    method: str
+    constraints: object
+    teacher_personality: CatPersonalityExperienceAppliedResult
+    student_personality: CatPersonalityExperienceAppliedResult
+
+    name: str = field(
+        default="feline_ability_method_learned",
+        init=False,
+    )
+
+    learned: bool = field(
+        default=True,
+        init=False,
+    )
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "teacher",
+            str(self.teacher),
+        )
+        object.__setattr__(
+            self,
+            "student",
+            str(self.student),
+        )
+        object.__setattr__(
+            self,
+            "ability",
+            str(self.ability),
+        )
+        object.__setattr__(
+            self,
+            "method",
+            str(self.method),
+        )
+
+        object.__setattr__(
+            self,
+            "constraints",
+            MappingProxyType(
+                deepcopy(
+                    dict(
+                        self.constraints or {}
+                    )
+                )
+            ),
+        )
+
+        if not isinstance(
+            self.teacher_personality,
+            CatPersonalityExperienceAppliedResult,
+        ):
+            raise TypeError(
+                "Teacher personality result must "
+                "be CatPersonalityExperienceAppliedResult."
+            )
+
+        if not isinstance(
+            self.student_personality,
+            CatPersonalityExperienceAppliedResult,
+        ):
+            raise TypeError(
+                "Student personality result must "
+                "be CatPersonalityExperienceAppliedResult."
+            )
+
+    def __deepcopy__(
+        self,
+        memo
+    ):
+        return self
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "teacher": self.teacher,
+            "student": self.student,
+            "ability": self.ability,
+            "method": self.method,
+            "constraints": deepcopy(
+                dict(
+                    self.constraints
+                )
+            ),
+            "teacher_personality": (
+                self.teacher_personality
+                .to_dict()
+            ),
+            "student_personality": (
+                self.student_personality
+                .to_dict()
+            ),
+            "learned": self.learned,
+        }
+
+
 @dataclass(slots=True)
 class FelineWisdomState:
     can_transmit_meow: bool = False
@@ -258,6 +485,26 @@ class FelineWisdomState:
             )
 
         self.transmission_history.append(
+            event
+        )
+
+        return event
+
+    def record_lesson(
+        self,
+        event,
+    ):
+        if not isinstance(
+            event,
+            FelineAbilityMethodLearnedEvent,
+        ):
+            raise TypeError(
+                "Feline wisdom lesson history "
+                "requires a "
+                "FelineAbilityMethodLearnedEvent object."
+            )
+
+        self.lesson_history.append(
             event
         )
 

@@ -379,12 +379,29 @@ class FelineTeacherHistoryObjectStateTests(
             event,
         )
 
+        self.assertTrue(
+            event.lesson.learned
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    event.lesson,
+                    mapping_method,
+                )
+            )
+
         with self.assertRaises(
             TypeError
         ):
-            event.lesson[
+            _ = event.lesson[
                 "learned"
-            ] = False
+            ]
 
         for mapping_method in (
             "get",
@@ -417,9 +434,7 @@ class FelineTeacherHistoryObjectStateTests(
         ] = False
 
         self.assertTrue(
-            event.lesson[
-                "learned"
-            ]
+            event.lesson.learned
         )
 
         audit = (

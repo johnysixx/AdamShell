@@ -309,7 +309,9 @@ class MeowFelineWisdomIntegrationTests(unittest.TestCase):
         self.kitten.family.parents.mother = None
         self.kitten.learning.teacher_mother = None
         teaching_lesson = self.abilities.teach_method(teacher=self.garfield, student=self.dice_cat, ability_name='teach_other_cats', method_name='garfield_teaching_method')
-        self.assertTrue(teaching_lesson['learned'])
+        self.assertTrue(
+            teaching_lesson.learned
+        )
         FelineWisdom.add_awareness(cat=self.dice_cat, knowledge_name='open_human_door', domain='feline', known_teachers=['pazuzu', 'queen_elisabeth'])
         result = self.resolver.transmit(mother=self.dice_cat, kitten=self.kitten, current_day=90)
         self.assertTrue(result.transmitted)

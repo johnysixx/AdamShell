@@ -96,7 +96,7 @@ class KittenLateEducationTests(unittest.TestCase):
         self.kitten.learning.teacher_mother = 'dice_teacher'
         self.cats.cats.remove(self.mother)
         lesson = self.abilities.teach_method(teacher=self.garfield, student=self.dice_teacher, ability_name='teach_other_cats', method_name='garfield_teaching_method')
-        self.assertTrue(lesson['learned'])
+        self.assertTrue(lesson.learned)
         result = self.run_at_age(90)
         meow_event = next((event for event in result['events'] if event.get('name') == 'meow_knowledge_transmitted'))
         self.assertTrue(meow_event['transmitted'])
