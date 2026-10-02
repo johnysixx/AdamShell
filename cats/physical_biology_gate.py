@@ -61,6 +61,110 @@ class PhysicalBiologyGateBlockedEvent:
         }
 
 
+@dataclass(slots=True, frozen=True)
+class PhysicalBiologyGateResult:
+
+    operation: str
+    allowed: bool
+
+    event: (
+        PhysicalBiologyGateBlockedEvent
+        | None
+    ) = None
+
+    cronenberg: object | None = None
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "operation",
+            str(
+                self.operation
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "allowed",
+            bool(
+                self.allowed
+            ),
+        )
+
+        if self.allowed:
+            if self.event is not None:
+                raise ValueError(
+                    "Allowed biology gate result "
+                    "cannot contain a blocked event."
+                )
+
+            if self.cronenberg is not None:
+                raise ValueError(
+                    "Allowed biology gate result "
+                    "cannot contain a Cronenberg."
+                )
+
+            return
+
+        if not isinstance(
+            self.event,
+            PhysicalBiologyGateBlockedEvent,
+        ):
+            raise TypeError(
+                "Blocked biology gate result "
+                "requires a blocked event."
+            )
+
+        if self.cronenberg is None:
+            raise ValueError(
+                "Blocked biology gate result "
+                "requires a Cronenberg."
+            )
+
+        if (
+            self.event.operation
+            != self.operation
+        ):
+            raise ValueError(
+                "Biology gate result operation "
+                "must match blocked event."
+            )
+
+        cronenberg_id = getattr(
+            self.cronenberg,
+            "id",
+            None,
+        )
+
+        if (
+            cronenberg_id is None
+            or str(cronenberg_id)
+            != self.event.cronenberg_id
+        ):
+            raise ValueError(
+                "Biology gate result Cronenberg "
+                "must match blocked event."
+            )
+
+    def to_dict(self):
+        if self.allowed:
+            return {
+                "allowed": True,
+                "operation": self.operation,
+                "cronenberg": None,
+            }
+
+        snapshot = (
+            self.event.to_dict()
+        )
+
+        snapshot[
+            "cronenberg"
+        ] = self.cronenberg
+
+        return snapshot
+
+
 class PhysicalBiologyGate:
 
     def __init__(
@@ -80,11 +184,10 @@ class PhysicalBiologyGate:
             "physical_universe_started",
             False
         ):
-            return {
-                "allowed": True,
-                "operation": operation,
-                "cronenberg": None
-            }
+            return PhysicalBiologyGateResult(
+                operation=operation,
+                allowed=True,
+            )
 
         cat_name = getattr(
             cat,
@@ -116,16 +219,16 @@ class PhysicalBiologyGate:
             event
         )
 
-        snapshot = event.to_dict()
-
         self.universe.quantum_events.append(
-            dict(snapshot)
+            event.to_dict()
         )
 
-        return {
-            **snapshot,
-            "cronenberg": cronenberg
-        }
+        return PhysicalBiologyGateResult(
+            operation=operation,
+            allowed=False,
+            event=event,
+            cronenberg=cronenberg,
+        )
 
     def record_event(
         self,

@@ -18,8 +18,8 @@ class KittenBirthResolver:
 
     def give_birth(self, mother, current_day=None):
         biology = self.biology_gate.require_physical_world(operation='kitten_birth', cat=mother)
-        if not biology['allowed']:
-            return biology
+        if not biology.allowed:
+            return biology.to_dict()
         reproduction = mother.reproduction
         if getattr(mother, 'sex', None) != 'female':
             raise ValueError('Only a female cat can give birth.')

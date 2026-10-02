@@ -352,8 +352,8 @@ class CatDevelopmentResolver:
             )
         )
 
-        if not biology["allowed"]:
-            return biology
+        if not biology.allowed:
+            return biology.to_dict()
 
         days = int(days)
 

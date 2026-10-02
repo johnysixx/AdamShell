@@ -31,8 +31,8 @@ class CatMatingResolver:
 
     def mate(self, female, male, current_day=0):
         biology = self.biology_gate.require_physical_world(operation='cat_mating', cat=female)
-        if not biology['allowed']:
-            return biology
+        if not biology.allowed:
+            return biology.to_dict()
         self._validate_pair(female, male)
         reproduction = female.reproduction
         if not reproduction.estrus_active:
@@ -109,8 +109,8 @@ class CatMatingResolver:
 
     def close_mating_window(self, female, current_day=0, gestation_days=None, embryo_count=None, rng=None):
         biology = self.biology_gate.require_physical_world(operation='close_cat_mating_window', cat=female)
-        if not biology['allowed']:
-            return biology
+        if not biology.allowed:
+            return biology.to_dict()
         reproduction = female.reproduction
         if reproduction.pregnant:
             raise ValueError('Cat is already pregnant.')
@@ -292,8 +292,8 @@ class CatMatingResolver:
 
     def advance_pregnancy(self, female, days=1):
         biology = self.biology_gate.require_physical_world(operation='advance_cat_pregnancy', cat=female)
-        if not biology['allowed']:
-            return biology
+        if not biology.allowed:
+            return biology.to_dict()
         reproduction = female.reproduction
         if not reproduction.pregnant:
             return {'name': 'cat_pregnancy_advance_failed', 'reason': 'cat_is_not_pregnant', 'advanced': False}

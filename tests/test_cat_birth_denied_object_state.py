@@ -17,9 +17,9 @@ class AllowPhysicalWorld:
         operation,
         cat,
     ):
-        return {
-            "allowed": True,
-        }
+        return SimpleNamespace(
+            allowed=True,
+        )
 
 
 class CatBirthDeniedObjectStateTests(

@@ -3,6 +3,7 @@ import unittest
 from cats.physical_biology_gate import (
     PhysicalBiologyGate,
     PhysicalBiologyGateBlockedEvent,
+    PhysicalBiologyGateResult,
 )
 
 
@@ -64,8 +65,22 @@ class PhysicalBiologyGateObjectStateTests(
         event = gate.history[-1]
 
         self.assertIsInstance(
+            result,
+            PhysicalBiologyGateResult,
+        )
+
+        self.assertIsInstance(
             event,
             PhysicalBiologyGateBlockedEvent,
+        )
+
+        self.assertIs(
+            result.event,
+            event,
+        )
+
+        self.assertFalse(
+            result.allowed
         )
 
         self.assertEqual(
@@ -98,7 +113,29 @@ class PhysicalBiologyGateObjectStateTests(
         with self.assertRaises(TypeError):
             _ = event["operation"]
 
-        result[
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    result,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(TypeError):
+            _ = result[
+                "operation"
+            ]
+
+        boundary = (
+            result.to_dict()
+        )
+
+        boundary[
             "operation"
         ] = "changed"
 
@@ -136,9 +173,27 @@ class PhysicalBiologyGateObjectStateTests(
             )
         )
 
-        self.assertTrue(
-            result["allowed"]
+        self.assertIsInstance(
+            result,
+            PhysicalBiologyGateResult,
         )
+
+        self.assertTrue(
+            result.allowed
+        )
+
+        self.assertIsNone(
+            result.event
+        )
+
+        self.assertIsNone(
+            result.cronenberg
+        )
+
+        with self.assertRaises(TypeError):
+            _ = result[
+                "allowed"
+            ]
 
         self.assertEqual(
             gate.history,
