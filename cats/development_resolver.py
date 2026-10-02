@@ -329,7 +329,7 @@ class CatDevelopmentResolver:
             event
         )
 
-        return event.to_dict()
+        return event
 
     def advance_age(
         self,
@@ -353,7 +353,7 @@ class CatDevelopmentResolver:
         )
 
         if not biology.allowed:
-            return biology.to_dict()
+            return biology
 
         days = int(days)
 
@@ -430,8 +430,6 @@ class CatDevelopmentResolver:
             event
         )
 
-        snapshot = event.to_dict()
-
         if hasattr(
             self.universe,
             "quantum_events"
@@ -440,7 +438,7 @@ class CatDevelopmentResolver:
                 event.to_dict()
             )
 
-        return snapshot
+        return event
 
     @classmethod
     def stage_for_age(

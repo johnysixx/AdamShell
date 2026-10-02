@@ -113,7 +113,7 @@ class CatLifeCycleHandler:
                 )
 
                 age_advances.append(
-                    age_result
+                    age_result.to_dict()
                 )
 
                 upbringing_result = (

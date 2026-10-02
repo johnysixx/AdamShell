@@ -55,8 +55,13 @@ class CatDevelopmentHistoryObjectStateTests(
         )
 
         self.assertIsInstance(
-            event,
+            result,
             NewbornCatDevelopmentInitializedEvent,
+        )
+
+        self.assertIs(
+            result,
+            event,
         )
 
         self.assertEqual(
@@ -64,9 +69,9 @@ class CatDevelopmentHistoryObjectStateTests(
             10,
         )
 
-        self.assertEqual(
-            result["stage"],
-            "newborn",
+        self.assertIs(
+            result.stage,
+            CatDevelopmentStage.NEWBORN,
         )
 
         for mapping_method in (
@@ -106,8 +111,13 @@ class CatDevelopmentHistoryObjectStateTests(
         )
 
         self.assertIsInstance(
-            event,
+            result,
             CatAgeAdvancedEvent,
+        )
+
+        self.assertIs(
+            result,
+            event,
         )
 
         self.assertTrue(
@@ -125,13 +135,19 @@ class CatDevelopmentHistoryObjectStateTests(
             )
         )
 
+        self.assertIsInstance(
+            result.transitions[0],
+            CatDevelopmentStageTransition,
+        )
+
         self.assertEqual(
-            result["transitions"][0],
-            {
-                "day": 14,
-                "stage":
-                    "socializing_kitten",
-            },
+            result.transitions[0].day,
+            14,
+        )
+
+        self.assertIs(
+            result.transitions[0].stage,
+            CatDevelopmentStage.SOCIALIZING_KITTEN,
         )
 
         with self.assertRaises(TypeError):
@@ -159,7 +175,11 @@ class CatDevelopmentHistoryObjectStateTests(
             .history[-1]
         )
 
-        result[
+        boundary = (
+            result.to_dict()
+        )
+
+        boundary[
             "transitions"
         ][0][
             "stage"

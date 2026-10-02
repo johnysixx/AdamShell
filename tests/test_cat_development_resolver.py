@@ -43,12 +43,15 @@ class CatDevelopmentResolverTests(unittest.TestCase):
 
     def test_intact_cat_becomes_fertile_at_six_months(self):
         before = self.resolver.advance_age(self.kitten, days=179)
-        self.assertFalse(before['fertile'])
+        self.assertFalse(before.fertile)
         maturity = self.resolver.advance_age(self.kitten, days=1)
-        self.assertEqual(maturity['age_days'], 180)
-        self.assertEqual(maturity['stage'], 'adolescent')
-        self.assertTrue(maturity['reproductive_maturity'])
-        self.assertTrue(maturity['fertile'])
+        self.assertEqual(maturity.age_days, 180)
+        self.assertIs(
+            maturity.stage,
+            CatDevelopmentStage.ADOLESCENT,
+        )
+        self.assertTrue(maturity.reproductive_maturity)
+        self.assertTrue(maturity.fertile)
 
     def test_neutered_cat_never_becomes_fertile(self):
         self.kitten.reproduction = CatReproduction.create_state(sex='female', neutered=True)
@@ -56,12 +59,46 @@ class CatDevelopmentResolverTests(unittest.TestCase):
         self.kitten.developmental_stage = CatDevelopmentStage.NEWBORN
         result = self.resolver.advance_age(self.kitten, days=365)
         reproduction = self.kitten.reproduction
-        self.assertEqual(result['stage'], 'adult')
+        self.assertIs(
+            result.stage,
+            CatDevelopmentStage.ADULT,
+        )
         self.assertTrue(reproduction.reproductive_maturity)
         self.assertFalse(reproduction.fertile)
 
     def test_large_age_jump_records_all_transitions(self):
         result = self.resolver.advance_age(self.kitten, days=365)
-        self.assertEqual(result['transitions'], [{'day': 14, 'stage': 'socializing_kitten'}, {'day': 49, 'stage': 'playful_kitten'}, {'day': 98, 'stage': 'juvenile'}, {'day': 180, 'stage': 'adolescent'}, {'day': 365, 'stage': 'adult'}])
+        self.assertEqual(
+            tuple(
+                (
+                    transition.day,
+                    transition.stage,
+                )
+                for transition
+                in result.transitions
+            ),
+            (
+                (
+                    14,
+                    CatDevelopmentStage.SOCIALIZING_KITTEN,
+                ),
+                (
+                    49,
+                    CatDevelopmentStage.PLAYFUL_KITTEN,
+                ),
+                (
+                    98,
+                    CatDevelopmentStage.JUVENILE,
+                ),
+                (
+                    180,
+                    CatDevelopmentStage.ADOLESCENT,
+                ),
+                (
+                    365,
+                    CatDevelopmentStage.ADULT,
+                ),
+            ),
+        )
 if __name__ == '__main__':
     unittest.main()
