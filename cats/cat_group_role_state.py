@@ -34,6 +34,48 @@ class CatGroupRoleState:
 
 
 @dataclass(slots=True, frozen=True)
+class CatGroupRoleAssignmentDeniedResult:
+    group_id: str
+    cat: str
+    role: str
+    reason: str
+    name: str = "cat_group_role_denied"
+    assigned: bool = False
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "group_id",
+            str(self.group_id),
+        )
+        object.__setattr__(
+            self,
+            "cat",
+            str(self.cat),
+        )
+        object.__setattr__(
+            self,
+            "role",
+            str(self.role),
+        )
+        object.__setattr__(
+            self,
+            "reason",
+            str(self.reason),
+        )
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "group_id": self.group_id,
+            "cat": self.cat,
+            "role": self.role,
+            "reason": self.reason,
+            "assigned": self.assigned,
+        }
+
+
+@dataclass(slots=True, frozen=True)
 class CatGroupRoleAssignedEvent:
     group_id: str
     cat: str

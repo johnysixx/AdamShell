@@ -23,7 +23,7 @@ class CatGroupInstitutionTests(unittest.TestCase):
         self.first.group.influence = 0.8
         roles = CatGroupRoleSystem(self.groups)
         result = roles.assign(self.group_id, self.first, 'guardian')
-        self.assertTrue(result['assigned'])
+        self.assertTrue(result.assigned)
         self.assertIn('guardian', self.first.group_roles.active)
 
         role = (

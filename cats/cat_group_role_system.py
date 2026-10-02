@@ -2,6 +2,7 @@ from copy import deepcopy
 
 from cats.cat_group_role_state import (
     CatGroupRoleAssignedEvent,
+    CatGroupRoleAssignmentDeniedResult,
     CatGroupRoleReleasedEvent,
     CatGroupRoleState,
 )
@@ -32,7 +33,17 @@ class CatGroupRoleSystem:
     def assign(self, group_id, cat, role):
         check = self.suitability(group_id, cat, role)
         if not check['eligible']:
-            return {'name': 'cat_group_role_denied', 'group_id': group_id, 'cat': cat.name, 'role': role, 'reason': check.get('reason', 'insufficient_suitability'), 'assigned': False}
+            return (
+                CatGroupRoleAssignmentDeniedResult(
+                    group_id=group_id,
+                    cat=cat.name,
+                    role=role,
+                    reason=check.get(
+                        'reason',
+                        'insufficient_suitability',
+                    ),
+                )
+            )
         existing = cat.group_roles.active.get(
             role
         )
@@ -94,7 +105,7 @@ class CatGroupRoleSystem:
             deepcopy(snapshot)
         )
 
-        return snapshot
+        return event
 
     def release(self, group_id, cat, role, reason='role_released'):
         group = self.group_system._group(group_id)

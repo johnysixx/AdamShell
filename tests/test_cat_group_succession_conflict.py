@@ -84,7 +84,7 @@ class CatGroupSuccessionConflictTests(unittest.TestCase):
         self.third.group.influence = 1.0
         roles = CatGroupRoleSystem(self.groups)
         assigned = roles.assign(self.group_id, self.third, 'mediator')
-        self.assertTrue(assigned['assigned'])
+        self.assertTrue(assigned.assigned)
         conflict = CatGroupInstitutionalConflictSystem(self.groups)
         created = conflict.escalate(self.group_id, 'night_watch', 'door_watch', issue='guardian_attention', intensity=0.4)
         result = conflict.mediate(self.group_id, created['conflict_id'], self.third)

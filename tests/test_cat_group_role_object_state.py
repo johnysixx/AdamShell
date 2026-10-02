@@ -13,6 +13,7 @@ from cats.cat_group_role_specialization_system import (
 )
 from cats.cat_group_role_state import (
     CatGroupRoleAssignedEvent,
+    CatGroupRoleAssignmentDeniedResult,
     CatGroupRoleReleasedEvent,
     CatGroupRoleSpecializedEvent,
     CatGroupRoleState,
@@ -204,8 +205,13 @@ class CatGroupRoleObjectStateTests(
         )
 
         self.assertIsInstance(
-            event,
+            result,
             CatGroupRoleAssignedEvent,
+        )
+
+        self.assertIs(
+            result,
+            event,
         )
 
         self.assertEqual(
@@ -221,15 +227,25 @@ class CatGroupRoleObjectStateTests(
         ):
             self.assertFalse(
                 hasattr(
-                    event,
+                    result,
                     mapping_method,
                 )
             )
 
-        with self.assertRaises(TypeError):
-            _ = event['role']
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = result[
+                'role'
+            ]
 
-        result['role'] = 'changed'
+        boundary = (
+            result.to_dict()
+        )
+
+        boundary[
+            'role'
+        ] = 'changed'
 
         self.assertEqual(
             event.role,
@@ -245,6 +261,72 @@ class CatGroupRoleObjectStateTests(
         self.assertEqual(
             group_event['role'],
             'guardian',
+        )
+
+    def test_role_assignment_denial_uses_result_object(
+        self
+    ):
+        result = self.roles.assign(
+            self.group_id,
+            self.cat,
+            'unknown_role',
+        )
+
+        self.assertIsInstance(
+            result,
+            CatGroupRoleAssignmentDeniedResult,
+        )
+
+        self.assertFalse(
+            result.assigned
+        )
+
+        self.assertEqual(
+            result.reason,
+            'unknown_role',
+        )
+
+        self.assertEqual(
+            result.role,
+            'unknown_role',
+        )
+
+        self.assertEqual(
+            self.cat.group_roles.history,
+            [],
+        )
+
+        for mapping_method in (
+            'get',
+            'keys',
+            'items',
+            'values',
+        ):
+            self.assertFalse(
+                hasattr(
+                    result,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = result[
+                'reason'
+            ]
+
+        boundary = (
+            result.to_dict()
+        )
+
+        boundary[
+            'reason'
+        ] = 'changed'
+
+        self.assertEqual(
+            result.reason,
+            'unknown_role',
         )
 
     def test_role_release_history_uses_object_state(

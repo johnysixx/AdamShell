@@ -38,7 +38,7 @@ class CatGroupSuccessionSystem:
             return event
         successor = ranked[0]['cat']
         assigned = self.roles.assign(group_id, successor, role)
-        if not assigned.get('assigned', False):
+        if not assigned.assigned:
             raise RuntimeError('Selected succession candidate could not be assigned.')
         self._strengthen_dependent_institutions(group, role, amount=0.05)
         event = {'name': 'cat_group_role_succeeded', 'group_id': group_id, 'role': role, 'previous_holder': vacated_cat.name, 'successor': successor.name, 'successor_score': ranked[0]['score'], 'reason': reason, 'succeeded': True}
