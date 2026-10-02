@@ -8,6 +8,7 @@ from cats.cats import Cats
 from cats.development_resolver import CatDevelopmentResolver
 from cats.feline_wisdom import FelineWisdom
 from cats.feline_wisdom_state import (
+    FelineAbilityAwarenessTransmissionDeniedResult,
     FelineAbilityAwarenessTransmissionEvent,
     MeowFelineAwarenessTransmissionEvent,
 )
@@ -151,8 +152,13 @@ class MeowFelineWisdomIntegrationTests(unittest.TestCase):
         )
 
         self.assertIsInstance(
-            teacher_event,
+            result,
             FelineAbilityAwarenessTransmissionEvent,
+        )
+
+        self.assertIs(
+            result,
+            teacher_event,
         )
 
         self.assertIs(
@@ -165,17 +171,134 @@ class MeowFelineWisdomIntegrationTests(unittest.TestCase):
             1,
         )
 
-        result[
-            'transferred_count'
-        ] = 99
+        for mapping_method in (
+            'get',
+            'keys',
+            'items',
+            'values',
+        ):
+            self.assertFalse(
+                hasattr(
+                    result,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = result[
+                'student'
+            ]
+
+        boundary = (
+            result.to_dict()
+        )
+
+        boundary[
+            'transferred'
+        ].append(
+            'changed'
+        )
 
         self.assertEqual(
             teacher_event.transferred_count,
             1,
         )
 
-        with self.assertRaises(TypeError):
-            _ = teacher_event['student']
+        audit = (
+            self.abilities.history[-1]
+        )
+
+        self.assertIsInstance(
+            audit,
+            dict,
+        )
+
+        self.assertEqual(
+            audit[
+                'transferred_count'
+            ],
+            1,
+        )
+
+    def test_ability_awareness_denial_uses_result_object(
+        self
+    ):
+        result = (
+            self.abilities
+            .transmit_meow_awareness(
+                teacher=self.mother,
+                student=self.kitten,
+            )
+        )
+
+        self.assertIsInstance(
+            result,
+            FelineAbilityAwarenessTransmissionDeniedResult,
+        )
+
+        self.assertFalse(
+            result.transmitted
+        )
+
+        self.assertFalse(
+            result.learned
+        )
+
+        self.assertEqual(
+            result.reason,
+            'teacher_cannot_transmit_meow',
+        )
+
+        for mapping_method in (
+            'get',
+            'keys',
+            'items',
+            'values',
+        ):
+            self.assertFalse(
+                hasattr(
+                    result,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = result[
+                'reason'
+            ]
+
+        boundary = (
+            result.to_dict()
+        )
+
+        boundary[
+            'reason'
+        ] = 'changed'
+
+        self.assertEqual(
+            result.reason,
+            'teacher_cannot_transmit_meow',
+        )
+
+        audit = (
+            self.abilities.history[-1]
+        )
+
+        self.assertIsInstance(
+            audit,
+            dict,
+        )
+
+        self.assertEqual(
+            audit[
+                'reason'
+            ],
+            'teacher_cannot_transmit_meow',
+        )
 
     def test_unrelated_natural_cat_cannot_teach_meow(self):
         result = self.resolver.transmit(mother=self.other_cat, kitten=self.kitten, current_day=90)

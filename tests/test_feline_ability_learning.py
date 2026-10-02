@@ -26,8 +26,11 @@ class FelineAbilityLearningTests(unittest.TestCase):
         FelineWisdom.add_awareness(cat=self.dice_teacher, knowledge_name='open_human_door', domain='feline', description='Some cats can open unlocked human doors.', known_teachers=['pazuzu', 'queen_elisabeth'])
         result = self.resolver.transmit_meow_awareness(teacher=self.dice_teacher, student=self.kitten)
         wisdom = self.kitten.feline_wisdom
-        self.assertTrue(result['transmitted'])
-        self.assertEqual(result['methods_transferred'], 0)
+        self.assertTrue(result.transmitted)
+        self.assertEqual(
+            result.methods_transferred,
+            0,
+        )
         self.assertTrue(
             wisdom
             .awareness[

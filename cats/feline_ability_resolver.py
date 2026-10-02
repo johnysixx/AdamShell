@@ -1,5 +1,6 @@
 from cats.feline_wisdom import FelineWisdom
 from cats.feline_wisdom_state import (
+    FelineAbilityAwarenessTransmissionDeniedResult,
     FelineAbilityAwarenessTransmissionEvent,
 )
 from cats.cat_personality import CatPersonality
@@ -34,7 +35,21 @@ class FelineAbilityResolver:
         teacher_wisdom = FelineWisdom.ensure_state(teacher)
         student_wisdom = FelineWisdom.ensure_state(student)
         if not teacher_wisdom.can_transmit_meow:
-            return self._deny(name='meow_awareness_transmission_denied', teacher=teacher, student=student, reason='teacher_cannot_transmit_meow')
+            result = (
+                FelineAbilityAwarenessTransmissionDeniedResult(
+                    teacher=teacher.name,
+                    student=student.name,
+                    reason=(
+                        'teacher_cannot_transmit_meow'
+                    ),
+                )
+            )
+
+            self._record(
+                result.to_dict()
+            )
+
+            return result
         transferred = []
         for knowledge_name, knowledge in teacher_wisdom.awareness_items():
             domain = knowledge.domain
@@ -66,7 +81,7 @@ class FelineAbilityResolver:
             snapshot
         )
 
-        return snapshot
+        return event
 
     def teach_method(self, teacher, student, ability_name, method_name):
         FelineWisdom.ensure_state(teacher)

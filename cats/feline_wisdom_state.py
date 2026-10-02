@@ -92,6 +92,57 @@ class MeowFelineAwarenessTransmissionEvent:
 
 
 @dataclass(slots=True, frozen=True)
+class FelineAbilityAwarenessTransmissionDeniedResult:
+    teacher: str
+    student: str
+    reason: str
+
+    name: str = field(
+        default=(
+            "meow_awareness_transmission_denied"
+        ),
+        init=False,
+    )
+
+    learned: bool = field(
+        default=False,
+        init=False,
+    )
+
+    transmitted: bool = field(
+        default=False,
+        init=False,
+    )
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "teacher",
+            str(self.teacher),
+        )
+        object.__setattr__(
+            self,
+            "student",
+            str(self.student),
+        )
+        object.__setattr__(
+            self,
+            "reason",
+            str(self.reason),
+        )
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "teacher": self.teacher,
+            "student": self.student,
+            "reason": self.reason,
+            "learned": self.learned,
+            "transmitted": self.transmitted,
+        }
+
+
+@dataclass(slots=True, frozen=True)
 class FelineAbilityAwarenessTransmissionEvent:
     teacher: str
     student: str
