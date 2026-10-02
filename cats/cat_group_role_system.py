@@ -117,7 +117,7 @@ class CatGroupRoleSystem:
             event
         )
 
-        return event.to_dict()
+        return event
 
     def holders(self, group_id, role):
         group = self.group_system._group(group_id)

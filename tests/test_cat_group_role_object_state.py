@@ -273,8 +273,13 @@ class CatGroupRoleObjectStateTests(
         )
 
         self.assertIsInstance(
-            event,
+            result,
             CatGroupRoleReleasedEvent,
+        )
+
+        self.assertIs(
+            result,
+            event,
         )
 
         self.assertEqual(
@@ -282,7 +287,33 @@ class CatGroupRoleObjectStateTests(
             'rotation',
         )
 
-        result['reason'] = 'changed'
+        for mapping_method in (
+            'get',
+            'keys',
+            'items',
+            'values',
+        ):
+            self.assertFalse(
+                hasattr(
+                    result,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = result[
+                'reason'
+            ]
+
+        boundary = (
+            result.to_dict()
+        )
+
+        boundary[
+            'reason'
+        ] = 'changed'
 
         self.assertEqual(
             event.reason,
