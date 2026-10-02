@@ -59,6 +59,41 @@ class KittenFatherSelectedEvent:
         }
 
 
+@dataclass(slots=True, frozen=True)
+class KittenFatherSelectionResult:
+
+    father: object
+    event: KittenFatherSelectedEvent
+
+    def __post_init__(self):
+        if not isinstance(
+            self.event,
+            KittenFatherSelectedEvent,
+        ):
+            raise TypeError(
+                "Father selection result requires "
+                "a KittenFatherSelectedEvent."
+            )
+
+        father_name = getattr(
+            self.father,
+            "name",
+            None,
+        )
+
+        if father_name is None:
+            raise TypeError(
+                "Father selection result requires "
+                "a father object with a name."
+            )
+
+        if str(father_name) != self.event.father:
+            raise ValueError(
+                "Father selection result father "
+                "must match selection event."
+            )
+
+
 class MultipleSirePaternityResolver:
 
     def __init__(self):
@@ -101,10 +136,10 @@ class MultipleSirePaternityResolver:
             event
         )
 
-        return {
-            'father': father,
-            'event': event.to_dict(),
-        }
+        return KittenFatherSelectionResult(
+            father=father,
+            event=event,
+        )
 
     def record_selection(
         self,

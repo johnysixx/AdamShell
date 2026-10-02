@@ -186,13 +186,12 @@ class CatMatingResolver:
             )
 
             paternity_event = (
-                self.paternity_resolver
-                .history[-1]
+                paternity.event
             )
 
-            father = paternity[
-                "father"
-            ]
+            father = (
+                paternity.father
+            )
 
             embryo_result = (
                 self.embryo_resolver

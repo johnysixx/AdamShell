@@ -3,6 +3,7 @@ import unittest
 from cats.mating_contact import CatMatingContact
 from cats.paternity_resolver import (
     KittenFatherSelectedEvent,
+    KittenFatherSelectionResult,
     MultipleSirePaternityResolver,
 )
 
@@ -85,6 +86,21 @@ class PaternityResolverObjectStateTests(
         )
 
         self.assertIsInstance(
+            result,
+            KittenFatherSelectionResult,
+        )
+
+        self.assertIs(
+            result.father,
+            self.first,
+        )
+
+        self.assertIs(
+            result.event,
+            event,
+        )
+
+        self.assertIsInstance(
             event,
             KittenFatherSelectedEvent,
         )
@@ -129,9 +145,32 @@ class PaternityResolverObjectStateTests(
         with self.assertRaises(TypeError):
             _ = event["father"]
 
-        result[
-            "event"
-        ][
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+            "__getitem__",
+            "to_dict",
+        ):
+            self.assertFalse(
+                hasattr(
+                    result,
+                    mapping_method,
+                ),
+                mapping_method,
+            )
+
+        with self.assertRaises(TypeError):
+            _ = result[
+                "father"
+            ]
+
+        boundary = (
+            event.to_dict()
+        )
+
+        boundary[
             "weighted_candidate_names"
         ].append(
             "changed"

@@ -56,8 +56,18 @@ class CatMatingResolverTests(unittest.TestCase):
         self.resolver.mate(self.female, self.first_male)
         self.resolver.mate(self.female, self.second_male)
         contacts = self.female.reproduction.mating_contacts
-        selected = self.resolver.paternity_resolver.select_father(contacts, rng=MultiSireRng())
-        self.assertEqual(selected['event']['weighted_candidate_names'], ['father_one', 'father_one', 'father_two'])
+        selected = self.resolver.paternity_resolver.select_father(
+            contacts,
+            rng=MultiSireRng(),
+        )
+        self.assertEqual(
+            selected.event.weighted_candidate_names,
+            (
+                "father_one",
+                "father_one",
+                "father_two",
+            ),
+        )
 
     def test_closing_window_starts_pregnancy(self):
         self.resolver.mate(self.female, self.first_male, current_day=10)
