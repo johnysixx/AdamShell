@@ -50,8 +50,13 @@ class CatOvulationObjectStateTests(
         )
 
         self.assertIsInstance(
-            event,
+            result,
             CatOvulationStimulationRecordedEvent,
+        )
+
+        self.assertIs(
+            result,
+            event,
         )
 
         self.assertEqual(
@@ -79,7 +84,18 @@ class CatOvulationObjectStateTests(
         with self.assertRaises(TypeError):
             _ = event["stimulation"]
 
-        result["stimulation"] = 99
+        with self.assertRaises(TypeError):
+            _ = result[
+                "stimulation"
+            ]
+
+        boundary = (
+            result.to_dict()
+        )
+
+        boundary[
+            "stimulation"
+        ] = 99
 
         self.assertEqual(
             event.stimulation,
@@ -112,8 +128,13 @@ class CatOvulationObjectStateTests(
         )
 
         self.assertIsInstance(
-            event,
+            result,
             CatInducedOvulationResolvedEvent,
+        )
+
+        self.assertIs(
+            result,
+            event,
         )
 
         self.assertTrue(
@@ -123,7 +144,16 @@ class CatOvulationObjectStateTests(
             event.reason
         )
 
-        result[
+        with self.assertRaises(TypeError):
+            _ = result[
+                "ovulation_induced"
+            ]
+
+        boundary = (
+            result.to_dict()
+        )
+
+        boundary[
             "ovulation_induced"
         ] = False
 

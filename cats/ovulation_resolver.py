@@ -180,7 +180,7 @@ class CatOvulationResolver:
             event
         )
 
-        return event.to_dict()
+        return event
 
     def resolve(self, female, day=None):
         reproduction = female.reproduction
@@ -209,7 +209,7 @@ class CatOvulationResolver:
             event
         )
 
-        return event.to_dict()
+        return event
 
     def record_event(
         self,

@@ -70,19 +70,14 @@ class CatMatingResolver:
                     .potential_fathers
                 ),
                 ovulation_stimulation=(
-                    stimulation[
-                        "stimulation"
-                    ]
+                    stimulation.stimulation
                 ),
                 ovulation_threshold=(
-                    stimulation[
-                        "threshold"
-                    ]
+                    stimulation.threshold
                 ),
                 ovulation_threshold_reached=(
-                    stimulation[
-                        "threshold_reached"
-                    ]
+                    stimulation
+                    .threshold_reached
                 ),
             )
         )
@@ -124,16 +119,11 @@ class CatMatingResolver:
         contacts = reproduction.mating_contacts
         if not contacts:
             raise ValueError('Ovulation requires at least one successful mating contact.')
-        ovulation = (
+        ovulation_event = (
             self.ovulation_resolver.resolve(
                 female,
                 day=current_day
             )
-        )
-
-        ovulation_event = (
-            self.ovulation_resolver
-            .history[-1]
         )
 
         if not ovulation_event.ovulation_induced:
