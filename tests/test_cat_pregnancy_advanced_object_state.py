@@ -5,6 +5,7 @@ from cats import Cats
 
 from cats.mating_pregnancy_event import (
     CatPregnancyAdvancedEvent,
+    CatPregnancyAdvanceDeniedResult,
     CatPregnancyStartedEvent,
 )
 
@@ -117,8 +118,13 @@ class CatPregnancyAdvancedObjectStateTests(
         )
 
         self.assertIsInstance(
-            event,
+            result,
             CatPregnancyAdvancedEvent,
+        )
+
+        self.assertIs(
+            result,
+            event,
         )
 
         self.assertEqual(
@@ -149,8 +155,12 @@ class CatPregnancyAdvancedObjectStateTests(
             event.advanced
         )
 
+        boundary = (
+            result.to_dict()
+        )
+
         self.assertEqual(
-            result,
+            boundary,
             event.to_dict(),
         )
 
@@ -219,9 +229,70 @@ class CatPregnancyAdvancedObjectStateTests(
         )
 
         self.assertTrue(
-            result[
-                "ready_for_birth"
+            result.ready_for_birth
+        )
+
+    def test_not_pregnant_returns_object_state(
+        self
+    ):
+        self.female.reproduction.pregnant = False
+
+        result = (
+            self.resolver
+            .advance_pregnancy(
+                self.female,
+                days=1,
+            )
+        )
+
+        self.assertIsInstance(
+            result,
+            CatPregnancyAdvanceDeniedResult,
+        )
+
+        self.assertEqual(
+            result.reason,
+            "cat_is_not_pregnant",
+        )
+
+        self.assertFalse(
+            result.advanced
+        )
+
+        self.assertFalse(
+            result.ready_for_birth
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    result,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(TypeError):
+            _ = result[
+                "reason"
             ]
+
+        self.assertEqual(
+            result.to_dict(),
+            {
+                "name": (
+                    "cat_pregnancy_advance_failed"
+                ),
+                "mother": "mother",
+                "reason": (
+                    "cat_is_not_pregnant"
+                ),
+                "advanced": False,
+            },
         )
 
     def test_history_keeps_distinct_advance_events(
@@ -279,16 +350,12 @@ class CatPregnancyAdvancedObjectStateTests(
         )
 
         self.assertEqual(
-            first_result[
-                "pregnancy_day"
-            ],
+            first_result.pregnancy_day,
             1,
         )
 
         self.assertEqual(
-            second_result[
-                "pregnancy_day"
-            ],
+            second_result.pregnancy_day,
             3,
         )
 

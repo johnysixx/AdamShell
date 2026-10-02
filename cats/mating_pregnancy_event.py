@@ -352,6 +352,59 @@ class CatPregnancyStartedEvent(
         }
 
 @dataclass(slots=True, frozen=True)
+class CatPregnancyAdvanceDeniedResult:
+
+    mother: str
+    reason: str
+
+    name: str = field(
+        default="cat_pregnancy_advance_failed",
+        init=False,
+    )
+
+    advanced: bool = field(
+        default=False,
+        init=False,
+    )
+
+    ready_for_birth: bool = field(
+        default=False,
+        init=False,
+    )
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "mother",
+            str(
+                self.mother
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "reason",
+            str(
+                self.reason
+            ),
+        )
+
+    def __deepcopy__(
+        self,
+        memo
+    ):
+        return self
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "mother": self.mother,
+            "reason": self.reason,
+            "advanced": self.advanced,
+        }
+
+
+@dataclass(slots=True, frozen=True)
 class CatPregnancyAdvancedEvent(
     CatMatingHistoryEvent
 ):

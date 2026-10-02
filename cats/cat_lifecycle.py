@@ -155,12 +155,13 @@ class CatLifeCycleHandler:
             )
 
             pregnancy_advances.append(
-                pregnancy_result
+                pregnancy_result.to_dict()
             )
 
-            if not pregnancy_result.get(
+            if not getattr(
+                pregnancy_result,
                 "ready_for_birth",
-                False
+                False,
             ):
                 continue
 

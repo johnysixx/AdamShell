@@ -14,6 +14,7 @@ from cats.mating_contact import (
 )
 from cats.mating_pregnancy_event import (
     CatPregnancyAdvancedEvent,
+    CatPregnancyAdvanceDeniedResult,
     CatPregnancyPaternityResult,
     CatPregnancyStartedEvent,
 )
@@ -293,10 +294,13 @@ class CatMatingResolver:
     def advance_pregnancy(self, female, days=1):
         biology = self.biology_gate.require_physical_world(operation='advance_cat_pregnancy', cat=female)
         if not biology.allowed:
-            return biology.to_dict()
+            return biology
         reproduction = female.reproduction
         if not reproduction.pregnant:
-            return {'name': 'cat_pregnancy_advance_failed', 'reason': 'cat_is_not_pregnant', 'advanced': False}
+            return CatPregnancyAdvanceDeniedResult(
+                mother=female.name,
+                reason="cat_is_not_pregnant",
+            )
         days = int(days)
         if days < 1:
             raise ValueError('Pregnancy advance must be at least one day.')
@@ -321,7 +325,7 @@ class CatMatingResolver:
             event
         )
 
-        return event.to_dict()
+        return event
 
     @staticmethod
     def _validate_pair(female, male):

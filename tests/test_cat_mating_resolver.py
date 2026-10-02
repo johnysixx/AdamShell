@@ -94,9 +94,9 @@ class CatMatingResolverTests(unittest.TestCase):
         self.resolver.mate(self.female, self.first_male)
         self.resolver.close_mating_window(self.female, embryo_count=2, rng=MultiSireRng())
         before = self.resolver.advance_pregnancy(self.female, days=64)
-        self.assertFalse(before['ready_for_birth'])
+        self.assertFalse(before.ready_for_birth)
         final = self.resolver.advance_pregnancy(self.female, days=1)
-        self.assertTrue(final['ready_for_birth'])
+        self.assertTrue(final.ready_for_birth)
 
     def test_neutered_female_cannot_open_window(self):
         self.female.reproduction = CatReproduction.create_state(sex='female', neutered=True)
