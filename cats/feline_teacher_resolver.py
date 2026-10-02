@@ -385,7 +385,6 @@ class FelineTeacherResolver:
                 ability_name=ability_name,
                 cats=cats,
             )
-            .to_dict()
         )
 
     def _find_teachers_event(

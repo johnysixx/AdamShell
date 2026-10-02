@@ -27,30 +27,30 @@ class FelineTeacherResolverTests(unittest.TestCase):
 
     def test_cat_without_awareness_cannot_search(self):
         result = self.teachers.find_teachers(student=self.kitten, ability_name='open_human_door')
-        self.assertFalse(result['found'])
-        self.assertEqual(result['reason'], 'ability_not_known_to_exist')
+        self.assertFalse(result.found)
+        self.assertEqual(result.reason, 'ability_not_known_to_exist')
 
     def test_awareness_finds_both_verified_teachers(self):
         self.give_door_awareness()
         result = self.teachers.find_teachers(student=self.kitten, ability_name='open_human_door')
-        self.assertTrue(result['found'])
-        self.assertEqual(result['teacher_count'], 2)
-        names = {teacher['name'] for teacher in result['teachers']}
+        self.assertTrue(result.found)
+        self.assertEqual(result.teacher_count, 2)
+        names = {teacher.name for teacher in result.teachers}
         self.assertEqual(names, {'pazuzu', 'queen_elisabeth'})
 
     def test_unknown_teacher_name_is_not_trusted(self):
         self.give_door_awareness(teacher_names=['imaginary_cat'])
         result = self.teachers.find_teachers(student=self.kitten, ability_name='open_human_door')
-        self.assertFalse(result['found'])
-        self.assertEqual(result['reason'], 'no_available_verified_teacher')
-        self.assertFalse(result['candidates'][0]['cat_found'])
+        self.assertFalse(result.found)
+        self.assertEqual(result.reason, 'no_available_verified_teacher')
+        self.assertFalse(result.candidates[0].cat_found)
 
     def test_named_cat_must_really_know_ability(self):
         ordinary_cat = self.cats.create_cat(name='ordinary_cat', color='gray', fur_length='short', origin='natural_birth')
         self.give_door_awareness(teacher_names=[ordinary_cat.name])
         result = self.teachers.find_teachers(student=self.kitten, ability_name='open_human_door')
-        self.assertFalse(result['found'])
-        self.assertFalse(result['candidates'][0]['knows_ability'])
+        self.assertFalse(result.found)
+        self.assertFalse(result.candidates[0].knows_ability)
 
     def test_cat_can_choose_pazuzu_method(self):
         self.give_door_awareness()

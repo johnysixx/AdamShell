@@ -125,8 +125,13 @@ class FelineTeacherHistoryObjectStateTests(
         )
 
         self.assertIsInstance(
-            event,
+            result,
             FelineAbilityTeacherSearchEvent,
+        )
+
+        self.assertIs(
+            result,
+            event,
         )
 
         self.assertIsInstance(
@@ -149,26 +154,29 @@ class FelineTeacherHistoryObjectStateTests(
             event.candidates[0],
             event.teachers[0],
         ):
-            self.assertFalse(
-                hasattr(
-                    obj,
-                    "get"
+            for mapping_method in (
+                "get",
+                "keys",
+                "items",
+                "values",
+            ):
+                self.assertFalse(
+                    hasattr(
+                        obj,
+                        mapping_method,
+                    )
                 )
-            )
-
-            self.assertFalse(
-                hasattr(
-                    obj,
-                    "items"
-                )
-            )
 
             with self.assertRaises(
                 TypeError
             ):
                 _ = obj["name"]
 
-        result[
+        boundary = (
+            result.to_dict()
+        )
+
+        boundary[
             "candidates"
         ][0][
             "methods"
