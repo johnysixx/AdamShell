@@ -52,8 +52,13 @@ class CatEstrousCycleObjectStateTests(
         )
 
         self.assertIsInstance(
-            event,
+            result,
             CatEstrousCycleEvent,
+        )
+
+        self.assertIs(
+            result,
+            event,
         )
 
         self.assertEqual(
@@ -85,7 +90,18 @@ class CatEstrousCycleObjectStateTests(
         with self.assertRaises(TypeError):
             _ = event["phase"]
 
-        result["phase"] = "changed"
+        with self.assertRaises(TypeError):
+            _ = result[
+                "phase"
+            ]
+
+        boundary = (
+            result.to_dict()
+        )
+
+        boundary[
+            "phase"
+        ] = "changed"
 
         self.assertIs(
             event.phase,
@@ -113,8 +129,13 @@ class CatEstrousCycleObjectStateTests(
         )
 
         self.assertIsInstance(
-            event,
+            result,
             CatEstrousCycleEvent,
+        )
+
+        self.assertIs(
+            result,
+            event,
         )
 
         self.assertEqual(
@@ -122,13 +143,23 @@ class CatEstrousCycleObjectStateTests(
             "neutered",
         )
 
+        self.assertIsNone(
+            result.cycle_day,
+        )
+
+        boundary = (
+            result.to_dict()
+        )
+
         self.assertNotIn(
             "cycle_day",
-            result,
+            boundary,
         )
 
         self.assertEqual(
-            result["reason"],
+            boundary[
+                "reason"
+            ],
             "neutered",
         )
 

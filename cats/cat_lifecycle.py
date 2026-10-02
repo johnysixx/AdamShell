@@ -140,7 +140,7 @@ class CatLifeCycleHandler:
             )
 
             estrous_cycle_results.append(
-                estrous_result
+                estrous_result.to_dict()
             )
 
             if not reproduction.pregnant:

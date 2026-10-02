@@ -55,7 +55,7 @@ class CatEstrousCycleTests(
         reproduction = self.female.reproduction
 
         self.assertEqual(
-            result["name"],
+            result.name,
             "cat_estrus_started"
         )
 
@@ -83,7 +83,7 @@ class CatEstrousCycleTests(
             )
 
         self.assertEqual(
-            result["name"],
+            result.name,
             "cat_interestrus_started"
         )
 
@@ -108,7 +108,7 @@ class CatEstrousCycleTests(
             )
 
         self.assertEqual(
-            result["name"],
+            result.name,
             "cat_estrus_started"
         )
 
@@ -173,7 +173,7 @@ class CatEstrousCycleTests(
         )
 
         self.assertEqual(
-            result["reason"],
+            result.reason,
             "neutered"
         )
 
@@ -193,7 +193,7 @@ class CatEstrousCycleTests(
         )
 
         self.assertEqual(
-            result["reason"],
+            result.reason,
             "pregnant"
         )
 

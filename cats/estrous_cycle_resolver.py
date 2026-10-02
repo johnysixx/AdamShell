@@ -186,7 +186,7 @@ class CatEstrousCycleResolver:
             event
         )
 
-        return event.to_dict()
+        return event
 
     def activate_estrus(
         self,
@@ -237,7 +237,7 @@ class CatEstrousCycleResolver:
             event
         )
 
-        return event.to_dict()
+        return event
 
     def _start_estrus(
         self,
@@ -270,7 +270,7 @@ class CatEstrousCycleResolver:
             f"CAT ESTRUS STARTED: {cat.name}"
         )
 
-        return event.to_dict()
+        return event
 
     def _start_interestrus(
         self,
@@ -309,7 +309,7 @@ class CatEstrousCycleResolver:
             event
         )
 
-        return event.to_dict()
+        return event
 
     def _set_inactive(
         self,
@@ -339,7 +339,7 @@ class CatEstrousCycleResolver:
             event
         )
 
-        return event.to_dict()
+        return event
 
     def record_event(
         self,
