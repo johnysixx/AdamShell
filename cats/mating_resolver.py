@@ -111,7 +111,7 @@ class CatMatingResolver:
     def close_mating_window(self, female, current_day=0, gestation_days=None, embryo_count=None, rng=None):
         biology = self.biology_gate.require_physical_world(operation='close_cat_mating_window', cat=female)
         if not biology.allowed:
-            return biology.to_dict()
+            return biology
         reproduction = female.reproduction
         if reproduction.pregnant:
             raise ValueError('Cat is already pregnant.')
@@ -154,7 +154,7 @@ class CatMatingResolver:
                 event
             )
 
-            return event.to_dict()
+            return event
         rng = rng or random
         gestation_days = CatReproduction.GESTATION_DAYS_DEFAULT if gestation_days is None else int(gestation_days)
         if not CatReproduction.GESTATION_DAYS_MIN <= gestation_days <= CatReproduction.GESTATION_DAYS_MAX:
@@ -289,7 +289,7 @@ class CatMatingResolver:
                 event.to_dict()
             )
 
-        return event.to_dict()
+        return event
 
     def advance_pregnancy(self, female, days=1):
         biology = self.biology_gate.require_physical_world(operation='advance_cat_pregnancy', cat=female)

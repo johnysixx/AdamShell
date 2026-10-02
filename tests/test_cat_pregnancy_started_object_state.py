@@ -129,8 +129,13 @@ class CatPregnancyStartedObjectStateTests(
         )
 
         self.assertIsInstance(
-            event,
+            result,
             CatPregnancyStartedEvent,
+        )
+
+        self.assertIs(
+            result,
+            event,
         )
 
         self.assertIsInstance(
@@ -202,7 +207,7 @@ class CatPregnancyStartedObjectStateTests(
         )
 
         self.assertEqual(
-            result,
+            result.to_dict(),
             event.to_dict(),
         )
 
@@ -268,13 +273,17 @@ class CatPregnancyStartedObjectStateTests(
             .history[-1]
         )
 
-        result[
+        boundary = (
+            result.to_dict()
+        )
+
+        boundary[
             "father_names"
         ].append(
             "changed"
         )
 
-        result[
+        boundary[
             "paternity_results"
         ][0][
             "selection"
@@ -284,7 +293,7 @@ class CatPregnancyStartedObjectStateTests(
             "changed"
         )
 
-        result[
+        boundary[
             "embryo_results"
         ][0][
             "viability"
@@ -294,7 +303,7 @@ class CatPregnancyStartedObjectStateTests(
             "changed"
         )
 
-        result[
+        boundary[
             "embryo_results"
         ][0][
             "phenotype"

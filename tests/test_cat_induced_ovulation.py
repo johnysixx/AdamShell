@@ -38,9 +38,9 @@ class CatInducedOvulationTests(unittest.TestCase):
         self.mating.mate(self.female, self.male)
         result = self.mating.close_mating_window(self.female, embryo_count=2, rng=FirstChoiceRng())
         reproduction = self.female.reproduction
-        self.assertFalse(result['started'])
-        self.assertFalse(result['ovulation_induced'])
-        self.assertEqual(result['ovulation']['reason'], 'insufficient_stimulation')
+        self.assertFalse(result.started)
+        self.assertFalse(result.ovulation_induced)
+        self.assertEqual(result.ovulation.reason, 'insufficient_stimulation')
         self.assertFalse(reproduction.pregnant)
         self.assertIs(reproduction.estrous_phase, CatEstrousPhase.INTERESTRUS)
         self.assertEqual(reproduction.embryos, [])
@@ -49,8 +49,8 @@ class CatInducedOvulationTests(unittest.TestCase):
         for _ in range(4):
             self.mating.mate(self.female, self.male)
         result = self.mating.close_mating_window(self.female, embryo_count=2, rng=FirstChoiceRng())
-        self.assertTrue(result['started'])
-        self.assertTrue(result['ovulation_induced'])
+        self.assertTrue(result.started)
+        self.assertTrue(result.ovulation_induced)
         self.assertTrue(self.female.reproduction.pregnant)
         self.assertEqual(len(self.female.reproduction.embryos), 2)
 

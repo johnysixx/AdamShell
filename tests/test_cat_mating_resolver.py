@@ -73,7 +73,7 @@ class CatMatingResolverTests(unittest.TestCase):
         self.resolver.mate(self.female, self.first_male, current_day=10)
         event = self.resolver.close_mating_window(self.female, current_day=12, embryo_count=3, rng=MultiSireRng())
         reproduction = self.female.reproduction
-        self.assertTrue(event['started'])
+        self.assertTrue(event.started)
         self.assertTrue(reproduction.pregnant)
         self.assertFalse(reproduction.mating_window_open)
         self.assertEqual(reproduction.expected_birth_day, 77)
@@ -83,10 +83,30 @@ class CatMatingResolverTests(unittest.TestCase):
         self.resolver.mate(self.female, self.first_male)
         self.resolver.mate(self.female, self.second_male)
         event = self.resolver.close_mating_window(self.female, embryo_count=4, rng=MultiSireRng())
-        fathers = [result['father'] for result in event['paternity_results']]
-        self.assertEqual(fathers, ['father_one', 'father_two', 'father_one', 'father_two'])
-        self.assertTrue(event['multiple_sires'])
-        self.assertEqual(set(event['father_names']), {'father_one', 'father_two'})
+        fathers = [
+            result.father
+            for result
+            in event.paternity_results
+        ]
+        self.assertEqual(
+            fathers,
+            [
+                'father_one',
+                'father_two',
+                'father_one',
+                'father_two',
+            ],
+        )
+        self.assertTrue(
+            event.multiple_sires
+        )
+        self.assertEqual(
+            set(event.father_names),
+            {
+                'father_one',
+                'father_two',
+            },
+        )
         embryos = self.female.reproduction.embryos
         self.assertEqual({embryo.father_name for embryo in embryos}, {'father_one', 'father_two'})
 

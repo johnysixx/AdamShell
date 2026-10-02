@@ -83,8 +83,13 @@ class CatMatingWindowWithoutOvulationObjectStateTests(
         )
 
         self.assertIsInstance(
-            event,
+            result,
             CatMatingWindowClosedWithoutOvulationEvent,
+        )
+
+        self.assertIs(
+            result,
+            event,
         )
 
         self.assertIsInstance(
@@ -111,7 +116,7 @@ class CatMatingWindowWithoutOvulationObjectStateTests(
         )
 
         self.assertEqual(
-            result,
+            result.to_dict(),
             event.to_dict(),
         )
 
@@ -166,7 +171,11 @@ class CatMatingWindowWithoutOvulationObjectStateTests(
             .history[-1]
         )
 
-        result[
+        boundary = (
+            result.to_dict()
+        )
+
+        boundary[
             "ovulation"
         ][
             "reason"
