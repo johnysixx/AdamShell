@@ -264,7 +264,14 @@ class KittenUpbringingResolver:
                 events.append({'name': 'adult_vocalization_teacher_unavailable', 'kitten': kitten.name, 'age_days': age_days, 'day': current_day, 'learned': False})
             else:
                 vocalization = CatLearning.ADULT_VOCALIZATIONS[vocalization_index]
-                events.append(self.vocalization_resolver.teach(teacher=teacher, kitten=kitten, vocalization=vocalization, current_day=current_day))
+                events.append(
+                    self.vocalization_resolver.teach(
+                        teacher=teacher,
+                        kitten=kitten,
+                        vocalization=vocalization,
+                        current_day=current_day,
+                    ).to_dict()
+                )
         if age_days == 75:
             events.append(self._teach_human_communication(kitten=kitten, teacher=teacher, age_days=age_days, current_day=current_day))
         if age_days == 90:

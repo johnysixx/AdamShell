@@ -155,7 +155,7 @@ class CatAdultVocalizationObjectStateTests(
         )
 
         self.assertTrue(
-            result['taught']
+            result.taught
         )
 
         self.assertTrue(
@@ -187,8 +187,13 @@ class CatAdultVocalizationObjectStateTests(
         )
 
         self.assertIsInstance(
-            event,
+            result,
             AdultVocalizationLearnedEvent,
+        )
+
+        self.assertIs(
+            result,
+            event,
         )
 
         self.assertIs(
@@ -221,7 +226,13 @@ class CatAdultVocalizationObjectStateTests(
         with self.assertRaises(TypeError):
             _ = event['vocalization']
 
-        result['vocalization'] = 'changed'
+        boundary = (
+            result.to_dict()
+        )
+
+        boundary[
+            'vocalization'
+        ] = 'changed'
 
         self.assertEqual(
             event.vocalization,
@@ -248,8 +259,13 @@ class CatAdultVocalizationObjectStateTests(
         event = self.resolver.history[-1]
 
         self.assertIsInstance(
-            event,
+            result,
             AdultVocalizationLessonDeniedEvent,
+        )
+
+        self.assertIs(
+            result,
+            event,
         )
 
         self.assertEqual(
@@ -262,12 +278,53 @@ class CatAdultVocalizationObjectStateTests(
         )
 
         self.assertEqual(
-            result['reason'],
+            result.reason,
             'vocalization_already_learned',
         )
 
         with self.assertRaises(TypeError):
             _ = event['reason']
+
+    def test_resolver_results_have_no_mapping_api(
+        self
+    ):
+        learned = self.resolver.teach(
+            teacher=self.mother,
+            kitten=self.kitten,
+            vocalization='food_request',
+            current_day=60,
+        )
+
+        denied = self.resolver.teach(
+            teacher=self.mother,
+            kitten=self.kitten,
+            vocalization='food_request',
+            current_day=61,
+        )
+
+        for result in (
+            learned,
+            denied,
+        ):
+            for mapping_method in (
+                'get',
+                'keys',
+                'items',
+                'values',
+            ):
+                self.assertFalse(
+                    hasattr(
+                        result,
+                        mapping_method,
+                    )
+                )
+
+            with self.assertRaises(
+                TypeError
+            ):
+                _ = result[
+                    'name'
+                ]
 
     def test_learning_snapshot_serializes_lesson_object(
         self

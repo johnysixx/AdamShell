@@ -152,8 +152,6 @@ class AdultVocalizationResolver:
             event
         )
 
-        snapshot = event.to_dict()
-
         quantum_events = getattr(
             self.universe,
             'quantum_events',
@@ -162,10 +160,10 @@ class AdultVocalizationResolver:
 
         if quantum_events is not None:
             quantum_events.append(
-                dict(snapshot)
+                event.to_dict()
             )
 
-        return snapshot
+        return event
 
     def _require_vocalizations(
         self,
@@ -191,7 +189,9 @@ class AdultVocalizationResolver:
         results = []
         for vocalization in CatLearning.ADULT_VOCALIZATIONS:
             result = self.teach(teacher=teacher, kitten=kitten, vocalization=vocalization, current_day=current_day)
-            results.append(result)
+            results.append(
+                result.to_dict()
+            )
         return {'name': 'adult_vocalization_repertoire_taught', 'teacher': teacher.name, 'student': kitten.name, 'day': current_day, 'results': results, 'complete': kitten.learning.skills['adult_meowing'].learned}
 
     def _deny(
@@ -224,4 +224,4 @@ class AdultVocalizationResolver:
             event
         )
 
-        return event.to_dict()
+        return event

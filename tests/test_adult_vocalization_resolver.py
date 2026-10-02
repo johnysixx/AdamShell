@@ -34,7 +34,7 @@ class AdultVocalizationResolverTests(unittest.TestCase):
 
     def test_mother_teaches_one_vocalization(self):
         result = self.vocalization.teach(teacher=self.mother, kitten=self.kitten, vocalization='food_request', current_day=60)
-        self.assertTrue(result['taught'])
+        self.assertTrue(result.taught)
         self.assertTrue(
             self.kitten
             .learning
