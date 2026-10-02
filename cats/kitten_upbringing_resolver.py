@@ -174,7 +174,7 @@ class KittenUpbringingResolver:
         events = []
         if age_days >= 14:
             socialization_lesson = self._advance_skill(kitten=kitten, skill_name='socialization', amount=1.0 / 7.0, teacher=mother, age_days=age_days, current_day=current_day, lesson_name='kitten_socialization_lesson')
-            socialization_lesson['personality'] = CatPersonality.apply_experience(cat=kitten, source='maternal_socialization', changes={'empathy': 0.01, 'patience': 0.005}, day=current_day, metadata={'teacher': getattr(mother, 'name', None) if mother is not None else None, 'age_days': age_days, 'skill_progress': socialization_lesson.get('progress')})
+            socialization_lesson['personality'] = CatPersonality.apply_experience(cat=kitten, source='maternal_socialization', changes={'empathy': 0.01, 'patience': 0.005}, day=current_day, metadata={'teacher': getattr(mother, 'name', None) if mother is not None else None, 'age_days': age_days, 'skill_progress': socialization_lesson.get('progress')}).to_dict()
             events.append(socialization_lesson)
         if age_days == 16:
             events.append({'name': 'kitten_played_with_siblings', 'kitten': kitten.name, 'age_days': age_days, 'day': current_day, 'learned': 'play_boundaries'})

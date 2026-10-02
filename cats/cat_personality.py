@@ -1,4 +1,5 @@
 from cats.cat_personality_state import (
+    CatPersonalityExperienceAppliedResult,
     CatPersonalityState,
     CatPersonalityTraitAdjustedEvent,
 )
@@ -115,7 +116,7 @@ class CatPersonality:
             event
         )
 
-        return event.to_dict()
+        return event
 
     @classmethod
     def apply_experience(
@@ -140,17 +141,17 @@ class CatPersonality:
                 )
             )
 
-        return {
-            "name": (
-                "cat_personality_experience_applied"
-            ),
-            "cat": cat.name,
-            "source": source,
-            "day": day,
-            "changes": dict(changes),
-            "events": events,
-            "applied": True,
-        }
+        return (
+            CatPersonalityExperienceAppliedResult(
+                cat=cat.name,
+                source=source,
+                day=day,
+                changes=changes,
+                events=tuple(
+                    events
+                ),
+            )
+        )
 
     @classmethod
     def dominant_trait(

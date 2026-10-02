@@ -86,7 +86,7 @@ class FelineAbilityResolver:
         learned_method = FelineWisdom.learn_ability_method(cat=student, ability_name=ability_name, method_name=method_name, teacher_name=teacher.name, constraints=teacher_method.constraints)
         teacher_personality = CatPersonality.apply_experience(cat=teacher, source='successfully_taught_other_cat', changes={'empathy': 0.02, 'patience': 0.015}, metadata={'student': student.name, 'ability': ability_name, 'method': method_name})
         student_personality = CatPersonality.apply_experience(cat=student, source='learned_from_other_cat', changes={'curiosity': 0.01}, metadata={'teacher': teacher.name, 'ability': ability_name, 'method': method_name})
-        event = {'name': 'feline_ability_method_learned', 'teacher': teacher.name, 'student': student.name, 'ability': ability_name, 'method': method_name, 'constraints': dict(learned_method.constraints), 'teacher_personality': teacher_personality, 'student_personality': student_personality, 'learned': True}
+        event = {'name': 'feline_ability_method_learned', 'teacher': teacher.name, 'student': student.name, 'ability': ability_name, 'method': method_name, 'constraints': dict(learned_method.constraints), 'teacher_personality': teacher_personality.to_dict(), 'student_personality': student_personality.to_dict(), 'learned': True}
         FelineWisdom.ensure_state(student).lesson_history.append(event)
         self._record(event)
         return event

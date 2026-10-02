@@ -6,6 +6,7 @@ from cats.cat_personality import (
     CatPersonality,
 )
 from cats.cat_personality_state import (
+    CatPersonalityExperienceAppliedResult,
     CatPersonalityTraitAdjustedEvent,
 )
 
@@ -48,8 +49,13 @@ class CatPersonalityHistoryObjectStateTests(
         )
 
         self.assertIsInstance(
-            event,
+            result,
             CatPersonalityTraitAdjustedEvent,
+        )
+
+        self.assertIs(
+            result,
+            event,
         )
 
         self.assertEqual(
@@ -83,9 +89,15 @@ class CatPersonalityHistoryObjectStateTests(
         with self.assertRaises(TypeError):
             _ = event["trait"]
 
-        result["trait"] = "changed"
+        boundary = (
+            result.to_dict()
+        )
 
-        result[
+        boundary[
+            "trait"
+        ] = "changed"
+
+        boundary[
             "metadata"
         ][
             "prey"
@@ -107,6 +119,103 @@ class CatPersonalityHistoryObjectStateTests(
             event.metadata[
                 "prey"
             ] = "changed"
+
+    def test_experience_result_uses_object_state(
+        self
+    ):
+        result = (
+            CatPersonality.apply_experience(
+                cat=self.cat,
+                source="socialization",
+                changes={
+                    "empathy": 0.1,
+                    "patience": 0.05,
+                },
+                day=12,
+            )
+        )
+
+        self.assertIsInstance(
+            result,
+            CatPersonalityExperienceAppliedResult,
+        )
+
+        self.assertTrue(
+            result.applied
+        )
+
+        self.assertEqual(
+            tuple(
+                result.changes.keys()
+            ),
+            (
+                "empathy",
+                "patience",
+            ),
+        )
+
+        self.assertEqual(
+            len(result.events),
+            2,
+        )
+
+        self.assertIs(
+            result.events[0],
+            self.cat.personality.history[-2],
+        )
+
+        self.assertIs(
+            result.events[1],
+            self.cat.personality.history[-1],
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    result,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = result[
+                "applied"
+            ]
+
+        boundary = (
+            result.to_dict()
+        )
+
+        boundary[
+            "changes"
+        ][
+            "empathy"
+        ] = 9.0
+
+        boundary[
+            "events"
+        ][0][
+            "trait"
+        ] = "changed"
+
+        self.assertEqual(
+            result.changes[
+                "empathy"
+            ],
+            0.1,
+        )
+
+        self.assertEqual(
+            result.events[0].trait,
+            "empathy",
+        )
 
     def test_state_snapshot_serializes_history(
         self

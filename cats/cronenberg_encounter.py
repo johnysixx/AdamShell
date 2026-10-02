@@ -404,7 +404,7 @@ class CatCronenbergEncounter:
             source=source,
             changes=changes,
             metadata=metadata
-        )
+        ).to_dict()
 
     def _remember_encounter(
         self,

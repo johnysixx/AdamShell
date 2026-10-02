@@ -117,6 +117,126 @@ class CatPersonalityTraitAdjustedEvent:
         }
 
 
+@dataclass(slots=True, frozen=True)
+class CatPersonalityExperienceAppliedResult:
+
+    cat: str
+    source: str
+    day: int | None
+    changes: object
+    events: tuple[
+        CatPersonalityTraitAdjustedEvent,
+        ...,
+    ]
+
+    name: str = field(
+        default=(
+            "cat_personality_experience_applied"
+        ),
+        init=False,
+    )
+
+    applied: bool = field(
+        default=True,
+        init=False,
+    )
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "cat",
+            str(self.cat),
+        )
+
+        object.__setattr__(
+            self,
+            "source",
+            str(self.source),
+        )
+
+        if self.day is not None:
+            object.__setattr__(
+                self,
+                "day",
+                int(self.day),
+            )
+
+        object.__setattr__(
+            self,
+            "changes",
+            MappingProxyType(
+                deepcopy(
+                    dict(
+                        self.changes or {}
+                    )
+                )
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "events",
+            tuple(
+                self.events
+            ),
+        )
+
+        if not all(
+            isinstance(
+                event,
+                CatPersonalityTraitAdjustedEvent,
+            )
+            for event
+            in self.events
+        ):
+            raise TypeError(
+                "Cat personality experience "
+                "events must contain "
+                "CatPersonalityTraitAdjustedEvent "
+                "objects."
+            )
+
+        event_traits = tuple(
+            event.trait
+            for event
+            in self.events
+        )
+
+        if (
+            event_traits
+            != tuple(
+                self.changes.keys()
+            )
+        ):
+            raise ValueError(
+                "Cat personality experience "
+                "events must match changed traits."
+            )
+
+    def __deepcopy__(
+        self,
+        memo
+    ):
+        return self
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "cat": self.cat,
+            "source": self.source,
+            "day": self.day,
+            "changes": deepcopy(
+                dict(self.changes)
+            ),
+            "events": [
+                event.to_dict()
+                for event
+                in self.events
+            ],
+            "applied": self.applied,
+        }
+
+
 @dataclass(slots=True)
 class CatPersonalityState:
 

@@ -35,7 +35,7 @@ class CatPersonalityTests(unittest.TestCase):
     def test_trait_can_increase(self):
         event = CatPersonality.adjust(cat=self.cat, trait='courage', amount=0.2, source='successful_hunt', day=10)
         self.assertAlmostEqual(self.cat.personality.traits.courage, 0.7)
-        self.assertAlmostEqual(event['applied_change'], 0.2)
+        self.assertAlmostEqual(event.applied_change, 0.2)
 
     def test_trait_can_decrease(self):
         CatPersonality.adjust(cat=self.cat, trait='patience', amount=-0.15, source='frustration')
@@ -49,7 +49,7 @@ class CatPersonalityTests(unittest.TestCase):
 
     def test_experience_changes_multiple_traits(self):
         result = CatPersonality.apply_experience(cat=self.cat, source='successful_cronenberg_hunt', changes={'courage': 0.05, 'aggression': 0.03, 'curiosity': 0.01}, day=20)
-        self.assertTrue(result['applied'])
+        self.assertTrue(result.applied)
         traits = self.cat.personality.traits
         self.assertAlmostEqual(traits.courage, 0.55)
         self.assertAlmostEqual(traits.aggression, 0.53)
