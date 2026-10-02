@@ -55,14 +55,14 @@ class FelineTeacherResolverTests(unittest.TestCase):
     def test_cat_can_choose_pazuzu_method(self):
         self.give_door_awareness()
         result = self.teachers.choose_teacher(student=self.kitten, ability_name='open_human_door', method_name='hang_on_handle')
-        self.assertTrue(result['chosen'])
-        self.assertEqual(result['teacher'], 'pazuzu')
+        self.assertTrue(result.chosen)
+        self.assertEqual(result.teacher, 'pazuzu')
 
     def test_cat_can_choose_queen_method(self):
         self.give_door_awareness()
         result = self.teachers.choose_teacher(student=self.kitten, ability_name='open_human_door', method_name='pull_with_paw')
-        self.assertTrue(result['chosen'])
-        self.assertEqual(result['teacher'], 'queen_elisabeth')
+        self.assertTrue(result.chosen)
+        self.assertEqual(result.teacher, 'queen_elisabeth')
 
     def test_request_lesson_teaches_real_method(self):
         self.give_door_awareness()

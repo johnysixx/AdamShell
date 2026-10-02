@@ -9,6 +9,7 @@ from cats.feline_ability_resolver import (
 from cats.feline_teacher_resolver import (
     FelineAbilityLessonRequestedEvent,
     FelineAbilityTeacherChosenEvent,
+    FelineAbilityTeacherNotFoundEvent,
     FelineAbilityTeacherSearchEvent,
     FelineTeacherCandidate,
     FelineTeacherMatch,
@@ -211,8 +212,13 @@ class FelineTeacherHistoryObjectStateTests(
         )
 
         self.assertIsInstance(
-            event,
+            result,
             FelineAbilityTeacherChosenEvent,
+        )
+
+        self.assertIs(
+            result,
+            event,
         )
 
         self.assertEqual(
@@ -221,11 +227,40 @@ class FelineTeacherHistoryObjectStateTests(
         )
 
         self.assertIs(
-            result["teacher_cat"],
+            result.teacher_cat,
             self.pazuzu,
         )
 
-        result[
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    result,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = result[
+                "teacher"
+            ]
+
+        boundary = (
+            result.to_dict()
+        )
+
+        self.assertNotIn(
+            "teacher_cat",
+            boundary,
+        )
+
+        boundary[
             "available_methods"
         ].append(
             "changed"
@@ -234,6 +269,79 @@ class FelineTeacherHistoryObjectStateTests(
         self.assertNotIn(
             "changed",
             event.available_methods,
+        )
+
+    def test_choose_teacher_not_found_returns_history_object(
+        self
+    ):
+        result = (
+            self.resolver
+            .choose_teacher(
+                student=self.kitten,
+                ability_name=(
+                    "open_human_door"
+                ),
+                method_name=(
+                    "unknown_method"
+                ),
+            )
+        )
+
+        event = (
+            self.resolver
+            .history[-1]
+        )
+
+        self.assertIsInstance(
+            result,
+            FelineAbilityTeacherNotFoundEvent,
+        )
+
+        self.assertIs(
+            result,
+            event,
+        )
+
+        self.assertFalse(
+            result.chosen
+        )
+
+        self.assertEqual(
+            result.reason,
+            "no_teacher_knows_requested_method",
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    result,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = result[
+                "reason"
+            ]
+
+        boundary = (
+            result.to_dict()
+        )
+
+        boundary[
+            "reason"
+        ] = "changed"
+
+        self.assertEqual(
+            result.reason,
+            "no_teacher_knows_requested_method",
         )
 
     def test_lesson_history_freezes_nested_lesson_and_keeps_boundary_dict(

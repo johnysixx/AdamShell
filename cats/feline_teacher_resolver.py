@@ -252,6 +252,7 @@ class FelineAbilityTeacherChosenEvent(
     requested_method: str | None
     teacher: str
     available_methods: tuple[str, ...]
+    teacher_cat: object
 
     name: str = field(
         default=(
@@ -264,6 +265,20 @@ class FelineAbilityTeacherChosenEvent(
         default=True,
         init=False,
     )
+
+    def __post_init__(self):
+        if (
+            getattr(
+                self.teacher_cat,
+                "name",
+                None,
+            )
+            != self.teacher
+        ):
+            raise ValueError(
+                "Chosen feline teacher object "
+                "must match teacher name."
+            )
 
     def to_dict(self):
         return {
@@ -513,7 +528,7 @@ class FelineTeacherResolver:
         method_name=None,
         cats=None
     ):
-        event, teacher_cat = (
+        return (
             self._choose_teacher_event(
                 student=student,
                 ability_name=ability_name,
@@ -521,15 +536,6 @@ class FelineTeacherResolver:
                 cats=cats,
             )
         )
-
-        result = event.to_dict()
-
-        if teacher_cat is not None:
-            result[
-                "teacher_cat"
-            ] = teacher_cat
-
-        return result
 
     def _choose_teacher_event(
         self,
@@ -569,6 +575,9 @@ class FelineTeacherResolver:
                         available_methods=(
                             methods
                         ),
+                        teacher_cat=(
+                            teacher.cat
+                        ),
                     )
                 )
 
@@ -576,10 +585,7 @@ class FelineTeacherResolver:
                     event
                 )
 
-                return (
-                    event,
-                    teacher.cat,
-                )
+                return event
 
         event = (
             FelineAbilityTeacherNotFoundEvent(
@@ -603,10 +609,7 @@ class FelineTeacherResolver:
             event
         )
 
-        return (
-            event,
-            None,
-        )
+        return event
 
     def request_lesson(
         self,
@@ -616,7 +619,7 @@ class FelineTeacherResolver:
         method_name=None,
         cats=None
     ):
-        choice, teacher = (
+        choice = (
             self._choose_teacher_event(
                 student=student,
                 ability_name=ability_name,
@@ -638,6 +641,8 @@ class FelineTeacherResolver:
                 "reason": choice.reason,
                 "learned": False,
             }
+
+        teacher = choice.teacher_cat
 
         selected_method = (
             method_name
