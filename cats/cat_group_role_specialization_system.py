@@ -1,6 +1,7 @@
 from copy import deepcopy
 
 from cats.cat_group_role_state import (
+    CatGroupRoleSpecializationDeniedResult,
     CatGroupRoleSpecializedEvent,
     CatGroupRoleState,
 )
@@ -23,7 +24,19 @@ class CatGroupRoleSpecializationSystem:
         )
 
         if base_state is None:
-            return {'name': 'cat_role_specialization_denied', 'reason': 'base_role_not_held', 'specialized': False}
+            return (
+                CatGroupRoleSpecializationDeniedResult(
+                    group_id=group_id,
+                    cat=cat.name,
+                    base_role=base_role,
+                    specialization=(
+                        specialization
+                    ),
+                    reason=(
+                        'base_role_not_held'
+                    ),
+                )
+            )
 
         if not isinstance(
             base_state,
@@ -56,12 +69,39 @@ class CatGroupRoleSpecializationSystem:
             existing = CatGroupRoleState()
         profile = self.SPECIALIZATIONS.get(base_role, {}).get(specialization)
         if profile is None:
-            return {'name': 'cat_role_specialization_denied', 'reason': 'unknown_specialization', 'specialized': False}
+            return (
+                CatGroupRoleSpecializationDeniedResult(
+                    group_id=group_id,
+                    cat=cat.name,
+                    base_role=base_role,
+                    specialization=(
+                        specialization
+                    ),
+                    reason=(
+                        'unknown_specialization'
+                    ),
+                )
+            )
         traits = cat.personality.traits
         for trait, minimum in profile['required_traits'].items():
             value = self._number(getattr(traits, trait, 0.5))
             if value < minimum:
-                return {'name': 'cat_role_specialization_denied', 'reason': 'insufficient_trait', 'trait': trait, 'required': minimum, 'actual': value, 'specialized': False}
+                return (
+                    CatGroupRoleSpecializationDeniedResult(
+                        group_id=group_id,
+                        cat=cat.name,
+                        base_role=base_role,
+                        specialization=(
+                            specialization
+                        ),
+                        reason=(
+                            'insufficient_trait'
+                        ),
+                        trait=trait,
+                        required=minimum,
+                        actual=value,
+                    )
+                )
         group.role_specializations.setdefault(
             base_role,
             {}
@@ -107,7 +147,7 @@ class CatGroupRoleSpecializationSystem:
             deepcopy(snapshot)
         )
 
-        return snapshot
+        return event
 
     def specializations(self, group_id, base_role=None):
         group = self.group_system._group(group_id)

@@ -15,6 +15,7 @@ from cats.cat_group_role_state import (
     CatGroupRoleAssignedEvent,
     CatGroupRoleAssignmentDeniedResult,
     CatGroupRoleReleasedEvent,
+    CatGroupRoleSpecializationDeniedResult,
     CatGroupRoleSpecializedEvent,
     CatGroupRoleState,
 )
@@ -431,8 +432,13 @@ class CatGroupRoleObjectStateTests(
         )
 
         self.assertIsInstance(
-            event,
+            result,
             CatGroupRoleSpecializedEvent,
+        )
+
+        self.assertIs(
+            result,
+            event,
         )
 
         self.assertEqual(
@@ -440,13 +446,125 @@ class CatGroupRoleObjectStateTests(
             'night_guardian',
         )
 
-        result[
+        for mapping_method in (
+            'get',
+            'keys',
+            'items',
+            'values',
+        ):
+            self.assertFalse(
+                hasattr(
+                    result,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = result[
+                'specialization'
+            ]
+
+        boundary = (
+            result.to_dict()
+        )
+
+        boundary[
             'specialization'
         ] = 'changed'
 
         self.assertEqual(
             event.specialization,
             'night_guardian',
+        )
+
+        group_event = (
+            self.groups
+            .groups[self.group_id]
+            .history[-1]
+        )
+
+        self.assertEqual(
+            group_event[
+                'specialization'
+            ],
+            'night_guardian',
+        )
+
+    def test_specialization_denial_uses_result_object(
+        self
+    ):
+        result = (
+            self.specializations
+            .specialize(
+                self.group_id,
+                self.cat,
+                'guardian',
+                'night_guardian',
+            )
+        )
+
+        self.assertIsInstance(
+            result,
+            CatGroupRoleSpecializationDeniedResult,
+        )
+
+        self.assertFalse(
+            result.specialized
+        )
+
+        self.assertEqual(
+            result.reason,
+            'base_role_not_held',
+        )
+
+        self.assertEqual(
+            result.base_role,
+            'guardian',
+        )
+
+        self.assertEqual(
+            result.specialization,
+            'night_guardian',
+        )
+
+        self.assertEqual(
+            self.cat.group_roles.history,
+            [],
+        )
+
+        for mapping_method in (
+            'get',
+            'keys',
+            'items',
+            'values',
+        ):
+            self.assertFalse(
+                hasattr(
+                    result,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = result[
+                'reason'
+            ]
+
+        boundary = (
+            result.to_dict()
+        )
+
+        boundary[
+            'reason'
+        ] = 'changed'
+
+        self.assertEqual(
+            result.reason,
+            'base_role_not_held',
         )
 
     def test_role_history_rejects_mapping_event(

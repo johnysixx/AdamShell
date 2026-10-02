@@ -94,14 +94,17 @@ class CatGroupRitualSpecializationTests(unittest.TestCase):
         self.assertTrue(assigned.assigned)
         specialization = CatGroupRoleSpecializationSystem(self.groups)
         result = specialization.specialize(self.group_id, cat, 'guardian', 'night_guardian')
-        self.assertTrue(result['specialized'])
+        self.assertTrue(result.specialized)
         self.assertIn('night_guardian', cat.group_roles.active)
 
     def test_specialization_requires_base_role(self):
         specialization = CatGroupRoleSpecializationSystem(self.groups)
         result = specialization.specialize(self.group_id, self.members[1], 'guardian', 'night_guardian')
-        self.assertFalse(result['specialized'])
-        self.assertEqual(result['reason'], 'base_role_not_held')
+        self.assertFalse(result.specialized)
+        self.assertEqual(
+            result.reason,
+            'base_role_not_held',
+        )
 
     def test_institution_is_inherited_after_group_split(self):
         institutions = CatGroupInstitutionSystem(self.groups)
