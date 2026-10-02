@@ -5,6 +5,7 @@ from cats import Cats
 
 from cats.kitten_embryo_resolver import (
     KittenEmbryoCreatedEvent,
+    KittenEmbryoResult,
 )
 
 from cats.kitten_viability_resolver import (
@@ -12,7 +13,6 @@ from cats.kitten_viability_resolver import (
 )
 
 from cats.mating_pregnancy_event import (
-    CatPregnancyEmbryoResult,
     CatPregnancyPaternityResult,
     CatPregnancyStartedEvent,
 )
@@ -140,7 +140,7 @@ class CatPregnancyStartedObjectStateTests(
 
         self.assertIsInstance(
             embryo,
-            CatPregnancyEmbryoResult,
+            KittenEmbryoResult,
         )
 
         self.assertIsInstance(

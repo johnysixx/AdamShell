@@ -1,16 +1,7 @@
 from dataclasses import dataclass, field
 
-from cats.cat_birth_objects import (
-    CatPhenotypeResult,
-)
-
 from cats.kitten_embryo_resolver import (
-    KittenEmbryoCreatedEvent,
-    NonviableKittenEmbryoReplacedByCronenbergEvent,
-)
-
-from cats.kitten_viability_resolver import (
-    KittenGeneticViabilityResult,
+    KittenEmbryoResult,
 )
 
 from cats.mating_contact import (
@@ -74,208 +65,6 @@ class CatPregnancyPaternityResult:
 
 
 @dataclass(slots=True, frozen=True)
-class CatPregnancyEmbryoResult:
-
-    embryo: object | None
-
-    viability: (
-        KittenGeneticViabilityResult
-    )
-
-    phenotype: (
-        CatPhenotypeResult
-        | None
-    )
-
-    cronenberg: object | None
-
-    event: (
-        KittenEmbryoCreatedEvent
-        | NonviableKittenEmbryoReplacedByCronenbergEvent
-    )
-
-    def __post_init__(self):
-        if not isinstance(
-            self.viability,
-            KittenGeneticViabilityResult,
-        ):
-            raise TypeError(
-                "Pregnancy embryo result "
-                "requires a typed viability "
-                "snapshot."
-            )
-
-        if not isinstance(
-            self.event,
-            (
-                KittenEmbryoCreatedEvent,
-                NonviableKittenEmbryoReplacedByCronenbergEvent,
-            ),
-        ):
-            raise TypeError(
-                "Pregnancy embryo result "
-                "requires a typed embryo event."
-            )
-
-        if self.viable:
-            if self.embryo is None:
-                raise ValueError(
-                    "Viable pregnancy embryo "
-                    "requires an embryo object."
-                )
-
-            if not isinstance(
-                self.phenotype,
-                CatPhenotypeResult,
-            ):
-                raise TypeError(
-                    "Viable pregnancy embryo "
-                    "requires a typed phenotype."
-                )
-
-            if (
-                self.phenotype.profile
-                is not self.event.profile
-            ):
-                raise ValueError(
-                    "Pregnancy phenotype profile "
-                    "must reuse embryo event profile."
-                )
-
-            if self.cronenberg is not None:
-                raise ValueError(
-                    "Viable pregnancy embryo "
-                    "cannot contain a Cronenberg."
-                )
-
-        else:
-            if self.embryo is not None:
-                raise ValueError(
-                    "Nonviable pregnancy embryo "
-                    "cannot contain an embryo."
-                )
-
-            if self.phenotype is not None:
-                raise ValueError(
-                    "Nonviable pregnancy embryo "
-                    "cannot contain a phenotype."
-                )
-
-            if self.cronenberg is None:
-                raise ValueError(
-                    "Nonviable pregnancy embryo "
-                    "requires a Cronenberg."
-                )
-
-    @property
-    def viable(self):
-        return isinstance(
-            self.event,
-            KittenEmbryoCreatedEvent,
-        )
-
-    @property
-    def embryo_id(self):
-        return self.event.embryo_id
-
-    @classmethod
-    def from_boundary(
-        cls,
-        payload,
-        event
-    ):
-        if isinstance(
-            event,
-            KittenEmbryoCreatedEvent,
-        ):
-            if not payload[
-                "viable"
-            ]:
-                raise ValueError(
-                    "Viable embryo event has "
-                    "nonviable boundary state."
-                )
-
-            viability = payload[
-                "viability"
-            ]
-
-            phenotype = payload[
-                "phenotype"
-            ]
-
-        elif isinstance(
-            event,
-            NonviableKittenEmbryoReplacedByCronenbergEvent,
-        ):
-            if payload[
-                "viable"
-            ]:
-                raise ValueError(
-                    "Nonviable embryo event has "
-                    "viable boundary state."
-                )
-
-            viability = (
-                event.viability
-            )
-
-            phenotype = None
-
-        else:
-            raise TypeError(
-                "Unsupported embryo event."
-            )
-
-        return cls(
-            embryo=payload[
-                "embryo"
-            ],
-            viability=viability,
-            phenotype=phenotype,
-            cronenberg=payload[
-                "cronenberg"
-            ],
-            event=event,
-        )
-
-    def __deepcopy__(
-        self,
-        memo
-    ):
-        return self
-
-    def to_dict(self):
-        result = {
-            "embryo": self.embryo,
-            "viability": (
-                self.viability.to_dict()
-            ),
-        }
-
-        if self.phenotype is not None:
-            result[
-                "phenotype"
-            ] = (
-                self.phenotype.to_dict()
-            )
-
-        result.update(
-            {
-                "cronenberg": (
-                    self.cronenberg
-                ),
-                "event": (
-                    self.event.to_dict()
-                ),
-                "viable": self.viable,
-            }
-        )
-
-        return result
-
-
-@dataclass(slots=True, frozen=True)
 class CatPregnancyStartedEvent(
     CatMatingHistoryEvent
 ):
@@ -297,7 +86,7 @@ class CatPregnancyStartedEvent(
     started_on_day: int
 
     embryo_results: tuple[
-        CatPregnancyEmbryoResult,
+        KittenEmbryoResult,
         ...,
     ]
 
@@ -356,7 +145,7 @@ class CatPregnancyStartedEvent(
         if not all(
             isinstance(
                 result,
-                CatPregnancyEmbryoResult,
+                KittenEmbryoResult,
             )
             for result
             in self.embryo_results

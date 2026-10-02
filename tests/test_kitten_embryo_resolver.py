@@ -4,7 +4,8 @@ from universe.universe import Universe
 from cats import Cats
 from cats.genotype import CatGenotype
 from cats.kitten_embryo_resolver import (
-    KittenEmbryoResolver
+    KittenEmbryoResolver,
+    KittenEmbryoResult,
 )
 
 
@@ -56,11 +57,34 @@ class KittenEmbryoResolverTests(
             )
         )
 
-        embryo = result["embryo"]
+        embryo = result.embryo
+
+        self.assertIsInstance(
+            result,
+            KittenEmbryoResult,
+        )
 
         self.assertTrue(
-            result["viable"]
+            result.viable
         )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    result,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(TypeError):
+            _ = result[
+                "embryo"
+            ]
 
         self.assertIsNotNone(
             embryo
@@ -81,7 +105,7 @@ class KittenEmbryoResolverTests(
         )
 
         self.assertIsNone(
-            result["cronenberg"]
+            result.cronenberg
         )
 
     def test_rare_xxy_male_embryo_is_preserved(self):
@@ -109,10 +133,10 @@ class KittenEmbryoResolverTests(
             )
         )
 
-        embryo = result["embryo"]
+        embryo = result.embryo
 
         self.assertTrue(
-            result["viable"]
+            result.viable
         )
 
         self.assertEqual(
@@ -135,7 +159,7 @@ class KittenEmbryoResolverTests(
         )
 
         self.assertIsNone(
-            result["cronenberg"]
+            result.cronenberg
         )
 
     def test_nonviable_embryo_becomes_cronenberg(self):
@@ -162,15 +186,15 @@ class KittenEmbryoResolverTests(
         )
 
         self.assertFalse(
-            result["viable"]
+            result.viable
         )
 
         self.assertIsNone(
-            result["embryo"]
+            result.embryo
         )
 
         self.assertIsNotNone(
-            result["cronenberg"]
+            result.cronenberg
         )
 
         self.assertEqual(
@@ -179,15 +203,11 @@ class KittenEmbryoResolverTests(
         )
 
         self.assertTrue(
-            result["event"][
-                "cronenberg_created"
-            ]
+            result.event.cronenberg_created
         )
 
         self.assertFalse(
-            result["event"][
-                "kitten_created"
-            ]
+            result.event.kitten_created
         )
 
 

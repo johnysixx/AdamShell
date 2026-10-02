@@ -14,7 +14,6 @@ from cats.mating_contact import (
 )
 from cats.mating_pregnancy_event import (
     CatPregnancyAdvancedEvent,
-    CatPregnancyEmbryoResult,
     CatPregnancyPaternityResult,
     CatPregnancyStartedEvent,
 )
@@ -195,25 +194,12 @@ class CatMatingResolver:
                 "father"
             ]
 
-            embryo_boundary = (
+            embryo_result = (
                 self.embryo_resolver
                 .create_embryo(
                     mother=female,
                     father=father,
                     rng=rng
-                )
-            )
-
-            embryo_event = (
-                self.embryo_resolver
-                .history[-1]
-            )
-
-            embryo_result = (
-                CatPregnancyEmbryoResult
-                .from_boundary(
-                    embryo_boundary,
-                    embryo_event,
                 )
             )
 

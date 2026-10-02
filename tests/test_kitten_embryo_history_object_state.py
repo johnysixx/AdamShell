@@ -90,9 +90,18 @@ class KittenEmbryoHistoryObjectStateTests(
             CatBirthProfile,
         )
 
+        self.assertIs(
+            result.event,
+            event,
+        )
+
+        boundary = (
+            result.to_dict()
+        )
+
         self.assertEqual(
             event.profile.sex,
-            result[
+            boundary[
                 "event"
             ][
                 "profile"
@@ -117,7 +126,7 @@ class KittenEmbryoHistoryObjectStateTests(
         with self.assertRaises(TypeError):
             _ = event["profile"]
 
-        result[
+        boundary[
             "event"
         ][
             "profile"
@@ -195,7 +204,11 @@ class KittenEmbryoHistoryObjectStateTests(
                 "lethal_mutations"
             ]
 
-        result[
+        boundary = (
+            result.to_dict()
+        )
+
+        boundary[
             "event"
         ][
             "viability"

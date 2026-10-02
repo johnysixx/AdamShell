@@ -8,6 +8,7 @@ from cats.kitten_viability_resolver import (
 )
 from cats.cat_birth_objects import (
     CatBirthProfile,
+    CatPhenotypeResult,
     KittenEmbryo,
 )
 
@@ -134,6 +135,170 @@ class KittenEmbryoCreatedEvent:
         }
 
 
+@dataclass(slots=True, frozen=True)
+class KittenEmbryoResult:
+
+    embryo: KittenEmbryo | None
+    viability: KittenGeneticViabilityResult
+
+    phenotype: (
+        CatPhenotypeResult
+        | None
+    )
+
+    cronenberg: object | None
+
+    event: (
+        KittenEmbryoCreatedEvent
+        | NonviableKittenEmbryoReplacedByCronenbergEvent
+    )
+
+    def __post_init__(self):
+        if not isinstance(
+            self.viability,
+            KittenGeneticViabilityResult,
+        ):
+            raise TypeError(
+                "Kitten embryo result requires "
+                "a viability result object."
+            )
+
+        if self.viable:
+            if not isinstance(
+                self.event,
+                KittenEmbryoCreatedEvent,
+            ):
+                raise TypeError(
+                    "Viable kitten embryo result "
+                    "requires a created event."
+                )
+
+            if not isinstance(
+                self.embryo,
+                KittenEmbryo,
+            ):
+                raise TypeError(
+                    "Viable kitten embryo result "
+                    "requires a KittenEmbryo."
+                )
+
+            if not isinstance(
+                self.phenotype,
+                CatPhenotypeResult,
+            ):
+                raise TypeError(
+                    "Viable kitten embryo result "
+                    "requires a phenotype result."
+                )
+
+            if self.cronenberg is not None:
+                raise ValueError(
+                    "Viable kitten embryo result "
+                    "cannot contain a Cronenberg."
+                )
+
+            if (
+                self.embryo.viability
+                is not self.viability
+            ):
+                raise ValueError(
+                    "Kitten embryo result must "
+                    "reuse embryo viability."
+                )
+
+            if (
+                self.embryo.phenotype
+                is not self.phenotype
+            ):
+                raise ValueError(
+                    "Kitten embryo result must "
+                    "reuse embryo phenotype."
+                )
+
+            if (
+                self.embryo.profile
+                is not self.event.profile
+            ):
+                raise ValueError(
+                    "Kitten embryo result must "
+                    "reuse event profile."
+                )
+
+        else:
+            if not isinstance(
+                self.event,
+                NonviableKittenEmbryoReplacedByCronenbergEvent,
+            ):
+                raise TypeError(
+                    "Nonviable kitten embryo result "
+                    "requires replacement event."
+                )
+
+            if self.embryo is not None:
+                raise ValueError(
+                    "Nonviable kitten embryo result "
+                    "cannot contain an embryo."
+                )
+
+            if self.phenotype is not None:
+                raise ValueError(
+                    "Nonviable kitten embryo result "
+                    "cannot contain a phenotype."
+                )
+
+            if self.cronenberg is None:
+                raise ValueError(
+                    "Nonviable kitten embryo result "
+                    "requires a Cronenberg."
+                )
+
+            if (
+                self.event.viability
+                is not self.viability
+            ):
+                raise ValueError(
+                    "Nonviable kitten embryo result "
+                    "must reuse event viability."
+                )
+
+    @property
+    def viable(self):
+        return self.viability.viable
+
+    @property
+    def embryo_id(self):
+        return self.event.embryo_id
+
+    def to_dict(self):
+        result = {
+            "embryo": self.embryo,
+            "viability": (
+                self.viability.to_dict()
+            ),
+        }
+
+        if self.phenotype is not None:
+            result[
+                "phenotype"
+            ] = (
+                self.phenotype.to_dict()
+            )
+
+        result.update(
+            {
+                "cronenberg": (
+                    self.cronenberg
+                ),
+                "event": (
+                    self.event.to_dict()
+                ),
+                "viable": self.viable,
+            }
+        )
+
+        return result
+
+
 class KittenEmbryoResolver:
 
     def __init__(self, universe):
@@ -164,21 +329,17 @@ class KittenEmbryoResolver:
                 event
             )
 
-            event_snapshot = (
-                event.to_dict()
-            )
-
             self.universe.quantum_events.append(
                 event.to_dict()
             )
 
-            return {
-                'embryo': None,
-                'viability': viability,
-                'cronenberg': cronenberg,
-                'event': event_snapshot,
-                'viable': False,
-            }
+            return KittenEmbryoResult(
+                embryo=None,
+                viability=viability,
+                phenotype=None,
+                cronenberg=cronenberg,
+                event=event,
+            )
         phenotype = CatPhenotypeResolver.resolve(
             genotype
         )
@@ -224,14 +385,13 @@ class KittenEmbryoResolver:
             event
         )
 
-        return {
-            'embryo': embryo,
-            'viability': viability,
-            'phenotype': phenotype,
-            'cronenberg': None,
-            'event': event.to_dict(),
-            'viable': True,
-        }
+        return KittenEmbryoResult(
+            embryo=embryo,
+            viability=viability,
+            phenotype=phenotype,
+            cronenberg=None,
+            event=event,
+        )
 
     def record_event(
         self,
