@@ -210,7 +210,7 @@ class MeowKnowledgeResolver:
                 event
             )
 
-            return event.to_dict()
+            return event
         learning = kitten.learning
         meow = learning.meow_knowledge
         teacher_role = self._resolve_teacher_role(teacher=mother, kitten=kitten)
@@ -278,8 +278,6 @@ class MeowKnowledgeResolver:
             event
         )
 
-        snapshot = event.to_dict()
-
         quantum_events = getattr(
             self.universe,
             'quantum_events',
@@ -291,7 +289,7 @@ class MeowKnowledgeResolver:
                 event.to_dict()
             )
 
-        return snapshot
+        return event
 
     def _resolve_teacher_role(self, teacher, kitten):
         teacher_name = getattr(teacher, 'name', None)

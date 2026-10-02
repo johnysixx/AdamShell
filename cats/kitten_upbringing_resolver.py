@@ -278,7 +278,13 @@ class KittenUpbringingResolver:
             if teacher is None:
                 events.append({'name': 'meow_teacher_unavailable', 'kitten': kitten.name, 'age_days': age_days, 'day': current_day, 'transmitted': False})
             else:
-                events.append(self.meow_resolver.transmit(mother=teacher, kitten=kitten, current_day=current_day))
+                events.append(
+                    self.meow_resolver.transmit(
+                        mother=teacher,
+                        kitten=kitten,
+                        current_day=current_day,
+                    ).to_dict()
+                )
         return events
 
     def _teach_human_communication(self, kitten, teacher, age_days, current_day):

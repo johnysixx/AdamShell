@@ -63,8 +63,11 @@ class AdultVocalizationResolverTests(unittest.TestCase):
             skill.learned_on_day = 70
         self.kitten.learning.human_communication_learned = True
         result = self.meow.transmit(mother=self.mother, kitten=self.kitten, current_day=75)
-        self.assertFalse(result['transmitted'])
-        self.assertIn('adult_meowing', result['missing_experiences'])
+        self.assertFalse(result.transmitted)
+        self.assertIn(
+            'adult_meowing',
+            result.missing_experiences,
+        )
 
     def test_meow_remains_separate_from_vocalizations(self):
         self.vocalization.teach_all(teacher=self.mother, kitten=self.kitten, current_day=70)

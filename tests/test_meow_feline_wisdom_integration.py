@@ -50,11 +50,11 @@ class MeowFelineWisdomIntegrationTests(unittest.TestCase):
         FelineWisdom.learn_ability_method(cat=self.mother, ability_name='open_human_door', method_name='example_method', teacher_name='pazuzu', constraints={'requires_unlocked': True})
         result = self.resolver.transmit(mother=self.mother, kitten=self.kitten, current_day=90)
         wisdom = self.kitten.feline_wisdom
-        self.assertTrue(result['transmitted'])
-        self.assertEqual(result['teacher_role'], 'biological_mother')
+        self.assertTrue(result.transmitted)
+        self.assertEqual(result.teacher_role, 'biological_mother')
         self.assertIn('open_human_door', wisdom.awareness)
         self.assertNotIn('open_human_door', wisdom.abilities)
-        self.assertEqual(result['ability_methods_transferred'], 0)
+        self.assertEqual(result.ability_methods_transferred, 0)
 
     def test_meow_transmission_history_uses_object_state(
         self
@@ -179,8 +179,8 @@ class MeowFelineWisdomIntegrationTests(unittest.TestCase):
 
     def test_unrelated_natural_cat_cannot_teach_meow(self):
         result = self.resolver.transmit(mother=self.other_cat, kitten=self.kitten, current_day=90)
-        self.assertFalse(result['transmitted'])
-        self.assertEqual(result['reason'], 'teacher_has_not_learned_to_teach')
+        self.assertFalse(result.transmitted)
+        self.assertEqual(result.reason, 'teacher_has_not_learned_to_teach')
 
     def test_dice_cat_can_teach_orphaned_kitten(self):
         self.kitten.family.parents.mother = None
@@ -189,9 +189,9 @@ class MeowFelineWisdomIntegrationTests(unittest.TestCase):
         self.assertTrue(teaching_lesson['learned'])
         FelineWisdom.add_awareness(cat=self.dice_cat, knowledge_name='open_human_door', domain='feline', known_teachers=['pazuzu', 'queen_elisabeth'])
         result = self.resolver.transmit(mother=self.dice_cat, kitten=self.kitten, current_day=90)
-        self.assertTrue(result['transmitted'])
-        self.assertEqual(result['teacher_role'], 'dice_cat_teacher')
-        self.assertEqual(result['transmission_source'], 'qualified_dice_cat_transmission')
+        self.assertTrue(result.transmitted)
+        self.assertEqual(result.teacher_role, 'dice_cat_teacher')
+        self.assertEqual(result.transmission_source, 'qualified_dice_cat_transmission')
         self.assertIn('open_human_door', self.kitten.feline_wisdom.awareness)
 
     def test_meow_ignores_forbidden_domains(self):
@@ -204,15 +204,15 @@ class MeowFelineWisdomIntegrationTests(unittest.TestCase):
             )
         )
         result = self.resolver.transmit(mother=self.mother, kitten=self.kitten, current_day=90)
-        self.assertTrue(result['transmitted'])
+        self.assertTrue(result.transmitted)
         self.assertNotIn('forbidden_magic', self.kitten.feline_wisdom.awareness)
 
     def test_untrained_dice_cat_cannot_teach_orphan(self):
         self.kitten.family.parents.mother = None
         self.kitten.learning.teacher_mother = None
         result = self.resolver.transmit(mother=self.dice_cat, kitten=self.kitten, current_day=90)
-        self.assertFalse(result['transmitted'])
-        self.assertEqual(result['reason'], 'teacher_has_not_learned_to_teach')
+        self.assertFalse(result.transmitted)
+        self.assertEqual(result.reason, 'teacher_has_not_learned_to_teach')
         self.assertFalse(self.kitten.learning.meow_knowledge.learned)
 if __name__ == '__main__':
     unittest.main()

@@ -33,25 +33,25 @@ class MeowKnowledgeResolverTests(unittest.TestCase):
 
     def test_meow_is_denied_before_experiences(self):
         result = self.meow.transmit(mother=self.mother, kitten=self.kitten, current_day=30)
-        self.assertFalse(result['transmitted'])
-        self.assertEqual(result['reason'], 'required_experiences_missing')
-        self.assertIn('hunting', result['missing_experiences'])
+        self.assertFalse(result.transmitted)
+        self.assertEqual(result.reason, 'required_experiences_missing')
+        self.assertIn('hunting', result.missing_experiences)
         self.assertFalse(self.kitten.learning.meow_knowledge.learned)
 
     def test_mother_must_know_meow(self):
         self.complete_required_experiences()
         self.mother.learning.meow_knowledge.learned = False
         result = self.meow.transmit(mother=self.mother, kitten=self.kitten, current_day=70)
-        self.assertFalse(result['transmitted'])
-        self.assertEqual(result['reason'], 'mother_does_not_know_meow')
+        self.assertFalse(result.transmitted)
+        self.assertEqual(result.reason, 'mother_does_not_know_meow')
 
     def test_ready_kitten_receives_complete_meow(self):
         self.complete_required_experiences()
         result = self.meow.transmit(mother=self.mother, kitten=self.kitten, current_day=75)
         learning = self.kitten.learning
         meow = learning.meow_knowledge
-        self.assertTrue(result['transmitted'])
-        self.assertEqual(result['name'], 'meow_knowledge_transmitted')
+        self.assertTrue(result.transmitted)
+        self.assertEqual(result.name, 'meow_knowledge_transmitted')
         self.assertTrue(meow.learned)
         self.assertTrue(meow.understood)
         self.assertTrue(meow.can_speak)
@@ -74,7 +74,7 @@ class MeowKnowledgeResolverTests(unittest.TestCase):
         self.complete_required_experiences()
         result = self.meow.transmit(mother=self.mother, kitten=self.kitten, current_day=75)
         learning = self.kitten.learning
-        self.assertTrue(result['learning_complete'])
+        self.assertTrue(result.learning_complete)
         self.assertTrue(learning.complete)
         self.assertFalse(learning.teaching_required)
         self.assertEqual(
@@ -101,8 +101,13 @@ class MeowKnowledgeResolverTests(unittest.TestCase):
         )
 
         self.assertIsInstance(
-            event,
+            result,
             MeowKnowledgeTransmittedEvent,
+        )
+
+        self.assertIs(
+            result,
+            event,
         )
 
         self.assertIsInstance(
@@ -146,13 +151,28 @@ class MeowKnowledgeResolverTests(unittest.TestCase):
             with self.assertRaises(TypeError):
                 _ = value[key]
 
-        result[
+        boundary = (
+            result.to_dict()
+        )
+
+        boundary[
             'teacher_role'
         ] = 'changed'
+
+        boundary[
+            'knowledge'
+        ].append(
+            'changed'
+        )
 
         self.assertEqual(
             event.teacher_role,
             'biological_mother',
+        )
+
+        self.assertNotIn(
+            'changed',
+            event.knowledge,
         )
 
     def test_denied_transmission_history_uses_object_state(
@@ -167,8 +187,13 @@ class MeowKnowledgeResolverTests(unittest.TestCase):
         event = self.meow.history[-1]
 
         self.assertIsInstance(
-            event,
+            result,
             MeowKnowledgeTransmissionDeniedEvent,
+        )
+
+        self.assertIs(
+            result,
+            event,
         )
 
         self.assertEqual(
@@ -185,15 +210,73 @@ class MeowKnowledgeResolverTests(unittest.TestCase):
             event.transmitted
         )
 
-        result['reason'] = 'changed'
+        boundary = (
+            result.to_dict()
+        )
+
+        boundary[
+            'reason'
+        ] = 'changed'
+
+        boundary[
+            'missing_experiences'
+        ].append(
+            'changed'
+        )
 
         self.assertEqual(
             event.reason,
             'required_experiences_missing',
         )
 
+        self.assertNotIn(
+            'changed',
+            event.missing_experiences,
+        )
+
         with self.assertRaises(TypeError):
             _ = event['reason']
+
+    def test_transmission_results_have_no_mapping_api(
+        self
+    ):
+        denied = self.meow.transmit(
+            mother=self.mother,
+            kitten=self.kitten,
+            current_day=30,
+        )
+
+        self.complete_required_experiences()
+
+        transmitted = self.meow.transmit(
+            mother=self.mother,
+            kitten=self.kitten,
+            current_day=75,
+        )
+
+        for result in (
+            denied,
+            transmitted,
+        ):
+            for mapping_method in (
+                'get',
+                'keys',
+                'items',
+                'values',
+            ):
+                self.assertFalse(
+                    hasattr(
+                        result,
+                        mapping_method,
+                    )
+                )
+
+            with self.assertRaises(
+                TypeError
+            ):
+                _ = result[
+                    'name'
+                ]
 
     def test_learning_snapshot_serializes_meow_lesson_object(
         self
@@ -240,7 +323,7 @@ class MeowKnowledgeResolverTests(unittest.TestCase):
         self.complete_required_experiences()
         self.meow.transmit(mother=self.mother, kitten=self.kitten, current_day=75)
         second = self.meow.transmit(mother=self.mother, kitten=self.kitten, current_day=76)
-        self.assertFalse(second['transmitted'])
-        self.assertEqual(second['reason'], 'meow_already_known')
+        self.assertFalse(second.transmitted)
+        self.assertEqual(second.reason, 'meow_already_known')
 if __name__ == '__main__':
     unittest.main()
