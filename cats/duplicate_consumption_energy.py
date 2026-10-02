@@ -88,6 +88,45 @@ class DuplicateConsumptionEnergyStoredEvent:
 
 
 @dataclass(slots=True, frozen=True)
+class DuplicateConsumptionEnergyResolutionSkippedResult:
+    cat_d20_value: int
+    reason: str = "no_pending_energy"
+    name: str = field(
+        default=(
+            "duplicate_consumption_energy_"
+            "resolution_skipped"
+        ),
+        init=False,
+    )
+    resolved: bool = field(
+        default=False,
+        init=False,
+    )
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "cat_d20_value",
+            int(self.cat_d20_value),
+        )
+        object.__setattr__(
+            self,
+            "reason",
+            str(self.reason),
+        )
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "reason": self.reason,
+            "cat_d20_value": (
+                self.cat_d20_value
+            ),
+            "resolved": self.resolved,
+        }
+
+
+@dataclass(slots=True, frozen=True)
 class DuplicateConsumptionEnergyResolvedEvent:
     energy_id: str
     cat: str
@@ -304,17 +343,13 @@ class DuplicateConsumptionEnergy:
         )
 
         if pending is None:
-            return {
-                "name": (
-                    "duplicate_consumption_energy_"
-                    "resolution_skipped"
-                ),
-                "reason": "no_pending_energy",
-                "cat_d20_value": int(
-                    cat_d20_value
-                ),
-                "resolved": False
-            }
+            return (
+                DuplicateConsumptionEnergyResolutionSkippedResult(
+                    cat_d20_value=(
+                        cat_d20_value
+                    ),
+                )
+            )
 
         value = int(
             cat_d20_value
@@ -388,7 +423,7 @@ class DuplicateConsumptionEnergy:
             event
         )
 
-        return event.to_dict()
+        return event
 
     def _create_counterpart_or_fallback(
         self,

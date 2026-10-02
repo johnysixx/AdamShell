@@ -6,6 +6,9 @@ from cats.kitten_growth import KittenGrowth
 from cats.duplicate_consumption_energy import (
     DuplicateConsumptionEnergy
 )
+from cats.duplicate_consumption_energy_resolution import (
+    DuplicateConsumptionEnergyResolution,
+)
 
 
 class DuplicateConsumptionEnergyTests(
@@ -108,8 +111,9 @@ class DuplicateConsumptionEnergyTests(
         )
 
         self.assertEqual(
-            result["resolution"],
-            "cronenberg_manifested"
+            result.resolution,
+            DuplicateConsumptionEnergyResolution
+            .CRONENBERG_MANIFESTED
         )
 
         self.assertEqual(
@@ -139,17 +143,13 @@ class DuplicateConsumptionEnergyTests(
         )
 
         self.assertEqual(
-            result["resolution"],
-            (
-                "cronenberg_quantum_"
-                "counterpart_created"
-            )
+            result.resolution,
+            DuplicateConsumptionEnergyResolution
+            .CRONENBERG_QUANTUM_COUNTERPART_CREATED
         )
 
         self.assertEqual(
-            result[
-                "original_cronenberg_id"
-            ],
+            result.original_cronenberg_id,
             original.id
         )
 
@@ -175,12 +175,13 @@ class DuplicateConsumptionEnergyTests(
         )
 
         self.assertEqual(
-            result["resolution"],
-            "cronenberg_manifested"
+            result.resolution,
+            DuplicateConsumptionEnergyResolution
+            .CRONENBERG_MANIFESTED
         )
 
         self.assertEqual(
-            result["fallback_reason"],
+            result.fallback_reason,
             (
                 "quantum_twin_target_"
                 "unavailable"

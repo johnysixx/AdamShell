@@ -4,6 +4,7 @@ from universe.universe import Universe
 from cats.cats import Cats
 from cats.duplicate_consumption_energy import (
     DuplicateConsumptionEnergy,
+    DuplicateConsumptionEnergyResolutionSkippedResult,
     DuplicateConsumptionEnergyResolvedEvent,
     DuplicateConsumptionEnergyStoredEvent,
 )
@@ -131,16 +132,25 @@ class DuplicateConsumptionEnergyObjectStateTests(
             .CRONENBERG_MANIFESTED,
         )
 
-        self.assertEqual(
-            result["resolution"],
-            "cronenberg_manifested",
+        self.assertIsInstance(
+            result,
+            DuplicateConsumptionEnergyResolvedEvent,
+        )
+
+        self.assertIs(
+            result,
+            self.energy.history[-1],
+        )
+
+        self.assertIs(
+            result.resolution,
+            DuplicateConsumptionEnergyResolution
+            .CRONENBERG_MANIFESTED,
         )
 
         self.assertEqual(
             state.resolved_entity_id,
-            result[
-                "resolved_entity_id"
-            ],
+            result.resolved_entity_id,
         )
 
     def test_store_history_uses_object_state(
@@ -230,12 +240,22 @@ class DuplicateConsumptionEnergyObjectStateTests(
             .CRONENBERG_MANIFESTED,
         )
 
-        self.assertEqual(
-            result["resolution"],
-            "cronenberg_manifested",
+        self.assertIs(
+            result,
+            event,
         )
 
-        result[
+        self.assertIs(
+            result.resolution,
+            DuplicateConsumptionEnergyResolution
+            .CRONENBERG_MANIFESTED,
+        )
+
+        boundary = (
+            result.to_dict()
+        )
+
+        boundary[
             "resolution"
         ] = "changed"
 
@@ -247,6 +267,93 @@ class DuplicateConsumptionEnergyObjectStateTests(
 
         with self.assertRaises(TypeError):
             _ = event["resolution"]
+
+    def test_resolution_results_use_object_state(
+        self
+    ):
+        skipped = (
+            self.energy.resolve_next(
+                cat_d20_value=20
+            )
+        )
+
+        self.assertIsInstance(
+            skipped,
+            DuplicateConsumptionEnergyResolutionSkippedResult,
+        )
+
+        self.assertFalse(
+            skipped.resolved
+        )
+
+        self.assertEqual(
+            skipped.reason,
+            "no_pending_energy",
+        )
+
+        state = self.energy.store(
+            cat=self.cat,
+            source="cat_milk",
+            day=1,
+        )
+
+        resolved = (
+            self.energy.resolve_next(
+                cat_d20_value=1
+            )
+        )
+
+        self.assertIsInstance(
+            resolved,
+            DuplicateConsumptionEnergyResolvedEvent,
+        )
+
+        self.assertIs(
+            resolved,
+            self.energy.history[-1],
+        )
+
+        self.assertEqual(
+            resolved.energy_id,
+            state.energy_id,
+        )
+
+        for result in (
+            skipped,
+            resolved,
+        ):
+            for mapping_method in (
+                "get",
+                "keys",
+                "items",
+                "values",
+            ):
+                self.assertFalse(
+                    hasattr(
+                        result,
+                        mapping_method,
+                    )
+                )
+
+            with self.assertRaises(
+                TypeError
+            ):
+                _ = result[
+                    "name"
+                ]
+
+        boundary = (
+            skipped.to_dict()
+        )
+
+        boundary[
+            "reason"
+        ] = "changed"
+
+        self.assertEqual(
+            skipped.reason,
+            "no_pending_energy",
+        )
 
     def test_state_rejects_string_resolution(
         self
