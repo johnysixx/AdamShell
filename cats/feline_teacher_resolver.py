@@ -336,6 +336,42 @@ class FelineAbilityTeacherNotFoundEvent(
     slots=True,
     frozen=True
 )
+class FelineAbilityLessonRequestFailedResult:
+
+    student: str
+    ability: str
+    requested_method: str | None
+    reason: str
+
+    name: str = field(
+        default=(
+            "feline_ability_"
+            "lesson_request_failed"
+        ),
+        init=False,
+    )
+
+    learned: bool = field(
+        default=False,
+        init=False,
+    )
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "student": self.student,
+            "ability": self.ability,
+            "requested_method":
+                self.requested_method,
+            "reason": self.reason,
+            "learned": self.learned,
+        }
+
+
+@dataclass(
+    slots=True,
+    frozen=True
+)
 class FelineAbilityLessonRequestedEvent(
     FelineTeacherHistoryEvent
 ):
@@ -629,18 +665,16 @@ class FelineTeacherResolver:
         )
 
         if not choice.chosen:
-            return {
-                "name": (
-                    "feline_ability_"
-                    "lesson_request_failed"
-                ),
-                "student": student.name,
-                "ability": ability_name,
-                "requested_method":
-                    method_name,
-                "reason": choice.reason,
-                "learned": False,
-            }
+            return (
+                FelineAbilityLessonRequestFailedResult(
+                    student=student.name,
+                    ability=ability_name,
+                    requested_method=(
+                        method_name
+                    ),
+                    reason=choice.reason,
+                )
+            )
 
         teacher = choice.teacher_cat
 
@@ -685,7 +719,7 @@ class FelineTeacherResolver:
             event
         )
 
-        return event.to_dict()
+        return event
 
     def _resolve_cats(
         self,

@@ -67,8 +67,8 @@ class FelineTeacherResolverTests(unittest.TestCase):
     def test_request_lesson_teaches_real_method(self):
         self.give_door_awareness()
         result = self.teachers.request_lesson(student=self.kitten, ability_name='open_human_door', method_name='hang_on_handle', ability_resolver=self.abilities)
-        self.assertTrue(result['learned'])
-        self.assertEqual(result['teacher'], 'pazuzu')
+        self.assertTrue(result.learned)
+        self.assertEqual(result.teacher, 'pazuzu')
         methods = (
             self.kitten
             .feline_wisdom

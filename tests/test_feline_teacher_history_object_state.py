@@ -7,6 +7,7 @@ from cats.feline_ability_resolver import (
     FelineAbilityResolver,
 )
 from cats.feline_teacher_resolver import (
+    FelineAbilityLessonRequestFailedResult,
     FelineAbilityLessonRequestedEvent,
     FelineAbilityTeacherChosenEvent,
     FelineAbilityTeacherNotFoundEvent,
@@ -369,8 +370,13 @@ class FelineTeacherHistoryObjectStateTests(
         )
 
         self.assertIsInstance(
-            event,
+            result,
             FelineAbilityLessonRequestedEvent,
+        )
+
+        self.assertIs(
+            result,
+            event,
         )
 
         with self.assertRaises(
@@ -380,7 +386,31 @@ class FelineTeacherHistoryObjectStateTests(
                 "learned"
             ] = False
 
-        result[
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    result,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = result[
+                "lesson"
+            ]
+
+        boundary = (
+            result.to_dict()
+        )
+
+        boundary[
             "lesson"
         ][
             "learned"
@@ -408,6 +438,83 @@ class FelineTeacherHistoryObjectStateTests(
 
         self.assertTrue(
             event.learned
+        )
+
+    def test_lesson_request_failure_uses_result_object(
+        self
+    ):
+        result = (
+            self.resolver
+            .request_lesson(
+                student=self.kitten,
+                ability_name=(
+                    "open_human_door"
+                ),
+                ability_resolver=(
+                    self.abilities
+                ),
+                method_name=(
+                    "unknown_method"
+                ),
+            )
+        )
+
+        self.assertIsInstance(
+            result,
+            FelineAbilityLessonRequestFailedResult,
+        )
+
+        self.assertFalse(
+            result.learned
+        )
+
+        self.assertEqual(
+            result.reason,
+            "no_teacher_knows_requested_method",
+        )
+
+        self.assertEqual(
+            result.requested_method,
+            "unknown_method",
+        )
+
+        # The chooser already recorded the domain event.
+        self.assertIsInstance(
+            self.resolver.history[-1],
+            FelineAbilityTeacherNotFoundEvent,
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    result,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = result[
+                "reason"
+            ]
+
+        boundary = (
+            result.to_dict()
+        )
+
+        boundary[
+            "reason"
+        ] = "changed"
+
+        self.assertEqual(
+            result.reason,
+            "no_teacher_knows_requested_method",
         )
 
     def test_history_rejects_mapping(
