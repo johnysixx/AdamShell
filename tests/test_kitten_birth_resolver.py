@@ -48,17 +48,17 @@ class KittenBirthResolverTests(unittest.TestCase):
         self._start_pregnancy(embryo_count=2)
         self.mating.advance_pregnancy(self.mother, days=64)
         result = self.birth.give_birth(self.mother, current_day=74)
-        self.assertFalse(result['born'])
-        self.assertEqual(result['reason'], 'gestation_not_complete')
+        self.assertFalse(result.born)
+        self.assertEqual(result.reason, 'gestation_not_complete')
         self.assertTrue(self.mother.reproduction.pregnant)
 
     def test_completed_pregnancy_creates_kittens(self):
         self._start_pregnancy(embryo_count=3)
         self.mating.advance_pregnancy(self.mother, days=65)
         result = self.birth.give_birth(self.mother, current_day=75)
-        kittens = result['kittens']
-        self.assertTrue(result['born'])
-        self.assertEqual(result['kittens_born'], 3)
+        kittens = result.kittens
+        self.assertTrue(result.born)
+        self.assertEqual(result.kittens_born, 3)
         self.assertEqual([kitten.name for kitten in kittens], ['kitten_0001', 'kitten_0002', 'kitten_0003'])
         self.assertTrue(all((kitten.state == 'newborn' for kitten in kittens)))
         self.assertTrue(all((kitten.mother_name == 'mother' for kitten in kittens)))
@@ -70,7 +70,7 @@ class KittenBirthResolverTests(unittest.TestCase):
         self._start_pregnancy(embryo_count=1)
         self.mating.advance_pregnancy(self.mother, days=65)
         result = self.birth.give_birth(self.mother, current_day=75)
-        kitten = result['kittens'][0]
+        kitten = result.kittens[0]
         reproduction = kitten.reproduction
         self.assertEqual(kitten.age_days, 0)
         self.assertEqual(kitten.birth_day, 75)
@@ -82,9 +82,9 @@ class KittenBirthResolverTests(unittest.TestCase):
         self._start_pregnancy(embryo_count=4)
         self.mating.advance_pregnancy(self.mother, days=65)
         result = self.birth.give_birth(self.mother)
-        fathers = {kitten.father_name for kitten in result['kittens']}
+        fathers = {kitten.father_name for kitten in result.kittens}
         self.assertEqual(fathers, {'father_one', 'father_two'})
-        self.assertTrue(result['multiple_sires'])
+        self.assertTrue(result.multiple_sires)
 
     def test_rare_traits_are_copied_from_embryo(self):
         self._start_pregnancy(embryo_count=1)
@@ -94,7 +94,7 @@ class KittenBirthResolverTests(unittest.TestCase):
         embryo.special_traits = ['xxy_male', 'rare_valid_genotype']
         self.mating.advance_pregnancy(self.mother, days=65)
         result = self.birth.give_birth(self.mother)
-        kitten = result['kittens'][0]
+        kitten = result.kittens[0]
         self.assertEqual(kitten.genetic_status, 'rare_valid')
         self.assertTrue(kitten.rare)
         self.assertIn('xxy_male', kitten.special_traits)
@@ -110,11 +110,7 @@ class KittenBirthResolverTests(unittest.TestCase):
         self.assertEqual(reproduction.litters_born, 1)
         self.assertEqual(
             reproduction.last_litter.kitten_names,
-            tuple(
-                result[
-                    "kitten_names"
-                ]
-            ),
+            result.kitten_names,
         )
         self.assertEqual(len(reproduction.litters), 1)
 if __name__ == '__main__':

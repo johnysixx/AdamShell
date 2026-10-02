@@ -174,7 +174,7 @@ class CatLifeCycleHandler:
             )
 
             births.append(
-                birth_result
+                birth_result.to_dict()
             )
 
         event = {

@@ -1100,3 +1100,104 @@ class CatLitter:
             "birth_day": self.birth_day,
             "born": self.born,
         }
+
+
+
+@dataclass(slots=True, frozen=True)
+class CatLitterBirthResult:
+
+    litter: CatLitter
+
+    kittens: tuple[
+        object,
+        ...,
+    ]
+
+    def __post_init__(self):
+        if not isinstance(
+            self.litter,
+            CatLitter,
+        ):
+            raise TypeError(
+                "Litter birth result requires "
+                "a CatLitter object."
+            )
+
+        kittens = tuple(
+            self.kittens
+        )
+
+        object.__setattr__(
+            self,
+            "kittens",
+            kittens,
+        )
+
+        if (
+            len(kittens)
+            != self.litter.kittens_born
+        ):
+            raise ValueError(
+                "Litter birth result kitten "
+                "count must match litter."
+            )
+
+        kitten_names = tuple(
+            str(
+                getattr(
+                    kitten,
+                    "name",
+                    None,
+                )
+            )
+            for kitten
+            in kittens
+        )
+
+        if (
+            kitten_names
+            != self.litter.kitten_names
+        ):
+            raise ValueError(
+                "Litter birth result kittens "
+                "must match litter kitten names."
+            )
+
+    @property
+    def born(self):
+        return self.litter.born
+
+    @property
+    def kittens_born(self):
+        return self.litter.kittens_born
+
+    @property
+    def kitten_names(self):
+        return self.litter.kitten_names
+
+    @property
+    def father_names(self):
+        return self.litter.father_names
+
+    @property
+    def multiple_sires(self):
+        return self.litter.multiple_sires
+
+    def __deepcopy__(
+        self,
+        memo
+    ):
+        return self
+
+    def to_dict(self):
+        snapshot = (
+            self.litter.to_dict()
+        )
+
+        snapshot[
+            "kittens"
+        ] = list(
+            self.kittens
+        )
+
+        return snapshot

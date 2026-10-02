@@ -3,6 +3,7 @@ import unittest
 from cats.cat_birth_objects import (
     CatKittenBirthResult,
     CatLitter,
+    CatLitterBirthResult,
 )
 
 from cats.cat_reproduction_state import (
@@ -174,6 +175,95 @@ class CatLitterObjectStateTests(
                 gestation_days=63,
                 birth_day=74,
             )
+
+    def test_litter_birth_result_uses_object_state(
+        self
+    ):
+        litter = self._litter()
+
+        kitten = type(
+            "FakeKitten",
+            (),
+            {
+                "name": "kitten_0001",
+            },
+        )()
+
+        result = (
+            CatLitterBirthResult(
+                litter=litter,
+                kittens=(
+                    kitten,
+                ),
+            )
+        )
+
+        self.assertIs(
+            result.litter,
+            litter,
+        )
+
+        self.assertIs(
+            result.kittens[0],
+            kitten,
+        )
+
+        self.assertTrue(
+            result.born
+        )
+
+        self.assertEqual(
+            result.kitten_names,
+            (
+                "kitten_0001",
+            ),
+        )
+
+        self.assertFalse(
+            result.multiple_sires
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    result,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(TypeError):
+            _ = result[
+                "kittens"
+            ]
+
+        boundary = (
+            result.to_dict()
+        )
+
+        self.assertIs(
+            boundary[
+                "kittens"
+            ][0],
+            kitten,
+        )
+
+        boundary[
+            "kitten_names"
+        ].append(
+            "changed"
+        )
+
+        self.assertEqual(
+            litter.kitten_names,
+            (
+                "kitten_0001",
+            ),
+        )
 
     def test_reproduction_boundary_serializes_litter(
         self

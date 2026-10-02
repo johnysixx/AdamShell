@@ -5,6 +5,7 @@ from cats.cat_birth_objects import (
     CatKittenBirthDeniedResult,
     CatKittenBirthResult,
     CatLitter,
+    CatLitterBirthResult,
 )
 
 class KittenBirthResolver:
@@ -19,7 +20,7 @@ class KittenBirthResolver:
     def give_birth(self, mother, current_day=None):
         biology = self.biology_gate.require_physical_world(operation='kitten_birth', cat=mother)
         if not biology.allowed:
-            return biology.to_dict()
+            return biology
         reproduction = mother.reproduction
         if getattr(mother, 'sex', None) != 'female':
             raise ValueError('Only a female cat can give birth.')
@@ -40,7 +41,7 @@ class KittenBirthResolver:
                 )
             )
 
-            return result.to_dict()
+            return result
         embryos = list(reproduction.embryos)
         litter_number = int(reproduction.litters_born) + 1
         kittens = []
@@ -142,7 +143,13 @@ class KittenBirthResolver:
         self.universe.quantum_events.append(
             litter.to_dict()
         )
-        return {**litter.to_dict(), 'kittens': kittens}
+
+        return CatLitterBirthResult(
+            litter=litter,
+            kittens=tuple(
+                kittens
+            ),
+        )
 
     def _next_kitten_name(self):
         cats_layer = getattr(self.universe, 'cats_layer', None)

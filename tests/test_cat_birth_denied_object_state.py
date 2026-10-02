@@ -112,7 +112,7 @@ class CatBirthDeniedObjectStateTests(
                 gestation_days=63,
             )
 
-    def test_resolver_returns_boundary_without_history_event(
+    def test_resolver_returns_object_without_history_event(
         self
     ):
         resolver = object.__new__(
@@ -141,8 +141,22 @@ class CatBirthDeniedObjectStateTests(
             mother
         )
 
-        self.assertEqual(
+        self.assertIsInstance(
             result,
+            CatKittenBirthDeniedResult,
+        )
+
+        self.assertEqual(
+            result.reason,
+            "gestation_not_complete",
+        )
+
+        self.assertFalse(
+            result.born
+        )
+
+        self.assertEqual(
+            result.to_dict(),
             {
                 "name": (
                     "kitten_birth_denied"
