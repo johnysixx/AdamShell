@@ -86,9 +86,7 @@ class CatGroupNormObservationObjectStateTests(
         )
 
         self.norm_id = (
-            created_norm[
-                "norm_id"
-            ]
+            created_norm.norm_id
         )
 
     def assert_not_mapping(

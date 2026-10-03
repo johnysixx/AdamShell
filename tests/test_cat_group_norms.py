@@ -28,13 +28,22 @@ class CatGroupNormTests(unittest.TestCase):
     def test_group_can_define_norm(self):
         norms = CatGroupNormSystem(self.groups)
         result = norms.define(self.group_id, 'protect_kittens', 'protective', {'action': 'protect', 'target': 'kitten'}, importance=0.9)
-        self.assertTrue(result['defined'])
-        self.assertIn(result['norm_id'], self.groups.groups[self.group_id].norms)
+        self.assertTrue(result.defined)
+        self.assertIn(
+            result.norm_id,
+            self.groups.groups[
+                self.group_id
+            ].norms,
+        )
 
     def test_cat_can_violate_norm(self):
         norms = CatGroupNormSystem(self.groups)
         created = norms.define(self.group_id, 'do_not_disturb_sleep', 'social', {'action': 'avoid_disturbing_sleep'}, importance=0.5)
-        result = norms.violate(self.group_id, self.second, created['norm_id'])
+        result = norms.violate(
+            self.group_id,
+            self.second,
+            created.norm_id,
+        )
         self.assertTrue(result.violated)
         self.assertEqual(len(self.second.norms.violations), 1)
 
@@ -58,7 +67,11 @@ class CatGroupNormTests(unittest.TestCase):
         sanctions = CatGroupSanctionSystem(self.groups)
         last = None
         for _ in range(5):
-            violation = norms.violate(self.group_id, self.second, created['norm_id'])
+            violation = norms.violate(
+                self.group_id,
+                self.second,
+                created.norm_id,
+            )
             last = sanctions.sanction(self.group_id, self.second, violation)
         self.assertNotEqual(last['sanction'], 'warning')
 
@@ -68,9 +81,20 @@ class CatGroupNormTests(unittest.TestCase):
         norms = CatGroupNormSystem(self.groups)
         created = norms.define(self.group_id, 'protect_kittens', 'protective', {'target': 'kitten'}, importance=0.9)
         linking = CatGroupNormInstitutionSystem(self.groups)
-        result = linking.attach_norm(self.group_id, 'kitten_guard', created['norm_id'])
+        result = linking.attach_norm(
+            self.group_id,
+            "kitten_guard",
+            created.norm_id,
+        )
         self.assertTrue(result['linked'])
-        self.assertIn(created['norm_id'], self.groups.groups[self.group_id].institutions['kitten_guard'].norms)
+        self.assertIn(
+            created.norm_id,
+            self.groups.groups[
+                self.group_id
+            ].institutions[
+                "kitten_guard"
+            ].norms,
+        )
 
     def test_social_avoidance_creates_relationship_object(self):
         self.second.relationships.pop(self.first.name, None)

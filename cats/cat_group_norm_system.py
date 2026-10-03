@@ -6,6 +6,9 @@ from cats.cat_group_norm_observation_state import (
     CatGroupNormObservationDeniedResult,
     CatGroupNormObservedResult,
 )
+from cats.cat_group_norm_definition_state import (
+    CatGroupNormDefinedEvent,
+)
 
 
 class CatGroupNormSystem:
@@ -13,13 +16,57 @@ class CatGroupNormSystem:
     def __init__(self, group_system):
         self.group_system = group_system
 
-    def define(self, group_id, name, category, rule, importance=0.5):
-        group = self.group_system._group(group_id)
-        norm_id = 'cat_norm_' + uuid4().hex[:8]
-        norm = CatGroupNorm(**{'id': norm_id, 'name': name, 'category': category, 'rule': deepcopy(rule), 'importance': self._clamp(importance), 'observances': 0, 'violations': 0, 'active': True})
-        group.norms[norm_id] = norm
-        event = {'name': 'cat_group_norm_defined', 'group_id': group_id, 'norm_id': norm_id, 'norm_name': name, 'category': category, 'defined': True}
-        group.history.append(deepcopy(event))
+    def define(
+        self,
+        group_id,
+        name,
+        category,
+        rule,
+        importance=0.5,
+    ):
+        group = (
+            self.group_system._group(
+                group_id
+            )
+        )
+
+        norm_id = (
+            "cat_norm_"
+            + uuid4().hex[:8]
+        )
+
+        norm = CatGroupNorm(
+            **{
+                "id": norm_id,
+                "name": name,
+                "category": category,
+                "rule": deepcopy(rule),
+                "importance": self._clamp(
+                    importance
+                ),
+                "observances": 0,
+                "violations": 0,
+                "active": True,
+            }
+        )
+
+        group.norms[
+            norm_id
+        ] = norm
+
+        event = (
+            CatGroupNormDefinedEvent(
+                group_id=group_id,
+                norm_id=norm_id,
+                norm_name=name,
+                category=category,
+            )
+        )
+
+        group.history.append(
+            event.to_dict()
+        )
+
         return event
 
     def observe(
