@@ -2,6 +2,11 @@ from copy import deepcopy
 from uuid import uuid4
 from cats.cat_culture_objects import CatGroupNorm
 from cats.cat_culture_objects import CatNormViolation
+from cats.cat_group_norm_observation_state import (
+    CatGroupNormObservationDeniedResult,
+    CatGroupNormObservedResult,
+)
+
 
 class CatGroupNormSystem:
 
@@ -17,13 +22,38 @@ class CatGroupNormSystem:
         group.history.append(deepcopy(event))
         return event
 
-    def observe(self, group_id, cat, norm_id):
-        group = self.group_system._group(group_id)
-        norm = group.norms.get(norm_id)
+    def observe(
+        self,
+        group_id,
+        cat,
+        norm_id,
+    ):
+        group = (
+            self.group_system._group(
+                group_id
+            )
+        )
+
+        norm = group.norms.get(
+            norm_id
+        )
+
         if norm is None:
-            return {'name': 'cat_group_norm_observation_denied', 'reason': 'unknown_norm', 'observed': False}
+            return (
+                CatGroupNormObservationDeniedResult(
+                    reason="unknown_norm",
+                )
+            )
+
         norm.observances += 1
-        return {'name': 'cat_group_norm_observed', 'group_id': group_id, 'cat': cat.name, 'norm_id': norm_id, 'observed': True}
+
+        return (
+            CatGroupNormObservedResult(
+                group_id=group_id,
+                cat=cat.name,
+                norm_id=norm_id,
+            )
+        )
 
     def violate(self, group_id, cat, norm_id, context=None):
         group = self.group_system._group(group_id)
