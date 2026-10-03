@@ -7,6 +7,9 @@ from cats.cat_group_institution_maintenance_state import (
     CatGroupInstitutionMaintainedResult,
     CatGroupInstitutionMaintenanceDeniedResult,
 )
+from cats.cat_group_institution_inheritance_state import (
+    CatGroupInstitutionsInheritedResult,
+)
 
 
 class CatGroupInstitutionSystem:
@@ -148,15 +151,65 @@ class CatGroupInstitutionSystem:
             )
         )
 
-    def transfer_after_split(self, parent_group_id, child_group_id, retention=0.65):
-        parent = self.group_system._group(parent_group_id)
-        child = self.group_system._group(child_group_id)
+    def transfer_after_split(
+        self,
+        parent_group_id,
+        child_group_id,
+        retention=0.65,
+    ):
+        parent = (
+            self.group_system._group(
+                parent_group_id
+            )
+        )
+
+        child = (
+            self.group_system._group(
+                child_group_id
+            )
+        )
+
         inherited = []
-        for name, institution in parent.institutions.items():
-            copied = deepcopy(institution)
-            copied.continuity = max(0.0, min(1.0, float(copied.continuity) * retention))
+
+        for (
+            name,
+            institution,
+        ) in parent.institutions.items():
+            copied = deepcopy(
+                institution
+            )
+
+            copied.continuity = max(
+                0.0,
+                min(
+                    1.0,
+                    float(
+                        copied.continuity
+                    )
+                    * retention,
+                ),
+            )
+
             copied.generations += 1
-            copied.inherited_from = parent_group_id
-            child.institutions[name] = copied
-            inherited.append(name)
-        return {'name': 'cat_group_institutions_inherited', 'parent_group': parent_group_id, 'child_group': child_group_id, 'institutions': inherited}
+
+            copied.inherited_from = (
+                parent_group_id
+            )
+
+            child.institutions[
+                name
+            ] = copied
+
+            inherited.append(
+                name
+            )
+
+        return (
+            CatGroupInstitutionsInheritedResult(
+                parent_group=parent_group_id,
+                child_group=child_group_id,
+                institutions=tuple(
+                    inherited
+                ),
+            )
+        )
