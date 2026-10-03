@@ -2,6 +2,10 @@ from cats.cat_culture_objects import CatTabooViolation
 from copy import deepcopy
 from uuid import uuid4
 from cats.cat_culture_objects import CatGroupTaboo
+from cats.cat_group_taboo_violation_state import (
+    CatGroupTabooViolationDeniedResult,
+)
+
 
 class CatGroupTabooSystem:
 
@@ -15,11 +19,30 @@ class CatGroupTabooSystem:
         group.taboos[taboo_id] = taboo
         return {'name': 'cat_group_taboo_defined', 'group_id': group_id, 'taboo_id': taboo_id, 'taboo_name': name, 'defined': True}
 
-    def violate(self, group_id, cat, taboo_id, context=None):
-        group = self.group_system._group(group_id)
-        taboo = group.taboos.get(taboo_id)
+    def violate(
+        self,
+        group_id,
+        cat,
+        taboo_id,
+        context=None,
+    ):
+        group = (
+            self.group_system._group(
+                group_id
+            )
+        )
+
+        taboo = group.taboos.get(
+            taboo_id
+        )
+
         if taboo is None:
-            return {'name': 'cat_group_taboo_violation_denied', 'reason': 'unknown_taboo', 'violated': False}
+            return (
+                CatGroupTabooViolationDeniedResult(
+                    reason="unknown_taboo",
+                )
+            )
+
         taboo.violations += 1
         event = CatTabooViolation(**{'name': 'cat_group_taboo_violated', 'group_id': group_id, 'cat': cat.name, 'taboo_id': taboo_id, 'taboo_name': taboo.name, 'severity': taboo.severity, 'target': deepcopy(taboo.target), 'context': deepcopy(context), 'violated': True})
         group.norm_violations.append(deepcopy(event))
