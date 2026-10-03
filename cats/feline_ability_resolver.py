@@ -8,6 +8,7 @@ from cats.feline_wisdom_state import (
     FelineAbilityTeachingCronenbergResult,
     FelineTeachingAbilitiesRegistrationResult,
     FelineHumanDoorCapabilityResult,
+    FelineTeachingPermissionResult,
 )
 from cats.cat_personality import CatPersonality
 from cats.cat_parentage_state import (
@@ -208,28 +209,21 @@ class FelineAbilityResolver:
             )
         )
 
-        if not permission['allowed']:
-            if permission.get(
-                'creates_cronenberg',
-                False,
-            ):
+        if not permission.allowed:
+            if permission.creates_cronenberg:
                 return (
                     self._create_teaching_cronenberg(
                         teacher=teacher,
                         student=student,
                         ability_name=ability_name,
-                        reason=permission[
-                            'reason'
-                        ],
+                        reason=permission.reason,
                     )
                 )
 
             return self._lesson_denied(
                 teacher=teacher,
                 student=student,
-                reason=permission[
-                    'reason'
-                ],
+                reason=permission.reason,
             )
 
         teacher_wisdom = (
@@ -556,28 +550,170 @@ class FelineAbilityResolver:
 
         return result
 
-    def _check_teaching_permission(self, teacher, student, ability_name):
-        if self._is_parent_of(teacher=teacher, student=student):
-            return {'allowed': True, 'reason': 'parent_teaching_own_kitten'}
-        teacher_wisdom = FelineWisdom.ensure_state(teacher)
-        knows_teaching = self._knows_ability(teacher_wisdom, self.TEACH_OTHER_CATS)
-        knows_meta_teaching = self._knows_ability(teacher_wisdom, self.TEACH_TEACHING)
-        is_garfield = getattr(teacher, 'name', None) == 'garfield'
-        if ability_name == self.TEACH_OTHER_CATS:
+    def _check_teaching_permission(
+        self,
+        teacher,
+        student,
+        ability_name,
+    ):
+        if self._is_parent_of(
+            teacher=teacher,
+            student=student,
+        ):
+            return (
+                FelineTeachingPermissionResult(
+                    teacher=teacher.name,
+                    student=student.name,
+                    ability=ability_name,
+                    allowed=True,
+                    reason=(
+                        "parent_teaching_own_kitten"
+                    ),
+                )
+            )
+
+        teacher_wisdom = (
+            FelineWisdom.ensure_state(
+                teacher
+            )
+        )
+
+        knows_teaching = (
+            self._knows_ability(
+                teacher_wisdom,
+                self.TEACH_OTHER_CATS,
+            )
+        )
+
+        knows_meta_teaching = (
+            self._knows_ability(
+                teacher_wisdom,
+                self.TEACH_TEACHING,
+            )
+        )
+
+        is_garfield = (
+            teacher.name
+            == "garfield"
+        )
+
+        if (
+            ability_name
+            == self.TEACH_OTHER_CATS
+        ):
             if is_garfield:
-                return {'allowed': True, 'reason': 'garfield_teaches_teaching'}
+                return (
+                    FelineTeachingPermissionResult(
+                        teacher=teacher.name,
+                        student=student.name,
+                        ability=ability_name,
+                        allowed=True,
+                        reason=(
+                            "garfield_teaches_teaching"
+                        ),
+                    )
+                )
+
             if knows_meta_teaching:
-                return {'allowed': True, 'reason': 'meta_teacher_creates_teacher'}
+                return (
+                    FelineTeachingPermissionResult(
+                        teacher=teacher.name,
+                        student=student.name,
+                        ability=ability_name,
+                        allowed=True,
+                        reason=(
+                            "meta_teacher_creates_teacher"
+                        ),
+                    )
+                )
+
             if knows_teaching:
-                return {'allowed': False, 'reason': 'teacher_cannot_create_non_offspring_teacher', 'creates_cronenberg': True}
-            return {'allowed': False, 'reason': 'teacher_has_not_learned_to_teach'}
-        if ability_name == self.TEACH_TEACHING:
-            if is_garfield or knows_meta_teaching:
-                return {'allowed': True, 'reason': 'meta_teaching_authorized'}
-            return {'allowed': False, 'reason': 'teacher_does_not_know_teach_teaching'}
+                return (
+                    FelineTeachingPermissionResult(
+                        teacher=teacher.name,
+                        student=student.name,
+                        ability=ability_name,
+                        allowed=False,
+                        reason=(
+                            "teacher_cannot_create_"
+                            "non_offspring_teacher"
+                        ),
+                        creates_cronenberg=True,
+                    )
+                )
+
+            return (
+                FelineTeachingPermissionResult(
+                    teacher=teacher.name,
+                    student=student.name,
+                    ability=ability_name,
+                    allowed=False,
+                    reason=(
+                        "teacher_has_not_learned_"
+                        "to_teach"
+                    ),
+                )
+            )
+
+        if (
+            ability_name
+            == self.TEACH_TEACHING
+        ):
+            if (
+                is_garfield
+                or knows_meta_teaching
+            ):
+                return (
+                    FelineTeachingPermissionResult(
+                        teacher=teacher.name,
+                        student=student.name,
+                        ability=ability_name,
+                        allowed=True,
+                        reason=(
+                            "meta_teaching_authorized"
+                        ),
+                    )
+                )
+
+            return (
+                FelineTeachingPermissionResult(
+                    teacher=teacher.name,
+                    student=student.name,
+                    ability=ability_name,
+                    allowed=False,
+                    reason=(
+                        "teacher_does_not_know_"
+                        "teach_teaching"
+                    ),
+                )
+            )
+
         if knows_teaching:
-            return {'allowed': True, 'reason': 'teacher_may_teach_owned_ability'}
-        return {'allowed': False, 'reason': 'teacher_has_not_learned_to_teach'}
+            return (
+                FelineTeachingPermissionResult(
+                    teacher=teacher.name,
+                    student=student.name,
+                    ability=ability_name,
+                    allowed=True,
+                    reason=(
+                        "teacher_may_teach_"
+                        "owned_ability"
+                    ),
+                )
+            )
+
+        return (
+            FelineTeachingPermissionResult(
+                teacher=teacher.name,
+                student=student.name,
+                ability=ability_name,
+                allowed=False,
+                reason=(
+                    "teacher_has_not_learned_"
+                    "to_teach"
+                ),
+            )
+        )
 
     def _is_parent_of(self, teacher, student):
         teacher_name = getattr(teacher, 'name', None)

@@ -440,6 +440,60 @@ class FelineTeachingAbilitiesRegistrationResult:
 
 
 @dataclass(slots=True, frozen=True)
+class FelineTeachingPermissionResult:
+    teacher: str
+    student: str
+    ability: str
+    allowed: bool
+    reason: str
+    creates_cronenberg: bool = False
+
+    name: str = field(
+        default="feline_teaching_permission",
+        init=False,
+    )
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "teacher",
+            str(self.teacher),
+        )
+
+        object.__setattr__(
+            self,
+            "student",
+            str(self.student),
+        )
+
+        object.__setattr__(
+            self,
+            "ability",
+            str(self.ability),
+        )
+
+        object.__setattr__(
+            self,
+            "allowed",
+            bool(self.allowed),
+        )
+
+        object.__setattr__(
+            self,
+            "reason",
+            str(self.reason),
+        )
+
+        object.__setattr__(
+            self,
+            "creates_cronenberg",
+            bool(
+                self.creates_cronenberg
+            ),
+        )
+
+
+@dataclass(slots=True, frozen=True)
 class FelineAbilityLessonDeniedResult:
     teacher: str
     student: str
