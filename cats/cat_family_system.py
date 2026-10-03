@@ -2,6 +2,10 @@ from cats.cat import Cat
 from cats.cat_parentage_state import (
     CatParentageState
 )
+from cats.cat_family_registration_state import (
+    CatFamilyRegistrationResult,
+)
+
 
 class CatFamilySystem:
 
@@ -21,8 +25,19 @@ class CatFamilySystem:
             father = by_name.get(father_name)
             if father is not None:
                 self._add_unique(father.family.children, kitten.name)
-        self._link_littermates(kittens)
-        return {'name': 'cat_family_registered', 'mother': mother.name, 'kittens': [kitten.name for kitten in kittens], 'registered': True}
+        self._link_littermates(
+            kittens
+        )
+
+        return (
+            CatFamilyRegistrationResult(
+                mother=mother.name,
+                kittens=tuple(
+                    kitten.name
+                    for kitten in kittens
+                ),
+            )
+        )
 
     def relation(self, cat, other_cat):
         self._require_cat(cat)
