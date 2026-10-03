@@ -9,6 +9,9 @@ from cats.cat_personality_state import (
 from cats.feline_ability_state import (
     FelineAbilityState,
 )
+from cats.feline_ability_method_state import (
+    FelineAbilityMethodState,
+)
 from cats.feline_awareness_state import (
     FelineAwarenessState,
 )
@@ -226,6 +229,62 @@ class FelineAbilityAwarenessTransmissionEvent:
                 self.methods_transferred
             ),
             "transmitted": self.transmitted,
+        }
+
+
+@dataclass(slots=True, frozen=True)
+class FelineAbilityMethodRegistrationResult:
+    name: str
+    cat: str
+    ability: str
+    method: FelineAbilityMethodState
+
+    registered: bool = field(
+        default=True,
+        init=False,
+    )
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "name",
+            str(self.name),
+        )
+        object.__setattr__(
+            self,
+            "cat",
+            str(self.cat),
+        )
+        object.__setattr__(
+            self,
+            "ability",
+            str(self.ability),
+        )
+
+        if not isinstance(
+            self.method,
+            FelineAbilityMethodState,
+        ):
+            raise TypeError(
+                "Registered feline ability method "
+                "must be FelineAbilityMethodState."
+            )
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "cat": self.cat,
+            "ability": self.ability,
+            "method": {
+                "name": self.method.name,
+                "teacher": self.method.teacher,
+                "constraints": deepcopy(
+                    dict(
+                        self.method.constraints
+                    )
+                ),
+            },
+            "registered": self.registered,
         }
 
 

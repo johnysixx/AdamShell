@@ -4,6 +4,7 @@ from cats.feline_wisdom_state import (
     FelineAbilityAwarenessTransmissionEvent,
     FelineAbilityLessonDeniedResult,
     FelineAbilityMethodLearnedEvent,
+    FelineAbilityMethodRegistrationResult,
     FelineAbilityTeachingCronenbergResult,
 )
 from cats.cat_personality import CatPersonality
@@ -24,15 +25,109 @@ class FelineAbilityResolver:
         self.universe = universe
         self.history = []
 
-    def register_pazuzu_door_method(self, pazuzu):
-        FelineWisdom.add_awareness(cat=pazuzu, knowledge_name=self.OPEN_HUMAN_DOOR, domain='feline', description='Some cats can open unlocked human doors.', known_teachers=[pazuzu.name])
-        method = FelineWisdom.learn_ability_method(cat=pazuzu, ability_name=self.OPEN_HUMAN_DOOR, method_name=self.PAZUZU_METHOD, teacher_name=None, constraints={'requires_unlocked': True, 'opens_toward_cat': True, 'opens_away_from_cat': True, 'can_close': False})
-        return {'name': 'pazuzu_human_door_method_registered', 'cat': pazuzu.name, 'method': method}
+    def register_pazuzu_door_method(
+        self,
+        pazuzu,
+    ):
+        FelineWisdom.add_awareness(
+            cat=pazuzu,
+            knowledge_name=(
+                self.OPEN_HUMAN_DOOR
+            ),
+            domain='feline',
+            description=(
+                'Some cats can open '
+                'unlocked human doors.'
+            ),
+            known_teachers=[
+                pazuzu.name
+            ],
+        )
 
-    def register_queen_elisabeth_door_method(self, queen):
-        FelineWisdom.add_awareness(cat=queen, knowledge_name=self.OPEN_HUMAN_DOOR, domain='feline', description='Some cats can open unlocked human doors.', known_teachers=[queen.name])
-        method = FelineWisdom.learn_ability_method(cat=queen, ability_name=self.OPEN_HUMAN_DOOR, method_name=self.QUEEN_ELISABETH_METHOD, teacher_name=None, constraints={'requires_unlocked': True, 'opens_toward_cat': True, 'opens_away_from_cat': False, 'can_close': False})
-        return {'name': 'queen_elisabeth_human_door_method_registered', 'cat': queen.name, 'method': method}
+        method = (
+            FelineWisdom.learn_ability_method(
+                cat=pazuzu,
+                ability_name=(
+                    self.OPEN_HUMAN_DOOR
+                ),
+                method_name=(
+                    self.PAZUZU_METHOD
+                ),
+                teacher_name=None,
+                constraints={
+                    'requires_unlocked': True,
+                    'opens_toward_cat': True,
+                    'opens_away_from_cat': True,
+                    'can_close': False,
+                },
+            )
+        )
+
+        return (
+            FelineAbilityMethodRegistrationResult(
+                name=(
+                    'pazuzu_human_door_'
+                    'method_registered'
+                ),
+                cat=pazuzu.name,
+                ability=(
+                    self.OPEN_HUMAN_DOOR
+                ),
+                method=method,
+            )
+        )
+
+    def register_queen_elisabeth_door_method(
+        self,
+        queen,
+    ):
+        FelineWisdom.add_awareness(
+            cat=queen,
+            knowledge_name=(
+                self.OPEN_HUMAN_DOOR
+            ),
+            domain='feline',
+            description=(
+                'Some cats can open '
+                'unlocked human doors.'
+            ),
+            known_teachers=[
+                queen.name
+            ],
+        )
+
+        method = (
+            FelineWisdom.learn_ability_method(
+                cat=queen,
+                ability_name=(
+                    self.OPEN_HUMAN_DOOR
+                ),
+                method_name=(
+                    self.QUEEN_ELISABETH_METHOD
+                ),
+                teacher_name=None,
+                constraints={
+                    'requires_unlocked': True,
+                    'opens_toward_cat': True,
+                    'opens_away_from_cat': False,
+                    'can_close': False,
+                },
+            )
+        )
+
+        return (
+            FelineAbilityMethodRegistrationResult(
+                name=(
+                    'queen_elisabeth_human_door_'
+                    'method_registered'
+                ),
+                cat=queen.name,
+                ability=(
+                    self.OPEN_HUMAN_DOOR
+                ),
+                method=method,
+            )
+        )
 
     def transmit_meow_awareness(self, teacher, student):
         teacher_wisdom = FelineWisdom.ensure_state(teacher)
