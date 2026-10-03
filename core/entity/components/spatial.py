@@ -86,6 +86,65 @@ def require_optional_spatial_vector(value, field_name="position"):
     )
 
 
+@dataclass(slots=True, frozen=True)
+class SpatialPositionChangedEvent:
+    previous_position: SpatialVector3 | None
+    current_position: SpatialVector3
+    layer: object = None
+    zone: object = None
+
+    name: str = "spatial_position_changed"
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "previous_position",
+            require_optional_spatial_vector(
+                self.previous_position,
+                field_name=(
+                    "previous position"
+                ),
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "current_position",
+            require_spatial_vector(
+                self.current_position,
+                field_name=(
+                    "current position"
+                ),
+            ),
+        )
+
+    def __deepcopy__(
+        self,
+        memo,
+    ):
+        return self
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "previous_position": (
+                None
+                if self.previous_position
+                is None
+                else (
+                    self.previous_position
+                    .to_dict()
+                )
+            ),
+            "current_position": (
+                self.current_position
+                .to_dict()
+            ),
+            "layer": self.layer,
+            "zone": self.zone,
+        }
+
+
 class SpatialComponent:
 
     def __init__(
@@ -149,17 +208,18 @@ class SpatialComponent:
         if zone is not None:
             self.zone = zone
 
-        return {
-            "name": "spatial_position_changed",
-            "previous_position": (
-                None
-                if previous_position is None
-                else previous_position.to_dict()
-            ),
-            "current_position": current_position.to_dict(),
-            "layer": self.layer,
-            "zone": self.zone,
-        }
+        return (
+            SpatialPositionChangedEvent(
+                previous_position=(
+                    previous_position
+                ),
+                current_position=(
+                    current_position
+                ),
+                layer=self.layer,
+                zone=self.zone,
+            )
+        )
 
     def set_velocity(self, velocity):
         self.velocity = self._require_vector(

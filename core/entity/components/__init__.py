@@ -1,5 +1,6 @@
 from .spatial import (
     SpatialComponent,
+    SpatialPositionChangedEvent,
     SpatialVector3,
     require_optional_spatial_vector,
     require_spatial_vector,
@@ -8,6 +9,7 @@ from .spatial import (
 
 __all__ = [
     "SpatialComponent",
+    "SpatialPositionChangedEvent",
     "SpatialVector3",
     "require_optional_spatial_vector",
     "require_spatial_vector",

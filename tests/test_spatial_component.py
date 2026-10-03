@@ -1,8 +1,8 @@
-from core.entity.components import SpatialVector3
 import unittest
 
 from core.entity.components import (
     SpatialComponent,
+    SpatialPositionChangedEvent,
     SpatialVector3,
 )
 from core.entity.entity import Entity
@@ -41,13 +41,61 @@ class SpatialComponentTests(
             position,
         )
 
+        self.assertIsInstance(
+            event,
+            SpatialPositionChangedEvent,
+        )
+
+        self.assertIsNone(
+            event.previous_position
+        )
+
+        self.assertIs(
+            event.current_position,
+            position,
+        )
+
         self.assertEqual(
-            event["current_position"],
-            {
-                "x": 3.0,
-                "y": 4.0,
-                "z": 0.0
-            }
+            event.layer,
+            "quantum_layer",
+        )
+
+        self.assertEqual(
+            event.zone,
+            "hunting_area",
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    event,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = event[
+                "current_position"
+            ]
+
+        boundary = event.to_dict()
+
+        boundary[
+            "current_position"
+        ][
+            "x"
+        ] = 999.0
+
+        self.assertEqual(
+            event.current_position.x,
+            3.0,
         )
 
         self.assertEqual(
@@ -107,13 +155,42 @@ class SpatialComponentTests(
             zone="test_zone"
         )
 
+        self.assertIsInstance(
+            event,
+            SpatialPositionChangedEvent,
+        )
+
+        self.assertIs(
+            event.previous_position,
+            original_position,
+        )
+
+        self.assertIs(
+            event.current_position,
+            new_position,
+        )
+
         self.assertEqual(
-            event["previous_position"],
-            {
-                "x": 1.0,
-                "y": 2.0,
-                "z": 3.0
-            }
+            event.layer,
+            "quantum_layer",
+        )
+
+        self.assertEqual(
+            event.zone,
+            "test_zone",
+        )
+
+        boundary = event.to_dict()
+
+        boundary[
+            "previous_position"
+        ][
+            "x"
+        ] = 999.0
+
+        self.assertEqual(
+            event.previous_position.x,
+            1.0,
         )
 
         self.assertIs(
