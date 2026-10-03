@@ -1,3 +1,9 @@
+from cats.cat_need_state import (
+    CatNeedsAdvancedResult,
+    CatNeedsSnapshot,
+)
+
+
 class CatNeedSystem:
     RATES = {'hunger': 0.025, 'thirst': 0.035, 'fatigue': 0.02, 'safety': 0.0, 'social': 0.018, 'curiosity': 0.015}
 
@@ -7,9 +13,33 @@ class CatNeedSystem:
         setattr(needs, 'tick', int(getattr(needs, 'tick', 0)) + 1)
         for key, rate in cls.RATES.items():
             setattr(needs, key, cls._clamp(float(getattr(needs, key, 0.0)) + rate))
-        dominant = max(cls.RATES, key=lambda key: getattr(needs, key))
-        setattr(needs, 'dominant', dominant)
-        return {'name': 'cat_needs_advanced', 'cat': cat.name, 'dominant': dominant, 'needs': dict(vars(needs))}
+        dominant = max(
+            cls.RATES,
+            key=lambda key: getattr(
+                needs,
+                key,
+            ),
+        )
+
+        setattr(
+            needs,
+            "dominant",
+            dominant,
+        )
+
+        snapshot = (
+            CatNeedsSnapshot.from_state(
+                needs
+            )
+        )
+
+        return (
+            CatNeedsAdvancedResult(
+                cat=cat.name,
+                dominant=dominant,
+                needs=snapshot,
+            )
+        )
 
     @classmethod
     def apply_action(cls, cat, intention_type):
@@ -20,7 +50,11 @@ class CatNeedSystem:
             setattr(needs, 'social', cls._clamp(getattr(needs, 'social', 0.0) - 0.3))
         elif intention_type in ('wander', 'observe', 'explore_box'):
             setattr(needs, 'curiosity', cls._clamp(getattr(needs, 'curiosity', 0.0) - 0.22))
-        return dict(vars(needs))
+        return (
+            CatNeedsSnapshot.from_state(
+                needs
+            )
+        )
 
     @staticmethod
     def _clamp(value):
