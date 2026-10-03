@@ -2,6 +2,9 @@ import unittest
 
 from cats.cat_knowledge_objects import CatKnownPlace
 from cats.cat_perception_state import CatScentTransferCandidate
+from cats.cat_spatial_state import (
+    CatPositionChangedEvent,
+)
 from cats.cats import Cats
 from core.entity.components import SpatialVector3
 from meeting_place.bar_objects import BarPosition
@@ -21,10 +24,98 @@ class CatSpatialObjectStateTests(unittest.TestCase):
         with self.assertRaises(TypeError):
             cat.position = {"x": 1.0, "y": 2.0, "z": 3.0}
         position = SpatialVector3(x=1.0, y=2.0, z=3.0)
-        event = cat.move_to(position)
-        self.assertIs(cat.position, position)
-        self.assertEqual(event["position"], position.to_dict())
-        self.assertIsInstance(event["position"], dict)
+        event = cat.move_to(
+            position
+        )
+
+        self.assertIs(
+            cat.position,
+            position,
+        )
+
+        self.assertIsInstance(
+            event,
+            CatPositionChangedEvent,
+        )
+
+        self.assertIsNone(
+            event.previous_position
+        )
+
+        self.assertIs(
+            event.position,
+            position,
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    event,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = event[
+                "position"
+            ]
+
+        next_position = (
+            SpatialVector3(
+                x=4.0,
+                y=5.0,
+                z=6.0,
+            )
+        )
+
+        second_event = cat.move_to(
+            next_position
+        )
+
+        self.assertIs(
+            second_event.previous_position,
+            position,
+        )
+
+        self.assertIs(
+            second_event.position,
+            next_position,
+        )
+
+        boundary = (
+            second_event.to_dict()
+        )
+
+        boundary[
+            "position"
+        ][
+            "x"
+        ] = 999.0
+
+        boundary[
+            "previous_position"
+        ][
+            "x"
+        ] = 888.0
+
+        self.assertEqual(
+            second_event.position.x,
+            4.0,
+        )
+
+        self.assertEqual(
+            second_event
+            .previous_position
+            .x,
+            1.0,
+        )
 
     def test_bar_position_uses_same_spatial_contract(self):
         universe = Universe()

@@ -6,6 +6,10 @@ from core.entity.components import SpatialVector3
 
 from cats.cat_distribution_state import CatDistributionState
 from cats.cat_parentage_state import CatParentageState
+from cats.cat_spatial_state import (
+    CatPositionChangedEvent,
+)
+
 
 class Cat(SocialMixin):
     """
@@ -125,21 +129,30 @@ class Cat(SocialMixin):
     def position(self):
         self._position = None
 
-    def move_to(self, position):
-        if not isinstance(position, SpatialVector3):
+    def move_to(
+        self,
+        position,
+    ):
+        if not isinstance(
+            position,
+            SpatialVector3,
+        ):
             raise TypeError(
-                "Cat movement requires a SpatialVector3 object."
+                "Cat movement requires a "
+                "SpatialVector3 object."
             )
+
         previous = self.position
+
         self.position = position
-        return {
-            "name": "cat_position_changed",
-            "cat": self.name,
-            "previous_position": (
-                None if previous is None else previous.to_dict()
-            ),
-            "position": position.to_dict(),
-        }
+
+        return (
+            CatPositionChangedEvent(
+                cat=self.name,
+                previous_position=previous,
+                position=position,
+            )
+        )
 
     def clear_position(self):
         previous = self.position
