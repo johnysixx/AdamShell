@@ -88,7 +88,10 @@ class CatGroupInstitutionTests(unittest.TestCase):
         before = self.groups.groups[self.group_id].institutions['night_watch'].generations
         result = institutions.maintain(self.group_id, 'night_watch')
         after = self.groups.groups[self.group_id].institutions['night_watch'].generations
-        self.assertEqual(result['status'], 'maintained')
+        self.assertEqual(
+            result.status,
+            'maintained',
+        )
         self.assertGreater(after, before)
 if __name__ == '__main__':
     unittest.main()

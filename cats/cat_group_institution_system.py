@@ -3,6 +3,10 @@ from cats.cat_culture_objects import CatGroupInstitution
 from cats.cat_group_institution_establishment_state import (
     CatGroupInstitutionEstablishedEvent,
 )
+from cats.cat_group_institution_maintenance_state import (
+    CatGroupInstitutionMaintainedResult,
+    CatGroupInstitutionMaintenanceDeniedResult,
+)
 
 
 class CatGroupInstitutionSystem:
@@ -58,23 +62,91 @@ class CatGroupInstitutionSystem:
 
         return event
 
-    def maintain(self, group_id, institution_name):
-        group = self.group_system._group(group_id)
-        institution = group.institutions.get(institution_name)
+    def maintain(
+        self,
+        group_id,
+        institution_name,
+    ):
+        group = (
+            self.group_system._group(
+                group_id
+            )
+        )
+
+        institution = (
+            group.institutions.get(
+                institution_name
+            )
+        )
+
         if institution is None:
-            return {'name': 'cat_group_institution_maintenance_denied', 'reason': 'unknown_institution', 'maintained': False}
-        roles_present = all((bool(group.roles.get(role)) for role in institution.roles))
-        rituals_present = all((ritual in group.rituals and group.rituals[ritual].performances > 0 for ritual in institution.rituals))
-        if roles_present and rituals_present:
-            institution.continuity = min(1.0, float(institution.continuity) + 0.05)
+            return (
+                CatGroupInstitutionMaintenanceDeniedResult(
+                    reason="unknown_institution",
+                )
+            )
+
+        roles_present = all(
+            bool(
+                group.roles.get(
+                    role
+                )
+            )
+            for role
+            in institution.roles
+        )
+
+        rituals_present = all(
+            ritual in group.rituals
+            and group.rituals[
+                ritual
+            ].performances > 0
+            for ritual
+            in institution.rituals
+        )
+
+        if (
+            roles_present
+            and rituals_present
+        ):
+            institution.continuity = min(
+                1.0,
+                float(
+                    institution.continuity
+                )
+                + 0.05,
+            )
+
             institution.generations += 1
-            status = 'maintained'
+
+            status = "maintained"
+
         else:
-            institution.continuity = max(0.0, float(institution.continuity) - 0.15)
-            status = 'weakened'
-        if institution.continuity <= 0.1:
+            institution.continuity = max(
+                0.0,
+                float(
+                    institution.continuity
+                )
+                - 0.15,
+            )
+
+            status = "weakened"
+
+        if (
+            institution.continuity
+            <= 0.1
+        ):
             institution.active = False
-        return {'name': 'cat_group_institution_maintained', 'group_id': group_id, 'institution': institution_name, 'status': status, 'continuity': institution.continuity, 'active': institution.active, 'maintained': True}
+
+        return (
+            CatGroupInstitutionMaintainedResult(
+                group_id=group_id,
+                institution=institution_name,
+                status=status,
+                continuity=institution.continuity,
+                active=institution.active,
+            )
+        )
 
     def transfer_after_split(self, parent_group_id, child_group_id, retention=0.65):
         parent = self.group_system._group(parent_group_id)
