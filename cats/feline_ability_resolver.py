@@ -6,6 +6,7 @@ from cats.feline_wisdom_state import (
     FelineAbilityMethodLearnedEvent,
     FelineAbilityMethodRegistrationResult,
     FelineAbilityTeachingCronenbergResult,
+    FelineTeachingAbilitiesRegistrationResult,
 )
 from cats.cat_personality import CatPersonality
 from cats.cat_parentage_state import (
@@ -364,14 +365,100 @@ class FelineAbilityResolver:
     def can_close_human_door(self, cat):
         return {'allowed': False, 'reason': 'no_cat_knows_how_to_close_human_doors'}
 
-    def register_garfield_teaching_abilities(self, garfield):
-        teach_method = FelineWisdom.learn_ability_method(cat=garfield, ability_name=self.TEACH_OTHER_CATS, method_name=self.GARFIELD_TEACHING_METHOD, teacher_name=None, constraints={'can_teach_meow': True, 'can_teach_owned_abilities': True, 'can_teach_to_own_kittens': True, 'can_create_foreign_teachers': True})
-        meta_method = FelineWisdom.learn_ability_method(cat=garfield, ability_name=self.TEACH_TEACHING, method_name=self.GARFIELD_META_TEACHING_METHOD, teacher_name=None, constraints={'can_teach_teach_other_cats': True, 'can_teach_teach_teaching': True})
-        FelineWisdom.add_awareness(cat=garfield, knowledge_name=self.TEACH_OTHER_CATS, domain='feline', description='Cats can learn to teach MEOW and their own abilities.', known_teachers=[garfield.name])
-        FelineWisdom.add_awareness(cat=garfield, knowledge_name=self.TEACH_TEACHING, domain='feline', description='A higher teaching ability allows a cat to create teachers outside its own offspring.', known_teachers=[garfield.name])
-        event = {'name': 'garfield_teaching_abilities_registered', 'cat': garfield.name, 'teach_other_cats': teach_method, 'teach_teaching': meta_method, 'registered': True}
-        self._record(event)
-        return event
+    def register_garfield_teaching_abilities(
+        self,
+        garfield,
+    ):
+        teach_method = (
+            FelineWisdom.learn_ability_method(
+                cat=garfield,
+                ability_name=(
+                    self.TEACH_OTHER_CATS
+                ),
+                method_name=(
+                    self.GARFIELD_TEACHING_METHOD
+                ),
+                teacher_name=None,
+                constraints={
+                    'can_teach_meow': True,
+                    'can_teach_owned_abilities':
+                        True,
+                    'can_teach_to_own_kittens':
+                        True,
+                    'can_create_foreign_teachers':
+                        True,
+                },
+            )
+        )
+
+        meta_method = (
+            FelineWisdom.learn_ability_method(
+                cat=garfield,
+                ability_name=(
+                    self.TEACH_TEACHING
+                ),
+                method_name=(
+                    self.GARFIELD_META_TEACHING_METHOD
+                ),
+                teacher_name=None,
+                constraints={
+                    'can_teach_teach_other_cats':
+                        True,
+                    'can_teach_teach_teaching':
+                        True,
+                },
+            )
+        )
+
+        FelineWisdom.add_awareness(
+            cat=garfield,
+            knowledge_name=(
+                self.TEACH_OTHER_CATS
+            ),
+            domain='feline',
+            description=(
+                'Cats can learn to teach MEOW '
+                'and their own abilities.'
+            ),
+            known_teachers=[
+                garfield.name
+            ],
+        )
+
+        FelineWisdom.add_awareness(
+            cat=garfield,
+            knowledge_name=(
+                self.TEACH_TEACHING
+            ),
+            domain='feline',
+            description=(
+                'A higher teaching ability '
+                'allows a cat to create '
+                'teachers outside its own '
+                'offspring.'
+            ),
+            known_teachers=[
+                garfield.name
+            ],
+        )
+
+        result = (
+            FelineTeachingAbilitiesRegistrationResult(
+                cat=garfield.name,
+                teach_other_cats=(
+                    teach_method
+                ),
+                teach_teaching=(
+                    meta_method
+                ),
+            )
+        )
+
+        self._record(
+            result.to_dict()
+        )
+
+        return result
 
     def _check_teaching_permission(self, teacher, student, ability_name):
         if self._is_parent_of(teacher=teacher, student=student):

@@ -10,6 +10,7 @@ from cats.feline_ability_resolver import (
 )
 from cats.feline_wisdom_state import (
     FelineAbilityMethodRegistrationResult,
+    FelineTeachingAbilitiesRegistrationResult,
 )
 
 
@@ -44,6 +45,15 @@ class FelineAbilityMethodRegistrationObjectStateTests(
                 name="queen_elisabeth",
                 color="calico",
                 fur_length="long",
+                origin="canonical_birth",
+            )
+        )
+
+        self.garfield = (
+            self.cats.create_cat(
+                name="garfield",
+                color="orange",
+                fur_length="short",
                 origin="canonical_birth",
             )
         )
@@ -142,6 +152,116 @@ class FelineAbilityMethodRegistrationObjectStateTests(
             result.method
             .constraints[
                 "can_close"
+            ]
+        )
+
+    def test_garfield_registration_returns_two_method_objects(
+        self
+    ):
+        result = (
+            self.resolver
+            .register_garfield_teaching_abilities(
+                self.garfield
+            )
+        )
+
+        self.assertIsInstance(
+            result,
+            FelineTeachingAbilitiesRegistrationResult,
+        )
+
+        self.assertTrue(
+            result.registered
+        )
+
+        self.assertEqual(
+            result.cat,
+            "garfield",
+        )
+
+        teach_stored = (
+            self.garfield
+            .feline_wisdom
+            .abilities[
+                "teach_other_cats"
+            ]
+            .methods[
+                "garfield_teaching_method"
+            ]
+        )
+
+        meta_stored = (
+            self.garfield
+            .feline_wisdom
+            .abilities[
+                "teach_teaching"
+            ]
+            .methods[
+                "garfield_meta_teaching_method"
+            ]
+        )
+
+        self.assertIs(
+            result.teach_other_cats,
+            teach_stored,
+        )
+
+        self.assertIs(
+            result.teach_teaching,
+            meta_stored,
+        )
+
+        self.assert_not_mapping(
+            result
+        )
+
+        boundary = (
+            result.to_dict()
+        )
+
+        boundary[
+            "teach_other_cats"
+        ][
+            "constraints"
+        ][
+            "can_teach_meow"
+        ] = False
+
+        self.assertTrue(
+            result.teach_other_cats
+            .constraints[
+                "can_teach_meow"
+            ]
+        )
+
+        audit = (
+            self.resolver
+            .history[-1]
+        )
+
+        self.assertIsInstance(
+            audit,
+            dict,
+        )
+
+        self.assertTrue(
+            audit[
+                "registered"
+            ]
+        )
+
+        audit[
+            "teach_teaching"
+        ][
+            "constraints"
+        ][
+            "can_teach_teach_teaching"
+        ] = False
+
+        self.assertTrue(
+            result.teach_teaching
+            .constraints[
+                "can_teach_teach_teaching"
             ]
         )
 

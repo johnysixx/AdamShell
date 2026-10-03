@@ -289,6 +289,79 @@ class FelineAbilityMethodRegistrationResult:
 
 
 @dataclass(slots=True, frozen=True)
+class FelineTeachingAbilitiesRegistrationResult:
+    cat: str
+    teach_other_cats: FelineAbilityMethodState
+    teach_teaching: FelineAbilityMethodState
+
+    name: str = field(
+        default=(
+            "garfield_teaching_"
+            "abilities_registered"
+        ),
+        init=False,
+    )
+
+    registered: bool = field(
+        default=True,
+        init=False,
+    )
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "cat",
+            str(self.cat),
+        )
+
+        for method in (
+            self.teach_other_cats,
+            self.teach_teaching,
+        ):
+            if not isinstance(
+                method,
+                FelineAbilityMethodState,
+            ):
+                raise TypeError(
+                    "Registered feline teaching "
+                    "ability must contain "
+                    "FelineAbilityMethodState objects."
+                )
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "cat": self.cat,
+            "teach_other_cats": {
+                "name":
+                    self.teach_other_cats.name,
+                "teacher":
+                    self.teach_other_cats.teacher,
+                "constraints": deepcopy(
+                    dict(
+                        self.teach_other_cats
+                        .constraints
+                    )
+                ),
+            },
+            "teach_teaching": {
+                "name":
+                    self.teach_teaching.name,
+                "teacher":
+                    self.teach_teaching.teacher,
+                "constraints": deepcopy(
+                    dict(
+                        self.teach_teaching
+                        .constraints
+                    )
+                ),
+            },
+            "registered":
+                self.registered,
+        }
+
+
+@dataclass(slots=True, frozen=True)
 class FelineAbilityLessonDeniedResult:
     teacher: str
     student: str
