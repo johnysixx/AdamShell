@@ -1,17 +1,61 @@
 from copy import deepcopy
 from cats.cat_culture_objects import CatGroupInstitution
+from cats.cat_group_institution_establishment_state import (
+    CatGroupInstitutionEstablishedEvent,
+)
+
 
 class CatGroupInstitutionSystem:
 
     def __init__(self, group_system):
         self.group_system = group_system
 
-    def establish(self, group_id, institution_name, purpose, roles, rituals):
-        group = self.group_system._group(group_id)
-        institution = CatGroupInstitution(**{'name': institution_name, 'purpose': purpose, 'roles': list(roles), 'rituals': list(rituals), 'continuity': 1.0, 'generations': 0, 'active': True})
-        group.institutions[institution_name] = institution
-        event = {'name': 'cat_group_institution_established', 'group_id': group_id, 'institution': institution_name, 'purpose': purpose, 'established': True}
-        group.history.append(deepcopy(event))
+    def establish(
+        self,
+        group_id,
+        institution_name,
+        purpose,
+        roles,
+        rituals,
+    ):
+        group = (
+            self.group_system._group(
+                group_id
+            )
+        )
+
+        institution = CatGroupInstitution(
+            **{
+                "name": institution_name,
+                "purpose": purpose,
+                "roles": list(
+                    roles
+                ),
+                "rituals": list(
+                    rituals
+                ),
+                "continuity": 1.0,
+                "generations": 0,
+                "active": True,
+            }
+        )
+
+        group.institutions[
+            institution_name
+        ] = institution
+
+        event = (
+            CatGroupInstitutionEstablishedEvent(
+                group_id=group_id,
+                institution=institution_name,
+                purpose=purpose,
+            )
+        )
+
+        group.history.append(
+            event.to_dict()
+        )
+
         return event
 
     def maintain(self, group_id, institution_name):

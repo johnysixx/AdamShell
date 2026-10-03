@@ -70,7 +70,9 @@ class CatGroupInstitutionTests(unittest.TestCase):
     def test_group_can_establish_institution(self):
         institutions = CatGroupInstitutionSystem(self.groups)
         result = institutions.establish(self.group_id, institution_name='night_watch', purpose='protect_sleeping_group', roles=['guardian'], rituals=['evening_patrol'])
-        self.assertTrue(result['established'])
+        self.assertTrue(
+            result.established
+        )
         self.assertIn('night_watch', self.groups.groups[self.group_id].institutions)
 
     def test_institution_strengthens_when_role_and_ritual_exist(self):
