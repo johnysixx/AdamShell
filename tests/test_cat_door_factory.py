@@ -101,13 +101,9 @@ class CatDoorFactoryTests(
             )
         )
 
-        forward = pair[
-            "forward"
-        ]
+        forward = pair.forward
 
-        backward = pair[
-            "backward"
-        ]
+        backward = pair.backward
 
         self.assertEqual(
             forward.source_layer,

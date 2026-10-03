@@ -1,4 +1,7 @@
 ﻿from cats.cat_door import CatDoor
+from cats.cat_door_pair_state import (
+    CatDoorPair,
+)
 
 
 class CatDoorFactory:
@@ -57,8 +60,10 @@ class CatDoorFactory:
             target_position=position_a
         )
 
-        return {
-            "forward": forward,
-            "backward": backward
-        }
+        return (
+            CatDoorPair(
+                forward=forward,
+                backward=backward,
+            )
+        )
 

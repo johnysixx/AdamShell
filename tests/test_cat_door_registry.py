@@ -47,7 +47,7 @@ class CatDoorRegistryTests(
                 source_layer="layer_a",
                 target_layer="layer_b"
             ),
-            pair["forward"]
+            pair.forward
         )
 
         self.assertIs(
@@ -55,7 +55,7 @@ class CatDoorRegistryTests(
                 source_layer="layer_b",
                 target_layer="layer_a"
             ),
-            pair["backward"]
+            pair.backward
         )
 
     def test_active_doors_from_layer(

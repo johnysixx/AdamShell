@@ -78,11 +78,11 @@ class CatDoorRegistry:
         )
 
         self.register(
-            pair["forward"]
+            pair.forward
         )
 
         self.register(
-            pair["backward"]
+            pair.backward
         )
 
         return pair
