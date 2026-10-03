@@ -1,5 +1,9 @@
 from cats.cat import Cat
 from core.entity.components import require_optional_spatial_vector
+from cats.cat_door_state import (
+    CatDoorTravelDeniedResult,
+    CatDoorTravelEvent,
+)
 
 class CatDoor:
 
@@ -71,6 +75,55 @@ class CatDoor:
         self.active = True
         self.cats_only = True
 
+    def _travel_denied(
+        self,
+        cat,
+        reason,
+        target_layer=None,
+        include_layers=False,
+        include_locations=False,
+    ):
+        return (
+            CatDoorTravelDeniedResult(
+                door=self.name,
+                cat=getattr(
+                    cat,
+                    "name",
+                    None,
+                ),
+                reason=reason,
+                source_layer=(
+                    self.source_layer
+                    if include_layers
+                    else None
+                ),
+                target_layer=(
+                    target_layer
+                    if include_layers
+                    else None
+                ),
+                source_location=(
+                    self.source_location
+                    if include_locations
+                    else None
+                ),
+                target_location=(
+                    self.target_location
+                    if include_locations
+                    else None
+                ),
+                cat_location=(
+                    getattr(
+                        cat,
+                        "location",
+                        None,
+                    )
+                    if include_locations
+                    else None
+                ),
+            )
+        )
+
     def travel(
         self,
         cat,
@@ -79,43 +132,31 @@ class CatDoor:
         chosen_target_layer=None
     ):
         if not self.active:
-            return {
-                "name": "cat_door_travel_failed",
-                "door": self.name,
-                "cat": getattr(
-                    cat,
-                    "name",
-                    None
-                ),
-                "reason": "door_inactive",
-                "traveled": False
-            }
+            return self._travel_denied(
+                cat=cat,
+                reason="door_inactive",
+            )
 
         if not isinstance(
             cat,
             Cat
         ):
-            return {
-                "name": "cat_door_travel_failed",
-                "door": self.name,
-                "cat": getattr(
-                    cat,
-                    "name",
-                    None
-                ),
-                "reason": "entity_is_not_cat",
-                "traveled": False
-            }
+            return self._travel_denied(
+                cat=cat,
+                reason="entity_is_not_cat",
+            )
 
-        if self.destination_mode == "cat_choice":
+        if (
+            self.destination_mode
+            == "cat_choice"
+        ):
             if chosen_target_layer is None:
-                return {
-                    "name": "cat_door_travel_failed",
-                    "door": self.name,
-                    "cat": cat.name,
-                    "reason": "cat_target_layer_missing",
-                    "traveled": False
-                }
+                return self._travel_denied(
+                    cat=cat,
+                    reason=(
+                        "cat_target_layer_missing"
+                    ),
+                )
 
             target_layer = str(
                 chosen_target_layer
@@ -125,33 +166,34 @@ class CatDoor:
                 self.target_layer
             )
 
-        if cat.current_layer != self.source_layer:
-            return {
-                "name": "cat_door_travel_failed",
-                "door": self.name,
-                "cat": cat.name,
-                "reason": "cat_not_in_source_layer",
-                "source_layer": self.source_layer,
-                "target_layer": target_layer,
-                "traveled": False
-            }
+        if (
+            cat.current_layer
+            != self.source_layer
+        ):
+            return self._travel_denied(
+                cat=cat,
+                reason=(
+                    "cat_not_in_source_layer"
+                ),
+                target_layer=target_layer,
+                include_layers=True,
+            )
 
         if (
-            self.source_location is not None
-            and cat.location != self.source_location
+            self.source_location
+            is not None
+            and cat.location
+            != self.source_location
         ):
-            return {
-                "name": "cat_door_travel_failed",
-                "door": self.name,
-                "cat": cat.name,
-                "reason": "cat_not_in_source_location",
-                "source_layer": self.source_layer,
-                "target_layer": target_layer,
-                "source_location": self.source_location,
-                "target_location": self.target_location,
-                "cat_location": cat.location,
-                "traveled": False
-            }
+            return self._travel_denied(
+                cat=cat,
+                reason=(
+                    "cat_not_in_source_location"
+                ),
+                target_layer=target_layer,
+                include_layers=True,
+                include_locations=True,
+            )
 
         learning = getattr(
             cat,
@@ -167,28 +209,30 @@ class CatDoor:
             else None
         )
 
-        if skill is None or not skill.learned:
-            return {
-                "name": "cat_door_travel_failed",
-                "door": self.name,
-                "cat": cat.name,
-                "reason": "cat_door_travel_not_learned",
-                "source_layer": self.source_layer,
-                "target_layer": target_layer,
-                "traveled": False
-            }
+        if (
+            skill is None
+            or not skill.learned
+        ):
+            return self._travel_denied(
+                cat=cat,
+                reason=(
+                    "cat_door_travel_not_learned"
+                ),
+                target_layer=target_layer,
+                include_layers=True,
+            )
 
         if source_entities is not None:
             if cat not in source_entities:
-                return {
-                    "name": "cat_door_travel_failed",
-                    "door": self.name,
-                    "cat": cat.name,
-                    "reason": "cat_missing_from_source_registry",
-                    "source_layer": self.source_layer,
-                    "target_layer": target_layer,
-                    "traveled": False
-                }
+                return self._travel_denied(
+                    cat=cat,
+                    reason=(
+                        "cat_missing_from_"
+                        "source_registry"
+                    ),
+                    target_layer=target_layer,
+                    include_layers=True,
+                )
 
             source_entities.remove(
                 cat
@@ -210,42 +254,44 @@ class CatDoor:
             )
 
         if self.target_position is not None:
-            cat.move_to(self.target_position)
+            cat.move_to(
+                self.target_position
+            )
 
         cat.state = (
             "traveled_through_cat_door"
         )
 
-        return {
-            "name": "cat_traveled_through_cat_door",
-            "door": self.name,
-            "cat": cat.name,
-            "source_layer": self.source_layer,
-            "target_layer": target_layer,
-            "source_location": (
-                self.source_location
-            ),
-            "target_location": (
-                self.target_location
-            ),
-            "source_position": (
-                self.source_position.to_dict()
-                if self.source_position is not None
-                else None
-            ),
-            "target_position": (
-                self.target_position.to_dict()
-                if self.target_position is not None
-                else None
-            ),
-            "source_registry_updated": (
-                source_entities is not None
-            ),
-            "target_registry_updated": (
-                target_entities is not None
-            ),
-            "traveled": True
-        }
+        return (
+            CatDoorTravelEvent(
+                door=self.name,
+                cat=cat.name,
+                source_layer=(
+                    self.source_layer
+                ),
+                target_layer=target_layer,
+                source_location=(
+                    self.source_location
+                ),
+                target_location=(
+                    self.target_location
+                ),
+                source_position=(
+                    self.source_position
+                ),
+                target_position=(
+                    self.target_position
+                ),
+                source_registry_updated=(
+                    source_entities
+                    is not None
+                ),
+                target_registry_updated=(
+                    target_entities
+                    is not None
+                ),
+            )
+        )
 
     @property
     def public_state(self):

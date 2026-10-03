@@ -154,7 +154,7 @@ class CatDoorFactoryTests(
         )
 
         self.assertTrue(
-            result["traveled"]
+            result.traveled
         )
 
         self.assertEqual(
@@ -163,12 +163,12 @@ class CatDoorFactoryTests(
         )
 
         self.assertEqual(
-            result["source_layer"],
+            result.source_layer,
             "layer_a"
         )
 
         self.assertEqual(
-            result["target_layer"],
+            result.target_layer,
             "layer_b"
         )
 
@@ -191,11 +191,11 @@ class CatDoorFactoryTests(
         )
 
         self.assertFalse(
-            result["traveled"]
+            result.traveled
         )
 
         self.assertEqual(
-            result["reason"],
+            result.reason,
             "cat_not_in_source_layer"
         )
 
@@ -224,11 +224,11 @@ class CatDoorFactoryTests(
         )
 
         self.assertFalse(
-            result["traveled"]
+            result.traveled
         )
 
         self.assertEqual(
-            result["reason"],
+            result.reason,
             "cat_door_travel_not_learned"
         )
 
@@ -265,7 +265,7 @@ class CatDoorFactoryTests(
         )
 
         self.assertTrue(
-            result["traveled"]
+            result.traveled
         )
 
         self.assertNotIn(
@@ -377,11 +377,11 @@ class CatDoorFactoryTests(
         result = door.travel(cat)
 
         self.assertFalse(
-            result["traveled"]
+            result.traveled
         )
 
         self.assertEqual(
-            result["reason"],
+            result.reason,
             "cat_not_in_source_location"
         )
 
@@ -410,7 +410,7 @@ class CatDoorFactoryTests(
         result = door.travel(cat)
 
         self.assertTrue(
-            result["traveled"]
+            result.traveled
         )
 
         self.assertEqual(
@@ -446,7 +446,7 @@ class CatDoorFactoryTests(
         )
 
         self.assertTrue(
-            result["traveled"]
+            result.traveled
         )
 
         self.assertEqual(
@@ -464,7 +464,7 @@ class CatDoorFactoryTests(
         )
 
         self.assertEqual(
-            result["target_layer"],
+            result.target_layer,
             "root_universe"
         )
 
@@ -491,11 +491,11 @@ class CatDoorFactoryTests(
         )
 
         self.assertFalse(
-            result["traveled"]
+            result.traveled
         )
 
         self.assertEqual(
-            result["reason"],
+            result.reason,
             "cat_target_layer_missing"
         )
 

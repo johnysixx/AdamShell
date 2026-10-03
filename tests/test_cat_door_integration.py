@@ -79,7 +79,7 @@ class CatDoorIntegrationTests(
         )
 
         self.assertTrue(
-            result["traveled"]
+            result.traveled
         )
 
         self.assertEqual(
