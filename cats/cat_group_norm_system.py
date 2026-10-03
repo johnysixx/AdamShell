@@ -9,6 +9,9 @@ from cats.cat_group_norm_observation_state import (
 from cats.cat_group_norm_definition_state import (
     CatGroupNormDefinedEvent,
 )
+from cats.cat_group_norm_violation_state import (
+    CatGroupNormViolationDeniedResult,
+)
 
 
 class CatGroupNormSystem:
@@ -102,11 +105,30 @@ class CatGroupNormSystem:
             )
         )
 
-    def violate(self, group_id, cat, norm_id, context=None):
-        group = self.group_system._group(group_id)
-        norm = group.norms.get(norm_id)
+    def violate(
+        self,
+        group_id,
+        cat,
+        norm_id,
+        context=None,
+    ):
+        group = (
+            self.group_system._group(
+                group_id
+            )
+        )
+
+        norm = group.norms.get(
+            norm_id
+        )
+
         if norm is None:
-            return {'name': 'cat_group_norm_violation_denied', 'reason': 'unknown_norm', 'violated': False}
+            return (
+                CatGroupNormViolationDeniedResult(
+                    reason="unknown_norm",
+                )
+            )
+
         norm.violations += 1
         violation = CatNormViolation(**{'name': 'cat_group_norm_violated', 'group_id': group_id, 'cat': cat.name, 'norm_id': norm_id, 'norm_name': norm.name, 'importance': norm.importance, 'context': deepcopy(context), 'violated': True})
         group.norm_violations.append(deepcopy(violation))
