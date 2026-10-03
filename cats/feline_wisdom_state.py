@@ -233,6 +233,84 @@ class FelineAbilityAwarenessTransmissionEvent:
 
 
 @dataclass(slots=True, frozen=True)
+class FelineHumanDoorCapabilityResult:
+    cat: str
+    action: str
+    allowed: bool
+    reason: str
+    usable_methods: tuple[str, ...] = ()
+
+    name: str = field(
+        default=(
+            "feline_human_door_capability"
+        ),
+        init=False,
+    )
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "cat",
+            str(self.cat),
+        )
+
+        action = str(
+            self.action
+        )
+
+        if action not in (
+            "open",
+            "close",
+        ):
+            raise ValueError(
+                "Feline human door action must "
+                "be 'open' or 'close'."
+            )
+
+        object.__setattr__(
+            self,
+            "action",
+            action,
+        )
+
+        object.__setattr__(
+            self,
+            "allowed",
+            bool(
+                self.allowed
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "reason",
+            str(self.reason),
+        )
+
+        object.__setattr__(
+            self,
+            "usable_methods",
+            tuple(
+                str(method)
+                for method
+                in self.usable_methods
+            ),
+        )
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "cat": self.cat,
+            "action": self.action,
+            "allowed": self.allowed,
+            "reason": self.reason,
+            "usable_methods": list(
+                self.usable_methods
+            ),
+        }
+
+
+@dataclass(slots=True, frozen=True)
 class FelineAbilityMethodRegistrationResult:
     name: str
     cat: str

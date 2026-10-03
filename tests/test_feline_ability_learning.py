@@ -45,28 +45,34 @@ class FelineAbilityLearningTests(unittest.TestCase):
         self.assertTrue(result.learned)
         toward = self.resolver.can_open_human_door(cat=self.kitten, locked=False, opens_toward_cat=True)
         away = self.resolver.can_open_human_door(cat=self.kitten, locked=False, opens_toward_cat=False)
-        self.assertTrue(toward['allowed'])
-        self.assertTrue(away['allowed'])
+        self.assertTrue(toward.allowed)
+        self.assertTrue(away.allowed)
 
     def test_queen_teaches_only_pull_direction(self):
         self.resolver.teach_method(teacher=self.queen, student=self.kitten, ability_name='open_human_door', method_name='pull_with_paw')
         toward = self.resolver.can_open_human_door(cat=self.kitten, locked=False, opens_toward_cat=True)
         away = self.resolver.can_open_human_door(cat=self.kitten, locked=False, opens_toward_cat=False)
-        self.assertTrue(toward['allowed'])
-        self.assertFalse(away['allowed'])
-        self.assertEqual(away['reason'], 'no_learned_method_for_door_direction')
+        self.assertTrue(toward.allowed)
+        self.assertFalse(away.allowed)
+        self.assertEqual(
+            away.reason,
+            'no_learned_method_for_door_direction',
+        )
 
     def test_locked_door_cannot_be_opened(self):
         self.resolver.teach_method(teacher=self.pazuzu, student=self.kitten, ability_name='open_human_door', method_name='hang_on_handle')
         result = self.resolver.can_open_human_door(cat=self.kitten, locked=True, opens_toward_cat=True)
-        self.assertFalse(result['allowed'])
-        self.assertEqual(result['reason'], 'door_is_locked')
+        self.assertFalse(result.allowed)
+        self.assertEqual(
+            result.reason,
+            'door_is_locked',
+        )
 
     def test_no_cat_can_close_human_door(self):
         pazuzu_result = self.resolver.can_close_human_door(self.pazuzu)
         queen_result = self.resolver.can_close_human_door(self.queen)
-        self.assertFalse(pazuzu_result['allowed'])
-        self.assertFalse(queen_result['allowed'])
+        self.assertFalse(pazuzu_result.allowed)
+        self.assertFalse(queen_result.allowed)
 
     def test_cat_can_learn_both_methods(self):
         self.resolver.teach_method(teacher=self.pazuzu, student=self.kitten, ability_name='open_human_door', method_name='hang_on_handle')
@@ -84,7 +90,10 @@ class FelineAbilityLearningTests(unittest.TestCase):
     def test_queen_cannot_open_locked_door(self):
         self.resolver.teach_method(teacher=self.queen, student=self.kitten, ability_name='open_human_door', method_name='pull_with_paw')
         result = self.resolver.can_open_human_door(cat=self.kitten, locked=True, opens_toward_cat=True)
-        self.assertFalse(result['allowed'])
-        self.assertEqual(result['reason'], 'door_is_locked')
+        self.assertFalse(result.allowed)
+        self.assertEqual(
+            result.reason,
+            'door_is_locked',
+        )
 if __name__ == '__main__':
     unittest.main()

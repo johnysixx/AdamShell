@@ -7,6 +7,7 @@ from cats.feline_wisdom_state import (
     FelineAbilityMethodRegistrationResult,
     FelineAbilityTeachingCronenbergResult,
     FelineTeachingAbilitiesRegistrationResult,
+    FelineHumanDoorCapabilityResult,
 )
 from cats.cat_personality import CatPersonality
 from cats.cat_parentage_state import (
@@ -344,26 +345,121 @@ class FelineAbilityResolver:
 
         return event
 
-    def can_open_human_door(self, cat, locked, opens_toward_cat):
-        wisdom = FelineWisdom.ensure_state(cat)
-        ability = wisdom.ability_record(self.OPEN_HUMAN_DOOR)
-        if ability is None or not ability.learned:
-            return {'allowed': False, 'reason': 'human_door_ability_not_learned'}
-        if locked:
-            return {'allowed': False, 'reason': 'door_is_locked'}
-        usable_methods = []
-        for method in ability.method_records():
-            constraints = method.constraints
-            if opens_toward_cat and constraints.get('opens_toward_cat', False):
-                usable_methods.append(method.name)
-            if not opens_toward_cat and constraints.get('opens_away_from_cat', False):
-                usable_methods.append(method.name)
-        if not usable_methods:
-            return {'allowed': False, 'reason': 'no_learned_method_for_door_direction'}
-        return {'allowed': True, 'reason': 'door_can_be_opened', 'usable_methods': usable_methods}
+    def can_open_human_door(
+        self,
+        cat,
+        locked,
+        opens_toward_cat,
+    ):
+        wisdom = (
+            FelineWisdom.ensure_state(
+                cat
+            )
+        )
 
-    def can_close_human_door(self, cat):
-        return {'allowed': False, 'reason': 'no_cat_knows_how_to_close_human_doors'}
+        ability = (
+            wisdom.ability_record(
+                self.OPEN_HUMAN_DOOR
+            )
+        )
+
+        if (
+            ability is None
+            or not ability.learned
+        ):
+            return (
+                FelineHumanDoorCapabilityResult(
+                    cat=cat.name,
+                    action="open",
+                    allowed=False,
+                    reason=(
+                        "human_door_"
+                        "ability_not_learned"
+                    ),
+                )
+            )
+
+        if locked:
+            return (
+                FelineHumanDoorCapabilityResult(
+                    cat=cat.name,
+                    action="open",
+                    allowed=False,
+                    reason="door_is_locked",
+                )
+            )
+
+        usable_methods = []
+
+        for method in (
+            ability.method_records()
+        ):
+            constraints = (
+                method.constraints
+            )
+
+            if (
+                opens_toward_cat
+                and constraints.get(
+                    "opens_toward_cat",
+                    False,
+                )
+            ):
+                usable_methods.append(
+                    method.name
+                )
+
+            if (
+                not opens_toward_cat
+                and constraints.get(
+                    "opens_away_from_cat",
+                    False,
+                )
+            ):
+                usable_methods.append(
+                    method.name
+                )
+
+        if not usable_methods:
+            return (
+                FelineHumanDoorCapabilityResult(
+                    cat=cat.name,
+                    action="open",
+                    allowed=False,
+                    reason=(
+                        "no_learned_method_"
+                        "for_door_direction"
+                    ),
+                )
+            )
+
+        return (
+            FelineHumanDoorCapabilityResult(
+                cat=cat.name,
+                action="open",
+                allowed=True,
+                reason="door_can_be_opened",
+                usable_methods=tuple(
+                    usable_methods
+                ),
+            )
+        )
+
+    def can_close_human_door(
+        self,
+        cat,
+    ):
+        return (
+            FelineHumanDoorCapabilityResult(
+                cat=cat.name,
+                action="close",
+                allowed=False,
+                reason=(
+                    "no_cat_knows_how_to_"
+                    "close_human_doors"
+                ),
+            )
+        )
 
     def register_garfield_teaching_abilities(
         self,
