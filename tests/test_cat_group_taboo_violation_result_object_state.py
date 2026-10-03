@@ -211,9 +211,7 @@ class CatGroupTabooViolationResultObjectStateTests(
             self.taboos.violate(
                 self.group_id,
                 self.second,
-                defined[
-                    "taboo_id"
-                ],
+                defined.taboo_id,
             )
         )
 
@@ -228,9 +226,7 @@ class CatGroupTabooViolationResultObjectStateTests(
 
         self.assertEqual(
             result.taboo_id,
-            defined[
-                "taboo_id"
-            ],
+            defined.taboo_id,
         )
 
 

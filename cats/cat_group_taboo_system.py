@@ -5,6 +5,9 @@ from cats.cat_culture_objects import CatGroupTaboo
 from cats.cat_group_taboo_violation_state import (
     CatGroupTabooViolationDeniedResult,
 )
+from cats.cat_group_taboo_definition_state import (
+    CatGroupTabooDefinedResult,
+)
 
 
 class CatGroupTabooSystem:
@@ -12,12 +15,52 @@ class CatGroupTabooSystem:
     def __init__(self, group_system):
         self.group_system = group_system
 
-    def define(self, group_id, name, taboo_type, target, severity=0.8):
-        group = self.group_system._group(group_id)
-        taboo_id = 'cat_taboo_' + uuid4().hex[:8]
-        taboo = CatGroupTaboo(**{'id': taboo_id, 'name': name, 'type': taboo_type, 'target': deepcopy(target), 'severity': self._clamp(severity), 'violations': 0, 'active': True})
-        group.taboos[taboo_id] = taboo
-        return {'name': 'cat_group_taboo_defined', 'group_id': group_id, 'taboo_id': taboo_id, 'taboo_name': name, 'defined': True}
+    def define(
+        self,
+        group_id,
+        name,
+        taboo_type,
+        target,
+        severity=0.8,
+    ):
+        group = (
+            self.group_system._group(
+                group_id
+            )
+        )
+
+        taboo_id = (
+            "cat_taboo_"
+            + uuid4().hex[:8]
+        )
+
+        taboo = CatGroupTaboo(
+            **{
+                "id": taboo_id,
+                "name": name,
+                "type": taboo_type,
+                "target": deepcopy(
+                    target
+                ),
+                "severity": self._clamp(
+                    severity
+                ),
+                "violations": 0,
+                "active": True,
+            }
+        )
+
+        group.taboos[
+            taboo_id
+        ] = taboo
+
+        return (
+            CatGroupTabooDefinedResult(
+                group_id=group_id,
+                taboo_id=taboo_id,
+                taboo_name=name,
+            )
+        )
 
     def violate(
         self,

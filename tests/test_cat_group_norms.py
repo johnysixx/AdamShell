@@ -50,12 +50,18 @@ class CatGroupNormTests(unittest.TestCase):
     def test_group_can_define_taboo(self):
         taboo = CatGroupTabooSystem(self.groups)
         result = taboo.define(self.group_id, 'do_not_open_black_box', taboo_type='place_action', target={'place': 'black_box', 'action': 'open'}, severity=1.0)
-        self.assertTrue(result['defined'])
+        self.assertTrue(
+            result.defined
+        )
 
     def test_taboo_violation_can_recommend_expulsion(self):
         taboo = CatGroupTabooSystem(self.groups)
         created = taboo.define(self.group_id, 'do_not_open_black_box', taboo_type='place_action', target={'place': 'black_box', 'action': 'open'}, severity=1.0)
-        violation = taboo.violate(self.group_id, self.second, created['taboo_id'])
+        violation = taboo.violate(
+            self.group_id,
+            self.second,
+            created.taboo_id,
+        )
         sanctions = CatGroupSanctionSystem(self.groups)
         result = sanctions.sanction(self.group_id, self.second, violation)
         self.assertEqual(result['sanction'], 'expulsion_recommended')
