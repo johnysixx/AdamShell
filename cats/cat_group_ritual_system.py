@@ -4,18 +4,60 @@ from cats.cat_culture_objects import CatGroupRitual
 from cats.cat_cultural_tradition_state import (
     CatCulturalTraditionState
 )
+from cats.cat_group_ritual_definition_state import (
+    CatGroupRitualDefinedResult,
+)
+
 
 class CatGroupRitualSystem:
 
     def __init__(self, group_system):
         self.group_system = group_system
 
-    def define(self, group_id, ritual_name, category, required_roles=None):
-        group = self.group_system._group(group_id)
-        ritual = CatGroupRitual(**{'name': ritual_name, 'category': category, 'required_roles': list(required_roles or []), 'performances': 0, 'strength': 0.0, 'last_participants': []})
-        group.rituals[ritual_name] = ritual
-        CatGroupRitualEvolutionSystem(self.group_system).register_origin(group_id, ritual_name)
-        return {'name': 'cat_group_ritual_defined', 'group_id': group_id, 'ritual': ritual_name, 'defined': True}
+    def define(
+        self,
+        group_id,
+        ritual_name,
+        category,
+        required_roles=None,
+    ):
+        group = (
+            self.group_system._group(
+                group_id
+            )
+        )
+
+        ritual = CatGroupRitual(
+            **{
+                "name": ritual_name,
+                "category": category,
+                "required_roles": list(
+                    required_roles
+                    or []
+                ),
+                "performances": 0,
+                "strength": 0.0,
+                "last_participants": [],
+            }
+        )
+
+        group.rituals[
+            ritual_name
+        ] = ritual
+
+        CatGroupRitualEvolutionSystem(
+            self.group_system
+        ).register_origin(
+            group_id,
+            ritual_name,
+        )
+
+        return (
+            CatGroupRitualDefinedResult(
+                group_id=group_id,
+                ritual=ritual_name,
+            )
+        )
 
     def perform(self, group_id, ritual_name, participants):
         group = self.group_system._group(group_id)
