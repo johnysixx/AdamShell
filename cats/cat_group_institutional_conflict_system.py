@@ -5,6 +5,10 @@ from cats.cat_group_institutional_conflict_detection_state import (
     CatInstitutionConflictDetectedResult,
     CatInstitutionConflictDetectionDeniedResult,
 )
+from cats.cat_group_institutional_conflict_escalation_state import (
+    CatGroupInstitutionalConflictEvent,
+    CatInstitutionConflictEscalationDeniedResult,
+)
 
 
 class CatGroupInstitutionalConflictSystem:
@@ -150,22 +154,110 @@ class CatGroupInstitutionalConflictSystem:
             )
         )
 
-    def escalate(self, group_id, first_institution, second_institution, issue, intensity=0.5):
-        group = self.group_system._group(group_id)
-        first = group.institutions.get(first_institution)
-        second = group.institutions.get(second_institution)
-        if first is None or second is None:
-            return {'name': 'cat_institution_conflict_denied', 'reason': 'unknown_institution', 'escalated': False}
-        intensity = self._clamp(intensity)
-        conflict_id = 'institution_conflict_' + uuid4().hex[:8]
-        continuity_loss = 0.2 * intensity
-        for institution in (first, second):
-            institution.continuity = max(0.0, float(getattr(institution, 'continuity', 1.0)) - continuity_loss)
-        conflict = CatInstitutionConflict(**{'id': conflict_id, 'first_institution': first_institution, 'second_institution': second_institution, 'issue': issue, 'intensity': intensity, 'resolved': False, 'mediator': None, 'history': []})
-        group.institution_conflicts[conflict_id] = conflict
-        event = {'name': 'cat_group_institutional_conflict', 'group_id': group_id, 'conflict_id': conflict_id, 'first_institution': first_institution, 'second_institution': second_institution, 'issue': issue, 'intensity': intensity, 'escalated': True}
-        conflict.history.append(deepcopy(event))
-        group.history.append(deepcopy(event))
+    def escalate(
+        self,
+        group_id,
+        first_institution,
+        second_institution,
+        issue,
+        intensity=0.5,
+    ):
+        group = (
+            self.group_system._group(
+                group_id
+            )
+        )
+
+        first = (
+            group.institutions.get(
+                first_institution
+            )
+        )
+
+        second = (
+            group.institutions.get(
+                second_institution
+            )
+        )
+
+        if (
+            first is None
+            or second is None
+        ):
+            return (
+                CatInstitutionConflictEscalationDeniedResult(
+                    reason="unknown_institution",
+                )
+            )
+
+        intensity = self._clamp(
+            intensity
+        )
+
+        conflict_id = (
+            "institution_conflict_"
+            + uuid4().hex[:8]
+        )
+
+        continuity_loss = (
+            0.2
+            * intensity
+        )
+
+        for institution in (
+            first,
+            second,
+        ):
+            institution.continuity = max(
+                0.0,
+                float(
+                    getattr(
+                        institution,
+                        "continuity",
+                        1.0,
+                    )
+                )
+                - continuity_loss,
+            )
+
+        conflict = CatInstitutionConflict(
+            **{
+                "id": conflict_id,
+                "first_institution":
+                    first_institution,
+                "second_institution":
+                    second_institution,
+                "issue": issue,
+                "intensity": intensity,
+                "resolved": False,
+                "mediator": None,
+                "history": [],
+            }
+        )
+
+        group.institution_conflicts[
+            conflict_id
+        ] = conflict
+
+        event = (
+            CatGroupInstitutionalConflictEvent(
+                group_id=group_id,
+                conflict_id=conflict_id,
+                first_institution=first_institution,
+                second_institution=second_institution,
+                issue=issue,
+                intensity=intensity,
+            )
+        )
+
+        conflict.history.append(
+            event.to_dict()
+        )
+
+        group.history.append(
+            event.to_dict()
+        )
+
         return event
 
     def mediate(self, group_id, conflict_id, mediator):

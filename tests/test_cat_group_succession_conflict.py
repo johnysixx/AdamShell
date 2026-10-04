@@ -78,7 +78,9 @@ class CatGroupSuccessionConflictTests(unittest.TestCase):
         self._institutions()
         conflict = CatGroupInstitutionalConflictSystem(self.groups)
         result = conflict.escalate(self.group_id, 'night_watch', 'door_watch', issue='guardian_attention', intensity=0.8)
-        self.assertTrue(result['escalated'])
+        self.assertTrue(
+            result.escalated
+        )
         group = self.groups.groups[self.group_id]
         self.assertLess(group.institutions['night_watch'].continuity, 1.0)
         self.assertLess(group.institutions['door_watch'].continuity, 1.0)
@@ -92,7 +94,11 @@ class CatGroupSuccessionConflictTests(unittest.TestCase):
         self.assertTrue(assigned.assigned)
         conflict = CatGroupInstitutionalConflictSystem(self.groups)
         created = conflict.escalate(self.group_id, 'night_watch', 'door_watch', issue='guardian_attention', intensity=0.4)
-        result = conflict.mediate(self.group_id, created['conflict_id'], self.third)
+        result = conflict.mediate(
+            self.group_id,
+            created.conflict_id,
+            self.third,
+        )
         self.assertTrue(result['mediated'])
         self.assertTrue(result['resolved'])
 if __name__ == '__main__':
