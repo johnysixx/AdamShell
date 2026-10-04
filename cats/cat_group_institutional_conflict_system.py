@@ -1,4 +1,3 @@
-from copy import deepcopy
 from uuid import uuid4
 from cats.cat_culture_objects import CatInstitutionConflict
 from cats.cat_group_institutional_conflict_detection_state import (
@@ -8,6 +7,10 @@ from cats.cat_group_institutional_conflict_detection_state import (
 from cats.cat_group_institutional_conflict_escalation_state import (
     CatGroupInstitutionalConflictEvent,
     CatInstitutionConflictEscalationDeniedResult,
+)
+from cats.cat_group_institutional_conflict_mediation_state import (
+    CatInstitutionConflictMediatedEvent,
+    CatInstitutionMediationDeniedResult,
 )
 
 
@@ -260,24 +263,94 @@ class CatGroupInstitutionalConflictSystem:
 
         return event
 
-    def mediate(self, group_id, conflict_id, mediator):
-        group = self.group_system._group(group_id)
-        conflict = group.institution_conflicts.get(conflict_id)
+    def mediate(
+        self,
+        group_id,
+        conflict_id,
+        mediator,
+    ):
+        group = (
+            self.group_system._group(
+                group_id
+            )
+        )
+
+        conflict = (
+            group.institution_conflicts.get(
+                conflict_id
+            )
+        )
+
         if conflict is None:
-            return {'name': 'cat_institution_mediation_denied', 'reason': 'unknown_conflict', 'mediated': False}
-        if 'mediator' not in mediator.group_roles.active:
-            return {'name': 'cat_institution_mediation_denied', 'reason': 'cat_not_mediator', 'mediated': False}
-        influence = float(mediator.group.influence)
-        reduction = min(0.5, 0.15 + influence * 0.3)
-        conflict.intensity = self._clamp(conflict.intensity - reduction)
-        conflict.mediator = mediator.name
-        if conflict.intensity <= 0.2:
+            return (
+                CatInstitutionMediationDeniedResult(
+                    reason="unknown_conflict",
+                )
+            )
+
+        if (
+            "mediator"
+            not in mediator.group_roles.active
+        ):
+            return (
+                CatInstitutionMediationDeniedResult(
+                    reason="cat_not_mediator",
+                )
+            )
+
+        influence = float(
+            mediator.group.influence
+        )
+
+        reduction = min(
+            0.5,
+            0.15
+            + influence
+            * 0.3,
+        )
+
+        conflict.intensity = (
+            self._clamp(
+                conflict.intensity
+                - reduction
+            )
+        )
+
+        conflict.mediator = (
+            mediator.name
+        )
+
+        if (
+            conflict.intensity
+            <= 0.2
+        ):
             conflict.resolved = True
+
         if conflict.resolved:
-            self._restore_institutions(group, conflict, amount=0.1)
-        event = {'name': 'cat_institution_conflict_mediated', 'group_id': group_id, 'conflict_id': conflict_id, 'mediator': mediator.name, 'intensity': conflict.intensity, 'resolved': conflict.resolved, 'mediated': True}
-        conflict.history.append(deepcopy(event))
-        group.history.append(deepcopy(event))
+            self._restore_institutions(
+                group,
+                conflict,
+                amount=0.1,
+            )
+
+        event = (
+            CatInstitutionConflictMediatedEvent(
+                group_id=group_id,
+                conflict_id=conflict_id,
+                mediator=mediator.name,
+                intensity=conflict.intensity,
+                resolved=conflict.resolved,
+            )
+        )
+
+        conflict.history.append(
+            event.to_dict()
+        )
+
+        group.history.append(
+            event.to_dict()
+        )
+
         return event
 
     def institutional_split(self, group_id, conflict_id):

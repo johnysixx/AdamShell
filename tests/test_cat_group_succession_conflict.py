@@ -99,7 +99,11 @@ class CatGroupSuccessionConflictTests(unittest.TestCase):
             created.conflict_id,
             self.third,
         )
-        self.assertTrue(result['mediated'])
-        self.assertTrue(result['resolved'])
+        self.assertTrue(
+            result.mediated
+        )
+        self.assertTrue(
+            result.resolved
+        )
 if __name__ == '__main__':
     unittest.main()
