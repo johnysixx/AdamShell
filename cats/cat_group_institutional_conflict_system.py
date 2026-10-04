@@ -12,6 +12,10 @@ from cats.cat_group_institutional_conflict_mediation_state import (
     CatInstitutionConflictMediatedEvent,
     CatInstitutionMediationDeniedResult,
 )
+from cats.cat_group_institutional_conflict_split_state import (
+    CatInstitutionalSplitResult,
+    CatInstitutionSplitDeniedResult,
+)
 
 
 class CatGroupInstitutionalConflictSystem:
@@ -353,18 +357,78 @@ class CatGroupInstitutionalConflictSystem:
 
         return event
 
-    def institutional_split(self, group_id, conflict_id):
-        group = self.group_system._group(group_id)
-        conflict = group.institution_conflicts.get(conflict_id)
+    def institutional_split(
+        self,
+        group_id,
+        conflict_id,
+    ):
+        group = (
+            self.group_system._group(
+                group_id
+            )
+        )
+
+        conflict = (
+            group.institution_conflicts.get(
+                conflict_id
+            )
+        )
+
         if conflict is None:
-            return {'name': 'cat_institution_split_denied', 'reason': 'unknown_conflict', 'split': False}
-        if conflict.resolved or conflict.intensity < 0.75:
-            return {'name': 'cat_institution_split_denied', 'reason': 'conflict_not_severe_enough', 'split': False}
-        first = group.institutions[conflict.first_institution]
-        second = group.institutions[conflict.second_institution]
-        first['continuity'] = max(0.0, first['continuity'] - 0.25)
-        second['continuity'] = max(0.0, second['continuity'] - 0.25)
-        return {'name': 'cat_institutional_split', 'group_id': group_id, 'conflict_id': conflict_id, 'institutions': [conflict.first_institution, conflict.second_institution], 'split': True}
+            return (
+                CatInstitutionSplitDeniedResult(
+                    reason="unknown_conflict",
+                )
+            )
+
+        if (
+            conflict.resolved
+            or conflict.intensity < 0.75
+        ):
+            return (
+                CatInstitutionSplitDeniedResult(
+                    reason="conflict_not_severe_enough",
+                )
+            )
+
+        first = (
+            group.institutions[
+                conflict.first_institution
+            ]
+        )
+
+        second = (
+            group.institutions[
+                conflict.second_institution
+            ]
+        )
+
+        first.continuity = max(
+            0.0,
+            float(
+                first.continuity
+            )
+            - 0.25,
+        )
+
+        second.continuity = max(
+            0.0,
+            float(
+                second.continuity
+            )
+            - 0.25,
+        )
+
+        return (
+            CatInstitutionalSplitResult(
+                group_id=group_id,
+                conflict_id=conflict_id,
+                institutions=(
+                    conflict.first_institution,
+                    conflict.second_institution,
+                ),
+            )
+        )
 
     def _restore_institutions(self, group, conflict, amount):
         for name in (conflict.first_institution, conflict.second_institution):
