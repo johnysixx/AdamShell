@@ -92,7 +92,9 @@ class CatGroupNormTests(unittest.TestCase):
             "kitten_guard",
             created.norm_id,
         )
-        self.assertTrue(result['linked'])
+        self.assertTrue(
+            result.linked
+        )
         self.assertIn(
             created.norm_id,
             self.groups.groups[
