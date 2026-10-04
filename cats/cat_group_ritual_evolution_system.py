@@ -4,17 +4,41 @@ from uuid import uuid4
 from cats.cat_ritual_lineage_state import (
     CatRitualLineageState,
 )
+from cats.cat_ritual_lineage_registration_state import (
+    CatRitualLineageRegisteredResult,
+    CatRitualLineageRegistrationDeniedResult,
+)
+
 
 class CatGroupRitualEvolutionSystem:
 
     def __init__(self, group_system):
         self.group_system = group_system
 
-    def register_origin(self, group_id, ritual_name):
-        group = self.group_system._group(group_id)
-        ritual = group.rituals.get(ritual_name)
+    def register_origin(
+        self,
+        group_id,
+        ritual_name,
+    ):
+        group = (
+            self.group_system._group(
+                group_id
+            )
+        )
+
+        ritual = (
+            group.rituals.get(
+                ritual_name
+            )
+        )
+
         if ritual is None:
-            return {'name': 'cat_ritual_lineage_denied', 'reason': 'unknown_ritual', 'registered': False}
+            return (
+                CatRitualLineageRegistrationDeniedResult(
+                    reason="unknown_ritual",
+                )
+            )
+
         lineage = self._lineage(
             group,
             ritual_name,
@@ -24,10 +48,20 @@ class CatGroupRitualEvolutionSystem:
         lineage.register_version(
             ritual_name
         )
-        ritual.lineage_root = ritual_name
+
+        ritual.lineage_root = (
+            ritual_name
+        )
+
         ritual.parent_ritual = None
         ritual.generation = 0
-        return {'name': 'cat_ritual_lineage_registered', 'group_id': group_id, 'ritual': ritual_name, 'registered': True}
+
+        return (
+            CatRitualLineageRegisteredResult(
+                group_id=group_id,
+                ritual=ritual_name,
+            )
+        )
 
     def mutate(self, group_id, ritual_name, new_name, category=None, required_roles=None, mutation_reason='local_adaptation'):
         group = self.group_system._group(group_id)
