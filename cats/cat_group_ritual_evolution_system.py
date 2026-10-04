@@ -8,6 +8,10 @@ from cats.cat_ritual_lineage_registration_state import (
     CatRitualLineageRegisteredResult,
     CatRitualLineageRegistrationDeniedResult,
 )
+from cats.cat_ritual_mutation_state import (
+    CatGroupRitualMutatedEvent,
+    CatRitualMutationDeniedResult,
+)
 
 
 class CatGroupRitualEvolutionSystem:
@@ -63,26 +67,104 @@ class CatGroupRitualEvolutionSystem:
             )
         )
 
-    def mutate(self, group_id, ritual_name, new_name, category=None, required_roles=None, mutation_reason='local_adaptation'):
-        group = self.group_system._group(group_id)
-        parent = group.rituals.get(ritual_name)
+    def mutate(
+        self,
+        group_id,
+        ritual_name,
+        new_name,
+        category=None,
+        required_roles=None,
+        mutation_reason="local_adaptation",
+    ):
+        group = (
+            self.group_system._group(
+                group_id
+            )
+        )
+
+        parent = (
+            group.rituals.get(
+                ritual_name
+            )
+        )
+
         if parent is None:
-            return {'name': 'cat_ritual_mutation_denied', 'reason': 'unknown_parent_ritual', 'mutated': False}
+            return (
+                CatRitualMutationDeniedResult(
+                    reason="unknown_parent_ritual",
+                )
+            )
+
         if new_name in group.rituals:
-            return {'name': 'cat_ritual_mutation_denied', 'reason': 'ritual_name_exists', 'mutated': False}
-        root = getattr(parent, 'lineage_root', ritual_name)
-        child = deepcopy(parent)
+            return (
+                CatRitualMutationDeniedResult(
+                    reason="ritual_name_exists",
+                )
+            )
+
+        root = getattr(
+            parent,
+            "lineage_root",
+            ritual_name,
+        )
+
+        child = deepcopy(
+            parent
+        )
+
         child.name = new_name
-        child.category = category if category is not None else getattr(parent, 'category', None)
+
+        child.category = (
+            category
+            if category is not None
+            else getattr(
+                parent,
+                "category",
+                None,
+            )
+        )
+
         if required_roles is not None:
-            child.required_roles = list(required_roles)
+            child.required_roles = list(
+                required_roles
+            )
+
         child.performances = 0
-        child.strength = max(0.0, float(getattr(parent, 'strength', 0.0)) * 0.7)
+
+        child.strength = max(
+            0.0,
+            float(
+                getattr(
+                    parent,
+                    "strength",
+                    0.0,
+                )
+            )
+            * 0.7,
+        )
+
         child.lineage_root = root
         child.parent_ritual = ritual_name
-        child.generation = int(getattr(parent, 'generation', 0)) + 1
-        child.mutation_reason = mutation_reason
-        group.rituals[new_name] = child
+
+        child.generation = (
+            int(
+                getattr(
+                    parent,
+                    "generation",
+                    0,
+                )
+            )
+            + 1
+        )
+
+        child.mutation_reason = (
+            mutation_reason
+        )
+
+        group.rituals[
+            new_name
+        ] = child
+
         lineage = self._lineage(
             group,
             root,
@@ -97,8 +179,22 @@ class CatGroupRitualEvolutionSystem:
             ritual_name,
             new_name,
         )
-        event = {'name': 'cat_group_ritual_mutated', 'group_id': group_id, 'parent_ritual': ritual_name, 'new_ritual': new_name, 'lineage_root': root, 'generation': child.generation, 'reason': mutation_reason, 'mutated': True}
-        group.history.append(deepcopy(event))
+
+        event = (
+            CatGroupRitualMutatedEvent(
+                group_id=group_id,
+                parent_ritual=ritual_name,
+                new_ritual=new_name,
+                lineage_root=root,
+                generation=child.generation,
+                reason=mutation_reason,
+            )
+        )
+
+        group.history.append(
+            event.to_dict()
+        )
+
         return event
 
     def lineage(

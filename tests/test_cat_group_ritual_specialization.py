@@ -57,7 +57,9 @@ class CatGroupRitualSpecializationTests(unittest.TestCase):
         rituals.define(self.group_id, 'evening_patrol', 'territory', required_roles=['guardian'])
         evolution = CatGroupRitualEvolutionSystem(self.groups)
         result = evolution.mutate(self.group_id, 'evening_patrol', 'silent_evening_patrol', required_roles=['night_guardian'])
-        self.assertTrue(result['mutated'])
+        self.assertTrue(
+            result.mutated
+        )
         child = self.groups.groups[self.group_id].rituals['silent_evening_patrol']
         self.assertEqual(child.parent_ritual, 'evening_patrol')
         self.assertEqual(child.generation, 1)
