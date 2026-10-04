@@ -1,30 +1,154 @@
 from copy import deepcopy
 from uuid import uuid4
 from cats.cat_culture_objects import CatInstitutionConflict
+from cats.cat_group_institutional_conflict_detection_state import (
+    CatInstitutionConflictDetectedResult,
+    CatInstitutionConflictDetectionDeniedResult,
+)
+
 
 class CatGroupInstitutionalConflictSystem:
 
     def __init__(self, group_system):
         self.group_system = group_system
 
-    def detect(self, group_id, first_institution, second_institution):
-        group = self.group_system._group(group_id)
-        first = group.institutions.get(first_institution)
-        second = group.institutions.get(second_institution)
-        if first is None or second is None:
-            return {'name': 'cat_institution_conflict_detection_denied', 'reason': 'unknown_institution', 'conflict': False}
-        shared_roles = sorted(set(getattr(first, 'roles', [])).intersection(getattr(second, 'roles', [])))
-        shared_rituals = sorted(set(getattr(first, 'rituals', [])).intersection(getattr(second, 'rituals', [])))
-        different_purpose = getattr(first, 'purpose', None) != getattr(second, 'purpose', None)
-        score = len(shared_roles) * 0.3 + len(shared_rituals) * 0.15 + (0.15 if different_purpose and shared_roles else 0.0)
-        score = min(1.0, score)
+    def detect(
+        self,
+        group_id,
+        first_institution,
+        second_institution,
+    ):
+        group = (
+            self.group_system._group(
+                group_id
+            )
+        )
+
+        first = (
+            group.institutions.get(
+                first_institution
+            )
+        )
+
+        second = (
+            group.institutions.get(
+                second_institution
+            )
+        )
+
+        if (
+            first is None
+            or second is None
+        ):
+            return (
+                CatInstitutionConflictDetectionDeniedResult(
+                    reason="unknown_institution",
+                )
+            )
+
+        shared_roles = tuple(
+            sorted(
+                set(
+                    getattr(
+                        first,
+                        "roles",
+                        [],
+                    )
+                ).intersection(
+                    getattr(
+                        second,
+                        "roles",
+                        [],
+                    )
+                )
+            )
+        )
+
+        shared_rituals = tuple(
+            sorted(
+                set(
+                    getattr(
+                        first,
+                        "rituals",
+                        [],
+                    )
+                ).intersection(
+                    getattr(
+                        second,
+                        "rituals",
+                        [],
+                    )
+                )
+            )
+        )
+
+        different_purpose = (
+            getattr(
+                first,
+                "purpose",
+                None,
+            )
+            != getattr(
+                second,
+                "purpose",
+                None,
+            )
+        )
+
+        score = (
+            len(shared_roles)
+            * 0.3
+            + len(shared_rituals)
+            * 0.15
+            + (
+                0.15
+                if (
+                    different_purpose
+                    and shared_roles
+                )
+                else 0.0
+            )
+        )
+
+        score = min(
+            1.0,
+            score,
+        )
+
         if score >= 0.6:
-            status = 'institutional_conflict'
+            status = (
+                "institutional_conflict"
+            )
+
         elif score >= 0.25:
-            status = 'institutional_friction'
+            status = (
+                "institutional_friction"
+            )
+
         else:
-            status = 'institutionally_compatible'
-        return {'name': 'cat_institution_conflict_detected', 'group_id': group_id, 'first_institution': first_institution, 'second_institution': second_institution, 'shared_roles': shared_roles, 'shared_rituals': shared_rituals, 'different_purpose': different_purpose, 'score': round(score, 4), 'status': status, 'conflict': status != 'institutionally_compatible'}
+            status = (
+                "institutionally_compatible"
+            )
+
+        return (
+            CatInstitutionConflictDetectedResult(
+                group_id=group_id,
+                first_institution=first_institution,
+                second_institution=second_institution,
+                shared_roles=shared_roles,
+                shared_rituals=shared_rituals,
+                different_purpose=different_purpose,
+                score=round(
+                    score,
+                    4,
+                ),
+                status=status,
+                conflict=(
+                    status
+                    != "institutionally_compatible"
+                ),
+            )
+        )
 
     def escalate(self, group_id, first_institution, second_institution, issue, intensity=0.5):
         group = self.group_system._group(group_id)

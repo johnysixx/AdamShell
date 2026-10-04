@@ -66,8 +66,13 @@ class CatGroupSuccessionConflictTests(unittest.TestCase):
         self._institutions()
         conflict = CatGroupInstitutionalConflictSystem(self.groups)
         result = conflict.detect(self.group_id, 'night_watch', 'door_watch')
-        self.assertTrue(result['conflict'])
-        self.assertIn('guardian', result['shared_roles'])
+        self.assertTrue(
+            result.conflict
+        )
+        self.assertIn(
+            'guardian',
+            result.shared_roles,
+        )
 
     def test_conflict_weakens_both_institutions(self):
         self._institutions()
