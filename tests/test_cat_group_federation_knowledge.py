@@ -103,7 +103,7 @@ class CatGroupFederationKnowledgeTests(
         )
 
         self.assertTrue(
-            result["contributed"]
+            result.contributed
         )
 
         record = (

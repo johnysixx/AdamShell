@@ -47,7 +47,7 @@ class CatGroupFederationSystem:
             if group_id == source_group_id:
                 continue
             result = self.knowledge.transmit_between_groups(source_group_id, group_id, knowledge_id, transmission='federation')
-            if result.get('transmitted', False):
+            if result.transmitted:
                 targets.append(group_id)
         return {'name': 'cat_federation_knowledge_shared', 'federation_id': federation_id, 'source_group': source_group_id, 'knowledge_id': knowledge_id, 'targets': targets, 'shared': True}
 
