@@ -94,9 +94,7 @@ class CatMemeticSelectionObjectStateTests(
             myths.create_from_knowledge(
                 self.group_id,
                 'danger_scent',
-            )[
-                'myth_id'
-            ]
+            ).myth_id
         )
 
         innovations = (

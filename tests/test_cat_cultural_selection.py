@@ -58,7 +58,7 @@ class CatCulturalSelectionTests(unittest.TestCase):
         innovations = CatGroupInnovationSystem(self.groups)
         innovation = innovations.combine(self.first_group, ['safe_route', 'danger_scent'], name='safe_scent_route', category='navigation', procedure={'rule': 'avoid danger scent'})
         return (
-            myth['myth_id'],
+            myth.myth_id,
             innovation.innovation_id,
         )
 

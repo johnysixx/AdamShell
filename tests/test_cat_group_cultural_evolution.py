@@ -236,34 +236,24 @@ class CatGroupCulturalEvolutionTests(
         result = myths.retell(
             self.parent,
             second,
-            created[
-                "myth_id"
-            ],
+            created.myth_id,
             transformation={
                 "claim": "all boxes are dangerous"
             }
         )
 
         self.assertNotEqual(
-            result[
-                "myth_id"
-            ],
-            created[
-                "myth_id"
-            ]
+            result.myth_id,
+            created.myth_id
         )
 
         child = self.groups.groups[second].myths[
-            result[
-                "myth_id"
-            ]
+            result.myth_id
         ]
 
         self.assertEqual(
             child.parent_version,
-            created[
-                "myth_id"
-            ]
+            created.myth_id
         )
 
         self.assertEqual(

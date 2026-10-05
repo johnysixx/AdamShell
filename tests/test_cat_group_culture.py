@@ -199,13 +199,11 @@ class CatGroupCultureTests(
         )
 
         self.assertTrue(
-            result["created"]
+            result.created
         )
 
         myth = self.groups.groups[self.group_id].myths[
-            result[
-                "myth_id"
-            ]
+            result.myth_id
         ]
 
         self.assertFalse(
@@ -238,9 +236,7 @@ class CatGroupCultureTests(
         result = myths.retell(
             self.group_id,
             second_group,
-            created[
-                "myth_id"
-            ],
+            created.myth_id,
             transformation={
                 "claim": (
                     "all strange boxes contain "
@@ -250,35 +246,27 @@ class CatGroupCultureTests(
         )
 
         self.assertTrue(
-            result["retold"]
+            result.retold
         )
 
         self.assertTrue(
-            result["transformed"]
+            result.transformed
         )
 
         received = (
             self.groups.groups[second_group].myths[
-                result[
-                    "myth_id"
-                ]
+                result.myth_id
             ]
         )
 
         self.assertNotEqual(
-            result[
-                "myth_id"
-            ],
-            created[
-                "myth_id"
-            ]
+            result.myth_id,
+            created.myth_id
         )
 
         self.assertEqual(
             received.parent_version,
-            created[
-                "myth_id"
-            ]
+            created.myth_id
         )
 
         self.assertEqual(
@@ -309,15 +297,11 @@ class CatGroupCultureTests(
         myths.tell_members(
             self.group_id,
             self.cats.cats,
-            created[
-                "myth_id"
-            ]
+            created.myth_id
         )
 
         self.assertIn(
-            created[
-                "myth_id"
-            ],
+            created.myth_id,
             self.other.knowledge.heard_group_myths
         )
 

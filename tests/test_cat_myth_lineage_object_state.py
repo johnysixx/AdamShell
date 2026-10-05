@@ -135,9 +135,7 @@ class CatMythLineageObjectStateTests(
             )
         )
 
-        myth_id = created[
-            'myth_id'
-        ]
+        myth_id = created.myth_id
 
         state = (
             self.groups
@@ -175,9 +173,7 @@ class CatMythLineageObjectStateTests(
             )
         )
 
-        root = created[
-            'myth_id'
-        ]
+        root = created.myth_id
 
         retold = self.myths.retell(
             self.first_group,
@@ -194,9 +190,7 @@ class CatMythLineageObjectStateTests(
             root,
         )
 
-        child = retold[
-            'myth_id'
-        ]
+        child = retold.myth_id
 
         self.assertIsInstance(
             state,
