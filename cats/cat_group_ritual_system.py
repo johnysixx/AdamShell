@@ -7,6 +7,10 @@ from cats.cat_cultural_tradition_state import (
 from cats.cat_group_ritual_definition_state import (
     CatGroupRitualDefinedResult,
 )
+from cats.cat_group_ritual_performance_state import (
+    CatGroupRitualPerformedEvent,
+    CatGroupRitualPerformanceDeniedResult,
+)
 
 
 class CatGroupRitualSystem:
@@ -28,17 +32,15 @@ class CatGroupRitualSystem:
         )
 
         ritual = CatGroupRitual(
-            **{
-                "name": ritual_name,
-                "category": category,
-                "required_roles": list(
-                    required_roles
-                    or []
-                ),
-                "performances": 0,
-                "strength": 0.0,
-                "last_participants": [],
-            }
+            name=ritual_name,
+            category=category,
+            required_roles=list(
+                required_roles
+                or []
+            ),
+            performances=0,
+            strength=0.0,
+            last_participants=[],
         )
 
         group.rituals[
@@ -59,17 +61,58 @@ class CatGroupRitualSystem:
             )
         )
 
-    def perform(self, group_id, ritual_name, participants):
-        group = self.group_system._group(group_id)
-        ritual = group.rituals.get(ritual_name)
+    def perform(
+        self,
+        group_id,
+        ritual_name,
+        participants,
+    ):
+        group = (
+            self.group_system._group(
+                group_id
+            )
+        )
+
+        ritual = (
+            group.rituals.get(
+                ritual_name
+            )
+        )
+
         if ritual is None:
-            return {'name': 'cat_group_ritual_denied', 'reason': 'unknown_ritual', 'performed': False}
-        participant_names = [cat.name for cat in participants if cat.name in group.members]
+            return (
+                CatGroupRitualPerformanceDeniedResult(
+                    reason="unknown_ritual",
+                )
+            )
+
+        participant_names = [
+            cat.name
+            for cat in participants
+            if cat.name in group.members
+        ]
+
         if not participant_names:
-            return {'name': 'cat_group_ritual_denied', 'reason': 'no_group_participants', 'performed': False}
+            return (
+                CatGroupRitualPerformanceDeniedResult(
+                    reason="no_group_participants",
+                )
+            )
+
         ritual.performances += 1
-        ritual.strength = min(1.0, float(ritual.strength) + 0.1)
-        ritual.last_participants = participant_names
+
+        ritual.strength = min(
+            1.0,
+            float(
+                ritual.strength
+            )
+            + 0.1,
+        )
+
+        ritual.last_participants = list(
+            participant_names
+        )
+
         culture = group.culture
 
         tradition = (
@@ -82,7 +125,7 @@ class CatGroupRitualSystem:
             tradition = (
                 CatCulturalTraditionState(
                     name=ritual_name,
-                    category='ritual',
+                    category="ritual",
                 )
             )
 
@@ -95,21 +138,44 @@ class CatGroupRitualSystem:
             CatCulturalTraditionState,
         ):
             raise TypeError(
-                'Cat cultural tradition record '
-                'must be '
-                'CatCulturalTraditionState.'
+                "Cat cultural tradition record "
+                "must be "
+                "CatCulturalTraditionState."
             )
 
         tradition.occurrences += 1
 
         tradition.strength = min(
             1.0,
-            float(tradition.strength)
+            float(
+                tradition.strength
+            )
             + 0.08,
         )
-        event = {'name': 'cat_group_ritual_performed', 'group_id': group_id, 'ritual': ritual_name, 'participants': participant_names, 'strength': ritual.strength, 'performed': True}
-        group.history.append(deepcopy(event))
+
+        event = (
+            CatGroupRitualPerformedEvent(
+                group_id=group_id,
+                ritual=ritual_name,
+                participants=tuple(
+                    participant_names
+                ),
+                strength=
+                    ritual.strength,
+            )
+        )
+
+        group.history.append(
+            event.to_dict()
+        )
+
         for cat in participants:
-            if cat.name in participant_names:
-                cat.social_interactions.append(deepcopy(event))
+            if (
+                cat.name
+                in participant_names
+            ):
+                cat.social_interactions.append(
+                    event.to_dict()
+                )
+
         return event

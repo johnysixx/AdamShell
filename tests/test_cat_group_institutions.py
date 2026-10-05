@@ -58,7 +58,7 @@ class CatGroupInstitutionTests(unittest.TestCase):
         rituals = CatGroupRitualSystem(self.groups)
         rituals.define(self.group_id, 'evening_patrol', 'territory', required_roles=['guardian'])
         result = rituals.perform(self.group_id, 'evening_patrol', [self.first, self.second])
-        self.assertTrue(result['performed'])
+        self.assertTrue(result.performed)
         self.assertEqual(self.groups.groups[self.group_id].rituals['evening_patrol'].performances, 1)
 
     def test_ritual_strengthens_group_tradition(self):
