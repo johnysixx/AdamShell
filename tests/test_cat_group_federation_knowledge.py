@@ -305,14 +305,12 @@ class CatGroupFederationKnowledgeTests(
         )
 
         result = federation.admit(
-            created[
-                "federation_id"
-            ],
+            created.federation_id,
             self.second_group
         )
 
         self.assertTrue(
-            result["admitted"]
+            result.admitted
         )
 
     def test_federation_propagates_knowledge_between_groups(
@@ -340,22 +338,18 @@ class CatGroupFederationKnowledgeTests(
         )
 
         federation.admit(
-            created[
-                "federation_id"
-            ],
+            created.federation_id,
             self.second_group
         )
 
         result = federation.share_knowledge(
-            created[
-                "federation_id"
-            ],
+            created.federation_id,
             self.first_group,
             "cronenberg_scent"
         )
 
         self.assertTrue(
-            result["shared"]
+            result.shared
         )
 
         self.assertIn(
