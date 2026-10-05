@@ -3,17 +3,42 @@ from copy import deepcopy
 from cats.cat_myth_lineage_state import (
     CatMythLineageState,
 )
+from cats.cat_myth_lineage_registration_state import (
+    CatMythDescendantRegisteredResult,
+    CatMythLineageRegisteredResult,
+    CatMythLineageRegistrationDeniedResult,
+)
+
 
 class CatGroupMythLineageSystem:
 
     def __init__(self, group_system):
         self.group_system = group_system
 
-    def register_origin(self, group_id, myth_id):
-        group = self.group_system._group(group_id)
-        myth = group.myths.get(myth_id)
+    def register_origin(
+        self,
+        group_id,
+        myth_id,
+    ):
+        group = (
+            self.group_system._group(
+                group_id
+            )
+        )
+
+        myth = (
+            group.myths.get(
+                myth_id
+            )
+        )
+
         if myth is None:
-            return {'name': 'cat_myth_lineage_denied', 'reason': 'unknown_myth', 'registered': False}
+            return (
+                CatMythLineageRegistrationDeniedResult(
+                    reason="unknown_myth",
+                )
+            )
+
         lineage = self._lineage(
             group,
             myth_id,
@@ -23,13 +48,31 @@ class CatGroupMythLineageSystem:
         lineage.register_version(
             myth_id
         )
+
         myth.lineage_root = myth_id
         myth.parent_version = None
         myth.generation = 0
-        return {'name': 'cat_myth_lineage_registered', 'group_id': group_id, 'myth_id': myth_id, 'registered': True}
 
-    def register_descendant(self, group_id, root_myth_id, parent_myth_id, child_myth_id):
-        group = self.group_system._group(group_id)
+        return (
+            CatMythLineageRegisteredResult(
+                group_id=group_id,
+                myth_id=myth_id,
+            )
+        )
+
+    def register_descendant(
+        self,
+        group_id,
+        root_myth_id,
+        parent_myth_id,
+        child_myth_id,
+    ):
+        group = (
+            self.group_system._group(
+                group_id
+            )
+        )
+
         lineage = self._lineage(
             group,
             root_myth_id,
@@ -44,7 +87,15 @@ class CatGroupMythLineageSystem:
             parent_myth_id,
             child_myth_id,
         )
-        return {'name': 'cat_myth_descendant_registered', 'group_id': group_id, 'root_myth_id': root_myth_id, 'parent_myth_id': parent_myth_id, 'child_myth_id': child_myth_id, 'registered': True}
+
+        return (
+            CatMythDescendantRegisteredResult(
+                group_id=group_id,
+                root_myth_id=root_myth_id,
+                parent_myth_id=parent_myth_id,
+                child_myth_id=child_myth_id,
+            )
+        )
 
     def lineage(
         self,
