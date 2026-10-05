@@ -3,6 +3,11 @@ from copy import deepcopy
 from cats.cat_innovation_tree_state import (
     CatInnovationTreeState,
 )
+from cats.cat_innovation_tree_registration_state import (
+    CatInnovationTreeRegisteredResult,
+    CatInnovationTreeRegistrationDeniedResult,
+)
+
 
 class CatGroupInnovationTreeSystem:
 
@@ -15,23 +20,24 @@ class CatGroupInnovationTreeSystem:
         innovation_id,
         parent_innovation_id=None,
     ):
-        group = self.group_system._group(
-            group_id
+        group = (
+            self.group_system._group(
+                group_id
+            )
         )
 
-        innovation = group.innovations.get(
-            innovation_id
+        innovation = (
+            group.innovations.get(
+                innovation_id
+            )
         )
 
         if innovation is None:
-            return {
-                'name':
-                    'cat_innovation_tree_denied',
-                'reason':
-                    'unknown_innovation',
-                'registered':
-                    False,
-            }
+            return (
+                CatInnovationTreeRegistrationDeniedResult(
+                    reason="unknown_innovation",
+                )
+            )
 
         parent_state = None
         generation = 0
@@ -44,12 +50,16 @@ class CatGroupInnovationTreeSystem:
             )
 
             generation = (
-                int(
-                    parent_state.generation
+                (
+                    int(
+                        parent_state.generation
+                    )
+                    if parent_state
+                    is not None
+                    else 0
                 )
-                if parent_state is not None
-                else 0
-            ) + 1
+                + 1
+            )
 
         state = self._state(
             group,
@@ -58,9 +68,12 @@ class CatGroupInnovationTreeSystem:
         )
 
         state.register(
-            innovation_id=innovation_id,
-            parent=parent_innovation_id,
-            generation=generation,
+            innovation_id=
+                innovation_id,
+            parent=
+                parent_innovation_id,
+            generation=
+                generation,
         )
 
         if parent_state is not None:
@@ -76,20 +89,17 @@ class CatGroupInnovationTreeSystem:
             state.generation
         )
 
-        return {
-            'name':
-                'cat_innovation_tree_registered',
-            'group_id':
-                group_id,
-            'innovation_id':
-                innovation_id,
-            'parent':
-                parent_innovation_id,
-            'generation':
-                innovation.generation,
-            'registered':
-                True,
-        }
+        return (
+            CatInnovationTreeRegisteredResult(
+                group_id=group_id,
+                innovation_id=
+                    innovation_id,
+                parent=
+                    parent_innovation_id,
+                generation=
+                    innovation.generation,
+            )
+        )
 
     def descendants(
         self,
