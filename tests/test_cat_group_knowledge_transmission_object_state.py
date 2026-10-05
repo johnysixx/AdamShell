@@ -247,7 +247,7 @@ class CatGroupKnowledgeTransmissionObjectStateTests(
             self.groups
             .groups[self.first_group]
             .knowledge[
-                result["innovation_id"]
+                result.innovation_id
             ]
         )
 

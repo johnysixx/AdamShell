@@ -99,9 +99,7 @@ class CatInnovationTreeObjectStateTests(
                 'rule': name
             },
             parent_innovation_id=parent,
-        )[
-            'innovation_id'
-        ]
+        ).innovation_id
 
     def test_state_has_no_mapping_api(
         self

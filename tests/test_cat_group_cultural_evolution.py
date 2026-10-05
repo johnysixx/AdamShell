@@ -310,9 +310,7 @@ class CatGroupCulturalEvolutionTests(
                 )
             },
             parent_innovation_id=(
-                first[
-                    "innovation_id"
-                ]
+                first.innovation_id
             )
         )
 
@@ -322,15 +320,11 @@ class CatGroupCulturalEvolutionTests(
 
         descendants = tree.descendants(
             self.parent,
-            first[
-                "innovation_id"
-            ]
+            first.innovation_id
         )
 
         self.assertIn(
-            second[
-                "innovation_id"
-            ],
+            second.innovation_id,
             descendants
         )
 
@@ -338,9 +332,7 @@ class CatGroupCulturalEvolutionTests(
             self.groups
             .groups[self.parent]
             .innovation_tree[
-                second[
-                    "innovation_id"
-                ]
+                second.innovation_id
             ]
         )
 
@@ -355,9 +347,7 @@ class CatGroupCulturalEvolutionTests(
         )
 
         record = self.groups.groups[self.parent].innovations[
-            second[
-                "innovation_id"
-            ]
+            second.innovation_id
         ]
 
         self.assertEqual(

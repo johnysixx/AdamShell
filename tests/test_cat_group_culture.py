@@ -349,13 +349,11 @@ class CatGroupCultureTests(
         )
 
         self.assertTrue(
-            result["created"]
+            result.created
         )
 
         self.assertIn(
-            result[
-                "innovation_id"
-            ],
+            result.innovation_id,
             self.groups.groups[self.group_id].knowledge
         )
 
@@ -383,9 +381,9 @@ class CatGroupCultureTests(
             }
         )
 
-        innovation_id = created[
-            "innovation_id"
-        ]
+        innovation_id = (
+            created.innovation_id
+        )
 
         for _ in range(3):
             innovation.trial(

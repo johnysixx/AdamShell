@@ -57,7 +57,10 @@ class CatCulturalSelectionTests(unittest.TestCase):
         myth = myths.create_from_knowledge(self.first_group, 'danger_scent')
         innovations = CatGroupInnovationSystem(self.groups)
         innovation = innovations.combine(self.first_group, ['safe_route', 'danger_scent'], name='safe_scent_route', category='navigation', procedure={'rule': 'avoid danger scent'})
-        return (myth['myth_id'], innovation['innovation_id'])
+        return (
+            myth['myth_id'],
+            innovation.innovation_id,
+        )
 
     def test_myths_gain_memetic_fitness_from_adoption(self):
         myth_id, _ = self._create_myth_and_innovation()

@@ -118,9 +118,7 @@ class CatMemeticSelectionObjectStateTests(
                     'rule':
                         'avoid danger scent'
                 },
-            )[
-                'innovation_id'
-            ]
+            ).innovation_id
         )
 
         self.selection = (
