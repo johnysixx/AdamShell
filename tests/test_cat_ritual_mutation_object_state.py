@@ -451,36 +451,34 @@ class CatRitualMutationObjectStateTests(
             ],
         )
 
-    def test_history_remains_serialized_boundary(
+    def test_history_stores_detached_event_object(
         self
     ):
         self.define_parent()
 
-        group = (
-            self.groups.groups[
-                self.group_id
-            ]
+        group = self.groups.groups[
+            self.group_id
+        ]
+
+        result = self.evolution.mutate(
+            self.group_id,
+            "night_watch",
+            "silent_watch",
+            mutation_reason="quiet_patrol",
         )
 
-        result = (
-            self.evolution.mutate(
-                self.group_id,
-                "night_watch",
-                "silent_watch",
-                mutation_reason=
-                    "quiet_patrol",
-            )
-        )
-
-        stored = (
-            group.history[
-                -1
-            ]
-        )
+        stored = group.history[
+            -1
+        ]
 
         self.assertIsInstance(
             stored,
-            dict,
+            CatGroupRitualMutatedEvent,
+        )
+
+        self.assertEqual(
+            stored,
+            result,
         )
 
         self.assertIsNot(
@@ -489,68 +487,55 @@ class CatRitualMutationObjectStateTests(
         )
 
         self.assertEqual(
-            stored,
-            result.to_dict(),
-        )
-
-        self.assertEqual(
-            stored[
-                "new_ritual"
-            ],
+            stored.new_ritual,
             "silent_watch",
         )
 
-    def test_history_snapshot_is_detached(
+        self.assertFalse(
+            hasattr(
+                stored,
+                "to_dict",
+            )
+        )
+
+    def test_history_event_is_frozen_and_detached(
         self
     ):
         self.define_parent()
 
-        group = (
-            self.groups.groups[
-                self.group_id
-            ]
+        group = self.groups.groups[
+            self.group_id
+        ]
+
+        result = self.evolution.mutate(
+            self.group_id,
+            "night_watch",
+            "silent_watch",
         )
 
-        result = (
-            self.evolution.mutate(
-                self.group_id,
-                "night_watch",
-                "silent_watch",
+        stored = group.history[
+            -1
+        ]
+
+        self.assertIsNot(
+            stored,
+            result,
+        )
+
+        with self.assertRaises(
+            AttributeError
+        ):
+            stored.new_ritual = (
+                "changed"
             )
-        )
-
-        stored = (
-            group.history[
-                -1
-            ]
-        )
-
-        stored[
-            "new_ritual"
-        ] = "changed"
 
         self.assertEqual(
             result.new_ritual,
             "silent_watch",
         )
 
-        fresh = (
-            result.to_dict()
-        )
-
-        fresh[
-            "reason"
-        ] = "changed"
-
         self.assertEqual(
-            result.reason,
-            "local_adaptation",
-        )
-
-        self.assertEqual(
-            stored[
-                "reason"
-            ],
+            stored.reason,
             "local_adaptation",
         )
 

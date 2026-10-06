@@ -82,31 +82,24 @@ class CatGroupRoleAssignmentDeniedResult:
             "group_id",
             str(self.group_id),
         )
+
         object.__setattr__(
             self,
             "cat",
             str(self.cat),
         )
+
         object.__setattr__(
             self,
             "role",
             str(self.role),
         )
+
         object.__setattr__(
             self,
             "reason",
             str(self.reason),
         )
-
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "group_id": self.group_id,
-            "cat": self.cat,
-            "role": self.role,
-            "reason": self.reason,
-            "assigned": self.assigned,
-        }
 
 
 @dataclass(slots=True, frozen=True)
@@ -124,31 +117,24 @@ class CatGroupRoleAssignedEvent:
             "group_id",
             str(self.group_id),
         )
+
         object.__setattr__(
             self,
             "cat",
             str(self.cat),
         )
+
         object.__setattr__(
             self,
             "role",
             str(self.role),
         )
+
         object.__setattr__(
             self,
             "score",
             float(self.score),
         )
-
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "group_id": self.group_id,
-            "cat": self.cat,
-            "role": self.role,
-            "score": self.score,
-            "assigned": self.assigned,
-        }
 
 
 @dataclass(slots=True, frozen=True)
@@ -166,31 +152,24 @@ class CatGroupRoleReleasedEvent:
             "group_id",
             str(self.group_id),
         )
+
         object.__setattr__(
             self,
             "cat",
             str(self.cat),
         )
+
         object.__setattr__(
             self,
             "role",
             str(self.role),
         )
+
         object.__setattr__(
             self,
             "reason",
             str(self.reason),
         )
-
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "group_id": self.group_id,
-            "cat": self.cat,
-            "role": self.role,
-            "reason": self.reason,
-            "released": self.released,
-        }
 
 
 @dataclass(slots=True, frozen=True)
@@ -212,21 +191,25 @@ class CatGroupRoleSpecializationDeniedResult:
             "group_id",
             str(self.group_id),
         )
+
         object.__setattr__(
             self,
             "cat",
             str(self.cat),
         )
+
         object.__setattr__(
             self,
             "base_role",
             str(self.base_role),
         )
+
         object.__setattr__(
             self,
             "specialization",
             str(self.specialization),
         )
+
         object.__setattr__(
             self,
             "reason",
@@ -254,34 +237,6 @@ class CatGroupRoleSpecializationDeniedResult:
                 float(self.actual),
             )
 
-    def to_dict(self):
-        result = {
-            "name": self.name,
-            "group_id": self.group_id,
-            "cat": self.cat,
-            "base_role": self.base_role,
-            "specialization":
-                self.specialization,
-            "reason": self.reason,
-            "specialized":
-                self.specialized,
-        }
-
-        if self.trait is not None:
-            result["trait"] = self.trait
-
-        if self.required is not None:
-            result["required"] = (
-                self.required
-            )
-
-        if self.actual is not None:
-            result["actual"] = (
-                self.actual
-            )
-
-        return result
-
 
 @dataclass(slots=True, frozen=True)
 class CatGroupRoleSpecializedEvent:
@@ -298,28 +253,21 @@ class CatGroupRoleSpecializedEvent:
             "group_id",
             str(self.group_id),
         )
+
         object.__setattr__(
             self,
             "cat",
             str(self.cat),
         )
+
         object.__setattr__(
             self,
             "base_role",
             str(self.base_role),
         )
+
         object.__setattr__(
             self,
             "specialization",
             str(self.specialization),
         )
-
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "group_id": self.group_id,
-            "cat": self.cat,
-            "base_role": self.base_role,
-            "specialization": self.specialization,
-            "specialized": self.specialized,
-        }

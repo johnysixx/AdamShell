@@ -16,12 +16,3 @@ class CatGroupInstitutionEstablishedEvent:
         default=True,
         init=False,
     )
-
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "group_id": self.group_id,
-            "institution": self.institution,
-            "purpose": self.purpose,
-            "established": self.established,
-        }

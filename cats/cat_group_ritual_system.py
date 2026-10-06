@@ -166,7 +166,9 @@ class CatGroupRitualSystem:
         )
 
         group.history.append(
-            event.to_dict()
+            deepcopy(
+                event
+            )
         )
 
         for cat in participants:
@@ -175,7 +177,9 @@ class CatGroupRitualSystem:
                 in participant_names
             ):
                 cat.social_interactions.append(
-                    event.to_dict()
+                    deepcopy(
+                        event
+                    )
                 )
 
         return event

@@ -35,14 +35,11 @@ class CatGroupRitualMutatedEvent:
         init=False,
     )
 
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "group_id": self.group_id,
-            "parent_ritual": self.parent_ritual,
-            "new_ritual": self.new_ritual,
-            "lineage_root": self.lineage_root,
-            "generation": self.generation,
-            "reason": self.reason,
-            "mutated": self.mutated,
-        }
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "generation",
+            int(
+                self.generation
+            ),
+        )

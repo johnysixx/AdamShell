@@ -484,37 +484,36 @@ class CatGroupRitualPerformanceObjectStateTests(
             [],
         )
 
-    def test_history_is_serialized_detached_boundary(
+    def test_history_stores_detached_event_object(
         self
     ):
         self.define_ritual()
 
-        group = (
-            self.groups.groups[
-                self.group_id
-            ]
+        group = self.groups.groups[
+            self.group_id
+        ]
+
+        result = self.rituals.perform(
+            self.group_id,
+            "evening_patrol",
+            [
+                self.first,
+                self.second,
+            ],
         )
 
-        result = (
-            self.rituals.perform(
-                self.group_id,
-                "evening_patrol",
-                [
-                    self.first,
-                    self.second,
-                ],
-            )
-        )
-
-        stored = (
-            group.history[
-                -1
-            ]
-        )
+        stored = group.history[
+            -1
+        ]
 
         self.assertIsInstance(
             stored,
-            dict,
+            CatGroupRitualPerformedEvent,
+        )
+
+        self.assertEqual(
+            stored,
+            result,
         )
 
         self.assertIsNot(
@@ -522,73 +521,39 @@ class CatGroupRitualPerformanceObjectStateTests(
             result,
         )
 
-        self.assertEqual(
-            stored,
-            result.to_dict(),
-        )
-
         self.assertIsInstance(
-            stored[
-                "participants"
-            ],
-            list,
+            stored.participants,
+            tuple,
         )
 
-        stored[
-            "participants"
-        ].append(
-            "changed"
+        self.assertFalse(
+            hasattr(
+                stored,
+                "to_dict",
+            )
         )
 
-        self.assertEqual(
-            result.participants,
-            (
-                self.first.name,
-                self.second.name,
-            ),
-        )
-
-        fresh = (
-            result.to_dict()
-        )
-
-        self.assertEqual(
-            fresh[
-                "participants"
-            ],
-            [
-                self.first.name,
-                self.second.name,
-            ],
-        )
-
-    def test_social_interactions_are_detached_boundaries(
+    def test_social_interactions_store_detached_event_objects(
         self
     ):
         self.define_ritual()
 
-        group = (
-            self.groups.groups[
-                self.group_id
-            ]
+        group = self.groups.groups[
+            self.group_id
+        ]
+
+        result = self.rituals.perform(
+            self.group_id,
+            "evening_patrol",
+            [
+                self.first,
+                self.second,
+            ],
         )
 
-        result = (
-            self.rituals.perform(
-                self.group_id,
-                "evening_patrol",
-                [
-                    self.first,
-                    self.second,
-                ],
-            )
-        )
-
-        group_event = (
-            group.history[
-                -1
-            ]
-        )
+        group_event = group.history[
+            -1
+        ]
 
         first_event = (
             self.first.social_interactions[
@@ -602,15 +567,20 @@ class CatGroupRitualPerformanceObjectStateTests(
             ]
         )
 
-        self.assertEqual(
+        for event in (
+            group_event,
             first_event,
-            result.to_dict(),
-        )
-
-        self.assertEqual(
             second_event,
-            result.to_dict(),
-        )
+        ):
+            self.assertIsInstance(
+                event,
+                CatGroupRitualPerformedEvent,
+            )
+
+            self.assertEqual(
+                event,
+                result,
+            )
 
         self.assertIsNot(
             first_event,
@@ -627,24 +597,8 @@ class CatGroupRitualPerformanceObjectStateTests(
             second_event,
         )
 
-        first_event[
-            "participants"
-        ].append(
-            "changed"
-        )
-
         self.assertEqual(
-            second_event[
-                "participants"
-            ],
-            [
-                self.first.name,
-                self.second.name,
-            ],
-        )
-
-        self.assertEqual(
-            result.participants,
+            first_event.participants,
             (
                 self.first.name,
                 self.second.name,

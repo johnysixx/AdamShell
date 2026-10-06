@@ -141,10 +141,10 @@ class CatGroupRoleSpecializationSystem:
             event
         )
 
-        snapshot = event.to_dict()
-
         group.history.append(
-            deepcopy(snapshot)
+            deepcopy(
+                event
+            )
         )
 
         return event

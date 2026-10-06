@@ -33,20 +33,19 @@ class CatGroupRitualPerformedEvent:
         init=False,
     )
 
-    def to_dict(self):
-        return {
-            "name":
-                self.name,
-            "group_id":
-                self.group_id,
-            "ritual":
-                self.ritual,
-            "participants":
-                list(
-                    self.participants
-                ),
-            "strength":
-                self.strength,
-            "performed":
-                self.performed,
-        }
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "participants",
+            tuple(
+                self.participants
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "strength",
+            float(
+                self.strength
+            ),
+        )

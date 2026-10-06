@@ -184,7 +184,7 @@ class CatGroupInstitutionEstablishmentObjectStateTests(
             institution.active
         )
 
-    def test_history_remains_serialized_boundary(
+    def test_history_stores_detached_event_object(
         self
     ):
         result = (
@@ -207,22 +207,32 @@ class CatGroupInstitutionEstablishmentObjectStateTests(
 
         self.assertIsInstance(
             history_event,
-            dict,
+            CatGroupInstitutionEstablishedEvent,
         )
 
         self.assertEqual(
             history_event,
-            result.to_dict(),
+            result,
+        )
+
+        self.assertIsNot(
+            history_event,
+            result,
         )
 
         self.assertEqual(
-            history_event[
-                "institution"
-            ],
+            history_event.institution,
             result.institution,
         )
 
-    def test_serialized_snapshot_is_detached(
+        self.assertFalse(
+            hasattr(
+                history_event,
+                "to_dict",
+            )
+        )
+
+    def test_history_event_is_frozen_and_detached(
         self
     ):
         result = (
@@ -235,14 +245,6 @@ class CatGroupInstitutionEstablishmentObjectStateTests(
             )
         )
 
-        serialized = (
-            result.to_dict()
-        )
-
-        serialized[
-            "institution"
-        ] = "changed"
-
         history_event = (
             self.groups.groups[
                 self.group_id
@@ -251,15 +253,25 @@ class CatGroupInstitutionEstablishmentObjectStateTests(
             ]
         )
 
+        self.assertIsNot(
+            history_event,
+            result,
+        )
+
+        with self.assertRaises(
+            AttributeError
+        ):
+            history_event.institution = (
+                "changed"
+            )
+
         self.assertEqual(
             result.institution,
             "door_watch",
         )
 
         self.assertEqual(
-            history_event[
-                "institution"
-            ],
+            history_event.institution,
             "door_watch",
         )
 
