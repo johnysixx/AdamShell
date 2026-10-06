@@ -133,9 +133,7 @@ class CatGroupCulturalEvolutionTests(
             new_name="daughter"
         )
 
-        daughter = result[
-            "daughter_group"
-        ]
+        daughter = result.daughter_group
 
         self.assertIn(
             "night_patrol",
@@ -175,9 +173,7 @@ class CatGroupCulturalEvolutionTests(
             new_name="daughter"
         )
 
-        daughter = result[
-            "daughter_group"
-        ]
+        daughter = result.daughter_group
 
         culture.practice(
             daughter,
@@ -198,9 +194,7 @@ class CatGroupCulturalEvolutionTests(
         )
 
         self.assertGreater(
-            divergence[
-                "divergence"
-            ],
+            divergence.divergence,
             0.0
         )
 

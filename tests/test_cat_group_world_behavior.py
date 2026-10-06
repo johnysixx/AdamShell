@@ -50,7 +50,7 @@ class CatGroupWorldBehaviorTests(unittest.TestCase):
         group_id = self._group(self.members[:3], 'first')
         migration = CatGroupMigrationSystem(self.groups)
         result = migration.migrate(group_id, self.cats.cats, layer='meeting_place', location='back_room', position=SpatialVector3(x=2.0, y=1.0, z=0.0))
-        self.assertTrue(result['migrated'])
+        self.assertTrue(result.migrated)
         for cat in self.members[:3]:
             self.assertEqual(cat.location, 'back_room')
             self.assertEqual(cat.current_layer, 'meeting_place')
@@ -172,8 +172,8 @@ class CatGroupWorldBehaviorTests(unittest.TestCase):
         group_id = self._group(self.members[:4], 'parent')
         split = CatGroupSplitSystem(self.groups)
         result = split.split(group_id, self.cats.cats, departing_members=[self.members[2].name, self.members[3].name], new_name='daughter')
-        self.assertTrue(result['split'])
-        daughter = result['daughter_group']
+        self.assertTrue(result.split)
+        daughter = result.daughter_group
         self.assertEqual(self.groups.groups[daughter].parent_group, group_id)
         self.assertIn(daughter, self.groups.groups[group_id].daughter_groups)
 
