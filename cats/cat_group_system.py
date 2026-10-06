@@ -30,6 +30,8 @@ from cats.cat_group_scent_state import (
 from cats.cat_social_objects import CatRelationship
 from cats.cat_territory_system import CatTerritorySystem
 from cats.cat_group_territory_state import (
+    CatGroupTerritoryClaimedEvent,
+    CatGroupTerritoryClaimedResult,
     CatGroupTerritoryState,
 )
 from cats.cat_group_threat_state import (
@@ -478,10 +480,26 @@ class CatGroupSystem:
 
         return event
 
-    def claim_territory(self, group_id, cats, layer, location, strength=0.7):
-        group = self._group(group_id)
-        members = self._member_objects(group, cats)
-        key = f'{layer}::{location}'
+    def claim_territory(
+        self,
+        group_id,
+        cats,
+        layer,
+        location,
+        strength=0.7,
+    ):
+        group = self._group(
+            group_id
+        )
+
+        members = self._member_objects(
+            group,
+            cats,
+        )
+
+        key = (
+            f"{layer}::{location}"
+        )
 
         territory = group.territories.get(
             key
@@ -495,9 +513,9 @@ class CatGroupSystem:
             )
         ):
             raise TypeError(
-                'Cat group territory record '
-                'must be '
-                'CatGroupTerritoryState.'
+                "Cat group territory record "
+                "must be "
+                "CatGroupTerritoryState."
             )
 
         if territory is None:
@@ -508,15 +526,19 @@ class CatGroupSystem:
         claims = []
 
         for member in members:
-            claim = self.territory_system.claim(
-                member,
-                layer=layer,
-                location=location,
-                strength=strength,
+            claim = (
+                self.territory_system.claim(
+                    member,
+                    layer=layer,
+                    location=location,
+                    strength=strength,
+                )
             )
 
             claims.append(
-                deepcopy(claim)
+                deepcopy(
+                    claim
+                )
             )
 
         territory.record_claim(
@@ -535,9 +557,34 @@ class CatGroupSystem:
             key
         ] = territory
 
-        event = {'name': 'cat_group_territory_claimed', 'group_id': group_id, 'territory': key, 'member_count': len(members), 'claimed': True}
-        self._record(group, event, cats=members)
-        return {**event, 'claims': claims}
+        event = (
+            CatGroupTerritoryClaimedEvent(
+                group_id=group_id,
+                territory=key,
+                member_count=len(
+                    members
+                ),
+            )
+        )
+
+        self._record(
+            group,
+            event,
+            cats=members,
+        )
+
+        return (
+            CatGroupTerritoryClaimedResult(
+                group_id=group_id,
+                territory=key,
+                member_count=len(
+                    members
+                ),
+                claims=tuple(
+                    claims
+                ),
+            )
+        )
 
     def respond_to_threat(self, group_id, cats, threat):
         group = self._group(group_id)

@@ -68,7 +68,7 @@ class CatGroupSystemTests(unittest.TestCase):
         group_id = self._create_group()
         self.group_system.add_member(group_id, self.second, self.cats.cats)
         result = self.group_system.claim_territory(group_id, self.cats.cats, layer='meeting_place', location='bar_window', strength=0.8)
-        self.assertTrue(result['claimed'])
+        self.assertTrue(result.claimed)
         key = 'meeting_place::bar_window'
         self.assertIn(key, self.first.territories.claims)
         self.assertIn(key, self.second.territories.claims)
