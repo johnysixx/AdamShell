@@ -450,30 +450,29 @@ class CatGroupInnovationResultsObjectStateTests(
             self.group_id,
         )
 
-    def test_creation_history_is_serialized_boundary(
+    def test_creation_history_is_detached_object_event(
         self
     ):
         self.contribute_sources()
 
-        group = (
-            self.groups.groups[
-                self.group_id
-            ]
-        )
+        group = self.groups.groups[
+            self.group_id
+        ]
 
-        result = (
-            self.create_innovation()
-        )
+        result = self.create_innovation()
 
-        stored = (
-            group.history[
-                -1
-            ]
-        )
+        stored = group.history[
+            -1
+        ]
 
         self.assertIsInstance(
             stored,
-            dict,
+            CatGroupInnovationCreatedEvent,
+        )
+
+        self.assertEqual(
+            stored,
+            result,
         )
 
         self.assertIsNot(
@@ -481,45 +480,32 @@ class CatGroupInnovationResultsObjectStateTests(
             result,
         )
 
-        self.assertEqual(
-            stored,
-            result.to_dict(),
-        )
-
         self.assertIsInstance(
-            stored[
-                "sources"
-            ],
-            list,
-        )
-
-        stored[
-            "sources"
-        ].append(
-            "changed"
+            stored.sources,
+            tuple,
         )
 
         self.assertEqual(
-            result.sources,
+            stored.sources,
             (
                 "first_source",
                 "second_source",
             ),
         )
 
-        fresh = (
-            result.to_dict()
+        self.assertFalse(
+            hasattr(
+                stored,
+                "to_dict",
+            )
         )
 
-        self.assertEqual(
-            fresh[
-                "sources"
-            ],
-            [
-                "first_source",
-                "second_source",
-            ],
-        )
+        with self.assertRaises(
+            AttributeError
+        ):
+            stored.sources = (
+                "changed",
+            )
 
     def test_parent_innovation_is_registered_in_tree(
         self

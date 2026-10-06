@@ -127,18 +127,16 @@ class CatGroupNormDefinitionObjectStateTests(
                 "norm_id"
             ]
 
-    def test_history_remains_serialized_boundary(
+    def test_history_stores_detached_event_object(
         self
     ):
-        result = (
-            self.norms.define(
-                self.group_id,
-                "quiet_sleeping_area",
-                "social",
-                {
-                    "action": "stay_quiet",
-                },
-            )
+        result = self.norms.define(
+            self.group_id,
+            "quiet_sleeping_area",
+            "social",
+            {
+                "action": "stay_quiet",
+            },
         )
 
         history_event = (
@@ -151,42 +149,42 @@ class CatGroupNormDefinitionObjectStateTests(
 
         self.assertIsInstance(
             history_event,
-            dict,
+            CatGroupNormDefinedEvent,
         )
 
         self.assertEqual(
             history_event,
-            result.to_dict(),
+            result,
+        )
+
+        self.assertIsNot(
+            history_event,
+            result,
         )
 
         self.assertEqual(
-            history_event[
-                "norm_id"
-            ],
+            history_event.norm_id,
             result.norm_id,
         )
 
-    def test_history_snapshot_is_detached(
-        self
-    ):
-        result = (
-            self.norms.define(
-                self.group_id,
-                "share_food",
-                "social",
-                {
-                    "action": "share",
-                },
+        self.assertFalse(
+            hasattr(
+                history_event,
+                "to_dict",
             )
         )
 
-        snapshot = (
-            result.to_dict()
+    def test_history_event_is_frozen_and_detached(
+        self
+    ):
+        result = self.norms.define(
+            self.group_id,
+            "share_food",
+            "social",
+            {
+                "action": "share",
+            },
         )
-
-        snapshot[
-            "norm_name"
-        ] = "changed"
 
         history_event = (
             self.groups.groups[
@@ -195,6 +193,18 @@ class CatGroupNormDefinitionObjectStateTests(
                 -1
             ]
         )
+
+        self.assertIsNot(
+            history_event,
+            result,
+        )
+
+        with self.assertRaises(
+            AttributeError
+        ):
+            history_event.norm_name = (
+                "changed"
+            )
 
         self.assertEqual(
             result.norm_name,
@@ -202,48 +212,42 @@ class CatGroupNormDefinitionObjectStateTests(
         )
 
         self.assertEqual(
-            history_event[
-                "norm_name"
-            ],
+            history_event.norm_name,
             "share_food",
         )
 
-    def test_definition_event_only_serializes_explicitly(
+    def test_definition_event_has_no_serialization_api(
         self
     ):
-        result = (
-            self.norms.define(
-                self.group_id,
-                "protect_food",
-                "resource",
-                {
-                    "action": "protect",
-                },
+        result = self.norms.define(
+            self.group_id,
+            "protect_food",
+            "resource",
+            {
+                "action": "protect",
+            },
+        )
+
+        for method_name in (
+            "get",
+            "keys",
+            "items",
+            "values",
+            "to_dict",
+        ):
+            self.assertFalse(
+                hasattr(
+                    result,
+                    method_name,
+                )
             )
-        )
 
-        self.assertFalse(
-            hasattr(
-                result,
-                "get",
-            )
-        )
-
-        serialized = (
-            result.to_dict()
-        )
-
-        self.assertIsInstance(
-            serialized,
-            dict,
-        )
-
-        self.assertEqual(
-            serialized[
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = result[
                 "norm_id"
-            ],
-            result.norm_id,
-        )
+            ]
 
 
 if __name__ == "__main__":

@@ -35,22 +35,15 @@ class CatGroupKnowledgeContributedEvent:
         init=False,
     )
 
-    def to_dict(self):
-        return {
-            "name":
-                self.name,
-            "group_id":
-                self.group_id,
-            "cat":
-                self.cat,
-            "knowledge_id":
-                self.knowledge_id,
-            "category":
-                self.category,
-            "confidence":
-                self.confidence,
-            "verified":
-                self.verified,
-            "contributed":
-                self.contributed,
-        }
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "confidence",
+            float(self.confidence),
+        )
+
+        object.__setattr__(
+            self,
+            "verified",
+            bool(self.verified),
+        )

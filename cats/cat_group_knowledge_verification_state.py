@@ -29,18 +29,9 @@ class CatGroupKnowledgeVerifiedEvent:
         init=False,
     )
 
-    def to_dict(self):
-        return {
-            "name":
-                self.name,
-            "group_id":
-                self.group_id,
-            "cat":
-                self.cat,
-            "knowledge_id":
-                self.knowledge_id,
-            "outcome":
-                self.outcome,
-            "confidence":
-                self.confidence,
-        }
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "confidence",
+            float(self.confidence),
+        )

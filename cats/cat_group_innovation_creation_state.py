@@ -35,15 +35,15 @@ class CatGroupInnovationCreatedEvent:
         init=False,
     )
 
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "group_id": self.group_id,
-            "innovation_id": self.innovation_id,
-            "innovation_name": self.innovation_name,
-            "sources": list(
-                self.sources
-            ),
-            "confidence": self.confidence,
-            "created": self.created,
-        }
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "sources",
+            tuple(self.sources),
+        )
+
+        object.__setattr__(
+            self,
+            "confidence",
+            float(self.confidence),
+        )

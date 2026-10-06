@@ -140,7 +140,7 @@ class CatGroupKnowledgeSystem:
         )
 
         group.history.append(
-            event.to_dict()
+            deepcopy(event)
         )
 
         return event
@@ -302,11 +302,11 @@ class CatGroupKnowledgeSystem:
         )
 
         source.history.append(
-            event.to_dict()
+            deepcopy(event)
         )
 
         target.history.append(
-            event.to_dict()
+            deepcopy(event)
         )
 
         return event
@@ -459,7 +459,7 @@ class CatGroupKnowledgeSystem:
         )
 
         group.history.append(
-            event.to_dict()
+            deepcopy(event)
         )
 
         return event

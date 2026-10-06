@@ -263,28 +263,27 @@ class CatGroupKnowledgeResultsObjectStateTests(
             result
         )
 
-    def test_contribution_history_is_detached_boundary(
+    def test_contribution_history_is_detached_object_event(
         self
     ):
-        group = (
-            self.groups.groups[
-                self.first_group
-            ]
-        )
+        group = self.groups.groups[
+            self.first_group
+        ]
 
-        result = (
-            self.contribute()
-        )
+        result = self.contribute()
 
-        stored = (
-            group.history[
-                -1
-            ]
-        )
+        stored = group.history[
+            -1
+        ]
 
         self.assertIsInstance(
             stored,
-            dict,
+            CatGroupKnowledgeContributedEvent,
+        )
+
+        self.assertEqual(
+            stored,
+            result,
         )
 
         self.assertIsNot(
@@ -293,18 +292,23 @@ class CatGroupKnowledgeResultsObjectStateTests(
         )
 
         self.assertEqual(
-            stored,
-            result.to_dict(),
-        )
-
-        stored[
-            "knowledge_id"
-        ] = "changed"
-
-        self.assertEqual(
-            result.knowledge_id,
+            stored.knowledge_id,
             "safe_route",
         )
+
+        self.assertFalse(
+            hasattr(
+                stored,
+                "to_dict",
+            )
+        )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = stored[
+                "knowledge_id"
+            ]
 
     def test_unknown_share_returns_denied_object(
         self
@@ -526,22 +530,18 @@ class CatGroupKnowledgeResultsObjectStateTests(
             result
         )
 
-    def test_transmission_histories_are_separate_snapshots(
+    def test_transmission_histories_are_separate_object_events(
         self
     ):
         self.contribute()
 
-        source = (
-            self.groups.groups[
-                self.first_group
-            ]
-        )
+        source = self.groups.groups[
+            self.first_group
+        ]
 
-        target = (
-            self.groups.groups[
-                self.second_group
-            ]
-        )
+        target = self.groups.groups[
+            self.second_group
+        ]
 
         result = (
             self.knowledge
@@ -552,46 +552,52 @@ class CatGroupKnowledgeResultsObjectStateTests(
             )
         )
 
-        source_event = (
-            source.history[
-                -1
-            ]
-        )
+        source_event = source.history[
+            -1
+        ]
 
-        target_event = (
-            target.history[
-                -1
-            ]
-        )
+        target_event = target.history[
+            -1
+        ]
 
-        self.assertEqual(
+        for event in (
             source_event,
-            result.to_dict(),
-        )
-
-        self.assertEqual(
             target_event,
-            result.to_dict(),
-        )
+        ):
+            self.assertIsInstance(
+                event,
+                CatGroupKnowledgeTransmittedEvent,
+            )
+
+            self.assertEqual(
+                event,
+                result,
+            )
+
+            self.assertIsNot(
+                event,
+                result,
+            )
+
+            self.assertFalse(
+                hasattr(
+                    event,
+                    "to_dict",
+                )
+            )
 
         self.assertIsNot(
             source_event,
             target_event,
         )
 
-        source_event[
-            "knowledge_id"
-        ] = "changed"
-
         self.assertEqual(
-            target_event[
-                "knowledge_id"
-            ],
+            source_event.knowledge_id,
             "safe_route",
         )
 
         self.assertEqual(
-            result.knowledge_id,
+            target_event.knowledge_id,
             "safe_route",
         )
 
@@ -830,7 +836,7 @@ class CatGroupKnowledgeResultsObjectStateTests(
             record.verified
         )
 
-    def test_verification_history_is_detached_boundary(
+    def test_verification_history_is_detached_object_event(
         self
     ):
         self.contribute(
@@ -838,44 +844,46 @@ class CatGroupKnowledgeResultsObjectStateTests(
             verified=False,
         )
 
-        group = (
-            self.groups.groups[
-                self.first_group
-            ]
+        group = self.groups.groups[
+            self.first_group
+        ]
+
+        result = self.knowledge.verify(
+            self.first_group,
+            self.first,
+            "safe_route",
+            confirmed=True,
         )
 
-        result = (
-            self.knowledge.verify(
-                self.first_group,
-                self.first,
-                "safe_route",
-                confirmed=True,
-            )
-        )
-
-        stored = (
-            group.history[
-                -1
-            ]
-        )
+        stored = group.history[
+            -1
+        ]
 
         self.assertIsInstance(
             stored,
-            dict,
+            CatGroupKnowledgeVerifiedEvent,
         )
 
         self.assertEqual(
             stored,
-            result.to_dict(),
+            result,
         )
 
-        stored[
-            "outcome"
-        ] = "changed"
+        self.assertIsNot(
+            stored,
+            result,
+        )
 
         self.assertEqual(
-            result.outcome,
+            stored.outcome,
             "confirmed",
+        )
+
+        self.assertFalse(
+            hasattr(
+                stored,
+                "to_dict",
+            )
         )
 
     def test_results_are_immutable(

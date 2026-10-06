@@ -365,30 +365,29 @@ class CatGroupMythResultsObjectStateTests(
             0,
         )
 
-    def test_creation_history_is_serialized_boundary(
+    def test_creation_history_is_detached_object_event(
         self
     ):
         self.contribute_source()
 
-        group = (
-            self.groups.groups[
-                self.group_id
-            ]
-        )
+        group = self.groups.groups[
+            self.group_id
+        ]
 
-        result = (
-            self.create_myth()
-        )
+        result = self.create_myth()
 
-        stored = (
-            group.history[
-                -1
-            ]
-        )
+        stored = group.history[
+            -1
+        ]
 
         self.assertIsInstance(
             stored,
-            dict,
+            CatGroupMythCreatedEvent,
+        )
+
+        self.assertEqual(
+            stored,
+            result,
         )
 
         self.assertIsNot(
@@ -397,26 +396,21 @@ class CatGroupMythResultsObjectStateTests(
         )
 
         self.assertEqual(
-            stored,
-            result.to_dict(),
-        )
-
-        stored[
-            "myth_id"
-        ] = "changed"
-
-        self.assertNotEqual(
+            stored.myth_id,
             result.myth_id,
-            "changed",
         )
 
-        fresh = (
-            result.to_dict()
+        self.assertFalse(
+            hasattr(
+                stored,
+                "to_dict",
+            )
         )
 
-        fresh[
-            "source_knowledge"
-        ] = "changed"
+        with self.assertRaises(
+            AttributeError
+        ):
+            stored.myth_id = "changed"
 
         self.assertEqual(
             result.source_knowledge,

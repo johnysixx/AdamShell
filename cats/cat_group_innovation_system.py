@@ -170,7 +170,7 @@ class CatGroupInnovationSystem:
         )
 
         group.history.append(
-            event.to_dict()
+            deepcopy(event)
         )
 
         return event

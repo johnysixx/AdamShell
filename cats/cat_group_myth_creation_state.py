@@ -31,12 +31,3 @@ class CatGroupMythCreatedEvent:
         default=True,
         init=False,
     )
-
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "group_id": self.group_id,
-            "myth_id": self.myth_id,
-            "source_knowledge": self.source_knowledge,
-            "created": self.created,
-        }
