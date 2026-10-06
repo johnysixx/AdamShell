@@ -135,9 +135,7 @@ class CatGroupFederationSystem:
             )
 
             relations.append(
-                relation[
-                    "mutual_score"
-                ]
+                relation.mutual_score
             )
 
         average = (

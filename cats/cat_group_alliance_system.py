@@ -67,42 +67,24 @@ class CatGroupAllianceSystem:
             )
         )
 
-        first_memory = relation[
-            "first"
-        ][
-            "memory"
-        ]
+        first_memory = relation.first.memory
 
-        second_memory = relation[
-            "second"
-        ][
-            "memory"
-        ]
+        second_memory = relation.second.memory
 
         sufficient_history = bool(
-            first_memory[
-                "cooperations"
-            ] >= 2
-            and second_memory[
-                "cooperations"
-            ] >= 2
+            first_memory.cooperations >= 2
+            and second_memory.cooperations >= 2
         )
 
         no_betrayal = bool(
-            first_memory[
-                "betrayals"
-            ] == 0
-            and second_memory[
-                "betrayals"
-            ] == 0
+            first_memory.betrayals == 0
+            and second_memory.betrayals == 0
         )
 
         accepted = bool(
             sufficient_history
             and no_betrayal
-            and relation[
-                "mutual_score"
-            ] >= 0.30
+            and relation.mutual_score >= 0.30
         )
 
         if not accepted:

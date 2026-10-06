@@ -22,6 +22,13 @@ from cats.cat_group_federation_leave_state import (
 from cats.cat_group_federation_system import (
     CatGroupFederationSystem,
 )
+from cats.cat_group_diplomacy_state import (
+    CatGroupDiplomacyState,
+    CatGroupMutualRelationResult,
+)
+from cats.cat_group_memory_state import (
+    CatGroupMemoryState,
+)
 from cats.cat_group_knowledge_system import (
     CatGroupKnowledgeSystem,
 )
@@ -30,6 +37,30 @@ from cats.cat_group_system import (
 )
 from cats.cats import Cats
 from universe.universe import Universe
+
+
+def _mutual_relation_result(
+    first_group_id,
+    second_group_id,
+    mutual_score,
+):
+    return CatGroupMutualRelationResult(
+        first=CatGroupDiplomacyState(
+            group_id=first_group_id,
+            other_group_id=second_group_id,
+            score=mutual_score,
+            status="neutral",
+            memory=CatGroupMemoryState(),
+        ),
+        second=CatGroupDiplomacyState(
+            group_id=second_group_id,
+            other_group_id=first_group_id,
+            score=mutual_score,
+            status="neutral",
+            memory=CatGroupMemoryState(),
+        ),
+        mutual_score=mutual_score,
+    )
 
 
 class CatGroupFederationResultsObjectStateTests(
@@ -296,14 +327,12 @@ class CatGroupFederationResultsObjectStateTests(
         )
 
         self.federations.diplomacy.mutual_relation = (
-            lambda first_group_id, second_group_id: {
-                "first":
+            lambda first_group_id, second_group_id:
+                _mutual_relation_result(
                     first_group_id,
-                "second":
                     second_group_id,
-                "mutual_score":
                     -0.5,
-            }
+                )
         )
 
         result = (
@@ -756,10 +785,12 @@ class CatGroupFederationResultsObjectStateTests(
             skipped.reason = "changed"
 
         self.federations.diplomacy.mutual_relation = (
-            lambda first_group_id, second_group_id: {
-                "mutual_score":
+            lambda first_group_id, second_group_id:
+                _mutual_relation_result(
+                    first_group_id,
+                    second_group_id,
                     -0.5,
-            }
+                )
         )
 
         denied = (
@@ -775,10 +806,12 @@ class CatGroupFederationResultsObjectStateTests(
             denied.score = 0.0
 
         self.federations.diplomacy.mutual_relation = (
-            lambda first_group_id, second_group_id: {
-                "mutual_score":
+            lambda first_group_id, second_group_id:
+                _mutual_relation_result(
+                    first_group_id,
+                    second_group_id,
                     0.0,
-            }
+                )
         )
 
         admitted = (

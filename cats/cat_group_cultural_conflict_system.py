@@ -3,6 +3,9 @@ from copy import deepcopy
 from cats.cat_cultural_preference_state import (
     CatCulturalPreferenceState
 )
+from cats.cat_group_diplomacy_state import (
+    CatGroupDiplomacyState,
+)
 
 class CatGroupCulturalConflictSystem:
 
@@ -89,7 +92,20 @@ class CatGroupCulturalConflictSystem:
         for group, other_id in ((first, second_group_id), (second, first_group_id)):
             diplomacy = group.diplomacy.get(other_id)
             if diplomacy is not None:
-                diplomacy['score'] = max(-1.0, min(1.0, self._number(diplomacy.get('score', 0.0)) + diplomacy_delta))
+                if not isinstance(
+                    diplomacy,
+                    CatGroupDiplomacyState,
+                ):
+                    raise TypeError(
+                        "Cat group diplomacy record must be "
+                        "CatGroupDiplomacyState."
+                    )
+
+                group.diplomacy[
+                    other_id
+                ] = diplomacy.with_score_delta(
+                    diplomacy_delta
+                )
         event = {'name': 'cat_group_cultural_interaction', **result, 'diplomacy_delta': diplomacy_delta}
         first.history.append(deepcopy(event))
         second.history.append(deepcopy(event))

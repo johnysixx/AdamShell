@@ -139,7 +139,7 @@ class CatGroupDiplomacyTests(
         )
 
         self.assertIn(
-            result["status"],
+            result.status,
             {
                 "tolerant",
                 "friendly"
@@ -147,7 +147,7 @@ class CatGroupDiplomacyTests(
         )
 
         self.assertGreater(
-            result["score"],
+            result.score,
             0.0
         )
 
@@ -263,11 +263,7 @@ class CatGroupDiplomacyTests(
         )
 
         self.assertGreaterEqual(
-            relation[
-                "memory"
-            ][
-                "betrayals"
-            ],
+            relation.memory.betrayals,
             1
         )
 
