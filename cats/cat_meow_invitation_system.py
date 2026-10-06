@@ -21,7 +21,7 @@ class CatMeowInvitationSystem:
         if getattr(cat.meow_invitations, 'garfield_training_required', False):
             return {'name': 'cat_MEOW_not_offered', 'cat': cat.name, 'human': self._name(human), 'reason': 'garfield_training_required', 'offered': False}
         evaluation = self.bonds.evaluate(cat, human)
-        if not evaluation['right_human']:
+        if not evaluation.right_human:
             return {'name': 'cat_MEOW_not_offered', 'cat': cat.name, 'human': self._name(human), 'reason': 'not_recognized_as_right_human', 'offered': False}
         invitation_id = 'MEOW_' + uuid4().hex[:8]
         invitation = CatMeowInvitation(**{'id': invitation_id, 'name': 'cat_MEOW_invitation', 'cat': cat.name, 'human': self._name(human), 'escort_required': True, 'sound': 'MEOW', 'meaning': 'follow_me', 'offered': True, 'understood': None, 'accepted': False, 'used': False})

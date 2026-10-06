@@ -1,54 +1,218 @@
 from copy import deepcopy
+
 from cats.cat import Cat
-from cats.cat_components import CatHumanBond
+from cats.cat_components import (
+    CatHumanBond,
+)
+from cats.cat_human_bond_result_state import (
+    CatHumanBondEvaluationResult,
+    CatHumanInteractionRememberedEvent,
+)
+
 
 class CatHumanBondSystem:
+
     RIGHT_HUMAN_THRESHOLD = 0.72
 
-    def __init__(self, cats_layer=None):
+    def __init__(
+        self,
+        cats_layer=None,
+    ):
         self.cats_layer = cats_layer
 
-    def remember_interaction(self, cat, human, positive=True, significance=0.1):
-        self._require_cat(cat)
-        human_name = self._name(human)
+    def remember_interaction(
+        self,
+        cat,
+        human,
+        positive=True,
+        significance=0.1,
+    ):
+        self._require_cat(
+            cat
+        )
+
+        human_name = self._name(
+            human
+        )
+
         if human_name is None:
-            raise ValueError('Human must have a name.')
-        bond = cat.human_bonds.records.setdefault(human_name, self._new_bond(human_name))
-        significance = self._clamp(significance)
+            raise ValueError(
+                "Human must have a name."
+            )
+
+        bond = (
+            cat.human_bonds.records.setdefault(
+                human_name,
+                self._new_bond(
+                    human_name
+                ),
+            )
+        )
+
+        significance = self._clamp(
+            significance
+        )
+
         bond.encounters += 1
-        bond.familiarity = self._clamp(bond.familiarity + significance * 0.7)
+
+        bond.familiarity = self._clamp(
+            bond.familiarity
+            + significance
+            * 0.7
+        )
+
         if positive:
             bond.positive_interactions += 1
-            bond.trust = self._clamp(bond.trust + significance)
-            bond.affection = self._clamp(bond.affection + significance * 0.8)
+
+            bond.trust = self._clamp(
+                bond.trust
+                + significance
+            )
+
+            bond.affection = self._clamp(
+                bond.affection
+                + significance
+                * 0.8
+            )
+
         else:
             bond.negative_interactions += 1
-            bond.trust = self._clamp(bond.trust - significance * 1.3)
-            bond.affection = self._clamp(bond.affection - significance)
-        bond.right_human_score = self._score(cat, bond)
-        event = {'name': 'cat_human_interaction_remembered', 'cat': cat.name, 'human': human_name, 'positive': bool(positive), 'right_human_score': bond.right_human_score}
-        cat.social_interactions.append(deepcopy(event))
+
+            bond.trust = self._clamp(
+                bond.trust
+                - significance
+                * 1.3
+            )
+
+            bond.affection = self._clamp(
+                bond.affection
+                - significance
+            )
+
+        bond.right_human_score = (
+            self._score(
+                cat,
+                bond,
+            )
+        )
+
+        event = (
+            CatHumanInteractionRememberedEvent(
+                cat=cat.name,
+                human=human_name,
+                positive=positive,
+                right_human_score=
+                    bond.right_human_score,
+            )
+        )
+
+        cat.social_interactions.append(
+            deepcopy(
+                event
+            )
+        )
+
         return event
 
-    def evaluate(self, cat, human):
-        self._require_cat(cat)
-        human_name = self._name(human)
-        bond = cat.human_bonds.records.get(human_name)
+    def evaluate(
+        self,
+        cat,
+        human,
+    ):
+        self._require_cat(
+            cat
+        )
+
+        human_name = self._name(
+            human
+        )
+
+        bond = (
+            cat.human_bonds.records.get(
+                human_name
+            )
+        )
+
         if bond is None:
-            return {'cat': cat.name, 'human': human_name, 'score': 0.0, 'right_human': False, 'reason': 'human_not_known'}
-        score = self._score(cat, bond)
-        bond.right_human_score = score
-        right_human = bool(score >= self.RIGHT_HUMAN_THRESHOLD and bond.negative_interactions <= bond.positive_interactions)
-        bond.recognized_as_right_human = right_human
-        return {'cat': cat.name, 'human': human_name, 'score': score, 'right_human': right_human, 'trust': bond.trust, 'affection': bond.affection, 'familiarity': bond.familiarity}
+            return (
+                CatHumanBondEvaluationResult(
+                    cat=cat.name,
+                    human=human_name,
+                    score=0.0,
+                    right_human=False,
+                    reason="human_not_known",
+                )
+            )
 
-    def _score(self, cat, bond):
-        personality = cat.personality.traits
-        sociability = self._number(personality.sociability)
-        score = bond.trust * 0.4 + bond.affection * 0.35 + bond.familiarity * 0.2 + sociability * 0.05
-        return round(self._clamp(score), 4)
+        score = self._score(
+            cat,
+            bond,
+        )
 
-    def _new_bond(self, human_name):
+        bond.right_human_score = (
+            score
+        )
+
+        right_human = bool(
+            score
+            >= self.RIGHT_HUMAN_THRESHOLD
+            and bond.negative_interactions
+            <= bond.positive_interactions
+        )
+
+        bond.recognized_as_right_human = (
+            right_human
+        )
+
+        return (
+            CatHumanBondEvaluationResult(
+                cat=cat.name,
+                human=human_name,
+                score=score,
+                right_human=
+                    right_human,
+                trust=bond.trust,
+                affection=bond.affection,
+                familiarity=
+                    bond.familiarity,
+            )
+        )
+
+    def _score(
+        self,
+        cat,
+        bond,
+    ):
+        personality = (
+            cat.personality.traits
+        )
+
+        sociability = self._number(
+            personality.sociability
+        )
+
+        score = (
+            bond.trust
+            * 0.4
+            + bond.affection
+            * 0.35
+            + bond.familiarity
+            * 0.2
+            + sociability
+            * 0.05
+        )
+
+        return round(
+            self._clamp(
+                score
+            ),
+            4,
+        )
+
+    def _new_bond(
+        self,
+        human_name,
+    ):
         return CatHumanBond(
             human=human_name,
             encounters=0,
@@ -61,18 +225,52 @@ class CatHumanBondSystem:
             recognized_as_right_human=False,
         )
 
-    def _name(self, entity):
-        return getattr(entity, 'name', None)
+    def _name(
+        self,
+        entity,
+    ):
+        return getattr(
+            entity,
+            "name",
+            None,
+        )
 
-    def _number(self, value):
+    def _number(
+        self,
+        value,
+    ):
         try:
-            return float(value)
-        except (TypeError, ValueError):
+            return float(
+                value
+            )
+
+        except (
+            TypeError,
+            ValueError,
+        ):
             return 0.0
 
-    def _clamp(self, value):
-        return max(0.0, min(1.0, float(value)))
+    def _clamp(
+        self,
+        value,
+    ):
+        return max(
+            0.0,
+            min(
+                1.0,
+                float(value),
+            ),
+        )
 
-    def _require_cat(self, cat):
-        if not isinstance(cat, Cat):
-            raise TypeError('CatHumanBondSystem requires Cat.')
+    def _require_cat(
+        self,
+        cat,
+    ):
+        if not isinstance(
+            cat,
+            Cat,
+        ):
+            raise TypeError(
+                "CatHumanBondSystem "
+                "requires Cat."
+            )

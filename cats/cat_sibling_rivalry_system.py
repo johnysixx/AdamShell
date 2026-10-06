@@ -1,85 +1,349 @@
 from copy import deepcopy
+
 from cats.cat import Cat
-from cats.cat_family_system import CatFamilySystem
-from cats.cat_social_objects import CatRelationship
+from cats.cat_family_system import (
+    CatFamilySystem,
+)
+from cats.cat_sibling_rivalry_result_state import (
+    CatSiblingReconciliationDeniedResult,
+    CatSiblingRivalryDeniedResult,
+    CatSiblingRivalryEvent,
+    CatSiblingsReconciledEvent,
+)
+from cats.cat_social_objects import (
+    CatRelationship,
+)
+
 
 class CatSiblingRivalrySystem:
 
-    def __init__(self, cats_layer=None):
+    def __init__(
+        self,
+        cats_layer=None,
+    ):
         self.cats_layer = cats_layer
-        self.family_system = CatFamilySystem(cats_layer)
 
-    def compete(self, first, second, resource, intensity=0.5):
-        self._require_cat(first)
-        self._require_cat(second)
-        relation = self.family_system.relation(first, second)
-        if relation not in {'sibling', 'half_sibling', 'sibling_littermate', 'half_sibling_littermate'}:
-            return {'name': 'sibling_rivalry_denied', 'first': first.name, 'second': second.name, 'reason': 'not_siblings', 'competed': False}
-        intensity = self._clamp(intensity)
-        first_relation = self._relationship(first, second)
-        second_relation = self._relationship(second, first)
+        self.family_system = (
+            CatFamilySystem(
+                cats_layer
+            )
+        )
+
+    def compete(
+        self,
+        first,
+        second,
+        resource,
+        intensity=0.5,
+    ):
+        self._require_cat(
+            first
+        )
+
+        self._require_cat(
+            second
+        )
+
+        relation = (
+            self.family_system.relation(
+                first,
+                second,
+            )
+        )
+
+        if relation not in {
+            "sibling",
+            "half_sibling",
+            "sibling_littermate",
+            "half_sibling_littermate",
+        }:
+            return (
+                CatSiblingRivalryDeniedResult(
+                    first=first.name,
+                    second=second.name,
+                    reason="not_siblings",
+                )
+            )
+
+        intensity = self._clamp(
+            intensity
+        )
+
+        first_relation = (
+            self._relationship(
+                first,
+                second,
+            )
+        )
+
+        second_relation = (
+            self._relationship(
+                second,
+                first,
+            )
+        )
+
         bond = first.bonds.records.get(
             second.name
         )
+
         bonded = bool(
             getattr(
                 bond,
                 "active",
-                False
+                False,
             )
         )
-        tension_gain = 0.12 * intensity * (0.5 if bonded else 1.0)
-        for relationship in (first_relation, second_relation):
-            relationship.familiarity = self._clamp(relationship.familiarity + 0.02)
-            relationship.tension = self._clamp(relationship.tension + tension_gain)
-            relationship.affiliation = self._clamp(relationship.affiliation - 0.04 * intensity)
-            relationship.last_interaction = 'sibling_rivalry'
-        tension = max(first_relation.tension, second_relation.tension)
+
+        tension_gain = (
+            0.12
+            * intensity
+            * (
+                0.5
+                if bonded
+                else 1.0
+            )
+        )
+
+        for relationship in (
+            first_relation,
+            second_relation,
+        ):
+            relationship.familiarity = (
+                self._clamp(
+                    relationship.familiarity
+                    + 0.02
+                )
+            )
+
+            relationship.tension = (
+                self._clamp(
+                    relationship.tension
+                    + tension_gain
+                )
+            )
+
+            relationship.affiliation = (
+                self._clamp(
+                    relationship.affiliation
+                    - 0.04
+                    * intensity
+                )
+            )
+
+            relationship.last_interaction = (
+                "sibling_rivalry"
+            )
+
+        tension = max(
+            first_relation.tension,
+            second_relation.tension,
+        )
+
         if tension < 0.35:
-            outcome = 'playful_competition'
+            outcome = (
+                "playful_competition"
+            )
+
         elif tension < 0.7:
-            outcome = 'warning_competition'
+            outcome = (
+                "warning_competition"
+            )
+
         else:
-            outcome = 'sibling_conflict'
-        event = {'name': 'cat_sibling_rivalry', 'first': first.name, 'second': second.name, 'relation': relation, 'resource': resource, 'intensity': intensity, 'outcome': outcome, 'bonded': bonded, 'competed': True}
-        self._record(first, second, resource, event)
+            outcome = (
+                "sibling_conflict"
+            )
+
+        event = (
+            CatSiblingRivalryEvent(
+                first=first.name,
+                second=second.name,
+                relation=relation,
+                resource=resource,
+                intensity=intensity,
+                outcome=outcome,
+                bonded=bonded,
+            )
+        )
+
+        self._record(
+            first,
+            second,
+            resource,
+            event,
+        )
+
         return event
 
-    def reconcile(self, first, second):
-        self._require_cat(first)
-        self._require_cat(second)
-        relation = self.family_system.relation(first, second)
-        if relation not in {'sibling', 'half_sibling', 'sibling_littermate', 'half_sibling_littermate'}:
-            return {'name': 'sibling_reconciliation_denied', 'reconciled': False}
-        for cat, other in ((first, second), (second, first)):
-            relationship = self._relationship(cat, other)
-            relationship.tension = self._clamp(relationship.tension - 0.15)
-            relationship.affiliation = self._clamp(relationship.affiliation + 0.05)
-        event = {'name': 'cat_siblings_reconciled', 'first': first.name, 'second': second.name, 'reconciled': True}
-        first.social_interactions.append(deepcopy(event))
-        second.social_interactions.append(deepcopy(event))
+    def reconcile(
+        self,
+        first,
+        second,
+    ):
+        self._require_cat(
+            first
+        )
+
+        self._require_cat(
+            second
+        )
+
+        relation = (
+            self.family_system.relation(
+                first,
+                second,
+            )
+        )
+
+        if relation not in {
+            "sibling",
+            "half_sibling",
+            "sibling_littermate",
+            "half_sibling_littermate",
+        }:
+            return (
+                CatSiblingReconciliationDeniedResult(
+                    first=first.name,
+                    second=second.name,
+                    reason="not_siblings",
+                )
+            )
+
+        for (
+            cat,
+            other,
+        ) in (
+            (
+                first,
+                second,
+            ),
+            (
+                second,
+                first,
+            ),
+        ):
+            relationship = (
+                self._relationship(
+                    cat,
+                    other,
+                )
+            )
+
+            relationship.tension = (
+                self._clamp(
+                    relationship.tension
+                    - 0.15
+                )
+            )
+
+            relationship.affiliation = (
+                self._clamp(
+                    relationship.affiliation
+                    + 0.05
+                )
+            )
+
+        event = (
+            CatSiblingsReconciledEvent(
+                first=first.name,
+                second=second.name,
+            )
+        )
+
+        first.social_interactions.append(
+            deepcopy(
+                event
+            )
+        )
+
+        second.social_interactions.append(
+            deepcopy(
+                event
+            )
+        )
+
         return event
 
-    def _relationship(self, cat, other_cat):
-        relation = cat.relationships.setdefault(
+    def _relationship(
+        self,
+        cat,
+        other_cat,
+    ):
+        return cat.relationships.setdefault(
             other_cat.name,
             CatRelationship.create(),
         )
-        return relation
 
-    def _record(self, first, second, resource, event):
-        for cat, rival in ((first, second), (second, first)):
-            state = cat.sibling_rivalry
+    def _record(
+        self,
+        first,
+        second,
+        resource,
+        event,
+    ):
+        for (
+            cat,
+            rival,
+        ) in (
+            (
+                first,
+                second,
+            ),
+            (
+                second,
+                first,
+            ),
+        ):
+            state = (
+                cat.sibling_rivalry
+            )
+
             state.events += 1
             state.last_rival = rival.name
             state.last_resource = resource
+
             rivals = state.rivals
-            rivals[rival.name] = int(rivals.get(rival.name, 0)) + 1
-            cat.social_interactions.append(deepcopy(event))
 
-    def _clamp(self, value):
-        return max(0.0, min(1.0, float(value)))
+            rivals[
+                rival.name
+            ] = (
+                int(
+                    rivals.get(
+                        rival.name,
+                        0,
+                    )
+                )
+                + 1
+            )
 
-    def _require_cat(self, cat):
-        if not isinstance(cat, Cat):
-            raise TypeError('CatSiblingRivalrySystem requires Cat.')
+            cat.social_interactions.append(
+                deepcopy(
+                    event
+                )
+            )
+
+    def _clamp(
+        self,
+        value,
+    ):
+        return max(
+            0.0,
+            min(
+                1.0,
+                float(value),
+            ),
+        )
+
+    def _require_cat(
+        self,
+        cat,
+    ):
+        if not isinstance(
+            cat,
+            Cat,
+        ):
+            raise TypeError(
+                "CatSiblingRivalrySystem "
+                "requires Cat."
+            )

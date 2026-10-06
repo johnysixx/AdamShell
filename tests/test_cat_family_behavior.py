@@ -138,7 +138,7 @@ class CatFamilyBehaviorTests(
         )
 
         self.assertTrue(
-            result["competed"]
+            result.competed
         )
 
         first_relation = self.first.relationships[self.second.name]
@@ -227,7 +227,7 @@ class CatFamilyBehaviorTests(
         )
 
         self.assertTrue(
-            result["reconciled"]
+            result.reconciled
         )
 
         self.assertLess(
@@ -253,11 +253,11 @@ class CatFamilyBehaviorTests(
         )
 
         self.assertTrue(
-            result["taught"]
+            result.taught
         )
 
         self.assertEqual(
-            result["parent_role"],
+            result.parent_role,
             "mother"
         )
 
@@ -288,7 +288,7 @@ class CatFamilyBehaviorTests(
         )
 
         self.assertTrue(
-            result["taught"]
+            result.taught
         )
 
         self.assertEqual(
@@ -341,11 +341,11 @@ class CatFamilyBehaviorTests(
         )
 
         self.assertFalse(
-            result["taught"]
+            result.taught
         )
 
         self.assertEqual(
-            result["reason"],
+            result.reason,
             "not_parent"
         )
 
@@ -368,12 +368,12 @@ class CatFamilyBehaviorTests(
         competed = rivalry.compete(
             self.first, self.second, resource='food', intensity=0.5,
         )
-        self.assertTrue(competed['competed'])
+        self.assertTrue(competed.competed)
         self.assertAlmostEqual(relation.tension, 0.46)
         self.assertAlmostEqual(legacy.tension, 0.06)
 
         reconciled = rivalry.reconcile(self.first, self.second)
-        self.assertTrue(reconciled['reconciled'])
+        self.assertTrue(reconciled.reconciled)
         self.assertIs(self.first.relationships[self.second.name], relation)
         self.assertIs(self.second.relationships[self.first.name], legacy)
         self.assertAlmostEqual(relation.trust, 0.8)
@@ -410,8 +410,8 @@ class CatFamilyBehaviorTests(
             father_result = teaching.teach(
                 self.father, self.first, skill='hunting',
             )
-            self.assertTrue(mother_result['taught'])
-            self.assertTrue(father_result['taught'])
+            self.assertTrue(mother_result.taught)
+            self.assertTrue(father_result.taught)
 
         self.assertIs(self.first.relationships[self.mother.name], relation)
         self.assertIs(self.first.relationships[self.father.name], legacy)

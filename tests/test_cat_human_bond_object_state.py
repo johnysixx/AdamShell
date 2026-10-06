@@ -95,14 +95,14 @@ class CatHumanBondObjectStateTests(unittest.TestCase):
         ]
 
         self.assertTrue(
-            result["right_human"]
+            result.right_human
         )
         self.assertTrue(
             bond.recognized_as_right_human
         )
         self.assertEqual(
             bond.right_human_score,
-            result["score"],
+            result.score,
         )
 
 

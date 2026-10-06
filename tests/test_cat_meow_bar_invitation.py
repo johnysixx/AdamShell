@@ -47,7 +47,7 @@ class CatMEOWBarInvitationTests(unittest.TestCase):
     def test_cat_can_recognize_right_human(self):
         self._make_right_human()
         result = self.bonds.evaluate(self.cat, self.human)
-        self.assertTrue(result['right_human'])
+        self.assertTrue(result.right_human)
 
     def test_cat_can_offer_MEOW_to_right_human(self):
         self._make_right_human()
