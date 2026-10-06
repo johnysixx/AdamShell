@@ -5,6 +5,10 @@ from cats.cat_group import CatGroup
 from cats.cat_group_lifecycle_state import (
     CatGroupLifecycleState,
 )
+from cats.cat_group_leave_state import (
+    CatGroupLeaveDeniedResult,
+    CatLeftGroupEvent,
+)
 from cats.cat_social_objects import CatRelationship
 from cats.cat_territory_system import CatTerritorySystem
 from cats.cat_group_territory_state import (
@@ -204,19 +208,50 @@ class CatGroupSystem:
         self._record(group, event, cats=members)
         return event
 
-    def leave_group(self, group_id, cat):
-        self._require_cat(cat)
-        group = self._group(group_id)
+    def leave_group(
+        self,
+        group_id,
+        cat,
+    ):
+        self._require_cat(
+            cat
+        )
+
+        group = self._group(
+            group_id
+        )
+
         if cat.name not in group.members:
-            return {'name': 'cat_group_leave_denied', 'group_id': group_id, 'cat': cat.name, 'reason': 'not_member', 'left': False}
-        group.members.remove(cat.name)
+            return CatGroupLeaveDeniedResult(
+                group_id=group_id,
+                cat=cat.name,
+                reason="not_member",
+            )
+
+        group.members.remove(
+            cat.name
+        )
+
         cat.group.group_id = None
         cat.group.member = False
         cat.group.joined_order = None
         cat.group.shared_scent = 0.0
         cat.group.accepted_members = []
-        event = {'name': 'cat_left_group', 'group_id': group_id, 'cat': cat.name, 'member_count': len(group.members), 'left': True}
-        self._record(group, event, cats=[cat])
+
+        event = CatLeftGroupEvent(
+            group_id=group_id,
+            cat=cat.name,
+            member_count=len(
+                group.members
+            ),
+        )
+
+        self._record(
+            group,
+            event,
+            cats=[cat],
+        )
+
         return event
 
     def same_group(self, first, second):

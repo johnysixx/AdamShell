@@ -53,7 +53,7 @@ class CatGroupSuccessionSystem:
         for role in roles:
             succession_events.append(self.succeed(group_id, cat, role, cats, reason=reason))
         leave_result = self.group_system.leave_group(group_id, cat)
-        return {'name': 'cat_group_departure_with_succession', 'group_id': group_id, 'cat': cat.name, 'roles': roles, 'successions': succession_events, 'leave_result': leave_result, 'departed': bool(leave_result.get('left', False))}
+        return {'name': 'cat_group_departure_with_succession', 'group_id': group_id, 'cat': cat.name, 'roles': roles, 'successions': succession_events, 'leave_result': leave_result, 'departed': bool(leave_result.left)}
 
     def _weaken_dependent_institutions(self, group, role, amount):
         for institution in group.institutions.values():

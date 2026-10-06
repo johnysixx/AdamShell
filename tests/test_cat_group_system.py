@@ -128,8 +128,13 @@ class CatGroupSystemTests(unittest.TestCase):
     def test_cat_can_leave_group(self):
         group_id = self._create_group()
         self.group_system.add_member(group_id, self.second, self.cats.cats)
-        result = self.group_system.leave_group(group_id, self.second)
-        self.assertTrue(result['left'])
+        result = self.group_system.leave_group(
+            group_id,
+            self.second,
+        )
+        self.assertTrue(
+            result.left
+        )
         self.assertFalse(self.second.group.member)
         self.assertFalse(self.group_system.same_group(self.first, self.second))
 
