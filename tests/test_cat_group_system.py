@@ -36,7 +36,7 @@ class CatGroupSystemTests(unittest.TestCase):
     def test_neutral_cat_can_join_group(self):
         group_id = self._create_group()
         result = self.group_system.add_member(group_id, self.second, self.cats.cats)
-        self.assertTrue(result['joined'])
+        self.assertTrue(result.joined)
         self.assertTrue(self.group_system.same_group(self.first, self.second))
         first_relation = self.first.relationships[self.second.name]
         second_relation = self.second.relationships[self.first.name]
@@ -53,8 +53,8 @@ class CatGroupSystemTests(unittest.TestCase):
         relationship.tension = 0.9
         self.first.relationships[self.second.name] = relationship
         result = self.group_system.add_member(group_id, self.second, self.cats.cats)
-        self.assertFalse(result['joined'])
-        self.assertEqual(result['reason'], 'group_social_rejection')
+        self.assertFalse(result.joined)
+        self.assertEqual(result.reason, 'group_social_rejection')
 
     def test_group_scent_creates_shared_scent(self):
         group_id = self._create_group()
@@ -165,7 +165,7 @@ class CatGroupSystemTests(unittest.TestCase):
             group_id, self.cats.cats, amount=0.2,
         )
 
-        self.assertTrue(joined['joined'])
+        self.assertTrue(joined.joined)
         self.assertTrue(mixed['mixed'])
         self.assertIs(self.first.relationships[self.second.name], relation)
         self.assertIs(self.second.relationships[self.first.name], legacy)

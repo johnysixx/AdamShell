@@ -149,7 +149,7 @@ class CatGroupFederationKnowledgeTests(
         )
 
         self.assertTrue(
-            joined["joined"]
+            joined.joined
         )
 
         self.knowledge.share_with_group_members(

@@ -47,4 +47,4 @@ class CatGroupRecruitmentSystem:
         if not vote['accepted']:
             return {'name': 'cat_group_recruitment_failed', 'group_id': group_id, 'candidate': candidate.name, 'vote': vote, 'joined': False}
         result = self.group_system.add_member(group_id, candidate, cats)
-        return {'name': 'cat_group_recruitment_completed', 'group_id': group_id, 'candidate': candidate.name, 'vote': vote, 'join_result': result, 'joined': bool(result.get('joined', False))}
+        return {'name': 'cat_group_recruitment_completed', 'group_id': group_id, 'candidate': candidate.name, 'vote': vote, 'join_result': result, 'joined': bool(result.joined)}

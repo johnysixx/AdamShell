@@ -9,6 +9,12 @@ from cats.cat_group_leave_state import (
     CatGroupLeaveDeniedResult,
     CatLeftGroupEvent,
 )
+from cats.cat_group_membership_state import (
+    CatGroupCandidateEvaluation,
+    CatGroupJoinDeniedResult,
+    CatGroupJoinSkippedResult,
+    CatJoinedGroupEvent,
+)
 from cats.cat_social_objects import CatRelationship
 from cats.cat_territory_system import CatTerritorySystem
 from cats.cat_group_territory_state import (
@@ -40,53 +46,230 @@ class CatGroupSystem:
         self._record(group, event, cats=[founder])
         return {**event, 'group': deepcopy(group)}
 
-    def evaluate_candidate(self, group_id, candidate, cats):
-        self._require_cat(candidate)
-        group = self._group(group_id)
+    def evaluate_candidate(
+        self,
+        group_id,
+        candidate,
+        cats,
+    ):
+        self._require_cat(
+            candidate
+        )
+
+        group = self._group(
+            group_id
+        )
+
         if candidate.name in group.members:
-            return {'group_id': group_id, 'candidate': candidate.name, 'accepted': True, 'reason': 'already_member', 'score': 1.0}
+            return CatGroupCandidateEvaluation(
+                group_id=group_id,
+                candidate=candidate.name,
+                accepted=True,
+                reason="already_member",
+                score=1.0,
+            )
+
         if candidate.group.member:
-            return {'group_id': group_id, 'candidate': candidate.name, 'accepted': False, 'reason': 'member_of_other_group', 'score': 0.0}
-        members = self._member_objects(group, cats)
+            return CatGroupCandidateEvaluation(
+                group_id=group_id,
+                candidate=candidate.name,
+                accepted=False,
+                reason="member_of_other_group",
+                score=0.0,
+            )
+
+        members = self._member_objects(
+            group,
+            cats,
+        )
+
         if not members:
-            return {'group_id': group_id, 'candidate': candidate.name, 'accepted': False, 'reason': 'group_members_unavailable', 'score': 0.0}
+            return CatGroupCandidateEvaluation(
+                group_id=group_id,
+                candidate=candidate.name,
+                accepted=False,
+                reason="group_members_unavailable",
+                score=0.0,
+                hostile_members=0,
+                member_count=0,
+            )
+
         total = 0.0
         hostile = 0
-        for member in members:
-            relation = member.relationships.get(candidate.name, CatRelationship.create())
-            trust = self._number(relation.trust)
-            affiliation = self._number(relation.affiliation)
-            tension = self._number(relation.tension)
-            familiarity = self._number(relation.familiarity)
-            score = trust * 0.4 + affiliation * 0.25 + familiarity * 0.15 + 0.2 - tension * 0.55
-            total += score
-            if tension >= 0.7 or trust <= 0.15:
-                hostile += 1
-        average = total / len(members)
-        accepted = bool(hostile == 0 and average >= 0.35)
-        return {'group_id': group_id, 'candidate': candidate.name, 'accepted': accepted, 'reason': 'socially_accepted' if accepted else 'group_social_rejection', 'score': round(average, 4), 'hostile_members': hostile, 'member_count': len(members)}
 
-    def add_member(self, group_id, candidate, cats):
-        check = self.evaluate_candidate(group_id=group_id, candidate=candidate, cats=cats)
-        if not check['accepted']:
-            return {'name': 'cat_group_join_denied', **check, 'joined': False}
-        group = self._group(group_id)
+        for member in members:
+            relation = member.relationships.get(
+                candidate.name,
+                CatRelationship.create(),
+            )
+
+            trust = self._number(
+                relation.trust
+            )
+
+            affiliation = self._number(
+                relation.affiliation
+            )
+
+            tension = self._number(
+                relation.tension
+            )
+
+            familiarity = self._number(
+                relation.familiarity
+            )
+
+            score = (
+                trust * 0.4
+                + affiliation * 0.25
+                + familiarity * 0.15
+                + 0.2
+                - tension * 0.55
+            )
+
+            total += score
+
+            if (
+                tension >= 0.7
+                or trust <= 0.15
+            ):
+                hostile += 1
+
+        average = (
+            total
+            / len(members)
+        )
+
+        accepted = bool(
+            hostile == 0
+            and average >= 0.35
+        )
+
+        return CatGroupCandidateEvaluation(
+            group_id=group_id,
+            candidate=candidate.name,
+            accepted=accepted,
+            reason=(
+                "socially_accepted"
+                if accepted
+                else "group_social_rejection"
+            ),
+            score=round(
+                average,
+                4,
+            ),
+            hostile_members=hostile,
+            member_count=len(
+                members
+            ),
+        )
+
+    def add_member(
+        self,
+        group_id,
+        candidate,
+        cats,
+    ):
+        check = self.evaluate_candidate(
+            group_id=group_id,
+            candidate=candidate,
+            cats=cats,
+        )
+
+        if not isinstance(
+            check,
+            CatGroupCandidateEvaluation,
+        ):
+            raise TypeError(
+                "Cat group candidate evaluation "
+                "must be CatGroupCandidateEvaluation."
+            )
+
+        if not check.accepted:
+            return CatGroupJoinDeniedResult(
+                group_id=check.group_id,
+                candidate=check.candidate,
+                reason=check.reason,
+                score=check.score,
+                hostile_members=(
+                    check.hostile_members
+                ),
+                member_count=(
+                    check.member_count
+                ),
+            )
+
+        group = self._group(
+            group_id
+        )
+
         if candidate.name in group.members:
-            return {'name': 'cat_group_join_skipped', 'group_id': group_id, 'cat': candidate.name, 'reason': 'already_member', 'joined': False}
-        group.members.append(candidate.name)
-        self._set_membership(candidate, group_id, joined_order=len(group.members))
-        members = self._member_objects(group, cats)
+            return CatGroupJoinSkippedResult(
+                group_id=group_id,
+                cat=candidate.name,
+            )
+
+        group.members.append(
+            candidate.name
+        )
+
+        self._set_membership(
+            candidate,
+            group_id,
+            joined_order=len(
+                group.members
+            ),
+        )
+
+        members = self._member_objects(
+            group,
+            cats,
+        )
+
         for member in members:
             if member is candidate:
                 continue
-            self._ensure_relationship(member, candidate)
-            self._ensure_relationship(candidate, member)
-            if member.name not in candidate.group.accepted_members:
-                candidate.group.accepted_members.append(member.name)
-            if candidate.name not in member.group.accepted_members:
-                member.group.accepted_members.append(candidate.name)
-        event = {'name': 'cat_joined_group', 'group_id': group_id, 'cat': candidate.name, 'member_count': len(group.members), 'joined': True}
-        self._record(group, event, cats=members)
+
+            self._ensure_relationship(
+                member,
+                candidate,
+            )
+
+            self._ensure_relationship(
+                candidate,
+                member,
+            )
+
+            if (
+                member.name
+                not in candidate.group.accepted_members
+            ):
+                candidate.group.accepted_members.append(
+                    member.name
+                )
+
+            if (
+                candidate.name
+                not in member.group.accepted_members
+            ):
+                member.group.accepted_members.append(
+                    candidate.name
+                )
+
+        event = CatJoinedGroupEvent(
+            group_id=group_id,
+            cat=candidate.name,
+            member_count=len(
+                group.members
+            ),
+        )
+
+        self._record(
+            group,
+            event,
+            cats=members,
+        )
+
         return event
 
     def mix_group_scent(self, group_id, cats, amount=0.1):
