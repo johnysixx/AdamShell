@@ -34,6 +34,40 @@ class CatGroupRoleState:
 
 
 @dataclass(slots=True, frozen=True)
+class CatGroupRoleSuitabilityResult:
+    role: str
+    eligible: bool
+    score: float
+    reason: str | None = None
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "role",
+            str(self.role),
+        )
+
+        object.__setattr__(
+            self,
+            "eligible",
+            bool(self.eligible),
+        )
+
+        object.__setattr__(
+            self,
+            "score",
+            float(self.score),
+        )
+
+        if self.reason is not None:
+            object.__setattr__(
+                self,
+                "reason",
+                str(self.reason),
+            )
+
+
+@dataclass(slots=True, frozen=True)
 class CatGroupRoleAssignmentDeniedResult:
     group_id: str
     cat: str

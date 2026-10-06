@@ -29,8 +29,8 @@ class CatGroupSuccessionConflictTests(unittest.TestCase):
         roles.assign(self.group_id, self.first, 'guardian')
         succession = CatGroupSuccessionSystem(self.groups)
         result = succession.succeed(self.group_id, self.first, 'guardian', self.cats.cats)
-        self.assertTrue(result['succeeded'])
-        self.assertEqual(result['successor'], self.second.name)
+        self.assertTrue(result.succeeded)
+        self.assertEqual(result.successor, self.second.name)
         self.assertIn('guardian', self.second.group_roles.active)
 
     def test_departure_can_trigger_succession(self):
@@ -38,7 +38,7 @@ class CatGroupSuccessionConflictTests(unittest.TestCase):
         roles.assign(self.group_id, self.first, 'guardian')
         succession = CatGroupSuccessionSystem(self.groups)
         result = succession.handle_departure(self.group_id, self.first, self.cats.cats)
-        self.assertTrue(result['departed'])
+        self.assertTrue(result.departed)
         self.assertFalse(self.first.group.member)
         self.assertIn('guardian', self.second.group_roles.active)
 
@@ -54,7 +54,7 @@ class CatGroupSuccessionConflictTests(unittest.TestCase):
         before = self.groups.groups[self.group_id].institutions['night_watch'].continuity
         result = succession.succeed(self.group_id, self.first, 'guardian', self.cats.cats)
         after = self.groups.groups[self.group_id].institutions['night_watch'].continuity
-        self.assertFalse(result['succeeded'])
+        self.assertFalse(result.succeeded)
         self.assertLess(after, before)
 
     def _institutions(self):

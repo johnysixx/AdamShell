@@ -5,6 +5,7 @@ from cats.cat_group_role_state import (
     CatGroupRoleAssignmentDeniedResult,
     CatGroupRoleReleasedEvent,
     CatGroupRoleState,
+    CatGroupRoleSuitabilityResult,
 )
 
 class CatGroupRoleSystem:
@@ -13,34 +14,110 @@ class CatGroupRoleSystem:
     def __init__(self, group_system):
         self.group_system = group_system
 
-    def suitability(self, group_id, cat, role):
-        group = self.group_system._group(group_id)
+    def suitability(
+        self,
+        group_id,
+        cat,
+        role,
+    ):
+        group = self.group_system._group(
+            group_id
+        )
+
         if cat.name not in group.members:
-            return {'role': role, 'eligible': False, 'score': 0.0, 'reason': 'not_group_member'}
-        profile = self.ROLE_PROFILES.get(role)
+            return CatGroupRoleSuitabilityResult(
+                role=role,
+                eligible=False,
+                score=0.0,
+                reason="not_group_member",
+            )
+
+        profile = self.ROLE_PROFILES.get(
+            role
+        )
+
         if profile is None:
-            return {'role': role, 'eligible': False, 'score': 0.0, 'reason': 'unknown_role'}
+            return CatGroupRoleSuitabilityResult(
+                role=role,
+                eligible=False,
+                score=0.0,
+                reason="unknown_role",
+            )
+
         traits = cat.personality.traits
         score = 0.0
-        for trait, weight in profile.get('traits', {}).items():
-            score += self._number(getattr(traits, trait, 0.5)) * weight
-        score += self._number(cat.group.influence) * profile.get('influence_weight', 0.0)
-        score += cat.knowledge.role_knowledge_score() * profile.get('knowledge_weight', 0.0)
-        score += self._number(cat.group.shared_scent) * profile.get('group_scent_weight', 0.0)
-        score = min(1.0, score)
-        return {'role': role, 'eligible': score >= 0.35, 'score': round(score, 4)}
+
+        for trait, weight in (
+            profile.get(
+                "traits",
+                {},
+            ).items()
+        ):
+            score += (
+                self._number(
+                    getattr(
+                        traits,
+                        trait,
+                        0.5,
+                    )
+                )
+                * weight
+            )
+
+        score += (
+            self._number(
+                cat.group.influence
+            )
+            * profile.get(
+                "influence_weight",
+                0.0,
+            )
+        )
+
+        score += (
+            cat.knowledge
+            .role_knowledge_score()
+            * profile.get(
+                "knowledge_weight",
+                0.0,
+            )
+        )
+
+        score += (
+            self._number(
+                cat.group.shared_scent
+            )
+            * profile.get(
+                "group_scent_weight",
+                0.0,
+            )
+        )
+
+        score = min(
+            1.0,
+            score,
+        )
+
+        return CatGroupRoleSuitabilityResult(
+            role=role,
+            eligible=score >= 0.35,
+            score=round(
+                score,
+                4,
+            ),
+        )
 
     def assign(self, group_id, cat, role):
         check = self.suitability(group_id, cat, role)
-        if not check['eligible']:
+        if not check.eligible:
             return (
                 CatGroupRoleAssignmentDeniedResult(
                     group_id=group_id,
                     cat=cat.name,
                     role=role,
-                    reason=check.get(
-                        'reason',
-                        'insufficient_suitability',
+                    reason=(
+                        check.reason
+                        or 'insufficient_suitability'
                     ),
                 )
             )
@@ -79,7 +156,7 @@ class CatGroupRoleSystem:
 
         existing.assign_base(
             group_id=group_id,
-            score=check['score'],
+            score=check.score,
         )
 
         cat.group_roles.active[
@@ -92,7 +169,7 @@ class CatGroupRoleSystem:
             group_id=group_id,
             cat=cat.name,
             role=role,
-            score=check['score'],
+            score=check.score,
         )
 
         cat.group_roles.record_event(
