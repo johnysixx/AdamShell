@@ -1,4 +1,79 @@
 from dataclasses import dataclass, field
+from enum import Enum
+
+
+class CatGroupMemoryEventKind(Enum):
+    PEACEFUL = "peaceful"
+    CONFLICT = "conflict"
+    COOPERATION = "cooperation"
+    BETRAYAL = "betrayal"
+
+
+@dataclass(slots=True, frozen=True)
+class CatGroupMemorySignal:
+    kind: CatGroupMemoryEventKind
+    winner: str | None = None
+    loser: str | None = None
+
+    def __post_init__(self):
+        if not isinstance(
+            self.kind,
+            CatGroupMemoryEventKind,
+        ):
+            raise TypeError(
+                "Cat group memory signal kind "
+                "must be CatGroupMemoryEventKind."
+            )
+
+
+@dataclass(slots=True, frozen=True)
+class CatGroupEncounterRememberedResult:
+    first_group: str
+    second_group: str
+
+    name: str = field(
+        default="cat_group_encounter_remembered",
+        init=False,
+    )
+
+    remembered: bool = field(
+        default=True,
+        init=False,
+    )
+
+
+@dataclass(slots=True, frozen=True)
+class CatGroupCooperationEvent:
+    first_group: str
+    second_group: str
+    cooperation_type: str
+
+    name: str = field(
+        default="cat_group_cooperation",
+        init=False,
+    )
+
+    cooperation: bool = field(
+        default=True,
+        init=False,
+    )
+
+
+@dataclass(slots=True, frozen=True)
+class CatGroupBetrayalEvent:
+    betrayer: str
+    victim: str
+    reason: str
+
+    name: str = field(
+        default="cat_group_betrayal",
+        init=False,
+    )
+
+    betrayal: bool = field(
+        default=True,
+        init=False,
+    )
 
 
 @dataclass(slots=True)
@@ -18,18 +93,26 @@ class CatGroupMemoryState:
 
     def to_dict(self):
         return {
-            "encounters": self.encounters,
-            "peaceful_encounters": (
-                self.peaceful_encounters
-            ),
-            "conflicts": self.conflicts,
-            "victories": self.victories,
-            "defeats": self.defeats,
-            "standoffs": self.standoffs,
-            "cooperations": self.cooperations,
-            "betrayals": self.betrayals,
-            "last_outcome": self.last_outcome,
-            "recent_events": list(
-                self.recent_events
-            ),
+            "encounters":
+                self.encounters,
+            "peaceful_encounters":
+                self.peaceful_encounters,
+            "conflicts":
+                self.conflicts,
+            "victories":
+                self.victories,
+            "defeats":
+                self.defeats,
+            "standoffs":
+                self.standoffs,
+            "cooperations":
+                self.cooperations,
+            "betrayals":
+                self.betrayals,
+            "last_outcome":
+                self.last_outcome,
+            "recent_events":
+                list(
+                    self.recent_events
+                ),
         }

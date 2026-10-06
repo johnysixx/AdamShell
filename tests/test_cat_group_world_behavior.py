@@ -41,7 +41,10 @@ class CatGroupWorldBehaviorTests(unittest.TestCase):
             bonding.reinforce(group_id, self.cats.cats, amount=0.08)
         lifecycle = CatGroupLifecycleSystem(self.groups)
         result = lifecycle.advance(group_id, self.cats.cats)
-        self.assertEqual(result['state'], 'stable')
+        self.assertIs(
+            result.state,
+            CatGroupLifecycleState.STABLE,
+        )
 
     def test_group_can_migrate_together(self):
         group_id = self._group(self.members[:3], 'first')
@@ -59,8 +62,8 @@ class CatGroupWorldBehaviorTests(unittest.TestCase):
         self.groups.claim_territory(second, self.cats.cats, layer='meeting_place', location='window', strength=0.8)
         conflict = CatGroupConflictSystem(self.groups)
         result = conflict.encounter(first, second, self.cats.cats)
-        self.assertTrue(result['conflict'])
-        self.assertIn(result['outcome'], {'standoff', 'first_group_prevailed', 'second_group_prevailed'})
+        self.assertTrue(result.conflict)
+        self.assertIn(result.outcome, {'standoff', 'first_group_prevailed', 'second_group_prevailed'})
 
     def test_group_conflict_increments_history(self):
         first = self._group(self.members[:3], 'first')
@@ -141,11 +144,11 @@ class CatGroupWorldBehaviorTests(unittest.TestCase):
             first, second, self.cats.cats, resource='milk'
         )
 
-        self.assertTrue(result['conflict'])
-        self.assertEqual(result['winner'], winner_id)
-        self.assertEqual(result['loser'], loser_id)
+        self.assertTrue(result.conflict)
+        self.assertEqual(result.winner, winner_id)
+        self.assertEqual(result.loser, loser_id)
         self.assertEqual(
-            result['outcome'],
+            result.outcome,
             'first_group_prevailed' if first_wins else 'second_group_prevailed',
         )
         self.assertIs(
@@ -178,7 +181,7 @@ class CatGroupWorldBehaviorTests(unittest.TestCase):
         group_id = self._group(self.members[:2], 'first')
         lifecycle = CatGroupLifecycleSystem(self.groups)
         result = lifecycle.dissolve(group_id, self.cats.cats, reason='members_disperse')
-        self.assertTrue(result['dissolved'])
+        self.assertTrue(result.dissolved)
         self.assertIs(
             self.groups.groups[group_id].state,
             CatGroupLifecycleState.DISSOLVED,

@@ -8,6 +8,10 @@ from cats.cat_group_system import (
 from cats.cat_group_memory_system import (
     CatGroupMemorySystem
 )
+from cats.cat_group_memory_state import (
+    CatGroupMemoryEventKind,
+    CatGroupMemorySignal,
+)
 from cats.cat_group_knowledge_system import (
     CatGroupKnowledgeSystem
 )
@@ -358,16 +362,19 @@ class CatGroupFederationKnowledgeTests(
             self.groups
         )
 
-        event = {
-            "conflict": True,
-            "winner": self.first_group,
-            "loser": self.second_group
-        }
+        signal = CatGroupMemorySignal(
+            kind=(
+                CatGroupMemoryEventKind
+                .CONFLICT
+            ),
+            winner=self.first_group,
+            loser=self.second_group,
+        )
 
         memory.remember_encounter(
             self.first_group,
             self.second_group,
-            event
+            signal,
         )
 
         lifecycle = (

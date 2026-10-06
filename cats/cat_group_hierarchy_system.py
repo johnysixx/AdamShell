@@ -1,6 +1,14 @@
 from copy import deepcopy
-from cats.cat_social_objects import CatRelationship
-from cats.cat import Cat
+
+from cats.cat_group_hierarchy_state import (
+    CatGroupInfluenceRankedEvent,
+    CatGroupInfluenceRankEntry,
+    CatGroupInfluenceRankingResult,
+)
+from cats.cat_social_objects import (
+    CatRelationship,
+)
+
 
 class CatGroupHierarchySystem:
     """
@@ -11,49 +19,203 @@ class CatGroupHierarchySystem:
     defense and group participation.
     """
 
-    def __init__(self, group_system):
+    def __init__(
+        self,
+        group_system,
+    ):
         self.group_system = group_system
 
-    def rank(self, group_id, cats):
-        group = self.group_system._group(group_id)
-        members = self.group_system._member_objects(group, cats)
+    def rank(
+        self,
+        group_id,
+        cats,
+    ):
+        group = self.group_system._group(
+            group_id
+        )
+
+        members = (
+            self.group_system
+            ._member_objects(
+                group,
+                cats,
+            )
+        )
+
         ranking = []
+
         for cat in members:
-            influence = self._influence(cat, members)
-            cat.group.influence = influence
-            ranking.append({'cat': cat.name, 'influence': influence})
-        ranking.sort(key=lambda item: (item['influence'], item['cat']), reverse=True)
-        event = {'name': 'cat_group_influence_ranked', 'group_id': group_id, 'ranking': deepcopy(ranking)}
-        group.history.append(deepcopy(event))
-        return ranking
+            influence = self._influence(
+                cat,
+                members,
+            )
 
-    def most_influential(self, group_id, cats):
-        ranking = self.rank(group_id, cats)
-        if not ranking:
+            cat.group.influence = (
+                influence
+            )
+
+            ranking.append(
+                CatGroupInfluenceRankEntry(
+                    cat=cat.name,
+                    influence=influence,
+                )
+            )
+
+        ranking.sort(
+            key=lambda item: (
+                item.influence,
+                item.cat,
+            ),
+            reverse=True,
+        )
+
+        ranking = tuple(
+            ranking
+        )
+
+        event = (
+            CatGroupInfluenceRankedEvent(
+                group_id=group_id,
+                ranking=ranking,
+            )
+        )
+
+        group.history.append(
+            deepcopy(
+                event
+            )
+        )
+
+        return (
+            CatGroupInfluenceRankingResult(
+                group_id=group_id,
+                ranking=ranking,
+            )
+        )
+
+    def most_influential(
+        self,
+        group_id,
+        cats,
+    ):
+        result = self.rank(
+            group_id,
+            cats,
+        )
+
+        if not result.ranking:
             return None
-        return ranking[0]
 
-    def _influence(self, cat, members):
-        traits = cat.personality.traits
-        courage = self._number(traits.courage)
-        intellect = self._number(cat.intellect.normalized)
+        return result.ranking[
+            0
+        ]
+
+    def _influence(
+        self,
+        cat,
+        members,
+    ):
+        traits = (
+            cat.personality.traits
+        )
+
+        courage = self._number(
+            traits.courage
+        )
+
+        intellect = self._number(
+            cat.intellect.normalized
+        )
+
         relationship_scores = []
+
         for other in members:
             if other is cat:
                 continue
-            relation = other.relationships.get(cat.name, CatRelationship.create())
-            relationship_scores.append(self._number(relation.trust) * 0.55 + self._number(relation.affiliation) * 0.3 + self._number(relation.familiarity) * 0.15)
-        social_support = sum(relationship_scores) / len(relationship_scores) if relationship_scores else 0.5
-        defense = min(1.0, int(cat.group.defense_events) / 5.0)
-        participation = min(1.0, int(cat.group.group_events) / 20.0)
-        influence = social_support * 0.35 + courage * 0.2 + intellect * 0.15 + defense * 0.15 + participation * 0.15
-        return round(self._clamp(influence), 4)
 
-    def _number(self, value):
+            relation = (
+                other.relationships.get(
+                    cat.name,
+                    CatRelationship.create(),
+                )
+            )
+
+            relationship_scores.append(
+                self._number(
+                    relation.trust
+                ) * 0.55
+                + self._number(
+                    relation.affiliation
+                ) * 0.3
+                + self._number(
+                    relation.familiarity
+                ) * 0.15
+            )
+
+        social_support = (
+            sum(
+                relationship_scores
+            )
+            / len(
+                relationship_scores
+            )
+            if relationship_scores
+            else 0.5
+        )
+
+        defense = min(
+            1.0,
+            int(
+                cat.group.defense_events
+            )
+            / 5.0,
+        )
+
+        participation = min(
+            1.0,
+            int(
+                cat.group.group_events
+            )
+            / 20.0,
+        )
+
+        influence = (
+            social_support * 0.35
+            + courage * 0.2
+            + intellect * 0.15
+            + defense * 0.15
+            + participation * 0.15
+        )
+
+        return round(
+            self._clamp(
+                influence
+            ),
+            4,
+        )
+
+    def _number(
+        self,
+        value,
+    ):
         try:
-            return float(value)
-        except (TypeError, ValueError):
+            return float(
+                value
+            )
+        except (
+            TypeError,
+            ValueError,
+        ):
             return 0.0
 
-    def _clamp(self, value):
-        return max(0.0, min(1.0, float(value)))
+    def _clamp(
+        self,
+        value,
+    ):
+        return max(
+            0.0,
+            min(
+                1.0,
+                float(value),
+            ),
+        )

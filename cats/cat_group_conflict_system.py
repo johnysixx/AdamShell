@@ -1,20 +1,27 @@
 from copy import deepcopy
-from cats.cat_social_objects import CatRelationship
 
 from cats.cat_group_bonding_system import (
-    CatGroupBondingSystem
+    CatGroupBondingSystem,
+)
+from cats.cat_group_conflict_state import (
+    CatGroupConflictEvent,
+    CatGroupEncounterPeacefulResult,
 )
 from cats.cat_group_hierarchy_system import (
-    CatGroupHierarchySystem
-)
-from cats.cat_group_memory_system import (
-    CatGroupMemorySystem
+    CatGroupHierarchySystem,
 )
 from cats.cat_group_lifecycle_state import (
     CatGroupLifecycleState,
 )
+from cats.cat_group_memory_state import (
+    CatGroupMemoryEventKind,
+    CatGroupMemorySignal,
+)
+from cats.cat_group_memory_system import (
+    CatGroupMemorySystem,
+)
 from cats.cat_social_objects import (
-    CatRelationship
+    CatRelationship,
 )
 
 
@@ -22,7 +29,7 @@ class CatGroupConflictSystem:
 
     def __init__(
         self,
-        group_system
+        group_system,
     ):
         self.group_system = group_system
 
@@ -49,19 +56,29 @@ class CatGroupConflictSystem:
         first_group_id,
         second_group_id,
         cats,
-        resource=None
+        resource=None,
     ):
-        first = self.group_system._group(
+        first = (
+            self.group_system
+            ._group(
+                first_group_id
+            )
+        )
+
+        second = (
+            self.group_system
+            ._group(
+                second_group_id
+            )
+        )
+
+        if (
             first_group_id
-        )
-
-        second = self.group_system._group(
-            second_group_id
-        )
-
-        if first_group_id == second_group_id:
+            == second_group_id
+        ):
             raise ValueError(
-                "Group cannot conflict with itself."
+                "Group cannot conflict "
+                "with itself."
             )
 
         shared_territories = set(
@@ -84,21 +101,27 @@ class CatGroupConflictSystem:
         )
 
         if not conflict_possible:
-            return {
-                "name": "cat_group_encounter_peaceful",
-                "first_group": first_group_id,
-                "second_group": second_group_id,
-                "conflict": False
-            }
+            return (
+                CatGroupEncounterPeacefulResult(
+                    first_group=(
+                        first_group_id
+                    ),
+                    second_group=(
+                        second_group_id
+                    ),
+                )
+            )
 
         return self.resolve(
             first_group_id,
             second_group_id,
             cats,
             resource=resource,
-            shared_territories=list(
-                shared_territories
-            )
+            shared_territories=tuple(
+                sorted(
+                    shared_territories
+                )
+            ),
         )
 
     def resolve(
@@ -107,24 +130,30 @@ class CatGroupConflictSystem:
         second_group_id,
         cats,
         resource=None,
-        shared_territories=None
+        shared_territories=None,
     ):
-        first = self.group_system._group(
-            first_group_id
+        first = (
+            self.group_system
+            ._group(
+                first_group_id
+            )
         )
 
-        second = self.group_system._group(
-            second_group_id
+        second = (
+            self.group_system
+            ._group(
+                second_group_id
+            )
         )
 
         first_strength = self._strength(
             first_group_id,
-            cats
+            cats,
         )
 
         second_strength = self._strength(
             second_group_id,
-            cats
+            cats,
         )
 
         difference = abs(
@@ -137,25 +166,31 @@ class CatGroupConflictSystem:
             loser = None
             outcome = "standoff"
 
-        elif first_strength > second_strength:
+        elif (
+            first_strength
+            > second_strength
+        ):
             winner = first_group_id
             loser = second_group_id
-            outcome = "first_group_prevailed"
+            outcome = (
+                "first_group_prevailed"
+            )
 
         else:
             winner = second_group_id
             loser = first_group_id
-            outcome = "second_group_prevailed"
+            outcome = (
+                "second_group_prevailed"
+            )
 
         first.conflict_count += 1
-
         second.conflict_count += 1
 
         first_members = (
             self.group_system
             ._member_objects(
                 first,
-                cats
+                cats,
             )
         )
 
@@ -163,46 +198,51 @@ class CatGroupConflictSystem:
             self.group_system
             ._member_objects(
                 second,
-                cats
+                cats,
             )
         )
 
         self._apply_group_tension(
             first_members,
-            0.08
+            0.08,
         )
 
         self._apply_group_tension(
             second_members,
-            0.08
+            0.08,
         )
 
         if loser is not None:
             loser_group = (
                 first
-                if loser == first_group_id
+                if loser
+                == first_group_id
                 else second
             )
 
             loser_group.state = (
-                CatGroupLifecycleState.STRAINED
+                CatGroupLifecycleState
+                .STRAINED
             )
 
-        event = {
-            "name": "cat_inter_group_conflict",
-            "first_group": first_group_id,
-            "second_group": second_group_id,
-            "resource": resource,
-            "shared_territories": (
-                shared_territories or []
+        event = CatGroupConflictEvent(
+            first_group=first_group_id,
+            second_group=second_group_id,
+            resource=resource,
+            shared_territories=tuple(
+                shared_territories
+                or ()
             ),
-            "first_strength": first_strength,
-            "second_strength": second_strength,
-            "winner": winner,
-            "loser": loser,
-            "outcome": outcome,
-            "conflict": True
-        }
+            first_strength=(
+                first_strength
+            ),
+            second_strength=(
+                second_strength
+            ),
+            winner=winner,
+            loser=loser,
+            outcome=outcome,
+        )
 
         first.history.append(
             deepcopy(
@@ -229,7 +269,14 @@ class CatGroupConflictSystem:
         self.memory.remember_encounter(
             first_group_id,
             second_group_id,
-            event
+            CatGroupMemorySignal(
+                kind=(
+                    CatGroupMemoryEventKind
+                    .CONFLICT
+                ),
+                winner=winner,
+                loser=loser,
+            ),
         )
 
         return event
@@ -237,17 +284,20 @@ class CatGroupConflictSystem:
     def _strength(
         self,
         group_id,
-        cats
+        cats,
     ):
-        group = self.group_system._group(
-            group_id
+        group = (
+            self.group_system
+            ._group(
+                group_id
+            )
         )
 
         members = (
             self.group_system
             ._member_objects(
                 group,
-                cats
+                cats,
             )
         )
 
@@ -257,27 +307,23 @@ class CatGroupConflictSystem:
         cohesion = (
             self.bonding.evaluate(
                 group_id,
-                cats
-            )[
-                "cohesion"
-            ]
+                cats,
+            ).cohesion
         )
 
-        ranking = self.hierarchy.rank(
-            group_id,
-            cats
+        ranking = (
+            self.hierarchy.rank(
+                group_id,
+                cats,
+            ).ranking
         )
 
         influence = (
             sum(
-                item[
-                    "influence"
-                ]
+                item.influence
                 for item in ranking
             )
-            / len(
-                ranking
-            )
+            / len(ranking)
             if ranking
             else 0.0
         )
@@ -287,18 +333,15 @@ class CatGroupConflictSystem:
                 float(
                     member.strength
                 )
-                for member in members
+                for member
+                in members
             )
-            / len(
-                members
-            )
+            / len(members)
         )
 
         number_bonus = min(
             0.30,
-            len(
-                members
-            ) * 0.05
+            len(members) * 0.05,
         )
 
         score = (
@@ -306,7 +349,7 @@ class CatGroupConflictSystem:
             + influence * 0.25
             + min(
                 1.0,
-                physical / 3.0
+                physical / 3.0,
             ) * 0.30
             + number_bonus
         )
@@ -314,15 +357,15 @@ class CatGroupConflictSystem:
         return round(
             min(
                 1.0,
-                score
+                score,
             ),
-            4
+            4,
         )
 
     def _apply_group_tension(
         self,
         members,
-        amount
+        amount,
     ):
         for first in members:
             for second in members:
@@ -330,17 +373,17 @@ class CatGroupConflictSystem:
                     continue
 
                 relation = (
-                    first.relationships.setdefault(
+                    first.relationships
+                    .setdefault(
                         second.name,
-                        CatRelationship.create()
+                        CatRelationship.create(),
                     )
                 )
-
 
                 relation.tension = min(
                     1.0,
                     float(
                         relation.tension
                     )
-                    + amount
+                    + amount,
                 )
