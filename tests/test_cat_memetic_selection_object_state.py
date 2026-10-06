@@ -51,9 +51,7 @@ class CatMemeticSelectionObjectStateTests(
             self.groups.create_group(
                 self.cat,
                 name='memetic_state_group',
-            )[
-                'group_id'
-            ]
+            ).group_id
         )
 
         knowledge = (

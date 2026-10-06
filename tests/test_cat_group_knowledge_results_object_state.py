@@ -79,18 +79,14 @@ class CatGroupKnowledgeResultsObjectStateTests(
             self.groups.create_group(
                 self.first,
                 name="first_group",
-            )[
-                "group_id"
-            ]
+            ).group_id
         )
 
         self.second_group = (
             self.groups.create_group(
                 self.second,
                 name="second_group",
-            )[
-                "group_id"
-            ]
+            ).group_id
         )
 
         self.knowledge = (

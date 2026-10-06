@@ -56,27 +56,21 @@ class CatGroupFederationKnowledgeTests(
             self.groups.create_group(
                 self.first_cat,
                 name="first"
-            )[
-                "group_id"
-            ]
+            ).group_id
         )
 
         self.second_group = (
             self.groups.create_group(
                 self.second_cat,
                 name="second"
-            )[
-                "group_id"
-            ]
+            ).group_id
         )
 
         self.third_group = (
             self.groups.create_group(
                 self.third_cat,
                 name="third"
-            )[
-                "group_id"
-            ]
+            ).group_id
         )
 
         self.knowledge = (

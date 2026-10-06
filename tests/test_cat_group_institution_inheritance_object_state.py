@@ -61,15 +61,11 @@ class CatGroupInstitutionInheritanceObjectStateTests(
         )
 
         self.parent_group_id = (
-            parent_created[
-                "group_id"
-            ]
+            parent_created.group_id
         )
 
         self.child_group_id = (
-            child_created[
-                "group_id"
-            ]
+            child_created.group_id
         )
 
         self.institutions = (

@@ -19,7 +19,7 @@ class CatGroupDynamicsTests(unittest.TestCase):
         self.candidate = self.cats.create_cat(name='candidate', color='orange', fur_length='short')
         self.groups = CatGroupSystem(self.cats)
         created = self.groups.create_group(self.first, name='bar_cats')
-        self.group_id = created['group_id']
+        self.group_id = created.group_id
         self.groups.add_member(self.group_id, self.second, self.cats.cats)
         self.groups.add_member(self.group_id, self.third, self.cats.cats)
 

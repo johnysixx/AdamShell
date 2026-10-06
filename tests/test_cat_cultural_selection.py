@@ -19,9 +19,9 @@ class CatCulturalSelectionTests(unittest.TestCase):
         self.second = self.cats.create_cat(name='second', color='white', fur_length='short')
         self.third = self.cats.create_cat(name='third', color='gray', fur_length='short')
         self.groups = CatGroupSystem(self.cats)
-        self.first_group = self.groups.create_group(self.first, name='first_group')['group_id']
+        self.first_group = self.groups.create_group(self.first, name='first_group').group_id
         self.groups.add_member(self.first_group, self.second, self.cats.cats)
-        self.second_group = self.groups.create_group(self.third, name='second_group')['group_id']
+        self.second_group = self.groups.create_group(self.third, name='second_group').group_id
 
     def test_cat_can_adopt_group_tradition(self):
         culture = CatGroupCultureSystem(self.groups)

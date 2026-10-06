@@ -25,7 +25,7 @@ class CatGroupSplitSystem:
             cat.group.joined_order = None
             cat.group.accepted_members = []
         created = self.group_system.create_group(founder, name=new_name)
-        daughter_id = created['group_id']
+        daughter_id = created.group_id
         daughter = self.group_system._group(daughter_id)
         daughter.parent_group = group_id
         CatGroupCulturalInheritanceSystem(self.group_system).inherit(parent_group_id=group_id, child_group_id=daughter_id, retention=0.7)

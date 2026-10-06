@@ -57,9 +57,7 @@ class CatGroupTabooViolationResultObjectStateTests(
         )
 
         self.group_id = (
-            created_group[
-                "group_id"
-            ]
+            created_group.group_id
         )
 
         self.groups.add_member(

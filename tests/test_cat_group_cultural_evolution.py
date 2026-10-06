@@ -64,9 +64,7 @@ class CatGroupCulturalEvolutionTests(
             name="parent"
         )
 
-        self.parent = created[
-            "group_id"
-        ]
+        self.parent = created.group_id
 
         for cat in self.members[1:]:
             self.groups.add_member(
@@ -220,9 +218,7 @@ class CatGroupCulturalEvolutionTests(
         second = self.groups.create_group(
             other_cat,
             name="second"
-        )[
-            "group_id"
-        ]
+        ).group_id
 
         myths = CatGroupMythSystem(
             self.groups

@@ -108,27 +108,21 @@ class CatGroupFederationResultsObjectStateTests(
             self.groups.create_group(
                 self.first,
                 name="first_group",
-            )[
-                "group_id"
-            ]
+            ).group_id
         )
 
         self.second_group = (
             self.groups.create_group(
                 self.second,
                 name="second_group",
-            )[
-                "group_id"
-            ]
+            ).group_id
         )
 
         self.third_group = (
             self.groups.create_group(
                 self.third,
                 name="third_group",
-            )[
-                "group_id"
-            ]
+            ).group_id
         )
 
         self.federations = (

@@ -48,14 +48,14 @@ class CatGroupMemoryObjectStateTests(
             self.groups.create_group(
                 first_cat,
                 name='memory_first_group',
-            )['group_id']
+            ).group_id
         )
 
         self.second_group = (
             self.groups.create_group(
                 second_cat,
                 name='memory_second_group',
-            )['group_id']
+            ).group_id
         )
 
         self.memory = (

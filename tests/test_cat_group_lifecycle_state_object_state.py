@@ -42,7 +42,7 @@ class CatGroupLifecycleStateObjectStateTests(
         )
 
         return self.groups.groups[
-            created["group_id"]
+            created.group_id
         ]
 
     def test_group_starts_forming_as_enum(self):

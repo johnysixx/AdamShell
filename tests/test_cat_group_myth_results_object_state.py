@@ -77,18 +77,14 @@ class CatGroupMythResultsObjectStateTests(
             self.groups.create_group(
                 self.founder,
                 name="myth_group",
-            )[
-                "group_id"
-            ]
+            ).group_id
         )
 
         self.target_group_id = (
             self.groups.create_group(
                 self.target_founder,
                 name="target_group",
-            )[
-                "group_id"
-            ]
+            ).group_id
         )
 
         self.groups.add_member(

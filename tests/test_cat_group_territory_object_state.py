@@ -41,9 +41,7 @@ class CatGroupTerritoryObjectStateTests(
             self.groups.create_group(
                 self.first,
                 name='territory_group',
-            )[
-                'group_id'
-            ]
+            ).group_id
         )
 
         self.groups.add_member(

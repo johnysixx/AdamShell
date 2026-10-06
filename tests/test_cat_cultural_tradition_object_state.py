@@ -41,9 +41,7 @@ class CatCulturalTraditionObjectStateTests(
             self.groups.create_group(
                 self.cat,
                 name='tradition_group',
-            )[
-                'group_id'
-            ]
+            ).group_id
         )
 
         self.culture = (

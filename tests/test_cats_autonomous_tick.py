@@ -49,7 +49,7 @@ class CatsAutonomousTickTests(unittest.TestCase):
         member = self.cats.create_cat(name='member', color='white', fur_length='short')
         groups = CatGroupSystem(self.cats)
         created = groups.create_group(founder, name='group')
-        group_id = created['group_id']
+        group_id = created.group_id
         groups.add_member(group_id, member, self.cats.cats)
         before = groups.groups[group_id].age_ticks
         report = self.cats.tick()

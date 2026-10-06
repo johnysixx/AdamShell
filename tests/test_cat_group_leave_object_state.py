@@ -50,9 +50,7 @@ class CatGroupLeaveObjectStateTests(
         )
 
         self.group_id = (
-            created[
-                "group_id"
-            ]
+            created.group_id
         )
 
     def assert_not_mapping(

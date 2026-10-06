@@ -29,7 +29,7 @@ class CatGroupWorldBehaviorTests(unittest.TestCase):
 
     def _group(self, members, name):
         created = self.groups.create_group(members[0], name=name)
-        group_id = created['group_id']
+        group_id = created.group_id
         for cat in members[1:]:
             self.groups.add_member(group_id, cat, self.cats.cats)
         return group_id

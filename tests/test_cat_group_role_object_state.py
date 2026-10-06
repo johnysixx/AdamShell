@@ -46,9 +46,7 @@ class CatGroupRoleObjectStateTests(
             self.groups.create_group(
                 self.cat,
                 name='role_state_group',
-            )[
-                'group_id'
-            ]
+            ).group_id
         )
 
         self.roles = CatGroupRoleSystem(

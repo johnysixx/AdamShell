@@ -62,9 +62,7 @@ class CatGroupRitualPerformanceObjectStateTests(
             self.groups.create_group(
                 self.first,
                 name="ritual_group",
-            )[
-                "group_id"
-            ]
+            ).group_id
         )
 
         self.groups.add_member(

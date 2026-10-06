@@ -56,18 +56,14 @@ class CatGroupDiplomacyTests(
             self.groups.create_group(
                 self.first_cat,
                 name="first_group"
-            )[
-                "group_id"
-            ]
+            ).group_id
         )
 
         self.second_group = (
             self.groups.create_group(
                 self.second_cat,
                 name="second_group"
-            )[
-                "group_id"
-            ]
+            ).group_id
         )
 
     def test_groups_remember_conflict(

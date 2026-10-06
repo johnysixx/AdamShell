@@ -50,18 +50,14 @@ class CatMythLineageObjectStateTests(
             self.groups.create_group(
                 self.first,
                 name='myth_first_group',
-            )[
-                'group_id'
-            ]
+            ).group_id
         )
 
         self.second_group = (
             self.groups.create_group(
                 self.second,
                 name='myth_second_group',
-            )[
-                'group_id'
-            ]
+            ).group_id
         )
 
         knowledge = (

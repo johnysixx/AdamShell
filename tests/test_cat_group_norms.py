@@ -22,7 +22,7 @@ class CatGroupNormTests(unittest.TestCase):
         self.first = self.cats.create_cat(name='first', color='black', fur_length='short')
         self.second = self.cats.create_cat(name='second', color='white', fur_length='short')
         self.groups = CatGroupSystem(self.cats)
-        self.group_id = self.groups.create_group(self.first, name='bar_cats')['group_id']
+        self.group_id = self.groups.create_group(self.first, name='bar_cats').group_id
         self.groups.add_member(self.group_id, self.second, self.cats.cats)
 
     def test_group_can_define_norm(self):

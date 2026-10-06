@@ -17,7 +17,7 @@ class CatGroupSuccessionConflictTests(unittest.TestCase):
         self.second = self.cats.create_cat(name='second', color='white', fur_length='short')
         self.third = self.cats.create_cat(name='third', color='gray', fur_length='short')
         self.groups = CatGroupSystem(self.cats)
-        self.group_id = self.groups.create_group(self.first, name='bar_cats')['group_id']
+        self.group_id = self.groups.create_group(self.first, name='bar_cats').group_id
         self.groups.add_member(self.group_id, self.second, self.cats.cats)
         self.groups.add_member(self.group_id, self.third, self.cats.cats)
         for cat in (self.first, self.second):

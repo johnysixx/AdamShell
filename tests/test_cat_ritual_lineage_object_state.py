@@ -41,9 +41,7 @@ class CatRitualLineageObjectStateTests(
             self.groups.create_group(
                 self.cat,
                 name='lineage_group',
-            )[
-                'group_id'
-            ]
+            ).group_id
         )
 
         self.rituals = (

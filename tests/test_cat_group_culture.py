@@ -56,9 +56,7 @@ class CatGroupCultureTests(
             self.groups.create_group(
                 self.cat,
                 name="bar_cats"
-            )[
-                "group_id"
-            ]
+            ).group_id
         )
 
         self.knowledge = (
@@ -219,9 +217,7 @@ class CatGroupCultureTests(
             self.groups.create_group(
                 self.other,
                 name="other_group"
-            )[
-                "group_id"
-            ]
+            ).group_id
         )
 
         myths = CatGroupMythSystem(

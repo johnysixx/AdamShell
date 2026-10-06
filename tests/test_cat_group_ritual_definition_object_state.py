@@ -49,9 +49,7 @@ class CatGroupRitualDefinitionObjectStateTests(
         )
 
         self.group_id = (
-            created_group[
-                "group_id"
-            ]
+            created_group.group_id
         )
 
         self.rituals = (

@@ -26,7 +26,7 @@ class CatGroupSystemTests(unittest.TestCase):
 
     def _create_group(self):
         result = self.group_system.create_group(self.first, name='bar_cats')
-        return result['group_id']
+        return result.group_id
 
     def test_cat_can_create_group(self):
         group_id = self._create_group()

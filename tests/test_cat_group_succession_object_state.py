@@ -64,9 +64,7 @@ class CatGroupSuccessionObjectStateTests(
         )
 
         self.group_id = (
-            created[
-                "group_id"
-            ]
+            created.group_id
         )
 
         self.groups.add_member(

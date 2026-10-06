@@ -52,9 +52,7 @@ class CatInnovationTreeRegistrationResultsObjectStateTests(
             self.groups.create_group(
                 self.cat,
                 name="innovation_group",
-            )[
-                "group_id"
-            ]
+            ).group_id
         )
 
         self.knowledge = (

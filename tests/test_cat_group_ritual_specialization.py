@@ -21,7 +21,7 @@ class CatGroupRitualSpecializationTests(unittest.TestCase):
             self.members.append(cat)
         self.groups = CatGroupSystem(self.cats)
         created = self.groups.create_group(self.members[0], name='parent')
-        self.group_id = created['group_id']
+        self.group_id = created.group_id
         for cat in self.members[1:]:
             self.groups.add_member(self.group_id, cat, self.cats.cats)
 
