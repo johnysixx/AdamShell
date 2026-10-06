@@ -46,8 +46,16 @@ class CatCulturalSelectionTests(unittest.TestCase):
         culture.express_preference(self.second_group, 'sleeping_place', 'window', strength=0.8)
         conflict = CatGroupCulturalConflictSystem(self.groups)
         result = conflict.compare(self.first_group, self.second_group)
-        self.assertGreater(result['conflict_score'], 0.0)
-        self.assertGreaterEqual(len(result['preference_conflicts']), 1)
+        self.assertGreater(
+            result.conflict_score,
+            0.0,
+        )
+        self.assertGreaterEqual(
+            len(
+                result.preference_conflicts
+            ),
+            1,
+        )
 
     def _create_myth_and_innovation(self):
         knowledge = CatGroupKnowledgeSystem(self.groups)

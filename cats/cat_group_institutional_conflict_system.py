@@ -1,3 +1,4 @@
+from copy import deepcopy
 from uuid import uuid4
 from cats.cat_culture_objects import CatInstitutionConflict
 from cats.cat_group_institutional_conflict_detection_state import (
@@ -258,11 +259,11 @@ class CatGroupInstitutionalConflictSystem:
         )
 
         conflict.history.append(
-            event.to_dict()
+            deepcopy(event)
         )
 
         group.history.append(
-            event.to_dict()
+            deepcopy(event)
         )
 
         return event
@@ -348,11 +349,11 @@ class CatGroupInstitutionalConflictSystem:
         )
 
         conflict.history.append(
-            event.to_dict()
+            deepcopy(event)
         )
 
         group.history.append(
-            event.to_dict()
+            deepcopy(event)
         )
 
         return event

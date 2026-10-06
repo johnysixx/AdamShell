@@ -479,29 +479,23 @@ class CatGroupInstitutionalConflictMediationObjectStateTests(
             1.0,
         )
 
-    def test_histories_remain_serialized_boundaries(
+    def test_histories_store_detached_event_objects(
         self
     ):
-        created = (
-            self.create_conflict(
-                intensity=0.4
-            )
+        created = self.create_conflict(
+            intensity=0.4
         )
 
         self.make_mediator()
 
-        group = (
-            self.groups.groups[
-                self.group_id
-            ]
-        )
+        group = self.groups.groups[
+            self.group_id
+        ]
 
-        result = (
-            self.conflicts.mediate(
-                self.group_id,
-                created.conflict_id,
-                self.mediator,
-            )
+        result = self.conflicts.mediate(
+            self.group_id,
+            created.conflict_id,
+            self.mediator,
         )
 
         conflict = (
@@ -522,24 +516,72 @@ class CatGroupInstitutionalConflictMediationObjectStateTests(
             ]
         )
 
-        self.assertIsInstance(
+        for event in (
             conflict_event,
-            dict,
-        )
-
-        self.assertIsInstance(
             group_event,
-            dict,
-        )
+        ):
+            self.assertIsInstance(
+                event,
+                CatInstitutionConflictMediatedEvent,
+            )
 
-        self.assertEqual(
+            self.assertEqual(
+                event,
+                result,
+            )
+
+            self.assertIsNot(
+                event,
+                result,
+            )
+
+            self.assertFalse(
+                hasattr(
+                    event,
+                    "to_dict",
+                )
+            )
+
+        self.assertIsNot(
             conflict_event,
-            result.to_dict(),
+            group_event,
         )
 
-        self.assertEqual(
-            group_event,
-            result.to_dict(),
+    def test_history_events_are_frozen_and_detached(
+        self
+    ):
+        created = self.create_conflict(
+            intensity=0.4
+        )
+
+        self.make_mediator()
+
+        group = self.groups.groups[
+            self.group_id
+        ]
+
+        result = self.conflicts.mediate(
+            self.group_id,
+            created.conflict_id,
+            self.mediator,
+        )
+
+        conflict = (
+            group.institution_conflicts[
+                created.conflict_id
+            ]
+        )
+
+        conflict_event = (
+            conflict.history[
+                -1
+            ]
+        )
+
+        group_event = (
+            group.history[
+                -1
+            ]
         )
 
         self.assertIsNot(
@@ -547,52 +589,12 @@ class CatGroupInstitutionalConflictMediationObjectStateTests(
             group_event,
         )
 
-    def test_history_snapshots_are_detached(
-        self
-    ):
-        created = (
-            self.create_conflict(
-                intensity=0.4
+        with self.assertRaises(
+            AttributeError
+        ):
+            conflict_event.mediator = (
+                "changed"
             )
-        )
-
-        self.make_mediator()
-
-        group = (
-            self.groups.groups[
-                self.group_id
-            ]
-        )
-
-        result = (
-            self.conflicts.mediate(
-                self.group_id,
-                created.conflict_id,
-                self.mediator,
-            )
-        )
-
-        conflict = (
-            group.institution_conflicts[
-                created.conflict_id
-            ]
-        )
-
-        conflict_event = (
-            conflict.history[
-                -1
-            ]
-        )
-
-        group_event = (
-            group.history[
-                -1
-            ]
-        )
-
-        conflict_event[
-            "mediator"
-        ] = "changed"
 
         self.assertEqual(
             result.mediator,
@@ -600,28 +602,12 @@ class CatGroupInstitutionalConflictMediationObjectStateTests(
         )
 
         self.assertEqual(
-            group_event[
-                "mediator"
-            ],
+            group_event.mediator,
             self.mediator.name,
         )
 
-        serialized = (
-            result.to_dict()
-        )
-
-        serialized[
-            "resolved"
-        ] = False
-
         self.assertTrue(
-            result.resolved
-        )
-
-        self.assertTrue(
-            group_event[
-                "resolved"
-            ]
+            group_event.resolved
         )
 
     def test_results_are_immutable(

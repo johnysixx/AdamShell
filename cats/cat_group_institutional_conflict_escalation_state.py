@@ -35,14 +35,9 @@ class CatGroupInstitutionalConflictEvent:
         init=False,
     )
 
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "group_id": self.group_id,
-            "conflict_id": self.conflict_id,
-            "first_institution": self.first_institution,
-            "second_institution": self.second_institution,
-            "issue": self.issue,
-            "intensity": self.intensity,
-            "escalated": self.escalated,
-        }
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "intensity",
+            float(self.intensity),
+        )

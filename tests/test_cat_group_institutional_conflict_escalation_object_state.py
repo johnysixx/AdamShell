@@ -334,25 +334,21 @@ class CatGroupInstitutionalConflictEscalationObjectStateTests(
             0.9,
         )
 
-    def test_histories_remain_serialized_boundaries(
+    def test_histories_store_detached_event_objects(
         self
     ):
         self.create_institutions()
 
-        group = (
-            self.groups.groups[
-                self.group_id
-            ]
-        )
+        group = self.groups.groups[
+            self.group_id
+        ]
 
-        result = (
-            self.conflicts.escalate(
-                self.group_id,
-                "night_watch",
-                "door_watch",
-                issue="guardian_attention",
-                intensity=0.4,
-            )
+        result = self.conflicts.escalate(
+            self.group_id,
+            "night_watch",
+            "door_watch",
+            issue="guardian_attention",
+            intensity=0.4,
         )
 
         conflict = (
@@ -373,24 +369,70 @@ class CatGroupInstitutionalConflictEscalationObjectStateTests(
             ]
         )
 
-        self.assertIsInstance(
+        for event in (
             conflict_event,
-            dict,
-        )
-
-        self.assertIsInstance(
             group_event,
-            dict,
-        )
+        ):
+            self.assertIsInstance(
+                event,
+                CatGroupInstitutionalConflictEvent,
+            )
 
-        self.assertEqual(
+            self.assertEqual(
+                event,
+                result,
+            )
+
+            self.assertIsNot(
+                event,
+                result,
+            )
+
+            self.assertFalse(
+                hasattr(
+                    event,
+                    "to_dict",
+                )
+            )
+
+        self.assertIsNot(
             conflict_event,
-            result.to_dict(),
+            group_event,
         )
 
-        self.assertEqual(
-            group_event,
-            result.to_dict(),
+    def test_history_events_are_frozen_and_detached(
+        self
+    ):
+        self.create_institutions()
+
+        group = self.groups.groups[
+            self.group_id
+        ]
+
+        result = self.conflicts.escalate(
+            self.group_id,
+            "night_watch",
+            "door_watch",
+            issue="guardian_attention",
+            intensity=0.4,
+        )
+
+        conflict = (
+            group.institution_conflicts[
+                result.conflict_id
+            ]
+        )
+
+        conflict_event = (
+            conflict.history[
+                -1
+            ]
+        )
+
+        group_event = (
+            group.history[
+                -1
+            ]
         )
 
         self.assertIsNot(
@@ -398,48 +440,12 @@ class CatGroupInstitutionalConflictEscalationObjectStateTests(
             group_event,
         )
 
-    def test_history_snapshots_are_detached_from_event_and_each_other(
-        self
-    ):
-        self.create_institutions()
-
-        group = (
-            self.groups.groups[
-                self.group_id
-            ]
-        )
-
-        result = (
-            self.conflicts.escalate(
-                self.group_id,
-                "night_watch",
-                "door_watch",
-                issue="guardian_attention",
-                intensity=0.4,
+        with self.assertRaises(
+            AttributeError
+        ):
+            conflict_event.issue = (
+                "changed"
             )
-        )
-
-        conflict = (
-            group.institution_conflicts[
-                result.conflict_id
-            ]
-        )
-
-        conflict_event = (
-            conflict.history[
-                -1
-            ]
-        )
-
-        group_event = (
-            group.history[
-                -1
-            ]
-        )
-
-        conflict_event[
-            "issue"
-        ] = "changed"
 
         self.assertEqual(
             result.issue,
@@ -447,29 +453,7 @@ class CatGroupInstitutionalConflictEscalationObjectStateTests(
         )
 
         self.assertEqual(
-            group_event[
-                "issue"
-            ],
-            "guardian_attention",
-        )
-
-        serialized = (
-            result.to_dict()
-        )
-
-        serialized[
-            "issue"
-        ] = "also_changed"
-
-        self.assertEqual(
-            result.issue,
-            "guardian_attention",
-        )
-
-        self.assertEqual(
-            group_event[
-                "issue"
-            ],
+            group_event.issue,
             "guardian_attention",
         )
 

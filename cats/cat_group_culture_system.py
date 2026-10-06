@@ -1,19 +1,37 @@
 from copy import deepcopy
 
 from cats.cat_cultural_preference_state import (
-    CatCulturalPreferenceState
+    CatCulturalPreferenceState,
 )
 from cats.cat_cultural_tradition_state import (
-    CatCulturalTraditionState
+    CatCulturalTraditionState,
 )
+from cats.cat_group_culture_history_state import (
+    CatGroupCulturalPracticeEvent,
+    CatGroupPreferenceExpressedResult,
+)
+
 
 class CatGroupCultureSystem:
 
-    def __init__(self, group_system):
+    def __init__(
+        self,
+        group_system,
+    ):
         self.group_system = group_system
 
-    def practice(self, group_id, practice, category, participants=None, weight=0.1):
-        group = self.group_system._group(group_id)
+    def practice(
+        self,
+        group_id,
+        practice,
+        category,
+        participants=None,
+        weight=0.1,
+    ):
+        group = self.group_system._group(
+            group_id
+        )
+
         culture = group.culture
         traditions = culture.traditions
 
@@ -38,9 +56,8 @@ class CatGroupCultureSystem:
             CatCulturalTraditionState,
         ):
             raise TypeError(
-                'Cat cultural tradition record '
-                'must be '
-                'CatCulturalTraditionState.'
+                "Cat cultural tradition record "
+                "must be CatCulturalTraditionState."
             )
 
         tradition.name = practice
@@ -58,34 +75,61 @@ class CatGroupCultureSystem:
 
         traits = culture.traits
 
-        traits[trait] = self._clamp(
+        traits[
+            trait
+        ] = self._clamp(
             float(
                 traits.get(
                     trait,
-                    0.0
+                    0.0,
                 )
             )
-            + float(weight) * 0.5
+            + float(weight)
+            * 0.5
         )
 
-        event = {
-            'name':
-                'cat_group_cultural_practice',
-            'group_id': group_id,
-            'practice': practice,
-            'category': category,
-            'participants':
-                list(participants or []),
-            'strength':
-                tradition.strength,
-        }
-        culture.history.append(deepcopy(event))
-        group.history.append(deepcopy(event))
+        event = (
+            CatGroupCulturalPracticeEvent(
+                group_id=group_id,
+                practice=practice,
+                category=category,
+                participants=tuple(
+                    participants
+                    or ()
+                ),
+                strength=tradition.strength,
+            )
+        )
+
+        culture.history.append(
+            deepcopy(
+                event
+            )
+        )
+
+        group.history.append(
+            deepcopy(
+                event
+            )
+        )
+
         return event
 
-    def express_preference(self, group_id, preference, value, strength=0.1):
-        group = self.group_system._group(group_id)
-        preferences = group.culture.preferences
+    def express_preference(
+        self,
+        group_id,
+        preference,
+        value,
+        strength=0.1,
+    ):
+        group = self.group_system._group(
+            group_id
+        )
+
+        preferences = (
+            group.culture.preferences
+        )
+
         record = preferences.get(
             preference
         )
@@ -106,9 +150,8 @@ class CatGroupCultureSystem:
             CatCulturalPreferenceState,
         ):
             raise TypeError(
-                'Cat cultural preference record '
-                'must be '
-                'CatCulturalPreferenceState.'
+                "Cat cultural preference record "
+                "must be CatCulturalPreferenceState."
             )
 
         record.value = value
@@ -119,22 +162,54 @@ class CatGroupCultureSystem:
             + float(strength)
         )
 
-        return {
-            'name':
-                'cat_group_preference_expressed',
-            'group_id': group_id,
-            'preference': preference,
-            'value': value,
-            'strength': record.strength,
+        return (
+            CatGroupPreferenceExpressedResult(
+                group_id=group_id,
+                preference=preference,
+                value=value,
+                strength=record.strength,
+            )
+        )
+
+    def profile(
+        self,
+        group_id,
+    ):
+        group = self.group_system._group(
+            group_id
+        )
+
+        return deepcopy(
+            group.culture
+        )
+
+    def _trait_for_category(
+        self,
+        category,
+    ):
+        mapping = {
+            "exploration": "curious",
+            "defense": "protective",
+            "knowledge": "scholarly",
+            "hunting": "hunters",
+            "social": "social",
+            "ritual": "ritualized",
+            "navigation": "wandering",
         }
 
-    def profile(self, group_id):
-        group = self.group_system._group(group_id)
-        return deepcopy(group.culture)
+        return mapping.get(
+            category,
+            "distinctive",
+        )
 
-    def _trait_for_category(self, category):
-        mapping = {'exploration': 'curious', 'defense': 'protective', 'knowledge': 'scholarly', 'hunting': 'hunters', 'social': 'social', 'ritual': 'ritualized', 'navigation': 'wandering'}
-        return mapping.get(category, 'distinctive')
-
-    def _clamp(self, value):
-        return max(0.0, min(1.0, float(value)))
+    def _clamp(
+        self,
+        value,
+    ):
+        return max(
+            0.0,
+            min(
+                1.0,
+                float(value),
+            ),
+        )

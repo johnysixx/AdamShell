@@ -34,13 +34,15 @@ class CatInstitutionConflictMediatedEvent:
         init=False,
     )
 
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "group_id": self.group_id,
-            "conflict_id": self.conflict_id,
-            "mediator": self.mediator,
-            "intensity": self.intensity,
-            "resolved": self.resolved,
-            "mediated": self.mediated,
-        }
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "intensity",
+            float(self.intensity),
+        )
+
+        object.__setattr__(
+            self,
+            "resolved",
+            bool(self.resolved),
+        )
