@@ -23,6 +23,10 @@ from cats.cat_group_membership_state import (
     CatGroupJoinSkippedResult,
     CatJoinedGroupEvent,
 )
+from cats.cat_group_scent_state import (
+    CatGroupScentMixedEvent,
+    CatGroupScentNotMixedResult,
+)
 from cats.cat_social_objects import CatRelationship
 from cats.cat_territory_system import CatTerritorySystem
 from cats.cat_group_territory_state import (
@@ -380,23 +384,98 @@ class CatGroupSystem:
 
         return event
 
-    def mix_group_scent(self, group_id, cats, amount=0.1):
-        group = self._group(group_id)
-        members = self._member_objects(group, cats)
+    def mix_group_scent(
+        self,
+        group_id,
+        cats,
+        amount=0.1,
+    ):
+        group = self._group(
+            group_id
+        )
+
+        members = self._member_objects(
+            group,
+            cats,
+        )
+
         if len(members) < 2:
-            return {'name': 'cat_group_scent_not_mixed', 'group_id': group_id, 'reason': 'not_enough_members', 'mixed': False}
-        amount = max(0.0, float(amount))
-        group.shared_scent_strength = self._clamp(self._number(getattr(group, 'shared_scent_strength', 0.0)) + amount)
+            return CatGroupScentNotMixedResult(
+                group_id=group_id,
+                reason="not_enough_members",
+            )
+
+        amount = max(
+            0.0,
+            float(
+                amount
+            ),
+        )
+
+        group.shared_scent_strength = (
+            self._clamp(
+                self._number(
+                    getattr(
+                        group,
+                        "shared_scent_strength",
+                        0.0,
+                    )
+                )
+                + amount
+            )
+        )
+
         for first in members:
-            first.group.shared_scent = group.shared_scent_strength
+            first.group.shared_scent = (
+                group.shared_scent_strength
+            )
+
             for second in members:
                 if first is second:
                     continue
-                relation = self._ensure_relationship(first, second)
-                relation.shared_scent = self._clamp(self._number(relation.shared_scent) + amount)
-                relation.familiarity = self._clamp(self._number(relation.familiarity) + amount * 0.5)
-        event = {'name': 'cat_group_scent_mixed', 'group_id': group_id, 'members': [cat.name for cat in members], 'shared_scent_strength': group.shared_scent_strength, 'mixed': True}
-        self._record(group, event, cats=members)
+
+                relation = (
+                    self._ensure_relationship(
+                        first,
+                        second,
+                    )
+                )
+
+                relation.shared_scent = (
+                    self._clamp(
+                        self._number(
+                            relation.shared_scent
+                        )
+                        + amount
+                    )
+                )
+
+                relation.familiarity = (
+                    self._clamp(
+                        self._number(
+                            relation.familiarity
+                        )
+                        + amount * 0.5
+                    )
+                )
+
+        event = CatGroupScentMixedEvent(
+            group_id=group_id,
+            members=tuple(
+                cat.name
+                for cat in members
+            ),
+            shared_scent_strength=(
+                group.shared_scent_strength
+            ),
+        )
+
+        self._record(
+            group,
+            event,
+            cats=members,
+        )
+
         return event
 
     def claim_territory(self, group_id, cats, layer, location, strength=0.7):

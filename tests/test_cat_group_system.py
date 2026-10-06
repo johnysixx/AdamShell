@@ -60,7 +60,7 @@ class CatGroupSystemTests(unittest.TestCase):
         group_id = self._create_group()
         self.group_system.add_member(group_id, self.second, self.cats.cats)
         result = self.group_system.mix_group_scent(group_id, self.cats.cats, amount=0.2)
-        self.assertTrue(result['mixed'])
+        self.assertTrue(result.mixed)
         self.assertAlmostEqual(self.first.relationships[self.second.name].shared_scent, 0.2)
         self.assertAlmostEqual(self.second.relationships[self.first.name].shared_scent, 0.2)
 
@@ -166,7 +166,7 @@ class CatGroupSystemTests(unittest.TestCase):
         )
 
         self.assertTrue(joined.joined)
-        self.assertTrue(mixed['mixed'])
+        self.assertTrue(mixed.mixed)
         self.assertIs(self.first.relationships[self.second.name], relation)
         self.assertIs(self.second.relationships[self.first.name], legacy)
         self.assertAlmostEqual(relation.trust, 0.8)
