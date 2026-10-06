@@ -1,5 +1,18 @@
 from copy import deepcopy
 
+from cats.cat_group_alliance_break_state import (
+    CatGroupAllianceBreakDeniedResult,
+    CatGroupAllianceBrokenEvent,
+)
+from cats.cat_group_alliance_defense_state import (
+    CatGroupAlliedDefenseDeniedResult,
+    CatGroupAlliedDefenseResult,
+)
+from cats.cat_group_alliance_proposal_state import (
+    CatGroupAllianceDeniedResult,
+    CatGroupAllianceFormedEvent,
+    CatGroupAlliancePreservedResult,
+)
 from cats.cat_group_diplomacy_system import (
     CatGroupDiplomacySystem
 )
@@ -34,11 +47,11 @@ class CatGroupAllianceSystem:
         second_group_id
     ):
         if first_group_id == second_group_id:
-            return {
-                "name": "cat_group_alliance_denied",
-                "reason": "same_group",
-                "formed": False
-            }
+            return CatGroupAllianceDeniedResult(
+                first_group=first_group_id,
+                second_group=second_group_id,
+                reason="same_group",
+            )
 
         first = self.group_system._group(
             first_group_id
@@ -52,13 +65,10 @@ class CatGroupAllianceSystem:
             second_group_id
             in first.alliances
         ):
-            return {
-                "name": "cat_group_alliance_preserved",
-                "first_group": first_group_id,
-                "second_group": second_group_id,
-                "formed": True,
-                "existing": True
-            }
+            return CatGroupAlliancePreservedResult(
+                first_group=first_group_id,
+                second_group=second_group_id,
+            )
 
         relation = (
             self.diplomacy.mutual_relation(
@@ -88,16 +98,14 @@ class CatGroupAllianceSystem:
         )
 
         if not accepted:
-            return {
-                "name": "cat_group_alliance_denied",
-                "first_group": first_group_id,
-                "second_group": second_group_id,
-                "reason": (
+            return CatGroupAllianceDeniedResult(
+                first_group=first_group_id,
+                second_group=second_group_id,
+                reason=(
                     "alliance_requirements_not_met"
                 ),
-                "relation": relation,
-                "formed": False
-            }
+                relation=relation,
+            )
 
         first.alliances.append(
             second_group_id
@@ -107,13 +115,11 @@ class CatGroupAllianceSystem:
             first_group_id
         )
 
-        event = {
-            "name": "cat_group_alliance_formed",
-            "first_group": first_group_id,
-            "second_group": second_group_id,
-            "relation": relation,
-            "formed": True
-        }
+        event = CatGroupAllianceFormedEvent(
+            first_group=first_group_id,
+            second_group=second_group_id,
+            relation=relation,
+        )
 
         first.history.append(
             deepcopy(
@@ -144,13 +150,11 @@ class CatGroupAllianceSystem:
             second_group_id
             not in first.alliances
         ):
-            return {
-                "name": (
-                    "cat_group_allied_defense_denied"
-                ),
-                "reason": "groups_not_allied",
-                "defended": False
-            }
+            return CatGroupAlliedDefenseDeniedResult(
+                first_group=first_group_id,
+                second_group=second_group_id,
+                reason="groups_not_allied",
+            )
 
         first_response = (
             self.group_system
@@ -178,14 +182,12 @@ class CatGroupAllianceSystem:
             )
         )
 
-        return {
-            "name": "cat_group_allied_defense",
-            "first_group": first_group_id,
-            "second_group": second_group_id,
-            "first_response": first_response,
-            "second_response": second_response,
-            "defended": True
-        }
+        return CatGroupAlliedDefenseResult(
+            first_group=first_group_id,
+            second_group=second_group_id,
+            first_response=first_response,
+            second_response=second_response,
+        )
 
     def break_alliance(
         self,
@@ -206,13 +208,11 @@ class CatGroupAllianceSystem:
             second_group_id
             not in first.alliances
         ):
-            return {
-                "name": (
-                    "cat_group_alliance_break_denied"
-                ),
-                "reason": "not_allied",
-                "broken": False
-            }
+            return CatGroupAllianceBreakDeniedResult(
+                first_group=first_group_id,
+                second_group=second_group_id,
+                reason="not_allied",
+            )
 
         first.alliances.remove(
             second_group_id
@@ -233,14 +233,12 @@ class CatGroupAllianceSystem:
                 reason=reason
             )
 
-        event = {
-            "name": "cat_group_alliance_broken",
-            "first_group": first_group_id,
-            "second_group": second_group_id,
-            "reason": reason,
-            "betrayal": betrayal,
-            "broken": True
-        }
+        event = CatGroupAllianceBrokenEvent(
+            first_group=first_group_id,
+            second_group=second_group_id,
+            reason=reason,
+            betrayal=betrayal,
+        )
 
         first.history.append(
             deepcopy(

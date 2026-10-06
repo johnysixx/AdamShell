@@ -9,6 +9,10 @@ from cats.cat_social_objects import (
 from cats.cat_group_territory_state import (
     CatGroupTerritoryState,
 )
+from cats.cat_group_threat_state import (
+    CatGroupThreatResponseEvent,
+    CatGroupThreatState,
+)
 
 class CatGroupSystemTests(unittest.TestCase):
 
@@ -100,10 +104,26 @@ class CatGroupSystemTests(unittest.TestCase):
         self.group_system.add_member(group_id, self.second, self.cats.cats)
         self.first.personality.traits.courage = 1.0
         self.second.personality.traits.courage = 0.0
-        result = self.group_system.respond_to_threat(group_id, self.cats.cats, threat={'name': 'cronenberg'})
-        self.assertTrue(result['responded'])
-        self.assertIn(self.first.name, result['defenders'])
-        self.assertIn(self.second.name, result['withdrawers'])
+        result = self.group_system.respond_to_threat(
+            group_id,
+            self.cats.cats,
+            threat=CatGroupThreatState(
+                name='cronenberg'
+            ),
+        )
+        self.assertIsInstance(
+            result,
+            CatGroupThreatResponseEvent,
+        )
+        self.assertTrue(result.responded)
+        self.assertIn(
+            self.first.name,
+            result.defenders,
+        )
+        self.assertIn(
+            self.second.name,
+            result.withdrawers,
+        )
 
     def test_cat_can_leave_group(self):
         group_id = self._create_group()

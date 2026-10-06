@@ -10,6 +10,10 @@ from cats.cat_territory_system import CatTerritorySystem
 from cats.cat_group_territory_state import (
     CatGroupTerritoryState,
 )
+from cats.cat_group_threat_state import (
+    CatGroupThreatResponseEvent,
+    CatGroupThreatState,
+)
 
 class CatGroupSystem:
 
@@ -164,10 +168,16 @@ class CatGroupSystem:
     def respond_to_threat(self, group_id, cats, threat):
         group = self._group(group_id)
         members = self._member_objects(group, cats)
-        if isinstance(threat, dict):
-            threat_name = threat.get('name')
-        else:
-            threat_name = getattr(threat, 'name', str(threat))
+        if not isinstance(
+            threat,
+            CatGroupThreatState,
+        ):
+            raise TypeError(
+                "Cat group threat must be "
+                "CatGroupThreatState."
+            )
+
+        threat_name = threat.name
         defenders = []
         withdrawers = []
         for member in members:
@@ -184,7 +194,13 @@ class CatGroupSystem:
                 member.state = 'group_withdrawing'
                 withdrawers.append(member.name)
         group.threat_events += 1
-        event = {'name': 'cat_group_threat_response', 'group_id': group_id, 'threat': threat_name, 'defenders': defenders, 'withdrawers': withdrawers, 'member_count': len(members), 'responded': True}
+        event = CatGroupThreatResponseEvent(
+            group_id=group_id,
+            threat=threat_name,
+            defenders=tuple(defenders),
+            withdrawers=tuple(withdrawers),
+            member_count=len(members),
+        )
         self._record(group, event, cats=members)
         return event
 

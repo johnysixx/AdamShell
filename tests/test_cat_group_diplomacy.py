@@ -20,6 +20,9 @@ from cats.cat_group_alliance_system import (
 from cats.cat_group_conflict_system import (
     CatGroupConflictSystem
 )
+from cats.cat_group_threat_state import (
+    CatGroupThreatState
+)
 
 
 class CatGroupDiplomacyTests(
@@ -175,7 +178,7 @@ class CatGroupDiplomacyTests(
         )
 
         self.assertTrue(
-            result["formed"]
+            result.formed
         )
 
         self.assertIn(
@@ -210,13 +213,13 @@ class CatGroupDiplomacyTests(
             self.first_group,
             self.second_group,
             self.cats.cats,
-            threat={
-                "name": "cronenberg"
-            }
+            threat=CatGroupThreatState(
+                name="cronenberg"
+            )
         )
 
         self.assertTrue(
-            result["defended"]
+            result.defended
         )
 
     def test_betrayal_breaks_alliance_and_hurts_relation(
@@ -250,7 +253,7 @@ class CatGroupDiplomacyTests(
         )
 
         self.assertTrue(
-            result["broken"]
+            result.broken
         )
 
         diplomacy = CatGroupDiplomacySystem(

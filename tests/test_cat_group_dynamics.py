@@ -2,6 +2,7 @@ import unittest
 from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat_group_system import CatGroupSystem
+from cats.cat_group_threat_state import CatGroupThreatState
 from cats.cat_social_objects import CatRelationship
 from cats.cat_group_hierarchy_system import CatGroupHierarchySystem
 from cats.cat_group_bonding_system import CatGroupBondingSystem
@@ -67,7 +68,7 @@ class CatGroupDynamicsTests(unittest.TestCase):
         self.first.personality.traits.courage = 1.0
         hierarchy = CatGroupHierarchySystem(self.groups)
         before = {item['cat']: item['influence'] for item in hierarchy.rank(self.group_id, self.cats.cats)}[self.first.name]
-        self.groups.respond_to_threat(self.group_id, self.cats.cats, threat={'name': 'cronenberg'})
+        self.groups.respond_to_threat(self.group_id, self.cats.cats, threat=CatGroupThreatState(name='cronenberg'))
         after = {item['cat']: item['influence'] for item in hierarchy.rank(self.group_id, self.cats.cats)}[self.first.name]
         self.assertGreater(after, before)
 if __name__ == '__main__':
