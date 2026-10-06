@@ -29,7 +29,7 @@ class CatCulturalSelectionTests(unittest.TestCase):
         self.second.personality.traits.curiosity = 1.0
         adoption = CatCulturalAdoptionSystem(self.groups)
         result = adoption.expose_to_tradition(self.second, self.first_group, 'night_patrol')
-        self.assertTrue(result['adopted'])
+        self.assertTrue(result.adopted)
         self.assertIn('night_patrol', self.second.culture.adopted_traditions)
 
     def test_cat_can_reject_weak_tradition(self):
@@ -38,7 +38,7 @@ class CatCulturalSelectionTests(unittest.TestCase):
         self.second.personality.traits.curiosity = 0.0
         adoption = CatCulturalAdoptionSystem(self.groups)
         result = adoption.expose_to_tradition(self.second, self.first_group, 'dangerous_box_jump')
-        self.assertFalse(result['adopted'])
+        self.assertFalse(result.adopted)
 
     def test_conflicting_preferences_create_friction(self):
         culture = CatGroupCultureSystem(self.groups)
@@ -74,15 +74,15 @@ class CatCulturalSelectionTests(unittest.TestCase):
         myth_id, _ = self._create_myth_and_innovation()
         selection = CatMemeticSelectionSystem(self.groups)
         result = selection.expose_myth(self.first_group, self.cats.cats, myth_id)
-        self.assertTrue(result['exposed'])
-        self.assertGreater(result['fitness'], 0.0)
+        self.assertTrue(result.exposed)
+        self.assertGreater(result.fitness, 0.0)
 
     def test_innovations_gain_memetic_fitness(self):
         _, innovation_id = self._create_myth_and_innovation()
         selection = CatMemeticSelectionSystem(self.groups)
         result = selection.expose_innovation(self.first_group, self.cats.cats, innovation_id)
-        self.assertTrue(result['exposed'])
-        self.assertGreater(result['fitness'], 0.0)
+        self.assertTrue(result.exposed)
+        self.assertGreater(result.fitness, 0.0)
 
     def test_memetic_selection_distinguishes_survival(self):
         myth_id, innovation_id = self._create_myth_and_innovation()
@@ -91,7 +91,7 @@ class CatCulturalSelectionTests(unittest.TestCase):
         selection.expose_innovation(self.first_group, self.cats.cats, innovation_id)
         myths = selection.select_myths(self.first_group, minimum_fitness=0.1)
         innovations = selection.select_innovations(self.first_group, minimum_fitness=0.1)
-        self.assertIn(myth_id, myths['surviving'])
-        self.assertIn(innovation_id, innovations['surviving'])
+        self.assertIn(myth_id, myths.surviving)
+        self.assertIn(innovation_id, innovations.surviving)
 if __name__ == '__main__':
     unittest.main()

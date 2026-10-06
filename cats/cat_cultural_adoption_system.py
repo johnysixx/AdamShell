@@ -1,35 +1,68 @@
 from copy import deepcopy
+
 from cats.cat import Cat
+from cats.cat_cultural_adoption_result_state import (
+    CatCulturalExposureDeniedResult,
+    CatCulturalPreferenceAdoptedResult,
+    CatCulturalPreferenceAdoptionDeniedResult,
+    CatCulturalTraditionEvaluatedEvent,
+    CatCulturalTraditionEvaluationResult,
+)
 from cats.cat_cultural_preference_state import (
-    CatCulturalPreferenceState
+    CatCulturalPreferenceState,
 )
 from cats.cat_cultural_tradition_evaluation_state import (
-    CatCulturalTraditionEvaluationState
+    CatCulturalTraditionEvaluationState,
 )
 from cats.cat_cultural_tradition_state import (
-    CatCulturalTraditionState
+    CatCulturalTraditionState,
 )
+
 
 class CatCulturalAdoptionSystem:
 
-    def __init__(self, group_system):
+    def __init__(
+        self,
+        group_system,
+    ):
         self.group_system = group_system
 
-    def evaluate_tradition(self, cat, group_id, tradition_name):
-        self._require_cat(cat)
-        group = self.group_system._group(group_id)
-        tradition = group.culture.traditions.get(tradition_name)
+    def evaluate_tradition(
+        self,
+        cat,
+        group_id,
+        tradition_name,
+    ):
+        self._require_cat(
+            cat
+        )
+
+        group = self.group_system._group(
+            group_id
+        )
+
+        tradition = (
+            group.culture.traditions.get(
+                tradition_name
+            )
+        )
+
         if tradition is None:
-            return {'tradition': tradition_name, 'known': False, 'adopt': False}
+            return (
+                CatCulturalTraditionEvaluationResult(
+                    tradition=tradition_name,
+                    known=False,
+                )
+            )
 
         if not isinstance(
             tradition,
             CatCulturalTraditionState,
         ):
             raise TypeError(
-                'Cat cultural tradition record '
-                'must be '
-                'CatCulturalTraditionState.'
+                "Cat cultural tradition record "
+                "must be "
+                "CatCulturalTraditionState."
             )
 
         traits = cat.personality.traits
@@ -48,30 +81,81 @@ class CatCulturalAdoptionSystem:
 
         category = tradition.category
 
-        category_affinity = {'exploration': curiosity, 'social': sociability, 'defense': courage, 'knowledge': self._number(cat.intellect.normalized), 'navigation': curiosity, 'ritual': sociability, 'hunting': courage * 0.6 + curiosity * 0.4}.get(category, 0.5)
+        category_affinity = {
+            "exploration":
+                curiosity,
+            "social":
+                sociability,
+            "defense":
+                courage,
+            "knowledge":
+                self._number(
+                    cat.intellect.normalized
+                ),
+            "navigation":
+                curiosity,
+            "ritual":
+                sociability,
+            "hunting":
+                courage
+                * 0.6
+                + curiosity
+                * 0.4,
+        }.get(
+            category,
+            0.5,
+        )
 
         strength = self._number(
             tradition.strength
         )
-        score = category_affinity * 0.55 + strength * 0.35 + 0.1
-        return {'tradition': tradition_name, 'known': True, 'category': category, 'score': round(score, 4), 'adopt': score >= 0.5}
 
-    def expose_to_tradition(self, cat, group_id, tradition_name):
-        evaluation = self.evaluate_tradition(
-            cat,
-            group_id,
-            tradition_name,
+        score = (
+            category_affinity
+            * 0.55
+            + strength
+            * 0.35
+            + 0.1
         )
 
-        if not evaluation['known']:
-            return {
-                'name':
-                    'cat_cultural_exposure_denied',
-                'reason':
-                    'unknown_tradition',
-                'adopted':
-                    False,
-            }
+        score = round(
+            score,
+            4,
+        )
+
+        return (
+            CatCulturalTraditionEvaluationResult(
+                tradition=tradition_name,
+                known=True,
+                category=category,
+                score=score,
+                adopt=(
+                    score
+                    >= 0.5
+                ),
+            )
+        )
+
+    def expose_to_tradition(
+        self,
+        cat,
+        group_id,
+        tradition_name,
+    ):
+        evaluation = (
+            self.evaluate_tradition(
+                cat,
+                group_id,
+                tradition_name,
+            )
+        )
+
+        if not evaluation.known:
+            return (
+                CatCulturalExposureDeniedResult(
+                    reason="unknown_tradition",
+                )
+            )
 
         self._require_evaluation_records(
             cat
@@ -80,18 +164,14 @@ class CatCulturalAdoptionSystem:
         record = (
             CatCulturalTraditionEvaluationState(
                 group_id=group_id,
-                score=float(
-                    evaluation['score']
-                ),
-                category=(
-                    evaluation['category']
-                ),
+                score=evaluation.score,
+                category=evaluation.category,
             )
         )
 
         cat.culture.exposures += 1
 
-        if evaluation['adopt']:
+        if evaluation.adopt:
             cat.culture.adopted_traditions[
                 tradition_name
             ] = record
@@ -101,67 +181,90 @@ class CatCulturalAdoptionSystem:
                 None,
             )
 
-            outcome = 'adopted'
+            outcome = "adopted"
 
         else:
             cat.culture.rejected_traditions[
                 tradition_name
             ] = record
 
-            outcome = 'rejected'
+            outcome = "rejected"
 
-        event = {
-            'name':
-                'cat_cultural_tradition_evaluated',
-            'cat':
-                cat.name,
-            'group_id':
-                group_id,
-            'tradition':
-                tradition_name,
-            'score':
-                evaluation['score'],
-            'outcome':
-                outcome,
-            'adopted':
-                outcome == 'adopted',
-        }
+        event = (
+            CatCulturalTraditionEvaluatedEvent(
+                cat=cat.name,
+                group_id=group_id,
+                tradition=tradition_name,
+                score=evaluation.score,
+                outcome=outcome,
+                adopted=(
+                    outcome
+                    == "adopted"
+                ),
+            )
+        )
 
         cat.social_interactions.append(
-            deepcopy(event)
+            deepcopy(
+                event
+            )
         )
 
         return event
 
-    def adopt_preference(self, cat, group_id, preference_name):
-        self._require_cat(cat)
-        group = self.group_system._group(group_id)
-        preference = group.culture.preferences.get(preference_name)
+    def adopt_preference(
+        self,
+        cat,
+        group_id,
+        preference_name,
+    ):
+        self._require_cat(
+            cat
+        )
+
+        group = self.group_system._group(
+            group_id
+        )
+
+        preference = (
+            group.culture.preferences.get(
+                preference_name
+            )
+        )
+
         if preference is None:
-            return {'name': 'cat_cultural_preference_denied', 'reason': 'unknown_preference', 'adopted': False}
+            return (
+                CatCulturalPreferenceAdoptionDeniedResult(
+                    reason="unknown_preference",
+                )
+            )
 
         if not isinstance(
             preference,
             CatCulturalPreferenceState,
         ):
             raise TypeError(
-                'Cat cultural preference record '
-                'must be '
-                'CatCulturalPreferenceState.'
+                "Cat cultural preference record "
+                "must be "
+                "CatCulturalPreferenceState."
             )
 
         cat.culture.preferences[
             preference_name
-        ] = deepcopy(preference)
+        ] = deepcopy(
+            preference
+        )
 
-        return {
-            'name':
-                'cat_cultural_preference_adopted',
-            'cat': cat.name,
-            'preference': preference_name,
-            'value': preference.value,
-            'adopted': True,
-        }
+        return (
+            CatCulturalPreferenceAdoptedResult(
+                cat=cat.name,
+                preference=
+                    preference_name,
+                value=deepcopy(
+                    preference.value
+                ),
+            )
+        )
 
     def _require_evaluation_records(
         self,
@@ -174,23 +277,40 @@ class CatCulturalAdoptionSystem:
 
         for registry in registries:
             for record in registry.values():
-
                 if not isinstance(
                     record,
                     CatCulturalTraditionEvaluationState,
                 ):
                     raise TypeError(
-                        'Cat cultural tradition '
-                        'evaluation record must be '
-                        'CatCulturalTraditionEvaluationState.'
+                        "Cat cultural tradition "
+                        "evaluation record must be "
+                        "CatCulturalTraditionEvaluationState."
                     )
 
-    def _require_cat(self, cat):
-        if not isinstance(cat, Cat):
-            raise TypeError('CatCulturalAdoptionSystem requires Cat.')
+    def _require_cat(
+        self,
+        cat,
+    ):
+        if not isinstance(
+            cat,
+            Cat,
+        ):
+            raise TypeError(
+                "CatCulturalAdoptionSystem "
+                "requires Cat."
+            )
 
-    def _number(self, value):
+    def _number(
+        self,
+        value,
+    ):
         try:
-            return float(value)
-        except (TypeError, ValueError):
+            return float(
+                value
+            )
+
+        except (
+            TypeError,
+            ValueError,
+        ):
             return 0.0

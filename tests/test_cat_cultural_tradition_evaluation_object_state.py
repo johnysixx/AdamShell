@@ -122,7 +122,7 @@ class CatCulturalTraditionEvaluationObjectStateTests(
         )
 
         self.assertTrue(
-            result['adopted']
+            result.adopted
         )
 
         record = (
@@ -150,7 +150,7 @@ class CatCulturalTraditionEvaluationObjectStateTests(
 
         self.assertEqual(
             record.score,
-            result['score'],
+            result.score,
         )
 
     def test_rejection_stores_object_record(
@@ -174,7 +174,7 @@ class CatCulturalTraditionEvaluationObjectStateTests(
         )
 
         self.assertFalse(
-            result['adopted']
+            result.adopted
         )
 
         record = (
@@ -202,7 +202,7 @@ class CatCulturalTraditionEvaluationObjectStateTests(
 
         self.assertEqual(
             record.score,
-            result['score'],
+            result.score,
         )
 
     def test_adoption_removes_previous_rejection(
@@ -226,7 +226,7 @@ class CatCulturalTraditionEvaluationObjectStateTests(
         )
 
         self.assertFalse(
-            rejected['adopted']
+            rejected.adopted
         )
 
         previous = (
@@ -260,7 +260,7 @@ class CatCulturalTraditionEvaluationObjectStateTests(
         )
 
         self.assertTrue(
-            adopted['adopted']
+            adopted.adopted
         )
 
         self.assertNotIn(
