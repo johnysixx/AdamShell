@@ -20,7 +20,7 @@ class CronenbergPopulationStatisticsTests(
         )
 
         self.assertIsNone(
-            first_record["pressure_transition"]
+            first_record.pressure_transition
         )
 
         self.assertEqual(
@@ -28,7 +28,7 @@ class CronenbergPopulationStatisticsTests(
                 statistics
                 .pressure_transition_history
             ),
-            0
+            0,
         )
 
         second_record = (
@@ -36,7 +36,7 @@ class CronenbergPopulationStatisticsTests(
         )
 
         self.assertIsNone(
-            second_record["pressure_transition"]
+            second_record.pressure_transition
         )
 
         self.assertEqual(
@@ -44,7 +44,7 @@ class CronenbergPopulationStatisticsTests(
                 statistics
                 .pressure_transition_history
             ),
-            0
+            0,
         )
 
         original = (
@@ -52,7 +52,7 @@ class CronenbergPopulationStatisticsTests(
             .create_cronenberg_from_quantum_error(
                 RuntimeError("test"),
                 "test",
-                "pressure_transition"
+                "pressure_transition",
             )
         )
 
@@ -64,40 +64,41 @@ class CronenbergPopulationStatisticsTests(
             statistics.record_snapshot()
         )
 
-        transition = third_record[
-            "pressure_transition"
-        ]
+        transition = (
+            third_record
+            .pressure_transition
+        )
 
         self.assertIsNotNone(
             transition
         )
 
         self.assertEqual(
-            transition["name"],
+            transition.name,
             (
                 "cronenberg_population_"
                 "pressure_level_changed"
-            )
+            ),
         )
 
         self.assertEqual(
-            transition["previous_level"],
-            "low"
+            transition.previous_level,
+            "low",
         )
 
         self.assertEqual(
-            transition["current_level"],
-            "elevated"
+            transition.current_level,
+            "elevated",
         )
 
         self.assertAlmostEqual(
-            transition["previous_pressure"],
-            0.0
+            transition.previous_pressure,
+            0.0,
         )
 
         self.assertAlmostEqual(
-            transition["current_pressure"],
-            5.0
+            transition.current_pressure,
+            5.0,
         )
 
         self.assertEqual(
@@ -105,12 +106,12 @@ class CronenbergPopulationStatisticsTests(
                 statistics
                 .pressure_transition_history
             ),
-            1
+            1,
         )
 
         self.assertEqual(
             statistics.last_pressure_transition,
-            transition
+            transition,
         )
 
     def test_population_pressure_levels(self):
@@ -123,46 +124,47 @@ class CronenbergPopulationStatisticsTests(
 
         self.assertEqual(
             statistics.classify_pressure(0),
-            "low"
+            "low",
         )
 
         self.assertEqual(
             statistics.classify_pressure(4.99),
-            "low"
+            "low",
         )
 
         self.assertEqual(
             statistics.classify_pressure(5.0),
-            "elevated"
+            "elevated",
         )
 
         self.assertEqual(
             statistics.classify_pressure(9.99),
-            "elevated"
+            "elevated",
         )
 
         self.assertEqual(
             statistics.classify_pressure(10.0),
-            "high"
+            "high",
         )
 
         self.assertEqual(
             statistics.classify_pressure(19.99),
-            "high"
+            "high",
         )
 
         self.assertEqual(
             statistics.classify_pressure(20.0),
-            "critical"
+            "critical",
         )
 
-        empty_snapshot = statistics.snapshot()
+        empty_snapshot = (
+            statistics.snapshot()
+        )
 
         self.assertEqual(
-            empty_snapshot[
-                "population_pressure_level"
-            ],
-            "low"
+            empty_snapshot
+            .population_pressure_level,
+            "low",
         )
 
         original = (
@@ -170,7 +172,7 @@ class CronenbergPopulationStatisticsTests(
             .create_cronenberg_from_quantum_error(
                 RuntimeError("test"),
                 "test",
-                "pressure_level"
+                "pressure_level",
             )
         )
 
@@ -178,20 +180,19 @@ class CronenbergPopulationStatisticsTests(
             original
         )
 
-        pair_snapshot = statistics.snapshot()
+        pair_snapshot = (
+            statistics.snapshot()
+        )
 
         self.assertAlmostEqual(
-            pair_snapshot[
-                "population_pressure"
-            ],
-            5.0
+            pair_snapshot.population_pressure,
+            5.0,
         )
 
         self.assertEqual(
-            pair_snapshot[
-                "population_pressure_level"
-            ],
-            "elevated"
+            pair_snapshot
+            .population_pressure_level,
+            "elevated",
         )
 
     def test_population_pressure_and_delta(self):
@@ -207,17 +208,17 @@ class CronenbergPopulationStatisticsTests(
         )
 
         self.assertEqual(
-            first_record["snapshot"][
-                "population_pressure"
-            ],
-            0
+            first_record
+            .snapshot
+            .population_pressure,
+            0,
         )
 
         self.assertEqual(
-            first_record["delta"][
-                "population_pressure_delta"
-            ],
-            0
+            first_record
+            .delta
+            .population_pressure_delta,
+            0,
         )
 
         original = (
@@ -225,7 +226,7 @@ class CronenbergPopulationStatisticsTests(
             .create_cronenberg_from_quantum_error(
                 RuntimeError("test"),
                 "test",
-                "population_pressure"
+                "population_pressure",
             )
         )
 
@@ -238,38 +239,38 @@ class CronenbergPopulationStatisticsTests(
         )
 
         self.assertEqual(
-            second_record["snapshot"][
-                "active_count"
-            ],
-            2
+            second_record
+            .snapshot
+            .active_count,
+            2,
         )
 
         self.assertEqual(
-            second_record["snapshot"][
-                "active_quantum_pair_count"
-            ],
-            1
+            second_record
+            .snapshot
+            .active_quantum_pair_count,
+            1,
         )
 
         self.assertAlmostEqual(
-            second_record["snapshot"][
-                "total_active_energy"
-            ],
-            2.0
+            second_record
+            .snapshot
+            .total_active_energy,
+            2.0,
         )
 
         self.assertAlmostEqual(
-            second_record["snapshot"][
-                "population_pressure"
-            ],
-            5.0
+            second_record
+            .snapshot
+            .population_pressure,
+            5.0,
         )
 
         self.assertAlmostEqual(
-            second_record["delta"][
-                "population_pressure_delta"
-            ],
-            5.0
+            second_record
+            .delta
+            .population_pressure_delta,
+            5.0,
         )
 
     def test_universe_tick_records_population_delta(self):
@@ -283,7 +284,7 @@ class CronenbergPopulationStatisticsTests(
                 .cronenberg_population_statistics
                 .history
             ),
-            1
+            1,
         )
 
         first_record = (
@@ -293,21 +294,21 @@ class CronenbergPopulationStatisticsTests(
         )
 
         self.assertEqual(
-            first_record["tick"],
-            1
+            first_record.tick,
+            1,
         )
 
         self.assertEqual(
-            first_record["snapshot"][
-                "total_count"
-            ],
-            0
+            first_record
+            .snapshot
+            .total_count,
+            0,
         )
 
         universe.create_cronenberg_from_quantum_error(
             RuntimeError("test"),
             "test",
-            "population_tick_delta"
+            "population_tick_delta",
         )
 
         universe.tick_universe()
@@ -318,50 +319,54 @@ class CronenbergPopulationStatisticsTests(
         )
 
         self.assertEqual(
-            len(statistics.history),
-            2
+            len(
+                statistics.history
+            ),
+            2,
         )
 
-        second_record = statistics.last_record
-
-        self.assertEqual(
-            second_record["tick"],
-            2
-        )
-
-        self.assertEqual(
-            second_record["snapshot"][
-                "total_count"
-            ],
-            1
+        second_record = (
+            statistics.last_record
         )
 
         self.assertEqual(
-            second_record["delta"][
-                "total_count_delta"
-            ],
-            1
+            second_record.tick,
+            2,
         )
 
         self.assertEqual(
-            second_record["delta"][
-                "active_count_delta"
-            ],
-            1
+            second_record
+            .snapshot
+            .total_count,
+            1,
+        )
+
+        self.assertEqual(
+            second_record
+            .delta
+            .total_count_delta,
+            1,
+        )
+
+        self.assertEqual(
+            second_record
+            .delta
+            .active_count_delta,
+            1,
         )
 
         self.assertAlmostEqual(
-            second_record["delta"][
-                "total_active_size_delta"
-            ],
-            1.1
+            second_record
+            .delta
+            .total_active_size_delta,
+            1.1,
         )
 
         self.assertAlmostEqual(
-            second_record["delta"][
-                "total_active_energy_delta"
-            ],
-            0.95
+            second_record
+            .delta
+            .total_active_energy_delta,
+            0.95,
         )
 
     def test_empty_and_single_population(self):
@@ -374,18 +379,18 @@ class CronenbergPopulationStatisticsTests(
         )
 
         self.assertEqual(
-            empty["total_count"],
-            0
+            empty.total_count,
+            0,
         )
 
         self.assertEqual(
-            empty["active_count"],
-            0
+            empty.active_count,
+            0,
         )
 
         self.assertEqual(
-            empty["standalone_active_count"],
-            0
+            empty.standalone_active_count,
+            0,
         )
 
         cronenberg = (
@@ -393,7 +398,7 @@ class CronenbergPopulationStatisticsTests(
             .create_cronenberg_from_quantum_error(
                 RuntimeError("test"),
                 "test",
-                "population_statistics"
+                "population_statistics",
             )
         )
 
@@ -404,38 +409,38 @@ class CronenbergPopulationStatisticsTests(
         )
 
         self.assertEqual(
-            state["total_count"],
-            1
+            state.total_count,
+            1,
         )
 
         self.assertEqual(
-            state["active_count"],
-            1
+            state.active_count,
+            1,
         )
 
         self.assertEqual(
-            state["inactive_count"],
-            0
+            state.inactive_count,
+            0,
         )
 
         self.assertEqual(
-            state["standalone_active_count"],
-            1
+            state.standalone_active_count,
+            1,
         )
 
         self.assertEqual(
-            state["active_quantum_pair_count"],
-            0
+            state.active_quantum_pair_count,
+            0,
         )
 
         self.assertAlmostEqual(
-            state["total_active_size"],
-            cronenberg.size
+            state.total_active_size,
+            cronenberg.size,
         )
 
         self.assertAlmostEqual(
-            state["total_active_energy"],
-            cronenberg.energy
+            state.total_active_energy,
+            cronenberg.energy,
         )
 
 

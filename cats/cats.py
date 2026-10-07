@@ -28,6 +28,10 @@ from .cat_navigation_offer_state import CatNavigationOfferState
 
 from .cat_navigation_decision_state import CatNavigationDecisionState
 from .cat_navigation_decision import CatNavigationDecision
+from .cat_overpopulation_activation_state import (
+    CatOverpopulationActivatedEvent,
+    CatOverpopulationActivationDeniedResult,
+)
 
 class Cats:
 
@@ -169,25 +173,81 @@ class Cats:
     def decay_cat_aroma(self, cat, ticks=1):
         return cat.aroma.decay(ticks=ticks)
 
-    def activate_for_cronenberg_overpopulation(self, cat, hunt_quota=10):
-        if not isinstance(cat, Cat):
-            return {'result': 'invalid_cat', 'activated': False}
-        if cat.type != 'cat':
-            return {'result': 'not_a_cat', 'activated': False}
-        if not self.can_travel(cat, via='boxes'):
-            return {'result': 'box_travel_unavailable', 'activated': False, 'cat': cat.name}
-        eaten = int(cat.cronenbergs_eaten)
-        hunt_quota = int(hunt_quota)
+    def activate_for_cronenberg_overpopulation(
+        self,
+        cat,
+        hunt_quota=10,
+    ):
+        if not isinstance(
+            cat,
+            Cat,
+        ):
+            return (
+                CatOverpopulationActivationDeniedResult(
+                    reason="invalid_cat",
+                )
+            )
+
+        if cat.type != "cat":
+            return (
+                CatOverpopulationActivationDeniedResult(
+                    reason="not_a_cat",
+                    cat=cat.name,
+                )
+            )
+
+        if not self.can_travel(
+            cat,
+            via="boxes",
+        ):
+            return (
+                CatOverpopulationActivationDeniedResult(
+                    reason="box_travel_unavailable",
+                    cat=cat.name,
+                )
+            )
+
+        eaten = int(
+            cat.cronenbergs_eaten
+        )
+
+        hunt_quota = int(
+            hunt_quota
+        )
+
         if eaten < hunt_quota:
-            intent = 'hunt_nearest_cronenberg'
+            intent = (
+                "hunt_nearest_cronenberg"
+            )
         else:
-            intent = 'return_to_bar'
-        cat.state = 'aware_of_cronenberg_overpopulation'
+            intent = (
+                "return_to_bar"
+            )
+
+        cat.state = (
+            "aware_of_cronenberg_overpopulation"
+        )
+
         cat.suggested_intent = intent
         cat.hunt_quota = hunt_quota
-        cat.overpopulation_response_available = True
-        event = {'name': 'cat_activated_for_cronenberg_overpopulation', 'cat': cat.name, 'suggested_intent': intent, 'cat_access_unchanged': True, 'cronenbergs_eaten': eaten, 'hunt_quota': hunt_quota, 'activated': True}
-        self.emit_event(event)
+
+        cat.overpopulation_response_available = (
+            True
+        )
+
+        event = (
+            CatOverpopulationActivatedEvent(
+                cat=cat.name,
+                suggested_intent=intent,
+                cronenbergs_eaten=eaten,
+                hunt_quota=hunt_quota,
+            )
+        )
+
+        self.emit_event(
+            event
+        )
+
         return event
 
     def offer_navigation_for_suggested_intent(self, cat, cronenbergs=None, step_size=None):

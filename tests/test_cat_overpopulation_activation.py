@@ -33,7 +33,7 @@ class CatOverpopulationActivationTests(
         )
 
         self.assertTrue(
-            result["activated"]
+            result.activated
         )
 
         self.assertEqual(
@@ -54,7 +54,7 @@ class CatOverpopulationActivationTests(
         self.assertFalse(hasattr(cat, 'travel_via'))
 
         self.assertTrue(
-            result["cat_access_unchanged"]
+            result.cat_access_unchanged
         )
 
         self.assertTrue(
@@ -231,7 +231,7 @@ class CatOverpopulationActivationTests(
         )
 
         self.assertTrue(
-            result["activated"]
+            result.activated
         )
 
         self.assertEqual(
@@ -249,12 +249,12 @@ class CatOverpopulationActivationTests(
         )
 
         self.assertEqual(
-            result["cronenbergs_eaten"],
+            result.cronenbergs_eaten,
             10
         )
 
         self.assertTrue(
-            result["cat_access_unchanged"]
+            result.cat_access_unchanged
         )
 
 
