@@ -28,6 +28,10 @@ from .cat_navigation_offer_state import CatNavigationOfferState
 
 from .cat_navigation_decision_state import CatNavigationDecisionState
 from .cat_navigation_decision import CatNavigationDecision
+from universe.quantum_cat_navigation_result_state import (
+    QuantumCatRouteNotPlannedResult,
+    QuantumCatRoutePlannedResult,
+)
 from .cat_overpopulation_activation_state import (
     CatOverpopulationActivatedEvent,
     CatOverpopulationActivationDeniedResult,
@@ -302,9 +306,29 @@ class Cats:
             plan = quantum_space.plan_direct_cat_route(cat_id=cat.name, start_position=start_position, destination_position=recipient_position, destination=f'recipient:{target_id}', step_size=step_size)
         else:
             return {'name': 'cat_navigation_not_offered', 'result': 'unsupported_suggested_intent', 'cat': cat.name, 'suggested_intent': suggested_intent, 'offered': False}
-        route = plan.get('route')
-        if route is None:
-            return {'name': 'cat_navigation_not_offered', 'result': plan.get('result', 'route_not_planned'), 'cat': cat.name, 'suggested_intent': suggested_intent, 'plan': plan, 'offered': False}
+        if isinstance(
+            plan,
+            QuantumCatRouteNotPlannedResult,
+        ):
+            return {
+                'name': 'cat_navigation_not_offered',
+                'result': plan.reason,
+                'cat': cat.name,
+                'suggested_intent': suggested_intent,
+                'plan': plan,
+                'offered': False,
+            }
+
+        if not isinstance(
+            plan,
+            QuantumCatRoutePlannedResult,
+        ):
+            raise TypeError(
+                'Cat navigation planner must return '
+                'a quantum cat route result object.'
+            )
+
+        route = plan.route
         offer = {'name': 'cat_navigation_offered', 'cat': cat.name, 'suggested_intent': suggested_intent, 'route_id': route.route_id, 'destination': route.destination, 'route_step_count': len(route.route_steps), 'accepted': False, 'offered': True}
 
         cat.navigation_offer = (

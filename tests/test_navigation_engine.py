@@ -19,43 +19,43 @@ class NavigationEngineTests(
         )
 
         self.assertAlmostEqual(
-            result["distance"],
+            result.distance,
             6.0
         )
 
         self.assertEqual(
-            result["step_count"],
+            result.step_count,
             3
         )
 
         self.assertEqual(
-            result["route_steps"][-1],
-            {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-            }
+            result.route_steps[-1],
+            SpatialVector3(
+                x=0.0,
+                y=0.0,
+                z=0.0,
+            )
         )
 
         self.assertEqual(
-            result["route_steps"],
-            [
-                {
-                    "x": 4.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                {
-                    "x": 2.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                }
-            ]
+            result.route_steps,
+            (
+                SpatialVector3(
+                    x=4.0,
+                    y=0.0,
+                    z=0.0,
+                ),
+                SpatialVector3(
+                    x=2.0,
+                    y=0.0,
+                    z=0.0,
+                ),
+                SpatialVector3(
+                    x=0.0,
+                    y=0.0,
+                    z=0.0,
+                ),
+            )
         )
 
     def test_zero_distance_creates_empty_route(self):
@@ -67,18 +67,18 @@ class NavigationEngineTests(
         )
 
         self.assertEqual(
-            result["distance"],
+            result.distance,
             0.0
         )
 
         self.assertEqual(
-            result["step_count"],
+            result.step_count,
             0
         )
 
         self.assertEqual(
-            result["route_steps"],
-            []
+            result.route_steps,
+            ()
         )
 
     def test_invalid_step_size_is_rejected(self):

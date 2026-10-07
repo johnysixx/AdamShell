@@ -8,6 +8,10 @@ from core.entity.quantum_cat_route import (
 from core.entity.components import SpatialVector3
 from quantum.geometry_engine import QuantumGeometryEngine
 from navigation import NavigationEngine
+from universe.quantum_cat_navigation_result_state import (
+    QuantumCatRouteNotPlannedResult,
+    QuantumCatRoutePlannedResult,
+)
 
 @dataclass(slots=True, frozen=True)
 class QuantumLandmark:
@@ -156,24 +160,61 @@ class QuantumUniverseSpace:
         route_details.update(details or {})
         return memory.remember(event_type=event_type, universe_tick=getattr(universe, 'universe_tick', None), location=route.current_position.to_dict(), participants=[], details=route_details)
 
-    def plan_direct_cat_route(self, cat_id, start_position, destination_position, destination, step_size=None):
-        if not isinstance(start_position, SpatialVector3):
-            raise TypeError('Cat route start_position must be a SpatialVector3 object.')
-        if not isinstance(destination_position, SpatialVector3):
-            raise TypeError('Cat route destination_position must be a SpatialVector3 object.')
-        plan = self.navigation_engine.direct_route(
-            start_position=start_position,
-            destination_position=destination_position,
-            step_size=step_size,
+    def plan_direct_cat_route(
+        self,
+        cat_id,
+        start_position,
+        destination_position,
+        destination,
+        step_size=None,
+    ):
+        if not isinstance(
+            start_position,
+            SpatialVector3,
+        ):
+            raise TypeError(
+                "Cat route start_position must "
+                "be a SpatialVector3 object."
+            )
+
+        if not isinstance(
+            destination_position,
+            SpatialVector3,
+        ):
+            raise TypeError(
+                "Cat route destination_position "
+                "must be a SpatialVector3 object."
+            )
+
+        plan = (
+            self.navigation_engine
+            .direct_route(
+                start_position=
+                    start_position,
+                destination_position=
+                    destination_position,
+                step_size=step_size,
+            )
         )
-        route_steps = [SpatialVector3(x=step['x'], y=step['y'], z=step['z']) for step in plan['route_steps']]
+
         route = self.create_cat_route(
             cat_id=cat_id,
-            route_steps=route_steps,
-            start_position=start_position,
-            destination=destination,
+            route_steps=
+                plan.route_steps,
+            start_position=
+                start_position,
+            destination=
+                destination,
         )
-        return {'name': 'cat_direct_route_planned', 'cat_id': cat_id, 'destination': destination, 'plan': plan, 'route': route}
+
+        return (
+            QuantumCatRoutePlannedResult(
+                cat_id=cat_id,
+                destination=destination,
+                plan=plan,
+                route=route,
+            )
+        )
 
     @staticmethod
     def _cronenberg_position(cronenberg):
@@ -182,31 +223,149 @@ class QuantumUniverseSpace:
             return None
         return position
 
-    def plan_cat_route_to_nearest_huntable_cronenberg(self, cat, cronenbergs, start_position=None, step_size=None, max_size_ratio=1.2):
-        cat_id = getattr(cat, 'name', None)
-        cat_size = float(getattr(cat, 'size', 1.0))
-        if start_position is None:
-            start_position = getattr(cat, 'position', None)
-        if start_position is None:
-            return {'name': 'cat_hunt_route_not_planned', 'result': 'cat_has_no_position', 'cat_id': cat_id}
-        huntable = [cronenberg for cronenberg in cronenbergs if getattr(cronenberg, 'active', True) and getattr(cronenberg, 'is_alive', False) and (getattr(cronenberg, 'position', None) is not None) and (float(cronenberg.size) / cat_size <= float(max_size_ratio))]
-        nearest = self.navigation_engine.nearest_target(
-            start_position,
-            huntable,
-            position_getter=self._cronenberg_position,
+    def plan_cat_route_to_nearest_huntable_cronenberg(
+        self,
+        cat,
+        cronenbergs,
+        start_position=None,
+        step_size=None,
+        max_size_ratio=1.2,
+    ):
+        cat_id = getattr(
+            cat,
+            "name",
+            None,
         )
-        if nearest is None:
-            return {'name': 'cat_hunt_route_not_planned', 'result': 'no_huntable_cronenberg', 'cat_id': cat_id}
-        target = nearest['target']
-        planned = self.plan_direct_cat_route(cat_id=cat_id, start_position=start_position, destination_position=nearest['position'], destination=target.id, step_size=step_size)
-        planned['name'] = 'cat_route_to_nearest_huntable_cronenberg_planned'
-        planned['target'] = target
-        planned['target_id'] = target.id
-        planned['target_distance'] = nearest['distance']
-        return planned
 
-    def plan_cat_route_to_bar(self, cat_id, start_position, step_size=None):
-        return self.plan_direct_cat_route(cat_id=cat_id, start_position=start_position, destination_position=self.bar_front_door.position, destination='bar_front_door', step_size=step_size)
+        cat_size = float(
+            getattr(
+                cat,
+                "size",
+                1.0,
+            )
+        )
+
+        if start_position is None:
+            start_position = getattr(
+                cat,
+                "position",
+                None,
+            )
+
+        if start_position is None:
+            return (
+                QuantumCatRouteNotPlannedResult(
+                    cat_id=cat_id,
+                    reason="cat_has_no_position",
+                )
+            )
+
+        huntable = [
+            cronenberg
+            for cronenberg
+            in cronenbergs
+            if (
+                getattr(
+                    cronenberg,
+                    "active",
+                    True,
+                )
+                and getattr(
+                    cronenberg,
+                    "is_alive",
+                    False,
+                )
+                and getattr(
+                    cronenberg,
+                    "position",
+                    None,
+                )
+                is not None
+                and (
+                    float(
+                        cronenberg.size
+                    )
+                    / cat_size
+                    <= float(
+                        max_size_ratio
+                    )
+                )
+            )
+        ]
+
+        nearest = (
+            self.navigation_engine
+            .nearest_target(
+                start_position,
+                huntable,
+                position_getter=
+                    self._cronenberg_position,
+            )
+        )
+
+        if nearest is None:
+            return (
+                QuantumCatRouteNotPlannedResult(
+                    cat_id=cat_id,
+                    reason=(
+                        "no_huntable_cronenberg"
+                    ),
+                )
+            )
+
+        target = nearest.target
+
+        direct = (
+            self.plan_direct_cat_route(
+                cat_id=cat_id,
+                start_position=
+                    start_position,
+                destination_position=
+                    nearest.position,
+                destination=target.id,
+                step_size=step_size,
+            )
+        )
+
+        return (
+            QuantumCatRoutePlannedResult(
+                name=(
+                    "cat_route_to_nearest_"
+                    "huntable_cronenberg_planned"
+                ),
+                cat_id=cat_id,
+                destination=
+                    direct.destination,
+                plan=direct.plan,
+                route=direct.route,
+                target=target,
+                target_id=target.id,
+                target_distance=
+                    nearest.distance,
+            )
+        )
+
+    def plan_cat_route_to_bar(
+        self,
+        cat_id,
+        start_position,
+        step_size=None,
+    ):
+        return (
+            self.plan_direct_cat_route(
+                cat_id=cat_id,
+                start_position=
+                    start_position,
+                destination_position=(
+                    self
+                    .bar_front_door
+                    .position
+                ),
+                destination=
+                    "bar_front_door",
+                step_size=step_size,
+            )
+        )
 
     def create_cat_route(self, cat_id, route_steps, start_position, destination='bar_front_door'):
         route = QuantumCatRoute(cat_id=cat_id, route_steps=route_steps, start_position=start_position, destination=destination)

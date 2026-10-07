@@ -86,27 +86,27 @@ class QuantumCatNavigationTests(
         )
 
         self.assertIs(
-            result["target"],
+            result.target,
             near
         )
 
         self.assertEqual(
-            result["target_id"],
+            result.target_id,
             near.id
         )
 
         self.assertAlmostEqual(
-            result["target_distance"],
+            result.target_distance,
             5.0
         )
 
         self.assertEqual(
-            result["route"].destination,
+            result.route.destination,
             near.id
         )
 
         self.assertEqual(
-            result["route"].route_steps[-1],
+            result.route.route_steps[-1],
             near.position
         )
 
@@ -149,12 +149,12 @@ class QuantumCatNavigationTests(
         )
 
         self.assertEqual(
-            result["result"],
+            result.reason,
             "no_huntable_cronenberg"
         )
 
         self.assertEqual(
-            result["cat_id"],
+            result.cat_id,
             "small_hunter"
         )
 
@@ -178,7 +178,7 @@ class QuantumCatNavigationTests(
             step_size=2.0
         )
 
-        route = result["route"]
+        route = result.route
 
         self.assertEqual(
             route.destination,
@@ -207,12 +207,12 @@ class QuantumCatNavigationTests(
         )
 
         self.assertEqual(
-            result["plan"]["step_count"],
+            result.plan.step_count,
             3
         )
 
         self.assertAlmostEqual(
-            result["plan"]["distance"],
+            result.plan.distance,
             6.0
         )
 
@@ -230,7 +230,7 @@ class QuantumCatNavigationTests(
             step_size=2.0
         )
 
-        route = result["route"]
+        route = result.route
 
         self.assertEqual(
             route.destination,
@@ -247,12 +247,12 @@ class QuantumCatNavigationTests(
         )
 
         self.assertAlmostEqual(
-            result["plan"]["distance"],
+            result.plan.distance,
             5.0
         )
 
         self.assertEqual(
-            result["plan"]["step_count"],
+            result.plan.step_count,
             3
         )
 

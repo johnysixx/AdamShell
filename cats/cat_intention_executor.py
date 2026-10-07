@@ -232,7 +232,7 @@ class CatIntentionExecutor:
         if quantum_space is None:
             return self._record({'name': 'cat_scent_box_transfer_failed', 'cat': cat.name, 'reason': 'quantum_space_unavailable', 'executed': False})
         planned = quantum_space.plan_direct_cat_route(cat_id=cat.name, start_position=cat_position, destination_position=source_position, destination=f'scent_box:{source_box_id}', step_size=step_size)
-        route = planned['route']
+        route = planned.route
         route.state = QuantumCatRouteState.READY
         cat.active_route_id = route.route_id
         cat.scent_box_follow = (
@@ -600,7 +600,7 @@ class CatIntentionExecutor:
         if quantum_space is None:
             return self._record({'name': 'cat_box_exploration_failed', 'cat': cat.name, 'box_id': box_id, 'reason': 'quantum_space_unavailable', 'executed': False})
         planned = quantum_space.plan_direct_cat_route(cat_id=cat.name, start_position=cat_position, destination_position=box_position, destination=f'explore_box:{box_id}', step_size=step_size)
-        route = planned['route']
+        route = planned.route
         route.state = QuantumCatRouteState.READY
         cat.active_route_id = route.route_id
         cat.box_exploration = (
@@ -765,7 +765,7 @@ class CatIntentionExecutor:
         if quantum_space is None:
             return self._record({'name': 'cat_scent_search_failed', 'cat': cat.name, 'reason': 'quantum_space_unavailable', 'executed': False})
         planned = quantum_space.plan_direct_cat_route(cat_id=cat.name, start_position=start, destination_position=destination, destination=f'scent_search:{identity}', step_size=step_size)
-        route = planned['route']
+        route = planned.route
         route.state = QuantumCatRouteState.READY
         cat.active_route_id = route.route_id
         cat.scent_search = CatScentSearchState(
@@ -902,7 +902,7 @@ class CatIntentionExecutor:
         if quantum_space is None:
             return self._record({'name': 'cat_known_scent_follow_failed', 'cat': cat.name, 'reason': 'quantum_space_unavailable', 'executed': False})
         planned = quantum_space.plan_direct_cat_route(cat_id=cat.name, start_position=cat_position, destination_position=position, destination=f"known_scent:{target.identity}", step_size=step_size)
-        route = planned['route']
+        route = planned.route
         route.state = QuantumCatRouteState.READY
         cat.active_route_id = route.route_id
         cat.known_scent_follow = (
@@ -1145,9 +1145,7 @@ class CatIntentionExecutor:
         if quantum_space is None:
             return self._record({'name': 'cat_approach_failed', 'cat': cat.name, 'target': target_name, 'reason': 'quantum_space_unavailable', 'executed': False})
         planned = quantum_space.plan_direct_cat_route(cat_id=cat.name, start_position=cat_position, destination_position=target_position, destination=f'cat:{target_name}', step_size=step_size)
-        route = planned.get('route')
-        if route is None:
-            return self._record({'name': 'cat_approach_failed', 'cat': cat.name, 'target': target_name, 'reason': planned.get('result', 'route_not_planned'), 'executed': False})
+        route = planned.route
         route.state = QuantumCatRouteState.READY
         cat.active_route_id = route.route_id
         cat.navigation_target = target_name

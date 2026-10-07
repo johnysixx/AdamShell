@@ -26,7 +26,7 @@ class CatPersonalityCronenbergEncounterTests(unittest.TestCase):
 
     def create_route(self, cronenberg):
         result = self.universe.quantum_space.plan_direct_cat_route(cat_id=self.cat.name, start_position=SpatialVector3(x=0.0, y=0.0, z=0.0), destination_position=cronenberg.position, destination=cronenberg.id, step_size=1.0)
-        return result['route']
+        return result.route
 
     def traits(self):
         return self.cat.personality.traits

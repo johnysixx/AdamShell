@@ -1257,7 +1257,7 @@ class CatQuantumBoxTransfer:
             )
         )
 
-        route = planned["route"]
+        route = planned.route
         route.state = QuantumCatRouteState.READY
 
         cat.active_route_id = (
@@ -1301,7 +1301,7 @@ class CatQuantumBoxTransfer:
         return {
             **event,
             "route": route,
-            "plan": planned["plan"]
+            "plan": planned.plan
         }
 
     def advance_quantum_exploration(
@@ -1791,7 +1791,7 @@ class CatQuantumBoxTransfer:
             )
         )
 
-        route = planned["route"]
+        route = planned.route
         route.state = QuantumCatRouteState.READY
 
         cat.active_route_id = (
@@ -1933,7 +1933,7 @@ class CatQuantumBoxTransfer:
             )
         )
 
-        route = planned["route"]
+        route = planned.route
         route.state = QuantumCatRouteState.READY
 
         cat.active_route_id = (
