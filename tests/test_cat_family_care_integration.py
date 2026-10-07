@@ -52,8 +52,8 @@ class CatFamilyCareIntegrationTests(unittest.TestCase):
     def test_littermates_can_play(self):
         play = CatSiblingPlaySystem(self.cats)
         result = play.play(self.first, self.second, age_days=30, current_day=200)
-        self.assertTrue(result['played'])
-        self.assertEqual(result['relation'], 'sibling_littermate')
+        self.assertTrue(result.played)
+        self.assertEqual(result.relation, 'sibling_littermate')
         self.assertEqual(self.first.sibling_play.play_events, 1)
         self.assertEqual(self.second.sibling_play.play_events, 1)
 
@@ -75,7 +75,7 @@ class CatFamilyCareIntegrationTests(unittest.TestCase):
         stranger = self.cats.create_cat(name='stranger', color='gray', fur_length='short')
         play = CatSiblingPlaySystem(self.cats)
         result = play.play(self.first, stranger, age_days=30)
-        self.assertFalse(result['played'])
+        self.assertFalse(result.played)
 
     def test_repeated_play_preserves_existing_relationship_records(self):
         relation = CatRelationship.create()
@@ -94,7 +94,7 @@ class CatFamilyCareIntegrationTests(unittest.TestCase):
         play = CatSiblingPlaySystem(self.cats)
         for _ in range(2):
             result = play.play(self.first, self.second, age_days=30)
-            self.assertTrue(result['played'])
+            self.assertTrue(result.played)
 
         self.assertIs(self.first.relationships[self.second.name], relation)
         self.assertIs(self.second.relationships[self.first.name], legacy)

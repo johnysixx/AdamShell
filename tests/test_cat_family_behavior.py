@@ -111,7 +111,7 @@ class CatFamilyBehaviorTests(
         )
 
         self.assertTrue(
-            result["formed"]
+            result.formed
         )
 
         self.assertTrue(
