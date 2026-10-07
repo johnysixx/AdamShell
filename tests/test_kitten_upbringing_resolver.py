@@ -11,6 +11,9 @@ from cats.kitten_upbringing_resolver import (
 from cats.kitten_upbringing_state import (
     KittenCronenbergExperienceState,
 )
+from cats.kitten_upbringing_phase import (
+    KittenUpbringingPhase,
+)
 
 
 class KittenUpbringingResolverTests(
@@ -87,17 +90,17 @@ class KittenUpbringingResolverTests(
         result = self.run_at_age(10)
 
         self.assertTrue(
-            result["processed"]
+            result.processed
         )
 
         self.assertEqual(
-            result["phase"],
-            "complete_maternal_care"
+            result.phase,
+            KittenUpbringingPhase.COMPLETE_MATERNAL_CARE
         )
 
         event_names = {
-            event["name"]
-            for event in result["events"]
+            event.name
+            for event in result.events
         }
 
         self.assertIn(
@@ -125,8 +128,8 @@ class KittenUpbringingResolverTests(
         result = self.run_at_age(10)
 
         event_names = {
-            event["name"]
-            for event in result["events"]
+            event.name
+            for event in result.events
         }
 
         self.assertIn(
@@ -153,13 +156,13 @@ class KittenUpbringingResolverTests(
         result = self.run_at_age(14)
 
         self.assertEqual(
-            result["phase"],
-            "early_socialization"
+            result.phase,
+            KittenUpbringingPhase.EARLY_SOCIALIZATION
         )
 
         event_names = {
-            event["name"]
-            for event in result["events"]
+            event.name
+            for event in result.events
         }
 
         self.assertIn(
@@ -236,11 +239,11 @@ class KittenUpbringingResolverTests(
         )
 
         self.assertFalse(
-            result["processed"]
+            result.processed
         )
 
         self.assertEqual(
-            result["reason"],
+            result.reason,
             "maternal_teaching_not_required"
         )
 
@@ -250,13 +253,13 @@ class KittenUpbringingResolverTests(
         result = self.run_at_age(21)
 
         self.assertEqual(
-            result["phase"],
-            "live_prey_training"
+            result.phase,
+            KittenUpbringingPhase.LIVE_PREY_TRAINING
         )
 
         event_names = {
-            event["name"]
-            for event in result["events"]
+            event.name
+            for event in result.events
         }
 
         self.assertIn(
@@ -284,8 +287,8 @@ class KittenUpbringingResolverTests(
 
         hunting_events = [
             event
-            for event in result["events"]
-            if event["name"]
+            for event in result.events
+            if event.name
             == "kitten_hunting_step_practiced"
         ]
 
@@ -295,7 +298,7 @@ class KittenUpbringingResolverTests(
         )
 
         self.assertEqual(
-            hunting_events[0]["step"],
+            hunting_events[0].step,
             "tracking_and_chasing"
         )
 
@@ -317,13 +320,13 @@ class KittenUpbringingResolverTests(
 
         hunting_event = next(
             event
-            for event in result["events"]
-            if event["name"]
+            for event in result.events
+            if event.name
             == "kitten_hunting_step_practiced"
         )
 
         self.assertEqual(
-            hunting_event["step"],
+            hunting_event.step,
             "capture_and_killing_bite"
         )
 
@@ -331,13 +334,13 @@ class KittenUpbringingResolverTests(
         result = self.run_at_age(35)
 
         self.assertEqual(
-            result["phase"],
-            "first_training_kill"
+            result.phase,
+            KittenUpbringingPhase.FIRST_TRAINING_KILL
         )
 
         event_names = {
-            event["name"]
-            for event in result["events"]
+            event.name
+            for event in result.events
         }
 
         self.assertIn(
@@ -375,24 +378,24 @@ class KittenUpbringingResolverTests(
         result = self.run_at_age(36)
 
         self.assertEqual(
-            result["phase"],
-            "family_hunting"
+            result.phase,
+            KittenUpbringingPhase.FAMILY_HUNTING
         )
 
         event = next(
             event
-            for event in result["events"]
-            if event["name"]
+            for event in result.events
+            if event.name
             == "kitten_joined_family_cronenberg_hunt"
         )
 
         self.assertEqual(
-            event["family_hunt_number"],
+            event.family_hunt_number,
             1
         )
 
         self.assertFalse(
-            event["father_joined"]
+            event.father_joined
         )
 
     def test_father_joins_every_second_family_hunt(self):
@@ -403,18 +406,18 @@ class KittenUpbringingResolverTests(
 
         event = next(
             event
-            for event in result["events"]
-            if event["name"]
+            for event in result.events
+            if event.name
             == "kitten_joined_family_cronenberg_hunt"
         )
 
         self.assertEqual(
-            event["family_hunt_number"],
+            event.family_hunt_number,
             2
         )
 
         self.assertTrue(
-            event["father_joined"]
+            event.father_joined
         )
 
         self.assertEqual(

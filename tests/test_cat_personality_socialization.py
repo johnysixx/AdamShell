@@ -27,10 +27,10 @@ class CatPersonalitySocializationTests(unittest.TestCase):
 
     def test_first_socialization_lesson_builds_empathy(self):
         result = self.run_day(14)
-        lesson = next((event for event in result['events'] if event.get('name') == 'kitten_socialization_lesson'))
+        lesson = next((event for event in result.events if event.name == 'kitten_socialization_lesson'))
         self.assertAlmostEqual(self.traits().empathy, 0.51)
         self.assertAlmostEqual(self.traits().patience, 0.505)
-        self.assertTrue(lesson['personality']['applied'])
+        self.assertTrue(lesson.personality.applied)
 
     def test_socialization_changes_accumulate(self):
         for day in range(14, 21):

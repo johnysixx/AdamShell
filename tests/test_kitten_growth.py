@@ -70,8 +70,8 @@ class KittenGrowthTests(unittest.TestCase):
         self.run_day(35)
         size_before = self.kitten.size
         result = self.run_day(36)
-        hunt = next((event for event in result['events'] if event.get('name') == 'kitten_joined_family_cronenberg_hunt'))
-        self.assertTrue(hunt['growth']['grew'])
+        hunt = next((event for event in result.events if event.name == 'kitten_joined_family_cronenberg_hunt'))
+        self.assertTrue(hunt.growth.grew)
         self.assertGreater(self.kitten.size, size_before)
 
     def test_father_delivery_causes_growth(self):
@@ -79,7 +79,7 @@ class KittenGrowthTests(unittest.TestCase):
         size_before = self.kitten.size
         event = self.upbringing._father_food_delivery(kitten=self.kitten, father=self.father, age_days=5, current_day=5)
         self.assertIsNotNone(event)
-        self.assertTrue(event['growth']['grew'])
+        self.assertTrue(event.growth.grew)
         self.assertGreater(self.kitten.size, size_before)
 
     def test_growth_updates_existing_food_statistics(self):

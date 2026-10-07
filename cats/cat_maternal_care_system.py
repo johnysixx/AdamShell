@@ -18,6 +18,10 @@ from cats.cat_maternal_care_result_state import (
     CatMotherProtectedKittenEvent,
     CatFosterMaternalCareDeniedResult,
     CatFosterMaternalCareEvent,
+    CatMaternalUpbringingSyncDeniedResult,
+    CatMaternalUpbringingCareSyncedEvent,
+    CatFosterUpbringingSyncDeniedResult,
+    CatFosterUpbringingCareSyncedEvent,
 )
 
 class CatMaternalCareSystem:
@@ -178,37 +182,102 @@ class CatMaternalCareSystem:
 
         return event
 
-    def record_upbringing_care(self, mother, kitten, events, age_days, current_day=None):
-        """
-        Mirror care already performed by
-        KittenUpbringingResolver.
+    def record_upbringing_care(
+        self,
+        mother,
+        kitten,
+        events,
+        age_days,
+        current_day=None,
+    ):
+        self._require_cat(
+            mother
+        )
 
-        This method never feeds or performs
-        care itself, so upbringing effects
-        are not duplicated.
-        """
-        self._require_cat(mother)
-        self._require_cat(kitten)
-        assessment = self.evaluate(mother, kitten, age_days)
+        self._require_cat(
+            kitten
+        )
+
+        assessment = self.evaluate(
+            mother,
+            kitten,
+            age_days,
+        )
+
         if not assessment.biological_child:
-            return {'name': 'maternal_upbringing_sync_denied', 'mother': mother.name, 'kitten': kitten.name, 'synced': False, 'reason': 'not_biological_mother'}
-        mapping = {'fed_by_mother': 'nursing', 'cleaned_by_mother': 'cleaning', 'warmed_by_mother': 'warming', 'protected_by_mother': 'protection'}
+            return (
+                CatMaternalUpbringingSyncDeniedResult(
+                    mother=mother.name,
+                    kitten=kitten.name,
+                    reason="not_biological_mother",
+                )
+            )
+
+        mapping = {
+            "fed_by_mother":
+                "nursing",
+            "cleaned_by_mother":
+                "cleaning",
+            "warmed_by_mother":
+                "warming",
+            "protected_by_mother":
+                "protection",
+        }
+
         actions = []
+
         for existing_event in events:
-            if not isinstance(existing_event, dict):
-                continue
-            action = mapping.get(existing_event.get('name'))
-            if action is not None and action not in actions:
-                actions.append(action)
-        sync_event = {'name': 'maternal_upbringing_care_synced', 'mother': mother.name, 'kitten': kitten.name, 'age_days': int(age_days), 'day': current_day, 'phase': assessment.phase, 'actions': actions, 'synced': True}
+            if isinstance(
+                existing_event,
+                dict,
+            ):
+                raise TypeError(
+                    "Maternal upbringing sync "
+                    "requires event objects."
+                )
+
+            event_name = getattr(
+                existing_event,
+                "name",
+                None,
+            )
+
+            if event_name is None:
+                raise TypeError(
+                    "Maternal upbringing event "
+                    "must expose a name attribute."
+                )
+
+            action = mapping.get(
+                event_name
+            )
+
+            if (
+                action is not None
+                and action not in actions
+            ):
+                actions.append(
+                    action
+                )
+
+        event = (
+            CatMaternalUpbringingCareSyncedEvent(
+                mother=mother.name,
+                kitten=kitten.name,
+                age_days=age_days,
+                day=current_day,
+                phase=assessment.phase,
+                actions=tuple(actions),
+            )
+        )
+
         self._record_state_only(
             mother=mother,
             kitten=kitten,
-            event=sync_event,
+            event=event,
         )
-        return self._event_snapshot(
-            sync_event
-        )
+
+        return event
 
     def provide_foster_care(
         self,
@@ -331,7 +400,7 @@ class CatMaternalCareSystem:
         kitten,
         events,
         age_days,
-        current_day=None
+        current_day=None,
     ):
         self._require_cat(
             foster_mother
@@ -346,22 +415,20 @@ class CatMaternalCareSystem:
                 kitten
                 .maternal_care_received,
                 "foster_mother",
-                None
+                None,
             )
             != foster_mother.name
         ):
-            return {
-                "name":
-                    "foster_upbringing_sync_denied",
-                "foster_mother":
-                    foster_mother.name,
-                "kitten":
-                    kitten.name,
-                "synced":
-                    False,
-                "reason":
-                    "not_registered_foster_mother",
-            }
+            return (
+                CatFosterUpbringingSyncDeniedResult(
+                    foster_mother=
+                        foster_mother.name,
+                    kitten=kitten.name,
+                    reason=(
+                        "not_registered_foster_mother"
+                    ),
+                )
+            )
 
         mapping = {
             "fed_by_mother":
@@ -377,17 +444,29 @@ class CatMaternalCareSystem:
         actions = []
 
         for existing_event in events:
-
-            if not isinstance(
+            if isinstance(
                 existing_event,
-                dict
+                dict,
             ):
-                continue
+                raise TypeError(
+                    "Foster upbringing sync "
+                    "requires event objects."
+                )
+
+            event_name = getattr(
+                existing_event,
+                "name",
+                None,
+            )
+
+            if event_name is None:
+                raise TypeError(
+                    "Foster upbringing event "
+                    "must expose a name attribute."
+                )
 
             action = mapping.get(
-                existing_event.get(
-                    "name"
-                )
+                event_name
             )
 
             if (
@@ -398,26 +477,19 @@ class CatMaternalCareSystem:
                     action
                 )
 
-        event = {
-            "name":
-                "foster_upbringing_care_synced",
-            "foster_mother":
-                foster_mother.name,
-            "kitten":
-                kitten.name,
-            "age_days":
-                int(age_days),
-            "day":
-                current_day,
-            "phase":
-                self.care_phase(
+        event = (
+            CatFosterUpbringingCareSyncedEvent(
+                foster_mother=
+                    foster_mother.name,
+                kitten=kitten.name,
+                age_days=age_days,
+                day=current_day,
+                phase=self.care_phase(
                     age_days
                 ),
-            "actions":
-                actions,
-            "synced":
-                True,
-        }
+                actions=tuple(actions),
+            )
+        )
 
         self._record_foster_upbringing_sync(
             foster_mother,
@@ -425,7 +497,7 @@ class CatMaternalCareSystem:
             event,
         )
 
-        return self._event_snapshot(event)
+        return event
 
     def _record_foster_care(
         self,
@@ -549,15 +621,6 @@ class CatMaternalCareSystem:
         kitten,
         event,
     ):
-        """
-        Temporary legacy boundary for
-        KittenUpbringingResolver.events.
-
-        The event is still a mapping because
-        that whole stream is not objectified
-        yet. No mapping compatibility is added
-        to domain objects.
-        """
         state = (
             foster_mother
             .maternal_care
@@ -569,7 +632,7 @@ class CatMaternalCareSystem:
         )
 
         state.active = (
-            event["phase"]
+            event.phase
             is not
             MaternalCarePhase.INDEPENDENCE
         )
@@ -577,8 +640,8 @@ class CatMaternalCareSystem:
         state.care_events += 1
 
         kitten_state.record(
-            event["day"],
-            event["phase"],
+            event.day,
+            event.phase,
         )
 
         received = (
@@ -594,11 +657,11 @@ class CatMaternalCareSystem:
         received.foster_care_events += 1
 
         received.last_care_day = (
-            event["day"]
+            event.day
         )
 
         received.last_phase = (
-            event["phase"]
+            event.phase
         )
 
         counters = {
@@ -614,7 +677,7 @@ class CatMaternalCareSystem:
                 "retrieval_events",
         }
 
-        for action in event["actions"]:
+        for action in event.actions:
             counter = counters.get(
                 action
             )
@@ -651,7 +714,7 @@ class CatMaternalCareSystem:
             emit_event
         ):
             emit_event(
-                self._event_snapshot(
+                deepcopy(
                     event
                 )
             )
@@ -757,31 +820,76 @@ class CatMaternalCareSystem:
 
         return event
 
-    def _record_state_only(self, mother, kitten, event):
+    def _record_state_only(
+        self,
+        mother,
+        kitten,
+        event,
+    ):
         state = mother.maternal_care
+
         kitten_state = self._kitten_state(
             state,
             kitten.name,
         )
+
         state.active = (
-            event['phase']
-            is not MaternalCarePhase.INDEPENDENCE
+            event.phase
+            is not
+            MaternalCarePhase.INDEPENDENCE
         )
+
         state.care_events += 1
+
         kitten_state.record(
-            event['day'],
-            event['phase'],
+            event.day,
+            event.phase,
         )
-        received = kitten.maternal_care_received
+
+        received = (
+            kitten
+            .maternal_care_received
+        )
+
         received.mother = mother.name
         received.care_events += 1
-        received.last_care_day = event['day']
-        received.last_phase = event['phase']
-        counters = {'nursing': 'nursing_events', 'cleaning': 'cleaning_events', 'warming': 'warming_events', 'protection': 'protection_events', 'retrieval': 'retrieval_events'}
-        for action in event['actions']:
-            counter = counters.get(action)
+
+        received.last_care_day = (
+            event.day
+        )
+
+        received.last_phase = (
+            event.phase
+        )
+
+        counters = {
+            "nursing":
+                "nursing_events",
+            "cleaning":
+                "cleaning_events",
+            "warming":
+                "warming_events",
+            "protection":
+                "protection_events",
+            "retrieval":
+                "retrieval_events",
+        }
+
+        for action in event.actions:
+            counter = counters.get(
+                action
+            )
+
             if counter is not None:
-                setattr(received, counter, getattr(received, counter) + 1)
+                setattr(
+                    received,
+                    counter,
+                    getattr(
+                        received,
+                        counter,
+                    )
+                    + 1,
+                )
 
     def _record(
         self,
@@ -880,25 +988,6 @@ class CatMaternalCareSystem:
                     event
                 )
             )
-
-    @staticmethod
-    def _event_snapshot(event):
-        snapshot = deepcopy(event)
-        phase = snapshot.get("phase")
-
-        if phase is not None:
-            if not isinstance(
-                phase,
-                MaternalCarePhase,
-            ):
-                raise TypeError(
-                    "Maternal care event phase "
-                    "must use MaternalCarePhase."
-                )
-
-            snapshot["phase"] = phase.value
-
-        return snapshot
 
     def _kitten_state(
         self,

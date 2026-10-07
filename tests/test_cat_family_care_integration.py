@@ -3,6 +3,9 @@ from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat_family_system import CatFamilySystem
 from cats.cat_maternal_care_system import CatMaternalCareSystem
+from cats.kitten_upbringing_result_state import (
+    KittenDailyCareEvent,
+)
 from cats.cat_sibling_play_system import CatSiblingPlaySystem
 from cats.cat_social_objects import (
     CatRelationship,
@@ -26,9 +29,23 @@ class CatFamilyCareIntegrationTests(unittest.TestCase):
 
     def test_existing_upbringing_events_sync_maternal_state(self):
         care = CatMaternalCareSystem(self.cats)
-        existing_events = [{'name': 'fed_by_mother'}, {'name': 'cleaned_by_mother'}, {'name': 'warmed_by_mother'}, {'name': 'protected_by_mother'}]
+        existing_events = [
+            KittenDailyCareEvent(
+                name=name,
+                kitten=self.first.name,
+                mother=self.mother.name,
+                age_days=5,
+                day=100,
+            )
+            for name in (
+                "fed_by_mother",
+                "cleaned_by_mother",
+                "warmed_by_mother",
+                "protected_by_mother",
+            )
+        ]
         result = care.record_upbringing_care(mother=self.mother, kitten=self.first, events=existing_events, age_days=5, current_day=100)
-        self.assertTrue(result['synced'])
+        self.assertTrue(result.synced)
         received = self.first.maternal_care_received
         self.assertEqual(received.nursing_events, 1)
         self.assertEqual(received.cleaning_events, 1)
@@ -38,7 +55,20 @@ class CatFamilyCareIntegrationTests(unittest.TestCase):
     def test_sync_does_not_perform_second_feeding(self):
         care = CatMaternalCareSystem(self.cats)
         before_size = self.first.size
-        care.record_upbringing_care(mother=self.mother, kitten=self.first, events=[{'name': 'fed_by_mother'}], age_days=5)
+        care.record_upbringing_care(
+            mother=self.mother,
+            kitten=self.first,
+            events=[
+                KittenDailyCareEvent(
+                    name="fed_by_mother",
+                    kitten=self.first.name,
+                    mother=self.mother.name,
+                    age_days=5,
+                    day=None,
+                )
+            ],
+            age_days=5,
+        )
         self.assertEqual(self.first.size, before_size)
 
     def test_mother_can_protect_kitten_from_threat(self):

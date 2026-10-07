@@ -1,3 +1,5 @@
+from dataclasses import replace
+
 from cats.kitten_upbringing_state import (
     KittenCareState,
     KittenCronenbergExperienceState,
@@ -16,6 +18,25 @@ from cats.cat_personality import CatPersonality
 from cats.kitten_growth import KittenGrowth
 from cats.cat_parentage_state import (
     CatParentageState
+)
+from cats.kitten_upbringing_result_state import (
+    KittenAdultVocalizationTeacherUnavailableEvent,
+    KittenDailyCareEvent,
+    KittenDeadCronenbergDeliveredEvent,
+    KittenFamilyHuntEvent,
+    KittenFatherFoodDeliveryEvent,
+    KittenFirstTrainingKillEvent,
+    KittenHumanCommunicationLearnedEvent,
+    KittenHumanCommunicationLessonDeniedResult,
+    KittenHuntingStepPracticedEvent,
+    KittenLiveCronenbergDeliveredEvent,
+    KittenMeowTeacherUnavailableEvent,
+    KittenMotherLeftBrieflyEvent,
+    KittenSiblingPlayLessonEvent,
+    KittenSkillCompletedLessonEvent,
+    KittenSocializationLessonEvent,
+    KittenUpbringingDayCompletedEvent,
+    KittenUpbringingDaySkippedResult,
 )
 
 class KittenUpbringingResolver:
@@ -36,67 +57,216 @@ class KittenUpbringingResolver:
         self.meow_resolver = MeowKnowledgeResolver(universe)
         self.growth = KittenGrowth(universe)
 
-    def tick_day(self, kitten, cats, current_day):
-        learning = getattr(kitten, 'learning', None)
-        if not isinstance(learning, CatLearningState):
-            return self._skip(kitten=kitten, current_day=current_day, reason='learning_state_unavailable')
-        if not learning.teaching_required:
-            return self._skip(kitten=kitten, current_day=current_day, reason='maternal_teaching_not_required')
-        age_days = int(getattr(kitten, 'age_days', 0))
-        if age_days > self.UPBRINGING_LAST_DAY:
-            return self._skip(kitten=kitten, current_day=current_day, reason='outside_early_upbringing_period')
-        upbringing = self._ensure_upbringing_state(
-            kitten
+    def tick_day(
+        self,
+        kitten,
+        cats,
+        current_day,
+    ):
+        learning = getattr(
+            kitten,
+            "learning",
+            None,
         )
-        mother = self._find_parent(kitten=kitten, cats=cats, parent_role='mother')
-        father = self._find_parent(kitten=kitten, cats=cats, parent_role='father')
+
+        if not isinstance(
+            learning,
+            CatLearningState,
+        ):
+            return self._skip(
+                kitten=kitten,
+                current_day=current_day,
+                reason="learning_state_unavailable",
+            )
+
+        if not learning.teaching_required:
+            return self._skip(
+                kitten=kitten,
+                current_day=current_day,
+                reason="maternal_teaching_not_required",
+            )
+
+        age_days = int(
+            getattr(
+                kitten,
+                "age_days",
+                0,
+            )
+        )
+
+        if age_days > self.UPBRINGING_LAST_DAY:
+            return self._skip(
+                kitten=kitten,
+                current_day=current_day,
+                reason="outside_early_upbringing_period",
+            )
+
+        upbringing = (
+            self._ensure_upbringing_state(
+                kitten
+            )
+        )
+
+        mother = self._find_parent(
+            kitten=kitten,
+            cats=cats,
+            parent_role="mother",
+        )
+
+        father = self._find_parent(
+            kitten=kitten,
+            cats=cats,
+            parent_role="father",
+        )
+
         events = []
+
         if age_days <= self.CARE_ONLY_LAST_DAY:
-            events.extend(self._provide_daily_care(kitten=kitten, mother=mother, age_days=age_days, current_day=current_day))
-            father_event = self._father_food_delivery(kitten=kitten, father=father, age_days=age_days, current_day=current_day)
+            events.extend(
+                self._provide_daily_care(
+                    kitten=kitten,
+                    mother=mother,
+                    age_days=age_days,
+                    current_day=current_day,
+                )
+            )
+
+            father_event = (
+                self._father_food_delivery(
+                    kitten=kitten,
+                    father=father,
+                    age_days=age_days,
+                    current_day=current_day,
+                )
+            )
+
             if father_event is not None:
-                events.append(father_event)
+                events.append(
+                    father_event
+                )
+
             phase = (
                 KittenUpbringingPhase
                 .COMPLETE_MATERNAL_CARE
             )
+
         elif age_days <= self.EARLY_LEARNING_LAST_DAY:
-            events.extend(self._provide_reduced_care(kitten=kitten, mother=mother, age_days=age_days, current_day=current_day))
-            events.extend(self._run_early_lessons(kitten=kitten, mother=mother, age_days=age_days, current_day=current_day))
+            events.extend(
+                self._provide_reduced_care(
+                    kitten=kitten,
+                    mother=mother,
+                    age_days=age_days,
+                    current_day=current_day,
+                )
+            )
+
+            events.extend(
+                self._run_early_lessons(
+                    kitten=kitten,
+                    mother=mother,
+                    age_days=age_days,
+                    current_day=current_day,
+                )
+            )
+
             phase = (
                 KittenUpbringingPhase
                 .EARLY_SOCIALIZATION
             )
+
         else:
-            events.extend(self._run_hunting_upbringing(kitten=kitten, mother=mother, father=father, age_days=age_days, current_day=current_day))
-            events.extend(self._run_late_education(kitten=kitten, mother=mother, cats=cats, age_days=age_days, current_day=current_day))
+            events.extend(
+                self._run_hunting_upbringing(
+                    kitten=kitten,
+                    mother=mother,
+                    father=father,
+                    age_days=age_days,
+                    current_day=current_day,
+                )
+            )
+
+            events.extend(
+                self._run_late_education(
+                    kitten=kitten,
+                    mother=mother,
+                    cats=cats,
+                    age_days=age_days,
+                    current_day=current_day,
+                )
+            )
+
             if age_days <= self.LIVE_PREY_PRACTICE_LAST_DAY:
                 phase = (
                     KittenUpbringingPhase
                     .LIVE_PREY_TRAINING
                 )
+
             elif age_days == self.FIRST_TRAINING_KILL_DAY:
                 phase = (
                     KittenUpbringingPhase
                     .FIRST_TRAINING_KILL
                 )
+
             else:
                 phase = (
                     KittenUpbringingPhase
                     .FAMILY_HUNTING
                 )
+
         upbringing.phase = phase
         upbringing.last_processed_age = age_days
         upbringing.last_processed_day = current_day
         upbringing.days_processed += 1
-        event = {'name': 'kitten_upbringing_day_completed', 'kitten': kitten.name, 'age_days': age_days, 'day': current_day, 'phase': phase.value, 'mother': getattr(mother, 'name', None) if mother is not None else None, 'father': getattr(father, 'name', None) if father is not None else None, 'events': events, 'event_count': len(events), 'processed': True}
-        self._record(kitten, event)
+
+        event = (
+            KittenUpbringingDayCompletedEvent(
+                kitten=kitten.name,
+                age_days=age_days,
+                day=current_day,
+                phase=phase,
+                mother=(
+                    mother.name
+                    if mother is not None
+                    else None
+                ),
+                father=(
+                    father.name
+                    if father is not None
+                    else None
+                ),
+                events=tuple(events),
+            )
+        )
+
+        self._record(
+            kitten,
+            event,
+        )
+
         return event
 
-    def _provide_daily_care(self, kitten, mother, age_days, current_day):
-        teacher_name = getattr(mother, 'name', None) if mother is not None else kitten.learning.teacher_mother
-        care_names = ('fed_by_mother', 'cleaned_by_mother', 'warmed_by_mother', 'protected_by_mother')
+    def _provide_daily_care(
+        self,
+        kitten,
+        mother,
+        age_days,
+        current_day,
+    ):
+        teacher_name = (
+            mother.name
+            if mother is not None
+            else kitten.learning.teacher_mother
+        )
+
+        care_names = (
+            "fed_by_mother",
+            "cleaned_by_mother",
+            "warmed_by_mother",
+            "protected_by_mother",
+        )
+
         events = []
+
         if mother is not None:
             events.append(
                 self.growth.feed_cat_milk(
@@ -104,26 +274,42 @@ class KittenUpbringingResolver:
                     day=current_day,
                     amount=1.0,
                     source=mother.name,
-                ).to_dict()
+                )
             )
+
         for care_name in care_names:
-            events.append({'name': care_name, 'kitten': kitten.name, 'mother': teacher_name, 'age_days': age_days, 'day': current_day, 'care': True})
+            events.append(
+                KittenDailyCareEvent(
+                    name=care_name,
+                    kitten=kitten.name,
+                    mother=teacher_name,
+                    age_days=age_days,
+                    day=current_day,
+                )
+            )
+
         care = kitten.upbringing.care
+
         care.fed_today = True
         care.cleaned_today = True
         care.warmed_today = True
         care.protected_today = True
+
         care.mother_present = (
             mother is not None
         )
+
         if mother is not None:
-            care_system = CatMaternalCareSystem()
+            care_system = (
+                CatMaternalCareSystem()
+            )
 
             if (
                 getattr(
-                    kitten.maternal_care_received,
+                    kitten
+                    .maternal_care_received,
                     "foster_mother",
-                    None
+                    None,
                 )
                 == mother.name
             ):
@@ -134,7 +320,7 @@ class KittenUpbringingResolver:
                         kitten=kitten,
                         events=events,
                         age_days=age_days,
-                        current_day=current_day
+                        current_day=current_day,
                     )
                 )
 
@@ -146,44 +332,140 @@ class KittenUpbringingResolver:
                         kitten=kitten,
                         events=events,
                         age_days=age_days,
-                        current_day=current_day
+                        current_day=current_day,
                     )
                 )
 
             events.append(
                 maternal_sync
             )
+
         return events
 
-    def _provide_reduced_care(self, kitten, mother, age_days, current_day):
-        events = self._provide_daily_care(kitten=kitten, mother=mother, age_days=age_days, current_day=current_day)
-        kitten.upbringing.care.left_alone_briefly = True
+    def _provide_reduced_care(
+        self,
+        kitten,
+        mother,
+        age_days,
+        current_day,
+    ):
+        events = self._provide_daily_care(
+            kitten=kitten,
+            mother=mother,
+            age_days=age_days,
+            current_day=current_day,
+        )
+
+        kitten.upbringing.care.left_alone_briefly = (
+            True
+        )
+
         if age_days == 14:
-            events.append({'name': 'mother_left_kittens_alone_briefly', 'kitten': kitten.name, 'mother': getattr(mother, 'name', None) if mother is not None else None, 'age_days': age_days, 'day': current_day, 'first_time': True})
+            events.append(
+                KittenMotherLeftBrieflyEvent(
+                    kitten=kitten.name,
+                    mother=(
+                        mother.name
+                        if mother is not None
+                        else None
+                    ),
+                    age_days=age_days,
+                    day=current_day,
+                )
+            )
+
             events.append(
                 self.growth.feed_dead_delivery(
                     kitten=kitten,
                     day=current_day,
-                ).to_dict()
+                )
             )
-            events.append({'name': 'mother_brought_small_dead_cronenberg', 'kitten': kitten.name, 'mother': getattr(mother, 'name', None) if mother is not None else None, 'age_days': age_days, 'day': current_day, 'prey_alive': False, 'purpose': 'food_and_prey_recognition'})
-            kitten.upbringing.cronenberg_experience.dead_deliveries += 1
+
+            events.append(
+                KittenDeadCronenbergDeliveredEvent(
+                    kitten=kitten.name,
+                    mother=(
+                        mother.name
+                        if mother is not None
+                        else None
+                    ),
+                    age_days=age_days,
+                    day=current_day,
+                )
+            )
+
+            (
+                kitten.upbringing
+                .cronenberg_experience
+                .dead_deliveries
+            ) += 1
+
         return events
 
-    def _run_early_lessons(self, kitten, mother, age_days, current_day):
+    def _run_early_lessons(
+        self,
+        kitten,
+        mother,
+        age_days,
+        current_day,
+    ):
         events = []
+
         if age_days >= 14:
-            socialization_lesson = self._advance_skill(kitten=kitten, skill_name='socialization', amount=1.0 / 7.0, teacher=mother, age_days=age_days, current_day=current_day, lesson_name='kitten_socialization_lesson')
-            socialization_lesson['personality'] = CatPersonality.apply_experience(cat=kitten, source='maternal_socialization', changes={'empathy': 0.01, 'patience': 0.005}, day=current_day, metadata={'teacher': getattr(mother, 'name', None) if mother is not None else None, 'age_days': age_days, 'skill_progress': socialization_lesson.get('progress')}).to_dict()
-            events.append(socialization_lesson)
+            events.append(
+                self._advance_socialization_skill(
+                    kitten=kitten,
+                    teacher=mother,
+                    age_days=age_days,
+                    current_day=current_day,
+                )
+            )
+
         if age_days == 16:
-            events.append({'name': 'kitten_played_with_siblings', 'kitten': kitten.name, 'age_days': age_days, 'day': current_day, 'learned': 'play_boundaries'})
+            events.append(
+                KittenSiblingPlayLessonEvent(
+                    kitten=kitten.name,
+                    age_days=age_days,
+                    day=current_day,
+                )
+            )
+
         if age_days == 18:
-            events.append(self._complete_skill(kitten=kitten, skill_name='litter_box', teacher=mother, age_days=age_days, current_day=current_day, lesson_name='mother_taught_litter_box'))
+            events.append(
+                self._complete_skill(
+                    kitten=kitten,
+                    skill_name="litter_box",
+                    teacher=mother,
+                    age_days=age_days,
+                    current_day=current_day,
+                    lesson_name="mother_taught_litter_box",
+                )
+            )
+
         if age_days == 19:
-            events.append(self._complete_skill(kitten=kitten, skill_name='box_travel', teacher=mother, age_days=age_days, current_day=current_day, lesson_name='mother_taught_box_travel'))
+            events.append(
+                self._complete_skill(
+                    kitten=kitten,
+                    skill_name="box_travel",
+                    teacher=mother,
+                    age_days=age_days,
+                    current_day=current_day,
+                    lesson_name="mother_taught_box_travel",
+                )
+            )
+
         if age_days == 20:
-            events.append(self._complete_skill(kitten=kitten, skill_name='cat_door_travel', teacher=mother, age_days=age_days, current_day=current_day, lesson_name='mother_taught_cat_door_travel'))
+            events.append(
+                self._complete_skill(
+                    kitten=kitten,
+                    skill_name="cat_door_travel",
+                    teacher=mother,
+                    age_days=age_days,
+                    current_day=current_day,
+                    lesson_name="mother_taught_cat_door_travel",
+                )
+            )
+
         return events
 
     def _run_hunting_upbringing(self, kitten, mother, father, age_days, current_day):
@@ -200,109 +482,437 @@ class KittenUpbringingResolver:
             events.append(self._family_hunt(kitten=kitten, mother=mother, father=father, age_days=age_days, current_day=current_day))
         return events
 
-    def _bring_live_cronenberg(self, kitten, mother, age_days, current_day):
-        experience = kitten.upbringing.cronenberg_experience
+    def _bring_live_cronenberg(
+        self,
+        kitten,
+        mother,
+        age_days,
+        current_day,
+    ):
+        experience = (
+            kitten.upbringing
+            .cronenberg_experience
+        )
+
         experience.live_deliveries += 1
-        event = {'name': 'mother_brought_small_live_cronenberg', 'kitten': kitten.name, 'mother': getattr(mother, 'name', None) if mother is not None else None, 'age_days': age_days, 'day': current_day, 'prey_alive': True, 'prey_controlled_by_mother': True, 'purpose': 'live_prey_training'}
-        kitten.learning.lessons.append(event)
+
+        event = (
+            KittenLiveCronenbergDeliveredEvent(
+                kitten=kitten.name,
+                mother=(
+                    mother.name
+                    if mother is not None
+                    else None
+                ),
+                age_days=age_days,
+                day=current_day,
+            )
+        )
+
+        kitten.learning.lessons.append(
+            event
+        )
+
         return event
 
-    def _practice_hunting_step(self, kitten, teacher, skill_step, progress_amount, age_days, current_day):
-        hunting = kitten.learning.skills['hunting']
-        previous_progress = float(hunting.progress)
-        progress = min(0.8, previous_progress + progress_amount)
-        teacher_name = getattr(teacher, 'name', None) if teacher is not None else kitten.learning.teacher_mother
+    def _practice_hunting_step(
+        self,
+        kitten,
+        teacher,
+        skill_step,
+        progress_amount,
+        age_days,
+        current_day,
+    ):
+        hunting = (
+            kitten.learning.skills[
+                "hunting"
+            ]
+        )
+
+        previous_progress = float(
+            hunting.progress
+        )
+
+        progress = min(
+            0.8,
+            previous_progress
+            + progress_amount,
+        )
+
+        teacher_name = (
+            teacher.name
+            if teacher is not None
+            else kitten.learning.teacher_mother
+        )
+
         hunting.progress = progress
         hunting.teacher = teacher_name
-        event = {'name': 'kitten_hunting_step_practiced', 'kitten': kitten.name, 'teacher': teacher_name, 'step': skill_step, 'age_days': age_days, 'day': current_day, 'previous_progress': previous_progress, 'progress': progress, 'learned': False}
-        kitten.learning.lessons.append(event)
+
+        event = (
+            KittenHuntingStepPracticedEvent(
+                kitten=kitten.name,
+                teacher=teacher_name,
+                step=skill_step,
+                age_days=age_days,
+                day=current_day,
+                previous_progress=
+                    previous_progress,
+                progress=progress,
+            )
+        )
+
+        kitten.learning.lessons.append(
+            event
+        )
+
         return event
 
-    def _first_training_kill(self, kitten, mother, age_days, current_day):
-        experience = kitten.upbringing.cronenberg_experience
+    def _first_training_kill(
+        self,
+        kitten,
+        mother,
+        age_days,
+        current_day,
+    ):
+        experience = (
+            kitten.upbringing
+            .cronenberg_experience
+        )
+
         experience.successful_kills += 1
-        hunting = kitten.learning.skills['hunting']
-        previous_progress = float(hunting.progress)
-        hunting.progress = max(previous_progress, 0.85)
-        growth_event = self.growth.feed_first_kill(kitten=kitten, day=current_day)
-        event = {'name': 'kitten_completed_first_training_kill', 'kitten': kitten.name, 'mother': getattr(mother, 'name', None) if mother is not None else None, 'age_days': age_days, 'day': current_day, 'prey': 'small_live_cronenberg', 'successful': True, 'successful_kills': experience.successful_kills, 'hunting_progress': hunting.progress, 'growth': growth_event.to_dict()}
-        kitten.learning.lessons.append(event)
+
+        hunting = (
+            kitten.learning.skills[
+                "hunting"
+            ]
+        )
+
+        previous_progress = float(
+            hunting.progress
+        )
+
+        hunting.progress = max(
+            previous_progress,
+            0.85,
+        )
+
+        growth_event = (
+            self.growth.feed_first_kill(
+                kitten=kitten,
+                day=current_day,
+            )
+        )
+
+        event = (
+            KittenFirstTrainingKillEvent(
+                kitten=kitten.name,
+                mother=(
+                    mother.name
+                    if mother is not None
+                    else None
+                ),
+                age_days=age_days,
+                day=current_day,
+                successful_kills=
+                    experience.successful_kills,
+                hunting_progress=
+                    hunting.progress,
+                growth=growth_event,
+            )
+        )
+
+        kitten.learning.lessons.append(
+            event
+        )
+
         return event
 
-    def _family_hunt(self, kitten, mother, father, age_days, current_day):
-        experience = kitten.upbringing.cronenberg_experience
+    def _family_hunt(
+        self,
+        kitten,
+        mother,
+        father,
+        age_days,
+        current_day,
+    ):
+        experience = (
+            kitten.upbringing
+            .cronenberg_experience
+        )
+
         experience.family_hunts += 1
-        family_hunt_number = experience.family_hunts
-        father_joined = father is not None and family_hunt_number % 2 == 0
-        hunting = kitten.learning.skills['hunting']
-        previous_progress = float(hunting.progress)
-        progress = min(1.0, previous_progress + 0.05)
-        enough_experience = experience.successful_kills >= 1 and family_hunt_number >= self.REQUIRED_FAMILY_HUNTS
-        learned = enough_experience and progress >= 0.999999
+
+        family_hunt_number = (
+            experience.family_hunts
+        )
+
+        father_joined = (
+            father is not None
+            and family_hunt_number % 2 == 0
+        )
+
+        hunting = (
+            kitten.learning.skills[
+                "hunting"
+            ]
+        )
+
+        previous_progress = float(
+            hunting.progress
+        )
+
+        progress = min(
+            1.0,
+            previous_progress + 0.05,
+        )
+
+        enough_experience = (
+            experience.successful_kills >= 1
+            and family_hunt_number
+            >= self.REQUIRED_FAMILY_HUNTS
+        )
+
+        learned = (
+            enough_experience
+            and progress >= 0.999999
+        )
+
         teacher_names = []
+
         if mother is not None:
-            teacher_names.append(mother.name)
+            teacher_names.append(
+                mother.name
+            )
+
         if father_joined:
-            teacher_names.append(father.name)
-            kitten.learning.hunting_teacher_father = father.name
+            teacher_names.append(
+                father.name
+            )
+
+            kitten.learning.hunting_teacher_father = (
+                father.name
+            )
+
         hunting.progress = progress
         hunting.learned = learned
-        hunting.teacher = teacher_names[0] if teacher_names else None
+
+        hunting.teacher = (
+            teacher_names[0]
+            if teacher_names
+            else None
+        )
+
         if learned:
-            hunting.learned_on_day = current_day
-        growth_event = self.growth.feed_family_hunt(kitten=kitten, day=current_day)
-        event = {'name': 'kitten_joined_family_cronenberg_hunt', 'kitten': kitten.name, 'mother': getattr(mother, 'name', None) if mother is not None else None, 'father': getattr(father, 'name', None) if father is not None else None, 'father_joined': father_joined, 'teachers': teacher_names, 'age_days': age_days, 'day': current_day, 'family_hunt_number': family_hunt_number, 'hunting_progress': progress, 'hunting_learned': learned, 'growth': growth_event.to_dict(), 'successful': True}
-        kitten.learning.lessons.append(event)
+            hunting.learned_on_day = (
+                current_day
+            )
+
+        growth_event = (
+            self.growth.feed_family_hunt(
+                kitten=kitten,
+                day=current_day,
+            )
+        )
+
+        event = (
+            KittenFamilyHuntEvent(
+                kitten=kitten.name,
+                mother=(
+                    mother.name
+                    if mother is not None
+                    else None
+                ),
+                father=(
+                    father.name
+                    if father is not None
+                    else None
+                ),
+                father_joined=
+                    father_joined,
+                teachers=tuple(
+                    teacher_names
+                ),
+                age_days=age_days,
+                day=current_day,
+                family_hunt_number=
+                    family_hunt_number,
+                hunting_progress=
+                    progress,
+                hunting_learned=
+                    learned,
+                growth=growth_event,
+            )
+        )
+
+        kitten.learning.lessons.append(
+            event
+        )
+
         return event
 
-    def _run_late_education(self, kitten, mother, cats, age_days, current_day):
+    def _run_late_education(
+        self,
+        kitten,
+        mother,
+        cats,
+        age_days,
+        current_day,
+    ):
         events = []
-        teacher = self._find_late_teacher(kitten=kitten, mother=mother, cats=cats)
-        vocalization_index = age_days - 60
-        if 0 <= vocalization_index < len(CatLearning.ADULT_VOCALIZATIONS):
+
+        teacher = self._find_late_teacher(
+            kitten=kitten,
+            mother=mother,
+            cats=cats,
+        )
+
+        vocalization_index = (
+            age_days - 60
+        )
+
+        if (
+            0
+            <= vocalization_index
+            < len(
+                CatLearning.ADULT_VOCALIZATIONS
+            )
+        ):
             if teacher is None:
-                events.append({'name': 'adult_vocalization_teacher_unavailable', 'kitten': kitten.name, 'age_days': age_days, 'day': current_day, 'learned': False})
+                events.append(
+                    KittenAdultVocalizationTeacherUnavailableEvent(
+                        kitten=kitten.name,
+                        age_days=age_days,
+                        day=current_day,
+                    )
+                )
+
             else:
-                vocalization = CatLearning.ADULT_VOCALIZATIONS[vocalization_index]
+                vocalization = (
+                    CatLearning
+                    .ADULT_VOCALIZATIONS[
+                        vocalization_index
+                    ]
+                )
+
                 events.append(
                     self.vocalization_resolver.teach(
                         teacher=teacher,
                         kitten=kitten,
                         vocalization=vocalization,
                         current_day=current_day,
-                    ).to_dict()
+                    )
                 )
+
         if age_days == 75:
-            events.append(self._teach_human_communication(kitten=kitten, teacher=teacher, age_days=age_days, current_day=current_day))
+            events.append(
+                self._teach_human_communication(
+                    kitten=kitten,
+                    teacher=teacher,
+                    age_days=age_days,
+                    current_day=current_day,
+                )
+            )
+
         if age_days == 90:
             if teacher is None:
-                events.append({'name': 'meow_teacher_unavailable', 'kitten': kitten.name, 'age_days': age_days, 'day': current_day, 'transmitted': False})
+                events.append(
+                    KittenMeowTeacherUnavailableEvent(
+                        kitten=kitten.name,
+                        age_days=age_days,
+                        day=current_day,
+                    )
+                )
+
             else:
                 events.append(
                     self.meow_resolver.transmit(
                         mother=teacher,
                         kitten=kitten,
                         current_day=current_day,
-                    ).to_dict()
+                    )
                 )
+
         return events
 
-    def _teach_human_communication(self, kitten, teacher, age_days, current_day):
+    def _teach_human_communication(
+        self,
+        kitten,
+        teacher,
+        age_days,
+        current_day,
+    ):
         learning = kitten.learning
-        adult_meowing = learning.skills['adult_meowing']
+
+        adult_meowing = (
+            learning.skills[
+                "adult_meowing"
+            ]
+        )
+
         if not adult_meowing.learned:
-            return {'name': 'human_communication_lesson_denied', 'kitten': kitten.name, 'teacher': getattr(teacher, 'name', None) if teacher is not None else None, 'age_days': age_days, 'day': current_day, 'reason': 'adult_vocalization_repertoire_incomplete', 'learned': False}
+            return (
+                KittenHumanCommunicationLessonDeniedResult(
+                    kitten=kitten.name,
+                    teacher=(
+                        teacher.name
+                        if teacher is not None
+                        else None
+                    ),
+                    age_days=age_days,
+                    day=current_day,
+                    reason=(
+                        "adult_vocalization_repertoire_incomplete"
+                    ),
+                )
+            )
+
         if teacher is None:
-            return {'name': 'human_communication_lesson_denied', 'kitten': kitten.name, 'teacher': None, 'age_days': age_days, 'day': current_day, 'reason': 'teacher_unavailable', 'learned': False}
-        skill = learning.skills['human_communication']
+            return (
+                KittenHumanCommunicationLessonDeniedResult(
+                    kitten=kitten.name,
+                    teacher=None,
+                    age_days=age_days,
+                    day=current_day,
+                    reason="teacher_unavailable",
+                )
+            )
+
+        skill = (
+            learning.skills[
+                "human_communication"
+            ]
+        )
+
         skill.learned = True
         skill.progress = 1.0
         skill.teacher = teacher.name
-        skill.learned_on_day = current_day
-        learning.human_communication_learned = True
-        lesson = {'name': 'human_feline_communication_learned', 'kitten': kitten.name, 'teacher': teacher.name, 'age_days': age_days, 'day': current_day, 'uses': list(CatLearning.ADULT_VOCALIZATIONS), 'learned': True}
-        learning.lessons.append(lesson)
-        return lesson
+        skill.learned_on_day = (
+            current_day
+        )
+
+        learning.human_communication_learned = (
+            True
+        )
+
+        event = (
+            KittenHumanCommunicationLearnedEvent(
+                kitten=kitten.name,
+                teacher=teacher.name,
+                age_days=age_days,
+                day=current_day,
+                uses=tuple(
+                    CatLearning
+                    .ADULT_VOCALIZATIONS
+                ),
+            )
+        )
+
+        learning.lessons.append(
+            event
+        )
+
+        return event
 
     def _find_late_teacher(self, kitten, mother, cats):
         if self._is_qualified_late_teacher(mother, parental_exception=True):
@@ -350,39 +960,170 @@ class KittenUpbringingResolver:
             and meow.can_speak
         )
 
-    def _advance_skill(self, kitten, skill_name, amount, teacher, age_days, current_day, lesson_name):
-        skill = kitten.learning.skills[skill_name]
-        previous_progress = float(skill.progress)
-        progress = min(1.0, previous_progress + amount)
-        learned = progress >= 0.999999
+    def _advance_socialization_skill(
+        self,
+        kitten,
+        teacher,
+        age_days,
+        current_day,
+    ):
+        skill = (
+            kitten.learning.skills[
+                "socialization"
+            ]
+        )
+
+        previous_progress = float(
+            skill.progress
+        )
+
+        progress = min(
+            1.0,
+            previous_progress
+            + (1.0 / 7.0),
+        )
+
+        learned = (
+            progress >= 0.999999
+        )
+
+        teacher_name = (
+            teacher.name
+            if teacher is not None
+            else kitten.learning.teacher_mother
+        )
+
         skill.progress = progress
         skill.learned = learned
-        skill.teacher = getattr(teacher, 'name', None) if teacher is not None else kitten.learning.teacher_mother
-        if learned:
-            skill.learned_on_day = current_day
-        lesson = {'name': lesson_name, 'student': kitten.name, 'teacher': skill.teacher, 'skill': skill_name, 'age_days': age_days, 'day': current_day, 'previous_progress': previous_progress, 'progress': progress, 'learned': learned}
-        kitten.learning.lessons.append(lesson)
-        return lesson
+        skill.teacher = teacher_name
 
-    def _complete_skill(self, kitten, skill_name, teacher, age_days, current_day, lesson_name):
-        skill = kitten.learning.skills[skill_name]
-        teacher_name = getattr(teacher, 'name', None) if teacher is not None else kitten.learning.teacher_mother
+        if learned:
+            skill.learned_on_day = (
+                current_day
+            )
+
+        personality = (
+            CatPersonality.apply_experience(
+                cat=kitten,
+                source="maternal_socialization",
+                changes={
+                    "empathy": 0.01,
+                    "patience": 0.005,
+                },
+                day=current_day,
+                metadata={
+                    "teacher": teacher_name,
+                    "age_days": age_days,
+                    "skill_progress": progress,
+                },
+            )
+        )
+
+        event = (
+            KittenSocializationLessonEvent(
+                student=kitten.name,
+                teacher=teacher_name,
+                skill="socialization",
+                age_days=age_days,
+                day=current_day,
+                previous_progress=
+                    previous_progress,
+                progress=progress,
+                learned=learned,
+                personality=personality,
+            )
+        )
+
+        kitten.learning.lessons.append(
+            event
+        )
+
+        return event
+
+    def _complete_skill(
+        self,
+        kitten,
+        skill_name,
+        teacher,
+        age_days,
+        current_day,
+        lesson_name,
+    ):
+        skill = (
+            kitten.learning.skills[
+                skill_name
+            ]
+        )
+
+        teacher_name = (
+            teacher.name
+            if teacher is not None
+            else kitten.learning.teacher_mother
+        )
+
         skill.learned = True
         skill.progress = 1.0
         skill.teacher = teacher_name
-        skill.learned_on_day = current_day
-        lesson = {'name': lesson_name, 'student': kitten.name, 'teacher': teacher_name, 'skill': skill_name, 'age_days': age_days, 'day': current_day, 'progress': 1.0, 'learned': True}
-        kitten.learning.lessons.append(lesson)
-        return lesson
+        skill.learned_on_day = (
+            current_day
+        )
 
-    def _father_food_delivery(self, kitten, father, age_days, current_day):
+        event = (
+            KittenSkillCompletedLessonEvent(
+                name=lesson_name,
+                student=kitten.name,
+                teacher=teacher_name,
+                skill=skill_name,
+                age_days=age_days,
+                day=current_day,
+            )
+        )
+
+        kitten.learning.lessons.append(
+            event
+        )
+
+        return event
+
+    def _father_food_delivery(
+        self,
+        kitten,
+        father,
+        age_days,
+        current_day,
+    ):
         if father is None:
             return None
-        if age_days == 0 or age_days % 5 != 0:
+
+        if (
+            age_days == 0
+            or age_days % 5 != 0
+        ):
             return None
-        growth_event = self.growth.feed_father_delivery(kitten=kitten, day=current_day)
-        event = {'name': 'father_brought_dead_cronenberg', 'kitten': kitten.name, 'father': father.name, 'age_days': age_days, 'day': current_day, 'prey_alive': False, 'purpose': 'family_food', 'growth': growth_event.to_dict()}
-        kitten.upbringing.cronenberg_experience.father_food_deliveries += 1
+
+        growth_event = (
+            self.growth.feed_father_delivery(
+                kitten=kitten,
+                day=current_day,
+            )
+        )
+
+        event = (
+            KittenFatherFoodDeliveryEvent(
+                kitten=kitten.name,
+                father=father.name,
+                age_days=age_days,
+                day=current_day,
+                growth=growth_event,
+            )
+        )
+
+        (
+            kitten.upbringing
+            .cronenberg_experience
+            .father_food_deliveries
+        ) += 1
+
         return event
 
     def _find_parent(
@@ -519,14 +1260,67 @@ class KittenUpbringingResolver:
 
         return state
 
-    def _skip(self, kitten, current_day, reason):
-        event = {'name': 'kitten_upbringing_day_skipped', 'kitten': getattr(kitten, 'name', None), 'day': current_day, 'reason': reason, 'processed': False}
-        self.history.append(event)
+    def _skip(
+        self,
+        kitten,
+        current_day,
+        reason,
+    ):
+        event = (
+            KittenUpbringingDaySkippedResult(
+                kitten=getattr(
+                    kitten,
+                    "name",
+                    None,
+                ),
+                day=current_day,
+                reason=reason,
+            )
+        )
+
+        self.history.append(
+            replace(
+                event
+            )
+        )
+
         return event
 
-    def _record(self, kitten, event):
-        self.history.append(event)
-        kitten.upbringing.history.append(event)
-        quantum_events = getattr(self.universe, 'quantum_events', None)
+    def _record(
+        self,
+        kitten,
+        event,
+    ):
+        if not isinstance(
+            event,
+            KittenUpbringingDayCompletedEvent,
+        ):
+            raise TypeError(
+                "Kitten upbringing history "
+                "requires completed event objects."
+            )
+
+        self.history.append(
+            replace(
+                event
+            )
+        )
+
+        kitten.upbringing.history.append(
+            replace(
+                event
+            )
+        )
+
+        quantum_events = getattr(
+            self.universe,
+            "quantum_events",
+            None,
+        )
+
         if quantum_events is not None:
-            quantum_events.append(event)
+            quantum_events.append(
+                replace(
+                    event
+                )
+            )

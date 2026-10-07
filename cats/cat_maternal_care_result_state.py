@@ -228,3 +228,122 @@ class CatFosterMaternalCareEvent:
             "actions",
             tuple(self.actions),
         )
+
+
+
+@dataclass(slots=True, frozen=True)
+class CatMaternalUpbringingSyncDeniedResult:
+    mother: str
+    kitten: str
+    reason: str
+
+    name: str = field(
+        default="maternal_upbringing_sync_denied",
+        init=False,
+    )
+
+    synced: bool = field(
+        default=False,
+        init=False,
+    )
+
+
+@dataclass(slots=True, frozen=True)
+class CatMaternalUpbringingCareSyncedEvent:
+    mother: str
+    kitten: str
+    age_days: int
+    day: int | None
+    phase: MaternalCarePhase
+    actions: tuple[str, ...]
+
+    name: str = field(
+        default="maternal_upbringing_care_synced",
+        init=False,
+    )
+
+    synced: bool = field(
+        default=True,
+        init=False,
+    )
+
+    def __post_init__(self):
+        if not isinstance(
+            self.phase,
+            MaternalCarePhase,
+        ):
+            raise TypeError(
+                "Maternal upbringing sync phase "
+                "must use MaternalCarePhase."
+            )
+
+        object.__setattr__(
+            self,
+            "age_days",
+            int(self.age_days),
+        )
+
+        object.__setattr__(
+            self,
+            "actions",
+            tuple(self.actions),
+        )
+
+
+@dataclass(slots=True, frozen=True)
+class CatFosterUpbringingSyncDeniedResult:
+    foster_mother: str
+    kitten: str
+    reason: str
+
+    name: str = field(
+        default="foster_upbringing_sync_denied",
+        init=False,
+    )
+
+    synced: bool = field(
+        default=False,
+        init=False,
+    )
+
+
+@dataclass(slots=True, frozen=True)
+class CatFosterUpbringingCareSyncedEvent:
+    foster_mother: str
+    kitten: str
+    age_days: int
+    day: int | None
+    phase: MaternalCarePhase
+    actions: tuple[str, ...]
+
+    name: str = field(
+        default="foster_upbringing_care_synced",
+        init=False,
+    )
+
+    synced: bool = field(
+        default=True,
+        init=False,
+    )
+
+    def __post_init__(self):
+        if not isinstance(
+            self.phase,
+            MaternalCarePhase,
+        ):
+            raise TypeError(
+                "Foster upbringing sync phase "
+                "must use MaternalCarePhase."
+            )
+
+        object.__setattr__(
+            self,
+            "age_days",
+            int(self.age_days),
+        )
+
+        object.__setattr__(
+            self,
+            "actions",
+            tuple(self.actions),
+        )
