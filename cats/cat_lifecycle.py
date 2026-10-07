@@ -1,17 +1,22 @@
+from dataclasses import replace
+
 from cats.estrous_cycle_resolver import (
-    CatEstrousCycleResolver
+    CatEstrousCycleResolver,
 )
 from cats.development_resolver import (
-    CatDevelopmentResolver
+    CatDevelopmentResolver,
 )
 from cats.mating_resolver import (
-    CatMatingResolver
+    CatMatingResolver,
 )
 from cats.kitten_birth_resolver import (
-    KittenBirthResolver
+    KittenBirthResolver,
 )
 from cats.kitten_upbringing_resolver import (
-    KittenUpbringingResolver
+    KittenUpbringingResolver,
+)
+from cats.cat_lifecycle_result_state import (
+    CatLifeCycleDayCompletedEvent,
 )
 
 
@@ -21,7 +26,7 @@ class CatLifeCycleHandler:
 
     def __init__(
         self,
-        universe
+        universe,
     ):
         self.universe = universe
         self.history = []
@@ -58,27 +63,28 @@ class CatLifeCycleHandler:
 
     def tick_day(
         self,
-        day
+        day,
     ):
         cats_layer = getattr(
             self.universe,
             "cats_layer",
-            None
+            None,
         )
 
         if cats_layer is None:
-            event = {
-                "name": (
-                    "cat_life_cycle_day_completed"
-                ),
-                "day": day,
-                "cats_processed": 0,
-                "age_advances": [],
-                "pregnancy_advances": [],
-                "births": []
-            }
+            event = (
+                CatLifeCycleDayCompletedEvent(
+                    day=day,
+                    cats_processed=0,
+                    age_advances=(),
+                    estrous_cycle_results=(),
+                    pregnancy_advances=(),
+                    births=(),
+                    upbringing_results=(),
+                )
+            )
 
-            self.history.append(
+            self._record(
                 event
             )
 
@@ -90,30 +96,33 @@ class CatLifeCycleHandler:
         births = []
         upbringing_results = []
 
-        # Kopie seznamu je důležitá:
-        # porod může během iterace přidat nová koťata.
+        # Snapshot is intentional:
+        # birth can add kittens while this
+        # lifecycle day is being processed.
         cats = list(
             cats_layer.cats
         )
 
         for cat in cats:
-            # Biologicky narozené kočky mají age_days.
-            # Kvantově manifestované kočky bez známého
-            # biologického věku zatím automaticky nestárnou.
+
+            # Biologically born cats have
+            # age_days. Quantum-manifested cats
+            # without biological age are not
+            # automatically aged.
             if hasattr(
                 cat,
-                "age_days"
+                "age_days",
             ):
                 age_result = (
                     self.development_resolver
                     .advance_age(
                         cat,
-                        days=1
+                        days=1,
                     )
                 )
 
                 age_advances.append(
-                    age_result.to_dict()
+                    age_result
                 )
 
                 upbringing_result = (
@@ -121,7 +130,7 @@ class CatLifeCycleHandler:
                     .tick_day(
                         kitten=cat,
                         cats=cats,
-                        current_day=day
+                        current_day=day,
                     )
                 )
 
@@ -129,18 +138,20 @@ class CatLifeCycleHandler:
                     upbringing_result
                 )
 
-            reproduction = cat.reproduction
+            reproduction = (
+                cat.reproduction
+            )
 
             estrous_result = (
                 self.estrous_cycle_resolver
                 .tick_day(
                     cat,
-                    day=day
+                    day=day,
                 )
             )
 
             estrous_cycle_results.append(
-                estrous_result.to_dict()
+                estrous_result
             )
 
             if not reproduction.pregnant:
@@ -150,12 +161,12 @@ class CatLifeCycleHandler:
                 self.mating_resolver
                 .advance_pregnancy(
                     cat,
-                    days=1
+                    days=1,
                 )
             )
 
             pregnancy_advances.append(
-                pregnancy_result.to_dict()
+                pregnancy_result
             )
 
             if not getattr(
@@ -169,35 +180,61 @@ class CatLifeCycleHandler:
                 self.birth_resolver
                 .give_birth(
                     cat,
-                    current_day=day
+                    current_day=day,
                 )
             )
 
             births.append(
-                birth_result.to_dict()
+                birth_result
             )
 
-        event = {
-            "name": (
-                "cat_life_cycle_day_completed"
-            ),
-            "day": day,
-            "cats_processed": len(cats),
-            "age_advances": age_advances,
-            "estrous_cycle_results": (
-                estrous_cycle_results
-            ),
-            "pregnancy_advances": (
-                pregnancy_advances
-            ),
-            "births": births,
-            "upbringing_results": (
-                upbringing_results
+        event = (
+            CatLifeCycleDayCompletedEvent(
+                day=day,
+                cats_processed=len(
+                    cats
+                ),
+                age_advances=tuple(
+                    age_advances
+                ),
+                estrous_cycle_results=tuple(
+                    estrous_cycle_results
+                ),
+                pregnancy_advances=tuple(
+                    pregnancy_advances
+                ),
+                births=tuple(
+                    births
+                ),
+                upbringing_results=tuple(
+                    upbringing_results
+                ),
             )
-        }
+        )
+
+        self._record(
+            event
+        )
+
+        return event
+
+    def _record(
+        self,
+        event,
+    ):
+        if not isinstance(
+            event,
+            CatLifeCycleDayCompletedEvent,
+        ):
+            raise TypeError(
+                "Cat lifecycle history requires "
+                "CatLifeCycleDayCompletedEvent."
+            )
 
         self.history.append(
-            event
+            replace(
+                event
+            )
         )
 
         return event
