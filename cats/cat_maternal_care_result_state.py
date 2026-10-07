@@ -161,3 +161,70 @@ class CatMotherProtectedKittenEvent:
                 "day",
                 int(self.day),
             )
+
+
+
+@dataclass(slots=True, frozen=True)
+class CatFosterMaternalCareDeniedResult:
+    foster_mother: str
+    kitten: str
+    reason: str
+
+    name: str = field(
+        default="foster_maternal_care_denied",
+        init=False,
+    )
+
+    provided: bool = field(
+        default=False,
+        init=False,
+    )
+
+
+@dataclass(slots=True, frozen=True)
+class CatFosterMaternalCareEvent:
+    foster_mother: str
+    kitten: str
+    age_days: int
+    day: int | None
+    phase: MaternalCarePhase
+    actions: tuple[str, ...]
+
+    name: str = field(
+        default="cat_foster_maternal_care",
+        init=False,
+    )
+
+    provided: bool = field(
+        default=True,
+        init=False,
+    )
+
+    def __post_init__(self):
+        if not isinstance(
+            self.phase,
+            MaternalCarePhase,
+        ):
+            raise TypeError(
+                "Foster maternal care event phase "
+                "must use MaternalCarePhase."
+            )
+
+        object.__setattr__(
+            self,
+            "age_days",
+            int(self.age_days),
+        )
+
+        if self.day is not None:
+            object.__setattr__(
+                self,
+                "day",
+                int(self.day),
+            )
+
+        object.__setattr__(
+            self,
+            "actions",
+            tuple(self.actions),
+        )

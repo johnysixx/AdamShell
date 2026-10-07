@@ -115,13 +115,11 @@ class CatEmergencyLactationSystemTests(
         )
 
         self.assertTrue(
-            result["rescued"]
+            result.rescued
         )
 
         self.assertTrue(
-            result[
-                "lactation_induced"
-            ]
+            result.lactation_induced
         )
 
         self.assertEqual(
@@ -179,11 +177,11 @@ class CatEmergencyLactationSystemTests(
         )
 
         self.assertFalse(
-            result["rescued"]
+            result.rescued
         )
 
         self.assertEqual(
-            result["reason"],
+            result.reason,
             "cat_cannot_induce_lactation"
         )
 
@@ -216,7 +214,7 @@ class CatEmergencyLactationSystemTests(
         )
 
         self.assertFalse(
-            result["rescued"]
+            result.rescued
         )
 
     def test_kitten_must_need_both_milk_and_teaching(
@@ -233,7 +231,7 @@ class CatEmergencyLactationSystemTests(
         )
 
         self.assertFalse(
-            assessment["needs_milk"]
+            assessment.needs_milk
         )
 
         self.kitten.age_days = 10
@@ -249,9 +247,7 @@ class CatEmergencyLactationSystemTests(
         )
 
         self.assertFalse(
-            assessment[
-                "needs_teaching"
-            ]
+            assessment.needs_teaching
         )
 
     def test_foster_mother_can_continue_maternal_care(
@@ -278,12 +274,12 @@ class CatEmergencyLactationSystemTests(
         )
 
         self.assertTrue(
-            result["provided"]
+            result.provided
         )
 
         self.assertIn(
             "nursing",
-            result["actions"]
+            result.actions
         )
 
     def test_upbringing_uses_foster_when_biological_mother_is_missing(

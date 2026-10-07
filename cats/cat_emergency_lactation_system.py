@@ -1,14 +1,24 @@
 from copy import deepcopy
 
 from cats.cat import Cat
+from cats.cat_emergency_lactation_result_state import (
+    CatOrphanArrivalRecord,
+    CatOrphanRescueAssessment,
+    CatOrphanRescueDeniedResult,
+    CatOrphanRescueEvent,
+    CatOrphanTransportEvent,
+)
+from cats.cat_maternal_care_result_state import (
+    CatFosterMaternalCareEvent,
+)
 from cats.cat_maternal_care_system import (
-    CatMaternalCareSystem
+    CatMaternalCareSystem,
 )
 from cats.cat_parentage_state import (
-    CatParentageState
+    CatParentageState,
 )
 from cats.garfield_training_system import (
-    GarfieldTrainingSystem
+    GarfieldTrainingSystem,
 )
 
 
@@ -22,7 +32,7 @@ class CatEmergencyLactationSystem:
     def __init__(
         self,
         cats_layer=None,
-        meeting_place=None
+        meeting_place=None,
     ):
         self.cats_layer = cats_layer
         self.meeting_place = meeting_place
@@ -36,7 +46,7 @@ class CatEmergencyLactationSystem:
     def needs_orphan_rescue(
         self,
         kitten,
-        cats=None
+        cats=None,
     ):
         self._require_cat(
             kitten
@@ -45,14 +55,14 @@ class CatEmergencyLactationSystem:
         learning = getattr(
             kitten,
             "learning",
-            None
+            None,
         )
 
         age_days = int(
             getattr(
                 kitten,
                 "age_days",
-                0
+                0,
             )
         )
 
@@ -60,7 +70,7 @@ class CatEmergencyLactationSystem:
             getattr(
                 learning,
                 "teaching_required",
-                False
+                False,
             )
         )
 
@@ -78,28 +88,25 @@ class CatEmergencyLactationSystem:
         mother_available = (
             self._mother_available(
                 mother_name,
-                cats
+                cats,
             )
         )
 
-        return {
-            "kitten":
-                kitten.name,
-            "mother":
-                mother_name,
-            "mother_available":
+        return CatOrphanRescueAssessment(
+            kitten=kitten.name,
+            mother=mother_name,
+            mother_available=
                 mother_available,
-            "needs_teaching":
+            needs_teaching=
                 needs_teaching,
-            "needs_milk":
+            needs_milk=
                 needs_milk,
-            "orphan_rescue_needed":
-                (
-                    not mother_available
-                    and needs_teaching
-                    and needs_milk
-                ),
-        }
+            orphan_rescue_needed=(
+                not mother_available
+                and needs_teaching
+                and needs_milk
+            ),
+        )
 
     def rescue_orphaned_kittens(
         self,
@@ -107,7 +114,7 @@ class CatEmergencyLactationSystem:
         kittens,
         cats=None,
         meeting_place=None,
-        current_day=None
+        current_day=None,
     ):
         self._require_cat(
             rescuer
@@ -118,14 +125,12 @@ class CatEmergencyLactationSystem:
         )
 
         if not kittens:
-            return {
-                "name":
-                    "orphan_kitten_rescue_denied",
-                "reason":
-                    "no_kittens",
-                "rescued":
-                    False,
-            }
+            return (
+                CatOrphanRescueDeniedResult(
+                    reason="no_kittens",
+                    cat=rescuer.name,
+                )
+            )
 
         for kitten in kittens:
             self._require_cat(
@@ -137,67 +142,61 @@ class CatEmergencyLactationSystem:
                 rescuer
                 .emergency_nursing,
                 "can_induce_lactation",
-                False
+                False,
             )
         ):
-            return {
-                "name":
-                    "orphan_kitten_rescue_denied",
-                "cat":
-                    rescuer.name,
-                "reason":
-                    "cat_cannot_induce_lactation",
-                "rescued":
-                    False,
-            }
+            return (
+                CatOrphanRescueDeniedResult(
+                    reason=(
+                        "cat_cannot_induce_lactation"
+                    ),
+                    cat=rescuer.name,
+                )
+            )
 
         if cats is None:
             cats = list(
                 getattr(
                     self.cats_layer,
                     "cats",
-                    []
+                    [],
                 )
             )
+
         else:
             cats = list(
                 cats
             )
 
-        assessments = [
+        assessments = tuple(
             self.needs_orphan_rescue(
                 kitten,
-                cats=cats
+                cats=cats,
             )
             for kitten
             in kittens
-        ]
+        )
 
         eligible = [
             kitten
             for kitten, assessment
             in zip(
                 kittens,
-                assessments
+                assessments,
             )
-            if assessment[
-                "orphan_rescue_needed"
-            ]
+            if assessment.orphan_rescue_needed
         ]
 
         if not eligible:
-            return {
-                "name":
-                    "orphan_kitten_rescue_denied",
-                "cat":
-                    rescuer.name,
-                "reason":
-                    "no_orphaned_milk_dependent_kittens",
-                "assessments":
-                    assessments,
-                "rescued":
-                    False,
-            }
+            return (
+                CatOrphanRescueDeniedResult(
+                    reason=(
+                        "no_orphaned_milk_dependent_kittens"
+                    ),
+                    cat=rescuer.name,
+                    assessments=assessments,
+                )
+            )
 
         bar = (
             meeting_place
@@ -205,30 +204,25 @@ class CatEmergencyLactationSystem:
         )
 
         if bar is None:
-            return {
-                "name":
-                    "orphan_kitten_rescue_denied",
-                "cat":
-                    rescuer.name,
-                "reason":
-                    "meeting_place_unavailable",
-                "rescued":
-                    False,
-            }
-
-        transport = (
-            self._bring_to_bar(
-                rescuer,
-                eligible,
-                bar
+            return (
+                CatOrphanRescueDeniedResult(
+                    reason="meeting_place_unavailable",
+                    cat=rescuer.name,
+                    assessments=assessments,
+                )
             )
+
+        transport = self._bring_to_bar(
+            rescuer,
+            eligible,
+            bar,
         )
 
         advice = (
             self.garfield
             .advise_emergency_lactation(
                 rescuer,
-                eligible
+                eligible,
             )
         )
 
@@ -236,33 +230,22 @@ class CatEmergencyLactationSystem:
             self._induce_and_assign(
                 rescuer=rescuer,
                 kittens=eligible,
-                current_day=current_day
+                current_day=current_day,
             )
         )
 
-        event = {
-            "name":
-                "cat_rescued_orphaned_kittens",
-            "cat":
-                rescuer.name,
-            "kittens": [
+        event = CatOrphanRescueEvent(
+            cat=rescuer.name,
+            kittens=tuple(
                 kitten.name
                 for kitten
                 in eligible
-            ],
-            "bar":
-                "meeting_place",
-            "transport":
-                transport,
-            "garfield_advice":
-                advice,
-            "foster_events":
-                foster_events,
-            "lactation_induced":
-                True,
-            "rescued":
-                True,
-        }
+            ),
+            bar="meeting_place",
+            transport=transport,
+            garfield_advice=advice,
+            foster_events=foster_events,
+        )
 
         (
             rescuer
@@ -278,20 +261,24 @@ class CatEmergencyLactationSystem:
         )
 
         self.history.append(
-            deepcopy(event)
+            deepcopy(
+                event
+            )
         )
 
         emit_event = getattr(
             self.cats_layer,
             "emit_event",
-            None
+            None,
         )
 
         if callable(
             emit_event
         ):
             emit_event(
-                deepcopy(event)
+                deepcopy(
+                    event
+                )
             )
 
         return event
@@ -300,25 +287,26 @@ class CatEmergencyLactationSystem:
         self,
         rescuer,
         kittens,
-        meeting_place
+        meeting_place,
     ):
         arrivals = []
 
         for cat in [
             rescuer,
-            *kittens
+            *kittens,
         ]:
-
-            arrival = (
+            raw_arrival = (
                 meeting_place
                 .admit_cat(
                     cat,
-                    bartender_available=True
+                    bartender_available=True,
                 )
             )
 
             arrivals.append(
-                arrival
+                self._arrival_record(
+                    raw_arrival
+                )
             )
 
         rescuer.state = (
@@ -326,7 +314,6 @@ class CatEmergencyLactationSystem:
         )
 
         for kitten in kittens:
-
             kitten.state = (
                 "rescued_orphan_kitten"
             )
@@ -337,33 +324,94 @@ class CatEmergencyLactationSystem:
                 .rescued_to_bar
             ) = True
 
-        event = {
-            "name":
-                "cat_brought_orphaned_kittens_to_bar",
-            "cat":
-                rescuer.name,
-            "kittens": [
+        event = CatOrphanTransportEvent(
+            cat=rescuer.name,
+            kittens=tuple(
                 kitten.name
                 for kitten
                 in kittens
-            ],
-            "arrivals":
-                arrivals,
-            "transported":
-                True,
-        }
+            ),
+            arrivals=tuple(
+                arrivals
+            ),
+        )
 
         meeting_place.emit_event(
-            deepcopy(event)
+            deepcopy(
+                event
+            )
         )
 
         return event
+
+    def _arrival_record(
+        self,
+        arrival,
+    ):
+        # Explicit adapter from the still-legacy
+        # MeetingPlace.admit_cat boundary.
+        if not isinstance(
+            arrival,
+            dict,
+        ):
+            raise TypeError(
+                "Meeting-place cat admission "
+                "must return a mapping at this "
+                "legacy boundary."
+            )
+
+        return CatOrphanArrivalRecord(
+            name=str(
+                arrival.get(
+                    "name",
+                    "cat_arrival_completed",
+                )
+            ),
+            cat=str(
+                arrival.get(
+                    "cat",
+                    "",
+                )
+            ),
+            entered=bool(
+                arrival.get(
+                    "entered",
+                    False,
+                )
+            ),
+            already_inside=bool(
+                arrival.get(
+                    "already_inside",
+                    False,
+                )
+            ),
+            alarm_before_bartender=(
+                arrival.get(
+                    "alarm_before_bartender"
+                )
+            ),
+            bartender_available=(
+                arrival.get(
+                    "bartender_available"
+                )
+            ),
+            bartender_responded=(
+                arrival.get(
+                    "bartender_responded"
+                )
+            ),
+            alarm_after_bartender=(
+                arrival.get(
+                    "alarm_after_bartender"
+                )
+            ),
+        )
 
     def _induce_and_assign(
         self,
         rescuer,
         kittens,
-        current_day=None
+        current_day=None,
     ):
         state = (
             rescuer
@@ -375,7 +423,7 @@ class CatEmergencyLactationSystem:
                 getattr(
                     state,
                     "garfield_consultations",
-                    0
+                    0,
                 )
             )
             <= 0
@@ -397,7 +445,6 @@ class CatEmergencyLactationSystem:
         events = []
 
         for kitten in kittens:
-
             if (
                 kitten.name
                 not in state.foster_kittens
@@ -430,28 +477,45 @@ class CatEmergencyLactationSystem:
                 getattr(
                     kitten,
                     "age_days",
-                    0
+                    0,
                 )
             )
 
-            events.append(
+            event = (
                 care.provide_foster_care(
                     foster_mother=rescuer,
                     kitten=kitten,
                     age_days=age_days,
-                    current_day=current_day
+                    current_day=current_day,
                 )
             )
 
-        return events
+            if not isinstance(
+                event,
+                CatFosterMaternalCareEvent,
+            ):
+                raise TypeError(
+                    "Emergency lactation must "
+                    "produce CatFosterMaternalCareEvent."
+                )
+
+            events.append(
+                event
+            )
+
+        return tuple(
+            events
+        )
 
     def _mother_name(
         self,
-        kitten
+        kitten,
     ):
         parentage = (
             CatParentageState
-            .require_from_cat(kitten)
+            .require_from_cat(
+                kitten
+            )
         )
 
         if parentage.mother is not None:
@@ -460,13 +524,13 @@ class CatEmergencyLactationSystem:
         return getattr(
             kitten,
             "mother_name",
-            None
+            None,
         )
 
     def _mother_available(
         self,
         mother_name,
-        cats
+        cats,
     ):
         if mother_name is None:
             return False
@@ -476,23 +540,22 @@ class CatEmergencyLactationSystem:
                 getattr(
                     self.cats_layer,
                     "cats",
-                    []
+                    [],
                 )
             )
+
         else:
             candidates = list(
                 cats
             )
 
         for cat in candidates:
-
             if (
-                cat.name
-                == mother_name
+                cat.name == mother_name
                 and getattr(
                     cat,
                     "active",
-                    True
+                    True,
                 )
             ):
                 return True
@@ -501,11 +564,11 @@ class CatEmergencyLactationSystem:
 
     def _require_cat(
         self,
-        cat
+        cat,
     ):
         if not isinstance(
             cat,
-            Cat
+            Cat,
         ):
             raise TypeError(
                 "CatEmergencyLactationSystem "

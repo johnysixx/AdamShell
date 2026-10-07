@@ -16,6 +16,8 @@ from cats.cat_maternal_care_result_state import (
     CatMaternalCareEvent,
     CatMaternalProtectionDeniedResult,
     CatMotherProtectedKittenEvent,
+    CatFosterMaternalCareDeniedResult,
+    CatFosterMaternalCareEvent,
 )
 
 class CatMaternalCareSystem:
@@ -213,7 +215,7 @@ class CatMaternalCareSystem:
         foster_mother,
         kitten,
         age_days,
-        current_day=None
+        current_day=None,
     ):
         self._require_cat(
             foster_mother
@@ -232,7 +234,7 @@ class CatMaternalCareSystem:
             getattr(
                 received,
                 "foster_mother",
-                None
+                None,
             )
             == foster_mother.name
             and kitten.name
@@ -240,31 +242,29 @@ class CatMaternalCareSystem:
                 foster_mother
                 .emergency_nursing,
                 "foster_kittens",
-                []
+                [],
             )
             and bool(
                 getattr(
                     foster_mother
                     .emergency_nursing,
                     "active",
-                    False
+                    False,
                 )
             )
         )
 
         if not registered:
-            return {
-                "name":
-                    "foster_maternal_care_denied",
-                "foster_mother":
-                    foster_mother.name,
-                "kitten":
-                    kitten.name,
-                "reason":
-                    "foster_relationship_not_active",
-                "provided":
-                    False,
-            }
+            return (
+                CatFosterMaternalCareDeniedResult(
+                    foster_mother=
+                        foster_mother.name,
+                    kitten=kitten.name,
+                    reason=(
+                        "foster_relationship_not_active"
+                    ),
+                )
+            )
 
         phase = self.care_phase(
             age_days
@@ -274,7 +274,8 @@ class CatMaternalCareSystem:
 
         if (
             phase
-            is not MaternalCarePhase.INDEPENDENCE
+            is not
+            MaternalCarePhase.INDEPENDENCE
         ):
             actions.append(
                 "nursing"
@@ -304,32 +305,25 @@ class CatMaternalCareSystem:
                 "retrieval"
             )
 
-        event = {
-            "name":
-                "cat_foster_maternal_care",
-            "foster_mother":
-                foster_mother.name,
-            "kitten":
-                kitten.name,
-            "age_days":
-                int(age_days),
-            "day":
-                current_day,
-            "phase":
-                phase,
-            "actions":
-                list(actions),
-            "provided":
-                True,
-        }
-
-        self._record_foster(
-            foster_mother,
-            kitten,
-            event
+        event = (
+            CatFosterMaternalCareEvent(
+                foster_mother=
+                    foster_mother.name,
+                kitten=kitten.name,
+                age_days=age_days,
+                day=current_day,
+                phase=phase,
+                actions=tuple(actions),
+            )
         )
 
-        return self._event_snapshot(event)
+        self._record_foster_care(
+            foster_mother,
+            kitten,
+            event,
+        )
+
+        return event
 
     def record_foster_upbringing_care(
         self,
@@ -425,21 +419,19 @@ class CatMaternalCareSystem:
                 True,
         }
 
-        self._record_foster(
+        self._record_foster_upbringing_sync(
             foster_mother,
             kitten,
             event,
-            append_interactions=False
         )
 
         return self._event_snapshot(event)
 
-    def _record_foster(
+    def _record_foster_care(
         self,
         foster_mother,
         kitten,
         event,
-        append_interactions=True
     ):
         state = (
             foster_mother
@@ -452,8 +444,134 @@ class CatMaternalCareSystem:
         )
 
         state.active = (
+            event.phase
+            is not
+            MaternalCarePhase.INDEPENDENCE
+        )
+
+        state.care_events += 1
+
+        kitten_state.record(
+            event.day,
+            event.phase,
+        )
+
+        received = (
+            kitten
+            .maternal_care_received
+        )
+
+        received.foster_mother = (
+            foster_mother.name
+        )
+
+        received.care_events += 1
+        received.foster_care_events += 1
+
+        received.last_care_day = (
+            event.day
+        )
+
+        received.last_phase = (
+            event.phase
+        )
+
+        counters = {
+            "nursing":
+                "nursing_events",
+            "cleaning":
+                "cleaning_events",
+            "warming":
+                "warming_events",
+            "protection":
+                "protection_events",
+            "retrieval":
+                "retrieval_events",
+        }
+
+        for action in event.actions:
+            counter = counters.get(
+                action
+            )
+
+            if counter is not None:
+                setattr(
+                    received,
+                    counter,
+                    getattr(
+                        received,
+                        counter,
+                    )
+                    + 1,
+                )
+
+            if action == "nursing":
+                received.foster_nursing_events += 1
+
+                (
+                    foster_mother
+                    .emergency_nursing
+                    .milk_feedings
+                ) += 1
+
+                received.needs_milk = False
+
+        foster_mother.social_interactions.append(
+            deepcopy(
+                event
+            )
+        )
+
+        kitten.social_interactions.append(
+            deepcopy(
+                event
+            )
+        )
+
+        emit_event = getattr(
+            self.cats_layer,
+            "emit_event",
+            None,
+        )
+
+        if callable(
+            emit_event
+        ):
+            emit_event(
+                deepcopy(
+                    event
+                )
+            )
+
+    def _record_foster_upbringing_sync(
+        self,
+        foster_mother,
+        kitten,
+        event,
+    ):
+        """
+        Temporary legacy boundary for
+        KittenUpbringingResolver.events.
+
+        The event is still a mapping because
+        that whole stream is not objectified
+        yet. No mapping compatibility is added
+        to domain objects.
+        """
+        state = (
+            foster_mother
+            .maternal_care
+        )
+
+        kitten_state = self._kitten_state(
+            state,
+            kitten.name,
+        )
+
+        state.active = (
             event["phase"]
-            is not MaternalCarePhase.INDEPENDENCE
+            is not
+            MaternalCarePhase.INDEPENDENCE
         )
 
         state.care_events += 1
@@ -496,10 +614,7 @@ class CatMaternalCareSystem:
                 "retrieval_events",
         }
 
-        for action in event[
-            "actions"
-        ]:
-
+        for action in event["actions"]:
             counter = counters.get(
                 action
             )
@@ -510,13 +625,12 @@ class CatMaternalCareSystem:
                     counter,
                     getattr(
                         received,
-                        counter
+                        counter,
                     )
-                    + 1
+                    + 1,
                 )
 
             if action == "nursing":
-
                 received.foster_nursing_events += 1
 
                 (
@@ -527,27 +641,19 @@ class CatMaternalCareSystem:
 
                 received.needs_milk = False
 
-        if append_interactions:
-
-            foster_mother.social_interactions.append(
-                self._event_snapshot(event)
-            )
-
-            kitten.social_interactions.append(
-                self._event_snapshot(event)
-            )
-
         emit_event = getattr(
             self.cats_layer,
             "emit_event",
-            None
+            None,
         )
 
         if callable(
             emit_event
         ):
             emit_event(
-                self._event_snapshot(event)
+                self._event_snapshot(
+                    event
+                )
             )
 
     def protect_from_threat(
