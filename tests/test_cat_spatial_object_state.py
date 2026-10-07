@@ -177,8 +177,14 @@ class CatSpatialObjectStateTests(unittest.TestCase):
         )
         self.assertIsInstance(cat.position, SpatialVector3)
         self.assertEqual(cat.position, destination)
-        self.assertIsInstance(result["position"], dict)
-        self.assertEqual(result["position"], destination.to_dict())
+        self.assertIsInstance(
+            result.position,
+            SpatialVector3,
+        )
+        self.assertEqual(
+            result.position,
+            destination,
+        )
 
     def test_spatial_vector_domain_operations_are_object_only(self):
         origin = SpatialVector3.zero()

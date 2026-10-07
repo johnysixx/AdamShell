@@ -12,6 +12,13 @@ from universe.quantum_cat_navigation_result_state import (
     QuantumCatRouteNotPlannedResult,
     QuantumCatRoutePlannedResult,
 )
+from universe.quantum_cat_route_advance_state import (
+    QuantumCatRouteAdvancedEvent,
+    QuantumCatRouteAlreadyArrivedResult,
+    QuantumCatRouteDetouredEvent,
+    QuantumCatRouteNoActiveRouteResult,
+    QuantumCatRouteParadoxResult,
+)
 
 @dataclass(slots=True, frozen=True)
 class QuantumLandmark:
@@ -375,53 +382,351 @@ class QuantumUniverseSpace:
     def find_cat_route(self, cat_id):
         return next((route for route in self.cat_routes if route.cat_id == cat_id and route.observation_active), None)
 
-    def advance_cat_route(self, cat, cronenbergs, encounter_system, universe, rng=None):
-        cat_id = getattr(cat, 'name', None)
-        route = self.find_cat_route(cat_id)
+    def advance_cat_route(
+        self,
+        cat,
+        cronenbergs,
+        encounter_system,
+        universe,
+        rng=None,
+    ):
+        cat_id = getattr(
+            cat,
+            "name",
+            None,
+        )
+
+        route = self.find_cat_route(
+            cat_id
+        )
+
         if route is None:
-            return {'result': 'no_active_route'}
+            return (
+                QuantumCatRouteNoActiveRouteResult(
+                    cat=cat_id,
+                )
+            )
+
         if not route.memory_started:
-            self._remember_cat_route_event(cat=cat, route=route, universe=universe, event_type='route_started', details={'route_steps': [step.to_dict() for step in route.route_steps]})
+            self._remember_cat_route_event(
+                cat=cat,
+                route=route,
+                universe=universe,
+                event_type="route_started",
+                details={
+                    "route_steps": [
+                        step.to_dict()
+                        for step
+                        in route.route_steps
+                    ],
+                },
+            )
+
             route.memory_started = True
-        next_position = route.next_position
+
+        next_position = (
+            route.next_position
+        )
+
         if next_position is None:
-            return {'result': 'already_arrived'}
-        crossing_cronenbergs = [cronenberg for cronenberg in cronenbergs if getattr(cronenberg, 'is_alive', False) and isinstance(getattr(cronenberg, 'position', None), SpatialVector3) and route.position_matches(cronenberg.position)]
+            return (
+                QuantumCatRouteAlreadyArrivedResult(
+                    cat=cat_id,
+                    position=
+                        route.current_position,
+                    destination=
+                        route.destination,
+                )
+            )
+
+        crossing_cronenbergs = [
+            cronenberg
+            for cronenberg
+            in cronenbergs
+            if (
+                getattr(
+                    cronenberg,
+                    "is_alive",
+                    False,
+                )
+                and isinstance(
+                    getattr(
+                        cronenberg,
+                        "position",
+                        None,
+                    ),
+                    SpatialVector3,
+                )
+                and route.position_matches(
+                    cronenberg.position
+                )
+            )
+        ]
+
+        encounter = None
+
         if crossing_cronenbergs:
-            cronenberg = min(crossing_cronenbergs, key=lambda item: item.size)
-            cronenberg_position = cronenberg.position
-            previous_detour_count = route.detour_count_for(cronenberg_position)
+            cronenberg = min(
+                crossing_cronenbergs,
+                key=lambda item: (
+                    item.size
+                ),
+            )
+
+            cronenberg_position = (
+                cronenberg.position
+            )
+
+            previous_detour_count = (
+                route.detour_count_for(
+                    cronenberg_position
+                )
+            )
+
             if previous_detour_count > 0:
 
                 def repeated_cat_route_paradox():
-                    raise RuntimeError('Cat route paradox: repeated obstacle on shortest path.')
-                quantum_error = universe.quantum_error_boundary.execute(operation=repeated_cat_route_paradox, source_component='quantum_cat_route', source_operation='repeated_detour_paradox')
-                manifested_cronenberg = quantum_error.get('cronenberg')
-                if manifested_cronenberg is not None:
-                    link_metadata = {'cat': cat_id, 'position': cronenberg_position.to_dict(), 'source_operation': 'repeated_detour_paradox'}
-                    cronenberg.quantum_link_system.add_link(target_id=manifested_cronenberg.id, link_type='manifested_consequence', strength=1.0, created_tick=getattr(universe, 'universe_tick', None), metadata=link_metadata)
-                    manifested_cronenberg.quantum_link_system.add_link(target_id=cronenberg.id, link_type='causal_paradox', strength=1.0, created_tick=getattr(universe, 'universe_tick', None), metadata=link_metadata)
-                route.record_encounter(
-                    QuantumCatRouteEncounter(
-                        result='cat_route_paradox',
-                        cat=cat_id,
-                        blocked_by=cronenberg.name,
-                        position=cronenberg_position,
+                    raise RuntimeError(
+                        "Cat route paradox: "
+                        "repeated obstacle on "
+                        "shortest path."
+                    )
+
+                quantum_error = (
+                    universe
+                    .quantum_error_boundary
+                    .execute(
+                        operation=(
+                            repeated_cat_route_paradox
+                        ),
+                        source_component=(
+                            "quantum_cat_route"
+                        ),
+                        source_operation=(
+                            "repeated_detour_paradox"
+                        ),
                     )
                 )
-                return {'result': 'cat_route_paradox_created_cronenberg', 'cat': cat_id, 'blocked_by': cronenberg.name, 'quantum_error': quantum_error}
-            encounter = encounter_system.resolve(cat=cat, cronenberg=cronenberg, route=route, universe=universe, rng=rng)
-            if encounter.get('result') == 'cat_avoids_cronenberg':
-                self._remember_cat_route_event(cat=cat, route=route, universe=universe, event_type='route_detour', details={'blocked_by': cronenberg.name, 'blocked_position': cronenberg_position.to_dict(), 'detour_position': dict(encounter['detour']), 'returns_to_original_route': True})
-                return encounter
-        previous_position = route.current_position.to_dict()
-        position = route.advance()
-        if position is not None:
-            cat.move_to(position)
-        self._remember_cat_route_event(cat=cat, route=route, universe=universe, event_type='route_step', details={'previous_position': previous_position, 'position': position.to_dict() if position is not None else None})
+
+                manifested_cronenberg = (
+                    quantum_error.get(
+                        "cronenberg"
+                    )
+                )
+
+                if (
+                    manifested_cronenberg
+                    is not None
+                ):
+                    link_metadata = {
+                        "cat":
+                            cat_id,
+                        "position":
+                            cronenberg_position
+                            .to_dict(),
+                        "source_operation": (
+                            "repeated_detour_paradox"
+                        ),
+                    }
+
+                    (
+                        cronenberg
+                        .quantum_link_system
+                        .add_link(
+                            target_id=(
+                                manifested_cronenberg
+                                .id
+                            ),
+                            link_type=(
+                                "manifested_consequence"
+                            ),
+                            strength=1.0,
+                            created_tick=getattr(
+                                universe,
+                                "universe_tick",
+                                None,
+                            ),
+                            metadata=
+                                link_metadata,
+                        )
+                    )
+
+                    (
+                        manifested_cronenberg
+                        .quantum_link_system
+                        .add_link(
+                            target_id=
+                                cronenberg.id,
+                            link_type=(
+                                "causal_paradox"
+                            ),
+                            strength=1.0,
+                            created_tick=getattr(
+                                universe,
+                                "universe_tick",
+                                None,
+                            ),
+                            metadata=
+                                link_metadata,
+                        )
+                    )
+
+                paradox_encounter = (
+                    QuantumCatRouteEncounter(
+                        result=(
+                            "cat_route_paradox"
+                        ),
+                        cat=cat_id,
+                        blocked_by=
+                            cronenberg.name,
+                        position=
+                            cronenberg_position,
+                    )
+                )
+
+                route.record_encounter(
+                    paradox_encounter
+                )
+
+                return (
+                    QuantumCatRouteParadoxResult(
+                        cat=cat_id,
+                        blocked_by=
+                            cronenberg.name,
+                        position=
+                            cronenberg_position,
+                        destination=
+                            route.destination,
+                        encounter=
+                            paradox_encounter,
+                    )
+                )
+
+            encounter = (
+                encounter_system.resolve(
+                    cat=cat,
+                    cronenberg=
+                        cronenberg,
+                    route=route,
+                    universe=universe,
+                    rng=rng,
+                )
+            )
+
+            if not isinstance(
+                encounter,
+                QuantumCatRouteEncounter,
+            ):
+                raise TypeError(
+                    "Cat Cronenberg encounter "
+                    "must return "
+                    "QuantumCatRouteEncounter."
+                )
+
+            if (
+                encounter.result
+                == "cat_avoids_cronenberg"
+            ):
+                if not isinstance(
+                    encounter.detour,
+                    SpatialVector3,
+                ):
+                    raise TypeError(
+                        "Avoided Cronenberg encounter "
+                        "requires a detour position."
+                    )
+
+                self._remember_cat_route_event(
+                    cat=cat,
+                    route=route,
+                    universe=universe,
+                    event_type="route_detour",
+                    details={
+                        "blocked_by":
+                            cronenberg.name,
+                        "blocked_position":
+                            cronenberg_position
+                            .to_dict(),
+                        "detour_position":
+                            encounter.detour
+                            .to_dict(),
+                        "returns_to_original_route":
+                            True,
+                    },
+                )
+
+                return (
+                    QuantumCatRouteDetouredEvent(
+                        cat=cat_id,
+                        position=
+                            encounter.detour,
+                        destination=
+                            route.destination,
+                        encounter=
+                            encounter,
+                    )
+                )
+
+        previous_position = (
+            route.current_position
+            .to_dict()
+        )
+
+        position = (
+            route.advance()
+        )
+
+        if not isinstance(
+            position,
+            SpatialVector3,
+        ):
+            raise TypeError(
+                "Advanced cat route must produce "
+                "a SpatialVector3 position."
+            )
+
+        cat.move_to(
+            position
+        )
+
+        self._remember_cat_route_event(
+            cat=cat,
+            route=route,
+            universe=universe,
+            event_type="route_step",
+            details={
+                "previous_position":
+                    previous_position,
+                "position":
+                    position.to_dict(),
+            },
+        )
+
         if route.has_arrived:
-            self._remember_cat_route_event(cat=cat, route=route, universe=universe, event_type='route_arrived', details={'arrival_position': route.current_position.to_dict()})
-        return {'result': 'route_advanced', 'position': position.to_dict() if position is not None else None, 'destination': route.destination, 'arrived': route.has_arrived}
+            self._remember_cat_route_event(
+                cat=cat,
+                route=route,
+                universe=universe,
+                event_type="route_arrived",
+                details={
+                    "arrival_position":
+                        route.current_position
+                        .to_dict(),
+                },
+            )
+
+        return (
+            QuantumCatRouteAdvancedEvent(
+                cat=cat_id,
+                position=position,
+                destination=
+                    route.destination,
+                arrived=
+                    route.has_arrived,
+                encounter=
+                    encounter,
+            )
+        )
 
     @property
     def public_state(self):

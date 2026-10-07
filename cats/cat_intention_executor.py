@@ -29,6 +29,9 @@ from cats.cat_scent_navigation_state import (
     CatScentBoxFollowState,
 )
 from cats.cat_social_system import CatSocialSystem
+from universe.quantum_cat_route_advance_state import (
+    QUANTUM_CAT_ROUTE_ADVANCE_RESULT_TYPES,
+)
 from cats.cat_basic_intention_result_state import (
     CatIntentionBodyActionDeferredEvent,
     CatRestStartedEvent,
@@ -409,12 +412,25 @@ class CatIntentionExecutor:
             )
 
         result = self.universe.quantum_space.advance_cat_route(cat=cat, cronenbergs=cronenbergs if cronenbergs is not None else getattr(self.universe, 'cronenbergs', []), encounter_system=self.universe.cat_cronenberg_encounter, universe=self.universe)
-        position = result.get('position')
-        if result.get('arrived', False):
+        if not isinstance(
+            result,
+            QUANTUM_CAT_ROUTE_ADVANCE_RESULT_TYPES,
+        ):
+            raise TypeError(
+                "Quantum cat route advancement "
+                "must return a route result object."
+            )
+
+        position = (
+            None
+            if result.position is None
+            else result.position.to_dict()
+        )
+        if result.arrived:
             follow.arrived_at_box = True
             follow.active = False
             return self._transfer_scent_box_follow(cat=cat, intention=intention, source_box_id=follow.source_box_id, target_box_id=follow.target_box_id)
-        event = {'name': 'cat_following_scent_to_box', 'cat': cat.name, 'identity': follow.identity, 'source_box_id': follow.source_box_id, 'target_box_id': follow.target_box_id, 'route_id': follow.route_id, 'position': position, 'route_result': result.get('result'), 'arrived_at_box': False, 'decision_source': 'cat_mind', 'executed': result.get('result') != 'no_active_route'}
+        event = {'name': 'cat_following_scent_to_box', 'cat': cat.name, 'identity': follow.identity, 'source_box_id': follow.source_box_id, 'target_box_id': follow.target_box_id, 'route_id': follow.route_id, 'position': position, 'route_result': result.result, 'arrived_at_box': False, 'decision_source': 'cat_mind', 'executed': result.result != 'no_active_route'}
         cat.mind.active_body_execution = deepcopy(event)
         return self._record(event)
 
@@ -775,13 +791,26 @@ class CatIntentionExecutor:
             )
 
         result = self.universe.quantum_space.advance_cat_route(cat=cat, cronenbergs=cronenbergs if cronenbergs is not None else getattr(self.universe, 'cronenbergs', []), encounter_system=self.universe.cat_cronenberg_encounter, universe=self.universe)
-        position = result.get('position')
-        if result.get('arrived', False):
+        if not isinstance(
+            result,
+            QUANTUM_CAT_ROUTE_ADVANCE_RESULT_TYPES,
+        ):
+            raise TypeError(
+                "Quantum cat route advancement "
+                "must return a route result object."
+            )
+
+        position = (
+            None
+            if result.position is None
+            else result.position.to_dict()
+        )
+        if result.arrived:
             box = next((candidate for candidate in getattr(self.universe, 'quantum_boxes', []) if getattr(candidate, 'id', None) == exploration.box_id), None)
             if box is None:
                 return self._record({'name': 'cat_box_exploration_failed', 'cat': cat.name, 'reason': 'box_disappeared', 'executed': False})
             return self._finish_box_exploration(cat=cat, intention=intention, box=box)
-        event = {'name': 'cat_approaching_box_to_explore', 'cat': cat.name, 'box_id': exploration.box_id, 'route_id': exploration.route_id, 'position': position, 'destination': (None if exploration.destination is None else exploration.destination.to_dict()), 'arrived': False, 'decision_source': 'cat_mind', 'executed': result.get('result') != 'no_active_route'}
+        event = {'name': 'cat_approaching_box_to_explore', 'cat': cat.name, 'box_id': exploration.box_id, 'route_id': exploration.route_id, 'position': position, 'destination': (None if exploration.destination is None else exploration.destination.to_dict()), 'arrived': False, 'decision_source': 'cat_mind', 'executed': result.result != 'no_active_route'}
         cat.mind.active_body_execution = deepcopy(event)
         return self._record(event)
 
@@ -937,7 +966,20 @@ class CatIntentionExecutor:
                 'CatScentSearchState.'
             )
         result = self.universe.quantum_space.advance_cat_route(cat=cat, cronenbergs=cronenbergs if cronenbergs is not None else getattr(self.universe, 'cronenbergs', []), encounter_system=self.universe.cat_cronenberg_encounter, universe=self.universe)
-        position = result.get('position')
+        if not isinstance(
+            result,
+            QUANTUM_CAT_ROUTE_ADVANCE_RESULT_TYPES,
+        ):
+            raise TypeError(
+                "Quantum cat route advancement "
+                "must return a route result object."
+            )
+
+        position = (
+            None
+            if result.position is None
+            else result.position.to_dict()
+        )
         olfaction = CatOlfaction.sniff(cat=cat, universe=self.universe)
         reacquired = next(
             (
@@ -967,9 +1009,9 @@ class CatIntentionExecutor:
             event = {'name': 'cat_reacquired_scent_during_search', 'cat': cat.name, 'identity': search.identity, 'source_id': reacquired.entity_id, 'position': (None if cat.position is None else cat.position.to_dict()), 'olfaction': deepcopy(olfaction), 'search_interrupted': True, 'decision_source': 'cat_mind', 'executed': True}
             mind.active_body_execution = deepcopy(event)
             return self._record(event)
-        if result.get('arrived', False):
+        if result.arrived:
             return self._finish_scent_search(cat=cat, intention=intention)
-        event = {'name': 'cat_searching_for_scent', 'cat': cat.name, 'identity': search.identity, 'attempt': search.current_attempt, 'max_attempts': search.max_attempts, 'route_id': search.route_id, 'position': position, 'destination': (None if search.destination is None else search.destination.to_dict()), 'arrived': False, 'decision_source': 'cat_mind', 'executed': result.get('result') != 'no_active_route'}
+        event = {'name': 'cat_searching_for_scent', 'cat': cat.name, 'identity': search.identity, 'attempt': search.current_attempt, 'max_attempts': search.max_attempts, 'route_id': search.route_id, 'position': position, 'destination': (None if search.destination is None else search.destination.to_dict()), 'arrived': False, 'decision_source': 'cat_mind', 'executed': result.result != 'no_active_route'}
         cat.mind.active_body_execution = deepcopy(event)
         return self._record(event)
 
@@ -1069,10 +1111,23 @@ class CatIntentionExecutor:
     def _advance_known_scent_follow(self, cat, intention, cronenbergs=None):
         follow = cat.known_scent_follow
         result = self.universe.quantum_space.advance_cat_route(cat=cat, cronenbergs=cronenbergs if cronenbergs is not None else getattr(self.universe, 'cronenbergs', []), encounter_system=self.universe.cat_cronenberg_encounter, universe=self.universe)
-        position = result.get('position')
-        if result.get('arrived', False):
+        if not isinstance(
+            result,
+            QUANTUM_CAT_ROUTE_ADVANCE_RESULT_TYPES,
+        ):
+            raise TypeError(
+                "Quantum cat route advancement "
+                "must return a route result object."
+            )
+
+        position = (
+            None
+            if result.position is None
+            else result.position.to_dict()
+        )
+        if result.arrived:
             return self._finish_known_scent_follow(cat=cat, intention=intention, position=cat.position)
-        event = {'name': 'cat_following_known_scent', 'cat': cat.name, 'identity': follow.identity, 'layer': cat.current_layer, 'destination': (None if follow.destination is None else follow.destination.to_dict()), 'route_id': follow.route_id, 'position': position, 'arrived': False, 'decision_source': 'cat_mind', 'executed': result.get('result') != 'no_active_route'}
+        event = {'name': 'cat_following_known_scent', 'cat': cat.name, 'identity': follow.identity, 'layer': cat.current_layer, 'destination': (None if follow.destination is None else follow.destination.to_dict()), 'route_id': follow.route_id, 'position': position, 'arrived': False, 'decision_source': 'cat_mind', 'executed': result.result != 'no_active_route'}
         cat.mind.active_body_execution = deepcopy(event)
         return self._record(event)
 

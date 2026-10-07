@@ -34,6 +34,10 @@ from cats.cat_quantum_exploration_state import CatQuantumExplorationState
 
 from cats.cat_quantum_transfer_state import CatQuantumTransferState
 
+from universe.quantum_cat_route_advance_state import (
+    QUANTUM_CAT_ROUTE_ADVANCE_RESULT_TYPES,
+)
+
 class CatQuantumBoxTransfer:
 
     def __init__(
@@ -1378,16 +1382,24 @@ class CatQuantumBoxTransfer:
             rng=rng
         )
 
-        position = result.get(
-            "position"
+        if not isinstance(
+            result,
+            QUANTUM_CAT_ROUTE_ADVANCE_RESULT_TYPES,
+        ):
+            raise TypeError(
+                "Quantum cat route advancement "
+                "must return a route result object."
+            )
+
+        position = (
+            None
+            if result.position is None
+            else result.position.to_dict()
         )
 
         arrival_resolution = None
 
-        if result.get(
-            "arrived",
-            False
-        ):
+        if result.arrived:
             exploration.active = False
             exploration.arrived = True
 
@@ -1427,18 +1439,13 @@ class CatQuantumBoxTransfer:
             "pair_id": exploration.pair_id,
             "route_id": exploration.route_id,
             "position": position,
-            "result": result.get(
-                "result"
-            ),
-            "arrived": result.get(
-                "arrived",
-                False
-            ),
+            "result": result.result,
+            "arrived": result.arrived,
             "arrival_resolution": (
                 arrival_resolution
             ),
             "advanced": (
-                result.get("result")
+                result.result
                 != "no_active_route"
             )
         }
@@ -2020,16 +2027,24 @@ class CatQuantumBoxTransfer:
             rng=rng
         )
 
-        position = result.get(
-            "position"
+        if not isinstance(
+            result,
+            QUANTUM_CAT_ROUTE_ADVANCE_RESULT_TYPES,
+        ):
+            raise TypeError(
+                "Quantum cat route advancement "
+                "must return a route result object."
+            )
+
+        position = (
+            None
+            if result.position is None
+            else result.position.to_dict()
         )
 
         transfer_result = None
 
-        if result.get(
-            "arrived",
-            False
-        ):
+        if result.arrived:
             returning.arrived_at_box = True
 
             returning.active = False
@@ -2060,10 +2075,7 @@ class CatQuantumBoxTransfer:
             "cat": cat.name,
             "pair_id": returning.pair_id,
             "position": position,
-            "arrived_at_box": result.get(
-                "arrived",
-                False
-            ),
+            "arrived_at_box": result.arrived,
             "transfer_result": (
                 transfer_result
             ),

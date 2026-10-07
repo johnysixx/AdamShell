@@ -32,36 +32,48 @@ class CatCronenbergEncounter:
         cronenberg,
         route,
         universe,
-        rng=None
+        rng=None,
     ):
-        rng = rng or random
+        rng = (
+            rng
+            or random
+        )
 
-        cronenberg_position = self._position_of(
-            cronenberg
+        cronenberg_position = (
+            self._position_of(
+                cronenberg
+            )
         )
 
         if cronenberg_position is None:
-            return {
-                "result": "no_position",
-                "encountered": False
-            }
+            return QuantumCatRouteEncounter(
+                result="no_position",
+                encountered=False,
+            )
 
         if not route.position_matches(
             cronenberg_position
         ):
-            return {
-                "result": "paths_do_not_cross",
-                "encountered": False
-            }
-
-        cat_name = self._cat_name(cat)
-        cat_size = self._cat_size(cat)
-
-        learned_aroma = (
-            self._learn_cronenberg_aroma(
-                cat=cat,
-                cronenberg=cronenberg
+            return QuantumCatRouteEncounter(
+                result="paths_do_not_cross",
+                encountered=False,
             )
+
+        cat_name = (
+            self._cat_name(
+                cat
+            )
+        )
+
+        cat_size = (
+            self._cat_size(
+                cat
+            )
+        )
+
+        self._learn_cronenberg_aroma(
+            cat=cat,
+            cronenberg=cronenberg,
         )
 
         cronenberg_size = float(
@@ -74,32 +86,36 @@ class CatCronenbergEncounter:
         )
 
         if size_ratio > 1.20:
-            detour = route.make_minimal_detour(
-                cronenberg_position
-            )
-
-            event = {
-                "result": "cat_avoids_cronenberg",
-                "encountered": True,
-                "cat": cat_name,
-                "cronenberg": cronenberg.name,
-                "size_ratio": size_ratio,
-                "detour": detour.to_dict(),
-                "destination": route.destination
-            }
-
-            route.record_encounter(
-                QuantumCatRouteEncounter(
-                    result="cat_avoids_cronenberg",
-                    encountered=True,
-                    cat=cat_name,
-                    cronenberg=cronenberg.name,
-                    size_ratio=size_ratio,
-                    detour=detour,
-                    destination=route.destination,
+            detour = (
+                route.make_minimal_detour(
+                    cronenberg_position
                 )
             )
-            self.history.append(event)
+
+            encounter = (
+                QuantumCatRouteEncounter(
+                    result=(
+                        "cat_avoids_cronenberg"
+                    ),
+                    encountered=True,
+                    cat=cat_name,
+                    cronenberg=
+                        cronenberg.name,
+                    size_ratio=
+                        size_ratio,
+                    detour=detour,
+                    destination=
+                        route.destination,
+                )
+            )
+
+            route.record_encounter(
+                encounter
+            )
+
+            self.history.append(
+                encounter
+            )
 
             UniverseLogger.event(
                 f"CAT AVOIDS LARGE CRONENBERG: "
@@ -111,35 +127,43 @@ class CatCronenbergEncounter:
                 cat=cat,
                 cronenberg=cronenberg,
                 universe=universe,
-                result="cat_avoids_cronenberg",
+                result=(
+                    "cat_avoids_cronenberg"
+                ),
                 size_ratio=size_ratio,
                 location=getattr(
                     cronenberg,
                     "location",
-                    "quantum_layer"
+                    "quantum_layer",
                 ),
                 details={
-                    "detour": detour.to_dict(),
-                    "destination": route.destination
-                }
+                    "detour":
+                        detour.to_dict(),
+                    "destination":
+                        route.destination,
+                },
             )
 
-            event["personality"] = (
-                self._apply_personality_experience(
-                    cat=cat,
-                    source="avoided_large_cronenberg",
-                    changes={
-                        "patience": 0.03,
-                        "courage": 0.01
-                    },
-                    metadata={
-                        "cronenberg": cronenberg.name,
-                        "size_ratio": size_ratio,
-                        "decision": "minimal_detour"
-                    }
-                )
+            self._apply_personality_experience(
+                cat=cat,
+                source=(
+                    "avoided_large_cronenberg"
+                ),
+                changes={
+                    "patience": 0.03,
+                    "courage": 0.01,
+                },
+                metadata={
+                    "cronenberg":
+                        cronenberg.name,
+                    "size_ratio":
+                        size_ratio,
+                    "decision":
+                        "minimal_detour",
+                },
             )
-            return event
+
+            return encounter
 
         escape_chance = (
             self._escape_chance(
@@ -157,28 +181,31 @@ class CatCronenbergEncounter:
                 "escaped_cat_encounter"
             )
 
-            event = {
-                "result": "cronenberg_escaped",
-                "encountered": True,
-                "cat": cat_name,
-                "cronenberg": cronenberg.name,
-                "size_ratio": size_ratio,
-                "escape_chance": escape_chance,
-                "destination": route.destination
-            }
-
-            route.record_encounter(
+            encounter = (
                 QuantumCatRouteEncounter(
-                    result="cronenberg_escaped",
+                    result=(
+                        "cronenberg_escaped"
+                    ),
                     encountered=True,
                     cat=cat_name,
-                    cronenberg=cronenberg.name,
-                    size_ratio=size_ratio,
-                    escape_chance=escape_chance,
-                    destination=route.destination,
+                    cronenberg=
+                        cronenberg.name,
+                    size_ratio=
+                        size_ratio,
+                    escape_chance=
+                        escape_chance,
+                    destination=
+                        route.destination,
                 )
             )
-            self.history.append(event)
+
+            route.record_encounter(
+                encounter
+            )
+
+            self.history.append(
+                encounter
+            )
 
             UniverseLogger.event(
                 f"CRONENBERG ESCAPES CAT: "
@@ -190,61 +217,83 @@ class CatCronenbergEncounter:
                 cat=cat,
                 cronenberg=cronenberg,
                 universe=universe,
-                result="cronenberg_escaped",
+                result=(
+                    "cronenberg_escaped"
+                ),
                 size_ratio=size_ratio,
                 location=getattr(
                     cronenberg,
                     "location",
-                    "quantum_layer"
+                    "quantum_layer",
                 ),
                 details={
-                    "escape_chance": escape_chance,
-                    "destination": route.destination
-                }
+                    "escape_chance":
+                        escape_chance,
+                    "destination":
+                        route.destination,
+                },
             )
 
-            event["personality"] = (
-                self._apply_personality_experience(
-                    cat=cat,
-                    source="cronenberg_escaped",
-                    changes={
-                        "patience": 0.02,
-                        "curiosity": 0.01
-                    },
-                    metadata={
-                        "cronenberg": cronenberg.name,
-                        "size_ratio": size_ratio,
-                        "escape_chance": escape_chance
-                    }
-                )
+            self._apply_personality_experience(
+                cat=cat,
+                source=(
+                    "cronenberg_escaped"
+                ),
+                changes={
+                    "patience": 0.02,
+                    "curiosity": 0.01,
+                },
+                metadata={
+                    "cronenberg":
+                        cronenberg.name,
+                    "size_ratio":
+                        size_ratio,
+                    "escape_chance":
+                        escape_chance,
+                },
             )
-            return event
+
+            return encounter
 
         encounter_layer = getattr(
             cronenberg,
             "location",
-            "quantum_layer"
+            "quantum_layer",
         )
 
-        cat_growth = cronenberg_size * 0.05
-        strength_gain = cronenberg_size * 0.10
+        cat_growth = (
+            cronenberg_size
+            * 0.05
+        )
 
-        cat.size = float(
-            cat.size
-        ) + cat_growth
+        strength_gain = (
+            cronenberg_size
+            * 0.10
+        )
 
-        cat.strength = float(
-            cat.strength
-        ) + strength_gain
+        cat.size = (
+            float(cat.size)
+            + cat_growth
+        )
 
-        cat.cronenbergs_eaten = int(
-            cat.cronenbergs_eaten
-        ) + 1
+        cat.strength = (
+            float(cat.strength)
+            + strength_gain
+        )
 
-        cat.cronenberg_mass_eaten = float(
-            cat.cronenberg_mass_eaten
-        ) + cronenberg_size
+        cat.cronenbergs_eaten = (
+            int(
+                cat.cronenbergs_eaten
+            )
+            + 1
+        )
 
+        cat.cronenberg_mass_eaten = (
+            float(
+                cat.cronenberg_mass_eaten
+            )
+            + cronenberg_size
+        )
 
         self._remember_encounter(
             cat=cat,
@@ -254,10 +303,13 @@ class CatCronenbergEncounter:
             size_ratio=size_ratio,
             location=encounter_layer,
             details={
-                "escape_chance": escape_chance,
-                "cat_growth": cat_growth,
-                "strength_gain": strength_gain
-            }
+                "escape_chance":
+                    escape_chance,
+                "cat_growth":
+                    cat_growth,
+                "strength_gain":
+                    strength_gain,
+            },
         )
 
         cronenberg.state = (
@@ -269,54 +321,58 @@ class CatCronenbergEncounter:
         )
 
         event_result = (
-            universe.quantum_event_bus.publish(
+            universe
+            .quantum_event_bus
+            .publish(
                 "cronenberg_hunted",
                 predator=cat_name,
                 prey=cronenberg.name,
                 layer=getattr(
                     cronenberg,
                     "location",
-                    "quantum_layer"
+                    "quantum_layer",
                 ),
-                cronenberg_size=cronenberg_size,
-                cat_size=cat_size
+                cronenberg_size=
+                    cronenberg_size,
+                cat_size=
+                    cat_size,
             )
         )
 
-        event = {
-            "result": "cronenberg_hunted",
-            "encountered": True,
-            "cat": cat_name,
-            "cronenberg": cronenberg.name,
-            "size_ratio": size_ratio,
-            "escape_chance": escape_chance,
-            "cat_growth": cat_growth,
-            "strength_gain": strength_gain,
-            "destination": route.destination,
-            "subscriber_count": (
-                event_result[
-                    "subscriber_count"
-                ]
-            )
-        }
-
-        route.record_encounter(
+        encounter = (
             QuantumCatRouteEncounter(
-                result="cronenberg_hunted",
+                result=(
+                    "cronenberg_hunted"
+                ),
                 encountered=True,
                 cat=cat_name,
-                cronenberg=cronenberg.name,
-                size_ratio=size_ratio,
-                escape_chance=escape_chance,
-                destination=route.destination,
-                cat_growth=cat_growth,
-                strength_gain=strength_gain,
-                subscriber_count=event_result[
-                    "subscriber_count"
-                ],
+                cronenberg=
+                    cronenberg.name,
+                size_ratio=
+                    size_ratio,
+                escape_chance=
+                    escape_chance,
+                destination=
+                    route.destination,
+                cat_growth=
+                    cat_growth,
+                strength_gain=
+                    strength_gain,
+                subscriber_count=(
+                    event_result[
+                        "subscriber_count"
+                    ]
+                ),
             )
         )
-        self.history.append(event)
+
+        route.record_encounter(
+            encounter
+        )
+
+        self.history.append(
+            encounter
+        )
 
         UniverseLogger.event(
             f"CAT HUNTS SMALL CRONENBERG: "
@@ -324,23 +380,25 @@ class CatCronenbergEncounter:
             f"{cronenberg.name}"
         )
 
-        event["personality"] = (
-            self._apply_personality_experience(
-                cat=cat,
-                source="successful_cronenberg_hunt",
-                changes={
-                    "courage": 0.04,
-                    "aggression": 0.025,
-                    "curiosity": 0.01
-                },
-                metadata={
-                    "cronenberg": cronenberg.name,
-                    "size_ratio": size_ratio
-                }
-            )
+        self._apply_personality_experience(
+            cat=cat,
+            source=(
+                "successful_cronenberg_hunt"
+            ),
+            changes={
+                "courage": 0.04,
+                "aggression": 0.025,
+                "curiosity": 0.01,
+            },
+            metadata={
+                "cronenberg":
+                    cronenberg.name,
+                "size_ratio":
+                    size_ratio,
+            },
         )
 
-        return event
+        return encounter
 
     def _learn_cronenberg_aroma(
         self,
@@ -384,27 +442,23 @@ class CatCronenbergEncounter:
         cat,
         source,
         changes,
-        metadata=None
+        metadata=None,
     ):
         if not isinstance(
             cat,
-            Cat
+            Cat,
         ):
-            return {
-                "name": (
-                    "cat_personality_experience_skipped"
-                ),
-                "reason": "invalid_cat",
-                "source": source,
-                "applied": False
-            }
+            return None
 
-        return CatPersonality.apply_experience(
-            cat=cat,
-            source=source,
-            changes=changes,
-            metadata=metadata
-        ).to_dict()
+        return (
+            CatPersonality
+            .apply_experience(
+                cat=cat,
+                source=source,
+                changes=changes,
+                metadata=metadata,
+            )
+        )
 
     def _remember_encounter(
         self,
@@ -543,7 +597,9 @@ class CatCronenbergEncounter:
             "encounter_count": len(
                 self.history
             ),
-            "history": list(
-                self.history
-            )
+            "history": [
+                encounter.to_dict()
+                for encounter
+                in self.history
+            ],
         }
