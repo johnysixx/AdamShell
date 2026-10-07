@@ -40,9 +40,7 @@ class UniverseTickSchedulerTests(
         report = universe.tick()
 
         self.assertEqual(
-            report[
-                "tick"
-            ],
+            report.tick,
             1
         )
 
@@ -51,14 +49,14 @@ class UniverseTickSchedulerTests(
             1
         )
 
-        self.assertIn(
-            "phases",
-            report
+        self.assertIsInstance(
+            report.phases,
+            tuple,
         )
 
-        self.assertIn(
-            "errors",
-            report
+        self.assertIsInstance(
+            report.errors,
+            tuple,
         )
 
     def test_phase_error_creates_cronenberg_and_tick_continues(
@@ -84,23 +82,17 @@ class UniverseTickSchedulerTests(
         )
 
         self.assertFalse(
-            report[
-                "ok"
-            ]
+            report.ok
         )
 
         self.assertEqual(
-            report[
-                "error_count"
-            ],
+            report.error_count,
             1
         )
 
         self.assertEqual(
             len(
-                report[
-                    "cronenbergs_created"
-                ]
+                report.cronenbergs_created
             ),
             1
         )
@@ -119,13 +111,7 @@ class UniverseTickSchedulerTests(
         )
 
         self.assertEqual(
-            report[
-                "errors"
-            ][
-                0
-            ][
-                "phase"
-            ],
+            report.errors[0].phase,
             "physics"
         )
 
@@ -166,9 +152,7 @@ class UniverseTickSchedulerTests(
         )
 
         self.assertEqual(
-            report[
-                "error_count"
-            ],
+            report.error_count,
             1
         )
 
@@ -178,13 +162,7 @@ class UniverseTickSchedulerTests(
         )
 
         self.assertEqual(
-            report[
-                "errors"
-            ][
-                0
-            ][
-                "source_component"
-            ],
+            report.errors[0].source_component,
             "entity:broken"
         )
 
@@ -212,17 +190,13 @@ class UniverseTickSchedulerTests(
         )
 
         self.assertEqual(
-            report[
-                "error_count"
-            ],
+            report.error_count,
             2
         )
 
         self.assertEqual(
             len(
-                report[
-                    "cronenbergs_created"
-                ]
+                report.cronenbergs_created
             ),
             2
         )
