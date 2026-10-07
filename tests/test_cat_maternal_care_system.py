@@ -26,30 +26,30 @@ class CatMaternalCareSystemTests(unittest.TestCase):
 
     def test_neonatal_kitten_gets_complete_care(self):
         result = self.care.provide_care(self.mother, self.kitten, age_days=5, current_day=100)
-        self.assertTrue(result['provided'])
-        self.assertEqual(result['phase'], 'neonatal_maternal_care')
-        self.assertIn('nursing', result['actions'])
-        self.assertIn('cleaning', result['actions'])
-        self.assertIn('warming', result['actions'])
-        self.assertIn('protection', result['actions'])
-        self.assertIn('retrieval', result['actions'])
+        self.assertTrue(result.provided)
+        self.assertEqual(result.phase, MaternalCarePhase.NEONATAL)
+        self.assertIn('nursing', result.actions)
+        self.assertIn('cleaning', result.actions)
+        self.assertIn('warming', result.actions)
+        self.assertIn('protection', result.actions)
+        self.assertIn('retrieval', result.actions)
 
     def test_warming_stops_after_neonatal_phase(self):
         result = self.care.provide_care(self.mother, self.kitten, age_days=20)
-        self.assertEqual(result['phase'], 'complete_maternal_care')
-        self.assertNotIn('warming', result['actions'])
+        self.assertEqual(result.phase, MaternalCarePhase.COMPLETE)
+        self.assertNotIn('warming', result.actions)
 
     def test_weaning_phase_keeps_reduced_care(self):
         result = self.care.provide_care(self.mother, self.kitten, age_days=40)
-        self.assertEqual(result['phase'], 'reduced_maternal_care')
-        self.assertIn('nursing', result['actions'])
-        self.assertNotIn('retrieval', result['actions'])
+        self.assertEqual(result.phase, MaternalCarePhase.REDUCED)
+        self.assertIn('nursing', result.actions)
+        self.assertNotIn('retrieval', result.actions)
 
     def test_independent_kitten_is_no_longer_nursed(self):
         result = self.care.provide_care(self.mother, self.kitten, age_days=70)
-        self.assertEqual(result['phase'], 'maternal_independence')
-        self.assertNotIn('nursing', result['actions'])
-        self.assertIn('protection', result['actions'])
+        self.assertEqual(result.phase, MaternalCarePhase.INDEPENDENCE)
+        self.assertNotIn('nursing', result.actions)
+        self.assertIn('protection', result.actions)
 
     def test_maternal_care_is_persisted(self):
         self.care.provide_care(self.mother, self.kitten, age_days=5, current_day=20)
@@ -92,7 +92,7 @@ class CatMaternalCareSystemTests(unittest.TestCase):
         stranger = self.cats.create_cat(name='stranger', color='white', fur_length='short')
         stranger.sex = 'female'
         result = self.care.provide_care(stranger, self.kitten, age_days=5)
-        self.assertFalse(result['provided'])
-        self.assertEqual(result['reason'], 'not_biological_mother')
+        self.assertFalse(result.provided)
+        self.assertEqual(result.reason, 'not_biological_mother')
 if __name__ == '__main__':
     unittest.main()
