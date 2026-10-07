@@ -39,6 +39,10 @@ from cats.cat_intention_state import CatVisitRecipientTarget
 from cats.cat_intention_state import CatApproachCatTarget
 
 from cats.cat_intention_state import CatShareLegendTarget
+from cats.cat_mind_result_state import (
+    CatIntentionNotSelectedResult,
+    CatIntentionSelectedEvent,
+)
 
 class CatMind:
     INTENTION_TYPES = ('visit_bar', 'visit_recipient', 'hunt_cronenberg', 'track_cronenberg_scent', 'follow_known_scent', 'search_for_scent', 'follow_scent_through_box', 'avoid_cronenberg_scent', 'explore_box', 'sense_quantum_counterpart', 'travel_through_known_quantum_box', 'travel_trough_known_quantum_box', 'create_exploration_pair', 'approach_cat', 'share_legend', 'observe', 'wander', 'rest')
@@ -603,38 +607,156 @@ class CatMind:
         return deepcopy(candidates)
 
     @classmethod
-    def decide(cls, cat, observations, quantum_roll=None, top_count=None):
-        """
-        Vybere vlastnĂ\xad Ăşmysl koÄŤky.
+    def decide(
+        cls,
+        cat,
+        observations,
+        quantum_roll=None,
+        top_count=None,
+    ):
+        candidates = cls.consider(
+            cat=cat,
+            observations=observations,
+        )
 
-        Cat D20 zde neurÄŤuje seznam moĹľnostĂ\xad.
-        Pouze vybere mezi nejlepĹˇĂ\xadmi
-        rozumnĂ˝mi kandidĂˇty.
-        """
-        candidates = cls.consider(cat=cat, observations=observations)
         if not candidates:
-            return {'name': 'cat_intention_not_selected', 'cat': cat.name, 'reason': 'no_candidates', 'selected': False}
+            return (
+                CatIntentionNotSelectedResult(
+                    cat=cat.name,
+                    reason="no_candidates",
+                )
+            )
+
         if top_count is None:
-            top_count = CatIntellect.decision_finalist_count(cat=cat, candidate_count=len(candidates))
+            top_count = (
+                CatIntellect
+                .decision_finalist_count(
+                    cat=cat,
+                    candidate_count=len(
+                        candidates
+                    ),
+                )
+            )
+
         else:
-            top_count = max(1, int(top_count))
-        finalists = candidates[:top_count]
+            top_count = max(
+                1,
+                int(
+                    top_count
+                ),
+            )
+
+        finalists = tuple(
+            deepcopy(
+                candidates[
+                    :top_count
+                ]
+            )
+        )
+
         if quantum_roll is None:
             winner_index = 0
+
         else:
-            quantum_roll = int(quantum_roll)
-            if not 1 <= quantum_roll <= 20:
-                raise ValueError('Cat quantum decision roll must be between 1 and 20.')
-            winner_index = (quantum_roll - 1) * len(finalists) // 20
-            winner_index = min(winner_index, len(finalists) - 1)
-        winner = deepcopy(finalists[winner_index])
-        mind = cls.ensure_state(cat)
-        previous = mind.current_intention
-        mind.previous_intention = deepcopy(previous)
-        mind.current_intention = deepcopy(winner)
+            quantum_roll = int(
+                quantum_roll
+            )
+
+            if not (
+                1
+                <= quantum_roll
+                <= 20
+            ):
+                raise ValueError(
+                    "Cat quantum decision roll "
+                    "must be between 1 and 20."
+                )
+
+            winner_index = (
+                (quantum_roll - 1)
+                * len(finalists)
+                // 20
+            )
+
+            winner_index = min(
+                winner_index,
+                len(finalists) - 1,
+            )
+
+        winner = deepcopy(
+            finalists[
+                winner_index
+            ]
+        )
+
+        mind = cls.ensure_state(
+            cat
+        )
+
+        previous = (
+            mind.current_intention
+        )
+
+        mind.previous_intention = (
+            deepcopy(
+                previous
+            )
+        )
+
+        mind.current_intention = (
+            deepcopy(
+                winner
+            )
+        )
+
         mind.decision_count += 1
-        event = {'name': 'cat_intention_selected', 'cat': cat.name, 'intention': winner.type, 'target': winner.target, 'score': winner.score, 'reasons': list(winner.reasons), 'quantum_roll': quantum_roll, 'intellect_score': CatIntellect.ensure_state(cat).score, 'intellect_category': CatIntellect.category(cat), 'finalist_count': len(finalists), 'finalists': deepcopy(finalists), 'previous_intention': deepcopy(previous), 'selected': True}
-        mind.history.append(deepcopy(event))
+
+        intellect = (
+            CatIntellect
+            .ensure_state(
+                cat
+            )
+        )
+
+        event = (
+            CatIntentionSelectedEvent(
+                cat=cat.name,
+                intention=
+                    winner.type,
+                target=deepcopy(
+                    winner.target
+                ),
+                score=
+                    winner.score,
+                reasons=tuple(
+                    winner.reasons
+                ),
+                quantum_roll=
+                    quantum_roll,
+                intellect_score=
+                    intellect.score,
+                intellect_category=
+                    CatIntellect.category(
+                        cat
+                    ),
+                finalists=tuple(
+                    deepcopy(
+                        finalists
+                    )
+                ),
+                previous_intention=
+                    deepcopy(
+                        previous
+                    ),
+            )
+        )
+
+        mind.history.append(
+            deepcopy(
+                event
+            )
+        )
+
         return event
 
     @classmethod

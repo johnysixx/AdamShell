@@ -22,7 +22,7 @@ class CatCronenbergScentBehaviorTests(unittest.TestCase):
         traits.curiosity = 1.0
         traits.patience = 0.0
         result = CatMind.decide(cat=self.cat, observations=self.observations())
-        self.assertEqual(result['intention'], 'track_cronenberg_scent')
+        self.assertEqual(result.intention, 'track_cronenberg_scent')
 
     def test_cautious_cat_avoids_cronenberg_scent(self):
         traits = self.cat.personality.traits
@@ -31,7 +31,7 @@ class CatCronenbergScentBehaviorTests(unittest.TestCase):
         traits.curiosity = 0.0
         traits.patience = 1.0
         result = CatMind.decide(cat=self.cat, observations=self.observations())
-        self.assertEqual(result['intention'], 'avoid_cronenberg_scent')
+        self.assertEqual(result.intention, 'avoid_cronenberg_scent')
 
     def test_unknown_ozone_does_not_mean_cronenberg(self):
         observations = self.observations()

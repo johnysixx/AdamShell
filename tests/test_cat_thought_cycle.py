@@ -19,7 +19,7 @@ class CatThoughtCycleTests(unittest.TestCase):
     def test_cat_can_think_and_start_bar_route(self):
         result = self.cats.think_and_act(cat=self.cat)
         self.assertTrue(result['completed'])
-        self.assertEqual(result['decision']['intention'], 'visit_bar')
+        self.assertEqual(result['decision'].intention, 'visit_bar')
         self.assertTrue(result['execution'].executed)
         self.assertEqual(self.cat.intent, 'return_to_bar')
 
@@ -28,7 +28,7 @@ class CatThoughtCycleTests(unittest.TestCase):
         box = self.universe.create_quantum_box()
         box.position = SpatialVector3(x=1.5, y=0.0, z=0.0)
         result = self.cats.think_and_act(cat=self.cat)
-        self.assertEqual(result['decision']['intention'], 'explore_box')
+        self.assertEqual(result['decision'].intention, 'explore_box')
         self.assertTrue(result['execution']['executed'])
         self.assertEqual(result['execution']['name'], 'cat_approaching_box_to_explore')
         self.assertEqual(result['execution']['box_id'], box.id)
@@ -54,7 +54,7 @@ class CatThoughtCycleTests(unittest.TestCase):
         self.cat.memory.remember(event_type='quantum_box_observed', universe_tick=0, location='quantum_layer', participants=[source.id], details={'box_id': source.id})
         first_cycle = self.cats.think_and_act(cat=self.cat)
         self.assertTrue(first_cycle['completed'])
-        self.assertEqual(first_cycle['decision']['intention'], 'sense_quantum_counterpart')
+        self.assertEqual(first_cycle['decision'].intention, 'sense_quantum_counterpart')
         self.assertTrue(first_cycle['execution']['executed'])
         self.assertIsInstance(
             self.cat.current_quantum_counterpart_observation,
@@ -62,7 +62,7 @@ class CatThoughtCycleTests(unittest.TestCase):
         )
         second_cycle = self.cats.think_and_act(cat=self.cat)
         self.assertTrue(second_cycle['completed'])
-        self.assertEqual(second_cycle['decision']['intention'], 'travel_through_known_quantum_box')
+        self.assertEqual(second_cycle['decision'].intention, 'travel_through_known_quantum_box')
         self.assertTrue(second_cycle['execution']['executed'])
         self.assertEqual(self.cat.current_layer, target.current_layer)
         self.assertEqual(self.cat.position, target.position)

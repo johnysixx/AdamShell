@@ -95,12 +95,12 @@ class CatScentReorientationAfterTransferTests(unittest.TestCase):
         traits.courage = 1.0
         traits.patience = 0.0
         decision = CatMind.decide(cat=self.tracker, observations=observations)
-        self.assertTrue(decision['selected'])
-        self.assertEqual(decision['intention'], 'follow_known_scent')
-        self.assertEqual(decision['target'].identity, 'cat:creator')
-        self.assertEqual(decision['target'].layer, 'quantum_layer')
-        self.assertEqual(decision['target'].source_id, self.trail_box.id)
-        self.assertEqual(decision['target'].position, self.trail_box.position)
+        self.assertTrue(decision.selected)
+        self.assertEqual(decision.intention, 'follow_known_scent')
+        self.assertEqual(decision.target.identity, 'cat:creator')
+        self.assertEqual(decision.target.layer, 'quantum_layer')
+        self.assertEqual(decision.target.source_id, self.trail_box.id)
+        self.assertEqual(decision.target.position, self.trail_box.position)
         self.assertEqual(self.tracker.mind.current_intention.type, 'follow_known_scent')
 if __name__ == '__main__':
     unittest.main()

@@ -84,7 +84,7 @@ class CatIntentionExecutorTests(unittest.TestCase):
         result = self.cats.execute_cat_intention(self.cat)
         self.assertTrue(result.executed)
         self.assertEqual(self.cat.mind.decision_count, decision_count)
-        self.assertEqual(decision['intention'], result.intention)
+        self.assertEqual(decision.intention, result.intention)
 
     def test_no_intention_does_nothing(self):
         result = self.cats.execute_cat_intention(self.cat)

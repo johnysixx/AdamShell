@@ -42,6 +42,10 @@ from universe.quantum_cat_navigation_result_state import (
     QuantumCatRouteNotPlannedResult,
     QuantumCatRoutePlannedResult,
 )
+from .cat_mind_result_state import (
+    CatIntentionNotSelectedResult,
+    CatIntentionSelectedEvent,
+)
 from .cat_overpopulation_activation_state import (
     CatOverpopulationActivatedEvent,
     CatOverpopulationActivationDeniedResult,
@@ -906,10 +910,38 @@ class Cats:
         observations = self.observe_cat(cat=cat, vision_radius=vision_radius)
         if not observations.observed:
             return {'name': 'cat_thought_cycle_failed', 'cat': getattr(cat, 'name', None), 'observation': observations, 'completed': False}
-        decision = CatMind.decide(cat=cat, observations=observations, quantum_roll=quantum_roll)
-        if not decision.get('selected', False):
-            return {'name': 'cat_thought_cycle_failed', 'cat': cat.name, 'observations': observations, 'decision': decision, 'completed': False}
-        execution = self.execute_cat_intention(cat=cat, cronenbergs=cronenbergs, step_size=step_size)
+        decision = CatMind.decide(
+            cat=cat,
+            observations=observations,
+            quantum_roll=quantum_roll,
+        )
+
+        if isinstance(
+            decision,
+            CatIntentionNotSelectedResult,
+        ):
+            return {
+                'name': 'cat_thought_cycle_failed',
+                'cat': cat.name,
+                'observations': observations,
+                'decision': decision,
+                'completed': False,
+            }
+
+        if not isinstance(
+            decision,
+            CatIntentionSelectedEvent,
+        ):
+            raise TypeError(
+                'Cat thought cycle requires '
+                'a cat intention decision object.'
+            )
+
+        execution = self.execute_cat_intention(
+            cat=cat,
+            cronenbergs=cronenbergs,
+            step_size=step_size,
+        )
         event = {'name': 'cat_thought_cycle_completed', 'cat': cat.name, 'observations': observations, 'decision': decision, 'execution': execution, 'completed': True}
         self.emit_event(event)
         return event
@@ -1023,11 +1055,48 @@ class Cats:
         if getattr(cat, 'position', None) is None:
             return {'name': 'cat_autonomous_tick_skipped', 'cat': cat.name, 'reason': 'no_position', 'completed': False}
         needs_event = CatNeedSystem.advance(cat)
-        thought = self.think_and_act(cat=cat, cronenbergs=getattr(self.universe, 'cronenbergs', []))
-        decision = thought.get('decision', {})
-        intention_type = decision.get('intention') or decision.get('type')
+        thought = self.think_and_act(
+            cat=cat,
+            cronenbergs=getattr(
+                self.universe,
+                "cronenbergs",
+                [],
+            ),
+        )
+
+        decision = thought.get(
+            "decision"
+        )
+
+        if isinstance(
+            decision,
+            CatIntentionSelectedEvent,
+        ):
+            intention_type = (
+                decision.intention
+            )
+
+        elif isinstance(
+            decision,
+            CatIntentionNotSelectedResult,
+        ):
+            intention_type = None
+
+        elif decision is None:
+            intention_type = None
+
+        else:
+            raise TypeError(
+                "Cat autonomous tick thought "
+                "decision must be a cat mind "
+                "decision result object."
+            )
+
         if intention_type is None:
-            current = cat.mind.current_intention
+            current = (
+                cat.mind.current_intention
+            )
+
             intention_type = (
                 current.type
                 if current is not None

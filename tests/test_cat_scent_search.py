@@ -125,8 +125,8 @@ class CatScentSearchTests(unittest.TestCase):
         self.assertNotIn('search_for_scent', types)
         self.assertIn('rest', types)
         decision = CatMind.decide(cat=self.cat, observations=self.observations(), quantum_roll=None)
-        self.assertTrue(decision['selected'])
-        self.assertNotEqual(decision['intention'], 'search_for_scent')
+        self.assertTrue(decision.selected)
+        self.assertNotEqual(decision.intention, 'search_for_scent')
         self.assertIsNotNone(self.cat.mind.current_intention)
 if __name__ == '__main__':
     unittest.main()

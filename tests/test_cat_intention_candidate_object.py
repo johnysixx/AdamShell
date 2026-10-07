@@ -102,7 +102,7 @@ class CatIntentionCandidateObjectTests(
         )
 
         self.assertTrue(
-            result["selected"]
+            result.selected
         )
 
         self.assertIsInstance(
@@ -112,7 +112,7 @@ class CatIntentionCandidateObjectTests(
 
         self.assertEqual(
             self.cat.mind.current_intention.type,
-            result["intention"],
+            result.intention,
         )
 
         self.assertTrue(
@@ -122,7 +122,7 @@ class CatIntentionCandidateObjectTests(
                     CatIntentionCandidate,
                 )
                 for finalist
-                in result["finalists"]
+                in result.finalists
             )
         )
 

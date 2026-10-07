@@ -29,13 +29,13 @@ class CatMindTests(unittest.TestCase):
         self.traits().curiosity = 1.0
         self.traits().courage = 0.7
         result = CatMind.decide(cat=self.cat, observations=CatPerceptionState(unexplored_boxes=['box_alpha']))
-        self.assertEqual(result['intention'], 'explore_box')
+        self.assertEqual(result.intention, 'explore_box')
         self.assertIsInstance(
-            result['target'],
+            result.target,
             CatExploreBoxTarget,
         )
         self.assertEqual(
-            result['target'].box_id,
+            result.target.box_id,
             'box_alpha',
         )
 
@@ -56,16 +56,16 @@ class CatMindTests(unittest.TestCase):
 
     def test_quantum_roll_only_selects_among_finalists(self):
         result = CatMind.decide(cat=self.cat, observations=CatPerceptionState(bar_known=True, bar_visible=True, unexplored_boxes=['box_alpha'], nearby_cats=['other_cat']), quantum_roll=20, top_count=3)
-        finalist_types = {candidate.type for candidate in result['finalists']}
-        self.assertIn(result['intention'], finalist_types)
-        self.assertEqual(len(result['finalists']), 3)
+        finalist_types = {candidate.type for candidate in result.finalists}
+        self.assertIn(result.intention, finalist_types)
+        self.assertEqual(len(result.finalists), 3)
 
     def test_decision_is_preserved_in_history(self):
         result = CatMind.decide(cat=self.cat, observations=CatPerceptionState(bar_known=True))
         mind = self.cat.mind
         self.assertEqual(mind.decision_count, 1)
         self.assertEqual(len(mind.history), 1)
-        self.assertEqual(mind.current_intention.type, result['intention'])
+        self.assertEqual(mind.current_intention.type, result.intention)
 
     def test_personality_changes_future_decision(self):
         observations = CatPerceptionState(huntable_cronenbergs=['cronenberg_small'], cronenberg_danger=0.5, unexplored_boxes=['box_alpha'])
@@ -73,7 +73,7 @@ class CatMindTests(unittest.TestCase):
         CatPersonality.adjust(cat=self.cat, trait='curiosity', amount=0.5, source='many_explorations')
         CatPersonality.adjust(cat=self.cat, trait='courage', amount=-0.4, source='dangerous_encounter')
         second = CatMind.decide(cat=self.cat, observations=observations)
-        self.assertNotEqual(first['score'], second['score'])
+        self.assertNotEqual(first.score, second.score)
 
     def test_failed_quantum_travel_increases_bar_score(self):
         before = CatMind.consider(cat=self.cat, observations=CatPerceptionState(bar_known=True, bar_visible=False))

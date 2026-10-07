@@ -31,23 +31,23 @@ class CatAutonomousExplorationPairTests(unittest.TestCase):
         from cats.cat_mind import CatMind
         decision = CatMind.decide(cat=self.cat, observations=observations)
         self.assertEqual(
-            decision['intention'],
+            decision.intention,
             'create_exploration_pair',
         )
         self.assertIsInstance(
-            decision['target'],
+            decision.target,
             CatExplorationPairTarget,
         )
         self.assertEqual(
-            decision['target'].layer,
+            decision.target.layer,
             observations.exploration_destination_layer,
         )
         self.assertEqual(
-            decision['target'].position,
+            decision.target.position,
             observations.exploration_destination_position,
         )
         self.assertEqual(
-            decision['target'].energy_cost,
+            decision.target.energy_cost,
             observations.exploration_pair_energy_cost,
         )
 
@@ -56,7 +56,7 @@ class CatAutonomousExplorationPairTests(unittest.TestCase):
         before_energy = self.cat.idea_energy
         result = self.cats.think_and_act(cat=self.cat)
         self.assertTrue(result['completed'])
-        self.assertEqual(result['decision']['intention'], 'create_exploration_pair')
+        self.assertEqual(result['decision'].intention, 'create_exploration_pair')
         execution = result['execution']
         self.assertTrue(execution['executed'])
         self.assertEqual(execution['name'], 'cat_started_autonomous_exploration_through_new_pair')
@@ -89,6 +89,6 @@ class CatAutonomousExplorationPairTests(unittest.TestCase):
         self.assertFalse(observations.can_create_exploration_pair)
         from cats.cat_mind import CatMind
         decision = CatMind.decide(cat=self.cat, observations=observations)
-        self.assertEqual(decision['intention'], 'explore_box')
+        self.assertEqual(decision.intention, 'explore_box')
 if __name__ == '__main__':
     unittest.main()
