@@ -45,6 +45,16 @@ from cats.cat_intention_state import CatVisitRecipientTarget
 from cats.cat_intention_state import CatApproachCatTarget
 
 from cats.cat_intention_state import CatShareLegendTarget
+from cats.cat_intention_navigation_result_state import (
+    CatIntentionNavigationFailedResult,
+    CatIntentionNavigationStartedEvent,
+)
+from cats.cat_navigation_result_state import (
+    CatNavigationNotOfferedResult,
+    CatNavigationOfferedEvent,
+    CatNavigationOfferAcceptedEvent,
+    CatNavigationOfferNotAcceptedResult,
+)
 
 class CatIntentionExecutor:
     NAVIGATION_INTENTS = {'visit_bar': 'return_to_bar', 'visit_recipient': 'follow_entity', 'hunt_cronenberg': 'hunt_nearest_cronenberg', 'track_cronenberg_scent': 'hunt_nearest_cronenberg', 'avoid_cronenberg_scent': 'return_to_bar'}
@@ -104,60 +114,188 @@ class CatIntentionExecutor:
             return self._defer_intention(cat=cat, intention=intention)
         return self._record({'name': 'cat_intention_execution_failed', 'cat': cat.name, 'intention': intention_type, 'reason': 'unsupported_intention', 'executed': False})
 
-    def _execute_navigation(self, cat, intention, cronenbergs, step_size):
-        intention_type = intention.type
-        body_intent = self.NAVIGATION_INTENTS[intention_type]
-        if intention_type == 'visit_recipient':
-            target = intention.target
+    def _execute_navigation(
+        self,
+        cat,
+        intention,
+        cronenbergs,
+        step_size,
+    ):
+        intention_type = (
+            intention.type
+        )
+
+        body_intent = (
+            self.NAVIGATION_INTENTS[
+                intention_type
+            ]
+        )
+
+        if (
+            intention_type
+            == "visit_recipient"
+        ):
+            target = (
+                intention.target
+            )
 
             if not isinstance(
                 target,
                 CatVisitRecipientTarget,
             ):
-                return self._record({
-                    'name': (
-                        'cat_intention_body_action_failed'
-                    ),
-                    'cat': cat.name,
-                    'intention': intention_type,
-                    'body_intent': body_intent,
-                    'reason': (
-                        'invalid_visit_recipient_target'
-                    ),
-                    'executed': False,
-                })
+                return self._record(
+                    CatIntentionNavigationFailedResult(
+                        cat=cat.name,
+                        intention=
+                            intention_type,
+                        body_intent=
+                            body_intent,
+                        reason=(
+                            "invalid_visit_recipient_target"
+                        ),
+                    )
+                )
 
             if target.recipient_id is None:
-                return self._record({
-                    'name': (
-                        'cat_intention_body_action_failed'
-                    ),
-                    'cat': cat.name,
-                    'intention': intention_type,
-                    'body_intent': body_intent,
-                    'reason': (
-                        'missing_recipient_id'
-                    ),
-                    'executed': False,
-                })
+                return self._record(
+                    CatIntentionNavigationFailedResult(
+                        cat=cat.name,
+                        intention=
+                            intention_type,
+                        body_intent=
+                            body_intent,
+                        reason=(
+                            "missing_recipient_id"
+                        ),
+                    )
+                )
 
             cat.navigation_target = (
                 target.recipient_id
             )
-        previous_suggestion = cat.suggested_intent
-        cat.suggested_intent = body_intent
-        offer = self.cats_layer.offer_navigation_for_suggested_intent(cat=cat, cronenbergs=cronenbergs, step_size=step_size)
-        if not offer.get('offered', False):
-            event = {'name': 'cat_intention_body_action_failed', 'cat': cat.name, 'intention': intention_type, 'body_intent': body_intent, 'reason': offer.get('result', 'navigation_not_offered'), 'navigation_offer': offer, 'previous_suggested_intent': previous_suggestion, 'executed': False}
-            return self._record(event)
-        acceptance = self.cats_layer.accept_navigation_offer(cat)
-        if not acceptance.get('accepted', False):
-            return self._record({'name': 'cat_intention_body_action_failed', 'cat': cat.name, 'intention': intention_type, 'body_intent': body_intent, 'reason': acceptance.get('result', 'navigation_not_accepted'), 'navigation_offer': offer, 'acceptance': acceptance, 'executed': False})
-        cat.state = 'acting_on_own_intention'
-        event = {'name': 'cat_intention_navigation_started', 'cat': cat.name, 'intention': intention_type, 'body_intent': body_intent, 'target': intention.target, 'route_id': acceptance.get('route_id'), 'destination': acceptance.get('destination'), 'decision_source': 'cat_mind', 'navigation_offer': {key: value for key, value in offer.items() if key not in {'route', 'plan'}}, 'executed': True}
-        mind = cat.mind
-        mind.active_body_execution = deepcopy(event)
-        return self._record(event)
+
+        previous_suggestion = (
+            cat.suggested_intent
+        )
+
+        cat.suggested_intent = (
+            body_intent
+        )
+
+        offer = (
+            self.cats_layer
+            .offer_navigation_for_suggested_intent(
+                cat=cat,
+                cronenbergs=
+                    cronenbergs,
+                step_size=
+                    step_size,
+            )
+        )
+
+        if isinstance(
+            offer,
+            CatNavigationNotOfferedResult,
+        ):
+            return self._record(
+                CatIntentionNavigationFailedResult(
+                    cat=cat.name,
+                    intention=
+                        intention_type,
+                    body_intent=
+                        body_intent,
+                    reason=offer.reason,
+                    navigation_offer=
+                        offer,
+                    previous_suggested_intent=
+                        previous_suggestion,
+                )
+            )
+
+        if not isinstance(
+            offer,
+            CatNavigationOfferedEvent,
+        ):
+            raise TypeError(
+                "Cat navigation offer must "
+                "return a navigation result object."
+            )
+
+        acceptance = (
+            self.cats_layer
+            .accept_navigation_offer(
+                cat
+            )
+        )
+
+        if isinstance(
+            acceptance,
+            CatNavigationOfferNotAcceptedResult,
+        ):
+            return self._record(
+                CatIntentionNavigationFailedResult(
+                    cat=cat.name,
+                    intention=
+                        intention_type,
+                    body_intent=
+                        body_intent,
+                    reason=
+                        acceptance.reason,
+                    navigation_offer=
+                        offer,
+                    acceptance=
+                        acceptance,
+                    previous_suggested_intent=
+                        previous_suggestion,
+                )
+            )
+
+        if not isinstance(
+            acceptance,
+            CatNavigationOfferAcceptedEvent,
+        ):
+            raise TypeError(
+                "Cat navigation acceptance must "
+                "return a navigation result object."
+            )
+
+        cat.state = (
+            "acting_on_own_intention"
+        )
+
+        event = (
+            CatIntentionNavigationStartedEvent(
+                cat=cat.name,
+                intention=
+                    intention_type,
+                body_intent=
+                    body_intent,
+                target=
+                    intention.target,
+                route_id=
+                    acceptance.route_id,
+                destination=
+                    acceptance.destination,
+                navigation_offer=
+                    offer,
+                acceptance=
+                    acceptance,
+            )
+        )
+
+        mind = (
+            cat.mind
+        )
+
+        mind.active_body_execution = (
+            deepcopy(
+                event
+            )
+        )
+
+        return self._record(
+            event
+        )
 
     def _execute_follow_scent_through_box(self, cat, intention, cronenbergs=None, step_size=None):
         target = intention.target

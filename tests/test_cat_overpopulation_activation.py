@@ -114,7 +114,7 @@ class CatOverpopulationActivationTests(
         )
 
         self.assertTrue(
-            result["accepted"]
+            result.accepted
         )
 
         self.assertEqual(
@@ -124,11 +124,11 @@ class CatOverpopulationActivationTests(
 
         self.assertEqual(
             cat.active_route_id,
-            result["route"].route_id
+            result.route.route_id
         )
 
         self.assertIs(
-            result["route"].state,
+            result.route.state,
             QuantumCatRouteState.READY,
         )
 
@@ -184,7 +184,7 @@ class CatOverpopulationActivationTests(
         )
 
         self.assertTrue(
-            result["declined"]
+            result.declined
         )
 
         self.assertFalse(hasattr(cat, 'intent'))
@@ -192,11 +192,11 @@ class CatOverpopulationActivationTests(
         self.assertFalse(hasattr(cat, 'active_route_id'))
 
         self.assertFalse(
-            result["route"].observation_active
+            result.route.observation_active
         )
 
         self.assertIs(
-            result["route"].state,
+            result.route.state,
             QuantumCatRouteState.RELEASED,
         )
 

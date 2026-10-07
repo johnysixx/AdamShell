@@ -10,6 +10,13 @@ from cats.cat_intention_state import CatIntentionCandidate
 from cats.cat_intention_state import CatVisitRecipientTarget
 
 from cats.cat_intention_state import CatApproachCatTarget
+from cats.cat_navigation_result_state import (
+    CatNavigationOfferedEvent,
+    CatNavigationOfferAcceptedEvent,
+)
+from core.entity.quantum_cat_route import (
+    QuantumCatRoute,
+)
 
 class CatIntentionExecutorTests(unittest.TestCase):
 
@@ -42,9 +49,9 @@ class CatIntentionExecutorTests(unittest.TestCase):
     def test_visit_bar_starts_existing_navigation(self):
         self.set_intention('visit_bar')
         result = self.cats.execute_cat_intention(self.cat)
-        self.assertTrue(result['executed'])
-        self.assertEqual(result['intention'], 'visit_bar')
-        self.assertEqual(result['body_intent'], 'return_to_bar')
+        self.assertTrue(result.executed)
+        self.assertEqual(result.intention, 'visit_bar')
+        self.assertEqual(result.body_intent, 'return_to_bar')
         self.assertEqual(self.cat.intent, 'return_to_bar')
         self.assertTrue(hasattr(self.cat, 'active_route_id'))
 
@@ -52,8 +59,8 @@ class CatIntentionExecutorTests(unittest.TestCase):
         cronenberg = self.create_cronenberg()
         self.set_intention('hunt_cronenberg', target=cronenberg.id)
         result = self.cats.execute_cat_intention(self.cat, cronenbergs=[cronenberg])
-        self.assertTrue(result['executed'])
-        self.assertEqual(result['body_intent'], 'hunt_nearest_cronenberg')
+        self.assertTrue(result.executed)
+        self.assertEqual(result.body_intent, 'hunt_nearest_cronenberg')
         self.assertEqual(self.cat.intent, 'hunt_nearest_cronenberg')
 
     def test_rest_is_executed_without_route(self):
@@ -75,9 +82,9 @@ class CatIntentionExecutorTests(unittest.TestCase):
         decision = CatMind.decide(cat=self.cat, observations=CatPerceptionState(bar_known=True, bar_visible=True))
         decision_count = self.cat.mind.decision_count
         result = self.cats.execute_cat_intention(self.cat)
-        self.assertTrue(result['executed'])
+        self.assertTrue(result.executed)
         self.assertEqual(self.cat.mind.decision_count, decision_count)
-        self.assertEqual(decision['intention'], result['intention'])
+        self.assertEqual(decision['intention'], result.intention)
 
     def test_no_intention_does_nothing(self):
         result = self.cats.execute_cat_intention(self.cat)
@@ -93,10 +100,30 @@ class CatIntentionExecutorTests(unittest.TestCase):
         def fake_navigation(cat, cronenbergs=None, step_size=None):
             captured['suggested_intent'] = getattr(cat, 'suggested_intent', None)
             captured['navigation_target'] = getattr(cat, 'navigation_target', None)
-            return {'name': 'cat_navigation_offered', 'offered': True, 'accepted': False, 'route_id': 'test_route', 'destination': 'wizard', 'route_step_count': 1}
+
+            return CatNavigationOfferedEvent(
+                cat=cat.name,
+                suggested_intent='follow_entity',
+                route_id='test_route',
+                destination='wizard',
+                route_step_count=1,
+            )
 
         def fake_acceptance(cat):
-            return {'name': 'cat_navigation_offer_accepted', 'accepted': True, 'route_id': 'test_route', 'destination': 'wizard'}
+            route = QuantumCatRoute(
+                cat_id=cat.name,
+                route_steps=[],
+                start_position=cat.position,
+                destination='wizard',
+            )
+
+            return CatNavigationOfferAcceptedEvent(
+                cat=cat.name,
+                intent='follow_entity',
+                route_id='test_route',
+                destination='wizard',
+                route=route,
+            )
         self.cats.offer_navigation_for_suggested_intent = fake_navigation
         self.cats.accept_navigation_offer = fake_acceptance
         try:
@@ -104,9 +131,9 @@ class CatIntentionExecutorTests(unittest.TestCase):
         finally:
             self.cats.offer_navigation_for_suggested_intent = original_navigation
             self.cats.accept_navigation_offer = original_acceptance
-        self.assertTrue(result['executed'])
-        self.assertEqual(result['intention'], 'visit_recipient')
-        self.assertEqual(result['body_intent'], 'follow_entity')
+        self.assertTrue(result.executed)
+        self.assertEqual(result.intention, 'visit_recipient')
+        self.assertEqual(result.body_intent, 'follow_entity')
         self.assertEqual(captured['suggested_intent'], 'follow_entity')
         self.assertEqual(captured['navigation_target'], 'wizard')
 
@@ -116,9 +143,9 @@ class CatIntentionExecutorTests(unittest.TestCase):
         self.cat.current_layer = 'idea_universe'
         self.set_intention('visit_recipient', target=CatVisitRecipientTarget(recipient_id='wizard'))
         result = self.cats.execute_cat_intention(self.cat)
-        self.assertTrue(result['executed'])
-        self.assertEqual(result['body_intent'], 'follow_entity')
-        self.assertEqual(result['destination'], 'recipient:wizard')
+        self.assertTrue(result.executed)
+        self.assertEqual(result.body_intent, 'follow_entity')
+        self.assertEqual(result.destination, 'recipient:wizard')
         self.assertEqual(self.cat.navigation_target, 'wizard')
         self.assertTrue(hasattr(self.cat, 'active_route_id'))
 

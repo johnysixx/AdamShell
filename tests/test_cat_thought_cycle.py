@@ -20,7 +20,7 @@ class CatThoughtCycleTests(unittest.TestCase):
         result = self.cats.think_and_act(cat=self.cat)
         self.assertTrue(result['completed'])
         self.assertEqual(result['decision']['intention'], 'visit_bar')
-        self.assertTrue(result['execution']['executed'])
+        self.assertTrue(result['execution'].executed)
         self.assertEqual(self.cat.intent, 'return_to_bar')
 
     def test_curious_cat_notices_new_box(self):

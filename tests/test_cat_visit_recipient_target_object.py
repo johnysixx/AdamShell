@@ -73,11 +73,11 @@ class CatVisitRecipientTargetObjectTests(
         )
 
         self.assertFalse(
-            result['executed']
+            result.executed
         )
 
         self.assertEqual(
-            result['reason'],
+            result.reason,
             (
                 'invalid_visit_recipient_target'
             ),

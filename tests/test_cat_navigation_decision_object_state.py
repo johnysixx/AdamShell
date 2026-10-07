@@ -11,6 +11,9 @@ from cats.cat_navigation_decision_state import (
 from cats.cat_navigation_decision import (
     CatNavigationDecision,
 )
+from cats.cat_navigation_result_state import (
+    CatNavigationOfferDecidedEvent,
+)
 
 
 class FixedRng:
@@ -149,12 +152,12 @@ class CatNavigationDecisionObjectStateTests(
 
         self.assertIsInstance(
             result,
-            dict,
+            CatNavigationOfferDecidedEvent,
         )
 
-        self.assertEqual(
-            result['decision'],
-            'accepted',
+        self.assertIs(
+            result.decision,
+            CatNavigationDecision.ACCEPTED,
         )
 
     def test_string_decision_is_rejected(
