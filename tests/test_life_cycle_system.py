@@ -24,8 +24,8 @@ class LifeCycleSystemTests(unittest.TestCase):
         development = CatDevelopmentResolver(self.universe)
         development.initialize_newborn(kitten)
         result = self.universe.life_cycle_system.tick_day()
-        self.assertFalse(result['advanced'])
-        self.assertEqual(result['reason'], 'physical_universe_not_started')
+        self.assertFalse(result.advanced)
+        self.assertEqual(result.reason, 'physical_universe_not_started')
         self.assertEqual(kitten.age_days, 0)
         self.assertEqual(self.universe.cronenberg_count, 0)
 

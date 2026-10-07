@@ -1,9 +1,15 @@
+from dataclasses import (
+    FrozenInstanceError,
+    dataclass,
+)
 import unittest
 
-from lifecycle.life_cycle_system import (
+from lifecycle.life_cycle_result_state import (
     LifeCycleDayCompletedEvent,
-    LifeCycleSystem,
     LifeCycleTickSkippedEvent,
+)
+from lifecycle.life_cycle_system import (
+    LifeCycleSystem,
 )
 
 
@@ -18,7 +24,25 @@ class FakeUniverse:
         )
 
 
+@dataclass(slots=True, frozen=True)
+class FakeLifeCycleResult:
+
+    day: int
+    value: int = 7
+
+
 class FakeHandler:
+
+    def tick_day(
+        self,
+        day,
+    ):
+        return FakeLifeCycleResult(
+            day=day
+        )
+
+
+class LegacyMappingHandler:
 
     def tick_day(
         self,
@@ -26,11 +50,6 @@ class FakeHandler:
     ):
         return {
             "day": day,
-            "nested": [
-                {
-                    "value": 7,
-                },
-            ],
         }
 
 
@@ -38,7 +57,32 @@ class LifeCycleHistoryObjectStateTests(
     unittest.TestCase
 ):
 
-    def test_skipped_history_uses_object_state(
+    def assert_object_only(
+        self,
+        value,
+    ):
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+            "to_dict",
+        ):
+            self.assertFalse(
+                hasattr(
+                    value,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = value[
+                "name"
+            ]
+
+    def test_skipped_result_and_history_use_object_state(
         self
     ):
         system = LifeCycleSystem(
@@ -49,41 +93,48 @@ class LifeCycleHistoryObjectStateTests(
 
         result = system.tick_day()
 
-        event = (
+        stored = (
             system.history[-1]
         )
 
         self.assertIsInstance(
-            event,
+            result,
+            LifeCycleTickSkippedEvent,
+        )
+
+        self.assertIsInstance(
+            stored,
             LifeCycleTickSkippedEvent,
         )
 
         self.assertFalse(
-            event.advanced
+            result.advanced
         )
 
         self.assertEqual(
-            result["day"],
-            0,
+            result.reason,
+            "physical_universe_not_started",
         )
 
-        for mapping_method in (
-            "get",
-            "keys",
-            "items",
-            "values",
-        ):
-            self.assertFalse(
-                hasattr(
-                    event,
-                    mapping_method,
-                )
-            )
+        self.assertEqual(
+            stored,
+            result,
+        )
 
-        with self.assertRaises(TypeError):
-            _ = event["day"]
+        self.assertIsNot(
+            stored,
+            result,
+        )
 
-    def test_completed_history_uses_object_state(
+        self.assert_object_only(
+            result
+        )
+
+        self.assert_object_only(
+            stored
+        )
+
+    def test_completed_result_and_history_use_object_state(
         self
     ):
         system = LifeCycleSystem(
@@ -98,33 +149,60 @@ class LifeCycleHistoryObjectStateTests(
 
         result = system.tick_day()
 
-        event = (
+        stored = (
             system.history[-1]
         )
 
         self.assertIsInstance(
-            event,
+            result,
+            LifeCycleDayCompletedEvent,
+        )
+
+        self.assertIsInstance(
+            stored,
             LifeCycleDayCompletedEvent,
         )
 
         self.assertEqual(
-            event.day,
+            result.day,
             1,
         )
 
         self.assertEqual(
-            event.processed_handlers,
+            result.processed_handlers,
             1,
+        )
+
+        self.assertIsInstance(
+            result.results,
+            tuple,
+        )
+
+        self.assertIsInstance(
+            result.results[0],
+            FakeLifeCycleResult,
         )
 
         self.assertEqual(
-            result[
-                "processed_handlers"
-            ],
-            1,
+            result.results[0].value,
+            7,
         )
 
-    def test_result_snapshot_is_detached_from_history(
+        self.assertEqual(
+            stored,
+            result,
+        )
+
+        self.assertIsNot(
+            stored,
+            result,
+        )
+
+        self.assert_object_only(
+            result
+        )
+
+    def test_completed_wrapper_shares_only_immutable_child_object(
         self
     ):
         system = LifeCycleSystem(
@@ -139,35 +217,42 @@ class LifeCycleHistoryObjectStateTests(
 
         result = system.tick_day()
 
-        event = (
+        stored = (
             system.history[-1]
         )
 
-        result[
-            "results"
-        ][0][
-            "nested"
-        ][0][
-            "value"
-        ] = 99
+        self.assertIsNot(
+            stored,
+            result,
+        )
 
-        self.assertEqual(
-            event.results[0][
-                "nested"
-            ][0][
-                "value"
-            ],
-            7,
+        self.assertIs(
+            stored.results[0],
+            result.results[0],
+        )
+
+        with self.assertRaises(
+            FrozenInstanceError
+        ):
+            result.results[0].value = 99
+
+    def test_mapping_handler_result_is_rejected(
+        self
+    ):
+        system = LifeCycleSystem(
+            FakeUniverse(
+                started=True
+            )
+        )
+
+        system.register(
+            LegacyMappingHandler()
         )
 
         with self.assertRaises(
             TypeError
         ):
-            event.results[0][
-                "nested"
-            ][0][
-                "value"
-            ] = 99
+            system.tick_day()
 
     def test_history_rejects_mapping_event(
         self
@@ -178,12 +263,13 @@ class LifeCycleHistoryObjectStateTests(
             )
         )
 
-        with self.assertRaises(TypeError):
+        with self.assertRaises(
+            TypeError
+        ):
             system.record_event(
                 {
-                    "name": (
-                        "life_cycle_day_completed"
-                    ),
+                    "name":
+                        "life_cycle_day_completed",
                 }
             )
 
