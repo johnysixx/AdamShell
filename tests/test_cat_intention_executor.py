@@ -66,16 +66,16 @@ class CatIntentionExecutorTests(unittest.TestCase):
     def test_rest_is_executed_without_route(self):
         self.set_intention('rest')
         result = self.cats.execute_cat_intention(self.cat)
-        self.assertTrue(result['executed'])
+        self.assertTrue(result.executed)
         self.assertEqual(self.cat.state, 'resting_by_own_choice')
         self.assertFalse(hasattr(self.cat, 'active_route_id'))
 
     def test_unimplemented_body_action_is_deferred(self):
         self.set_intention('observe', target='unknown_target')
         result = self.cats.execute_cat_intention(self.cat)
-        self.assertFalse(result['executed'])
-        self.assertTrue(result['deferred'])
-        self.assertTrue(result['decision_preserved'])
+        self.assertFalse(result.executed)
+        self.assertTrue(result.deferred)
+        self.assertTrue(result.decision_preserved)
         self.assertEqual(self.cat.mind.current_intention.type, 'observe')
 
     def test_executor_does_not_make_new_decision(self):

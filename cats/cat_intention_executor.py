@@ -29,6 +29,12 @@ from cats.cat_scent_navigation_state import (
     CatScentBoxFollowState,
 )
 from cats.cat_social_system import CatSocialSystem
+from cats.cat_basic_intention_result_state import (
+    CatIntentionBodyActionDeferredEvent,
+    CatRestStartedEvent,
+    CatWanderedEvent,
+    CatWanderFailedResult,
+)
 
 from cats.cat_intention_state import CatQuantumBoxTravelTarget
 
@@ -1213,34 +1219,158 @@ class CatIntentionExecutor:
         mind.active_body_execution = deepcopy(event)
         return self._record(event)
 
-    def _execute_wander(self, cat, intention, step_size=None):
+    def _execute_wander(
+        self,
+        cat,
+        intention,
+        step_size=None,
+    ):
         position = cat.position
-        if not isinstance(position, SpatialVector3):
-            return self._record({'name': 'cat_wander_failed', 'cat': cat.name, 'reason': 'missing_position', 'executed': False})
-        step = 1.0 if step_size is None else max(0.0, float(step_size))
-        phase = int(getattr(cat.needs, 'tick', 0)) + sum((ord(ch) for ch in cat.name))
-        axis = 'x' if phase % 2 == 0 else 'y'
-        direction = 1.0 if phase // 2 % 2 == 0 else -1.0
+
+        if not isinstance(
+            position,
+            SpatialVector3,
+        ):
+            return self._record(
+                CatWanderFailedResult(
+                    cat=cat.name,
+                    reason="missing_position",
+                )
+            )
+
+        step = (
+            1.0
+            if step_size is None
+            else max(
+                0.0,
+                float(step_size),
+            )
+        )
+
+        phase = (
+            int(
+                getattr(
+                    cat.needs,
+                    "tick",
+                    0,
+                )
+            )
+            + sum(
+                ord(character)
+                for character
+                in cat.name
+            )
+        )
+
+        axis = (
+            "x"
+            if phase % 2 == 0
+            else "y"
+        )
+
+        direction = (
+            1.0
+            if (
+                phase // 2
+            )
+            % 2
+            == 0
+            else -1.0
+        )
+
         previous = position
         delta = direction * step
-        destination = position.translated(dx=delta if axis == 'x' else 0.0, dy=delta if axis == 'y' else 0.0)
-        cat.move_to(destination)
-        cat.state = 'wandering_by_own_choice'
-        event = {'name': 'cat_wandered', 'cat': cat.name, 'from_position': previous.to_dict(), 'position': destination.to_dict(), 'axis': axis, 'step': delta, 'decision_source': 'cat_mind', 'executed': True}
-        cat.mind.active_body_execution = deepcopy(event)
-        return self._record(event)
 
-    def _execute_rest(self, cat, intention):
-        previous_state = cat.state
-        cat.state = 'resting_by_own_choice'
+        destination = (
+            position.translated(
+                dx=(
+                    delta
+                    if axis == "x"
+                    else 0.0
+                ),
+                dy=(
+                    delta
+                    if axis == "y"
+                    else 0.0
+                ),
+            )
+        )
+
+        cat.move_to(
+            destination
+        )
+
+        cat.state = (
+            "wandering_by_own_choice"
+        )
+
+        event = (
+            CatWanderedEvent(
+                cat=cat.name,
+                from_position=
+                    previous,
+                position=
+                    destination,
+                axis=axis,
+                step=delta,
+            )
+        )
+
+        cat.mind.active_body_execution = (
+            deepcopy(
+                event
+            )
+        )
+
+        return self._record(
+            event
+        )
+
+    def _execute_rest(
+        self,
+        cat,
+        intention,
+    ):
+        previous_state = (
+            cat.state
+        )
+
+        cat.state = (
+            "resting_by_own_choice"
+        )
+
         cat.suggested_intent = None
-        if hasattr(cat, 'intent'):
+
+        if hasattr(
+            cat,
+            "intent",
+        ):
             del cat.intent
-        if hasattr(cat, 'active_route_id'):
+
+        if hasattr(
+            cat,
+            "active_route_id",
+        ):
             del cat.active_route_id
-        event = {'name': 'cat_intention_rest_started', 'cat': cat.name, 'intention': 'rest', 'previous_state': previous_state, 'state': cat.state, 'decision_source': 'cat_mind', 'executed': True}
-        cat.mind.active_body_execution = deepcopy(event)
-        return self._record(event)
+
+        event = (
+            CatRestStartedEvent(
+                cat=cat.name,
+                previous_state=
+                    previous_state,
+                state=cat.state,
+            )
+        )
+
+        cat.mind.active_body_execution = (
+            deepcopy(
+                event
+            )
+        )
+
+        return self._record(
+            event
+        )
 
     def _execute_approach_cat(self, cat, intention, step_size=None):
         target = intention.target
@@ -1292,13 +1422,47 @@ class CatIntentionExecutor:
         cat.mind.active_body_execution = deepcopy(event)
         return self._record(event)
 
-    def _defer_intention(self, cat, intention):
-        intention_type = intention.type
-        required_system = self.DEFERRED_INTENTS[intention_type]
-        cat.state = 'intention_waiting_for_body_system'
-        event = {'name': 'cat_intention_body_action_deferred', 'cat': cat.name, 'intention': intention_type, 'target': intention.target, 'required_system': required_system, 'decision_preserved': True, 'executed': False, 'deferred': True}
-        cat.mind.active_body_execution = deepcopy(event)
-        return self._record(event)
+    def _defer_intention(
+        self,
+        cat,
+        intention,
+    ):
+        intention_type = (
+            intention.type
+        )
+
+        required_system = (
+            self.DEFERRED_INTENTS[
+                intention_type
+            ]
+        )
+
+        cat.state = (
+            "intention_waiting_for_body_system"
+        )
+
+        event = (
+            CatIntentionBodyActionDeferredEvent(
+                cat=cat.name,
+                intention=
+                    intention_type,
+                target=deepcopy(
+                    intention.target
+                ),
+                required_system=
+                    required_system,
+            )
+        )
+
+        cat.mind.active_body_execution = (
+            deepcopy(
+                event
+            )
+        )
+
+        return self._record(
+            event
+        )
 
     def _record(self, event):
         stored = deepcopy(event)
