@@ -226,19 +226,6 @@ class CatAdultVocalizationObjectStateTests(
         with self.assertRaises(TypeError):
             _ = event['vocalization']
 
-        boundary = (
-            result.to_dict()
-        )
-
-        boundary[
-            'vocalization'
-        ] = 'changed'
-
-        self.assertEqual(
-            event.vocalization,
-            'food_request',
-        )
-
     def test_denied_lesson_history_uses_object_state(
         self
     ):
@@ -311,6 +298,7 @@ class CatAdultVocalizationObjectStateTests(
                 'keys',
                 'items',
                 'values',
+                'to_dict',
             ):
                 self.assertFalse(
                     hasattr(

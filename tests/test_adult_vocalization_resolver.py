@@ -47,7 +47,7 @@ class AdultVocalizationResolverTests(unittest.TestCase):
     def test_complete_repertoire_is_learned(self):
         result = self.vocalization.teach_all(teacher=self.mother, kitten=self.kitten, current_day=70)
         skill = self.kitten.learning.skills['adult_meowing']
-        self.assertTrue(result['complete'])
+        self.assertTrue(result.complete)
         self.assertTrue(skill.learned)
         self.assertTrue(
             skill.vocalizations.complete

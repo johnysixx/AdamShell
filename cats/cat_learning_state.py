@@ -1,9 +1,89 @@
 from copy import deepcopy
-from dataclasses import dataclass, field
+from dataclasses import (
+    dataclass,
+    field,
+    fields,
+    is_dataclass,
+)
+from enum import Enum
 
 from cats.cat_adult_vocalization_state import (
     CatAdultVocalizationState,
 )
+
+
+def _learning_snapshot_value(
+    value,
+):
+    serializer = getattr(
+        value,
+        "to_dict",
+        None,
+    )
+
+    if callable(
+        serializer
+    ):
+        return deepcopy(
+            serializer()
+        )
+
+    if isinstance(
+        value,
+        Enum,
+    ):
+        return value.value
+
+    if is_dataclass(
+        value
+    ):
+        return {
+            item.name: (
+                _learning_snapshot_value(
+                    getattr(
+                        value,
+                        item.name,
+                    )
+                )
+            )
+            for item
+            in fields(value)
+        }
+
+    if isinstance(
+        value,
+        dict,
+    ):
+        return {
+            key: (
+                _learning_snapshot_value(
+                    item
+                )
+            )
+            for key, item
+            in value.items()
+        }
+
+    if isinstance(
+        value,
+        (
+            list,
+            tuple,
+            set,
+            frozenset,
+        ),
+    ):
+        return [
+            _learning_snapshot_value(
+                item
+            )
+            for item
+            in value
+        ]
+
+    return deepcopy(
+        value
+    )
 
 
 @dataclass(slots=True)
@@ -110,22 +190,11 @@ class CatLearningState:
                 for name, skill in self.skills.items()
             },
             "lessons": [
-                (
-                    deepcopy(
-                        lesson.to_dict()
-                    )
-                    if callable(
-                        getattr(
-                            lesson,
-                            "to_dict",
-                            None,
-                        )
-                    )
-                    else deepcopy(
-                        lesson
-                    )
+                _learning_snapshot_value(
+                    lesson
                 )
-                for lesson in self.lessons
+                for lesson
+                in self.lessons
             ],
             "family_knowledge": (
                 self.family_knowledge.to_dict()

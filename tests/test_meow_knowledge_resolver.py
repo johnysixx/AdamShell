@@ -140,6 +140,7 @@ class MeowKnowledgeResolverTests(unittest.TestCase):
                 'keys',
                 'items',
                 'values',
+                'to_dict',
             ):
                 self.assertFalse(
                     hasattr(
@@ -150,30 +151,6 @@ class MeowKnowledgeResolverTests(unittest.TestCase):
 
             with self.assertRaises(TypeError):
                 _ = value[key]
-
-        boundary = (
-            result.to_dict()
-        )
-
-        boundary[
-            'teacher_role'
-        ] = 'changed'
-
-        boundary[
-            'knowledge'
-        ].append(
-            'changed'
-        )
-
-        self.assertEqual(
-            event.teacher_role,
-            'biological_mother',
-        )
-
-        self.assertNotIn(
-            'changed',
-            event.knowledge,
-        )
 
     def test_denied_transmission_history_uses_object_state(
         self
@@ -210,30 +187,6 @@ class MeowKnowledgeResolverTests(unittest.TestCase):
             event.transmitted
         )
 
-        boundary = (
-            result.to_dict()
-        )
-
-        boundary[
-            'reason'
-        ] = 'changed'
-
-        boundary[
-            'missing_experiences'
-        ].append(
-            'changed'
-        )
-
-        self.assertEqual(
-            event.reason,
-            'required_experiences_missing',
-        )
-
-        self.assertNotIn(
-            'changed',
-            event.missing_experiences,
-        )
-
         with self.assertRaises(TypeError):
             _ = event['reason']
 
@@ -263,6 +216,7 @@ class MeowKnowledgeResolverTests(unittest.TestCase):
                 'keys',
                 'items',
                 'values',
+                'to_dict',
             ):
                 self.assertFalse(
                     hasattr(
