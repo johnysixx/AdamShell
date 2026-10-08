@@ -144,18 +144,6 @@ class CatMatingDeniedResult:
     ):
         return self
 
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "female": self.female,
-            "male": self.male,
-            "reason": self.reason,
-            "mating_recorded": (
-                self.mating_recorded
-            ),
-        }
-
-
 class CatMatingHistoryEvent:
 
     def __deepcopy__(

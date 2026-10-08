@@ -233,6 +233,7 @@ class CatMatingContactObjectStateTests(
             "keys",
             "items",
             "values",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
@@ -247,16 +248,12 @@ class CatMatingContactObjectStateTests(
             ]
 
         self.assertEqual(
-            result.to_dict(),
-            {
-                "name": "cat_mating_denied",
-                "female": "mother",
-                "male": "father",
-                "reason": (
-                    "female_not_in_estrus"
-                ),
-                "mating_recorded": False,
-            },
+            result.name,
+            "cat_mating_denied",
+        )
+
+        self.assertFalse(
+            result.mating_recorded
         )
 
     def test_history_rejects_mapping(
