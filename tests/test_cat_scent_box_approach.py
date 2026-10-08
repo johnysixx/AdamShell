@@ -26,8 +26,8 @@ class CatScentBoxApproachTests(unittest.TestCase):
         self.tracker.current_layer = 'meeting_place'
         self.tracker.position = SpatialVector3(x=0.0, y=0.0, z=0.0)
         creation = self.universe.cat_box_transfer.create_exploration_pair(cat=self.creator, destination_layer='quantum_layer', destination_position=SpatialVector3(x=8.0, y=0.0, z=0.0), source_position=SpatialVector3(x=3.0, y=0.0, z=0.0))
-        self.source = creation['source_box']
-        self.target = creation['target_box']
+        self.source = creation.source_box
+        self.target = creation.target_box
         self.tracker.mind.current_intention = CatIntentionCandidate(
 
             type='follow_scent_through_box',

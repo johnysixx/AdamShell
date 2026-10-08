@@ -209,10 +209,10 @@ class CatQuantumBoxTransferResultsObjectStateTests(
             .transfer_cat(
                 cat=self.cat,
                 source_box_id=(
-                    creation["source_box"].id
+                    creation.source_box.id
                 ),
                 target_box_id=(
-                    creation["target_box"].id
+                    creation.target_box.id
                 ),
             )
         )
@@ -263,13 +263,9 @@ class CatQuantumBoxTransferResultsObjectStateTests(
             )
         )
 
-        source = creation[
-            "source_box"
-        ]
+        source = creation.source_box
 
-        target = creation[
-            "target_box"
-        ]
+        target = creation.target_box
 
         self.universe.cat_box_transfer            .transfer_cat(
                 cat=self.cat,

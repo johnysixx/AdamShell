@@ -58,16 +58,16 @@ class CatAutonomousExplorationPairTests(unittest.TestCase):
         self.assertTrue(result['completed'])
         self.assertEqual(result['decision'].intention, 'create_exploration_pair')
         execution = result['execution']
-        self.assertTrue(execution['executed'])
-        self.assertEqual(execution['name'], 'cat_started_autonomous_exploration_through_new_pair')
+        self.assertTrue(execution.executed)
+        self.assertEqual(execution.name, 'cat_started_autonomous_exploration_through_new_pair')
         self.assertEqual(len(self.universe.quantum_boxes), before_boxes + 2)
         self.assertEqual(len(self.universe.stable_cat_box_pairs), 1)
         self.assertLess(self.cat.idea_energy, before_energy)
         self.assertEqual(self.cat.current_layer, 'quantum_layer')
         self.assertEqual(self.cat.state, 'materialized_through_stable_exploration_pair')
-        self.assertTrue(execution['transfer'].transferred)
-        self.assertTrue(execution['transfer'].pair_remains_stable)
-        self.assertFalse(execution['transfer'].target_box_consumed)
+        self.assertTrue(execution.transfer.transferred)
+        self.assertTrue(execution.transfer.pair_remains_stable)
+        self.assertFalse(execution.transfer.target_box_consumed)
         self.assertIsInstance(
             self.cat.quantum_transfer,
             CatQuantumTransferState,

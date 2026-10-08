@@ -26,8 +26,8 @@ class CatScentReorientationAfterTransferTests(unittest.TestCase):
         self.tracker.position = SpatialVector3(x=0.0, y=0.0, z=0.0)
         self.cats.learn_cat_aroma(observer=self.tracker, observed_cat=self.creator)
         creation = self.universe.cat_box_transfer.create_exploration_pair(cat=self.creator, destination_layer='quantum_layer', destination_position=SpatialVector3(x=8.0, y=0.0, z=0.0), source_position=SpatialVector3(x=3.0, y=0.0, z=0.0))
-        self.source = creation['source_box']
-        self.target = creation['target_box']
+        self.source = creation.source_box
+        self.target = creation.target_box
         self.trail_box = self.universe.create_quantum_box(layer='quantum_layer')
         self.trail_box.position = SpatialVector3(x=9.0, y=0.0, z=0.0)
         AromaResidue.transfer(source_profile=self.creator.aroma, target=self.trail_box, source_identity='creator', fraction=0.3)

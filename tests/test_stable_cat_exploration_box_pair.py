@@ -59,13 +59,9 @@ class StableCatExplorationBoxPairTests(
             )
         )
 
-        self.source = result[
-            "source_box"
-        ]
+        self.source = result.source_box
 
-        self.target = result[
-            "target_box"
-        ]
+        self.target = result.target_box
 
     def transfer(
         self,

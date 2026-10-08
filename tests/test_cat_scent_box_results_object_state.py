@@ -92,13 +92,9 @@ class CatScentBoxResultsObjectStateTests(
             )
         )
 
-        self.source = creation[
-            "source_box"
-        ]
+        self.source = creation.source_box
 
-        self.target = creation[
-            "target_box"
-        ]
+        self.target = creation.target_box
 
     def assert_object_only(
         self,

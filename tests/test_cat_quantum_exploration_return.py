@@ -62,7 +62,7 @@ class CatQuantumExplorationReturnTests(unittest.TestCase):
                 break
         self.assertEqual(self.cat.current_layer, 'meeting_place')
         self.assertEqual(self.cat.state, 'returned_from_quantum_exploration')
-        self.assertEqual(len([pair for pair in self.universe.stable_cat_box_pairs if pair.get('active', False)]), 0)
+        self.assertEqual(len([pair for pair in self.universe.stable_cat_box_pairs if pair.active]), 0)
         self.assertGreaterEqual(len(self.universe.cronenbergs), 1)
 if __name__ == '__main__':
     unittest.main()

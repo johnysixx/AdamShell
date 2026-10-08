@@ -46,14 +46,14 @@ class CatQuantumExplorationContinuationTests(unittest.TestCase):
         self.assertEqual(len(self.universe.stable_cat_box_pairs), 0)
         self.reach_first_goal()
         self.assertEqual(len(self.universe.stable_cat_box_pairs), 1)
-        active_pairs = [pair for pair in self.universe.stable_cat_box_pairs if pair.get('active', False)]
+        active_pairs = [pair for pair in self.universe.stable_cat_box_pairs if pair.active]
         self.assertEqual(len(active_pairs), 1)
 
     def test_return_anchor_survives_continuation(self):
         self.reach_first_goal()
-        pair = next((pair for pair in self.universe.stable_cat_box_pairs if pair.get('active', False)))
-        self.assertIn(pair['anchor_box_id'], [box.id for box in self.universe.quantum_boxes])
-        self.assertIn(pair['remote_box_id'], [box.id for box in self.universe.quantum_boxes])
+        pair = next((pair for pair in self.universe.stable_cat_box_pairs if pair.active))
+        self.assertIn(pair.anchor_box_id, [box.id for box in self.universe.quantum_boxes])
+        self.assertIn(pair.remote_box_id, [box.id for box in self.universe.quantum_boxes])
 
     def test_second_goal_is_different(self):
         first_goal = self.cat.exploration_goal.position.to_dict()

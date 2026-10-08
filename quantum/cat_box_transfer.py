@@ -41,6 +41,14 @@ from universe.quantum_cat_route_advance_state import (
 from quantum.cat_quantum_trail_state import (
     QuantumCatTrail,
 )
+from quantum.cat_stable_exploration_pair_state import (
+    CatStableExplorationPairState,
+)
+from quantum.cat_stable_exploration_pair_result_state import (
+    CatStableExplorationPairCreatedEvent,
+    CatStableExplorationPairCreatedResult,
+    CatStableExplorationPairCreationFailedResult,
+)
 from quantum.cat_quantum_return_result_state import (
     CatQuantumReturnAdvancedEvent,
     CatQuantumReturnNotAdvancedResult,
@@ -127,35 +135,65 @@ class CatQuantumBoxTransfer:
 
         return event
 
+    def _exploration_pair_creation_failure(
+        self,
+        cat,
+        reason,
+    ):
+        result = (
+            CatStableExplorationPairCreationFailedResult(
+                cat=getattr(
+                    cat,
+                    "name",
+                    None,
+                ),
+                reason=reason,
+            )
+        )
+
+        self._record(
+            result
+        )
+
+        return result
+
     def create_exploration_pair(
         self,
         cat,
         destination_layer,
         destination_position,
-        source_position=None
+        source_position=None,
     ):
-        """
-        Ko?ka vytvo?? za vlastn? energii
-        stabiln? dvojici krabic pro pr?zkum.
-
-        P?r mohou vyu??vat i jin? ko?ky.
-        """
-        if not isinstance(cat, Cat):
-            return self._failure(
-                cat,
-                "invalid_cat"
+        if not isinstance(
+            cat,
+            Cat,
+        ):
+            return (
+                self._exploration_pair_creation_failure(
+                    cat=cat,
+                    reason="invalid_cat",
+                )
             )
 
-        source_layer = cat.current_layer
+        source_layer = (
+            cat.current_layer
+        )
 
         destination_layer = str(
             destination_layer
         )
 
-        if destination_layer == source_layer:
-            return self._failure(
-                cat,
-                "destination_layer_matches_source"
+        if (
+            destination_layer
+            == source_layer
+        ):
+            return (
+                self._exploration_pair_creation_failure(
+                    cat=cat,
+                    reason=(
+                        "destination_layer_matches_source"
+                    ),
+                )
             )
 
         energy_cost = (
@@ -167,10 +205,15 @@ class CatQuantumBoxTransfer:
             cat.idea_energy
         )
 
-        if available_energy < energy_cost:
-            return self._failure(
-                cat,
-                "insufficient_cat_energy"
+        if (
+            available_energy
+            < energy_cost
+        ):
+            return (
+                self._exploration_pair_creation_failure(
+                    cat=cat,
+                    reason="insufficient_cat_energy",
+                )
             )
 
         cat.idea_energy = (
@@ -192,30 +235,54 @@ class CatQuantumBoxTransfer:
             )
         )
 
-        source_position_snapshot = require_optional_spatial_vector(
-            source_position,
-            field_name="exploration pair source position",
-        )
-        if source_position_snapshot is None:
-            source_position_snapshot = cat.position if cat.position is not None else SpatialVector3.zero()
-        source_box.position = source_position_snapshot
-
-        exploration_destination_position = require_spatial_vector(
-            destination_position,
-            field_name="exploration destination position",
+        source_position_snapshot = (
+            require_optional_spatial_vector(
+                source_position,
+                field_name=(
+                    "exploration pair "
+                    "source position"
+                ),
+            )
         )
 
-        # P?i vstupu do Quantum Layer nen?
-        # vzd?len? krabice samotn?m c?lem.
-        # Je pouze vstupn?m bodem.
-        if destination_layer == "quantum_layer":
-            target_box.position = source_box.position
+        if (
+            source_position_snapshot
+            is None
+        ):
+            source_position_snapshot = (
+                cat.position
+                if cat.position is not None
+                else SpatialVector3.zero()
+            )
+
+        source_box.position = (
+            source_position_snapshot
+        )
+
+        exploration_destination_position = (
+            require_spatial_vector(
+                destination_position,
+                field_name=(
+                    "exploration destination position"
+                ),
+            )
+        )
+
+        if (
+            destination_layer
+            == "quantum_layer"
+        ):
+            target_box.position = (
+                source_box.position
+            )
         else:
-            target_box.position = exploration_destination_position
+            target_box.position = (
+                exploration_destination_position
+            )
 
         self.pair_boxes(
             source_box,
-            target_box
+            target_box,
         )
 
         pair_number = (
@@ -231,31 +298,32 @@ class CatQuantumBoxTransfer:
             f"{pair_number:04d}"
         )
 
-        pair = {
-            "pair_id": pair_id,
-            "pair_kind": (
-                "cat_created_exploration_pair"
-            ),
-            "stable": True,
-            "active": True,
-            "creator_cat": cat.name,
-            "creator_departed": False,
-            "creator_returned": False,
-            "anchor_box_id": source_box.id,
-            "remote_box_id": target_box.id,
-            "anchor_layer": source_layer,
-            "remote_layer": destination_layer,
-            "exploration_destination_position": exploration_destination_position,
-            "creation_energy_j": energy_cost,
-            "remaining_energy_j": energy_cost,
-            "currently_in_use": False,
-            "current_user": None,
-            "use_count": 0,
-            "used_by": [],
-            "created_tick": (
-                self.universe.quantum_state.tick_count
+        pair = (
+            CatStableExplorationPairState(
+                pair_id=pair_id,
+                creator_cat=cat.name,
+                anchor_box_id=
+                    source_box.id,
+                remote_box_id=
+                    target_box.id,
+                anchor_layer=
+                    source_layer,
+                remote_layer=
+                    destination_layer,
+                exploration_destination_position=(
+                    exploration_destination_position
+                ),
+                creation_energy_j=
+                    energy_cost,
+                remaining_energy_j=
+                    energy_cost,
+                created_tick=(
+                    self.universe
+                    .quantum_state
+                    .tick_count
+                ),
             )
-        }
+        )
 
         self.universe.stable_cat_box_pairs.append(
             pair
@@ -269,67 +337,77 @@ class CatQuantumBoxTransfer:
             pair_id
         )
 
-        event = {
-            "name": (
-                "cat_created_stable_"
-                "exploration_box_pair"
-            ),
-            "cat": cat.name,
-            "pair_id": pair_id,
-            "source_box_id": source_box.id,
-            "target_box_id": target_box.id,
-            "source_layer": source_layer,
-            "target_layer": destination_layer,
-            "energy_cost_j": energy_cost,
-            "remaining_cat_energy": (
-                cat.idea_energy
-            ),
-            "available_to_other_cats": True,
-            "stable": True,
-            "created": True
-        }
+        event = (
+            CatStableExplorationPairCreatedEvent(
+                cat=cat.name,
+                pair_id=pair_id,
+                source_box_id=
+                    source_box.id,
+                target_box_id=
+                    target_box.id,
+                source_layer=
+                    source_layer,
+                target_layer=
+                    destination_layer,
+                energy_cost_j=
+                    energy_cost,
+                remaining_cat_energy=
+                    cat.idea_energy,
+            )
+        )
 
         self._record(
             event
         )
 
-        return {
-            **event,
-            "source_box": source_box,
-            "target_box": target_box,
-            "pair": deepcopy(pair)
-        }
+        return (
+            CatStableExplorationPairCreatedResult(
+                cat=cat.name,
+                pair_id=pair_id,
+                source_box_id=
+                    source_box.id,
+                target_box_id=
+                    target_box.id,
+                source_layer=
+                    source_layer,
+                target_layer=
+                    destination_layer,
+                energy_cost_j=
+                    energy_cost,
+                remaining_cat_energy=
+                    cat.idea_energy,
+                source_box=
+                    source_box,
+                target_box=
+                    target_box,
+                pair=pair,
+            )
+        )
 
     def _find_stable_pair(
         self,
         source_box_id,
-        target_box_id
+        target_box_id,
     ):
-        expected_boxes = {
-            source_box_id,
-            target_box_id
-        }
-
         for pair in (
             self.universe
             .stable_cat_box_pairs
         ):
-            if not pair.get(
-                "active",
-                False
+            if not isinstance(
+                pair,
+                CatStableExplorationPairState,
             ):
-                continue
-
-            pair_boxes = {
-                pair.get(
-                    "anchor_box_id"
-                ),
-                pair.get(
-                    "remote_box_id"
+                raise TypeError(
+                    "Stable cat box pair registry "
+                    "must contain "
+                    "CatStableExplorationPairState "
+                    "objects."
                 )
-            }
 
-            if pair_boxes == expected_boxes:
+            if pair.matches_boxes(
+                source_box_id,
+                target_box_id,
+            ):
                 return pair
 
         return None
@@ -350,14 +428,9 @@ class CatQuantumBoxTransfer:
         """
         cat_name = cat.name
 
-        pair["currently_in_use"] = True
-        pair["current_user"] = cat_name
-        pair["use_count"] += 1
-
-        if cat_name not in pair["used_by"]:
-            pair["used_by"].append(
-                cat_name
-            )
+        pair.begin_use(
+            cat_name
+        )
 
         target_position = target_box.position
 
@@ -380,9 +453,7 @@ class CatQuantumBoxTransfer:
             resolved_layer=target_layer,
             resolved_position=target_position,
             target_box_consumed=False,
-            stable_pair_id=pair[
-                "pair_id"
-            ],
+            stable_pair_id=pair.pair_id,
         )
 
         for box in (
@@ -395,41 +466,17 @@ class CatQuantumBoxTransfer:
                 clear_source=True
             )
 
-        creator_returned = False
-
-        if cat_name == pair["creator_cat"]:
-            leaving_anchor = (
-                source_box.id
-                == pair["anchor_box_id"]
+        creator_returned = (
+            pair.register_creator_transfer(
+                cat_name=cat_name,
+                source_box_id=
+                    source_box.id,
+                target_box_id=
+                    target_box.id,
             )
+        )
 
-            returning_to_anchor = (
-                target_box.id
-                == pair["anchor_box_id"]
-            )
-
-            if (
-                leaving_anchor
-                and not pair[
-                    "creator_departed"
-                ]
-            ):
-                pair[
-                    "creator_departed"
-                ] = True
-
-            elif (
-                pair["creator_departed"]
-                and returning_to_anchor
-            ):
-                pair[
-                    "creator_returned"
-                ] = True
-
-                creator_returned = True
-
-        pair["currently_in_use"] = False
-        pair["current_user"] = None
+        pair.finish_use()
 
         source_box_aroma_pickup = (
             AromaResidue.transfer_existing(
@@ -511,9 +558,7 @@ class CatQuantumBoxTransfer:
                     target_box.id
                 ],
                 details={
-                    "pair_id": pair[
-                        "pair_id"
-                    ],
+                    "pair_id": pair.pair_id,
                     "source_layer": (
                         transfer_state.source_layer
                     ),
@@ -540,14 +585,14 @@ class CatQuantumBoxTransfer:
         event = (
             CatStableExplorationPairTransferEvent(
                 cat=cat_name,
-                pair_id=pair["pair_id"],
+                pair_id=pair.pair_id,
                 source_box_id=source_box.id,
                 target_box_id=target_box.id,
                 source_layer=(
                     transfer_state.source_layer
                 ),
                 target_layer=target_layer,
-                use_count=pair["use_count"],
+                use_count=pair.use_count,
                 trail=trail,
                 pair_remains_stable=(
                     not creator_returned
@@ -612,10 +657,7 @@ class CatQuantumBoxTransfer:
         tak? k temn? energii.
         """
         total_energy = float(
-            pair.get(
-                "remaining_energy_j",
-                0.0
-            )
+            pair.remaining_energy_j
         )
 
         cronenberg_energy = (
@@ -631,7 +673,7 @@ class CatQuantumBoxTransfer:
         )
 
         if (
-            pair["remote_layer"]
+            pair.remote_layer
             == "quantum_layer"
         ):
             remote_layer_energy = 0.0
@@ -678,13 +720,13 @@ class CatQuantumBoxTransfer:
         )
 
         self._credit_layer_energy(
-            pair["anchor_layer"],
+            pair.anchor_layer,
             anchor_layer_energy
         )
 
         if remote_layer_energy > 0.0:
             self._credit_layer_energy(
-                pair["remote_layer"],
+                pair.remote_layer,
                 remote_layer_energy
             )
 
@@ -701,7 +743,7 @@ class CatQuantumBoxTransfer:
                 "stable_box_pair_dark_"
                 "energy_received"
             ),
-            "pair_id": pair["pair_id"],
+            "pair_id": pair.pair_id,
             "energy_j": dark_energy,
             "dark_energy_total_j": (
                 dark_sector.dark_energy_j
@@ -715,8 +757,8 @@ class CatQuantumBoxTransfer:
         removed_boxes = []
 
         for box_id in (
-            pair["anchor_box_id"],
-            pair["remote_box_id"]
+            pair.anchor_box_id,
+            pair.remote_box_id
         ):
             box = self._find_box(
                 box_id
@@ -738,11 +780,7 @@ class CatQuantumBoxTransfer:
                     box.id
                 )
 
-        pair["active"] = False
-        pair["stable"] = False
-        pair["dissolved"] = True
-        pair["remaining_energy_j"] = 0.0
-        pair["dissolved_by_return_of"] = (
+        pair.dissolve(
             returning_cat.name
         )
 
@@ -756,8 +794,8 @@ class CatQuantumBoxTransfer:
 
         event = (
             StableCatBoxPairDissolutionEvent(
-                pair_id=pair["pair_id"],
-                creator_cat=pair["creator_cat"],
+                pair_id=pair.pair_id,
+                creator_cat=pair.creator_cat,
                 returning_cat=
                     returning_cat.name,
                 removed_boxes=tuple(
@@ -786,11 +824,11 @@ class CatQuantumBoxTransfer:
                 global_pool_energy_j=
                     pool_energy,
                 anchor_layer=
-                    pair["anchor_layer"],
+                    pair.anchor_layer,
                 anchor_layer_energy_j=
                     anchor_layer_energy,
                 remote_layer=
-                    pair["remote_layer"],
+                    pair.remote_layer,
                 remote_layer_energy_j=
                     remote_layer_energy,
                 quantum_dark_energy_j=
@@ -1175,21 +1213,10 @@ class CatQuantumBoxTransfer:
                 "CatQuantumExplorationState."
             )
 
-        pair = next(
-            (
-                item
-                for item
-                in self.universe
-                .stable_cat_box_pairs
-                if item.get(
-                    "pair_id"
-                ) == pair_id
-                and item.get(
-                    "active",
-                    False,
-                )
-            ),
-            None,
+        pair = (
+            self._find_stable_pair_by_id(
+                pair_id
+            )
         )
 
         if pair is None:
@@ -1216,9 +1243,7 @@ class CatQuantumBoxTransfer:
             )
 
         destination = require_spatial_vector(
-            pair[
-                "exploration_destination_position"
-            ],
+            pair.exploration_destination_position,
             field_name=(
                 "stable pair "
                 "exploration destination"
@@ -1470,24 +1495,31 @@ class CatQuantumBoxTransfer:
 
     def _find_stable_pair_by_id(
         self,
-        pair_id
+        pair_id,
     ):
-        return next(
-            (
-                pair
-                for pair
-                in self.universe
-                .stable_cat_box_pairs
-                if pair.get(
-                    "pair_id"
-                ) == pair_id
-                and pair.get(
-                    "active",
-                    False
+        for pair in (
+            self.universe
+            .stable_cat_box_pairs
+        ):
+            if not isinstance(
+                pair,
+                CatStableExplorationPairState,
+            ):
+                raise TypeError(
+                    "Stable cat box pair registry "
+                    "must contain "
+                    "CatStableExplorationPairState "
+                    "objects."
                 )
-            ),
-            None
-        )
+
+            if (
+                pair.pair_id
+                == pair_id
+                and pair.active
+            ):
+                return pair
+
+        return None
 
     def finish_quantum_exploration(
         self,
@@ -1667,9 +1699,7 @@ class CatQuantumBoxTransfer:
             return_plan = (
                 self.start_quantum_return_route(
                     cat=cat,
-                    pair_id=pair[
-                        "pair_id"
-                    ],
+                    pair_id=pair.pair_id,
                 )
             )
 
@@ -1936,7 +1966,7 @@ class CatQuantumBoxTransfer:
 
         remote_box = (
             self._find_box(
-                pair["remote_box_id"]
+                pair.remote_box_id
             )
         )
 
@@ -2014,10 +2044,10 @@ class CatQuantumBoxTransfer:
                 pair_id=pair_id,
                 route_id=route.route_id,
                 remote_box_id=(
-                    pair["remote_box_id"]
+                    pair.remote_box_id
                 ),
                 anchor_box_id=(
-                    pair["anchor_box_id"]
+                    pair.anchor_box_id
                 ),
                 destination=destination,
                 stabilized_path=stabilized,

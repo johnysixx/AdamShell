@@ -47,6 +47,15 @@ from cats.cat_social_system import CatSocialSystem
 from universe.quantum_cat_route_advance_state import (
     QUANTUM_CAT_ROUTE_ADVANCE_RESULT_TYPES,
 )
+from quantum.cat_stable_exploration_pair_result_state import (
+    CAT_STABLE_EXPLORATION_PAIR_CREATION_RESULT_TYPES,
+    CatStableExplorationPairCreatedResult,
+)
+from cats.cat_exploration_pair_execution_result_state import (
+    CatAutonomousExplorationPairStartedEvent,
+    CatExplorationPairCreationFailedResult,
+    CatExplorationPairTransferFailedResult,
+)
 from quantum.cat_box_transfer_result_state import (
     CAT_QUANTUM_BOX_TRANSFER_RESULT_TYPES,
 )
@@ -2149,50 +2158,119 @@ class CatIntentionExecutor:
         mind.active_body_execution = deepcopy(event)
         return self._record(event)
 
-    def _execute_exploration_pair_creation(self, cat, intention):
-        """
-        Ko?ka vytvo?? stabiln? pr?zkumn? p?r
-        a ihned jej pou?ije.
-
-        Rozhodnut? u? prob?hlo v CatMind.
-        Executor pouze vytvo?? t?lesnou cestu
-        a zah?j? p?enos.
-        """
+    def _execute_exploration_pair_creation(
+        self,
+        cat,
+        intention,
+    ):
         target = intention.target
 
         if not isinstance(
             target,
             CatExplorationPairTarget,
         ):
-            return self._record({
-                'name': (
-                    'cat_exploration_pair_creation_failed'
-                ),
-                'cat': cat.name,
-                'intention': (
-                    'create_exploration_pair'
-                ),
-                'reason': (
-                    'invalid_exploration_pair_target'
-                ),
-                'executed': False,
-            })
+            return self._record(
+                CatExplorationPairCreationFailedResult(
+                    cat=cat.name,
+                    reason=(
+                        "invalid_exploration_pair_target"
+                    ),
+                )
+            )
 
-        destination_layer = target.layer
-        destination_position = target.position
-        if destination_layer is None or destination_position is None:
-            return self._record({'name': 'cat_exploration_pair_creation_failed', 'cat': cat.name, 'intention': 'create_exploration_pair', 'reason': 'missing_exploration_destination', 'executed': False})
-        transfer_system = getattr(self.universe, 'cat_box_transfer', None)
+        destination_layer = (
+            target.layer
+        )
+
+        destination_position = (
+            target.position
+        )
+
+        if (
+            destination_layer is None
+            or destination_position is None
+        ):
+            return self._record(
+                CatExplorationPairCreationFailedResult(
+                    cat=cat.name,
+                    reason=(
+                        "missing_exploration_destination"
+                    ),
+                )
+            )
+
+        transfer_system = getattr(
+            self.universe,
+            "cat_box_transfer",
+            None,
+        )
+
         if transfer_system is None:
-            return self._record({'name': 'cat_exploration_pair_creation_failed', 'cat': cat.name, 'intention': 'create_exploration_pair', 'reason': 'cat_box_transfer_unavailable', 'executed': False})
-        creation = transfer_system.create_exploration_pair(cat=cat, destination_layer=destination_layer, destination_position=destination_position)
-        if not creation.get('created', False):
-            return self._record({'name': 'cat_exploration_pair_creation_failed', 'cat': cat.name, 'intention': 'create_exploration_pair', 'reason': creation.get('reason', 'pair_creation_failed'), 'creation_result': creation, 'executed': False})
-        source_box = creation.get('source_box')
-        target_box = creation.get('target_box')
-        if source_box is None or target_box is None:
-            return self._record({'name': 'cat_exploration_pair_transfer_failed', 'cat': cat.name, 'intention': 'create_exploration_pair', 'pair_id': creation.get('pair_id'), 'reason': 'created_pair_boxes_missing', 'creation_result': creation, 'executed': False})
-        transfer = transfer_system.transfer_cat(cat=cat, source_box_id=source_box.id, target_box_id=target_box.id)
+            return self._record(
+                CatExplorationPairCreationFailedResult(
+                    cat=cat.name,
+                    reason=(
+                        "cat_box_transfer_unavailable"
+                    ),
+                )
+            )
+
+        creation = (
+            transfer_system
+            .create_exploration_pair(
+                cat=cat,
+                destination_layer=
+                    destination_layer,
+                destination_position=
+                    destination_position,
+            )
+        )
+
+        if not isinstance(
+            creation,
+            CAT_STABLE_EXPLORATION_PAIR_CREATION_RESULT_TYPES,
+        ):
+            raise TypeError(
+                "Stable exploration pair creation "
+                "must return a creation result object."
+            )
+
+        if not creation.created:
+            return self._record(
+                CatExplorationPairCreationFailedResult(
+                    cat=cat.name,
+                    reason=creation.reason,
+                    creation_result=creation,
+                )
+            )
+
+        if not isinstance(
+            creation,
+            CatStableExplorationPairCreatedResult,
+        ):
+            raise TypeError(
+                "Successful stable pair creation "
+                "must return "
+                "CatStableExplorationPairCreatedResult."
+            )
+
+        source_box = (
+            creation.source_box
+        )
+
+        target_box = (
+            creation.target_box
+        )
+
+        transfer = (
+            transfer_system.transfer_cat(
+                cat=cat,
+                source_box_id=
+                    source_box.id,
+                target_box_id=
+                    target_box.id,
+            )
+        )
 
         if not isinstance(
             transfer,
@@ -2202,18 +2280,92 @@ class CatIntentionExecutor:
                 "Cat quantum box transfer must "
                 "return a transfer result object."
             )
+
         if not transfer.transferred:
-            cat.state = 'exploration_pair_created_but_transfer_failed'
-            return self._record({'name': 'cat_exploration_pair_transfer_failed', 'cat': cat.name, 'intention': 'create_exploration_pair', 'pair_id': creation['pair_id'], 'source_box_id': source_box.id, 'target_box_id': target_box.id, 'reason': getattr(transfer, 'reason', 'stable_pair_transfer_failed'), 'creation_result': creation, 'transfer_result': transfer, 'pair_preserved': True, 'executed': False})
+            cat.state = (
+                "exploration_pair_created_"
+                "but_transfer_failed"
+            )
+
+            return self._record(
+                CatExplorationPairTransferFailedResult(
+                    cat=cat.name,
+                    pair_id=
+                        creation.pair_id,
+                    source_box_id=
+                        source_box.id,
+                    target_box_id=
+                        target_box.id,
+                    reason=getattr(
+                        transfer,
+                        "reason",
+                        "stable_pair_transfer_failed",
+                    ),
+                    transfer_result=
+                        transfer,
+                    pair_preserved=True,
+                )
+            )
+
         exploration_route = None
-        if cat.current_layer == 'quantum_layer':
-            exploration_route = transfer_system.start_quantum_exploration_route(cat=cat, pair_id=creation['pair_id'])
+
+        if (
+            cat.current_layer
+            == "quantum_layer"
+        ):
+            exploration_route = (
+                transfer_system
+                .start_quantum_exploration_route(
+                    cat=cat,
+                    pair_id=
+                        creation.pair_id,
+                )
+            )
+
         mind = cat.mind
-        mind.previous_intention = deepcopy(intention)
+
+        mind.previous_intention = (
+            deepcopy(
+                intention
+            )
+        )
+
         mind.current_intention = None
-        event = {'name': 'cat_started_autonomous_exploration_through_new_pair', 'cat': cat.name, 'intention': 'create_exploration_pair', 'pair_id': creation['pair_id'], 'source_box_id': source_box.id, 'target_box_id': target_box.id, 'source_layer': creation['source_layer'], 'target_layer': creation['target_layer'], 'energy_cost_j': creation['energy_cost_j'], 'remaining_cat_energy': creation['remaining_cat_energy'], 'creation': {'created': True, 'stable': creation.get('stable', True), 'available_to_other_cats': creation.get('available_to_other_cats', True)}, 'transfer': deepcopy(transfer), 'exploration_route': exploration_route, 'decision_source': 'cat_mind', 'executed': True}
-        mind.active_body_execution = deepcopy(event)
-        return self._record(event)
+
+        event = (
+            CatAutonomousExplorationPairStartedEvent(
+                cat=cat.name,
+                pair_id=
+                    creation.pair_id,
+                source_box_id=
+                    source_box.id,
+                target_box_id=
+                    target_box.id,
+                source_layer=
+                    creation.source_layer,
+                target_layer=
+                    creation.target_layer,
+                energy_cost_j=
+                    creation.energy_cost_j,
+                remaining_cat_energy=(
+                    creation
+                    .remaining_cat_energy
+                ),
+                transfer=transfer,
+                exploration_route=
+                    exploration_route,
+            )
+        )
+
+        mind.active_body_execution = (
+            deepcopy(
+                event
+            )
+        )
+
+        return self._record(
+            event
+        )
 
     def _execute_wander(
         self,

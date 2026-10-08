@@ -123,9 +123,7 @@ class CatQuantumReturnResultsObjectStateTests(
             self.create_pair()
         )
 
-        pair_id = creation[
-            "pair_id"
-        ]
+        pair_id = creation.pair_id
 
         # Return route starts from the remote side.
         self.cat.current_layer = (
@@ -133,9 +131,7 @@ class CatQuantumReturnResultsObjectStateTests(
         )
 
         self.cat.position = (
-            creation[
-                "target_box"
-            ].position
+            creation.target_box.position
         )
 
         result = (
@@ -195,13 +191,9 @@ class CatQuantumReturnResultsObjectStateTests(
             self.create_pair()
         )
 
-        source = creation[
-            "source_box"
-        ]
+        source = creation.source_box
 
-        target = creation[
-            "target_box"
-        ]
+        target = creation.target_box
 
         self.universe.cat_box_transfer            .transfer_cat(
                 cat=self.cat,
@@ -214,9 +206,7 @@ class CatQuantumReturnResultsObjectStateTests(
             .cat_box_transfer
             .start_quantum_return_route(
                 cat=self.cat,
-                pair_id=creation[
-                    "pair_id"
-                ],
+                pair_id=creation.pair_id,
             )
         )
 
