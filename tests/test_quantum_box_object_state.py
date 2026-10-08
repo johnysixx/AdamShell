@@ -22,18 +22,28 @@ class QuantumBoxObjectStateTests(
     def _assert_object_only(
         self,
         value,
-        key
+        key,
+        reject_to_dict=False,
     ):
-        for mapping_method in (
+        mapping_methods = [
             'get',
             'keys',
             'items',
             'values',
+        ]
+
+        if reject_to_dict:
+            mapping_methods.append(
+                'to_dict'
+            )
+
+        for mapping_method in (
+            mapping_methods
         ):
             self.assertFalse(
                 hasattr(
                     value,
-                    mapping_method
+                    mapping_method,
                 )
             )
 
@@ -51,6 +61,7 @@ class QuantumBoxObjectStateTests(
             box.position,
             SpatialVector3,
         )
+
         self._assert_object_only(
             box.position,
             'x',
@@ -85,11 +96,13 @@ class QuantumBoxObjectStateTests(
         ):
             self.assertIsInstance(
                 value,
-                expected_type
+                expected_type,
             )
+
             self._assert_object_only(
                 value,
-                key
+                key,
+                reject_to_dict=True,
             )
 
     def test_pairing_mutates_same_objects(
@@ -187,7 +200,10 @@ class QuantumBoxObjectStateTests(
     def test_transfer_completion_preserves_source_anchor(
         self
     ):
-        transfer = QuantumBoxCatTransferState()
+        transfer = (
+            QuantumBoxCatTransferState()
+        )
+
         transfer.begin(
             cat_name='traveller',
             source_box_id='source',
@@ -201,32 +217,39 @@ class QuantumBoxObjectStateTests(
             clear_source=False
         )
 
-        self.assertFalse(transfer.active)
+        self.assertFalse(
+            transfer.active
+        )
+
         self.assertIs(
             transfer.state,
             CatQuantumTransferPhase.COMPLETED,
         )
+
         self.assertEqual(
             transfer.source_box_id,
-            'source'
+            'source',
         )
+
         self.assertEqual(
             transfer.source_layer,
-            'meeting_place'
+            'meeting_place',
         )
+
         self.assertEqual(
             transfer.started_tick,
-            7
+            7,
         )
+
         self.assertIsNone(
             transfer.target_box_id
         )
 
-        snapshot = transfer.to_dict()
-
-        self.assertEqual(
-            snapshot["state"],
-            "completed",
+        self.assertFalse(
+            hasattr(
+                transfer,
+                'to_dict',
+            )
         )
 
     def test_cat_transfer_rejects_string_phase(

@@ -57,13 +57,6 @@ class QuantumBoxCounterpartState:
 
         return event
 
-    def to_dict(self):
-        return {
-            'box_id': self.box_id,
-            'layer': self.layer,
-            'paired': self.paired,
-        }
-
 
 @dataclass(slots=True)
 class QuantumBoxCatTransferState:
@@ -124,20 +117,6 @@ class QuantumBoxCatTransferState:
 
         return self
 
-    def to_dict(self):
-        return {
-            'active': self.active,
-            'state': self.state.value,
-            'cat_name': self.cat_name,
-            'source_box_id':
-                self.source_box_id,
-            'target_box_id':
-                self.target_box_id,
-            'source_layer': self.source_layer,
-            'target_layer': self.target_layer,
-            'started_tick': self.started_tick,
-        }
-
 
 @dataclass(slots=True)
 class QuantumBoxEnergyState:
@@ -150,13 +129,6 @@ class QuantumBoxEnergyState:
         self.consumed = True
         self.purpose = 'cat_layer_transfer'
         return self
-
-    def to_dict(self):
-        return {
-            'available': self.available,
-            'consumed': self.consumed,
-            'purpose': self.purpose,
-        }
 
 
 @dataclass(slots=True)
@@ -172,14 +144,6 @@ class QuantumBoxContentState:
     def resolve(self, result):
         self.resolved = result
         return result
-
-    def to_dict(self):
-        return {
-            'possibilities': list(
-                self.possibilities
-            ),
-            'resolved': self.resolved,
-        }
 
 
 @dataclass(slots=True)
@@ -200,14 +164,6 @@ class QuantumBoxCollapseState:
         self.observer = observer
         self.tick = tick
         return self
-
-    def to_dict(self):
-        return {
-            'collapsed': self.collapsed,
-            'cause': self.cause,
-            'observer': self.observer,
-            'tick': self.tick,
-        }
 
 
 class QuantumBox:
@@ -462,22 +418,79 @@ class QuantumBox:
         return {
             'id': self.id,
             'type': 'quantum_box',
-            'position': self.position.to_dict(),
+            'position': (
+                self.position.to_dict()
+            ),
             'state': self.state,
             'content_state': (
                 'unresolved'
                 if not self.collapse.collapsed
                 else self.content.resolved
             ),
-            'collapsed': self.collapse.collapsed,
+            'collapsed': (
+                self.collapse.collapsed
+            ),
             'box_class': self.box_class,
-            'current_layer': self.current_layer,
-            'quantum_counterpart': (
-                self.quantum_counterpart
-                .to_dict()
+            'current_layer': (
+                self.current_layer
             ),
-            'cat_transfer': (
-                self.cat_transfer.to_dict()
-            ),
-            'energy': self.energy.to_dict(),
+            'quantum_counterpart': {
+                'box_id': (
+                    self.quantum_counterpart
+                    .box_id
+                ),
+                'layer': (
+                    self.quantum_counterpart
+                    .layer
+                ),
+                'paired': (
+                    self.quantum_counterpart
+                    .paired
+                ),
+            },
+            'cat_transfer': {
+                'active': (
+                    self.cat_transfer.active
+                ),
+                'state': (
+                    self.cat_transfer
+                    .state
+                    .value
+                ),
+                'cat_name': (
+                    self.cat_transfer
+                    .cat_name
+                ),
+                'source_box_id': (
+                    self.cat_transfer
+                    .source_box_id
+                ),
+                'target_box_id': (
+                    self.cat_transfer
+                    .target_box_id
+                ),
+                'source_layer': (
+                    self.cat_transfer
+                    .source_layer
+                ),
+                'target_layer': (
+                    self.cat_transfer
+                    .target_layer
+                ),
+                'started_tick': (
+                    self.cat_transfer
+                    .started_tick
+                ),
+            },
+            'energy': {
+                'available': (
+                    self.energy.available
+                ),
+                'consumed': (
+                    self.energy.consumed
+                ),
+                'purpose': (
+                    self.energy.purpose
+                ),
+            },
         }
