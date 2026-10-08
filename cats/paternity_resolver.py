@@ -43,21 +43,6 @@ class KittenFatherSelectedEvent:
             ),
         )
 
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "father": self.father,
-            "successful_contact_count": (
-                self.successful_contact_count
-            ),
-            "total_successful_contacts": (
-                self.total_successful_contacts
-            ),
-            "weighted_candidate_names": list(
-                self.weighted_candidate_names
-            ),
-        }
-
 
 @dataclass(slots=True, frozen=True)
 class KittenFatherSelectionResult:

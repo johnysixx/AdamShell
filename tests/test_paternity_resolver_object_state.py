@@ -134,6 +134,7 @@ class PaternityResolverObjectStateTests(
             "keys",
             "items",
             "values",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
@@ -166,19 +167,13 @@ class PaternityResolverObjectStateTests(
                 "father"
             ]
 
-        boundary = (
-            event.to_dict()
-        )
-
-        boundary[
-            "weighted_candidate_names"
-        ].append(
-            "changed"
-        )
-
-        self.assertNotIn(
-            "changed",
+        self.assertEqual(
             event.weighted_candidate_names,
+            (
+                "father_one",
+                "father_one",
+                "father_two",
+            ),
         )
 
     def test_history_rejects_mapping_event(

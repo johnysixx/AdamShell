@@ -58,9 +58,22 @@ class CatPregnancyPaternityResult:
                 self.embryo_id
             ),
             "father": self.father,
-            "selection": (
-                self.selection.to_dict()
-            ),
+            "selection": {
+                "name": self.selection.name,
+                "father": self.selection.father,
+                "successful_contact_count": (
+                    self.selection
+                    .successful_contact_count
+                ),
+                "total_successful_contacts": (
+                    self.selection
+                    .total_successful_contacts
+                ),
+                "weighted_candidate_names": list(
+                    self.selection
+                    .weighted_candidate_names
+                ),
+            },
         }
 
 
