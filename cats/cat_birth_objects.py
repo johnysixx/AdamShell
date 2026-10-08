@@ -1080,16 +1080,3 @@ class CatLitterBirthResult:
         memo
     ):
         return self
-
-    def to_dict(self):
-        snapshot = (
-            self.litter.to_dict()
-        )
-
-        snapshot[
-            "kittens"
-        ] = list(
-            self.kittens
-        )
-
-        return snapshot

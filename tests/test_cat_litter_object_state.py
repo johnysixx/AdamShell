@@ -228,6 +228,7 @@ class CatLitterObjectStateTests(
             "keys",
             "items",
             "values",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
@@ -240,23 +241,6 @@ class CatLitterObjectStateTests(
             _ = result[
                 "kittens"
             ]
-
-        boundary = (
-            result.to_dict()
-        )
-
-        self.assertIs(
-            boundary[
-                "kittens"
-            ][0],
-            kitten,
-        )
-
-        boundary[
-            "kitten_names"
-        ].append(
-            "changed"
-        )
 
         self.assertEqual(
             litter.kitten_names,
