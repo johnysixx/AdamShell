@@ -146,25 +146,6 @@ class PhysicalBiologyGateResult:
                 "must match blocked event."
             )
 
-    def to_dict(self):
-        if self.allowed:
-            return {
-                "allowed": True,
-                "operation": self.operation,
-                "cronenberg": None,
-            }
-
-        snapshot = (
-            self.event.to_dict()
-        )
-
-        snapshot[
-            "cronenberg"
-        ] = self.cronenberg
-
-        return snapshot
-
-
 class PhysicalBiologyGate:
 
     def __init__(

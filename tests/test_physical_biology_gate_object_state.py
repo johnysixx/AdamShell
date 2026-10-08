@@ -118,6 +118,7 @@ class PhysicalBiologyGateObjectStateTests(
             "keys",
             "items",
             "values",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
@@ -131,17 +132,14 @@ class PhysicalBiologyGateObjectStateTests(
                 "operation"
             ]
 
-        boundary = (
-            result.to_dict()
+        self.assertEqual(
+            result.operation,
+            "reproduce",
         )
 
-        boundary[
-            "operation"
-        ] = "changed"
-
         self.assertEqual(
-            event.operation,
-            "reproduce",
+            result.cronenberg.id,
+            "cronenberg_gate_test",
         )
 
         universe.quantum_events[
