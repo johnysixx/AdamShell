@@ -101,7 +101,7 @@ class CatQuantumBoxTransferTests(
         )
 
         self.assertTrue(
-            result["transferred"]
+            result.transferred
         )
 
         self.assertEqual(
@@ -147,9 +147,7 @@ class CatQuantumBoxTransferTests(
         )
 
         self.assertTrue(
-            result[
-                "target_box_consumed"
-            ]
+            result.target_box_consumed
         )
 
         self.assertNotIn(
@@ -267,11 +265,7 @@ class CatQuantumBoxTransferTests(
         )
 
         self.assertEqual(
-            result[
-                "trail"
-            ][
-                "cat"
-            ],
+            result.trail.cat,
             "traveller"
         )
 

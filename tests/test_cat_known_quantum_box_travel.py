@@ -4,6 +4,9 @@ from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat_mind import CatMind
 from cats.cat_perception import CatPerception
+from quantum.cat_box_transfer_result_state import (
+    CatQuantumBoxTransferFailedResult,
+)
 
 class CatKnownQuantumBoxTravelTests(unittest.TestCase):
 
@@ -84,8 +87,23 @@ class CatKnownQuantumBoxTravelTests(unittest.TestCase):
         self.cat.mind.current_intention = travel
         cronenberg_count_before = len(self.universe.cronenbergs)
 
-        def fail_transfer(cat, source_box_id, target_box_id):
-            return {'name': 'cat_quantum_box_transfer_failed', 'cat': getattr(cat, 'name', None), 'source_box_id': source_box_id, 'target_box_id': target_box_id, 'reason': 'simulated_quantum_transfer_error', 'transferred': False}
+        def fail_transfer(
+            cat,
+            source_box_id,
+            target_box_id,
+        ):
+            return CatQuantumBoxTransferFailedResult(
+                cat=getattr(
+                    cat,
+                    'name',
+                    None,
+                ),
+                source_box_id=source_box_id,
+                target_box_id=target_box_id,
+                reason=(
+                    'simulated_quantum_transfer_error'
+                ),
+            )
         self.universe.cat_box_transfer.transfer_cat = fail_transfer
         result = self.cats.execute_cat_intention(self.cat)
         self.assertFalse(result['executed'])

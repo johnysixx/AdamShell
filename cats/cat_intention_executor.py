@@ -47,6 +47,9 @@ from cats.cat_social_system import CatSocialSystem
 from universe.quantum_cat_route_advance_state import (
     QUANTUM_CAT_ROUTE_ADVANCE_RESULT_TYPES,
 )
+from quantum.cat_box_transfer_result_state import (
+    CAT_QUANTUM_BOX_TRANSFER_RESULT_TYPES,
+)
 from cats.cat_basic_intention_result_state import (
     CatIntentionBodyActionDeferredEvent,
     CatRestStartedEvent,
@@ -787,19 +790,15 @@ class CatIntentionExecutor:
 
         if not isinstance(
             transfer_result,
-            dict,
+            CAT_QUANTUM_BOX_TRANSFER_RESULT_TYPES,
         ):
             raise TypeError(
-                "Legacy cat box transfer must "
-                "return a dict until its result "
-                "contract is objectified."
+                "Cat quantum box transfer must "
+                "return a transfer result object."
             )
 
-        transferred = bool(
-            transfer_result.get(
-                "transferred",
-                False,
-            )
+        transferred = (
+            transfer_result.transferred
         )
 
         if transferred:
@@ -832,7 +831,8 @@ class CatIntentionExecutor:
                     target_layer=
                         target.target_layer,
                     reason=(
-                        transfer_result.get(
+                        getattr(
+                            transfer_result,
                             "reason",
                             "quantum_box_transfer_failed",
                         )
@@ -993,7 +993,17 @@ class CatIntentionExecutor:
         if transfer_system is None:
             return self._record({'name': 'cat_quantum_box_travel_failed', 'cat': cat.name, 'source_box_id': source_box_id, 'counterpart_box_id': counterpart_box_id, 'reason': 'cat_box_tranfer_unavaible', 'executed': False})
         result = transfer_system.transfer_cat(cat=cat, source_box_id=source_box_id, target_box_id=counterpart_box_id)
-        transferred = result.get('transferred', False)
+
+        if not isinstance(
+            result,
+            CAT_QUANTUM_BOX_TRANSFER_RESULT_TYPES,
+        ):
+            raise TypeError(
+                "Cat quantum box transfer must "
+                "return a transfer result object."
+            )
+
+        transferred = result.transferred
         event = {'name': 'cat_traveled_through_known_quantum_box' if transferred else 'cat_quantum_box_travel_failed', 'cat': cat.name, 'source_box_id': source_box_id, 'counterpart_box_id': counterpart_box_id, 'source_layer': target.source_layer, 'transfer': deepcopy(result), 'decision_source': 'cat_mind', 'executed': transferred}
         mind = cat.mind
         mind.previous_intention = deepcopy(intention)
@@ -1002,7 +1012,7 @@ class CatIntentionExecutor:
             mind.active_body_execution = deepcopy(event)
             cat.current_quantum_counterpart_observation = None
             return self._record(event)
-        failure_reason = result.get('reason', 'quantum_transfer_failed')
+        failure_reason = getattr(result, 'reason', 'quantum_transfer_failed')
         cronenberg = self.universe.create_cronenberg_from_quantum_error(error=RuntimeError(f'Cat quantum box transfer failed: {failure_reason}'), source_component='cat_intention_executor', source_operation='quantum_box_travel_failed')
         memory = cat.memory.remember(event_type='quantum_box_layer_transfer_failed', universe_tick=self.universe.quantum_state.tick_count, location=(None if cat.position is None else cat.position.to_dict()), participants=[source_box_id, counterpart_box_id], details={'source_layer': target.source_layer, 'target_layer': target.target_layer, 'reason': failure_reason, 'cronenberg_id': cronenberg.id})
         event['reason'] = failure_reason
@@ -2183,16 +2193,25 @@ class CatIntentionExecutor:
         if source_box is None or target_box is None:
             return self._record({'name': 'cat_exploration_pair_transfer_failed', 'cat': cat.name, 'intention': 'create_exploration_pair', 'pair_id': creation.get('pair_id'), 'reason': 'created_pair_boxes_missing', 'creation_result': creation, 'executed': False})
         transfer = transfer_system.transfer_cat(cat=cat, source_box_id=source_box.id, target_box_id=target_box.id)
-        if not transfer.get('transferred', False):
+
+        if not isinstance(
+            transfer,
+            CAT_QUANTUM_BOX_TRANSFER_RESULT_TYPES,
+        ):
+            raise TypeError(
+                "Cat quantum box transfer must "
+                "return a transfer result object."
+            )
+        if not transfer.transferred:
             cat.state = 'exploration_pair_created_but_transfer_failed'
-            return self._record({'name': 'cat_exploration_pair_transfer_failed', 'cat': cat.name, 'intention': 'create_exploration_pair', 'pair_id': creation['pair_id'], 'source_box_id': source_box.id, 'target_box_id': target_box.id, 'reason': transfer.get('reason', 'stable_pair_transfer_failed'), 'creation_result': creation, 'transfer_result': transfer, 'pair_preserved': True, 'executed': False})
+            return self._record({'name': 'cat_exploration_pair_transfer_failed', 'cat': cat.name, 'intention': 'create_exploration_pair', 'pair_id': creation['pair_id'], 'source_box_id': source_box.id, 'target_box_id': target_box.id, 'reason': getattr(transfer, 'reason', 'stable_pair_transfer_failed'), 'creation_result': creation, 'transfer_result': transfer, 'pair_preserved': True, 'executed': False})
         exploration_route = None
         if cat.current_layer == 'quantum_layer':
             exploration_route = transfer_system.start_quantum_exploration_route(cat=cat, pair_id=creation['pair_id'])
         mind = cat.mind
         mind.previous_intention = deepcopy(intention)
         mind.current_intention = None
-        event = {'name': 'cat_started_autonomous_exploration_through_new_pair', 'cat': cat.name, 'intention': 'create_exploration_pair', 'pair_id': creation['pair_id'], 'source_box_id': source_box.id, 'target_box_id': target_box.id, 'source_layer': creation['source_layer'], 'target_layer': creation['target_layer'], 'energy_cost_j': creation['energy_cost_j'], 'remaining_cat_energy': creation['remaining_cat_energy'], 'creation': {'created': True, 'stable': creation.get('stable', True), 'available_to_other_cats': creation.get('available_to_other_cats', True)}, 'transfer': {'transferred': True, 'pair_remains_stable': transfer.get('pair_remains_stable', False), 'target_box_consumed': transfer.get('target_box_consumed'), 'destination_layer': transfer.get('target_layer'), 'trail': transfer.get('trail')}, 'exploration_route': exploration_route, 'decision_source': 'cat_mind', 'executed': True}
+        event = {'name': 'cat_started_autonomous_exploration_through_new_pair', 'cat': cat.name, 'intention': 'create_exploration_pair', 'pair_id': creation['pair_id'], 'source_box_id': source_box.id, 'target_box_id': target_box.id, 'source_layer': creation['source_layer'], 'target_layer': creation['target_layer'], 'energy_cost_j': creation['energy_cost_j'], 'remaining_cat_energy': creation['remaining_cat_energy'], 'creation': {'created': True, 'stable': creation.get('stable', True), 'available_to_other_cats': creation.get('available_to_other_cats', True)}, 'transfer': deepcopy(transfer), 'exploration_route': exploration_route, 'decision_source': 'cat_mind', 'executed': True}
         mind.active_body_execution = deepcopy(event)
         return self._record(event)
 

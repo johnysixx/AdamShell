@@ -1,4 +1,5 @@
 from copy import deepcopy
+from dataclasses import replace
 import math
 
 from universe.aroma_profile import AromaProfile
@@ -36,6 +37,16 @@ from cats.cat_quantum_transfer_state import CatQuantumTransferState
 
 from universe.quantum_cat_route_advance_state import (
     QUANTUM_CAT_ROUTE_ADVANCE_RESULT_TYPES,
+)
+from quantum.cat_quantum_trail_state import (
+    QuantumCatTrail,
+)
+from quantum.cat_box_transfer_result_state import (
+    CAT_QUANTUM_BOX_TRANSFER_RESULT_TYPES,
+    CatQuantumBoxTransferCompletedEvent,
+    CatQuantumBoxTransferFailedResult,
+    CatStableExplorationPairTransferEvent,
+    StableCatBoxPairDissolutionEvent,
 )
 
 class CatQuantumBoxTransfer:
@@ -493,67 +504,41 @@ class CatQuantumBoxTransfer:
                     "target_box_consumed": (
                         False
                     ),
-                    "trail_id": trail[
-                        "trail_id"
-                    ]
+                    "trail_id": trail.trail_id
                 }
             )
 
-        event = {
-            "name": (
-                "cat_used_stable_"
-                "exploration_box_pair"
-            ),
-            "cat": cat_name,
-            "pair_id": pair["pair_id"],
-            "source_box_id": source_box.id,
-            "target_box_id": target_box.id,
-            "source_layer": transfer_state.source_layer,
-            "target_layer": target_layer,
-            "target_box_consumed": False,
-            "source_box_survived": True,
-            "target_box_survived": True,
-            "pair_remains_stable": (
-                not creator_returned
-            ),
-            "creator_returned": (
-                creator_returned
-            ),
-            "use_count": pair[
-                "use_count"
-            ],
-            "trail": trail,
-            "source_box_aroma_pickup": (
-                source_box_aroma_pickup
-            ),
-            "target_box_aroma_pickup": (
-                target_box_aroma_pickup
-            ),
-            "source_box_aroma_residue": (
-                source_box_residue
-            ),
-            "target_box_aroma_residue": (
-                target_box_residue
-            ),
-            "memory": remembered,
-            "transferred": True
-        }
+        dissolution = None
 
         if creator_returned:
             dissolution = (
                 self._dissolve_stable_pair(
                     pair=pair,
-                    returning_cat=cat
+                    returning_cat=cat,
                 )
             )
 
-            event[
-                "pair_dissolution"
-            ] = dissolution
-
-            event[
-                "pair_remains_stable"
-            ] = False
+        event = (
+            CatStableExplorationPairTransferEvent(
+                cat=cat_name,
+                pair_id=pair["pair_id"],
+                source_box_id=source_box.id,
+                target_box_id=target_box.id,
+                source_layer=(
+                    transfer_state.source_layer
+                ),
+                target_layer=target_layer,
+                use_count=pair["use_count"],
+                trail=trail,
+                pair_remains_stable=(
+                    not creator_returned
+                ),
+                creator_returned=(
+                    creator_returned
+                ),
+                pair_dissolution=dissolution,
+            )
+        )
 
         self._record(
             event
@@ -750,58 +735,49 @@ class CatQuantumBoxTransfer:
             + remote_layer_energy
         )
 
-        event = {
-            "name": (
-                "stable_cat_box_pair_dissolved"
-            ),
-            "pair_id": pair["pair_id"],
-            "creator_cat": pair[
-                "creator_cat"
-            ],
-            "returning_cat": (
-                returning_cat.name
-            ),
-            "removed_boxes": removed_boxes,
-            "energy_total_j": total_energy,
-            "energy_distributed_j": (
-                distributed_energy
-            ),
-            "energy_conserved": (
-                math.isclose(
+        event = (
+            StableCatBoxPairDissolutionEvent(
+                pair_id=pair["pair_id"],
+                creator_cat=pair["creator_cat"],
+                returning_cat=
+                    returning_cat.name,
+                removed_boxes=tuple(
+                    removed_boxes
+                ),
+                energy_total_j=
                     total_energy,
+                energy_distributed_j=
                     distributed_energy,
-                    rel_tol=1e-12,
-                    abs_tol=1e-15
-                )
-            ),
-            "energy_difference_j": (
-                total_energy
-                - distributed_energy
-            ),
-            "cronenberg": {
-                "id": cronenberg.id,
-                "energy_j": cronenberg_energy
-            },
-            "global_pool_energy_j": (
-                pool_energy
-            ),
-            "anchor_layer": pair[
-                "anchor_layer"
-            ],
-            "anchor_layer_energy_j": (
-                anchor_layer_energy
-            ),
-            "remote_layer": pair[
-                "remote_layer"
-            ],
-            "remote_layer_energy_j": (
-                remote_layer_energy
-            ),
-            "quantum_dark_energy_j": (
-                dark_energy
-            ),
-            "dissolved": True
-        }
+                energy_conserved=(
+                    math.isclose(
+                        total_energy,
+                        distributed_energy,
+                        rel_tol=1e-12,
+                        abs_tol=1e-15,
+                    )
+                ),
+                energy_difference_j=(
+                    total_energy
+                    - distributed_energy
+                ),
+                cronenberg_id=
+                    cronenberg.id,
+                cronenberg_energy_j=
+                    cronenberg_energy,
+                global_pool_energy_j=
+                    pool_energy,
+                anchor_layer=
+                    pair["anchor_layer"],
+                anchor_layer_energy_j=
+                    anchor_layer_energy,
+                remote_layer=
+                    pair["remote_layer"],
+                remote_layer_energy_j=
+                    remote_layer_energy,
+                quantum_dark_energy_j=
+                    dark_energy,
+            )
+        )
 
         self._record(
             event
@@ -838,30 +814,40 @@ class CatQuantumBoxTransfer:
         )
 
         if source_box is None:
-            return self._failure(
-                cat,
-                "source_box_not_found"
+            return self._transfer_failure(
+                cat=cat,
+                reason="source_box_not_found",
+                source_box_id=source_box_id,
+                target_box_id=target_box_id,
             )
 
         if target_box is None:
-            return self._failure(
-                cat,
-                "target_box_not_found"
+            return self._transfer_failure(
+                cat=cat,
+                reason="target_box_not_found",
+                source_box_id=source_box_id,
+                target_box_id=target_box_id,
             )
 
         if cat.current_layer != source_box.current_layer:
-            return self._failure(
-                cat,
-                "cat_not_in_source_layer"
+            return self._transfer_failure(
+                cat=cat,
+                reason="cat_not_in_source_layer",
+                source_box_id=source_box_id,
+                target_box_id=target_box_id,
             )
 
         if not self._cat_can_recognize_pair(
             cat,
             source_box
         ):
-            return self._failure(
-                cat,
-                "cat_cannot_recognize_quantum_pair"
+            return self._transfer_failure(
+                cat=cat,
+                reason=(
+                    "cat_cannot_recognize_quantum_pair"
+                ),
+                source_box_id=source_box_id,
+                target_box_id=target_box_id,
             )
 
         source_box.begin_cat_transfer(
@@ -1038,39 +1024,24 @@ class CatQuantumBoxTransfer:
                     "target_layer": target_layer,
                     "target_box_consumed": True,
                     "energy_j": consumed_energy,
-                    "trail_id": trail["trail_id"]
+                    "trail_id": trail.trail_id
                 }
             )
 
-        event = {
-            "name": (
-                "cat_quantum_box_transfer_completed"
-            ),
-            "cat": cat.name,
-            "source_box_id": source_box.id,
-            "target_box_id": target_box.id,
-            "source_layer": transfer_state.source_layer,
-            "target_layer": target_layer,
-            "source_box_survived": True,
-            "target_box_consumed": True,
-            "target_box_energy_used": True,
-            "energy_use": "cat_layer_transfer",
-            "energy_j": consumed_energy,
-            "energy_conserved": True,
-            "cat_state": cat.state,
-            "trail": trail,
-            "source_box_aroma_pickup": (
-                source_box_aroma_pickup
-            ),
-            "target_box_aroma_pickup": (
-                target_box_aroma_pickup
-            ),
-            "source_box_aroma_residue": (
-                source_box_aroma_residue
-            ),
-            "memory": remembered,
-            "transferred": True
-        }
+        event = (
+            CatQuantumBoxTransferCompletedEvent(
+                cat=cat.name,
+                source_box_id=source_box.id,
+                target_box_id=target_box.id,
+                source_layer=(
+                    transfer_state.source_layer
+                ),
+                target_layer=target_layer,
+                cat_state=cat.state,
+                trail=trail,
+                energy_j=consumed_energy,
+            )
+        )
 
         self._record(
             event
@@ -2059,10 +2030,16 @@ class CatQuantumBoxTransfer:
                 )
             )
 
-            if transfer_result.get(
-                "transferred",
-                False
+            if not isinstance(
+                transfer_result,
+                CAT_QUANTUM_BOX_TRANSFER_RESULT_TYPES,
             ):
+                raise TypeError(
+                    "Cat quantum box transfer must "
+                    "return a transfer result object."
+                )
+
+            if transfer_result.transferred:
                 cat.state = (
                     "returned_from_"
                     "quantum_exploration"
@@ -2125,69 +2102,104 @@ class CatQuantumBoxTransfer:
     def reinforce_trail(
         self,
         trail_id,
-        amount=0.05
+        amount=0.05,
     ):
-        trail = next(
-            (
-                item
-                for item
-                in self.universe.quantum_cat_trails
-                if item["trail_id"] == trail_id
-            ),
-            None
+        trails = (
+            self.universe
+            .quantum_cat_trails
         )
 
-        if trail is None:
+        for trail in trails:
+            if not isinstance(
+                trail,
+                QuantumCatTrail,
+            ):
+                raise TypeError(
+                    "Quantum cat trail registry "
+                    "must contain "
+                    "QuantumCatTrail objects."
+                )
+
+        trail_index = next(
+            (
+                index
+                for index, trail
+                in enumerate(trails)
+                if trail.trail_id
+                == trail_id
+            ),
+            None,
+        )
+
+        if trail_index is None:
             return None
 
-        trail["uses"] += 1
-        trail["stability"] = min(
-            1.0,
-            trail["stability"] + float(amount)
+        trail = trails[
+            trail_index
+        ]
+
+        reinforced = replace(
+            trail,
+            uses=trail.uses + 1,
+            stability=min(
+                1.0,
+                trail.stability
+                + float(amount),
+            ),
         )
 
-        return deepcopy(
-            trail
-        )
+        trails[
+            trail_index
+        ] = reinforced
+
+        return reinforced
+
 
     def _create_trail(
         self,
         cat,
         source_box,
-        target_box
+        target_box,
     ):
-        trail_number = len(
-            self.universe.quantum_cat_trails
-        ) + 1
+        trail_number = (
+            len(
+                self.universe
+                .quantum_cat_trails
+            )
+            + 1
+        )
 
-        trail = {
-            "trail_id": (
+        trail = QuantumCatTrail(
+            trail_id=(
                 f"quantum_cat_trail_"
                 f"{trail_number:04d}"
             ),
-            "cat": cat.name,
-            "from_box": source_box.id,
-            "to_box": target_box.id,
-            "from_layer": (
+            cat=cat.name,
+            from_box=source_box.id,
+            to_box=target_box.id,
+            from_layer=(
                 source_box.current_layer
             ),
-            "to_layer": (
+            to_layer=(
                 target_box.current_layer
             ),
-            "start_position": source_box.position.to_dict(),
-            "end_position": target_box.position.to_dict(),
-            "stability": 0.50,
-            "uses": 1,
-            "age_ticks": 0
-        }
+            start_position=(
+                source_box.position
+            ),
+            end_position=(
+                target_box.position
+            ),
+            stability=0.50,
+            uses=1,
+            age_ticks=0,
+        )
 
         self.universe.quantum_cat_trails.append(
             trail
         )
 
-        return deepcopy(
-            trail
-        )
+        return trail
+
 
     def _cat_can_recognize_pair(
         self,
@@ -2239,6 +2251,34 @@ class CatQuantumBoxTransfer:
             ),
             None
         )
+
+    def _transfer_failure(
+        self,
+        cat,
+        reason,
+        source_box_id=None,
+        target_box_id=None,
+    ):
+        event = (
+            CatQuantumBoxTransferFailedResult(
+                cat=getattr(
+                    cat,
+                    "name",
+                    None,
+                ),
+                reason=reason,
+                source_box_id=
+                    source_box_id,
+                target_box_id=
+                    target_box_id,
+            )
+        )
+
+        self._record(
+            event
+        )
+
+        return event
 
     def _failure(
         self,

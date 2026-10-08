@@ -93,11 +93,11 @@ class StableCatExplorationBoxPairTests(
         )
 
         self.assertTrue(
-            result["transferred"]
+            result.transferred
         )
 
         self.assertTrue(
-            result["pair_remains_stable"]
+            result.pair_remains_stable
         )
 
         self.assertIn(
@@ -120,11 +120,11 @@ class StableCatExplorationBoxPairTests(
         )
 
         self.assertTrue(
-            result["transferred"]
+            result.transferred
         )
 
         self.assertTrue(
-            result["pair_remains_stable"]
+            result.pair_remains_stable
         )
 
     def test_other_cat_return_keeps_pair(
@@ -143,7 +143,7 @@ class StableCatExplorationBoxPairTests(
         )
 
         self.assertTrue(
-            result["pair_remains_stable"]
+            result.pair_remains_stable
         )
 
         self.assertIn(
@@ -172,19 +172,17 @@ class StableCatExplorationBoxPairTests(
         )
 
         self.assertTrue(
-            result["creator_returned"]
+            result.creator_returned
         )
 
         self.assertFalse(
-            result["pair_remains_stable"]
+            result.pair_remains_stable
         )
 
-        dissolution = result[
-            "pair_dissolution"
-        ]
+        dissolution = result.pair_dissolution
 
         self.assertTrue(
-            dissolution["dissolved"]
+            dissolution.dissolved
         )
 
         self.assertNotIn(
@@ -212,19 +210,15 @@ class StableCatExplorationBoxPairTests(
             self.source
         )
 
-        dissolution = result[
-            "pair_dissolution"
-        ]
+        dissolution = result.pair_dissolution
 
         self.assertTrue(
-            dissolution["energy_conserved"]
+            dissolution.energy_conserved
         )
 
         self.assertAlmostEqual(
-            dissolution["energy_total_j"],
-            dissolution[
-                "energy_distributed_j"
-            ]
+            dissolution.energy_total_j,
+            dissolution.energy_distributed_j
         )
 
     def test_quantum_remote_share_becomes_dark_energy(
@@ -242,25 +236,17 @@ class StableCatExplorationBoxPairTests(
             self.source
         )
 
-        dissolution = result[
-            "pair_dissolution"
-        ]
+        dissolution = result.pair_dissolution
 
-        total = dissolution[
-            "energy_total_j"
-        ]
+        total = dissolution.energy_total_j
 
         self.assertAlmostEqual(
-            dissolution[
-                "quantum_dark_energy_j"
-            ],
+            dissolution.quantum_dark_energy_j,
             total * 0.30
         )
 
         self.assertEqual(
-            dissolution[
-                "remote_layer_energy_j"
-            ],
+            dissolution.remote_layer_energy_j,
             0.0
         )
 
@@ -290,19 +276,11 @@ class StableCatExplorationBoxPairTests(
             before + 1
         )
 
-        dissolution = result[
-            "pair_dissolution"
-        ]
+        dissolution = result.pair_dissolution
 
         self.assertAlmostEqual(
-            dissolution[
-                "cronenberg"
-            ][
-                "energy_j"
-            ],
-            dissolution[
-                "energy_total_j"
-            ] * 0.20
+            dissolution.cronenberg_energy_j,
+            dissolution.energy_total_j * 0.20
         )
 
 

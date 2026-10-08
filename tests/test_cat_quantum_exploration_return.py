@@ -58,7 +58,7 @@ class CatQuantumExplorationReturnTests(unittest.TestCase):
         for _ in range(100):
             result = self.cats.advance_cat_quantum_return(self.cat)
             transfer = result.get('transfer_result')
-            if transfer is not None and transfer.get('transferred', False):
+            if transfer is not None and transfer.transferred:
                 break
         self.assertEqual(self.cat.current_layer, 'meeting_place')
         self.assertEqual(self.cat.state, 'returned_from_quantum_exploration')

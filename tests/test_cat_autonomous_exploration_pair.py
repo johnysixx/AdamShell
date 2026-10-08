@@ -65,9 +65,9 @@ class CatAutonomousExplorationPairTests(unittest.TestCase):
         self.assertLess(self.cat.idea_energy, before_energy)
         self.assertEqual(self.cat.current_layer, 'quantum_layer')
         self.assertEqual(self.cat.state, 'materialized_through_stable_exploration_pair')
-        self.assertTrue(execution['transfer']['transferred'])
-        self.assertTrue(execution['transfer']['pair_remains_stable'])
-        self.assertFalse(execution['transfer']['target_box_consumed'])
+        self.assertTrue(execution['transfer'].transferred)
+        self.assertTrue(execution['transfer'].pair_remains_stable)
+        self.assertFalse(execution['transfer'].target_box_consumed)
         self.assertIsInstance(
             self.cat.quantum_transfer,
             CatQuantumTransferState,
