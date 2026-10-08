@@ -100,6 +100,13 @@ class CatGroupMemoryObjectStateTests(
             )
         )
 
+        self.assertFalse(
+            hasattr(
+                state,
+                'to_dict',
+            )
+        )
+
     def test_registry_stores_object_record(
         self
     ):

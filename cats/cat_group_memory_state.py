@@ -90,29 +90,3 @@ class CatGroupMemoryState:
     recent_events: list = field(
         default_factory=list
     )
-
-    def to_dict(self):
-        return {
-            "encounters":
-                self.encounters,
-            "peaceful_encounters":
-                self.peaceful_encounters,
-            "conflicts":
-                self.conflicts,
-            "victories":
-                self.victories,
-            "defeats":
-                self.defeats,
-            "standoffs":
-                self.standoffs,
-            "cooperations":
-                self.cooperations,
-            "betrayals":
-                self.betrayals,
-            "last_outcome":
-                self.last_outcome,
-            "recent_events":
-                list(
-                    self.recent_events
-                ),
-        }
