@@ -10,6 +10,7 @@ from cats.cat_birth_objects import (
     CatBirthProfile,
     CatPhenotypeResult,
     KittenEmbryo,
+    cat_phenotype_snapshot,
     kitten_genetic_viability_snapshot,
 )
 
@@ -286,7 +287,9 @@ class KittenEmbryoResult:
             result[
                 "phenotype"
             ] = (
-                self.phenotype.to_dict()
+                cat_phenotype_snapshot(
+                    self.phenotype
+                )
             )
 
         result.update(

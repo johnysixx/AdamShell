@@ -83,6 +83,38 @@ def kitten_genetic_viability_snapshot(
     }
 
 
+def cat_phenotype_snapshot(
+    phenotype,
+):
+    if not isinstance(
+        phenotype,
+        CatPhenotypeResult,
+    ):
+        raise TypeError(
+            "Phenotype snapshot requires "
+            "CatPhenotypeResult."
+        )
+
+    return {
+        "name": phenotype.name,
+        "profile": (
+            phenotype.profile.to_dict()
+        ),
+        "base_color": (
+            phenotype.base_color
+        ),
+        "diluted": phenotype.diluted,
+        "white_spotted": (
+            phenotype.white_spotted
+        ),
+        "colorpoint": (
+            phenotype.colorpoint
+        ),
+        "genotype": phenotype.genotype,
+        "resolved": phenotype.resolved,
+    }
+
+
 @dataclass(frozen=True)
 class CatBirthProfile:
     color: str
@@ -196,22 +228,6 @@ class CatPhenotypeResult:
         memo,
     ):
         return self
-
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "profile": (
-                self.profile.to_dict()
-            ),
-            "base_color": self.base_color,
-            "diluted": self.diluted,
-            "white_spotted": (
-                self.white_spotted
-            ),
-            "colorpoint": self.colorpoint,
-            "genotype": self.genotype,
-            "resolved": self.resolved,
-        }
 
 
 @dataclass(frozen=True)
@@ -593,7 +609,9 @@ class KittenEmbryo:
             ),
             "genotype": self.genotype,
             "phenotype": (
-                self.phenotype.to_dict()
+                cat_phenotype_snapshot(
+                    self.phenotype
+                )
             ),
             "profile": (
                 self.profile.to_dict()
