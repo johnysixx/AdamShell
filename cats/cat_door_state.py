@@ -47,41 +47,6 @@ class CatDoorTravelDeniedResult:
             str(self.reason),
         )
 
-    def to_dict(self):
-        snapshot = {
-            "name": self.name,
-            "door": self.door,
-            "cat": self.cat,
-            "reason": self.reason,
-            "traveled": self.traveled,
-        }
-
-        if self.source_layer is not None:
-            snapshot[
-                "source_layer"
-            ] = self.source_layer
-
-        if self.target_layer is not None:
-            snapshot[
-                "target_layer"
-            ] = self.target_layer
-
-        if self.source_location is not None:
-            snapshot[
-                "source_location"
-            ] = self.source_location
-
-        if self.target_location is not None:
-            snapshot[
-                "target_location"
-            ] = self.target_location
-
-        if self.cat_location is not None:
-            snapshot[
-                "cat_location"
-            ] = self.cat_location
-
-        return snapshot
 
 
 @dataclass(slots=True, frozen=True)
@@ -175,42 +140,3 @@ class CatDoorTravelEvent:
         memo,
     ):
         return self
-
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "door": self.door,
-            "cat": self.cat,
-            "source_layer":
-                self.source_layer,
-            "target_layer":
-                self.target_layer,
-            "source_location":
-                self.source_location,
-            "target_location":
-                self.target_location,
-            "source_position": (
-                None
-                if self.source_position
-                is None
-                else (
-                    self.source_position
-                    .to_dict()
-                )
-            ),
-            "target_position": (
-                None
-                if self.target_position
-                is None
-                else (
-                    self.target_position
-                    .to_dict()
-                )
-            ),
-            "source_registry_updated":
-                self.source_registry_updated,
-            "target_registry_updated":
-                self.target_registry_updated,
-            "traveled":
-                self.traveled,
-        }

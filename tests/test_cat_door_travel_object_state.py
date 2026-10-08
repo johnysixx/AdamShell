@@ -47,6 +47,7 @@ class CatDoorTravelObjectStateTests(
             "keys",
             "items",
             "values",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
@@ -166,7 +167,7 @@ class CatDoorTravelObjectStateTests(
             result
         )
 
-    def test_success_boundary_snapshot_is_detached(
+    def test_success_event_has_no_serialization_shim(
         self
     ):
         target_position = (
@@ -190,24 +191,26 @@ class CatDoorTravelObjectStateTests(
             self.cat
         )
 
-        boundary = (
-            result.to_dict()
-        )
-
-        boundary[
-            "target_position"
-        ][
-            "x"
-        ] = 999.0
-
-        self.assertEqual(
-            result.target_position.x,
-            4.0,
+        self.assertIsInstance(
+            result,
+            CatDoorTravelEvent,
         )
 
         self.assertIs(
             result.target_position,
             target_position,
+        )
+
+        self.assertFalse(
+            hasattr(
+                result,
+                "to_dict",
+            )
+        )
+
+        self.assertEqual(
+            result.target_position.x,
+            4.0,
         )
 
 

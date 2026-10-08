@@ -52,20 +52,3 @@ class CatPositionChangedEvent:
         memo,
     ):
         return self
-
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "cat": self.cat,
-            "previous_position": (
-                None
-                if self.previous_position
-                is None
-                else (
-                    self.previous_position
-                    .to_dict()
-                )
-            ),
-            "position":
-                self.position.to_dict(),
-        }

@@ -89,21 +89,12 @@ class CatSpatialObjectStateTests(unittest.TestCase):
             next_position,
         )
 
-        boundary = (
-            second_event.to_dict()
+        self.assertFalse(
+            hasattr(
+                second_event,
+                "to_dict",
+            )
         )
-
-        boundary[
-            "position"
-        ][
-            "x"
-        ] = 999.0
-
-        boundary[
-            "previous_position"
-        ][
-            "x"
-        ] = 888.0
 
         self.assertEqual(
             second_event.position.x,
