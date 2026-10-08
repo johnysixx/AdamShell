@@ -356,18 +356,6 @@ class FelineAbilityLessonRequestFailedResult:
         init=False,
     )
 
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "student": self.student,
-            "ability": self.ability,
-            "requested_method":
-                self.requested_method,
-            "reason": self.reason,
-            "learned": self.learned,
-        }
-
-
 @dataclass(
     slots=True,
     frozen=True

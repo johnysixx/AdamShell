@@ -504,6 +504,7 @@ class FelineTeacherHistoryObjectStateTests(
             "keys",
             "items",
             "values",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
@@ -519,17 +520,19 @@ class FelineTeacherHistoryObjectStateTests(
                 "reason"
             ]
 
-        boundary = (
-            result.to_dict()
+        self.assertEqual(
+            result.name,
+            "feline_ability_lesson_request_failed",
         )
 
-        boundary[
-            "reason"
-        ] = "changed"
+        self.assertEqual(
+            result.student,
+            "kitten",
+        )
 
         self.assertEqual(
-            result.reason,
-            "no_teacher_knows_requested_method",
+            result.ability,
+            "open_human_door",
         )
 
     def test_history_rejects_mapping(
