@@ -51,6 +51,10 @@ from .cat_overpopulation_activation_state import (
     CatOverpopulationActivationDeniedResult,
 )
 
+from quantum.cat_quantum_return_result_state import (
+    CatQuantumReturnNotAdvancedResult,
+)
+
 class Cats:
 
     def __init__(self, universe):
@@ -952,11 +956,35 @@ class Cats:
             return {'name': 'cat_quantum_exploration_not_advanced', 'cat': cat.name, 'reason': 'cat_box_transfer_unavailable', 'advanced': False}
         return transfer_system.advance_quantum_exploration(cat=cat, rng=rng)
 
-    def advance_cat_quantum_return(self, cat, rng=None):
-        transfer_system = getattr(self.universe, 'cat_box_transfer', None)
+    def advance_cat_quantum_return(
+        self,
+        cat,
+        rng=None,
+    ):
+        transfer_system = getattr(
+            self.universe,
+            "cat_box_transfer",
+            None,
+        )
+
         if transfer_system is None:
-            return {'name': 'cat_quantum_return_not_advanced', 'cat': cat.name, 'reason': 'cat_box_transfer_unavailable', 'advanced': False}
-        return transfer_system.advance_quantum_return(cat=cat, rng=rng)
+            return (
+                CatQuantumReturnNotAdvancedResult(
+                    cat=cat.name,
+                    reason=(
+                        "cat_box_transfer_unavailable"
+                    ),
+                )
+            )
+
+        return (
+            transfer_system
+            .advance_quantum_return(
+                cat=cat,
+                rng=rng,
+            )
+        )
+
 
     def execute_cat_intention(self, cat, cronenbergs=None, step_size=None):
         return self.intention_executor.execute_current_intention(cat=cat, cronenbergs=cronenbergs, step_size=step_size)

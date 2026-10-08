@@ -41,6 +41,12 @@ from universe.quantum_cat_route_advance_state import (
 from quantum.cat_quantum_trail_state import (
     QuantumCatTrail,
 )
+from quantum.cat_quantum_return_result_state import (
+    CatQuantumReturnAdvancedEvent,
+    CatQuantumReturnNotAdvancedResult,
+    CatQuantumReturnRouteNotStartedResult,
+    CatQuantumReturnRouteStartedEvent,
+)
 from quantum.cat_box_transfer_result_state import (
     CAT_QUANTUM_BOX_TRANSFER_RESULT_TYPES,
     CatQuantumBoxTransferCompletedEvent,
@@ -1817,9 +1823,11 @@ class CatQuantumBoxTransfer:
     def start_quantum_return_route(
         self,
         cat,
-        pair_id
+        pair_id,
     ):
-        current_return = cat.quantum_return
+        current_return = (
+            cat.quantum_return
+        )
 
         if (
             current_return is not None
@@ -1829,90 +1837,92 @@ class CatQuantumBoxTransfer:
             )
         ):
             raise TypeError(
-                'Cat quantum return state '
-                'must be CatQuantumReturnState.'
+                "Cat quantum return state "
+                "must be CatQuantumReturnState."
             )
 
-        pair = self._find_stable_pair_by_id(
-            pair_id
+        pair = (
+            self._find_stable_pair_by_id(
+                pair_id
+            )
         )
 
         if pair is None:
-            return {
-                "name": (
-                    "cat_quantum_return_"
-                    "route_not_started"
-                ),
-                "cat": cat.name,
-                "reason": (
-                    "stable_pair_not_found"
-                ),
-                "started": False
-            }
+            return (
+                CatQuantumReturnRouteNotStartedResult(
+                    cat=cat.name,
+                    reason="stable_pair_not_found",
+                )
+            )
 
-        remote_box = self._find_box(
-            pair["remote_box_id"]
+        remote_box = (
+            self._find_box(
+                pair["remote_box_id"]
+            )
         )
 
         if remote_box is None:
-            return {
-                "name": (
-                    "cat_quantum_return_"
-                    "route_not_started"
-                ),
-                "cat": cat.name,
-                "reason": (
-                    "remote_box_not_found"
-                ),
-                "started": False
-            }
+            return (
+                CatQuantumReturnRouteNotStartedResult(
+                    cat=cat.name,
+                    reason="remote_box_not_found",
+                )
+            )
 
         quantum_space = getattr(
             self.universe,
             "quantum_space",
-            None
+            None,
         )
 
         if quantum_space is None:
-            return {
-                "name": (
-                    "cat_quantum_return_"
-                    "route_not_started"
-                ),
-                "cat": cat.name,
-                "reason": (
-                    "quantum_space_unavailable"
-                ),
-                "started": False
-            }
+            return (
+                CatQuantumReturnRouteNotStartedResult(
+                    cat=cat.name,
+                    reason=(
+                        "quantum_space_unavailable"
+                    ),
+                )
+            )
 
-        destination = remote_box.position
+        destination = (
+            remote_box.position
+        )
 
-        stabilized = self.stabilize_direct_trail(
-            cat=cat,
-            destination=destination
+        stabilized = (
+            self.stabilize_direct_trail(
+                cat=cat,
+                destination=destination,
+            )
         )
 
         planned = (
             quantum_space
             .plan_direct_cat_route(
                 cat_id=cat.name,
-                start_position=require_spatial_vector(
-                    cat.position,
-                    field_name="cat return start position",
+                start_position=(
+                    require_spatial_vector(
+                        cat.position,
+                        field_name=(
+                            "cat return "
+                            "start position"
+                        ),
+                    )
                 ),
-                destination_position=(
-                    destination
-                ),
+                destination_position=
+                    destination,
                 destination=(
                     f"return_to_pair:"
                     f"{pair_id}"
-                )
+                ),
             )
         )
 
         route = planned.route
-        route.state = QuantumCatRouteState.READY
+
+        route.state = (
+            QuantumCatRouteState.READY
+        )
 
         cat.active_route_id = (
             route.route_id
@@ -1935,23 +1945,23 @@ class CatQuantumBoxTransfer:
             )
         )
 
-        return {
-            "name": (
-                "cat_quantum_return_route_started"
-            ),
-            "cat": cat.name,
-            "pair_id": pair_id,
-            "route_id": route.route_id,
-            "destination": destination.to_dict(),
-            "started": True
-        }
+        return (
+            CatQuantumReturnRouteStartedEvent(
+                cat=cat.name,
+                pair_id=pair_id,
+                route_id=route.route_id,
+                destination=destination,
+            )
+        )
 
     def advance_quantum_return(
         self,
         cat,
-        rng=None
+        rng=None,
     ):
-        returning = cat.quantum_return
+        returning = (
+            cat.quantum_return
+        )
 
         if (
             returning is not None
@@ -1961,41 +1971,42 @@ class CatQuantumBoxTransfer:
             )
         ):
             raise TypeError(
-                'Cat quantum return state '
-                'must be CatQuantumReturnState.'
+                "Cat quantum return state "
+                "must be CatQuantumReturnState."
             )
 
         if (
             returning is None
             or not returning.active
         ):
-            return {
-                "name": (
-                    "cat_quantum_return_"
-                    "not_advanced"
-                ),
-                "cat": cat.name,
-                "reason": (
-                    "no_active_quantum_return"
-                ),
-                "advanced": False
-            }
+            return (
+                CatQuantumReturnNotAdvancedResult(
+                    cat=cat.name,
+                    reason=(
+                        "no_active_quantum_return"
+                    ),
+                )
+            )
 
-        quantum_space = self.universe.quantum_space
+        quantum_space = (
+            self.universe.quantum_space
+        )
 
-        result = quantum_space.advance_cat_route(
-            cat=cat,
-            cronenbergs=getattr(
-                self.universe,
-                "cronenbergs",
-                []
-            ),
-            encounter_system=(
-                self.universe
-                .cat_cronenberg_encounter
-            ),
-            universe=self.universe,
-            rng=rng
+        result = (
+            quantum_space.advance_cat_route(
+                cat=cat,
+                cronenbergs=getattr(
+                    self.universe,
+                    "cronenbergs",
+                    [],
+                ),
+                encounter_system=(
+                    self.universe
+                    .cat_cronenberg_encounter
+                ),
+                universe=self.universe,
+                rng=rng,
+            )
         )
 
         if not isinstance(
@@ -2007,26 +2018,21 @@ class CatQuantumBoxTransfer:
                 "must return a route result object."
             )
 
-        position = (
-            None
-            if result.position is None
-            else result.position.to_dict()
-        )
-
         transfer_result = None
 
         if result.arrived:
             returning.arrived_at_box = True
-
             returning.active = False
 
-            transfer_result = self.transfer_cat(
-                cat=cat,
-                source_box_id=(
-                    returning.remote_box_id
-                ),
-                target_box_id=(
-                    returning.anchor_box_id
+            transfer_result = (
+                self.transfer_cat(
+                    cat=cat,
+                    source_box_id=(
+                        returning.remote_box_id
+                    ),
+                    target_box_id=(
+                        returning.anchor_box_id
+                    ),
                 )
             )
 
@@ -2045,19 +2051,17 @@ class CatQuantumBoxTransfer:
                     "quantum_exploration"
                 )
 
-        event = {
-            "name": (
-                "cat_quantum_return_advanced"
-            ),
-            "cat": cat.name,
-            "pair_id": returning.pair_id,
-            "position": position,
-            "arrived_at_box": result.arrived,
-            "transfer_result": (
-                transfer_result
-            ),
-            "advanced": True
-        }
+        event = (
+            CatQuantumReturnAdvancedEvent(
+                cat=cat.name,
+                pair_id=returning.pair_id,
+                position=result.position,
+                arrived_at_box=
+                    result.arrived,
+                transfer_result=
+                    transfer_result,
+            )
+        )
 
         self._record(
             event

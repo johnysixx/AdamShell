@@ -44,7 +44,7 @@ class CatQuantumExplorationReturnTests(unittest.TestCase):
         result = self.reach_goal()
         resolution = result['arrival_resolution']
         self.assertEqual(resolution['action'], 'return_via_exploration_pair')
-        self.assertTrue(resolution['return_plan']['started'])
+        self.assertTrue(resolution['return_plan'].started)
         self.assertIsInstance(
             self.cat.quantum_return,
             CatQuantumReturnState,
@@ -57,7 +57,7 @@ class CatQuantumExplorationReturnTests(unittest.TestCase):
         self.reach_goal()
         for _ in range(100):
             result = self.cats.advance_cat_quantum_return(self.cat)
-            transfer = result.get('transfer_result')
+            transfer = result.transfer_result
             if transfer is not None and transfer.transferred:
                 break
         self.assertEqual(self.cat.current_layer, 'meeting_place')
