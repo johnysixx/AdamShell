@@ -83,6 +83,7 @@ class FelineHumanDoorCapabilityObjectStateTests(
             "keys",
             "items",
             "values",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
@@ -170,16 +171,6 @@ class FelineHumanDoorCapabilityObjectStateTests(
 
         self.assert_not_mapping(
             result
-        )
-
-        boundary = (
-            result.to_dict()
-        )
-
-        boundary[
-            "usable_methods"
-        ].append(
-            "changed"
         )
 
         self.assertEqual(

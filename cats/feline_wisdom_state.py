@@ -364,18 +364,6 @@ class FelineHumanDoorCapabilityResult:
             ),
         )
 
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "cat": self.cat,
-            "action": self.action,
-            "allowed": self.allowed,
-            "reason": self.reason,
-            "usable_methods": list(
-                self.usable_methods
-            ),
-        }
-
 
 @dataclass(slots=True, frozen=True)
 class FelineAbilityMethodRegistrationResult:
