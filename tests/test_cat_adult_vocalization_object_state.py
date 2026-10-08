@@ -85,6 +85,7 @@ class CatAdultVocalizationObjectStateTests(
             'values',
             'items',
             'update',
+            'to_dict',
         ):
             self.assertFalse(
                 hasattr(

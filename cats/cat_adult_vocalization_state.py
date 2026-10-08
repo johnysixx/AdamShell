@@ -97,26 +97,6 @@ class CatAdultVocalizationState:
             )
         )
 
-    def to_dict(self):
-        return {
-            "food_request":
-                self.food_request,
-            "door_request":
-                self.door_request,
-            "attention_request":
-                self.attention_request,
-            "greeting":
-                self.greeting,
-            "warning":
-                self.warning,
-            "follow_me":
-                self.follow_me,
-            "distress_call":
-                self.distress_call,
-            "human_summoning":
-                self.human_summoning,
-        }
-
     @classmethod
     def _require_name(
         cls,

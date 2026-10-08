@@ -105,7 +105,9 @@ class CatSkillState:
 
         if self.vocalizations is not None:
             state["vocalizations"] = (
-                self.vocalizations.to_dict()
+                _learning_snapshot_value(
+                    self.vocalizations
+                )
             )
 
         return state
