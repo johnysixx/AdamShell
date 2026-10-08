@@ -73,6 +73,7 @@ class CatOvulationObjectStateTests(
             "keys",
             "items",
             "values",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
@@ -89,17 +90,14 @@ class CatOvulationObjectStateTests(
                 "stimulation"
             ]
 
-        boundary = (
-            result.to_dict()
+        self.assertEqual(
+            result.stimulation,
+            1,
         )
 
-        boundary[
-            "stimulation"
-        ] = 99
-
         self.assertEqual(
-            event.stimulation,
-            1,
+            result.threshold_reached,
+            False,
         )
 
     def test_resolution_history_uses_object_state(

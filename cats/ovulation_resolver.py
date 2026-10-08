@@ -56,21 +56,6 @@ class CatOvulationStimulationRecordedEvent:
             bool(self.threshold_reached),
         )
 
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "female": self.female,
-            "male": self.male,
-            "day": self.day,
-            "amount": self.amount,
-            "stimulation": self.stimulation,
-            "threshold": self.threshold,
-            "threshold_reached": (
-                self.threshold_reached
-            ),
-        }
-
-
 @dataclass(slots=True, frozen=True)
 class CatInducedOvulationResolvedEvent:
     female: str
