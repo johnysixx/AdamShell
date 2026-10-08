@@ -392,18 +392,6 @@ class CatBirthPercentileRoll:
     def is_percentile(self):
         return True
 
-    def to_dict(self):
-        return {
-            "die": self.die,
-            "sides": self.sides,
-            "face_value": self.face_value,
-            "percentile_tens": self.percentile_tens,
-            "raw_value": self.raw_value,
-            "value": self.value,
-            "is_percentile": self.is_percentile,
-            "attempt": self.attempt,
-        }
-
 
 @dataclass(frozen=True)
 class CatBirthPercentileResult:
@@ -490,20 +478,6 @@ class CatBirthPercentileResult:
     @property
     def cronenberg_count(self):
         return len(self.cronenbergs_created)
-
-    def to_dict(self):
-        return {
-            "final_roll": self.final_roll.to_dict(),
-            "history": [
-                item.to_dict()
-                for item in self.history
-            ],
-            "reroll_count": self.reroll_count,
-            "cronenbergs_created": list(
-                self.cronenbergs_created
-            ),
-            "cronenberg_count": self.cronenberg_count,
-        }
 
 
 @dataclass(slots=True)

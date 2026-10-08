@@ -70,6 +70,20 @@ class CatBirthPercentileObjectStateTests(unittest.TestCase):
         with self.assertRaises(AttributeError):
             result.final_roll.get("value")
 
+        self.assertFalse(
+            hasattr(
+                result,
+                "to_dict",
+            )
+        )
+
+        self.assertFalse(
+            hasattr(
+                result.final_roll,
+                "to_dict",
+            )
+        )
+
     def test_zero_percentile_builds_object_history_and_rerolls(self):
         cronenberg = object()
 
@@ -111,33 +125,6 @@ class CatBirthPercentileObjectStateTests(unittest.TestCase):
                 for item in result.history
             )
         )
-
-    def test_to_dict_is_detached_snapshot(self):
-        first = CatBirthPercentileRoll(
-            die="d10_percentile",
-            value=0,
-            attempt=1,
-        )
-        second = CatBirthPercentileRoll(
-            die="d10_percentile",
-            value=60,
-            attempt=2,
-        )
-        result = CatBirthPercentileResult(
-            final_roll=second,
-            history=(first, second),
-        )
-
-        snapshot = result.to_dict()
-        snapshot["final_roll"]["value"] = 10
-        snapshot["history"][0]["value"] = 90
-        snapshot["history"].append(
-            {"value": 20}
-        )
-
-        self.assertEqual(result.value, 60)
-        self.assertEqual(result.history[0].value, 0)
-        self.assertEqual(len(result.history), 2)
 
     def test_result_rejects_legacy_history_dicts(self):
         final_roll = CatBirthPercentileRoll(
