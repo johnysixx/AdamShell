@@ -107,7 +107,7 @@ class CatKnownScentFollowStateObjectTests(
         )
 
         self.assertEqual(
-            result['name'],
+            result.name,
             'cat_following_known_scent',
         )
 

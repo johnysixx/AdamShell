@@ -12,6 +12,9 @@ from cats.cat_intention_state import (
     CatScentSearchTarget,
 )
 from cats.cat_mind import CatMind
+from cats.cat_scent_navigation_result_state import (
+    CatScentSearchFailedResult,
+)
 from cats.cat_perception import CatPerception
 from cats.cat_scent_navigation_state import (
     CatKnownScentFollowState,
@@ -152,14 +155,33 @@ class CatScentSearchTargetObjectTests(
             )
         )
 
+        self.assertIsInstance(
+            result,
+            CatScentSearchFailedResult,
+        )
+
         self.assertEqual(
-            result['reason'],
+            result.reason,
             'invalid_search_target',
         )
 
         self.assertFalse(
-            result['executed']
+            result.executed
         )
+
+        self.assertFalse(
+            hasattr(
+                result,
+                'get',
+            )
+        )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = result[
+                'reason'
+            ]
 
 
 if __name__ == '__main__':

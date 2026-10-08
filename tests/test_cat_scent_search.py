@@ -54,7 +54,7 @@ class CatScentSearchTests(unittest.TestCase):
         intention = next((candidate for candidate in candidates if candidate.type == 'search_for_scent'))
         self.cat.mind.current_intention = intention
         first = self.cats.execute_cat_intention(self.cat)
-        self.assertEqual(first['name'], 'cat_searching_for_scent')
+        self.assertEqual(first.name, 'cat_searching_for_scent')
         self.assertEqual(
             self.cat.position,
             SpatialVector3(x=3.0, y=0.0, z=0.0)
@@ -62,9 +62,9 @@ class CatScentSearchTests(unittest.TestCase):
         result = first
         for _ in range(10):
             result = self.cats.execute_cat_intention(self.cat)
-            if result['name'] == 'cat_completed_scent_search_step':
+            if result.name == 'cat_completed_scent_search_step':
                 break
-        self.assertEqual(result['name'], 'cat_completed_scent_search_step')
+        self.assertEqual(result.name, 'cat_completed_scent_search_step')
         self.assertGreater(self.cat.position.x, 3.0)
         self.assertEqual(self.cat.scent_search.attempts, 1)
         self.assertIsNone(self.cat.mind.current_intention)
@@ -80,11 +80,11 @@ class CatScentSearchTests(unittest.TestCase):
         intention = next((candidate for candidate in candidates if candidate.type == 'search_for_scent'))
         self.cat.mind.current_intention = intention
         started = self.cats.execute_cat_intention(self.cat)
-        self.assertEqual(started['name'], 'cat_searching_for_scent')
+        self.assertEqual(started.name, 'cat_searching_for_scent')
         reacquired = self.cats.execute_cat_intention(self.cat)
-        self.assertEqual(reacquired['name'], 'cat_reacquired_scent_during_search')
-        self.assertEqual(reacquired['identity'], 'cat:pazuzu')
-        self.assertTrue(reacquired['search_interrupted'])
+        self.assertEqual(reacquired.name, 'cat_reacquired_scent_during_search')
+        self.assertEqual(reacquired.identity, 'cat:pazuzu')
+        self.assertTrue(reacquired.search_interrupted)
         self.assertFalse(self.cat.scent_search.active)
         self.assertTrue(self.cat.scent_search.reacquired)
         self.assertIsNone(self.cat.mind.current_intention)

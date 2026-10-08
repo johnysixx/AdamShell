@@ -155,7 +155,7 @@ class CatScentSearchStateObjectTests(
         )
 
         self.assertEqual(
-            result['name'],
+            result.name,
             'cat_searching_for_scent',
         )
 

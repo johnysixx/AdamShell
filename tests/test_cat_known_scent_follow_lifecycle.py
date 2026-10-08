@@ -44,14 +44,14 @@ class CatKnownScentFollowLifecycleTests(unittest.TestCase):
 
     def test_cat_reaches_last_known_scent_point(self):
         first = self.cats.execute_cat_intention(self.cat)
-        self.assertEqual(first['name'], 'cat_following_known_scent')
+        self.assertEqual(first.name, 'cat_following_known_scent')
         self.assertIsNotNone(self.cat.mind.current_intention)
         result = first
         for _ in range(10):
             result = self.cats.execute_cat_intention(self.cat)
-            if result['name'] == 'cat_reached_known_scent':
+            if result.name == 'cat_reached_known_scent':
                 break
-        self.assertEqual(result['name'], 'cat_reached_known_scent')
+        self.assertEqual(result.name, 'cat_reached_known_scent')
         self.assertEqual(
             self.cat.position,
             SpatialVector3(x=3.0, y=0.0, z=0.0)
