@@ -44,6 +44,14 @@ from quantum.cat_quantum_trail_state import (
 from quantum.cat_stable_exploration_pair_state import (
     CatStableExplorationPairState,
 )
+from core.entity.quantum_box_pairing_result_state import (
+    QuantumBoxesPairedEvent,
+)
+from quantum.cat_return_counterpart_result_state import (
+    CatReturnCounterpartCreatedEvent,
+    CatReturnCounterpartCreatedResult,
+    CatReturnCounterpartCreationFailedResult,
+)
 from quantum.cat_stable_exploration_pair_result_state import (
     CatStableExplorationPairCreatedEvent,
     CatStableExplorationPairCreatedResult,
@@ -1106,20 +1114,59 @@ class CatQuantumBoxTransfer:
 
         return event
 
+    def _return_counterpart_creation_failure(
+        self,
+        cat,
+        reason,
+    ):
+        result = (
+            CatReturnCounterpartCreationFailedResult(
+                cat=getattr(
+                    cat,
+                    "name",
+                    None,
+                ),
+                reason=reason,
+            )
+        )
+
+        self._record(
+            result
+        )
+
+        return result
+
     def create_return_counterpart(
         self,
         cat,
         source_box_id,
-        position=None
+        position=None,
     ):
-        source_box = self._find_box(
-            source_box_id
+        if not isinstance(
+            cat,
+            Cat,
+        ):
+            return (
+                self._return_counterpart_creation_failure(
+                    cat=cat,
+                    reason="invalid_cat",
+                )
+            )
+
+        source_box = (
+            self._find_box(
+                source_box_id
+            )
         )
 
         if source_box is None:
-            return self._failure(
-                cat,
-                "source_box_not_found"
+            return (
+                self._return_counterpart_creation_failure(
+                    cat=cat,
+                    reason=(
+                        "source_box_not_found"
+                    ),
+                )
             )
 
         energy_cost = (
@@ -1130,65 +1177,124 @@ class CatQuantumBoxTransfer:
             cat.idea_energy
         )
 
-        if cat_energy < energy_cost:
-            return self._failure(
-                cat,
-                "insufficient_cat_energy"
+        if (
+            cat_energy
+            < energy_cost
+        ):
+            return (
+                self._return_counterpart_creation_failure(
+                    cat=cat,
+                    reason=(
+                        "insufficient_cat_energy"
+                    ),
+                )
             )
 
         cat.idea_energy = (
-            cat_energy - energy_cost
+            cat_energy
+            - energy_cost
         )
 
         counterpart = (
-            self.universe.create_quantum_box()
+            self.universe
+            .create_quantum_box()
         )
 
-        counterpart.current_layer = cat.current_layer
-
-        counterpart_position_snapshot = require_optional_spatial_vector(
-            position,
-            field_name="return counterpart position",
-        )
-        if counterpart_position_snapshot is None:
-            counterpart_position_snapshot = cat.position if cat.position is not None else SpatialVector3.zero()
-        counterpart.position = counterpart_position_snapshot
-
-        pair_event = self.pair_boxes(
-            source_box,
-            counterpart
+        counterpart.current_layer = (
+            cat.current_layer
         )
 
-        event = {
-            "name": (
-                "cat_created_return_box_counterpart"
-            ),
-            "cat": cat.name,
-            "source_box_id": source_box.id,
-            "counterpart_box_id": counterpart.id,
-            "source_layer": (
-                source_box.current_layer
-            ),
-            "counterpart_layer": (
-                counterpart.current_layer
-            ),
-            "position": counterpart.position.to_dict(),
-            "energy_cost": energy_cost,
-            "remaining_cat_energy": (
-                cat.idea_energy
-            ),
-            "pair_event": pair_event,
-            "created": True
-        }
+        counterpart_position = (
+            require_optional_spatial_vector(
+                position,
+                field_name=(
+                    "return counterpart position"
+                ),
+            )
+        )
+
+        if counterpart_position is None:
+            counterpart_position = (
+                cat.position
+                if cat.position is not None
+                else SpatialVector3.zero()
+            )
+
+        counterpart.position = (
+            counterpart_position
+        )
+
+        pair_event = (
+            self.pair_boxes(
+                source_box,
+                counterpart,
+            )
+        )
+
+        if not isinstance(
+            pair_event,
+            QuantumBoxesPairedEvent,
+        ):
+            raise TypeError(
+                "Quantum box pairing must return "
+                "QuantumBoxesPairedEvent."
+            )
+
+        event = (
+            CatReturnCounterpartCreatedEvent(
+                cat=cat.name,
+                source_box_id=
+                    source_box.id,
+                counterpart_box_id=
+                    counterpart.id,
+                source_layer=(
+                    source_box.current_layer
+                ),
+                counterpart_layer=(
+                    counterpart.current_layer
+                ),
+                position=(
+                    counterpart.position
+                ),
+                energy_cost_j=
+                    energy_cost,
+                remaining_cat_energy=
+                    cat.idea_energy,
+                pair_event=
+                    pair_event,
+            )
+        )
 
         self._record(
             event
         )
 
-        return {
-            **event,
-            "counterpart": counterpart
-        }
+        return (
+            CatReturnCounterpartCreatedResult(
+                cat=cat.name,
+                source_box_id=
+                    source_box.id,
+                counterpart_box_id=
+                    counterpart.id,
+                source_layer=(
+                    source_box.current_layer
+                ),
+                counterpart_layer=(
+                    counterpart.current_layer
+                ),
+                position=(
+                    counterpart.position
+                ),
+                energy_cost_j=
+                    energy_cost,
+                remaining_cat_energy=
+                    cat.idea_energy,
+                pair_event=
+                    pair_event,
+                counterpart=
+                    counterpart,
+            )
+        )
 
     def start_quantum_exploration_route(
         self,
@@ -2395,35 +2501,6 @@ class CatQuantumBoxTransfer:
 
         return event
 
-    def _failure(
-        self,
-        cat,
-        reason
-    ):
-        event = {
-            "name": (
-                "cat_quantum_box_transfer_failed"
-            ),
-            "cat": (
-                cat.name
-                if isinstance(
-                    cat,
-                    (
-                        Cat,
-                        dict
-                    )
-                )
-                else None
-            ),
-            "reason": reason,
-            "transferred": False
-        }
-
-        self._record(
-            event
-        )
-
-        return event
 
     def _record(
         self,

@@ -119,7 +119,9 @@ class QuantumBoxObjectStateTests(
             source_state.box_id,
             target.id
         )
-        self.assertTrue(event['paired'])
+        self.assertTrue(
+            event.paired
+        )
 
         previous = source.clear_counterpart()
         self.assertTrue(previous['paired'])

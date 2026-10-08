@@ -220,12 +220,10 @@ class CatQuantumBoxTransferTests(
         )
 
         self.assertTrue(
-            result["created"]
+            result.created
         )
 
-        counterpart = result[
-            "counterpart"
-        ]
+        counterpart = result.counterpart
 
         self.assertEqual(
             counterpart.current_layer,

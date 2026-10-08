@@ -14,6 +14,9 @@ from core.entity.quantum_box_cat_observation import (
 from core.entity.quantum_box_occupancy_state import (
     QuantumBoxOccupancyState,
 )
+from core.entity.quantum_box_pairing_result_state import (
+    QuantumBoxesPairedEvent,
+)
 
 
 @dataclass(slots=True)
@@ -234,22 +237,41 @@ class QuantumBox:
         self.position = position
         return self.position
 
-    def pair_with(self, counterpart):
+    def pair_with(
+        self,
+        counterpart,
+    ):
         if counterpart is self:
-            raise ValueError('Quantum box cannot pair with itself.')
-        if self.box_class != '1x':
-            raise ValueError('Only 1x boxes are supported.')
-        if counterpart.box_class != '1x':
-            raise ValueError('Only 1x boxes are supported.')
+            raise ValueError(
+                "Quantum box cannot pair with itself."
+            )
+
+        if self.box_class != "1x":
+            raise ValueError(
+                "Only 1x boxes are supported."
+            )
+
+        if counterpart.box_class != "1x":
+            raise ValueError(
+                "Only 1x boxes are supported."
+            )
+
         self.quantum_counterpart.pair(
             box_id=counterpart.id,
             layer=counterpart.current_layer,
         )
+
         counterpart.quantum_counterpart.pair(
             box_id=self.id,
             layer=self.current_layer,
         )
-        return {'name': 'quantum_boxes_paired', 'box_a': self.id, 'box_b': counterpart.id, 'layer_a': self.current_layer, 'layer_b': counterpart.current_layer, 'paired': True}
+
+        return QuantumBoxesPairedEvent(
+            box_a=self.id,
+            box_b=counterpart.id,
+            layer_a=self.current_layer,
+            layer_b=counterpart.current_layer,
+        )
 
     def clear_counterpart(self):
         return self.quantum_counterpart.clear()

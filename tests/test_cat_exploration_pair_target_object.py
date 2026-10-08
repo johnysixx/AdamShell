@@ -96,11 +96,11 @@ class CatExplorationPairTargetObjectTests(
         )
 
         self.assertFalse(
-            result['executed']
+            result.executed
         )
 
         self.assertEqual(
-            result['reason'],
+            result.reason,
             (
                 'invalid_exploration_pair_target'
             ),
