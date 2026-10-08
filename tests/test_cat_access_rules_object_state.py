@@ -47,6 +47,13 @@ class CatAccessRulesObjectStateTests(
             )
         )
 
+        self.assertFalse(
+            hasattr(
+                state,
+                "to_dict",
+            )
+        )
+
     def test_created_cat_shares_species_access_rules(
         self
     ):

@@ -10,13 +10,3 @@ class CatAccessRules:
             "cat_doors",
         ]
     )
-
-    def to_dict(self):
-        return {
-            "can_access_anywhere": (
-                self.can_access_anywhere
-            ),
-            "access_via": list(
-                self.access_via
-            ),
-        }

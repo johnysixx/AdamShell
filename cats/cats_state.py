@@ -1,4 +1,3 @@
-from copy import deepcopy
 from dataclasses import dataclass, field
 
 from .cat_access_rules import CatAccessRules
@@ -77,21 +76,3 @@ class CatsState:
     access_rules: CatAccessRules = field(
         default_factory=CatAccessRules
     )
-
-    def to_dict(self):
-        return {
-            "type": self.layer_type,
-            "state": self.status,
-            "cats": list(self.cats),
-            "events": deepcopy(self.events),
-            "tick_count": self.tick_count,
-            "allowed_colors": list(self.allowed_colors),
-            "allowed_patterns": list(self.allowed_patterns),
-            "allowed_eye_colors": list(self.allowed_eye_colors),
-            "allowed_fur_lengths": list(
-                self.allowed_fur_lengths
-            ),
-            "allowed_sexes": list(self.allowed_sexes),
-            "default_idea_energy": self.default_idea_energy,
-            "access_rules": self.access_rules.to_dict(),
-        }

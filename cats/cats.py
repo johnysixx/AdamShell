@@ -1,3 +1,4 @@
+from copy import deepcopy
 import random
 from universe.logger import UniverseLogger
 from .memory import CatMemory
@@ -130,18 +131,99 @@ class Cats:
 
     @property
     def public_state(self):
+        access_rules_boundary = {
+            "can_access_anywhere": (
+                self.access_rules
+                .can_access_anywhere
+            ),
+            "access_via": list(
+                self.access_rules.access_via
+            ),
+        }
+
+        cats_state_boundary = {
+            "type": (
+                self.cats_state.layer_type
+            ),
+            "state": (
+                self.cats_state.status
+            ),
+            "cats": list(
+                self.cats_state.cats
+            ),
+            "events": deepcopy(
+                self.cats_state.events
+            ),
+            "tick_count": (
+                self.cats_state.tick_count
+            ),
+            "allowed_colors": list(
+                self.cats_state.allowed_colors
+            ),
+            "allowed_patterns": list(
+                self.cats_state.allowed_patterns
+            ),
+            "allowed_eye_colors": list(
+                self.cats_state
+                .allowed_eye_colors
+            ),
+            "allowed_fur_lengths": list(
+                self.cats_state
+                .allowed_fur_lengths
+            ),
+            "allowed_sexes": list(
+                self.cats_state.allowed_sexes
+            ),
+            "default_idea_energy": (
+                self.cats_state
+                .default_idea_energy
+            ),
+            "access_rules": {
+                "can_access_anywhere": (
+                    self.cats_state
+                    .access_rules
+                    .can_access_anywhere
+                ),
+                "access_via": list(
+                    self.cats_state
+                    .access_rules
+                    .access_via
+                ),
+            },
+        }
+
         return {
-            'type': self.cats_state.layer_type,
-            'state': self.cats_state.status,
-            'allowed_colors': self.allowed_colors,
-            'allowed_patterns': self.allowed_patterns,
-            'allowed_eye_colors': self.allowed_eye_colors,
-            'allowed_fur_lengths': self.allowed_fur_lengths,
-            'allowed_sexes': self.allowed_sexes,
-            'default_idea_energy': self.default_idea_energy,
-            'access_rules': self.access_rules.to_dict(),
-            'cats': self.cats,
-            'cats_state': self.cats_state.to_dict(),
+            "type": (
+                self.cats_state.layer_type
+            ),
+            "state": (
+                self.cats_state.status
+            ),
+            "allowed_colors": (
+                self.allowed_colors
+            ),
+            "allowed_patterns": (
+                self.allowed_patterns
+            ),
+            "allowed_eye_colors": (
+                self.allowed_eye_colors
+            ),
+            "allowed_fur_lengths": (
+                self.allowed_fur_lengths
+            ),
+            "allowed_sexes": (
+                self.allowed_sexes
+            ),
+            "default_idea_energy": (
+                self.default_idea_energy
+            ),
+            "access_rules": (
+                access_rules_boundary
+            ),
+            "cats": self.cats,
+            "cats_state": (
+                cats_state_boundary
+            ),
         }
 
     def write_to_world(self):

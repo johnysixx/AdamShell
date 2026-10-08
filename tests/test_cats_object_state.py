@@ -22,6 +22,7 @@ class CatsObjectStateTests(unittest.TestCase):
             "keys",
             "items",
             "values",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(state, mapping_method)
@@ -106,7 +107,13 @@ class CatsObjectStateTests(unittest.TestCase):
 
         self.assertEqual(
             boundary["access_rules"],
-            cats.access_rules.to_dict(),
+            {
+                "can_access_anywhere": True,
+                "access_via": [
+                    "boxes",
+                    "cat_doors",
+                ],
+            },
         )
         self.assertIs(
             boundary["allowed_colors"],
@@ -187,28 +194,67 @@ class CatsObjectStateTests(unittest.TestCase):
         self.assertNotIn("changed", cats.allowed_colors)
         self.assertEqual(cats.cats, [])
 
-    def test_to_dict_returns_detached_values(self):
-        state = CatsState()
-        snapshot = state.to_dict()
+    def test_public_state_cats_state_snapshot_is_detached(
+        self
+    ):
+        _, cats = self._layer()
+
+        state = cats.cats_state
+
+        self.assertFalse(
+            hasattr(
+                state,
+                "to_dict",
+            )
+        )
+
+        snapshot = (
+            cats.public_state[
+                "cats_state"
+            ]
+        )
 
         snapshot["events"].append(
             {"name": "changed"}
         )
-        snapshot["access_rules"]["access_via"].append(
+
+        snapshot[
+            "access_rules"
+        ][
+            "access_via"
+        ].append(
             "changed"
         )
-        snapshot["allowed_patterns"].append("changed")
+
+        snapshot[
+            "allowed_patterns"
+        ].append(
+            "changed"
+        )
+
         snapshot["cats"].append(
             {"name": "changed"}
         )
 
-        self.assertEqual(state.events, [])
+        self.assertEqual(
+            state.events,
+            [],
+        )
+
         self.assertNotIn(
             "changed",
             state.access_rules.access_via,
         )
-        self.assertNotIn("changed", state.allowed_patterns)
-        self.assertEqual(state.cats, [])
+
+        self.assertNotIn(
+            "changed",
+            state.allowed_patterns,
+        )
+
+        self.assertEqual(
+            state.cats,
+            [],
+        )
 
 
 if __name__ == "__main__":
