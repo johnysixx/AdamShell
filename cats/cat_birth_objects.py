@@ -695,20 +695,6 @@ class CatKittenBirthDeniedResult:
     ):
         return self
 
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "reason": self.reason,
-            "mother": self.mother,
-            "pregnancy_day": (
-                self.pregnancy_day
-            ),
-            "gestation_days": (
-                self.gestation_days
-            ),
-            "born": self.born,
-        }
-
 
 @dataclass(slots=True, frozen=True)
 class CatKittenBirthResult:

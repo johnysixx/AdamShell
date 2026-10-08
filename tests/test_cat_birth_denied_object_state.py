@@ -64,6 +64,7 @@ class CatBirthDeniedObjectStateTests(
             "keys",
             "items",
             "values",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
@@ -78,27 +79,6 @@ class CatBirthDeniedObjectStateTests(
             _ = result[
                 "reason"
             ]
-
-    def test_boundary_preserves_existing_shape(
-        self
-    ):
-        result = self._result()
-
-        self.assertEqual(
-            result.to_dict(),
-            {
-                "name": (
-                    "kitten_birth_denied"
-                ),
-                "reason": (
-                    "gestation_not_complete"
-                ),
-                "mother": "mother",
-                "pregnancy_day": 10,
-                "gestation_days": 63,
-                "born": False,
-            },
-        )
 
     def test_completed_gestation_cannot_be_denied(
         self
@@ -155,20 +135,26 @@ class CatBirthDeniedObjectStateTests(
             result.born
         )
 
+        self.assertFalse(
+            hasattr(
+                result,
+                "to_dict",
+            )
+        )
+
         self.assertEqual(
-            result.to_dict(),
-            {
-                "name": (
-                    "kitten_birth_denied"
-                ),
-                "reason": (
-                    "gestation_not_complete"
-                ),
-                "mother": "mother",
-                "pregnancy_day": 10,
-                "gestation_days": 63,
-                "born": False,
-            },
+            result.mother,
+            "mother",
+        )
+
+        self.assertEqual(
+            result.pregnancy_day,
+            10,
+        )
+
+        self.assertEqual(
+            result.gestation_days,
+            63,
         )
 
         self.assertEqual(
