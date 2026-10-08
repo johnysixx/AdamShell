@@ -97,6 +97,7 @@ class KittenEmbryoObjectStateTests(
             "keys",
             "items",
             "values",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
@@ -147,14 +148,24 @@ class KittenEmbryoObjectStateTests(
             "standard",
         )
 
-    def test_boundary_is_detached(
+    def test_reproduction_boundary_is_detached(
         self
     ):
         embryo = self._embryo()
 
-        boundary = (
-            embryo.to_dict()
+        state = CatReproductionState(
+            sex="female"
         )
+
+        state.embryos.append(
+            embryo
+        )
+
+        boundary = (
+            state.to_dict()
+        )[
+            "embryos"
+        ][0]
 
         self.assertIsInstance(
             boundary,
@@ -164,6 +175,13 @@ class KittenEmbryoObjectStateTests(
         self.assertIsInstance(
             boundary[
                 "profile"
+            ],
+            dict,
+        )
+
+        self.assertIsInstance(
+            boundary[
+                "phenotype"
             ],
             dict,
         )
@@ -209,9 +227,7 @@ class KittenEmbryoObjectStateTests(
         )
 
         self.assertEqual(
-            tuple(
-                embryo.special_traits
-            ),
+            embryo.special_traits,
             (),
         )
 

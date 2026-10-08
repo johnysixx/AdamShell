@@ -1,10 +1,61 @@
 from cats.cat_development_stage import CatDevelopmentStage
 from dataclasses import dataclass, field
 
-from cats.cat_birth_objects import CatLitter, KittenEmbryo
+from cats.cat_birth_objects import (
+    CatLitter,
+    KittenEmbryo,
+    cat_phenotype_snapshot,
+    kitten_genetic_viability_snapshot,
+)
 from cats.cat_estrous_phase import CatEstrousPhase
 
 from cats.mating_contact import CatMatingContact
+
+
+def _kitten_embryo_snapshot(
+    embryo,
+):
+    if not isinstance(
+        embryo,
+        KittenEmbryo,
+    ):
+        raise TypeError(
+            "Reproduction embryo snapshot requires "
+            "KittenEmbryo."
+        )
+
+    return {
+        "id": embryo.id,
+        "type": embryo.type,
+        "state": embryo.state,
+        "mother_name": (
+            embryo.mother_name
+        ),
+        "father_name": (
+            embryo.father_name
+        ),
+        "genotype": embryo.genotype,
+        "phenotype": (
+            cat_phenotype_snapshot(
+                embryo.phenotype
+            )
+        ),
+        "profile": (
+            embryo.profile.to_dict()
+        ),
+        "viability": (
+            kitten_genetic_viability_snapshot(
+                embryo.viability
+            )
+        ),
+        "genetic_status": (
+            embryo.genetic_status
+        ),
+        "rare": embryo.rare,
+        "special_traits": list(
+            embryo.special_traits
+        ),
+    }
 
 
 @dataclass(slots=True)
@@ -91,7 +142,9 @@ class CatReproductionState:
             "expected_birth_day": self.expected_birth_day,
             "mother_name": self.mother_name,
             "embryos": [
-                embryo.to_dict()
+                _kitten_embryo_snapshot(
+                    embryo
+                )
                 for embryo
                 in self.embryos
             ],

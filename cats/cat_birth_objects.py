@@ -596,40 +596,6 @@ class KittenEmbryo:
             in self.special_traits
         )
 
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "type": self.type,
-            "state": self.state,
-            "mother_name": (
-                self.mother_name
-            ),
-            "father_name": (
-                self.father_name
-            ),
-            "genotype": self.genotype,
-            "phenotype": (
-                cat_phenotype_snapshot(
-                    self.phenotype
-                )
-            ),
-            "profile": (
-                self.profile.to_dict()
-            ),
-            "viability": (
-                kitten_genetic_viability_snapshot(
-                    self.viability
-                )
-            ),
-            "genetic_status": (
-                self.genetic_status
-            ),
-            "rare": self.rare,
-            "special_traits": list(
-                self.special_traits
-            ),
-        }
-
 
 @dataclass(slots=True, frozen=True)
 class CatKittenBirthDeniedResult:
