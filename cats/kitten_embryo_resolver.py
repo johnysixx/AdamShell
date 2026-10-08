@@ -273,38 +273,6 @@ class KittenEmbryoResult:
     def embryo_id(self):
         return self.event.embryo_id
 
-    def to_dict(self):
-        result = {
-            "embryo": self.embryo,
-            "viability": (
-                kitten_genetic_viability_snapshot(
-                    self.viability
-                )
-            ),
-        }
-
-        if self.phenotype is not None:
-            result[
-                "phenotype"
-            ] = (
-                cat_phenotype_snapshot(
-                    self.phenotype
-                )
-            )
-
-        result.update(
-            {
-                "cronenberg": (
-                    self.cronenberg
-                ),
-                "event": (
-                    self.event.to_dict()
-                ),
-                "viable": self.viable,
-            }
-        )
-
-        return result
 
 
 class KittenEmbryoResolver:

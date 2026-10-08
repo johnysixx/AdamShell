@@ -95,15 +95,20 @@ class KittenEmbryoHistoryObjectStateTests(
             event,
         )
 
+        self.assertFalse(
+            hasattr(
+                result,
+                "to_dict",
+            )
+        )
+
         boundary = (
-            result.to_dict()
+            event.to_dict()
         )
 
         self.assertEqual(
             event.profile.sex,
             boundary[
-                "event"
-            ][
                 "profile"
             ][
                 "sex"
@@ -127,8 +132,6 @@ class KittenEmbryoHistoryObjectStateTests(
             _ = event["profile"]
 
         boundary[
-            "event"
-        ][
             "profile"
         ][
             "sex"
@@ -205,12 +208,10 @@ class KittenEmbryoHistoryObjectStateTests(
             ]
 
         boundary = (
-            result.to_dict()
+            event.to_dict()
         )
 
         boundary[
-            "event"
-        ][
             "viability"
         ][
             "details"

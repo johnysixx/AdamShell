@@ -242,6 +242,13 @@ class CatPregnancyStartedObjectStateTests(
             embryo.phenotype.profile,
         )
 
+        self.assertFalse(
+            hasattr(
+                embryo,
+                "to_dict",
+            )
+        )
+
         for obj in objects:
             for mapping_method in (
                 "get",

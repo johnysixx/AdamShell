@@ -4,6 +4,11 @@ from cats.kitten_embryo_resolver import (
     KittenEmbryoResult,
 )
 
+from cats.cat_birth_objects import (
+    cat_phenotype_snapshot,
+    kitten_genetic_viability_snapshot,
+)
+
 from cats.mating_contact import (
     CatMatingHistoryEvent,
 )
@@ -15,6 +20,51 @@ from cats.ovulation_resolver import (
 from cats.paternity_resolver import (
     KittenFatherSelectedEvent,
 )
+
+
+def _kitten_embryo_result_snapshot(
+    result,
+):
+    if not isinstance(
+        result,
+        KittenEmbryoResult,
+    ):
+        raise TypeError(
+            "Pregnancy embryo snapshot requires "
+            "KittenEmbryoResult."
+        )
+
+    snapshot = {
+        "embryo": result.embryo,
+        "viability": (
+            kitten_genetic_viability_snapshot(
+                result.viability
+            )
+        ),
+    }
+
+    if result.phenotype is not None:
+        snapshot[
+            "phenotype"
+        ] = (
+            cat_phenotype_snapshot(
+                result.phenotype
+            )
+        )
+
+    snapshot.update(
+        {
+            "cronenberg": (
+                result.cronenberg
+            ),
+            "event": (
+                result.event.to_dict()
+            ),
+            "viable": result.viable,
+        }
+    )
+
+    return snapshot
 
 
 @dataclass(slots=True, frozen=True)
@@ -357,7 +407,9 @@ class CatPregnancyStartedEvent(
                 self.nonviable_embryo_count
             ),
             "embryo_results": [
-                result.to_dict()
+                _kitten_embryo_result_snapshot(
+                    result
+                )
                 for result
                 in self.embryo_results
             ],
