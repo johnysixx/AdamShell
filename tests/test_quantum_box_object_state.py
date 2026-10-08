@@ -124,8 +124,15 @@ class QuantumBoxObjectStateTests(
         )
 
         previous = source.clear_counterpart()
-        self.assertTrue(previous['paired'])
-        previous['box_id'] = 'changed'
+
+        self.assertTrue(
+            previous.was_paired
+        )
+
+        self.assertEqual(
+            previous.previous_box_id,
+            target.id,
+        )
 
         self.assertFalse(source_state.paired)
         self.assertIsNone(source_state.box_id)
@@ -162,14 +169,19 @@ class QuantumBoxObjectStateTests(
             source.cat_transfer.started_tick,
             7
         )
-        self.assertIsInstance(
-            snapshot,
-            dict
+        self.assertEqual(
+            snapshot.cat_name,
+            "traveller",
         )
-        snapshot['cat_name'] = 'changed'
+
+        self.assertIs(
+            snapshot.state,
+            CatQuantumTransferPhase.SUPERPOSITION,
+        )
+
         self.assertEqual(
             source.cat_transfer.cat_name,
-            'traveller'
+            "traveller",
         )
 
     def test_transfer_completion_preserves_source_anchor(
@@ -242,8 +254,22 @@ class QuantumBoxObjectStateTests(
             energy.purpose,
             'cat_layer_transfer'
         )
-        snapshot['available'] = True
-        self.assertFalse(energy.available)
+        self.assertFalse(
+            snapshot.available
+        )
+
+        self.assertTrue(
+            snapshot.consumed
+        )
+
+        self.assertEqual(
+            snapshot.purpose,
+            "cat_layer_transfer",
+        )
+
+        self.assertFalse(
+            energy.available
+        )
 
     def test_collapse_mutates_content_and_collapse_objects(
         self
@@ -276,8 +302,16 @@ class QuantumBoxObjectStateTests(
         )
         self.assertEqual(collapse.tick, 9)
         self.assertEqual(
-            event['result'],
-            'cat'
+            event.result,
+            "cat",
+        )
+
+        self.assertTrue(
+            event.collapsed
+        )
+
+        self.assertTrue(
+            event.changed
         )
 
     def test_position_requires_spatial_vector(

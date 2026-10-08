@@ -17,6 +17,13 @@ from core.entity.quantum_box_occupancy_state import (
 from core.entity.quantum_box_pairing_result_state import (
     QuantumBoxesPairedEvent,
 )
+from core.entity.quantum_box_operation_result_state import (
+    QuantumBoxAlreadyCollapsedResult,
+    QuantumBoxCatTransferEnergyConsumedEvent,
+    QuantumBoxCatTransferStartedEvent,
+    QuantumBoxCollapsedEvent,
+    QuantumBoxCounterpartClearedEvent,
+)
 
 
 @dataclass(slots=True)
@@ -36,11 +43,19 @@ class QuantumBoxCounterpartState:
         return self
 
     def clear(self):
-        previous = self.to_dict()
+        event = (
+            QuantumBoxCounterpartClearedEvent(
+                previous_box_id=self.box_id,
+                previous_layer=self.layer,
+                was_paired=self.paired,
+            )
+        )
+
         self.box_id = None
         self.layer = None
         self.paired = False
-        return previous
+
+        return event
 
     def to_dict(self):
         return {
@@ -284,22 +299,37 @@ class QuantumBox:
         if not target_box.energy.available:
             raise RuntimeError('Target box has no available energy.')
         transfer_values = {
-            'cat_name': getattr(cat, 'name', None),
-            'source_box_id': self.id,
-            'target_box_id': target_box.id,
-            'source_layer': self.current_layer,
-            'target_layer': target_box.current_layer,
-            'started_tick': tick,
+            "cat_name": getattr(
+                cat,
+                "name",
+                None,
+            ),
+            "source_box_id": self.id,
+            "target_box_id": target_box.id,
+            "source_layer": self.current_layer,
+            "target_layer": target_box.current_layer,
+            "started_tick": tick,
         }
+
         self.cat_transfer.begin(
             **transfer_values
         )
+
         target_box.cat_transfer.begin(
             **transfer_values
         )
-        self.state = 'cat_transfer_superposition'
-        target_box.state = 'cat_transfer_superposition'
-        return self.cat_transfer.to_dict()
+
+        self.state = (
+            "cat_transfer_superposition"
+        )
+
+        target_box.state = (
+            "cat_transfer_superposition"
+        )
+
+        return QuantumBoxCatTransferStartedEvent(
+            **transfer_values
+        )
 
     def is_in_cat_transfer_superposition(self):
         return bool(
@@ -353,8 +383,14 @@ class QuantumBox:
 
     def consume_for_cat_transfer(self):
         self.energy.consume_for_cat_transfer()
-        self.state = 'consumed'
-        return self.energy.to_dict()
+
+        self.state = "consumed"
+
+        return (
+            QuantumBoxCatTransferEnergyConsumedEvent(
+                purpose=self.energy.purpose,
+            )
+        )
 
     @property
     def possibilities(self):
@@ -368,20 +404,50 @@ class QuantumBox:
         probability = 1.0 / len(self.possibilities)
         return [Potential(possibility=Possibility(name=possibility_name, probability=probability, action=lambda result=possibility_name: self.resolve_state(result=result, cause='actualization', observer='reality', tick=cycle_id)), cycle_id=cycle_id, source=self.id, context={'type': 'quantum_box_collapse', 'quantum_box_id': self.id, 'result': possibility_name, 'exclusive_group': self.id}) for possibility_name in self.possibilities]
 
-    def resolve_state(self, result, cause, observer=None, tick=None):
+    def resolve_state(
+        self,
+        result,
+        cause,
+        observer=None,
+        tick=None,
+    ):
         if self.collapse.collapsed:
-            return self.content.resolved
+            return QuantumBoxAlreadyCollapsedResult(
+                quantum_box_id=self.id,
+                result=self.content.resolved,
+            )
+
         if result not in self.possibilities:
-            raise ValueError(f'Unknown quantum box result: {result}')
-        self.content.resolve(result)
-        self.state = 'collapsed'
+            raise ValueError(
+                f"Unknown quantum box result: {result}"
+            )
+
+        self.content.resolve(
+            result
+        )
+
+        self.state = "collapsed"
+
         self.collapse.resolve(
             cause=cause,
             observer=observer,
             tick=tick,
         )
-        print(f'QUANTUM BOX COLLAPSED: {self.id} CAUSE={cause} RESULT={result}')
-        return {'type': 'quantum_box_collapsed', 'quantum_box_id': self.id, 'result': result, 'cause': cause, 'observer': observer, 'tick': tick}
+
+        print(
+            f"QUANTUM BOX COLLAPSED: "
+            f"{self.id} "
+            f"CAUSE={cause} "
+            f"RESULT={result}"
+        )
+
+        return QuantumBoxCollapsedEvent(
+            quantum_box_id=self.id,
+            result=result,
+            cause=cause,
+            observer=observer,
+            tick=tick,
+        )
 
     def collapse_state(self, cause, observer=None, tick=None, rng=None):
         if self.collapse.collapsed:
@@ -389,7 +455,7 @@ class QuantumBox:
         rng = rng or random
         result = rng.choice(self.possibilities)
         event = self.resolve_state(result=result, cause=cause, observer=observer, tick=tick)
-        return event['result']
+        return event.result
 
     @property
     def public_state(self):
