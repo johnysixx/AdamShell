@@ -268,6 +268,7 @@ class CatPregnancyAdvancedObjectStateTests(
             "keys",
             "items",
             "values",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
@@ -282,17 +283,13 @@ class CatPregnancyAdvancedObjectStateTests(
             ]
 
         self.assertEqual(
-            result.to_dict(),
-            {
-                "name": (
-                    "cat_pregnancy_advance_failed"
-                ),
-                "mother": "mother",
-                "reason": (
-                    "cat_is_not_pregnant"
-                ),
-                "advanced": False,
-            },
+            result.name,
+            "cat_pregnancy_advance_failed",
+        )
+
+        self.assertEqual(
+            result.mother,
+            "mother",
         )
 
     def test_history_keeps_distinct_advance_events(

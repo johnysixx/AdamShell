@@ -395,15 +395,6 @@ class CatPregnancyAdvanceDeniedResult:
     ):
         return self
 
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "mother": self.mother,
-            "reason": self.reason,
-            "advanced": self.advanced,
-        }
-
-
 @dataclass(slots=True, frozen=True)
 class CatPregnancyAdvancedEvent(
     CatMatingHistoryEvent
