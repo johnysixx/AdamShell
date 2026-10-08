@@ -48,7 +48,7 @@ class CatScentBoxApproachTests(unittest.TestCase):
 
     def test_cat_walks_to_box_before_transfer(self):
         first = self.cats.execute_cat_intention(self.tracker)
-        self.assertEqual(first['name'], 'cat_following_scent_to_box')
+        self.assertEqual(first.name, 'cat_following_scent_to_box')
         self.assertEqual(self.tracker.current_layer, 'meeting_place')
         self.assertEqual(
             self.tracker.position,
@@ -59,10 +59,10 @@ class CatScentBoxApproachTests(unittest.TestCase):
         last = first
         for _ in range(10):
             last = self.cats.execute_cat_intention(self.tracker)
-            if last['name'] == 'cat_followed_scent_through_box':
+            if last.name == 'cat_followed_scent_through_box':
                 break
-        self.assertEqual(last['name'], 'cat_followed_scent_through_box')
-        self.assertTrue(last['transfer']['transferred'])
+        self.assertEqual(last.name, 'cat_followed_scent_through_box')
+        self.assertTrue(last.transferred)
         self.assertEqual(self.tracker.current_layer, 'quantum_layer')
         self.assertIsNone(self.tracker.mind.current_intention)
         self.assertTrue(self.tracker.scent_box_follow.arrived_at_box)
@@ -70,8 +70,8 @@ class CatScentBoxApproachTests(unittest.TestCase):
     def test_cat_already_at_box_transfers_immediately(self):
         self.tracker.position = self.source.position
         result = self.cats.execute_cat_intention(self.tracker)
-        self.assertEqual(result['name'], 'cat_followed_scent_through_box')
-        self.assertTrue(result['transfer']['transferred'])
+        self.assertEqual(result.name, 'cat_followed_scent_through_box')
+        self.assertTrue(result.transferred)
         self.assertEqual(self.tracker.current_layer, 'quantum_layer')
 
     def test_scent_box_follow_is_object_state(

@@ -53,13 +53,13 @@ class CatScentReorientationAfterTransferTests(unittest.TestCase):
         result = None
         for _ in range(20):
             result = self.cats.execute_cat_intention(self.tracker)
-            if result['name'] == 'cat_followed_scent_through_box':
+            if result.name == 'cat_followed_scent_through_box':
                 return result
         self.fail('Tracker nedokončil průchod boxem.')
 
     def test_new_layer_is_freshly_perceived_and_sniffed(self):
         transfer = self.transfer_tracker()
-        self.assertTrue(transfer['transfer']['transferred'])
+        self.assertTrue(transfer.transferred)
         self.assertEqual(self.tracker.current_layer, 'quantum_layer')
         self.assertIsNone(self.tracker.mind.current_intention)
         perception = CatPerception(self.cats)

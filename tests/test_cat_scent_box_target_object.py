@@ -2,6 +2,9 @@ import unittest
 
 from universe.universe import Universe
 from cats.cats import Cats
+from cats.cat_scent_box_result_state import (
+    CatScentBoxTransferFailedResult,
+)
 from cats.cat_intention_state import (
     CatIntentionCandidate,
     CatScentBoxTarget,
@@ -93,14 +96,33 @@ class CatScentBoxTargetObjectTests(
             )
         )
 
+        self.assertIsInstance(
+            result,
+            CatScentBoxTransferFailedResult,
+        )
+
         self.assertEqual(
-            result['reason'],
+            result.reason,
             'invalid_scent_box_target',
         )
 
         self.assertFalse(
-            result['executed']
+            result.executed
         )
+
+        self.assertFalse(
+            hasattr(
+                result,
+                'get',
+            )
+        )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = result[
+                'reason'
+            ]
 
 
 if __name__ == '__main__':
