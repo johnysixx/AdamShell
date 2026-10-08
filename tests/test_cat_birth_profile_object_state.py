@@ -81,7 +81,9 @@ class CatBirthProfileObjectStateTests(unittest.TestCase):
         self.assertEqual(original.eye_color, "green")
         self.assertEqual(changed.eye_color, "gold")
 
-    def test_snapshots_are_detached(self):
+    def test_profile_snapshot_is_detached_and_canonical_is_object_only(
+        self
+    ):
         profile = self.resolver.canonical_profile
         resolution = CatCanonicalBirthResolution(
             matched=True,
@@ -94,16 +96,49 @@ class CatBirthProfileObjectStateTests(unittest.TestCase):
         )
 
         profile_snapshot = profile.to_dict()
-        canonical_snapshot = resolution.to_dict()
-
         profile_snapshot["color"] = "white"
-        canonical_snapshot["profile"]["color"] = "white"
 
-        self.assertEqual(profile.color, "black")
         self.assertEqual(
-            resolution.profile.color,
+            profile.color,
             "black",
         )
+
+        self.assertIs(
+            resolution.profile,
+            profile,
+        )
+
+        self.assertEqual(
+            resolution.identity,
+            "pazuzu",
+        )
+
+        self.assertFalse(
+            hasattr(
+                resolution,
+                "to_dict",
+            )
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    resolution,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = resolution[
+                "identity"
+            ]
 
 
 if __name__ == "__main__":

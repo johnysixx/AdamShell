@@ -164,36 +164,6 @@ class CatCanonicalBirthResolution:
                 "profile must be a CatBirthProfile object."
             )
 
-    def to_dict(self):
-        snapshot = {
-            "matched": self.matched,
-            "occurrence": self.occurrence,
-            "identity": self.identity,
-            "profile": self.profile.to_dict(),
-            "special_birth_event": (
-                self.special_birth_event
-            ),
-            "woodoo_rebirth": self.woodoo_rebirth,
-        }
-
-        if self.woodoo_birth_number is not None:
-            snapshot["woodoo_birth_number"] = (
-                self.woodoo_birth_number
-            )
-
-        if self.rebirth_probability is not None:
-            snapshot["rebirth_probability"] = (
-                self.rebirth_probability
-            )
-
-        if self.forced_birth:
-            snapshot["forced_birth"] = True
-
-        if self.forced_by is not None:
-            snapshot["forced_by"] = self.forced_by
-
-        return snapshot
-
 
 @dataclass(frozen=True)
 class CatGeneticsValidation:
