@@ -136,17 +136,12 @@ class FelineAbilityMethodRegistrationObjectStateTests(
             result
         )
 
-        boundary = (
-            result.to_dict()
+        self.assertFalse(
+            hasattr(
+                result,
+                "to_dict",
+            )
         )
-
-        boundary[
-            "method"
-        ][
-            "constraints"
-        ][
-            "can_close"
-        ] = True
 
         self.assertFalse(
             result.method
@@ -312,6 +307,13 @@ class FelineAbilityMethodRegistrationObjectStateTests(
 
         self.assert_not_mapping(
             result
+        )
+
+        self.assertFalse(
+            hasattr(
+                result,
+                "to_dict",
+            )
         )
 
 

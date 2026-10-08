@@ -403,23 +403,6 @@ class FelineAbilityMethodRegistrationResult:
                 "must be FelineAbilityMethodState."
             )
 
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "cat": self.cat,
-            "ability": self.ability,
-            "method": {
-                "name": self.method.name,
-                "teacher": self.method.teacher,
-                "constraints": deepcopy(
-                    dict(
-                        self.method.constraints
-                    )
-                ),
-            },
-            "registered": self.registered,
-        }
-
 
 @dataclass(slots=True, frozen=True)
 class FelineTeachingAbilitiesRegistrationResult:
