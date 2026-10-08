@@ -215,16 +215,6 @@ class CatGeneticsValidation:
                 "CatGeneticsValidationStatus."
             )
 
-    def to_dict(self):
-        return {
-            "valid": self.valid,
-            "status": self.status.value,
-            "reason": self.reason,
-            "karyotype": self.karyotype,
-            "conflicting_trait": self.conflicting_trait,
-            "reroll_die": self.reroll_die,
-        }
-
 
 @dataclass(frozen=True)
 class CatGeneticConflictResolution:
@@ -247,18 +237,6 @@ class CatGeneticConflictResolution:
             "reroll",
             MappingProxyType(dict(self.reroll)),
         )
-
-    def to_dict(self):
-        return {
-            "name": "cat_birth_genetic_conflict_resolved",
-            "attempt": self.attempt,
-            "reason": self.reason,
-            "trait": self.trait,
-            "die": self.die,
-            "previous_value": self.previous_value,
-            "new_value": self.new_value,
-            "reroll": dict(self.reroll),
-        }
 
 
 @dataclass(frozen=True)
@@ -313,22 +291,6 @@ class CatBirthGeneticsResult:
     @property
     def cronenberg_count(self):
         return len(self.cronenbergs_created)
-
-    def to_dict(self):
-        return {
-            "valid": self.valid,
-            "profile": self.profile.to_dict(),
-            "validation": self.validation.to_dict(),
-            "conflict_count": self.conflict_count,
-            "conflict_history": [
-                item.to_dict()
-                for item in self.conflict_history
-            ],
-            "cronenbergs_created": list(
-                self.cronenbergs_created
-            ),
-            "cronenberg_count": self.cronenberg_count,
-        }
 
 
 @dataclass(frozen=True)

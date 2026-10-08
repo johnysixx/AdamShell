@@ -45,8 +45,15 @@ class CatGeneticsValidationStatusObjectStateTests(
         )
 
         self.assertEqual(
-            result.to_dict()["status"],
+            result.status.value,
             "standard_genetics",
+        )
+
+        self.assertFalse(
+            hasattr(
+                result,
+                "to_dict",
+            )
         )
 
     def test_rare_genetic_exception_uses_enum(self):

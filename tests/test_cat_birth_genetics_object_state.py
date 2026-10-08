@@ -81,6 +81,12 @@ class CatBirthGeneticsObjectStateTests(unittest.TestCase):
             _ = validation["valid"]
 
         self.assertFalse(hasattr(validation, "get"))
+        self.assertFalse(
+            hasattr(
+                validation,
+                "to_dict",
+            )
+        )
 
     def test_genetic_resolution_returns_object_state(self):
         profile = self._profile()
@@ -111,6 +117,12 @@ class CatBirthGeneticsObjectStateTests(unittest.TestCase):
             _ = result["profile"]
 
         self.assertFalse(hasattr(result, "get"))
+        self.assertFalse(
+            hasattr(
+                result,
+                "to_dict",
+            )
+        )
 
     def test_genetic_conflict_reroll_uses_object_mapping(self):
         profile = self._profile(
@@ -155,37 +167,12 @@ class CatBirthGeneticsObjectStateTests(unittest.TestCase):
             "color",
         )
 
-    def test_genetics_to_dict_is_detached_snapshot(self):
-        profile = self._profile()
-        result = CatBirthGeneticsResult(
-            profile=profile,
-            validation=CatGeneticsValidation(
-                valid=True,
-                status=(
-                    CatGeneticsValidationStatus
-                    .STANDARD_GENETICS
-                ),
-                reason=None,
-                karyotype="XX",
-            ),
+        self.assertFalse(
+            hasattr(
+                result.conflict_history[0],
+                "to_dict",
+            )
         )
-
-        snapshot = result.to_dict()
-        snapshot["profile"]["color"] = "black"
-        snapshot["validation"]["status"] = "changed"
-        snapshot["conflict_history"].append(
-            {"attempt": 99}
-        )
-
-        self.assertEqual(result.profile.color, "white")
-        self.assertIs(
-            result.validation.status,
-            (
-                CatGeneticsValidationStatus
-                .STANDARD_GENETICS
-            ),
-        )
-        self.assertEqual(result.conflict_history, ())
 
     def test_create_cat_rejects_legacy_genetics_dict(self):
         profile = self._profile()
