@@ -29,16 +29,16 @@ class CatQuantumExplorationContinuationTests(unittest.TestCase):
         self.cats.think_and_act(cat=self.cat)
         for _ in range(100):
             result = self.cats.advance_cat_quantum_exploration(self.cat)
-            if result.get('arrived', False):
+            if result.arrived:
                 return result
         self.fail('Kočka nedorazila k prvnímu cíli.')
 
     def test_continue_exploration_starts_new_route(self):
         result = self.reach_first_goal()
-        resolution = result['arrival_resolution']
-        self.assertEqual(resolution['action'], 'continue_exploration')
-        continuation = resolution['continuation_plan']
-        self.assertTrue(continuation['continued'])
+        resolution = result.arrival_resolution
+        self.assertEqual(resolution.action, 'continue_exploration')
+        continuation = resolution.continuation_plan
+        self.assertTrue(continuation.continued)
         self.assertTrue(self.cat.quantum_exploration.active)
         self.assertEqual(self.cat.quantum_exploration.stage, 2)
 

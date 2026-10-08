@@ -46,22 +46,22 @@ class CatQuantumExplorationMovementTests(unittest.TestCase):
     def test_quantum_route_is_most_direct_possible(self):
         self.cats.think_and_act(cat=self.cat)
         exploration = self.cat.quantum_exploration
-        self.assertEqual(exploration.stabilized_path['path_kind'], 'most_direct_possible')
+        self.assertEqual(exploration.stabilized_path.path_kind, 'most_direct_possible')
 
     def test_cat_advances_along_quantum_route(self):
         self.cats.think_and_act(cat=self.cat)
         start = self.cat.position.to_dict()
         result = self.cats.advance_cat_quantum_exploration(self.cat)
-        self.assertTrue(result['advanced'])
+        self.assertTrue(result.advanced)
         self.assertNotEqual(self.cat.position.to_dict(), start)
 
     def test_cat_eventually_reaches_goal(self):
         self.cats.think_and_act(cat=self.cat)
         for _ in range(100):
             result = self.cats.advance_cat_quantum_exploration(self.cat)
-            if result.get('arrived', False):
+            if result.arrived:
                 break
-        self.assertTrue(result['arrived'])
+        self.assertTrue(result.arrived)
         history = self.cat.quantum_exploration_history
         self.assertIsInstance(
             history[-1],
@@ -77,7 +77,7 @@ class CatQuantumExplorationMovementTests(unittest.TestCase):
             self.cat.position,
             SpatialVector3(x=6.0, y=0.0, z=0.0)
         )
-        self.assertIsNotNone(result.get('arrival_resolution'))
-        self.assertTrue(result['arrival_resolution']['resolved'])
+        self.assertIsNotNone(result.arrival_resolution)
+        self.assertTrue(result.arrival_resolution.resolved)
 if __name__ == '__main__':
     unittest.main()

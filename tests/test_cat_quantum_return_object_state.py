@@ -89,11 +89,11 @@ class CatQuantumReturnObjectStateTests(
         )
 
         self.assertFalse(
-            result['advanced']
+            result.advanced
         )
 
         self.assertEqual(
-            result['reason'],
+            result.reason,
             'no_active_quantum_return',
         )
 

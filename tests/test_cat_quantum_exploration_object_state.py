@@ -104,11 +104,11 @@ class CatQuantumExplorationObjectStateTests(
         )
 
         self.assertFalse(
-            result['advanced']
+            result.advanced
         )
 
         self.assertEqual(
-            result['reason'],
+            result.reason,
             'exploration_not_active',
         )
 

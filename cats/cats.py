@@ -54,6 +54,9 @@ from .cat_overpopulation_activation_state import (
 from quantum.cat_quantum_return_result_state import (
     CatQuantumReturnNotAdvancedResult,
 )
+from quantum.cat_quantum_exploration_result_state import (
+    CatQuantumExplorationNotAdvancedResult,
+)
 
 class Cats:
 
@@ -950,11 +953,35 @@ class Cats:
         self.emit_event(event)
         return event
 
-    def advance_cat_quantum_exploration(self, cat, rng=None):
-        transfer_system = getattr(self.universe, 'cat_box_transfer', None)
+    def advance_cat_quantum_exploration(
+        self,
+        cat,
+        rng=None,
+    ):
+        transfer_system = getattr(
+            self.universe,
+            "cat_box_transfer",
+            None,
+        )
+
         if transfer_system is None:
-            return {'name': 'cat_quantum_exploration_not_advanced', 'cat': cat.name, 'reason': 'cat_box_transfer_unavailable', 'advanced': False}
-        return transfer_system.advance_quantum_exploration(cat=cat, rng=rng)
+            return (
+                CatQuantumExplorationNotAdvancedResult(
+                    cat=cat.name,
+                    reason=(
+                        "cat_box_transfer_unavailable"
+                    ),
+                )
+            )
+
+        return (
+            transfer_system
+            .advance_quantum_exploration(
+                cat=cat,
+                rng=rng,
+            )
+        )
+
 
     def advance_cat_quantum_return(
         self,

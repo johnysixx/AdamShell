@@ -282,11 +282,11 @@ class CatQuantumBoxTransferTests(
         )
 
         self.assertTrue(
-            result["stabilized"]
+            result.stabilized
         )
 
         self.assertEqual(
-            result["path_kind"],
+            result.path_kind,
             "most_direct_possible"
         )
 

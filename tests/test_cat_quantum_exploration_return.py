@@ -31,7 +31,7 @@ class CatQuantumExplorationReturnTests(unittest.TestCase):
         self.cats.think_and_act(cat=self.cat)
         for _ in range(100):
             result = self.cats.advance_cat_quantum_exploration(self.cat)
-            if result.get('arrived', False):
+            if result.arrived:
                 return result
         self.fail('Kočka nedorazila k cíli.')
 
@@ -42,9 +42,9 @@ class CatQuantumExplorationReturnTests(unittest.TestCase):
 
     def test_cat_can_choose_return_after_exploration(self):
         result = self.reach_goal()
-        resolution = result['arrival_resolution']
-        self.assertEqual(resolution['action'], 'return_via_exploration_pair')
-        self.assertTrue(resolution['return_plan'].started)
+        resolution = result.arrival_resolution
+        self.assertEqual(resolution.action, 'return_via_exploration_pair')
+        self.assertTrue(resolution.return_plan.started)
         self.assertIsInstance(
             self.cat.quantum_return,
             CatQuantumReturnState,

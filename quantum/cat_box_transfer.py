@@ -47,6 +47,19 @@ from quantum.cat_quantum_return_result_state import (
     CatQuantumReturnRouteNotStartedResult,
     CatQuantumReturnRouteStartedEvent,
 )
+from quantum.cat_quantum_path_state import (
+    CatQuantumDirectPathStabilizedEvent,
+)
+from quantum.cat_quantum_exploration_result_state import (
+    CatQuantumExplorationAdvancedEvent,
+    CatQuantumExplorationArrivalNotResolvedResult,
+    CatQuantumExplorationArrivalResolvedEvent,
+    CatQuantumExplorationContinuedEvent,
+    CatQuantumExplorationContinuationFailedResult,
+    CatQuantumExplorationNotAdvancedResult,
+    CatQuantumExplorationRouteNotStartedResult,
+    CatQuantumExplorationRouteStartedEvent,
+)
 from quantum.cat_box_transfer_result_state import (
     CAT_QUANTUM_BOX_TRANSFER_RESULT_TYPES,
     CatQuantumBoxTransferCompletedEvent,
@@ -1143,7 +1156,7 @@ class CatQuantumBoxTransfer:
         self,
         cat,
         pair_id,
-        step_size=None
+        step_size=None,
     ):
         current_exploration = (
             cat.quantum_exploration
@@ -1157,89 +1170,115 @@ class CatQuantumBoxTransfer:
             )
         ):
             raise TypeError(
-                'Cat quantum exploration state '
-                'must be '
-                'CatQuantumExplorationState.'
+                "Cat quantum exploration state "
+                "must be "
+                "CatQuantumExplorationState."
             )
 
         pair = next(
             (
                 item
-                for item in self.universe.stable_cat_box_pairs
-                if item.get("pair_id") == pair_id
-                and item.get("active", False)
+                for item
+                in self.universe
+                .stable_cat_box_pairs
+                if item.get(
+                    "pair_id"
+                ) == pair_id
+                and item.get(
+                    "active",
+                    False,
+                )
             ),
-            None
+            None,
         )
 
         if pair is None:
-            return {
-                "name": (
-                    "cat_quantum_exploration_"
-                    "route_not_started"
-                ),
-                "cat": cat.name,
-                "reason": "stable_pair_not_found",
-                "started": False
-            }
+            return (
+                CatQuantumExplorationRouteNotStartedResult(
+                    cat=cat.name,
+                    reason=(
+                        "stable_pair_not_found"
+                    ),
+                )
+            )
 
-        if cat.current_layer != "quantum_layer":
-            return {
-                "name": (
-                    "cat_quantum_exploration_"
-                    "route_not_started"
-                ),
-                "cat": cat.name,
-                "reason": "cat_not_in_quantum_layer",
-                "started": False
-            }
+        if (
+            cat.current_layer
+            != "quantum_layer"
+        ):
+            return (
+                CatQuantumExplorationRouteNotStartedResult(
+                    cat=cat.name,
+                    reason=(
+                        "cat_not_in_quantum_layer"
+                    ),
+                )
+            )
 
         destination = require_spatial_vector(
-            pair["exploration_destination_position"],
-            field_name="stable pair exploration destination",
+            pair[
+                "exploration_destination_position"
+            ],
+            field_name=(
+                "stable pair "
+                "exploration destination"
+            ),
         )
 
-        stabilized = self.stabilize_direct_trail(
-            cat=cat,
-            destination=destination
+        stabilized = (
+            self.stabilize_direct_trail(
+                cat=cat,
+                destination=destination,
+            )
         )
 
         quantum_space = getattr(
             self.universe,
             "quantum_space",
-            None
+            None,
         )
 
         if quantum_space is None:
-            return {
-                "name": (
-                    "cat_quantum_exploration_"
-                    "route_not_started"
+            return (
+                CatQuantumExplorationRouteNotStartedResult(
+                    cat=cat.name,
+                    reason=(
+                        "quantum_space_unavailable"
+                    ),
+                )
+            )
+
+        start_position = (
+            require_spatial_vector(
+                cat.position,
+                field_name=(
+                    "cat exploration "
+                    "start position"
                 ),
-                "cat": cat.name,
-                "reason": "quantum_space_unavailable",
-                "started": False
-            }
+            )
+        )
 
         planned = (
             quantum_space
             .plan_direct_cat_route(
                 cat_id=cat.name,
-                start_position=require_spatial_vector(
-                    cat.position,
-                    field_name="cat exploration start position",
-                ),
-                destination_position=destination,
+                start_position=
+                    start_position,
+                destination_position=
+                    destination,
                 destination=(
                     f"exploration_goal:"
                     f"{pair_id}"
                 ),
-                step_size=step_size
+                step_size=step_size,
             )
         )
 
         route = planned.route
-        route.state = QuantumCatRouteState.READY
+
+        route.state = (
+            QuantumCatRouteState.READY
+        )
 
         cat.active_route_id = (
             route.route_id
@@ -1252,45 +1291,46 @@ class CatQuantumBoxTransfer:
                 pair_id=pair_id,
                 route_id=route.route_id,
                 destination=destination,
-                stabilized_path=stabilized,
+                stabilized_path=
+                    stabilized,
                 stage=1,
                 continuation=False,
             )
         )
 
-        event = {
-            "name": (
-                "cat_quantum_exploration_"
-                "route_started"
-            ),
-            "cat": cat.name,
-            "pair_id": pair_id,
-            "route_id": route.route_id,
-            "start_position": cat.position.to_dict(),
-            "destination": destination.to_dict(),
-            "step_count": len(
-                route.route_steps
-            ),
-            "most_direct_possible": True,
-            "started": True
-        }
+        event = (
+            CatQuantumExplorationRouteStartedEvent(
+                cat=cat.name,
+                pair_id=pair_id,
+                route_id=route.route_id,
+                start_position=
+                    start_position,
+                destination=
+                    destination,
+                step_count=(
+                    len(
+                        route.route_steps
+                    )
+                ),
+                route=route,
+                plan=planned.plan,
+            )
+        )
 
         self._record(
             event
         )
 
-        return {
-            **event,
-            "route": route,
-            "plan": planned.plan
-        }
+        return event
 
     def advance_quantum_exploration(
         self,
         cat,
-        rng=None
+        rng=None,
     ):
-        exploration = cat.quantum_exploration
+        exploration = (
+            cat.quantum_exploration
+        )
 
         if (
             exploration is not None
@@ -1300,63 +1340,62 @@ class CatQuantumBoxTransfer:
             )
         ):
             raise TypeError(
-                'Cat quantum exploration state '
-                'must be '
-                'CatQuantumExplorationState.'
+                "Cat quantum exploration state "
+                "must be "
+                "CatQuantumExplorationState."
             )
 
         if exploration is None:
-            return {
-                "name": (
-                    "cat_quantum_exploration_"
-                    "not_advanced"
-                ),
-                "cat": cat.name,
-                "reason": "no_quantum_exploration",
-                "advanced": False
-            }
+            return (
+                CatQuantumExplorationNotAdvancedResult(
+                    cat=cat.name,
+                    reason=(
+                        "no_quantum_exploration"
+                    ),
+                )
+            )
 
         if not exploration.active:
-            return {
-                "name": (
-                    "cat_quantum_exploration_"
-                    "not_advanced"
-                ),
-                "cat": cat.name,
-                "reason": "exploration_not_active",
-                "advanced": False
-            }
+            return (
+                CatQuantumExplorationNotAdvancedResult(
+                    cat=cat.name,
+                    reason=(
+                        "exploration_not_active"
+                    ),
+                )
+            )
 
         quantum_space = getattr(
             self.universe,
             "quantum_space",
-            None
+            None,
         )
 
         if quantum_space is None:
-            return {
-                "name": (
-                    "cat_quantum_exploration_"
-                    "not_advanced"
-                ),
-                "cat": cat.name,
-                "reason": "quantum_space_unavailable",
-                "advanced": False
-            }
+            return (
+                CatQuantumExplorationNotAdvancedResult(
+                    cat=cat.name,
+                    reason=(
+                        "quantum_space_unavailable"
+                    ),
+                )
+            )
 
-        result = quantum_space.advance_cat_route(
-            cat=cat,
-            cronenbergs=getattr(
-                self.universe,
-                "cronenbergs",
-                []
-            ),
-            encounter_system=(
-                self.universe
-                .cat_cronenberg_encounter
-            ),
-            universe=self.universe,
-            rng=rng
+        result = (
+            quantum_space.advance_cat_route(
+                cat=cat,
+                cronenbergs=getattr(
+                    self.universe,
+                    "cronenbergs",
+                    [],
+                ),
+                encounter_system=(
+                    self.universe
+                    .cat_cronenberg_encounter
+                ),
+                universe=self.universe,
+                rng=rng,
+            )
         )
 
         if not isinstance(
@@ -1368,12 +1407,6 @@ class CatQuantumBoxTransfer:
                 "must return a route result object."
             )
 
-        position = (
-            None
-            if result.position is None
-            else result.position.to_dict()
-        )
-
         arrival_resolution = None
 
         if result.arrived:
@@ -1383,11 +1416,12 @@ class CatQuantumBoxTransfer:
             exploration_history = getattr(
                 cat,
                 "quantum_exploration_history",
-                None
+                None,
             )
 
             if exploration_history is None:
                 exploration_history = []
+
                 cat.quantum_exploration_history = (
                     exploration_history
                 )
@@ -1408,24 +1442,25 @@ class CatQuantumBoxTransfer:
                 )
             )
 
-        event = {
-            "name": (
-                "cat_quantum_exploration_advanced"
-            ),
-            "cat": cat.name,
-            "pair_id": exploration.pair_id,
-            "route_id": exploration.route_id,
-            "position": position,
-            "result": result.result,
-            "arrived": result.arrived,
-            "arrival_resolution": (
-                arrival_resolution
-            ),
-            "advanced": (
-                result.result
-                != "no_active_route"
+        event = (
+            CatQuantumExplorationAdvancedEvent(
+                cat=cat.name,
+                pair_id=
+                    exploration.pair_id,
+                route_id=
+                    exploration.route_id,
+                position=
+                    result.position,
+                result=result.result,
+                arrived=result.arrived,
+                arrival_resolution=
+                    arrival_resolution,
+                advanced=(
+                    result.result
+                    != "no_active_route"
+                ),
             )
-        }
+        )
 
         self._record(
             event
@@ -1457,9 +1492,11 @@ class CatQuantumBoxTransfer:
     def finish_quantum_exploration(
         self,
         cat,
-        quantum_roll=None
+        quantum_roll=None,
     ):
-        exploration = cat.quantum_exploration
+        exploration = (
+            cat.quantum_exploration
+        )
 
         if (
             exploration is not None
@@ -1469,24 +1506,23 @@ class CatQuantumBoxTransfer:
             )
         ):
             raise TypeError(
-                'Cat quantum exploration state '
-                'must be '
-                'CatQuantumExplorationState.'
+                "Cat quantum exploration state "
+                "must be "
+                "CatQuantumExplorationState."
             )
 
         if (
             exploration is None
             or not exploration.arrived
         ):
-            return {
-                "name": (
-                    "cat_quantum_exploration_"
-                    "arrival_not_resolved"
-                ),
-                "cat": cat.name,
-                "reason": "destination_not_reached",
-                "resolved": False
-            }
+            return (
+                CatQuantumExplorationArrivalNotResolvedResult(
+                    cat=cat.name,
+                    reason=(
+                        "destination_not_reached"
+                    ),
+                )
+            )
 
         pair = (
             self._find_stable_pair_by_id(
@@ -1507,44 +1543,53 @@ class CatQuantumBoxTransfer:
                     self.universe
                     .universe_tick
                 ),
-                location=cat.position.to_dict(),
+                location=(
+                    cat.position.to_dict()
+                ),
                 details={
-                    "target_layer": (
-                        cat.current_layer
-                    ),
-                    "position": cat.position.to_dict(),
-                    "pair_id": exploration.pair_id
-                }
+                    "target_layer":
+                        cat.current_layer,
+                    "position":
+                        cat.position.to_dict(),
+                    "pair_id":
+                        exploration.pair_id,
+                },
             )
 
         known_place = (
             CatKnowledge.remember_place(
                 cat=cat,
                 layer=cat.current_layer,
-                position=require_spatial_vector(
-                    cat.position,
-                    field_name="exploration arrival position",
+                position=(
+                    require_spatial_vector(
+                        cat.position,
+                        field_name=(
+                            "exploration "
+                            "arrival position"
+                        ),
+                    )
                 ),
                 source=(
                     "direct_quantum_exploration"
                 ),
                 safe=True,
                 universe_tick=(
-                    self.universe.universe_tick
+                    self.universe
+                    .universe_tick
                 ),
                 details={
-                    "pair_id": exploration.pair_id,
-                    "exploration_stage": (
-                        exploration.stage
-                    )
-                }
+                    "pair_id":
+                        exploration.pair_id,
+                    "exploration_stage":
+                        exploration.stage,
+                },
             )
         )
 
         verified_legends = (
             CatKnowledge.verify_heard_legend(
                 cat=cat,
-                place=known_place
+                place=known_place,
             )
         )
 
@@ -1555,7 +1600,7 @@ class CatQuantumBoxTransfer:
                 place=known_place,
                 claim_type=(
                     "place_discovered"
-                )
+                ),
             )
         )
 
@@ -1564,7 +1609,8 @@ class CatQuantumBoxTransfer:
             .choose_after_arrival(
                 cat=cat,
                 pair=pair,
-                quantum_roll=quantum_roll
+                quantum_roll=
+                    quantum_roll,
             )
         )
 
@@ -1573,20 +1619,28 @@ class CatQuantumBoxTransfer:
         return_plan = None
         continuation_plan = None
 
-        if action is CatAfterArrivalAction.REST_AT_DESTINATION:
+        if (
+            action
+            is CatAfterArrivalAction
+            .REST_AT_DESTINATION
+        ):
             cat.state = (
                 "resting_at_quantum_"
                 "exploration_goal"
             )
 
-        elif action is CatAfterArrivalAction.CONTINUE_EXPLORATION:
+        elif (
+            action
+            is CatAfterArrivalAction
+            .CONTINUE_EXPLORATION
+        ):
             if hasattr(
                 cat,
-                "exploration_goal"
+                "exploration_goal",
             ):
                 delattr(
                     cat,
-                    "exploration_goal"
+                    "exploration_goal",
                 )
 
             continuation_plan = (
@@ -1595,10 +1649,7 @@ class CatQuantumBoxTransfer:
                 )
             )
 
-            if continuation_plan.get(
-                "continued",
-                False
-            ):
+            if continuation_plan.continued:
                 cat.state = (
                     "continuing_quantum_exploration"
                 )
@@ -1610,14 +1661,15 @@ class CatQuantumBoxTransfer:
 
         elif (
             action
-            is CatAfterArrivalAction.RETURN_VIA_EXPLORATION_PAIR
+            is CatAfterArrivalAction
+            .RETURN_VIA_EXPLORATION_PAIR
         ):
             return_plan = (
                 self.start_quantum_return_route(
                     cat=cat,
                     pair_id=pair[
                         "pair_id"
-                    ]
+                    ],
                 )
             )
 
@@ -1626,40 +1678,48 @@ class CatQuantumBoxTransfer:
                 "exploration_pair"
             )
 
-        else:
+        if (
+            action
+            is not CatAfterArrivalAction
+            .RETURN_VIA_EXPLORATION_PAIR
+        ):
             return_plan = None
 
         if (
             action
-            is not CatAfterArrivalAction.RETURN_VIA_EXPLORATION_PAIR
+            is not CatAfterArrivalAction
+            .CONTINUE_EXPLORATION
         ):
-            return_plan = None
-
-        if action is not CatAfterArrivalAction.CONTINUE_EXPLORATION:
             continuation_plan = None
 
-        event = {
-            "name": (
-                "cat_quantum_exploration_"
-                "arrival_resolved"
-            ),
-            "cat": cat.name,
-            "pair_id": exploration.pair_id,
-            "position": cat.position.to_dict(),
-            "memory": remembered,
-            "known_place": known_place,
-            "verified_legends": (
-                verified_legends
-            ),
-            "legend": legend,
-            "decision": decision,
-            "action": action.value,
-            "return_plan": return_plan,
-            "continuation_plan": (
-                continuation_plan
-            ),
-            "resolved": True
-        }
+        event = (
+            CatQuantumExplorationArrivalResolvedEvent(
+                cat=cat.name,
+                pair_id=
+                    exploration.pair_id,
+                position=(
+                    require_spatial_vector(
+                        cat.position,
+                        field_name=(
+                            "exploration "
+                            "arrival position"
+                        ),
+                    )
+                ),
+                memory=remembered,
+                known_place=known_place,
+                verified_legends=(
+                    verified_legends
+                ),
+                legend=legend,
+                decision=decision,
+                action=action.value,
+                return_plan=
+                    return_plan,
+                continuation_plan=
+                    continuation_plan,
+            )
+        )
 
         self._record(
             event
@@ -1669,9 +1729,11 @@ class CatQuantumBoxTransfer:
 
     def continue_quantum_exploration(
         self,
-        cat
+        cat,
     ):
-        exploration = cat.quantum_exploration
+        exploration = (
+            cat.quantum_exploration
+        )
 
         if (
             exploration is not None
@@ -1681,9 +1743,9 @@ class CatQuantumBoxTransfer:
             )
         ):
             raise TypeError(
-                'Cat quantum exploration state '
-                'must be '
-                'CatQuantumExplorationState.'
+                "Cat quantum exploration state "
+                "must be "
+                "CatQuantumExplorationState."
             )
 
         pair_id = (
@@ -1692,106 +1754,125 @@ class CatQuantumBoxTransfer:
             else None
         )
 
-        pair = self._find_stable_pair_by_id(
-            pair_id
+        pair = (
+            self._find_stable_pair_by_id(
+                pair_id
+            )
         )
 
         if pair is None:
-            return {
-                "name": (
-                    "cat_quantum_exploration_"
-                    "continuation_failed"
-                ),
-                "cat": cat.name,
-                "reason": (
-                    "return_pair_not_found"
-                ),
-                "continued": False
-            }
+            return (
+                CatQuantumExplorationContinuationFailedResult(
+                    cat=cat.name,
+                    reason=(
+                        "return_pair_not_found"
+                    ),
+                )
+            )
 
-        if cat.current_layer != "quantum_layer":
-            return {
-                "name": (
-                    "cat_quantum_exploration_"
-                    "continuation_failed"
-                ),
-                "cat": cat.name,
-                "reason": (
-                    "cat_not_in_quantum_layer"
-                ),
-                "continued": False
-            }
+        if (
+            cat.current_layer
+            != "quantum_layer"
+        ):
+            return (
+                CatQuantumExplorationContinuationFailedResult(
+                    cat=cat.name,
+                    reason=(
+                        "cat_not_in_quantum_layer"
+                    ),
+                )
+            )
 
         plan = (
             CatExplorationPlanner
             .choose_continuation_destination(
                 cat=cat,
-                universe=self.universe
+                universe=self.universe,
             )
         )
 
         if not plan.selected:
-            return {
-                "name": (
-                    "cat_quantum_exploration_"
-                    "continuation_failed"
-                ),
-                "cat": cat.name,
-                "reason": (
-                    "no_continuation_destination"
-                ),
-                "continued": False
-            }
+            return (
+                CatQuantumExplorationContinuationFailedResult(
+                    cat=cat.name,
+                    reason=(
+                        "no_continuation_destination"
+                    ),
+                )
+            )
 
         destination = require_spatial_vector(
             plan.position,
-            field_name="continuation destination",
+            field_name=(
+                "continuation destination"
+            ),
         )
 
-        stabilized = self.stabilize_direct_trail(
-            cat=cat,
-            destination=destination
+        stabilized = (
+            self.stabilize_direct_trail(
+                cat=cat,
+                destination=destination,
+            )
         )
 
         quantum_space = (
             self.universe.quantum_space
         )
 
+        start_position = (
+            require_spatial_vector(
+                cat.position,
+                field_name=(
+                    "cat continuation "
+                    "start position"
+                ),
+            )
+        )
+
         planned = (
             quantum_space
             .plan_direct_cat_route(
                 cat_id=cat.name,
-                start_position=require_spatial_vector(
-                    cat.position,
-                    field_name="cat continuation start position",
-                ),
-                destination_position=(
-                    destination
-                ),
+                start_position=
+                    start_position,
+                destination_position=
+                    destination,
                 destination=(
                     f"continued_exploration:"
                     f"{pair_id}"
-                )
+                ),
             )
         )
 
         route = planned.route
-        route.state = QuantumCatRouteState.READY
+
+        route.state = (
+            QuantumCatRouteState.READY
+        )
 
         cat.active_route_id = (
             route.route_id
         )
 
-        stage = int(
-            exploration.stage
-        ) + 1
+        stage = (
+            int(
+                exploration.stage
+            )
+            + 1
+        )
 
         exploration.active = True
         exploration.arrived = False
         exploration.pair_id = pair_id
-        exploration.route_id = route.route_id
-        exploration.destination = destination
-        exploration.stabilized_path = stabilized
+        exploration.route_id = (
+            route.route_id
+        )
+        exploration.destination = (
+            destination
+        )
+        exploration.stabilized_path = (
+            stabilized
+        )
         exploration.stage = stage
         exploration.continuation = True
 
@@ -1799,20 +1880,18 @@ class CatQuantumBoxTransfer:
             "continuing_quantum_exploration"
         )
 
-        event = {
-            "name": (
-                "cat_continued_quantum_exploration"
-            ),
-            "cat": cat.name,
-            "pair_id": pair_id,
-            "stage": stage,
-            "route_id": route.route_id,
-            "start_position": cat.position.to_dict(),
-            "destination": destination.to_dict(),
-            "return_pair_preserved": True,
-            "created_new_pair": False,
-            "continued": True
-        }
+        event = (
+            CatQuantumExplorationContinuedEvent(
+                cat=cat.name,
+                pair_id=pair_id,
+                stage=stage,
+                route_id=route.route_id,
+                start_position=
+                    start_position,
+                destination=
+                    destination,
+            )
+        )
 
         self._record(
             event
@@ -2072,30 +2151,32 @@ class CatQuantumBoxTransfer:
     def stabilize_direct_trail(
         self,
         cat,
-        destination
+        destination,
     ):
         start = require_spatial_vector(
             cat.position,
-            field_name="cat trail start position",
+            field_name=(
+                "cat trail start position"
+            ),
         )
+
         end = require_spatial_vector(
             destination,
-            field_name="cat trail destination",
-        )
-        distance = start.distance_to(end)
-
-        event = {
-            "name": (
-                "cat_stabilized_direct_quantum_path"
+            field_name=(
+                "cat trail destination"
             ),
-            "cat": cat.name,
-            "start": start.to_dict(),
-            "destination": end.to_dict(),
-            "distance": distance,
-            "path_kind": "most_direct_possible",
-            "stability": 1.0,
-            "stabilized": True
-        }
+        )
+
+        event = (
+            CatQuantumDirectPathStabilizedEvent(
+                cat=cat.name,
+                start=start,
+                destination=end,
+                distance=(
+                    start.distance_to(end)
+                ),
+            )
+        )
 
         self._record(
             event
