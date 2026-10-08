@@ -47,16 +47,6 @@ class CatTraitDiceMappingResult:
     def die_for_trait(self, trait):
         return self.trait_to_die.get(trait)
 
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "cat_d20_value": self.cat_d20_value,
-            "permutation_index": self.permutation_index,
-            "die_to_trait": dict(self.die_to_trait),
-            "trait_to_die": dict(self.trait_to_die),
-            "resolved": self.resolved,
-        }
-
 
 class CatTraitDiceMapping:
 

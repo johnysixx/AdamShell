@@ -48,16 +48,19 @@ class CatTraitDiceMappingObjectStateTests(unittest.TestCase):
         with self.assertRaises(AttributeError):
             result.get("die_to_trait")
 
-    def test_to_dict_returns_detached_snapshot(self):
+    def test_result_has_no_serialization_shim(self):
         result = CatTraitDiceMapping().resolve(1)
-        snapshot = result.to_dict()
 
-        first_die = next(iter(snapshot["die_to_trait"]))
-        snapshot["die_to_trait"][first_die] = "changed"
+        self.assertFalse(
+            hasattr(
+                result,
+                "to_dict",
+            )
+        )
 
-        self.assertNotEqual(
-            result.die_to_trait[first_die],
-            "changed",
+        self.assertEqual(
+            result.trait_for_die("d4"),
+            result.die_to_trait["d4"],
         )
 
     def test_constructor_detaches_input_registries(self):
