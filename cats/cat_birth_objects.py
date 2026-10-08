@@ -9,6 +9,78 @@ from cats.cat_genetics_validation_status import (
     CatGeneticsValidationStatus,
 )
 from cats.genotype import CatGenotype
+from cats.kitten_viability_resolver import (
+    KittenGeneticViabilityResult,
+    KittenInvalidGenotypeDetails,
+    KittenLethalMutationDetails,
+    KittenXXYGenotypeDetails,
+)
+
+
+def kitten_genetic_viability_snapshot(
+    viability,
+):
+    if not isinstance(
+        viability,
+        KittenGeneticViabilityResult,
+    ):
+        raise TypeError(
+            "Viability snapshot requires "
+            "KittenGeneticViabilityResult."
+        )
+
+    if viability.details is None:
+        details = None
+
+    elif isinstance(
+        viability.details,
+        KittenInvalidGenotypeDetails,
+    ):
+        details = (
+            viability.details.error
+        )
+
+    elif isinstance(
+        viability.details,
+        KittenLethalMutationDetails,
+    ):
+        details = {
+            "lethal_mutations": list(
+                viability
+                .details
+                .lethal_mutations
+            )
+        }
+
+    elif isinstance(
+        viability.details,
+        KittenXXYGenotypeDetails,
+    ):
+        details = {
+            "sex_chromosomes": tuple(
+                viability
+                .details
+                .sex_chromosomes
+            )
+        }
+
+    else:
+        raise TypeError(
+            "Unsupported kitten viability details."
+        )
+
+    return {
+        "name": viability.name,
+        "status": viability.status,
+        "viable": viability.viable,
+        "rare": viability.rare,
+        "reason": viability.reason,
+        "details": details,
+        "special_traits": list(
+            viability.special_traits
+        ),
+        "genotype": viability.genotype,
+    }
 
 
 @dataclass(frozen=True)
@@ -423,7 +495,7 @@ class KittenEmbryo:
     phenotype: CatPhenotypeResult
 
     profile: CatBirthProfile
-    viability: object
+    viability: KittenGeneticViabilityResult
 
     genetic_status: str
     rare: bool
@@ -473,13 +545,13 @@ class KittenEmbryo:
                 "reuse phenotype profile."
             )
 
-        if not hasattr(
+        if not isinstance(
             self.viability,
-            "to_dict",
+            KittenGeneticViabilityResult,
         ):
             raise TypeError(
                 "Kitten embryo viability must "
-                "be a typed viability object."
+                "be KittenGeneticViabilityResult."
             )
 
         self.id = str(
@@ -527,7 +599,9 @@ class KittenEmbryo:
                 self.profile.to_dict()
             ),
             "viability": (
-                self.viability.to_dict()
+                kitten_genetic_viability_snapshot(
+                    self.viability
+                )
             ),
             "genetic_status": (
                 self.genetic_status

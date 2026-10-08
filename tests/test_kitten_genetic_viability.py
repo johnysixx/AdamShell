@@ -103,6 +103,7 @@ class KittenGeneticViabilityTests(
             "keys",
             "items",
             "values",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
@@ -292,24 +293,12 @@ class KittenGeneticViabilityTests(
                 "lethal_mutations"
             ]
 
-        boundary = result.to_dict()
-
-        self.assertEqual(
-            boundary[
-                "details"
-            ][
-                "lethal_mutations"
-            ],
-            [
-                "embryonic_lethal",
-            ],
+        self.assertFalse(
+            hasattr(
+                result,
+                "to_dict",
+            )
         )
-
-        boundary[
-            "details"
-        ][
-            "lethal_mutations"
-        ][0] = "changed"
 
         self.assertEqual(
             result.details.lethal_mutations,

@@ -201,53 +201,6 @@ class KittenGeneticViabilityResult:
                 "a CatGenotype object."
             )
 
-    def to_dict(self):
-        if self.details is None:
-            details = None
-
-        elif isinstance(
-            self.details,
-            KittenInvalidGenotypeDetails,
-        ):
-            details = self.details.error
-
-        elif isinstance(
-            self.details,
-            KittenLethalMutationDetails,
-        ):
-            details = {
-                "lethal_mutations": list(
-                    self.details.lethal_mutations
-                )
-            }
-
-        elif isinstance(
-            self.details,
-            KittenXXYGenotypeDetails,
-        ):
-            details = {
-                "sex_chromosomes": tuple(
-                    self.details.sex_chromosomes
-                )
-            }
-
-        else:
-            raise TypeError(
-                "Unsupported kitten viability details."
-            )
-
-        return {
-            "name": self.name,
-            "status": self.status,
-            "viable": self.viable,
-            "rare": self.rare,
-            "reason": self.reason,
-            "details": details,
-            "special_traits": list(
-                self.special_traits
-            ),
-            "genotype": self.genotype,
-        }
 
 
 class KittenGeneticViabilityResolver:
