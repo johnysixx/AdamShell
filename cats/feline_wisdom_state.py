@@ -4,7 +4,74 @@ from types import MappingProxyType
 
 from cats.cat_personality_state import (
     CatPersonalityExperienceAppliedResult,
+    CatPersonalityTraitAdjustedEvent,
 )
+
+def _personality_trait_event_snapshot(
+    event,
+):
+    if not isinstance(
+        event,
+        CatPersonalityTraitAdjustedEvent,
+    ):
+        raise TypeError(
+            "Personality snapshot event must be "
+            "CatPersonalityTraitAdjustedEvent."
+        )
+
+    return {
+        "name": event.name,
+        "cat": event.cat,
+        "trait": event.trait,
+        "source": event.source,
+        "day": event.day,
+        "previous": event.previous,
+        "requested_change": (
+            event.requested_change
+        ),
+        "applied_change": (
+            event.applied_change
+        ),
+        "value": event.value,
+        "metadata": deepcopy(
+            dict(
+                event.metadata
+            )
+        ),
+    }
+
+
+def _personality_experience_snapshot(
+    result,
+):
+    if not isinstance(
+        result,
+        CatPersonalityExperienceAppliedResult,
+    ):
+        raise TypeError(
+            "Personality snapshot result must be "
+            "CatPersonalityExperienceAppliedResult."
+        )
+
+    return {
+        "name": result.name,
+        "cat": result.cat,
+        "source": result.source,
+        "day": result.day,
+        "changes": deepcopy(
+            dict(
+                result.changes
+            )
+        ),
+        "events": [
+            _personality_trait_event_snapshot(
+                event
+            )
+            for event in result.events
+        ],
+        "applied": result.applied,
+    }
+
 
 from cats.feline_ability_state import (
     FelineAbilityState,
@@ -703,12 +770,14 @@ class FelineAbilityMethodLearnedEvent:
                 )
             ),
             "teacher_personality": (
-                self.teacher_personality
-                .to_dict()
+                _personality_experience_snapshot(
+                    self.teacher_personality
+                )
             ),
             "student_personality": (
-                self.student_personality
-                .to_dict()
+                _personality_experience_snapshot(
+                    self.student_personality
+                )
             ),
             "learned": self.learned,
         }

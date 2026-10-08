@@ -78,6 +78,7 @@ class CatPersonalityHistoryObjectStateTests(
             "keys",
             "items",
             "values",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
@@ -88,20 +89,6 @@ class CatPersonalityHistoryObjectStateTests(
 
         with self.assertRaises(TypeError):
             _ = event["trait"]
-
-        boundary = (
-            result.to_dict()
-        )
-
-        boundary[
-            "trait"
-        ] = "changed"
-
-        boundary[
-            "metadata"
-        ][
-            "prey"
-        ] = "changed"
 
         self.assertEqual(
             event.trait,
@@ -174,6 +161,7 @@ class CatPersonalityHistoryObjectStateTests(
             "keys",
             "items",
             "values",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
@@ -189,22 +177,6 @@ class CatPersonalityHistoryObjectStateTests(
                 "applied"
             ]
 
-        boundary = (
-            result.to_dict()
-        )
-
-        boundary[
-            "changes"
-        ][
-            "empathy"
-        ] = 9.0
-
-        boundary[
-            "events"
-        ][0][
-            "trait"
-        ] = "changed"
-
         self.assertEqual(
             result.changes[
                 "empathy"
@@ -217,7 +189,7 @@ class CatPersonalityHistoryObjectStateTests(
             "empathy",
         )
 
-    def test_state_snapshot_serializes_history(
+    def test_state_has_no_serialization_shim(
         self
     ):
         CatPersonality.adjust(
@@ -227,23 +199,29 @@ class CatPersonalityHistoryObjectStateTests(
             source="helped_kitten",
         )
 
-        event = (
-            self.cat
-            .personality
-            .history[-1]
+        state = self.cat.personality
+        event = state.history[-1]
+
+        self.assertFalse(
+            hasattr(
+                state,
+                "to_dict",
+            )
         )
 
-        snapshot = (
-            self.cat
-            .personality
-            .to_dict()
+        self.assertFalse(
+            hasattr(
+                state.traits,
+                "to_dict",
+            )
         )
 
-        snapshot[
-            "history"
-        ][0][
-            "trait"
-        ] = "changed"
+        self.assertFalse(
+            hasattr(
+                event,
+                "to_dict",
+            )
+        )
 
         self.assertEqual(
             event.trait,

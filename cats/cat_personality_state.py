@@ -13,16 +13,6 @@ class CatPersonalityTraits:
     patience: float = 0.5
     sociability: float = 0.5
 
-    def to_dict(self):
-        return {
-            "curiosity": self.curiosity,
-            "courage": self.courage,
-            "aggression": self.aggression,
-            "empathy": self.empathy,
-            "patience": self.patience,
-            "sociability": self.sociability,
-        }
-
 
 @dataclass(slots=True, frozen=True)
 class CatPersonalityTraitAdjustedEvent:
@@ -95,26 +85,6 @@ class CatPersonalityTraitAdjustedEvent:
                 )
             ),
         )
-
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "cat": self.cat,
-            "trait": self.trait,
-            "source": self.source,
-            "day": self.day,
-            "previous": self.previous,
-            "requested_change": (
-                self.requested_change
-            ),
-            "applied_change": (
-                self.applied_change
-            ),
-            "value": self.value,
-            "metadata": deepcopy(
-                dict(self.metadata)
-            ),
-        }
 
 
 @dataclass(slots=True, frozen=True)
@@ -219,23 +189,6 @@ class CatPersonalityExperienceAppliedResult:
     ):
         return self
 
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "cat": self.cat,
-            "source": self.source,
-            "day": self.day,
-            "changes": deepcopy(
-                dict(self.changes)
-            ),
-            "events": [
-                event.to_dict()
-                for event
-                in self.events
-            ],
-            "applied": self.applied,
-        }
-
 
 @dataclass(slots=True)
 class CatPersonalityState:
@@ -266,15 +219,3 @@ class CatPersonalityState:
         )
 
         return event
-
-    def to_dict(self):
-        return {
-            "traits": self.traits.to_dict(),
-            "experiences_processed": (
-                self.experiences_processed
-            ),
-            "history": [
-                event.to_dict()
-                for event in self.history
-            ],
-        }
