@@ -72,6 +72,7 @@ class CatLitterObjectStateTests(
             "keys",
             "items",
             "values",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
@@ -87,8 +88,16 @@ class CatLitterObjectStateTests(
                 "embryo_id"
             ]
 
+        litter = self._litter()
+
+        boundary = (
+            litter.to_dict()
+        )[
+            "birth_results"
+        ][0]
+
         self.assertEqual(
-            result.to_dict(),
+            boundary,
             {
                 "embryo_id": (
                     "embryo_0001"

@@ -795,31 +795,43 @@ class CatKittenBirthResult:
     ):
         return self
 
-    def to_dict(self):
-        if not self.born:
-            return {
-                "embryo_id": (
-                    self.embryo_id
-                ),
-                "kitten": None,
-                "born": False,
-                "reason": (
-                    self.reason
-                ),
-            }
 
+def _kitten_birth_result_snapshot(
+    result,
+):
+    if not isinstance(
+        result,
+        CatKittenBirthResult,
+    ):
+        raise TypeError(
+            "Litter birth result snapshot requires "
+            "CatKittenBirthResult."
+        )
+
+    if not result.born:
         return {
             "embryo_id": (
-                self.embryo_id
+                result.embryo_id
             ),
-            "kitten": self.kitten,
-            "father": self.father,
-            "genetic_status": (
-                self.genetic_status
+            "kitten": None,
+            "born": False,
+            "reason": (
+                result.reason
             ),
-            "rare": self.rare,
-            "born": True,
         }
+
+    return {
+        "embryo_id": (
+            result.embryo_id
+        ),
+        "kitten": result.kitten,
+        "father": result.father,
+        "genetic_status": (
+            result.genetic_status
+        ),
+        "rare": result.rare,
+        "born": True,
+    }
 
 
 @dataclass(slots=True, frozen=True)
@@ -1037,7 +1049,9 @@ class CatLitter:
                 self.kitten_names
             ),
             "birth_results": [
-                result.to_dict()
+                _kitten_birth_result_snapshot(
+                    result
+                )
                 for result
                 in self.birth_results
             ],
