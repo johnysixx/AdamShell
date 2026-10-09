@@ -39,16 +39,16 @@ class MaternalCareReceived(ComponentObject):
             value,
         )
 
-class SiblingPlay(ComponentObject):
+class SiblingPlay(DomainObject):
     pass
 
-class SiblingRivalry(ComponentObject):
+class SiblingRivalry(DomainObject):
     pass
 
-class ParentalTeaching(ComponentObject):
+class ParentalTeaching(DomainObject):
     pass
 
-class FamilyBonding(ComponentObject):
+class FamilyBonding(DomainObject):
     pass
 
 class CatGroupMembership(DomainObject):
