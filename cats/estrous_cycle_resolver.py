@@ -75,28 +75,6 @@ class CatEstrousCycleEvent:
                 str(self.reason),
             )
 
-    def to_dict(self):
-        snapshot = {
-            "name": self.name,
-            "cat": self.cat,
-            "day": self.day,
-            "phase": self.phase.value,
-            "estrus_active": self.estrus_active,
-            "phase_changed": self.phase_changed,
-        }
-
-        if self.cycle_day is not None:
-            snapshot[
-                "cycle_day"
-            ] = self.cycle_day
-
-        if self.reason is not None:
-            snapshot[
-                "reason"
-            ] = self.reason
-
-        return snapshot
-
 
 class CatEstrousCycleResolver:
 

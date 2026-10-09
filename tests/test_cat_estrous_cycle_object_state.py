@@ -79,6 +79,7 @@ class CatEstrousCycleObjectStateTests(
             "keys",
             "items",
             "values",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
@@ -95,20 +96,8 @@ class CatEstrousCycleObjectStateTests(
                 "phase"
             ]
 
-        boundary = (
-            result.to_dict()
-        )
 
-        boundary[
-            "phase"
-        ] = "changed"
-
-        self.assertIs(
-            event.phase,
-            CatEstrousPhase.ESTRUS,
-        )
-
-    def test_inactive_boundary_shape_is_preserved(
+    def test_inactive_event_uses_object_state(
         self
     ):
         self.female.reproduction = (
@@ -147,19 +136,12 @@ class CatEstrousCycleObjectStateTests(
             result.cycle_day,
         )
 
-        boundary = (
-            result.to_dict()
-        )
-
-        self.assertNotIn(
-            "cycle_day",
-            boundary,
+        self.assertIsNone(
+            event.cycle_day,
         )
 
         self.assertEqual(
-            boundary[
-                "reason"
-            ],
+            event.reason,
             "neutered",
         )
 
