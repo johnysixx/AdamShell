@@ -88,6 +88,13 @@ class CatReproductionMatingContactsStateTests(
             "father",
         )
 
+        self.assertFalse(
+            hasattr(
+                contact,
+                "to_dict",
+            )
+        )
+
     def test_boundary_serializes_contact_without_mutating_domain(
         self
     ):

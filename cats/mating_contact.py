@@ -75,27 +75,6 @@ class CatMatingContact:
     ):
         return self
 
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "contact_number": (
-                self.contact_number
-            ),
-            "female": self.female,
-            "male": self.male,
-            "male_name": (
-                self.male_name
-            ),
-            "successful": (
-                self.successful
-            ),
-            "day": self.day,
-            "_male_ref": (
-                self.male_ref
-            ),
-        }
-
-
 @dataclass(slots=True, frozen=True)
 class CatMatingDeniedResult:
 

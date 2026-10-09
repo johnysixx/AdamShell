@@ -12,6 +12,38 @@ from cats.cat_estrous_phase import CatEstrousPhase
 from cats.mating_contact import CatMatingContact
 
 
+def _mating_contact_snapshot(
+    contact,
+):
+    if not isinstance(
+        contact,
+        CatMatingContact,
+    ):
+        raise TypeError(
+            "Reproduction mating contact snapshot "
+            "requires CatMatingContact."
+        )
+
+    return {
+        "name": contact.name,
+        "contact_number": (
+            contact.contact_number
+        ),
+        "female": contact.female,
+        "male": contact.male,
+        "male_name": (
+            contact.male_name
+        ),
+        "successful": (
+            contact.successful
+        ),
+        "day": contact.day,
+        "_male_ref": (
+            contact.male_ref
+        ),
+    }
+
+
 def _kitten_embryo_snapshot(
     embryo,
 ):
@@ -127,7 +159,9 @@ class CatReproductionState:
             "mating_window_open": self.mating_window_open,
             "mating_window_started_day": self.mating_window_started_day,
             "mating_contacts": [
-                contact.to_dict()
+                _mating_contact_snapshot(
+                    contact
+                )
                 for contact
                 in self.mating_contacts
             ],
