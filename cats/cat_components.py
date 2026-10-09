@@ -1,4 +1,3 @@
-from core.entity.component_object import ComponentObject
 from core.entity.domain_object import DomainObject
 
 from cats.maternal_care_phase import (

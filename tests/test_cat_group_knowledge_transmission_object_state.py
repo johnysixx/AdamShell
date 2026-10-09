@@ -12,6 +12,10 @@ from cats.cat_group_innovation_system import (
 from cats.cat_social_objects import (
     CatGroupKnowledgeRecord,
     CatGroupKnowledgeTransmission,
+    cat_group_knowledge_record_snapshot,
+)
+from core.entity.domain_object import (
+    DomainObject,
 )
 
 
@@ -71,6 +75,7 @@ class CatGroupKnowledgeTransmissionObjectStateTests(
             "keys",
             "items",
             "values",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
@@ -142,7 +147,23 @@ class CatGroupKnowledgeTransmissionObjectStateTests(
             self.first_group,
         )
 
-        snapshot = record.to_dict()
+        self.assertIsInstance(
+            record,
+            DomainObject,
+        )
+
+        self.assertFalse(
+            hasattr(
+                record,
+                "to_dict",
+            )
+        )
+
+        snapshot = (
+            cat_group_knowledge_record_snapshot(
+                record
+            )
+        )
 
         snapshot[
             "transmission_path"

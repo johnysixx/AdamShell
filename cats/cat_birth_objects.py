@@ -4,7 +4,6 @@ from dataclasses import dataclass, replace
 from types import MappingProxyType
 from typing import Mapping
 
-from core.entity.component_object import ComponentObject
 from cats.cat_genetics_validation_status import (
     CatGeneticsValidationStatus,
 )

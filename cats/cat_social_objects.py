@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from copy import deepcopy
-from core.entity.component_object import ComponentObject
 from core.entity.domain_object import DomainObject
 
 
@@ -190,29 +189,40 @@ class CatGroupKnowledgeTransmission:
     source_group: str | None = None
     target_group: str | None = None
 
-    def to_dict(self):
-        snapshot = {
-            "type": self.type,
-        }
+def cat_group_knowledge_transmission_snapshot(
+    transmission,
+):
+    if not isinstance(
+        transmission,
+        CatGroupKnowledgeTransmission,
+    ):
+        raise TypeError(
+            "Knowledge transmission snapshot requires "
+            "CatGroupKnowledgeTransmission."
+        )
 
-        for field_name in (
-            "source",
-            "group",
-            "source_group",
-            "target_group",
-        ):
-            value = getattr(
-                self,
-                field_name,
-            )
+    snapshot = {
+        "type": transmission.type,
+    }
 
-            if value is not None:
-                snapshot[field_name] = value
+    for field_name in (
+        "source",
+        "group",
+        "source_group",
+        "target_group",
+    ):
+        value = getattr(
+            transmission,
+            field_name,
+        )
 
-        return snapshot
+        if value is not None:
+            snapshot[field_name] = value
+
+    return snapshot
 
 
-class CatGroupKnowledgeRecord(ComponentObject):
+class CatGroupKnowledgeRecord(DomainObject):
 
     def __init__(self, **values):
         transmission_path = list(
@@ -241,15 +251,30 @@ class CatGroupKnowledgeRecord(ComponentObject):
             **values
         )
 
-    def to_dict(self):
-        snapshot = deepcopy(
-            super().to_dict()
+def cat_group_knowledge_record_snapshot(
+    record,
+):
+    if not isinstance(
+        record,
+        CatGroupKnowledgeRecord,
+    ):
+        raise TypeError(
+            "Knowledge record snapshot requires "
+            "CatGroupKnowledgeRecord."
         )
 
-        snapshot["transmission_path"] = [
-            transmission.to_dict()
-            for transmission
-            in self.transmission_path
-        ]
+    snapshot = deepcopy(
+        vars(
+            record
+        )
+    )
 
-        return snapshot
+    snapshot["transmission_path"] = [
+        cat_group_knowledge_transmission_snapshot(
+            transmission
+        )
+        for transmission
+        in record.transmission_path
+    ]
+
+    return snapshot

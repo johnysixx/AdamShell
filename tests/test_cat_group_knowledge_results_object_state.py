@@ -30,6 +30,9 @@ from cats.cat_social_objects import (
     CatGroupKnowledgeRecord,
     CatGroupKnowledgeTransmission,
 )
+from core.entity.domain_object import (
+    DomainObject,
+)
 from cats.cats import Cats
 from universe.universe import Universe
 
@@ -245,6 +248,18 @@ class CatGroupKnowledgeResultsObjectStateTests(
         self.assertIsInstance(
             record,
             CatGroupKnowledgeRecord,
+        )
+
+        self.assertIsInstance(
+            record,
+            DomainObject,
+        )
+
+        self.assertFalse(
+            hasattr(
+                record,
+                "to_dict",
+            )
         )
 
         self.assertEqual(
