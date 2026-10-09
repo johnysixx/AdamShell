@@ -104,6 +104,38 @@ class BarObjectStateTests(unittest.TestCase):
         self.assertIsInstance(self.bar.how_to_mix_drinks.recipes, dict)
         self.assertIsInstance(self.bar.bartender.regular_drinks, dict)
 
+    def test_component_object_does_not_compare_equal_to_mapping(
+        self
+    ):
+        first = ComponentObject(
+            state="ready",
+        )
+
+        second = ComponentObject(
+            state="ready",
+        )
+
+        self.assertEqual(
+            first,
+            second,
+        )
+
+        self.assertIs(
+            first.__eq__(
+                {
+                    "state": "ready",
+                }
+            ),
+            NotImplemented,
+        )
+
+        self.assertNotEqual(
+            first,
+            {
+                "state": "ready",
+            },
+        )
+
     def test_domain_objects_do_not_expose_mapping_api(self):
         examples = [
             self.bar.bar_counter.milk_bowl,

@@ -10,8 +10,7 @@ class ComponentObject:
     def __eq__(self, other):
         if isinstance(other, ComponentObject):
             return vars(self) == vars(other)
-        if isinstance(other, dict):
-            return vars(self) == other
+
         return NotImplemented
 
     def __repr__(self):
