@@ -1,7 +1,9 @@
 from dataclasses import dataclass, field
 
 from cats.kitten_embryo_resolver import (
+    KittenEmbryoCreatedEvent,
     KittenEmbryoResult,
+    NonviableKittenEmbryoReplacedByCronenbergEvent,
 )
 
 from cats.cat_birth_objects import (
@@ -20,6 +22,45 @@ from cats.ovulation_resolver import (
 from cats.paternity_resolver import (
     KittenFatherSelectedEvent,
 )
+
+
+def _kitten_embryo_event_snapshot(
+    event,
+):
+    if isinstance(
+        event,
+        KittenEmbryoCreatedEvent,
+    ):
+        return {
+            "name": event.name,
+            "embryo_id": event.embryo_id,
+            "mother": event.mother,
+            "father": event.father,
+            "genetic_status": (
+                event.genetic_status
+            ),
+            "rare": event.rare,
+            "profile": (
+                event.profile.to_dict()
+            ),
+            "kitten_created": (
+                event.kitten_created
+            ),
+            "cronenberg_created": (
+                event.cronenberg_created
+            ),
+        }
+
+    if isinstance(
+        event,
+        NonviableKittenEmbryoReplacedByCronenbergEvent,
+    ):
+        return event.to_dict()
+
+    raise TypeError(
+        "Pregnancy embryo event snapshot "
+        "requires a typed embryo event."
+    )
 
 
 def _kitten_embryo_result_snapshot(
@@ -58,7 +99,9 @@ def _kitten_embryo_result_snapshot(
                 result.cronenberg
             ),
             "event": (
-                result.event.to_dict()
+                _kitten_embryo_event_snapshot(
+                    result.event
+                )
             ),
             "viable": result.viable,
         }

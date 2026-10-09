@@ -117,27 +117,6 @@ class KittenEmbryoCreatedEvent:
                 "a CatBirthProfile object."
             )
 
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "embryo_id": self.embryo_id,
-            "mother": self.mother,
-            "father": self.father,
-            "genetic_status": (
-                self.genetic_status
-            ),
-            "rare": self.rare,
-            "profile": (
-                self.profile.to_dict()
-            ),
-            "kitten_created": (
-                self.kitten_created
-            ),
-            "cronenberg_created": (
-                self.cronenberg_created
-            ),
-        }
-
 
 @dataclass(slots=True, frozen=True)
 class KittenEmbryoResult:

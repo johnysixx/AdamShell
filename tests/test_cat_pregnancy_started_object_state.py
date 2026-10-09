@@ -158,6 +158,13 @@ class CatPregnancyStartedObjectStateTests(
             KittenEmbryoCreatedEvent,
         )
 
+        self.assertFalse(
+            hasattr(
+                embryo.event,
+                "to_dict",
+            )
+        )
+
         self.assertIsInstance(
             embryo.viability,
             KittenGeneticViabilityResult,
@@ -314,6 +321,16 @@ class CatPregnancyStartedObjectStateTests(
             "embryo_results"
         ][0][
             "phenotype"
+        ][
+            "profile"
+        ][
+            "color"
+        ] = "changed"
+
+        boundary[
+            "embryo_results"
+        ][0][
+            "event"
         ][
             "profile"
         ][

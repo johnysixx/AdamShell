@@ -102,24 +102,12 @@ class KittenEmbryoHistoryObjectStateTests(
             )
         )
 
-        boundary = (
-            event.to_dict()
-        )
-
-        self.assertEqual(
-            event.profile.sex,
-            boundary[
-                "profile"
-            ][
-                "sex"
-            ],
-        )
-
         for mapping_method in (
             "get",
             "keys",
             "items",
             "values",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
@@ -130,17 +118,6 @@ class KittenEmbryoHistoryObjectStateTests(
 
         with self.assertRaises(TypeError):
             _ = event["profile"]
-
-        boundary[
-            "profile"
-        ][
-            "sex"
-        ] = "changed"
-
-        self.assertNotEqual(
-            event.profile.sex,
-            "changed",
-        )
 
     def test_nonviable_history_uses_object_state(
         self
