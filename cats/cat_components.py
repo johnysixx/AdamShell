@@ -1,4 +1,5 @@
 from core.entity.component_object import ComponentObject
+from core.entity.domain_object import DomainObject
 
 from cats.maternal_care_phase import (
     MaternalCarePhase,
@@ -97,15 +98,15 @@ class CatHumanBond(ComponentObject):
     pass
 
 
-class CatTerritories(ComponentObject):
+class CatTerritories(DomainObject):
     pass
 
 
-class CatSocialMemories(ComponentObject):
+class CatSocialMemories(DomainObject):
     pass
 
 
-class CatBonds(ComponentObject):
+class CatBonds(DomainObject):
     pass
 
 

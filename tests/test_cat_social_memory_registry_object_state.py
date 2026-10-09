@@ -5,6 +5,7 @@ from cats.cat_components import CatSocialMemories
 from cats.cat_social_objects import CatSocialMemory
 from cats.cat_social_system import CatSocialSystem
 from cats.cats import Cats
+from core.entity.domain_object import DomainObject
 from universe.universe import Universe
 
 
@@ -39,6 +40,18 @@ class CatSocialMemoryRegistryObjectStateTests(
         self.assertEqual(
             self.first.social_memory.records,
             {},
+        )
+
+        self.assertIsInstance(
+            self.first.social_memory,
+            DomainObject,
+        )
+
+        self.assertFalse(
+            hasattr(
+                self.first.social_memory,
+                "to_dict",
+            )
         )
 
     def test_meeting_stores_memory_in_registry(self):

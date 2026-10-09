@@ -4,6 +4,7 @@ from cats.cat_components import CatTerritories
 from cats.cat_social_objects import CatTerritoryClaim
 from cats.cat_territory_system import CatTerritorySystem
 from cats.cats import Cats
+from core.entity.domain_object import DomainObject
 from universe.universe import Universe
 
 
@@ -31,6 +32,18 @@ class CatTerritoriesObjectStateTests(unittest.TestCase):
         self.assertEqual(
             self.cat.territories.claims,
             {},
+        )
+
+        self.assertIsInstance(
+            self.cat.territories,
+            DomainObject,
+        )
+
+        self.assertFalse(
+            hasattr(
+                self.cat.territories,
+                "to_dict",
+            )
         )
 
     def test_claim_is_stored_in_object_registry(self):

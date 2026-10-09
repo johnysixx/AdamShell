@@ -4,6 +4,7 @@ from cats.cat_bonding_system import CatBondingSystem
 from cats.cat_components import CatBonds
 from cats.cat_social_objects import CatBond
 from cats.cats import Cats
+from core.entity.domain_object import DomainObject
 from universe.universe import Universe
 
 
@@ -36,6 +37,18 @@ class CatBondRegistryObjectStateTests(
         self.assertEqual(
             self.first.bonds.records,
             {},
+        )
+
+        self.assertIsInstance(
+            self.first.bonds,
+            DomainObject,
+        )
+
+        self.assertFalse(
+            hasattr(
+                self.first.bonds,
+                "to_dict",
+            )
         )
 
     def test_bond_is_stored_in_object_registry(self):
