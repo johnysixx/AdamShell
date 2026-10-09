@@ -11,6 +11,9 @@ from cats.cats import Cats
 from core.entity.components import (
     SpatialVector3,
 )
+from core.entity.domain_object import (
+    DomainObject,
+)
 from universe.universe import Universe
 
 
@@ -61,6 +64,41 @@ class CatNeedResultObjectStateTests(
             TypeError
         ):
             _ = value[
+                "hunger"
+            ]
+
+    def test_live_needs_use_pure_domain_object(
+        self
+    ):
+        self.assertIsInstance(
+            self.cat.needs,
+            DomainObject,
+        )
+
+        self.assertFalse(
+            hasattr(
+                self.cat.needs,
+                "to_dict",
+            )
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    self.cat.needs,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = self.cat.needs[
                 "hunger"
             ]
 

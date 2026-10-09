@@ -87,10 +87,10 @@ class CatMeowInvitations(DomainObject):
 class CatNorms(DomainObject):
     pass
 
-class CatNeeds(ComponentObject):
+class CatNeeds(DomainObject):
     pass
 
-class CatMindState(ComponentObject):
+class CatMindState(DomainObject):
     pass
 
 

@@ -4,6 +4,7 @@ from cats.cats import Cats
 from cats.cat_mind import CatMind
 from cats.cat_perception_state import CatPerceptionState
 from cats.cat_personality import CatPersonality
+from core.entity.domain_object import DomainObject
 
 from cats.cat_intention_state import CatExploreBoxTarget
 
@@ -21,6 +22,39 @@ class CatMindTests(unittest.TestCase):
 
     def test_new_cat_has_empty_mind(self):
         mind = self.cat.mind
+
+        self.assertIsInstance(
+            mind,
+            DomainObject,
+        )
+
+        self.assertFalse(
+            hasattr(
+                mind,
+                "to_dict",
+            )
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    mind,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = mind[
+                "current_intention"
+            ]
+
         self.assertIsNone(mind.current_intention)
         self.assertEqual(mind.decision_count, 0)
         self.assertEqual(mind.history, [])
