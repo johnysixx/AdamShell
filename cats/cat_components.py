@@ -81,10 +81,10 @@ class CatGroupRoles(ComponentObject):
 
         return event
 
-class CatMeowInvitations(ComponentObject):
+class CatMeowInvitations(DomainObject):
     pass
 
-class CatNorms(ComponentObject):
+class CatNorms(DomainObject):
     pass
 
 class CatNeeds(ComponentObject):
@@ -94,7 +94,7 @@ class CatMindState(ComponentObject):
     pass
 
 
-class CatHumanBond(ComponentObject):
+class CatHumanBond(DomainObject):
     pass
 
 
@@ -110,7 +110,7 @@ class CatBonds(DomainObject):
     pass
 
 
-class CatHumanBonds(ComponentObject):
+class CatHumanBonds(DomainObject):
     pass
 
 
