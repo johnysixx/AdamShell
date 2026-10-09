@@ -580,22 +580,3 @@ class CatPregnancyAdvancedEvent(
         memo
     ):
         return self
-
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "mother": self.mother,
-            "days_advanced": (
-                self.days_advanced
-            ),
-            "pregnancy_day": (
-                self.pregnancy_day
-            ),
-            "gestation_days": (
-                self.gestation_days
-            ),
-            "ready_for_birth": (
-                self.ready_for_birth
-            ),
-            "advanced": self.advanced,
-        }

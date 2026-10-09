@@ -155,14 +155,6 @@ class CatPregnancyAdvancedObjectStateTests(
             event.advanced
         )
 
-        boundary = (
-            result.to_dict()
-        )
-
-        self.assertEqual(
-            boundary,
-            event.to_dict(),
-        )
 
     def test_event_has_no_mapping_api(
         self
@@ -182,6 +174,7 @@ class CatPregnancyAdvancedObjectStateTests(
             "keys",
             "items",
             "values",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
