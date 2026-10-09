@@ -2,7 +2,7 @@ from copy import deepcopy
 from dataclasses import InitVar, dataclass, field
 from core.entity.components import SpatialVector3
 
-from core.entity.component_object import ComponentObject
+from core.entity.domain_object import DomainObject
 from meeting_place.bar_serving_vessel_fill_state import (
     BarServingVesselFillState,
 )
@@ -12,8 +12,12 @@ from meeting_place.drink_recipe_status import (
 )
 
 
-class BarObject(ComponentObject):
-    pass
+class BarObject(DomainObject):
+
+    def to_dict(self):
+        return dict(
+            vars(self)
+        )
 
 
 class BarOrigin(BarObject):

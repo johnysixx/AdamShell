@@ -1,6 +1,6 @@
 import unittest
 
-from core.entity.component_object import ComponentObject
+from core.entity.domain_object import DomainObject
 from multiverse import UniverseRegistry
 from universe.universe import Universe
 from meeting_place.meeting_place import MeetingPlace
@@ -104,14 +104,18 @@ class BarObjectStateTests(unittest.TestCase):
         self.assertIsInstance(self.bar.how_to_mix_drinks.recipes, dict)
         self.assertIsInstance(self.bar.bartender.regular_drinks, dict)
 
-    def test_component_object_does_not_compare_equal_to_mapping(
+    def test_bar_objects_use_domain_object_equality(
         self
     ):
-        first = ComponentObject(
+        first = BarOrigin(
             state="ready",
         )
 
-        second = ComponentObject(
+        second = BarOrigin(
+            state="ready",
+        )
+
+        other_type = BarShift(
             state="ready",
         )
 
@@ -120,13 +124,9 @@ class BarObjectStateTests(unittest.TestCase):
             second,
         )
 
-        self.assertIs(
-            first.__eq__(
-                {
-                    "state": "ready",
-                }
-            ),
-            NotImplemented,
+        self.assertNotEqual(
+            first,
+            other_type,
         )
 
         self.assertNotEqual(
@@ -145,7 +145,7 @@ class BarObjectStateTests(unittest.TestCase):
             self.bar.geometry_terminal.status_sign,
         ]
         for obj in examples:
-            self.assertIsInstance(obj, ComponentObject)
+            self.assertIsInstance(obj, DomainObject)
             self.assertFalse(hasattr(obj, "get"))
             self.assertFalse(hasattr(obj, "keys"))
             with self.assertRaises(TypeError):
