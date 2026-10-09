@@ -248,35 +248,6 @@ class CatMatingContactRecordedEvent(
             .contact_number
         )
 
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "female": self.female,
-            "male": self.male,
-            "day": self.day,
-            "contact_number": (
-                self.contact_number
-            ),
-            "mating_window_open": (
-                self.mating_window_open
-            ),
-            "potential_fathers": list(
-                self.potential_fathers
-            ),
-            "pregnancy_started": (
-                self.pregnancy_started
-            ),
-            "ovulation_stimulation": (
-                self.ovulation_stimulation
-            ),
-            "ovulation_threshold": (
-                self.ovulation_threshold
-            ),
-            "ovulation_threshold_reached": (
-                self.ovulation_threshold_reached
-            ),
-        }
-
 @dataclass(slots=True, frozen=True)
 class CatMatingWindowClosedWithoutOvulationEvent(
     CatMatingHistoryEvent

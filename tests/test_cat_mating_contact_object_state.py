@@ -96,8 +96,15 @@ class CatMatingContactObjectStateTests(
         )
 
         self.assertEqual(
-            result.to_dict(),
-            event.to_dict(),
+            event.contact_number,
+            1,
+        )
+
+        self.assertEqual(
+            event.potential_fathers,
+            (
+                "father",
+            ),
         )
 
     def test_contact_and_event_have_no_mapping_api(
@@ -142,6 +149,13 @@ class CatMatingContactObjectStateTests(
             ):
                 _ = obj["name"]
 
+        self.assertFalse(
+            hasattr(
+                event,
+                "to_dict",
+            )
+        )
+
     def test_boundaries_are_detached(
         self
     ):
@@ -158,13 +172,7 @@ class CatMatingContactObjectStateTests(
             .history[-1]
         )
 
-        boundary = (
-            result.to_dict()
-        )
-
-        boundary[
-            "potential_fathers"
-        ].append(
+        self.female.reproduction.potential_fathers.append(
             "changed"
         )
 
