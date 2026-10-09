@@ -1,27 +1,27 @@
-from core.entity.component_object import ComponentObject
+from core.entity.domain_object import DomainObject
 
-class CatGroupMyth(ComponentObject):
+class CatGroupMyth(DomainObject):
     pass
 
-class CatGroupNorm(ComponentObject):
+class CatGroupNorm(DomainObject):
     pass
 
-class CatGroupTaboo(ComponentObject):
+class CatGroupTaboo(DomainObject):
     pass
 
-class CatGroupRitual(ComponentObject):
+class CatGroupRitual(DomainObject):
     pass
 
-class CatGroupInstitution(ComponentObject):
+class CatGroupInstitution(DomainObject):
     pass
 
-class CatGroupInnovation(ComponentObject):
+class CatGroupInnovation(DomainObject):
     pass
 
-class CatInstitutionConflict(ComponentObject):
+class CatInstitutionConflict(DomainObject):
     pass
 
-class CatViolation(ComponentObject):
+class CatViolation(DomainObject):
 
     def __init__(self, **values):
         if 'severity' not in values:
