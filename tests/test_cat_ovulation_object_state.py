@@ -147,13 +147,12 @@ class CatOvulationObjectStateTests(
                 "ovulation_induced"
             ]
 
-        boundary = (
-            result.to_dict()
+        self.assertFalse(
+            hasattr(
+                event,
+                "to_dict",
+            )
         )
-
-        boundary[
-            "ovulation_induced"
-        ] = False
 
         self.assertTrue(
             event.ovulation_induced

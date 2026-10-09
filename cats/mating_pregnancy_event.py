@@ -24,6 +24,31 @@ from cats.paternity_resolver import (
 )
 
 
+def _induced_ovulation_snapshot(
+    event,
+):
+    if not isinstance(
+        event,
+        CatInducedOvulationResolvedEvent,
+    ):
+        raise TypeError(
+            "Pregnancy ovulation snapshot requires "
+            "CatInducedOvulationResolvedEvent."
+        )
+
+    return {
+        "name": event.name,
+        "female": event.female,
+        "day": event.day,
+        "stimulation": event.stimulation,
+        "threshold": event.threshold,
+        "ovulation_induced": (
+            event.ovulation_induced
+        ),
+        "reason": event.reason,
+    }
+
+
 def _kitten_embryo_event_snapshot(
     event,
 ):
@@ -425,7 +450,9 @@ class CatPregnancyStartedEvent(
                 self.multiple_sires
             ),
             "ovulation": (
-                self.ovulation.to_dict()
+                _induced_ovulation_snapshot(
+                    self.ovulation
+                )
             ),
             "ovulation_induced": (
                 self.ovulation_induced

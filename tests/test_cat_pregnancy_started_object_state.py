@@ -247,6 +247,7 @@ class CatPregnancyStartedObjectStateTests(
 
         objects = (
             event,
+            event.ovulation,
             paternity,
             paternity.selection,
             embryo,
@@ -259,6 +260,13 @@ class CatPregnancyStartedObjectStateTests(
         self.assertFalse(
             hasattr(
                 embryo,
+                "to_dict",
+            )
+        )
+
+        self.assertFalse(
+            hasattr(
+                event.ovulation,
                 "to_dict",
             )
         )
@@ -305,6 +313,12 @@ class CatPregnancyStartedObjectStateTests(
         )
 
         boundary[
+            "ovulation"
+        ][
+            "ovulation_induced"
+        ] = False
+
+        boundary[
             "paternity_results"
         ][0][
             "selection"
@@ -349,6 +363,10 @@ class CatPregnancyStartedObjectStateTests(
             (
                 "father",
             ),
+        )
+
+        self.assertTrue(
+            event.ovulation.ovulation_induced
         )
 
         self.assertNotIn(

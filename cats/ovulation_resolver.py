@@ -106,19 +106,6 @@ class CatInducedOvulationResolvedEvent:
                 str(self.reason),
             )
 
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "female": self.female,
-            "day": self.day,
-            "stimulation": self.stimulation,
-            "threshold": self.threshold,
-            "ovulation_induced": (
-                self.ovulation_induced
-            ),
-            "reason": self.reason,
-        }
-
 
 class CatOvulationResolver:
     DEFAULT_THRESHOLD = 4
