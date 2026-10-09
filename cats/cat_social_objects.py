@@ -1,18 +1,19 @@
 from dataclasses import dataclass
 from copy import deepcopy
 from core.entity.component_object import ComponentObject
+from core.entity.domain_object import DomainObject
 
 
-class CatMeowInvitation(ComponentObject):
+class CatMeowInvitation(DomainObject):
     pass
 
 
-class CatGuestIncident(ComponentObject):
+class CatGuestIncident(DomainObject):
     pass
 
 
 
-class GarfieldTraining(ComponentObject):
+class GarfieldTraining(DomainObject):
     pass
 
 
@@ -21,15 +22,15 @@ class CatLegend(ComponentObject):
 
 
 
-class CatTerritoryClaim(ComponentObject):
+class CatTerritoryClaim(DomainObject):
     pass
 
 
-class CatSocialMemory(ComponentObject):
+class CatSocialMemory(DomainObject):
     pass
 
 
-class CatBond(ComponentObject):
+class CatBond(DomainObject):
     pass
 
 
