@@ -98,10 +98,25 @@ class CatLegendReputationTests(unittest.TestCase):
             )
             self.assertEqual(len(history), 3)
             self.assertIs(history[0], prior_event)
-            self.assertEqual(history[1].to_dict(), first)
-            self.assertEqual(history[2].to_dict(), second)
-            second['current'] = -1.0
-            self.assertAlmostEqual(history[2].current, expected)
+            self.assertIs(
+                history[1],
+                first,
+            )
+
+            self.assertIs(
+                history[2],
+                second,
+            )
+
+            with self.assertRaises(
+                AttributeError
+            ):
+                second.current = -1.0
+
+            self.assertAlmostEqual(
+                history[2].current,
+                expected,
+            )
 
         self.assertEqual(record.meet_count, 4)
         self.assertEqual(legacy.custom_note, 'preserve_me')

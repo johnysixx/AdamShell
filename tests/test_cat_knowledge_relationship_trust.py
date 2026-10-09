@@ -4,6 +4,10 @@ from cats.cat_knowledge import CatKnowledge
 from cats.cat_social_objects import (
     CatRelationship,
     CatRelationshipTrustEvent,
+    cat_relationship_snapshot,
+)
+from core.entity.domain_object import (
+    DomainObject,
 )
 from cats.cats import Cats
 from universe.universe import Universe
@@ -42,6 +46,7 @@ class CatKnowledgeRelationshipTrustTests(
             "keys",
             "items",
             "values",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
@@ -214,7 +219,7 @@ class CatKnowledgeRelationshipTrustTests(
                 name
             ] = record
 
-            snapshot = (
+            event = (
                 CatKnowledge
                 .adjust_storyteller_trust(
                     self.listener,
@@ -233,32 +238,37 @@ class CatKnowledgeRelationshipTrustTests(
             )
 
             self.assertAlmostEqual(
-                snapshot["previous"],
+                event.previous,
                 0.5,
             )
 
             self.assertAlmostEqual(
-                snapshot["current"],
+                event.current,
                 0.6,
             )
 
             self.assertAlmostEqual(
-                snapshot["delta"],
+                event.delta,
                 0.1,
             )
 
             self.assertEqual(
-                snapshot["reason"],
+                event.reason,
                 "confirmed",
             )
 
             self.assertEqual(
-                snapshot["legend_id"],
+                event.legend_id,
                 "legend_1",
             )
 
             history_event = (
                 record.trust_history[-1]
+            )
+
+            self.assertIs(
+                history_event,
+                event,
             )
 
             self.assertIsInstance(
@@ -352,7 +362,7 @@ class CatKnowledgeRelationshipTrustTests(
                     (2.0, 0.0, 1.0),
                 )
             ):
-                snapshot = (
+                returned_event = (
                     CatKnowledge
                     .adjust_storyteller_trust(
                         self.listener,
@@ -402,7 +412,15 @@ class CatKnowledgeRelationshipTrustTests(
                     index + 2,
                 )
 
-                snapshot["current"] = -1.0
+                self.assertIs(
+                    returned_event,
+                    event,
+                )
+
+                with self.assertRaises(
+                    AttributeError
+                ):
+                    returned_event.current = -1.0
 
                 self.assertAlmostEqual(
                     event.current,
@@ -494,8 +512,22 @@ class CatKnowledgeRelationshipTrustTests(
             ],
         )
 
+        self.assertIsInstance(
+            relationship,
+            DomainObject,
+        )
+
+        self.assertFalse(
+            hasattr(
+                relationship,
+                "to_dict",
+            )
+        )
+
         snapshot = (
-            relationship.to_dict()
+            cat_relationship_snapshot(
+                relationship
+            )
         )
 
         snapshot[

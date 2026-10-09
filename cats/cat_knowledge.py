@@ -404,9 +404,7 @@ class CatKnowledge:
 
             heard.verify(
                 trust_after=(
-                    trust_change[
-                        'current'
-                    ]
+                    trust_change.current
                 )
             )
 
@@ -952,7 +950,7 @@ class CatKnowledge:
             event
         )
 
-        return event.to_dict()
+        return event
 
     @classmethod
     def contradict_heard_legend(
@@ -1017,9 +1015,7 @@ class CatKnowledge:
 
         heard.contradict(
             trust_after=(
-                trust_change[
-                    'current'
-                ]
+                trust_change.current
             )
         )
 

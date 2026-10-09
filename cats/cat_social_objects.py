@@ -66,17 +66,28 @@ class CatRelationshipTrustEvent:
                     float(value),
                 )
 
-    def to_dict(self):
-        return {
-            "previous": self.previous,
-            "current": self.current,
-            "delta": self.delta,
-            "reason": self.reason,
-            "legend_id": self.legend_id,
-        }
+def cat_relationship_trust_event_snapshot(
+    event,
+):
+    if not isinstance(
+        event,
+        CatRelationshipTrustEvent,
+    ):
+        raise TypeError(
+            "Relationship trust event snapshot "
+            "requires CatRelationshipTrustEvent."
+        )
+
+    return {
+        "previous": event.previous,
+        "current": event.current,
+        "delta": event.delta,
+        "reason": event.reason,
+        "legend_id": event.legend_id,
+    }
 
 
-class CatRelationship(ComponentObject):
+class CatRelationship(DomainObject):
 
     @property
     def trust_history(self):
@@ -136,23 +147,39 @@ class CatRelationship(ComponentObject):
     def create(cls):
         return cls()
 
-    def to_dict(self):
-        snapshot = deepcopy(
-            super().to_dict()
+
+def cat_relationship_snapshot(
+    relationship,
+):
+    if not isinstance(
+        relationship,
+        CatRelationship,
+    ):
+        raise TypeError(
+            "Relationship snapshot requires "
+            "CatRelationship."
         )
 
-        snapshot.pop(
-            "_trust_history",
-            None,
+    snapshot = deepcopy(
+        vars(
+            relationship
         )
+    )
 
-        snapshot["trust_history"] = [
-            event.to_dict()
-            for event
-            in self.trust_history
-        ]
+    snapshot.pop(
+        "_trust_history",
+        None,
+    )
 
-        return snapshot
+    snapshot["trust_history"] = [
+        cat_relationship_trust_event_snapshot(
+            event
+        )
+        for event
+        in relationship.trust_history
+    ]
+
+    return snapshot
 
 
 @dataclass(slots=True, frozen=True)

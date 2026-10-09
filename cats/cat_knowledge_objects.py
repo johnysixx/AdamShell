@@ -1,6 +1,9 @@
 from copy import deepcopy
 from dataclasses import dataclass, field
 from core.entity.components import SpatialVector3, require_optional_spatial_vector, require_spatial_vector
+from cats.cat_social_objects import (
+    CatRelationshipTrustEvent,
+)
 
 
 @dataclass(slots=True)
@@ -243,7 +246,17 @@ class CatVerifiedLegendRecord:
     verified_by: str
 
     credibility_before: float
-    trust_change: dict
+    trust_change: CatRelationshipTrustEvent
+
+    def __post_init__(self):
+        if not isinstance(
+            self.trust_change,
+            CatRelationshipTrustEvent,
+        ):
+            raise TypeError(
+                "Verified legend trust change must be "
+                "CatRelationshipTrustEvent."
+            )
 
 
 
