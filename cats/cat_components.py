@@ -11,13 +11,13 @@ from cats.cat_group_role_state import (
     CatGroupRoleSpecializedEvent,
 )
 
-class CatFamily(ComponentObject):
+class CatFamily(DomainObject):
     pass
 
-class MaternalCare(ComponentObject):
+class MaternalCare(DomainObject):
     pass
 
-class MaternalCareReceived(ComponentObject):
+class MaternalCareReceived(DomainObject):
     last_phase: MaternalCarePhase | None
 
     def __setattr__(self, key, value):
@@ -115,7 +115,7 @@ class CatHumanBonds(DomainObject):
 
 
 
-class CatEmergencyNursing(ComponentObject):
+class CatEmergencyNursing(DomainObject):
     DEFAULT_CAPABILITY_PERCENT = 12
 
     @classmethod

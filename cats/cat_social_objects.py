@@ -17,7 +17,7 @@ class GarfieldTraining(DomainObject):
     pass
 
 
-class CatLegend(ComponentObject):
+class CatLegend(DomainObject):
     pass
 
 
