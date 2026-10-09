@@ -62,8 +62,15 @@ class CatGroupLifecycleStateObjectStateTests(
         )
 
         self.assertEqual(
-            group.to_dict()["state"],
+            group.state.value,
             "forming",
+        )
+
+        self.assertFalse(
+            hasattr(
+                group,
+                "to_dict",
+            )
         )
 
     def test_lifecycle_event_uses_enum_state(

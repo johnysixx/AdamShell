@@ -104,6 +104,20 @@ class CatGroupCreationObjectStateTests(
             CatGroupCulture,
         )
 
+        self.assertFalse(
+            hasattr(
+                result.group,
+                "to_dict",
+            )
+        )
+
+        self.assertFalse(
+            hasattr(
+                result.group.culture,
+                "to_dict",
+            )
+        )
+
         self.assert_not_mapping(
             result,
             "group_id",

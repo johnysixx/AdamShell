@@ -1,5 +1,5 @@
-from core.entity.component_object import ComponentObject
+from core.entity.domain_object import DomainObject
 
 
-class CatFederation(ComponentObject):
+class CatFederation(DomainObject):
     pass

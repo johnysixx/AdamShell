@@ -209,6 +209,13 @@ class CatGroupFederationResultsObjectStateTests(
             CatFederation,
         )
 
+        self.assertFalse(
+            hasattr(
+                federation,
+                "to_dict",
+            )
+        )
+
         self.assertEqual(
             federation.name,
             "knowledge_union",

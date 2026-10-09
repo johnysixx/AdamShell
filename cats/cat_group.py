@@ -1,14 +1,14 @@
-from core.entity.component_object import ComponentObject
+from core.entity.domain_object import DomainObject
 from cats.cat_group_lifecycle_state import (
     CatGroupLifecycleState,
 )
 
 
-class CatGroupCulture(ComponentObject):
+class CatGroupCulture(DomainObject):
     pass
 
 
-class CatGroup(ComponentObject):
+class CatGroup(DomainObject):
 
     @property
     def state(self):
@@ -48,9 +48,3 @@ class CatGroup(ComponentObject):
         super().__init__(
             **values
         )
-
-    def to_dict(self):
-        snapshot = super().to_dict()
-        snapshot.pop("_state", None)
-        snapshot["state"] = self.state.value
-        return snapshot
