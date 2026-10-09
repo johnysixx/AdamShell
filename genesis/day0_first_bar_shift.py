@@ -35,6 +35,9 @@ from meeting_place.bouncer_state import (
     BouncerState,
 )
 from cats.cat_birth_resolver import CatBirthResolver
+from cats.cat_birth_objects import (
+    cat_birth_profile_snapshot,
+)
 
 class Day0FirstBarShift:
 
@@ -1530,7 +1533,19 @@ class Day0FirstBarShift:
             ),
             pending=True,
         )
-        event = {'name': 'cat_d20_sets_next_birth_to_garfield', 'cat': 'cat_d20', 'target_name': 'garfield', 'profile': garfield_profile.to_dict(), 'pending': True}
+        event = {
+            "name": (
+                "cat_d20_sets_next_birth_to_garfield"
+            ),
+            "cat": "cat_d20",
+            "target_name": "garfield",
+            "profile": (
+                cat_birth_profile_snapshot(
+                    garfield_profile
+                )
+            ),
+            "pending": True,
+        }
         if not hasattr(self.meeting_place, 'cat_d20_secret_history'):
             self.meeting_place.cat_d20_secret_history = []
         self.meeting_place.cat_d20_secret_history.append(dict(event))

@@ -9,6 +9,7 @@ from .cat_trait_dice_mapping import (
 from .cat_genetics_validator import CatGeneticsValidator
 from .cat_birth_objects import (
     CatBirthProfile,
+    cat_birth_profile_snapshot,
     CatCanonicalBirthResolution,
     CatBirthGeneticsResult,
     CatGeneticConflictResolution,
@@ -560,7 +561,11 @@ class CatBirthResolver:
                 None
             ),
             "identity": identity,
-            "profile": profile.to_dict(),
+            "profile": (
+                cat_birth_profile_snapshot(
+                    profile
+                )
+            ),
             "canonical_occurrence": (
                 canonical.occurrence
             ),

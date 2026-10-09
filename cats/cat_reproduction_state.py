@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from cats.cat_birth_objects import (
     CatLitter,
     KittenEmbryo,
+    cat_birth_profile_snapshot,
     cat_phenotype_snapshot,
     kitten_genetic_viability_snapshot,
 )
@@ -73,7 +74,9 @@ def _kitten_embryo_snapshot(
             )
         ),
         "profile": (
-            embryo.profile.to_dict()
+            cat_birth_profile_snapshot(
+                embryo.profile
+            )
         ),
         "viability": (
             kitten_genetic_viability_snapshot(

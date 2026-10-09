@@ -11,6 +11,7 @@ from cats.cat_birth_effect_resolver import (
 from cats.cat_birth_objects import (
     CatBirthProfile,
     CatCanonicalBirthResolution,
+    cat_birth_profile_snapshot,
 )
 from cats.cat_birth_resolver import (
     CatBirthResolver
@@ -169,7 +170,9 @@ class WoodooBirthEffectsTests(
             rng=None
         ):
             captured_profiles.append(
-                profile.to_dict()
+                cat_birth_profile_snapshot(
+                    profile
+                )
             )
 
             return CatCanonicalBirthResolution(

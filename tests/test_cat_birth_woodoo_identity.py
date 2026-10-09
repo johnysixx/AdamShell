@@ -8,6 +8,7 @@ from universe.bootstraps.universe_bootstrap import (
 from cats.cat_birth_objects import (
     CatBirthProfile,
     CatCanonicalBirthResolution,
+    cat_birth_profile_snapshot,
 )
 from cats.cat_birth_resolver import (
     CatBirthResolver
@@ -111,7 +112,9 @@ class CatBirthWoodooIdentityTests(
         )
 
         self.assertEqual(
-            third.profile.to_dict(),
+            cat_birth_profile_snapshot(
+                third.profile
+            ),
             {
                 "color": "black",
                 "fur_length": "short",
@@ -161,7 +164,9 @@ class CatBirthWoodooIdentityTests(
         )
 
         self.assertEqual(
-            result.profile.to_dict(),
+            cat_birth_profile_snapshot(
+                result.profile
+            ),
             {
                 "color": "black",
                 "fur_length": "short",

@@ -8,6 +8,7 @@ from universe.bootstraps.universe_bootstrap import (
 from cats.cat_birth_objects import (
     CatBirthProfile,
     CatCanonicalBirthResolution,
+    cat_birth_profile_snapshot,
 )
 from cats.cat_birth_resolver import CatBirthResolver
 
@@ -95,7 +96,18 @@ class CatBirthProfileObjectStateTests(unittest.TestCase):
             ),
         )
 
-        profile_snapshot = profile.to_dict()
+        self.assertFalse(
+            hasattr(
+                profile,
+                "to_dict",
+            )
+        )
+
+        profile_snapshot = (
+            cat_birth_profile_snapshot(
+                profile
+            )
+        )
         profile_snapshot["color"] = "white"
 
         self.assertEqual(

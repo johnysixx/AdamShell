@@ -7,6 +7,7 @@ from cats.kitten_embryo_resolver import (
 )
 
 from cats.cat_birth_objects import (
+    cat_birth_profile_snapshot,
     cat_phenotype_snapshot,
     kitten_genetic_viability_snapshot,
 )
@@ -66,7 +67,9 @@ def _kitten_embryo_event_snapshot(
             ),
             "rare": event.rare,
             "profile": (
-                event.profile.to_dict()
+                cat_birth_profile_snapshot(
+                    event.profile
+                )
             ),
             "kitten_created": (
                 event.kitten_created

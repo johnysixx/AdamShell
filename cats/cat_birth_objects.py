@@ -98,7 +98,9 @@ def cat_phenotype_snapshot(
     return {
         "name": phenotype.name,
         "profile": (
-            phenotype.profile.to_dict()
+            cat_birth_profile_snapshot(
+                phenotype.profile
+            )
         ),
         "base_color": (
             phenotype.base_color
@@ -150,14 +152,27 @@ class CatBirthProfile:
 
         return getattr(self, trait)
 
-    def to_dict(self):
-        return {
-            "color": self.color,
-            "fur_length": self.fur_length,
-            "pattern": self.pattern,
-            "eye_color": self.eye_color,
-            "sex": self.sex,
-        }
+
+
+def cat_birth_profile_snapshot(
+    profile,
+):
+    if not isinstance(
+        profile,
+        CatBirthProfile,
+    ):
+        raise TypeError(
+            "Birth profile snapshot requires "
+            "CatBirthProfile."
+        )
+
+    return {
+        "color": profile.color,
+        "fur_length": profile.fur_length,
+        "pattern": profile.pattern,
+        "eye_color": profile.eye_color,
+        "sex": profile.sex,
+    }
 
 
 @dataclass(slots=True, frozen=True)
