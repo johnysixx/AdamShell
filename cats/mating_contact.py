@@ -332,31 +332,3 @@ class CatMatingWindowClosedWithoutOvulationEvent(
                 self.mating_contact_count
             ),
         )
-
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "mother": self.mother,
-            "mating_contact_count": (
-                self.mating_contact_count
-            ),
-            "ovulation": (
-                self.ovulation.to_dict()
-            ),
-            "ovulation_induced": (
-                self.ovulation_induced
-            ),
-            "pregnancy_started": (
-                self.pregnancy_started
-            ),
-            "embryos_attempted": (
-                self.embryos_attempted
-            ),
-            "viable_embryo_count": (
-                self.viable_embryo_count
-            ),
-            "nonviable_embryo_count": (
-                self.nonviable_embryo_count
-            ),
-            "started": self.started,
-        }

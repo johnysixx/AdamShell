@@ -116,8 +116,8 @@ class CatMatingWindowWithoutOvulationObjectStateTests(
         )
 
         self.assertEqual(
-            result.to_dict(),
-            event.to_dict(),
+            event.ovulation.reason,
+            "insufficient_stimulation",
         )
 
     def test_event_and_nested_ovulation_have_no_mapping_api(
@@ -131,6 +131,13 @@ class CatMatingWindowWithoutOvulationObjectStateTests(
         event = (
             self.resolver
             .history[-1]
+        )
+
+        self.assertFalse(
+            hasattr(
+                event,
+                "to_dict",
+            )
         )
 
         for obj in (
@@ -155,7 +162,7 @@ class CatMatingWindowWithoutOvulationObjectStateTests(
             ):
                 _ = obj["name"]
 
-    def test_boundary_is_detached_from_nested_ovulation_event(
+    def test_closed_window_keeps_nested_ovulation_object_state(
         self
     ):
         result = (
@@ -171,15 +178,15 @@ class CatMatingWindowWithoutOvulationObjectStateTests(
             .history[-1]
         )
 
-        boundary = (
-            result.to_dict()
+        self.assertIs(
+            result,
+            event,
         )
 
-        boundary[
-            "ovulation"
-        ][
-            "reason"
-        ] = "changed"
+        self.assertIsInstance(
+            event.ovulation,
+            CatInducedOvulationResolvedEvent,
+        )
 
         self.assertEqual(
             event.ovulation.reason,
