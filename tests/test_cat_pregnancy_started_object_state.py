@@ -143,6 +143,13 @@ class CatPregnancyStartedObjectStateTests(
             CatPregnancyPaternityResult,
         )
 
+        self.assertFalse(
+            hasattr(
+                paternity,
+                "to_dict",
+            )
+        )
+
         self.assertIsInstance(
             embryo,
             KittenEmbryoResult,

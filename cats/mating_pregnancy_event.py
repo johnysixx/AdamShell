@@ -145,29 +145,39 @@ class CatPregnancyPaternityResult:
     ):
         return self
 
-    def to_dict(self):
-        return {
-            "embryo_id": (
-                self.embryo_id
+
+def _pregnancy_paternity_snapshot(
+    result,
+):
+    if not isinstance(
+        result,
+        CatPregnancyPaternityResult,
+    ):
+        raise TypeError(
+            "Pregnancy paternity snapshot requires "
+            "CatPregnancyPaternityResult."
+        )
+
+    return {
+        "embryo_id": result.embryo_id,
+        "father": result.father,
+        "selection": {
+            "name": result.selection.name,
+            "father": result.selection.father,
+            "successful_contact_count": (
+                result.selection
+                .successful_contact_count
             ),
-            "father": self.father,
-            "selection": {
-                "name": self.selection.name,
-                "father": self.selection.father,
-                "successful_contact_count": (
-                    self.selection
-                    .successful_contact_count
-                ),
-                "total_successful_contacts": (
-                    self.selection
-                    .total_successful_contacts
-                ),
-                "weighted_candidate_names": list(
-                    self.selection
-                    .weighted_candidate_names
-                ),
-            },
-        }
+            "total_successful_contacts": (
+                result.selection
+                .total_successful_contacts
+            ),
+            "weighted_candidate_names": list(
+                result.selection
+                .weighted_candidate_names
+            ),
+        },
+    }
 
 
 @dataclass(slots=True, frozen=True)
@@ -424,7 +434,9 @@ class CatPregnancyStartedEvent(
                 self.mating_contact_count
             ),
             "paternity_results": [
-                result.to_dict()
+                _pregnancy_paternity_snapshot(
+                    result
+                )
                 for result
                 in self.paternity_results
             ],
