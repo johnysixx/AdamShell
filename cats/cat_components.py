@@ -51,13 +51,13 @@ class ParentalTeaching(ComponentObject):
 class FamilyBonding(ComponentObject):
     pass
 
-class CatGroupMembership(ComponentObject):
+class CatGroupMembership(DomainObject):
     pass
 
-class CatCulture(ComponentObject):
+class CatCulture(DomainObject):
     pass
 
-class CatGroupRoles(ComponentObject):
+class CatGroupRoles(DomainObject):
     def record_event(
         self,
         event,
