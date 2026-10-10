@@ -6,6 +6,15 @@ from cats.cats import Cats
 from cats.cat_mind import CatMind
 from cats.cat_perception_state import CatPerceptionState
 from cats.cat_intention_state import CatIntentionCandidate
+from cats.cat_scent_box_intention_handler import (
+    CatScentBoxIntentionHandler,
+)
+from cats.cat_scent_search_intention_handler import (
+    CatScentSearchIntentionHandler,
+)
+from cats.cat_known_scent_intention_handler import (
+    CatKnownScentIntentionHandler,
+)
 
 from cats.cat_intention_state import CatVisitRecipientTarget
 
@@ -45,6 +54,28 @@ class CatIntentionExecutorTests(unittest.TestCase):
         cronenberg.position = SpatialVector3(x=3.0, y=0.0, z=0.0)
         cronenberg.size = 0.5
         return cronenberg
+
+    def test_scent_workflows_use_dedicated_handlers(
+        self
+    ):
+        executor = (
+            self.cats.intention_executor
+        )
+
+        self.assertIsInstance(
+            executor.scent_box_intentions,
+            CatScentBoxIntentionHandler,
+        )
+
+        self.assertIsInstance(
+            executor.scent_search_intentions,
+            CatScentSearchIntentionHandler,
+        )
+
+        self.assertIsInstance(
+            executor.known_scent_intentions,
+            CatKnownScentIntentionHandler,
+        )
 
     def test_visit_bar_starts_existing_navigation(self):
         self.set_intention('visit_bar')
