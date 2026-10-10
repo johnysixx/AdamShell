@@ -5,6 +5,9 @@ from cats.cats import Cats
 from cats.cat_navigation_offer_state import (
     CatNavigationOfferState,
 )
+from cats.cat_navigation_system import (
+    CatNavigationSystem,
+)
 
 
 class CatNavigationOfferObjectStateTests(
@@ -36,6 +39,14 @@ class CatNavigationOfferObjectStateTests(
             'accepted': False,
             'offered': True,
         }
+
+    def test_cats_uses_navigation_system(
+        self
+    ):
+        self.assertIsInstance(
+            self.cats.navigation_system,
+            CatNavigationSystem,
+        )
 
     def test_state_has_no_mapping_api(
         self
