@@ -16,6 +16,11 @@ from cats.cat_bonding_system import (
 from cats.cat_family_system import (
     CatFamilySystem
 )
+from cats.cat_social_assessment_state import (
+    CatFamilySocialBias,
+    CatSocialAssessment,
+    CatTerritoryContext,
+)
 
 
 class CatSocialSystem:
@@ -246,7 +251,7 @@ class CatSocialSystem:
     def assess(
         self,
         cat,
-        other_cat
+        other_cat,
     ):
         self._require_cat(
             cat
@@ -272,16 +277,18 @@ class CatSocialSystem:
         )
 
         positive_memory = int(
-            getattr(memory,
+            getattr(
+                memory,
                 "friendly_count",
-                0
+                0,
             )
         )
 
         negative_memory = int(
-            getattr(memory,
+            getattr(
+                memory,
                 "hostile_count",
-                0
+                0,
             )
         )
 
@@ -292,35 +299,54 @@ class CatSocialSystem:
                 (
                     positive_memory
                     - negative_memory
-                ) * 0.08
-            )
+                )
+                * 0.08,
+            ),
         )
 
         family_relation = (
-            self.family_system.relation(
+            self.family_system
+            .relation(
                 cat,
-                other_cat
+                other_cat,
             )
         )
 
-        family_bias = self._family_bias(
-            family_relation
+        family_bias = (
+            self._family_bias(
+                family_relation
+            )
         )
+
+        if not isinstance(
+            family_bias,
+            CatFamilySocialBias,
+        ):
+            raise TypeError(
+                "Cat social family bias must be "
+                "CatFamilySocialBias."
+            )
 
         territory = (
-            self.territory_system.context(
+            self.territory_system
+            .context(
                 cat,
-                other_cat
+                other_cat,
             )
         )
 
+        if not isinstance(
+            territory,
+            CatTerritoryContext,
+        ):
+            raise TypeError(
+                "Cat territory context must be "
+                "CatTerritoryContext."
+            )
+
         territorial_pressure = (
-            territory[
-                "claim_strength"
-            ]
-            if territory[
-                "intrusion"
-            ]
+            territory.claim_strength
+            if territory.intrusion
             else 0.0
         )
 
@@ -340,30 +366,32 @@ class CatSocialSystem:
             relation.tension
         )
 
-        traits = cat.personality.traits
+        traits = (
+            cat.personality.traits
+        )
 
         empathy = self._trait(
             traits,
             "empathy",
-            0.5
+            0.5,
         )
 
         sociability = self._trait(
             traits,
             "sociability",
-            0.5
+            0.5,
         )
 
         courage = self._trait(
             traits,
             "courage",
-            0.5
+            0.5,
         )
 
         aggression = self._trait(
             traits,
             "aggression",
-            0.0
+            0.0,
         )
 
         friendly_score = (
@@ -376,14 +404,12 @@ class CatSocialSystem:
             - tension * 0.35
             - aggression * 0.15
             + memory_bias
-            + family_bias[
-                "friendly"
-            ]
-            - territorial_pressure * (
+            + family_bias.friendly
+            - territorial_pressure
+            * (
                 0.35
-                * family_bias[
-                    "territory_multiplier"
-                ]
+                * family_bias
+                .territory_multiplier
             )
         )
 
@@ -396,13 +422,15 @@ class CatSocialSystem:
                 > positive_memory + 1
             )
             or (
-                territory["intrusion"]
-                and territory[
-                    "claim_strength"
-                ] >= 0.80
-                and not family_bias[
-                    "protected_from_territorial_hostility"
-                ]
+                territory.intrusion
+                and (
+                    territory.claim_strength
+                    >= 0.80
+                )
+                and not (
+                    family_bias
+                    .protected_from_territorial_hostility
+                )
             )
             or (
                 aggression >= 0.80
@@ -422,52 +450,61 @@ class CatSocialSystem:
         else:
             attitude = "uncertain"
 
-        return {
-            "cat": cat.name,
-            "other_cat": other_cat.name,
-            "known": known_before,
-            "attitude": attitude,
-            "friendly_score": round(
-                friendly_score,
-                4
-            ),
-            "familiarity": familiarity,
-            "trust": trust,
-            "affiliation": affiliation,
-            "tension": tension,
-            "empathy": empathy,
-            "sociability": sociability,
-            "courage": courage,
-            "aggression": aggression,
-            "positive_social_memories": (
-                positive_memory
-            ),
-            "negative_social_memories": (
-                negative_memory
-            ),
-            "memory_bias": round(
-                memory_bias,
-                4
-            ),
-            "last_social_outcome": (
-                getattr(memory,
-                    "last_outcome"
-                )
-            ),
-            "territory": deepcopy(
-                territory
-            ),
-            "territorial_pressure": round(
-                territorial_pressure,
-                4
-            ),
-            "family_relation": (
-                family_relation
-            ),
-            "family_bias": dict(
-                family_bias
+        return (
+            CatSocialAssessment(
+                cat=cat.name,
+                other_cat=
+                    other_cat.name,
+                known=
+                    known_before,
+                attitude=
+                    attitude,
+                friendly_score=round(
+                    friendly_score,
+                    4,
+                ),
+                familiarity=
+                    familiarity,
+                trust=
+                    trust,
+                affiliation=
+                    affiliation,
+                tension=
+                    tension,
+                empathy=
+                    empathy,
+                sociability=
+                    sociability,
+                courage=
+                    courage,
+                aggression=
+                    aggression,
+                positive_social_memories=
+                    positive_memory,
+                negative_social_memories=
+                    negative_memory,
+                memory_bias=round(
+                    memory_bias,
+                    4,
+                ),
+                last_social_outcome=
+                    getattr(
+                        memory,
+                        "last_outcome",
+                    ),
+                territory=
+                    territory,
+                territorial_pressure=round(
+                    territorial_pressure,
+                    4,
+                ),
+                family_relation=
+                    family_relation,
+                family_bias=
+                    family_bias,
             )
-        }
+        )
+
 
     def sniff(
         self,
@@ -627,21 +664,39 @@ class CatSocialSystem:
         cat,
         other_cat,
         cat_assessment,
-        other_assessment
+        other_assessment,
     ):
+        if not isinstance(
+            cat_assessment,
+            CatSocialAssessment,
+        ):
+            raise TypeError(
+                "Cat hostile greeting assessment "
+                "must be CatSocialAssessment."
+            )
+
+        if not isinstance(
+            other_assessment,
+            CatSocialAssessment,
+        ):
+            raise TypeError(
+                "Other cat hostile greeting assessment "
+                "must be CatSocialAssessment."
+            )
+
         steps = []
 
         hiss = {
             "name": "cat_hissed_at_cat",
             "cat": cat.name,
             "other_cat": other_cat.name,
-            "warning": True
+            "warning": True,
         }
 
         self._record_both(
             cat,
             other_cat,
-            hiss
+            hiss,
         )
 
         steps.append(
@@ -650,32 +705,20 @@ class CatSocialSystem:
 
         tension = max(
             self._number(
-                cat_assessment.get(
-                    "tension",
-                    0.0
-                )
+                cat_assessment.tension
             ),
             self._number(
-                other_assessment.get(
-                    "tension",
-                    0.0
-                )
-            )
+                other_assessment.tension
+            ),
         )
 
         aggression = max(
             self._number(
-                cat_assessment.get(
-                    "aggression",
-                    0.0
-                )
+                cat_assessment.aggression
             ),
             self._number(
-                other_assessment.get(
-                    "aggression",
-                    0.0
-                )
-            )
+                other_assessment.aggression
+            ),
         )
 
         if (
@@ -687,13 +730,13 @@ class CatSocialSystem:
                 "cat": cat.name,
                 "other_cat": other_cat.name,
                 "warning": True,
-                "injury": False
+                "injury": False,
             }
 
             self._record_both(
                 cat,
                 other_cat,
-                swat
+                swat,
             )
 
             steps.append(
@@ -708,13 +751,13 @@ class CatSocialSystem:
                 "name": "cat_fight_started",
                 "cat": cat.name,
                 "other_cat": other_cat.name,
-                "escalated": True
+                "escalated": True,
             }
 
             self._record_both(
                 cat,
                 other_cat,
-                fight
+                fight,
             )
 
             steps.append(
@@ -722,6 +765,7 @@ class CatSocialSystem:
             )
 
         return steps
+
 
     def _update_relationships(
         self,
@@ -828,26 +872,41 @@ class CatSocialSystem:
     def _combined_attitude(
         self,
         assessment_a,
-        assessment_b
+        assessment_b,
     ):
+        if not isinstance(
+            assessment_a,
+            CatSocialAssessment,
+        ):
+            raise TypeError(
+                "First cat social assessment "
+                "must be CatSocialAssessment."
+            )
+
+        if not isinstance(
+            assessment_b,
+            CatSocialAssessment,
+        ):
+            raise TypeError(
+                "Second cat social assessment "
+                "must be CatSocialAssessment."
+            )
+
         attitudes = {
-            assessment_a[
-                "attitude"
-            ],
-            assessment_b[
-                "attitude"
-            ]
+            assessment_a.attitude,
+            assessment_b.attitude,
         }
 
         if "hostile" in attitudes:
             return "hostile"
 
         if attitudes == {
-            "friendly"
+            "friendly",
         }:
             return "friendly"
 
         return "uncertain"
+
 
     def _outcome_from_steps(
         self,
@@ -886,54 +945,69 @@ class CatSocialSystem:
 
     def _family_bias(
         self,
-        relation
+        relation,
     ):
         profiles = {
-            "mother": {
-                "friendly": 0.30,
-                "territory_multiplier": 0.20,
-                "protected_from_territorial_hostility": True
-            },
-            "child": {
-                "friendly": 0.30,
-                "territory_multiplier": 0.20,
-                "protected_from_territorial_hostility": True
-            },
-            "sibling_littermate": {
-                "friendly": 0.22,
-                "territory_multiplier": 0.35,
-                "protected_from_territorial_hostility": True
-            },
-            "half_sibling_littermate": {
-                "friendly": 0.15,
-                "territory_multiplier": 0.50,
-                "protected_from_territorial_hostility": True
-            },
-            "sibling": {
-                "friendly": 0.10,
-                "territory_multiplier": 0.70,
-                "protected_from_territorial_hostility": False
-            },
-            "half_sibling": {
-                "friendly": 0.05,
-                "territory_multiplier": 0.85,
-                "protected_from_territorial_hostility": False
-            },
-            "father": {
-                "friendly": 0.08,
-                "territory_multiplier": 0.80,
-                "protected_from_territorial_hostility": False
-            }
+            "mother": (
+                CatFamilySocialBias(
+                    friendly=0.30,
+                    territory_multiplier=0.20,
+                    protected_from_territorial_hostility=True,
+                )
+            ),
+            "child": (
+                CatFamilySocialBias(
+                    friendly=0.30,
+                    territory_multiplier=0.20,
+                    protected_from_territorial_hostility=True,
+                )
+            ),
+            "sibling_littermate": (
+                CatFamilySocialBias(
+                    friendly=0.22,
+                    territory_multiplier=0.35,
+                    protected_from_territorial_hostility=True,
+                )
+            ),
+            "half_sibling_littermate": (
+                CatFamilySocialBias(
+                    friendly=0.15,
+                    territory_multiplier=0.50,
+                    protected_from_territorial_hostility=True,
+                )
+            ),
+            "sibling": (
+                CatFamilySocialBias(
+                    friendly=0.10,
+                    territory_multiplier=0.70,
+                    protected_from_territorial_hostility=False,
+                )
+            ),
+            "half_sibling": (
+                CatFamilySocialBias(
+                    friendly=0.05,
+                    territory_multiplier=0.85,
+                    protected_from_territorial_hostility=False,
+                )
+            ),
+            "father": (
+                CatFamilySocialBias(
+                    friendly=0.08,
+                    territory_multiplier=0.80,
+                    protected_from_territorial_hostility=False,
+                )
+            ),
         }
 
         return profiles.get(
             relation,
-            {
-                "friendly": 0.0,
-                "territory_multiplier": 1.0,
-                "protected_from_territorial_hostility": False
-            }
+            CatFamilySocialBias(
+                friendly=0.0,
+                territory_multiplier=1.0,
+                protected_from_territorial_hostility=False,
+            ),
         )
+
 
     def _memory_profile(
         self,

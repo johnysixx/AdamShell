@@ -5,6 +5,11 @@ from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat import Cat
 from cats.cat_social_system import CatSocialSystem
+from cats.cat_social_assessment_state import (
+    CatFamilySocialBias,
+    CatSocialAssessment,
+    CatTerritoryContext,
+)
 from cats.cat_territory_system import CatTerritorySystem
 from cats.cat_social_objects import (
     CatRelationship,
@@ -84,6 +89,66 @@ class CatSocialInteractionTests(unittest.TestCase):
         first.current_layer = 'quantum_layer'
         second.current_layer = 'quantum_layer'
         return (first, second)
+
+    def test_social_assessment_is_object_state(
+        self
+    ):
+        first, second = (
+            self._social_pair()
+        )
+
+        social = (
+            CatSocialSystem(
+                self.cats
+            )
+        )
+
+        assessment = (
+            social.assess(
+                first,
+                second,
+            )
+        )
+
+        self.assertIsInstance(
+            assessment,
+            CatSocialAssessment,
+        )
+
+        self.assertIsInstance(
+            assessment.territory,
+            CatTerritoryContext,
+        )
+
+        self.assertIsInstance(
+            assessment.family_bias,
+            CatFamilySocialBias,
+        )
+
+        for state in (
+            assessment,
+            assessment.territory,
+            assessment.family_bias,
+        ):
+            for mapping_method in (
+                "get",
+                "keys",
+                "items",
+                "values",
+            ):
+                self.assertFalse(
+                    hasattr(
+                        state,
+                        mapping_method,
+                    )
+                )
+
+            with self.assertRaises(
+                TypeError
+            ):
+                _ = state[
+                    "attitude"
+                ]
 
     def test_unknown_cats_sniff_and_keep_distance(self):
         first, second = self._social_pair()
@@ -184,9 +249,9 @@ class CatSocialInteractionTests(unittest.TestCase):
         first.social_memory.records[second.name] = CatSocialMemory(**{'meet_count': 4, 'friendly_count': 4, 'uncertain_count': 0, 'hostile_count': 0, 'last_attitude': 'friendly', 'last_outcome': 'head_bunt', 'last_steps': ['cat_head_bunt'], 'recent_outcomes': ['nose_touch', 'head_bunt']})
         social = CatSocialSystem(self.cats)
         assessment = social.assess(first, second)
-        self.assertGreater(assessment['memory_bias'], 0.0)
-        self.assertEqual(assessment['positive_social_memories'], 4)
-        self.assertEqual(assessment['last_social_outcome'], 'head_bunt')
+        self.assertGreater(assessment.memory_bias, 0.0)
+        self.assertEqual(assessment.positive_social_memories, 4)
+        self.assertEqual(assessment.last_social_outcome, 'head_bunt')
 
     def test_repeated_hostile_memory_can_make_cat_hostile(self):
         first, second = self._social_pair()
@@ -194,9 +259,9 @@ class CatSocialInteractionTests(unittest.TestCase):
         first.social_memory.records[second.name] = CatSocialMemory(**{'meet_count': 4, 'friendly_count': 0, 'uncertain_count': 0, 'hostile_count': 4, 'last_attitude': 'hostile', 'last_outcome': 'hiss', 'last_steps': ['cat_hissed_at_cat'], 'recent_outcomes': ['hiss', 'warning_swat', 'hiss', 'hiss']})
         social = CatSocialSystem(self.cats)
         assessment = social.assess(first, second)
-        self.assertEqual(assessment['attitude'], 'hostile')
-        self.assertLess(assessment['memory_bias'], 0.0)
-        self.assertEqual(assessment['negative_social_memories'], 4)
+        self.assertEqual(assessment.attitude, 'hostile')
+        self.assertLess(assessment.memory_bias, 0.0)
+        self.assertEqual(assessment.negative_social_memories, 4)
 
     def test_social_memory_keeps_only_five_recent_outcomes(self):
         first, second = self._social_pair()
@@ -225,9 +290,9 @@ class CatSocialInteractionTests(unittest.TestCase):
         territory = CatTerritorySystem(self.cats)
         territory.claim(first, strength=0.9)
         context = territory.context(first, second)
-        self.assertTrue(context['owns_here'])
-        self.assertTrue(context['intrusion'])
-        self.assertFalse(context['accepted'])
+        self.assertTrue(context.owns_here)
+        self.assertTrue(context.intrusion)
+        self.assertFalse(context.accepted)
 
     def test_bonded_cat_is_accepted_in_territory(self):
         first, second = self._social_pair()
@@ -237,9 +302,9 @@ class CatSocialInteractionTests(unittest.TestCase):
         territory = CatTerritorySystem(self.cats)
         territory.claim(first, strength=1.0)
         context = territory.context(first, second)
-        self.assertTrue(context['owns_here'])
-        self.assertTrue(context['accepted'])
-        self.assertFalse(context['intrusion'])
+        self.assertTrue(context.owns_here)
+        self.assertTrue(context.accepted)
+        self.assertFalse(context.intrusion)
 
     def test_strong_territory_can_make_stranger_hostile(self):
         first, second = self._social_pair()
@@ -249,9 +314,9 @@ class CatSocialInteractionTests(unittest.TestCase):
         territory.claim(first, strength=0.9)
         social = CatSocialSystem(self.cats)
         assessment = social.assess(first, second)
-        self.assertTrue(assessment['territory']['intrusion'])
-        self.assertGreater(assessment['territorial_pressure'], 0.0)
-        self.assertEqual(assessment['attitude'], 'hostile')
+        self.assertTrue(assessment.territory.intrusion)
+        self.assertGreater(assessment.territorial_pressure, 0.0)
+        self.assertEqual(assessment.attitude, 'hostile')
 
     def test_weak_territory_makes_stranger_cautious_not_hostile(self):
         first, second = self._social_pair()
@@ -261,8 +326,8 @@ class CatSocialInteractionTests(unittest.TestCase):
         territory.claim(first, strength=0.4)
         social = CatSocialSystem(self.cats)
         assessment = social.assess(first, second)
-        self.assertTrue(assessment['territory']['intrusion'])
-        self.assertEqual(assessment['attitude'], 'uncertain')
+        self.assertTrue(assessment.territory.intrusion)
+        self.assertEqual(assessment.attitude, 'uncertain')
 
     def _prepare_bonded_pair(self):
         first, second = self._social_pair()
@@ -333,8 +398,8 @@ class CatSocialInteractionTests(unittest.TestCase):
         mother.family.children.append(kitten.name)
         social = CatSocialSystem(self.cats)
         assessment = social.assess(kitten, mother)
-        self.assertEqual(assessment['family_relation'], 'mother')
-        self.assertGreater(assessment['family_bias']['friendly'], 0.0)
+        self.assertEqual(assessment.family_relation, 'mother')
+        self.assertGreater(assessment.family_bias.friendly, 0.0)
 
     def test_littermates_get_stronger_bonus_than_half_siblings(self):
         first, second = self._social_pair()
@@ -345,9 +410,9 @@ class CatSocialInteractionTests(unittest.TestCase):
         first.family.siblings.clear()
         first.family.half_siblings.append(second.name)
         half = social.assess(first, second)
-        self.assertEqual(full['family_relation'], 'sibling_littermate')
-        self.assertEqual(half['family_relation'], 'half_sibling_littermate')
-        self.assertGreater(full['family_bias']['friendly'], half['family_bias']['friendly'])
+        self.assertEqual(full.family_relation, 'sibling_littermate')
+        self.assertEqual(half.family_relation, 'half_sibling_littermate')
+        self.assertGreater(full.family_bias.friendly, half.family_bias.friendly)
 
     def test_family_reduces_territorial_hostility(self):
         first, second = self._social_pair()
@@ -359,8 +424,8 @@ class CatSocialInteractionTests(unittest.TestCase):
         territory.claim(first, strength=1.0)
         social = CatSocialSystem(self.cats)
         assessment = social.assess(first, second)
-        self.assertEqual(assessment['family_relation'], 'sibling_littermate')
-        self.assertNotEqual(assessment['attitude'], 'hostile')
+        self.assertEqual(assessment.family_relation, 'sibling_littermate')
+        self.assertNotEqual(assessment.attitude, 'hostile')
 
     def test_family_does_not_override_real_hostile_history(self):
         first, second = self._social_pair()
@@ -370,13 +435,13 @@ class CatSocialInteractionTests(unittest.TestCase):
         first.social_memory.records[second.name] = CatSocialMemory(**{'meet_count': 5, 'friendly_count': 0, 'uncertain_count': 0, 'hostile_count': 5, 'last_attitude': 'hostile', 'last_outcome': 'hiss', 'last_steps': [], 'recent_outcomes': ['hiss', 'hiss', 'warning_swat']})
         social = CatSocialSystem(self.cats)
         assessment = social.assess(first, second)
-        self.assertEqual(assessment['attitude'], 'hostile')
+        self.assertEqual(assessment.attitude, 'hostile')
 
     def test_unrelated_cat_gets_no_family_bonus(self):
         first, second = self._social_pair()
         social = CatSocialSystem(self.cats)
         assessment = social.assess(first, second)
-        self.assertIsNone(assessment['family_relation'])
-        self.assertEqual(assessment['family_bias']['friendly'], 0.0)
+        self.assertIsNone(assessment.family_relation)
+        self.assertEqual(assessment.family_bias.friendly, 0.0)
 if __name__ == '__main__':
     unittest.main()
