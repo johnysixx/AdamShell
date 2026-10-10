@@ -15,6 +15,12 @@ from cats.cat_scent_search_intention_handler import (
 from cats.cat_known_scent_intention_handler import (
     CatKnownScentIntentionHandler,
 )
+from cats.cat_quantum_box_intention_handler import (
+    CatQuantumBoxIntentionHandler,
+)
+from cats.cat_exploration_pair_intention_handler import (
+    CatExplorationPairIntentionHandler,
+)
 
 from cats.cat_intention_state import CatVisitRecipientTarget
 
@@ -75,6 +81,23 @@ class CatIntentionExecutorTests(unittest.TestCase):
         self.assertIsInstance(
             executor.known_scent_intentions,
             CatKnownScentIntentionHandler,
+        )
+
+    def test_quantum_workflows_use_dedicated_handlers(
+        self
+    ):
+        executor = (
+            self.cats.intention_executor
+        )
+
+        self.assertIsInstance(
+            executor.quantum_box_intentions,
+            CatQuantumBoxIntentionHandler,
+        )
+
+        self.assertIsInstance(
+            executor.exploration_pair_intentions,
+            CatExplorationPairIntentionHandler,
         )
 
     def test_visit_bar_starts_existing_navigation(self):
