@@ -1,5 +1,8 @@
 import unittest
 
+from meeting_place.cat_arrival_state import (
+    CatBarArrivalResult,
+)
 from universe.universe import Universe
 from multiverse import UniverseRegistry
 from meeting_place.meeting_place import MeetingPlace
@@ -45,6 +48,53 @@ class GeneralCatArrivalTests(
             )
         )
 
+    def test_admit_cat_returns_object_result(
+        self
+    ):
+        manifestation = (
+            self.universe
+            .manifest_cat(
+                name="test_cat",
+                source="test"
+            )
+        )
+
+        result = (
+            self.bar
+            .admit_cat(
+                manifestation["cat"]
+            )
+        )
+
+        self.assertIsInstance(
+            result,
+            CatBarArrivalResult,
+        )
+
+        for method_name in (
+            "get",
+            "keys",
+            "items",
+            "values",
+            "to_dict",
+        ):
+            self.assertFalse(
+                hasattr(
+                    result,
+                    method_name,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = result["cat"]
+
+        with self.assertRaises(
+            AttributeError
+        ):
+            result.entered = False
+
     def test_admit_cat_uses_normal_alarm(
         self
     ):
@@ -69,21 +119,15 @@ class GeneralCatArrivalTests(
         )
 
         self.assertTrue(
-            result[
-                "alarm_before_bartender"
-            ]
+            result.alarm_before_bartender
         )
 
         self.assertTrue(
-            result[
-                "bartender_responded"
-            ]
+            result.bartender_responded
         )
 
         self.assertFalse(
-            result[
-                "alarm_after_bartender"
-            ]
+            result.alarm_after_bartender
         )
 
     def test_admit_cat_enters_once_only(
@@ -144,21 +188,15 @@ class GeneralCatArrivalTests(
         )
 
         self.assertTrue(
-            result[
-                "alarm_before_bartender"
-            ]
+            result.alarm_before_bartender
         )
 
         self.assertFalse(
-            result[
-                "bartender_responded"
-            ]
+            result.bartender_responded
         )
 
         self.assertTrue(
-            result[
-                "alarm_after_bartender"
-            ]
+            result.alarm_after_bartender
         )
 
 

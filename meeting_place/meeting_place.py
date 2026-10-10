@@ -13,6 +13,9 @@ from meeting_place.bar_objects import (
     BarMenuItem,
     DrinkRecipe,
 )
+from meeting_place.cat_arrival_state import (
+    CatBarArrivalResult,
+)
 import random
 from cats.cat import Cat
 from core.entity.components import SpatialVector3
@@ -411,7 +414,12 @@ class MeetingPlace:
         cat_name = self._get_entity_name(cat)
         already_inside = any((entity is cat for entity in self.entities))
         if already_inside:
-            return {'name': 'cat_arrival_already_completed', 'cat': cat_name, 'entered': True, 'already_inside': True}
+            return CatBarArrivalResult(
+                name='cat_arrival_already_completed',
+                cat=cat_name,
+                entered=True,
+                already_inside=True,
+            )
         self.handle_cat_created(cat_name)
         red_button = self.bar_counter.red_button
         alarm_before = bool(red_button.alarm_active)
@@ -419,7 +427,16 @@ class MeetingPlace:
         alarm_after_bartender = bool(red_button.alarm_active)
         self.add_entity(cat)
         entered = any((entity is cat for entity in self.entities))
-        return {'name': 'cat_arrival_completed', 'cat': cat_name, 'alarm_before_bartender': alarm_before, 'bartender_available': bool(bartender_available), 'bartender_responded': bool(bartender_responded), 'alarm_after_bartender': alarm_after_bartender, 'entered': entered, 'already_inside': False}
+        return CatBarArrivalResult(
+            name='cat_arrival_completed',
+            cat=cat_name,
+            alarm_before_bartender=alarm_before,
+            bartender_available=bartender_available,
+            bartender_responded=bartender_responded,
+            alarm_after_bartender=alarm_after_bartender,
+            entered=entered,
+            already_inside=False,
+        )
 
     def handle_cat_created(self, cat_id):
         self.geometry_terminal.cat_detected(cat_id)

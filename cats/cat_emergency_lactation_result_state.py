@@ -1,4 +1,7 @@
 from dataclasses import dataclass, field
+from meeting_place.cat_arrival_state import (
+    CatBarArrivalResult,
+)
 
 from cats.cat_maternal_care_result_state import (
     CatFosterMaternalCareEvent,
@@ -70,54 +73,11 @@ class CatEmergencyLactationAdviceEvent:
 
 
 @dataclass(slots=True, frozen=True)
-class CatOrphanArrivalRecord:
-    name: str
-    cat: str
-    entered: bool
-    already_inside: bool
-    alarm_before_bartender: bool | None = None
-    bartender_available: bool | None = None
-    bartender_responded: bool | None = None
-    alarm_after_bartender: bool | None = None
-
-    def __post_init__(self):
-        object.__setattr__(
-            self,
-            "entered",
-            bool(self.entered),
-        )
-
-        object.__setattr__(
-            self,
-            "already_inside",
-            bool(self.already_inside),
-        )
-
-        for attribute in (
-            "alarm_before_bartender",
-            "bartender_available",
-            "bartender_responded",
-            "alarm_after_bartender",
-        ):
-            value = getattr(
-                self,
-                attribute,
-            )
-
-            if value is not None:
-                object.__setattr__(
-                    self,
-                    attribute,
-                    bool(value),
-                )
-
-
-@dataclass(slots=True, frozen=True)
 class CatOrphanTransportEvent:
     cat: str
     kittens: tuple[str, ...]
     arrivals: tuple[
-        CatOrphanArrivalRecord,
+        CatBarArrivalResult,
         ...
     ]
 

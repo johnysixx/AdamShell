@@ -1,5 +1,8 @@
 import unittest
 
+from meeting_place.cat_arrival_state import (
+    CatBarArrivalResult,
+)
 from multiverse import UniverseRegistry
 from universe.universe import Universe
 from meeting_place.meeting_place import MeetingPlace
@@ -63,16 +66,12 @@ class Day0GarfieldOrdinaryCatArrivalTests(
         arrival = self._arrival()
 
         self.assertEqual(
-            arrival[
-                "name"
-            ],
+            arrival.name,
             "cat_arrival_completed"
         )
 
         self.assertEqual(
-            arrival[
-                "cat"
-            ],
+            arrival.cat,
             "garfield"
         )
 
@@ -82,9 +81,7 @@ class Day0GarfieldOrdinaryCatArrivalTests(
         arrival = self._arrival()
 
         self.assertTrue(
-            arrival[
-                "alarm_before_bartender"
-            ]
+            arrival.alarm_before_bartender
         )
 
     def test_bartender_decides_to_respond(
@@ -93,15 +90,11 @@ class Day0GarfieldOrdinaryCatArrivalTests(
         arrival = self._arrival()
 
         self.assertTrue(
-            arrival[
-                "bartender_responded"
-            ]
+            arrival.bartender_responded
         )
 
         self.assertFalse(
-            arrival[
-                "alarm_after_bartender"
-            ]
+            arrival.alarm_after_bartender
         )
 
     def test_garfield_enters_bar(

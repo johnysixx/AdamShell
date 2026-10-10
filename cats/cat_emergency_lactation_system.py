@@ -1,8 +1,10 @@
 from copy import deepcopy
 
+from meeting_place.cat_arrival_state import (
+    CatBarArrivalResult,
+)
 from cats.cat import Cat
 from cats.cat_emergency_lactation_result_state import (
-    CatOrphanArrivalRecord,
     CatOrphanRescueAssessment,
     CatOrphanRescueDeniedResult,
     CatOrphanRescueEvent,
@@ -303,10 +305,17 @@ class CatEmergencyLactationSystem:
                 )
             )
 
-            arrivals.append(
-                self._arrival_record(
-                    raw_arrival
+            if not isinstance(
+                raw_arrival,
+                CatBarArrivalResult,
+            ):
+                raise TypeError(
+                    "Meeting-place cat admission must "
+                    "return CatBarArrivalResult."
                 )
+
+            arrivals.append(
+                raw_arrival
             )
 
         rescuer.state = (
@@ -343,69 +352,6 @@ class CatEmergencyLactationSystem:
         )
 
         return event
-
-    def _arrival_record(
-        self,
-        arrival,
-    ):
-        # Explicit adapter from the still-legacy
-        # MeetingPlace.admit_cat boundary.
-        if not isinstance(
-            arrival,
-            dict,
-        ):
-            raise TypeError(
-                "Meeting-place cat admission "
-                "must return a mapping at this "
-                "legacy boundary."
-            )
-
-        return CatOrphanArrivalRecord(
-            name=str(
-                arrival.get(
-                    "name",
-                    "cat_arrival_completed",
-                )
-            ),
-            cat=str(
-                arrival.get(
-                    "cat",
-                    "",
-                )
-            ),
-            entered=bool(
-                arrival.get(
-                    "entered",
-                    False,
-                )
-            ),
-            already_inside=bool(
-                arrival.get(
-                    "already_inside",
-                    False,
-                )
-            ),
-            alarm_before_bartender=(
-                arrival.get(
-                    "alarm_before_bartender"
-                )
-            ),
-            bartender_available=(
-                arrival.get(
-                    "bartender_available"
-                )
-            ),
-            bartender_responded=(
-                arrival.get(
-                    "bartender_responded"
-                )
-            ),
-            alarm_after_bartender=(
-                arrival.get(
-                    "alarm_after_bartender"
-                )
-            ),
-        )
 
     def _induce_and_assign(
         self,

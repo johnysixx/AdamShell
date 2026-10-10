@@ -1,11 +1,14 @@
 import unittest
 
+from meeting_place.cat_arrival_state import (
+    CatBarArrivalResult,
+)
+
 from multiverse import UniverseRegistry
 from universe.universe import Universe
 
 from cats.cat_emergency_lactation_result_state import (
     CatEmergencyLactationAdviceEvent,
-    CatOrphanArrivalRecord,
     CatOrphanRescueAssessment,
     CatOrphanRescueDeniedResult,
     CatOrphanRescueEvent,
@@ -254,7 +257,7 @@ class CatEmergencyLactationResultsObjectStateTests(
         ):
             self.assertIsInstance(
                 arrival,
-                CatOrphanArrivalRecord,
+                CatBarArrivalResult,
             )
 
             self.assert_object_only(
