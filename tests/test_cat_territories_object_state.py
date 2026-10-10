@@ -3,6 +3,10 @@ import unittest
 from cats.cat_components import CatTerritories
 from cats.cat_social_objects import CatTerritoryClaim
 from cats.cat_territory_system import CatTerritorySystem
+from cats.cat_territory_result_state import (
+    CatTerritoryClaimedEvent,
+    CatTerritoryScentMarkedEvent,
+)
 from cats.cats import Cats
 from core.entity.domain_object import DomainObject
 from universe.universe import Universe
@@ -65,6 +69,71 @@ class CatTerritoriesObjectStateTests(unittest.TestCase):
             claim,
             self.cat.territories.claims[key],
         )
+
+    def test_territory_events_are_object_state(
+        self
+    ):
+        self.system.claim(
+            self.cat,
+            strength=0.7,
+        )
+
+        claimed = (
+            self.cat
+            .social_interactions[
+                -1
+            ]
+        )
+
+        self.assertIsInstance(
+            claimed,
+            CatTerritoryClaimedEvent,
+        )
+
+        self.assertEqual(
+            claimed.territory,
+            "meeting_place::window",
+        )
+
+        self.system.scent_mark(
+            self.cat
+        )
+
+        marked = (
+            self.cat
+            .social_interactions[
+                -1
+            ]
+        )
+
+        self.assertIsInstance(
+            marked,
+            CatTerritoryScentMarkedEvent,
+        )
+
+        for event in (
+            claimed,
+            marked,
+        ):
+            for mapping_method in (
+                "get",
+                "keys",
+                "items",
+                "values",
+            ):
+                self.assertFalse(
+                    hasattr(
+                        event,
+                        mapping_method,
+                    )
+                )
+
+            with self.assertRaises(
+                TypeError
+            ):
+                _ = event[
+                    "name"
+                ]
 
     def test_scent_mark_updates_registered_claim(self):
         self.system.claim(

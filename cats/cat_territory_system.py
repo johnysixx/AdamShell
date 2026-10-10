@@ -4,42 +4,210 @@ from cats.cat_social_assessment_state import (
     CatTerritoryContext,
 )
 from cats.cat_social_objects import CatRelationship, CatTerritoryClaim
+from cats.cat_territory_result_state import (
+    CatTerritoryClaimedEvent,
+    CatTerritoryScentMarkedEvent,
+)
 
 class CatTerritorySystem:
 
     def __init__(self, cats_layer=None):
         self.cats_layer = cats_layer
 
-    def claim(self, cat, layer=None, location=None, strength=0.6):
-        self._require_cat(cat)
-        layer = layer if layer is not None else cat.current_layer
-        location = location if location is not None else cat.location
-        key = self._territory_key(layer, location)
-        previous = cat.territories.claims.get(key)
+    def claim(
+        self,
+        cat,
+        layer=None,
+        location=None,
+        strength=0.6,
+    ):
+        self._require_cat(
+            cat
+        )
+
+        layer = (
+            layer
+            if layer is not None
+            else cat.current_layer
+        )
+
+        location = (
+            location
+            if location is not None
+            else cat.location
+        )
+
+        key = self._territory_key(
+            layer,
+            location,
+        )
+
+        previous = (
+            cat.territories.claims.get(
+                key
+            )
+        )
+
         if previous is None:
-            claim = CatTerritoryClaim(**{'owner': cat.name, 'layer': layer, 'location': location, 'strength': self._clamp(strength), 'scent_marks': 1})
-            cat.territories.claims[key] = claim
+            claim = (
+                CatTerritoryClaim(
+                    owner=cat.name,
+                    layer=layer,
+                    location=location,
+                    strength=
+                        self._clamp(
+                            strength
+                        ),
+                    scent_marks=1,
+                )
+            )
+
+            cat.territories.claims[
+                key
+            ] = claim
+
         else:
             claim = previous
-            claim.strength = self._clamp(max(float(getattr(claim, 'strength', 0.0)), float(strength)))
-            claim.scent_marks = int(getattr(claim, 'scent_marks', 0)) + 1
-        event = {'name': 'cat_claimed_territory', 'cat': cat.name, 'territory': key, 'layer': layer, 'location': location, 'strength': claim.strength, 'scent_marks': claim.scent_marks}
-        self._record(cat, event)
-        return deepcopy(claim)
 
-    def scent_mark(self, cat, layer=None, location=None):
-        self._require_cat(cat)
-        layer = layer if layer is not None else cat.current_layer
-        location = location if location is not None else cat.location
-        key = self._territory_key(layer, location)
-        if key not in cat.territories.claims:
-            return self.claim(cat=cat, layer=layer, location=location, strength=0.5)
-        claim = cat.territories.claims[key]
-        claim.scent_marks = int(getattr(claim, 'scent_marks', 0)) + 1
-        claim.strength = self._clamp(float(getattr(claim, 'strength', 0.0)) + 0.05)
-        event = {'name': 'cat_scent_marked_territory', 'cat': cat.name, 'territory': key, 'strength': claim.strength, 'scent_marks': claim.scent_marks}
-        self._record(cat, event)
-        return deepcopy(claim)
+            claim.strength = (
+                self._clamp(
+                    max(
+                        float(
+                            getattr(
+                                claim,
+                                "strength",
+                                0.0,
+                            )
+                        ),
+                        float(
+                            strength
+                        ),
+                    )
+                )
+            )
+
+            claim.scent_marks = (
+                int(
+                    getattr(
+                        claim,
+                        "scent_marks",
+                        0,
+                    )
+                )
+                + 1
+            )
+
+        event = (
+            CatTerritoryClaimedEvent(
+                cat=cat.name,
+                territory=key,
+                layer=layer,
+                location=location,
+                strength=
+                    claim.strength,
+                scent_marks=
+                    claim.scent_marks,
+            )
+        )
+
+        self._record(
+            cat,
+            event,
+        )
+
+        return deepcopy(
+            claim
+        )
+
+
+    def scent_mark(
+        self,
+        cat,
+        layer=None,
+        location=None,
+    ):
+        self._require_cat(
+            cat
+        )
+
+        layer = (
+            layer
+            if layer is not None
+            else cat.current_layer
+        )
+
+        location = (
+            location
+            if location is not None
+            else cat.location
+        )
+
+        key = self._territory_key(
+            layer,
+            location,
+        )
+
+        if (
+            key
+            not in cat.territories.claims
+        ):
+            return self.claim(
+                cat=cat,
+                layer=layer,
+                location=location,
+                strength=0.5,
+            )
+
+        claim = (
+            cat.territories.claims[
+                key
+            ]
+        )
+
+        claim.scent_marks = (
+            int(
+                getattr(
+                    claim,
+                    "scent_marks",
+                    0,
+                )
+            )
+            + 1
+        )
+
+        claim.strength = (
+            self._clamp(
+                float(
+                    getattr(
+                        claim,
+                        "strength",
+                        0.0,
+                    )
+                )
+                + 0.05
+            )
+        )
+
+        event = (
+            CatTerritoryScentMarkedEvent(
+                cat=cat.name,
+                territory=key,
+                strength=
+                    claim.strength,
+                scent_marks=
+                    claim.scent_marks,
+            )
+        )
+
+        self._record(
+            cat,
+            event,
+        )
+
+        return deepcopy(
+            claim
+        )
+
 
     def context(
         self,
