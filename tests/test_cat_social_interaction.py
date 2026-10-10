@@ -5,6 +5,11 @@ from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat import Cat
 from cats.cat_social_system import CatSocialSystem
+from cats.cat_social_interaction_result_state import (
+    CAT_SOCIAL_STEP_EVENT_TYPES,
+    CatSocialMeetingEvent,
+    CatSocialMeetingFailedResult,
+)
 from cats.cat_social_assessment_state import (
     CatFamilySocialBias,
     CatSocialAssessment,
@@ -150,13 +155,99 @@ class CatSocialInteractionTests(unittest.TestCase):
                     "attitude"
                 ]
 
+    def test_social_meeting_uses_object_events(
+        self
+    ):
+        first, second = (
+            self._social_pair()
+        )
+
+        social = (
+            CatSocialSystem(
+                self.cats
+            )
+        )
+
+        result = (
+            social.meet(
+                first,
+                second,
+            )
+        )
+
+        self.assertIsInstance(
+            result,
+            CatSocialMeetingEvent,
+        )
+
+        self.assertFalse(
+            hasattr(
+                result,
+                "get",
+            )
+        )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = result[
+                "attitude"
+            ]
+
+        for step in result.steps:
+            self.assertIsInstance(
+                step,
+                CAT_SOCIAL_STEP_EVENT_TYPES,
+            )
+
+            self.assertFalse(
+                hasattr(
+                    step,
+                    "get",
+                )
+            )
+
+            with self.assertRaises(
+                TypeError
+            ):
+                _ = step[
+                    "name"
+                ]
+
+        first, second = (
+            self._social_pair()
+        )
+
+        second.current_layer = (
+            "other_layer"
+        )
+
+        failed = (
+            social.meet(
+                first,
+                second,
+            )
+        )
+
+        self.assertIsInstance(
+            failed,
+            CatSocialMeetingFailedResult,
+        )
+
+        self.assertFalse(
+            hasattr(
+                failed,
+                "get",
+            )
+        )
+
     def test_unknown_cats_sniff_and_keep_distance(self):
         first, second = self._social_pair()
         social = CatSocialSystem(self.cats)
         result = social.meet(first, second)
-        self.assertTrue(result['socialized'])
-        self.assertEqual(result['attitude'], 'uncertain')
-        names = [step['name'] for step in result['steps']]
+        self.assertTrue(result.socialized)
+        self.assertEqual(result.attitude, 'uncertain')
+        names = [step.name for step in result.steps]
         self.assertIn('cat_sniffed_cat', names)
         self.assertIn('cat_kept_social_distance', names)
         self.assertIn(second.name, first.relationships)
@@ -168,8 +259,8 @@ class CatSocialInteractionTests(unittest.TestCase):
         second.relationships[first.name] = self._relationship(familiarity=0.8, trust=0.9, affiliation=0.8, tension=0.0)
         social = CatSocialSystem(self.cats)
         result = social.meet(first, second)
-        self.assertEqual(result['attitude'], 'friendly')
-        names = [step['name'] for step in result['steps']]
+        self.assertEqual(result.attitude, 'friendly')
+        names = [step.name for step in result.steps]
         self.assertIn('cat_nose_touch', names)
         self.assertIn('cat_slow_blink', names)
         self.assertIn('cat_head_bunt', names)
@@ -182,8 +273,8 @@ class CatSocialInteractionTests(unittest.TestCase):
         second.relationships[first.name] = self._relationship(familiarity=0.5, trust=0.1, affiliation=0.0, tension=0.8)
         social = CatSocialSystem(self.cats)
         result = social.meet(first, second)
-        self.assertEqual(result['attitude'], 'hostile')
-        names = [step['name'] for step in result['steps']]
+        self.assertEqual(result.attitude, 'hostile')
+        names = [step.name for step in result.steps]
         self.assertIn('cat_hissed_at_cat', names)
         self.assertIn('cat_warning_swat', names)
         self.assertNotIn('cat_fight_started', names)
@@ -197,8 +288,8 @@ class CatSocialInteractionTests(unittest.TestCase):
         second.personality.traits.aggression = 1.0
         social = CatSocialSystem(self.cats)
         result = social.meet(first, second)
-        names = [step['name'] for step in result['steps']]
-        self.assertEqual(result['attitude'], 'hostile')
+        names = [step.name for step in result.steps]
+        self.assertEqual(result.attitude, 'hostile')
         self.assertIn('cat_hissed_at_cat', names)
         self.assertIn('cat_warning_swat', names)
         self.assertIn('cat_fight_started', names)
@@ -207,8 +298,8 @@ class CatSocialInteractionTests(unittest.TestCase):
         first, second = self._social_pair()
         social = CatSocialSystem(self.cats)
         social.meet(first, second)
-        first_names = [event.get('name') for event in first.social_interactions]
-        second_names = [event.get('name') for event in second.social_interactions]
+        first_names = [event.name for event in first.social_interactions]
+        second_names = [event.name for event in second.social_interactions]
         self.assertIn('cat_social_meeting', first_names)
         self.assertIn('cat_social_meeting', second_names)
 
@@ -219,23 +310,23 @@ class CatSocialInteractionTests(unittest.TestCase):
         self.assertEqual(result['name'], 'cat_approach_completed')
         self.assertTrue(result['executed'])
         self.assertIn('social', result)
-        self.assertEqual(result['social']['name'], 'cat_social_meeting')
+        self.assertEqual(result['social'].name, 'cat_social_meeting')
 
     def test_social_system_does_not_repeat_greeting_while_still_near(self):
         first, second = self._social_pair()
         social = CatSocialSystem(self.cats)
         first.state = 'near_target_cat'
         first_result = social.meet(first, second)
-        self.assertTrue(first_result['socialized'])
+        self.assertTrue(first_result.socialized)
         second_result = social.meet(first, second)
-        self.assertFalse(second_result['socialized'])
-        self.assertEqual(second_result['reason'], 'already_greeted_while_near')
+        self.assertFalse(second_result.socialized)
+        self.assertEqual(second_result.reason, 'already_greeted_while_near')
 
     def test_social_meeting_creates_memory_for_both_cats(self):
         first, second = self._social_pair()
         social = CatSocialSystem(self.cats)
         result = social.meet(first, second)
-        self.assertTrue(result['socialized'])
+        self.assertTrue(result.socialized)
         self.assertIn(second.name, first.social_memory.records)
         self.assertIn(first.name, second.social_memory.records)
         first_memory = first.social_memory.records[second.name]
@@ -386,8 +477,8 @@ class CatSocialInteractionTests(unittest.TestCase):
         bonding.form_bond(first, second)
         social = CatSocialSystem(self.cats)
         result = social.meet(first, second)
-        self.assertEqual(result['attitude'], 'friendly')
-        self.assertIsNotNone(result['bond'])
+        self.assertEqual(result.attitude, 'friendly')
+        self.assertIsNotNone(result.bond)
         self.assertTrue(first.bonds.records[second.name].active)
 
     def test_mother_and_kitten_get_family_social_bonus(self):

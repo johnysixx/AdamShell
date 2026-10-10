@@ -21,6 +21,20 @@ from cats.cat_social_assessment_state import (
     CatSocialAssessment,
     CatTerritoryContext,
 )
+from cats.cat_social_interaction_result_state import (
+    CatBodyRubEvent,
+    CatFightStartedEvent,
+    CatHeadBuntEvent,
+    CatHissedAtCatEvent,
+    CatKeptSocialDistanceEvent,
+    CatNoseTouchEvent,
+    CatSlowBlinkEvent,
+    CatSniffedCatEvent,
+    CatSocialMeetingEvent,
+    CatSocialMeetingFailedResult,
+    CatSocialMeetingSkippedResult,
+    CatWarningSwatEvent,
+)
 
 
 class CatSocialSystem:
@@ -59,7 +73,7 @@ class CatSocialSystem:
     def meet(
         self,
         cat,
-        other_cat
+        other_cat,
     ):
         self._require_cat(
             cat
@@ -78,68 +92,82 @@ class CatSocialSystem:
             cat.current_layer
             != other_cat.current_layer
         ):
-            return {
-                "name": "cat_social_meeting_failed",
-                "cat": cat.name,
-                "other_cat": other_cat.name,
-                "reason": "different_layers",
-                "socialized": False
-            }
+            return (
+                CatSocialMeetingFailedResult(
+                    cat=cat.name,
+                    other_cat=
+                        other_cat.name,
+                    reason=
+                        "different_layers",
+                )
+            )
 
         if not self._same_position(
             cat.position,
-            other_cat.position
+            other_cat.position,
         ):
-            return {
-                "name": "cat_social_meeting_failed",
-                "cat": cat.name,
-                "other_cat": other_cat.name,
-                "reason": "cats_not_near",
-                "socialized": False
-            }
+            return (
+                CatSocialMeetingFailedResult(
+                    cat=cat.name,
+                    other_cat=
+                        other_cat.name,
+                    reason=
+                        "cats_not_near",
+                )
+            )
 
-        previous = self._last_meeting(
-            cat
+        previous = (
+            self._last_meeting(
+                cat
+            )
         )
 
         if (
             previous is not None
-            and previous.get(
-                "other_cat"
-            ) == other_cat.name
+            and previous.other_cat
+            == other_cat.name
             and cat.state
             == "near_target_cat"
         ):
-            return {
-                "name": "cat_social_meeting_skipped",
-                "cat": cat.name,
-                "other_cat": other_cat.name,
-                "reason": (
-                    "already_greeted_while_near"
-                ),
-                "socialized": False
-            }
+            return (
+                CatSocialMeetingSkippedResult(
+                    cat=cat.name,
+                    other_cat=
+                        other_cat.name,
+                    reason=(
+                        "already_greeted_while_near"
+                    ),
+                )
+            )
 
-        cat_assessment = self.assess(
-            cat,
-            other_cat
+        cat_assessment = (
+            self.assess(
+                cat,
+                other_cat,
+            )
         )
 
-        other_assessment = self.assess(
-            other_cat,
-            cat
+        other_assessment = (
+            self.assess(
+                other_cat,
+                cat,
+            )
         )
 
-        attitude = self._combined_attitude(
-            cat_assessment,
-            other_assessment
+        attitude = (
+            self._combined_attitude(
+                cat_assessment,
+                other_assessment,
+            )
         )
 
         steps = []
 
-        sniff_event = self.sniff(
-            cat,
-            other_cat
+        sniff_event = (
+            self.sniff(
+                cat,
+                other_cat,
+            )
         )
 
         steps.append(
@@ -150,7 +178,7 @@ class CatSocialSystem:
             outcome_steps = (
                 self._friendly_greeting(
                     cat,
-                    other_cat
+                    other_cat,
                 )
             )
 
@@ -160,7 +188,7 @@ class CatSocialSystem:
                     cat,
                     other_cat,
                     cat_assessment,
-                    other_assessment
+                    other_assessment,
                 )
             )
 
@@ -168,7 +196,7 @@ class CatSocialSystem:
             outcome_steps = (
                 self._uncertain_greeting(
                     cat,
-                    other_cat
+                    other_cat,
                 )
             )
 
@@ -176,16 +204,18 @@ class CatSocialSystem:
             outcome_steps
         )
 
-        outcome = self._outcome_from_steps(
-            attitude,
-            outcome_steps
+        outcome = (
+            self._outcome_from_steps(
+                attitude,
+                outcome_steps,
+            )
         )
 
         self._update_relationships(
             cat,
             other_cat,
             attitude=attitude,
-            outcome=outcome
+            outcome=outcome,
         )
 
         self._remember_meeting(
@@ -193,7 +223,7 @@ class CatSocialSystem:
             other_cat,
             attitude=attitude,
             outcome=outcome,
-            steps=steps
+            steps=steps,
         )
 
         self._remember_meeting(
@@ -201,7 +231,7 @@ class CatSocialSystem:
             cat,
             attitude=attitude,
             outcome=outcome,
-            steps=steps
+            steps=steps,
         )
 
         bond_event = None
@@ -211,35 +241,42 @@ class CatSocialSystem:
                 self.bonding_system
                 .ensure_bond(
                     cat,
-                    other_cat
+                    other_cat,
                 )
             )
 
-        event = {
-            "name": "cat_social_meeting",
-            "cat": cat.name,
-            "other_cat": other_cat.name,
-            "attitude": attitude,
-            "cat_assessment": deepcopy(
-                cat_assessment
-            ),
-            "other_cat_assessment": deepcopy(
-                other_assessment
-            ),
-            "steps": deepcopy(
-                steps
-            ),
-            "outcome": outcome,
-            "bond": deepcopy(
-                bond_event
-            ),
-            "socialized": True
-        }
+        event = (
+            CatSocialMeetingEvent(
+                cat=cat.name,
+                other_cat=
+                    other_cat.name,
+                attitude=
+                    attitude,
+                cat_assessment=
+                    deepcopy(
+                        cat_assessment
+                    ),
+                other_cat_assessment=
+                    deepcopy(
+                        other_assessment
+                    ),
+                steps=tuple(
+                    deepcopy(
+                        steps
+                    )
+                ),
+                outcome=
+                    outcome,
+                bond=deepcopy(
+                    bond_event
+                ),
+            )
+        )
 
         self._record_both(
             cat,
             other_cat,
-            event
+            event,
         )
 
         cat.state = (
@@ -247,6 +284,7 @@ class CatSocialSystem:
         )
 
         return event
+
 
     def assess(
         self,
@@ -509,38 +547,44 @@ class CatSocialSystem:
     def sniff(
         self,
         cat,
-        other_cat
+        other_cat,
     ):
-        event = {
-            "name": "cat_sniffed_cat",
-            "cat": cat.name,
-            "other_cat": other_cat.name,
-            "contact": "scent_inspection"
-        }
+        event = (
+            CatSniffedCatEvent(
+                cat=cat.name,
+                other_cat=
+                    other_cat.name,
+            )
+        )
 
         self._record_both(
             cat,
             other_cat,
-            event
+            event,
         )
 
         return event
 
+
     def _friendly_greeting(
         self,
         cat,
-        other_cat
+        other_cat,
     ):
         steps = []
 
-        relation_a = self._relation(
-            cat,
-            other_cat
+        relation_a = (
+            self._relation(
+                cat,
+                other_cat,
+            )
         )
 
-        relation_b = self._relation(
-            other_cat,
-            cat
+        relation_b = (
+            self._relation(
+                other_cat,
+                cat,
+            )
         )
 
         familiarity = (
@@ -561,34 +605,36 @@ class CatSocialSystem:
             )
         ) / 2.0
 
-        nose_touch = {
-            "name": "cat_nose_touch",
-            "cat": cat.name,
-            "other_cat": other_cat.name,
-            "contact": True
-        }
+        nose_touch = (
+            CatNoseTouchEvent(
+                cat=cat.name,
+                other_cat=
+                    other_cat.name,
+            )
+        )
 
         self._record_both(
             cat,
             other_cat,
-            nose_touch
+            nose_touch,
         )
 
         steps.append(
             nose_touch
         )
 
-        slow_blink = {
-            "name": "cat_slow_blink",
-            "cat": cat.name,
-            "other_cat": other_cat.name,
-            "signal": "friendly"
-        }
+        slow_blink = (
+            CatSlowBlinkEvent(
+                cat=cat.name,
+                other_cat=
+                    other_cat.name,
+            )
+        )
 
         self._record_both(
             cat,
             other_cat,
-            slow_blink
+            slow_blink,
         )
 
         steps.append(
@@ -599,17 +645,18 @@ class CatSocialSystem:
             familiarity >= 0.40
             or affiliation >= 0.30
         ):
-            head_bunt = {
-                "name": "cat_head_bunt",
-                "cat": cat.name,
-                "other_cat": other_cat.name,
-                "shared_scent": True
-            }
+            head_bunt = (
+                CatHeadBuntEvent(
+                    cat=cat.name,
+                    other_cat=
+                        other_cat.name,
+                )
+            )
 
             self._record_both(
                 cat,
                 other_cat,
-                head_bunt
+                head_bunt,
             )
 
             steps.append(
@@ -617,17 +664,18 @@ class CatSocialSystem:
             )
 
         if affiliation >= 0.70:
-            body_rub = {
-                "name": "cat_body_rub",
-                "cat": cat.name,
-                "other_cat": other_cat.name,
-                "shared_scent": True
-            }
+            body_rub = (
+                CatBodyRubEvent(
+                    cat=cat.name,
+                    other_cat=
+                        other_cat.name,
+                )
+            )
 
             self._record_both(
                 cat,
                 other_cat,
-                body_rub
+                body_rub,
             )
 
             steps.append(
@@ -636,28 +684,30 @@ class CatSocialSystem:
 
         return steps
 
+
     def _uncertain_greeting(
         self,
         cat,
-        other_cat
+        other_cat,
     ):
-        event = {
-            "name": "cat_kept_social_distance",
-            "cat": cat.name,
-            "other_cat": other_cat.name,
-            "signal": "uncertain",
-            "escalated": False
-        }
+        event = (
+            CatKeptSocialDistanceEvent(
+                cat=cat.name,
+                other_cat=
+                    other_cat.name,
+            )
+        )
 
         self._record_both(
             cat,
             other_cat,
-            event
+            event,
         )
 
         return [
             event
         ]
+
 
     def _hostile_greeting(
         self,
@@ -686,12 +736,13 @@ class CatSocialSystem:
 
         steps = []
 
-        hiss = {
-            "name": "cat_hissed_at_cat",
-            "cat": cat.name,
-            "other_cat": other_cat.name,
-            "warning": True,
-        }
+        hiss = (
+            CatHissedAtCatEvent(
+                cat=cat.name,
+                other_cat=
+                    other_cat.name,
+            )
+        )
 
         self._record_both(
             cat,
@@ -725,13 +776,13 @@ class CatSocialSystem:
             tension >= 0.75
             or aggression >= 0.75
         ):
-            swat = {
-                "name": "cat_warning_swat",
-                "cat": cat.name,
-                "other_cat": other_cat.name,
-                "warning": True,
-                "injury": False,
-            }
+            swat = (
+                CatWarningSwatEvent(
+                    cat=cat.name,
+                    other_cat=
+                        other_cat.name,
+                )
+            )
 
             self._record_both(
                 cat,
@@ -747,12 +798,13 @@ class CatSocialSystem:
             tension >= 0.95
             and aggression >= 0.85
         ):
-            fight = {
-                "name": "cat_fight_started",
-                "cat": cat.name,
-                "other_cat": other_cat.name,
-                "escalated": True,
-            }
+            fight = (
+                CatFightStartedEvent(
+                    cat=cat.name,
+                    other_cat=
+                        other_cat.name,
+                )
+            )
 
             self._record_both(
                 cat,
@@ -765,6 +817,7 @@ class CatSocialSystem:
             )
 
         return steps
+
 
 
     def _update_relationships(
@@ -911,12 +964,10 @@ class CatSocialSystem:
     def _outcome_from_steps(
         self,
         attitude,
-        steps
+        steps,
     ):
         names = [
-            step.get(
-                "name"
-            )
+            step.name
             for step in steps
         ]
 
@@ -942,6 +993,7 @@ class CatSocialSystem:
             return "kept_distance"
 
         return attitude
+
 
     def _family_bias(
         self,
@@ -1034,19 +1086,22 @@ class CatSocialSystem:
         other_cat,
         attitude,
         outcome,
-        steps
+        steps,
     ):
-        memory = cat.social_memory.records.setdefault(
-            other_cat.name,
-            CatSocialMemory(
-                meet_count=0,
-                friendly_count=0,
-                uncertain_count=0,
-                hostile_count=0,
-                last_attitude=None,
-                last_outcome=None,
-                last_steps=[],
-                recent_outcomes=[],
+        memory = (
+            cat.social_memory.records
+            .setdefault(
+                other_cat.name,
+                CatSocialMemory(
+                    meet_count=0,
+                    friendly_count=0,
+                    uncertain_count=0,
+                    hostile_count=0,
+                    last_attitude=None,
+                    last_outcome=None,
+                    last_steps=[],
+                    recent_outcomes=[],
+                ),
             )
         )
 
@@ -1065,18 +1120,22 @@ class CatSocialSystem:
                 getattr(
                     memory,
                     counter,
-                    0
+                    0,
                 )
-            ) + 1
+            )
+            + 1,
         )
 
-        memory.last_attitude = attitude
-        memory.last_outcome = outcome
+        memory.last_attitude = (
+            attitude
+        )
+
+        memory.last_outcome = (
+            outcome
+        )
 
         memory.last_steps = [
-            step.get(
-                "name"
-            )
+            step.name
             for step in steps
         ]
 
@@ -1088,9 +1147,12 @@ class CatSocialSystem:
             outcome
         )
 
-        memory.recent_outcomes = recent[-5:]
+        memory.recent_outcomes = (
+            recent[-5:]
+        )
 
         return memory
+
 
     def _relation(
         self,
@@ -1150,20 +1212,19 @@ class CatSocialSystem:
 
     def _last_meeting(
         self,
-        cat
+        cat,
     ):
         for event in reversed(
             cat.social_interactions
         ):
-            if (
-                event.get(
-                    "name"
-                )
-                == "cat_social_meeting"
+            if isinstance(
+                event,
+                CatSocialMeetingEvent,
             ):
                 return event
 
         return None
+
 
     def _same_position(
         self,

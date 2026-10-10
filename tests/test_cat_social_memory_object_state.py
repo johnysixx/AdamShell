@@ -58,11 +58,11 @@ class CatSocialMemoryObjectStateTests(unittest.TestCase):
 
         self.assertEqual(
             memory.last_attitude,
-            result["attitude"],
+            result.attitude,
         )
         self.assertEqual(
             memory.last_outcome,
-            result["outcome"],
+            result.outcome,
         )
 
     def test_social_memory_limits_recent_outcomes(self):
