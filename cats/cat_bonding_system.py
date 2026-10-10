@@ -3,6 +3,16 @@ from copy import deepcopy
 
 from cats.cat import Cat
 from cats.cat_social_objects import CatBond, CatRelationship
+from cats.cat_bonding_result_state import (
+    BondedCatsSleptTogetherEvent,
+    CatBondActionDeniedResult,
+    CatBondEvaluation,
+    CatBondFormedEvent,
+    CatBondNotFormedResult,
+    CatBondPreservedEvent,
+    CatFollowingBondedCatEvent,
+    CatsMutuallyGroomedEvent,
+)
 
 
 class CatBondingSystem:
@@ -16,7 +26,7 @@ class CatBondingSystem:
     def evaluate(
         self,
         cat,
-        other_cat
+        other_cat,
     ):
         self._require_cat(
             cat
@@ -26,14 +36,17 @@ class CatBondingSystem:
             other_cat
         )
 
-        relation = cat.relationships.get(
-            other_cat.name,
-            CatRelationship.create()
+        relation = (
+            cat.relationships.get(
+                other_cat.name,
+                CatRelationship.create(),
+            )
         )
 
-        memory = cat.social_memory.records.get(
-            other_cat.name,
-            {}
+        memory = (
+            cat.social_memory.records.get(
+                other_cat.name
+            )
         )
 
         familiarity = self._number(
@@ -57,16 +70,18 @@ class CatBondingSystem:
         )
 
         friendly_count = int(
-            getattr(memory,
+            getattr(
+                memory,
                 "friendly_count",
-                0
+                0,
             )
         )
 
         hostile_count = int(
-            getattr(memory,
+            getattr(
+                memory,
                 "hostile_count",
-                0
+                0,
             )
         )
 
@@ -87,204 +102,254 @@ class CatBondingSystem:
                 + trust
                 + affiliation
                 + shared_scent
-            ) / 4.0
+            )
+            / 4.0
             - tension * 0.25
         )
 
-        return {
-            "cat": cat.name,
-            "other_cat": other_cat.name,
-            "eligible": eligible,
-            "strength": round(
-                strength,
-                4
-            ),
-            "familiarity": familiarity,
-            "trust": trust,
-            "affiliation": affiliation,
-            "shared_scent": shared_scent,
-            "tension": tension,
-            "friendly_memories": (
-                friendly_count
-            ),
-            "hostile_memories": (
-                hostile_count
+        return (
+            CatBondEvaluation(
+                cat=cat.name,
+                other_cat=
+                    other_cat.name,
+                eligible=
+                    eligible,
+                strength=round(
+                    strength,
+                    4,
+                ),
+                familiarity=
+                    familiarity,
+                trust=
+                    trust,
+                affiliation=
+                    affiliation,
+                shared_scent=
+                    shared_scent,
+                tension=
+                    tension,
+                friendly_memories=
+                    friendly_count,
+                hostile_memories=
+                    hostile_count,
             )
-        }
+        )
+
 
     def form_bond(
         self,
         cat,
-        other_cat
+        other_cat,
     ):
-        first = self.evaluate(
-            cat,
-            other_cat
+        first = (
+            self.evaluate(
+                cat,
+                other_cat,
+            )
         )
 
-        second = self.evaluate(
-            other_cat,
-            cat
+        second = (
+            self.evaluate(
+                other_cat,
+                cat,
+            )
         )
+
+        if not isinstance(
+            first,
+            CatBondEvaluation,
+        ):
+            raise TypeError(
+                "Cat bond evaluation must be "
+                "CatBondEvaluation."
+            )
+
+        if not isinstance(
+            second,
+            CatBondEvaluation,
+        ):
+            raise TypeError(
+                "Other cat bond evaluation must be "
+                "CatBondEvaluation."
+            )
 
         if (
-            not first["eligible"]
-            or not second["eligible"]
+            not first.eligible
+            or not second.eligible
         ):
-            return {
-                "name": "cat_bond_not_formed",
-                "cat": cat.name,
-                "other_cat": other_cat.name,
-                "formed": False,
-                "reason": (
-                    "bond_requirements_not_met"
-                ),
-                "cat_evaluation": first,
-                "other_cat_evaluation": second
-            }
+            return (
+                CatBondNotFormedResult(
+                    cat=cat.name,
+                    other_cat=
+                        other_cat.name,
+                    reason=(
+                        "bond_requirements_not_met"
+                    ),
+                    cat_evaluation=
+                        first,
+                    other_cat_evaluation=
+                        second,
+                )
+            )
 
         strength = min(
-            first["strength"],
-            second["strength"]
+            first.strength,
+            second.strength,
         )
 
         self._store_bond(
             cat,
             other_cat,
-            strength
+            strength,
         )
 
         self._store_bond(
             other_cat,
             cat,
-            strength
+            strength,
         )
 
-        event = {
-            "name": "cat_bond_formed",
-            "cat": cat.name,
-            "other_cat": other_cat.name,
-            "strength": strength,
-            "formed": True,
-            "behaviors": [
-                "mutual_grooming",
-                "sleep_together",
-                "follow_bonded_cat"
-            ]
-        }
+        event = (
+            CatBondFormedEvent(
+                cat=cat.name,
+                other_cat=
+                    other_cat.name,
+                strength=
+                    strength,
+                behaviors=(
+                    "mutual_grooming",
+                    "sleep_together",
+                    "follow_bonded_cat",
+                ),
+            )
+        )
 
         self._record_both(
             cat,
             other_cat,
-            event
+            event,
         )
 
         return event
 
+
     def ensure_bond(
         self,
         cat,
-        other_cat
+        other_cat,
     ):
         if self.is_bonded(
             cat,
-            other_cat
+            other_cat,
         ):
-            return {
-                "name": "cat_bond_preserved",
-                "cat": cat.name,
-                "other_cat": other_cat.name,
-                "formed": True,
-                "existing": True
-            }
+            return (
+                CatBondPreservedEvent(
+                    cat=cat.name,
+                    other_cat=
+                        other_cat.name,
+                )
+            )
 
         return self.form_bond(
             cat,
-            other_cat
+            other_cat,
         )
+
 
     def mutual_groom(
         self,
         cat,
-        other_cat
+        other_cat,
     ):
         if not self.is_bonded(
             cat,
-            other_cat
+            other_cat,
         ):
-            return self._bond_action_denied(
-                cat,
-                other_cat,
-                "mutual_grooming"
+            return (
+                self._bond_action_denied(
+                    cat,
+                    other_cat,
+                    "mutual_grooming",
+                )
             )
 
         self._strengthen(
             cat,
             other_cat,
-            amount=0.03
+            amount=0.03,
         )
 
         self._strengthen(
             other_cat,
             cat,
-            amount=0.03
+            amount=0.03,
         )
 
-        event = {
-            "name": "cats_mutually_groomed",
-            "cat": cat.name,
-            "other_cat": other_cat.name,
-            "bonded": True
-        }
+        event = (
+            CatsMutuallyGroomedEvent(
+                cat=cat.name,
+                other_cat=
+                    other_cat.name,
+            )
+        )
 
         self._record_both(
             cat,
             other_cat,
-            event
+            event,
         )
 
         return event
 
+
     def sleep_together(
         self,
         cat,
-        other_cat
+        other_cat,
     ):
         if not self.is_bonded(
             cat,
-            other_cat
+            other_cat,
         ):
-            return self._bond_action_denied(
-                cat,
-                other_cat,
-                "sleep_together"
+            return (
+                self._bond_action_denied(
+                    cat,
+                    other_cat,
+                    "sleep_together",
+                )
             )
 
         if (
             cat.current_layer
             != other_cat.current_layer
         ):
-            return {
-                "name": "cat_bond_action_denied",
-                "cat": cat.name,
-                "other_cat": other_cat.name,
-                "action": "sleep_together",
-                "reason": "different_layers",
-                "performed": False
-            }
+            return (
+                CatBondActionDeniedResult(
+                    cat=cat.name,
+                    other_cat=
+                        other_cat.name,
+                    action=
+                        "sleep_together",
+                    reason=
+                        "different_layers",
+                )
+            )
 
         if not self._same_position(
             cat.position,
-            other_cat.position
+            other_cat.position,
         ):
-            return {
-                "name": "cat_bond_action_denied",
-                "cat": cat.name,
-                "other_cat": other_cat.name,
-                "action": "sleep_together",
-                "reason": "cats_not_near",
-                "performed": False
-            }
+            return (
+                CatBondActionDeniedResult(
+                    cat=cat.name,
+                    other_cat=
+                        other_cat.name,
+                    action=
+                        "sleep_together",
+                    reason=
+                        "cats_not_near",
+                )
+            )
 
         cat.state = (
             "resting_with_bonded_cat"
@@ -294,35 +359,38 @@ class CatBondingSystem:
             "resting_with_bonded_cat"
         )
 
-        event = {
-            "name": "bonded_cats_slept_together",
-            "cat": cat.name,
-            "other_cat": other_cat.name,
-            "bonded": True,
-            "performed": True
-        }
+        event = (
+            BondedCatsSleptTogetherEvent(
+                cat=cat.name,
+                other_cat=
+                    other_cat.name,
+            )
+        )
 
         self._record_both(
             cat,
             other_cat,
-            event
+            event,
         )
 
         return event
 
+
     def follow(
         self,
         cat,
-        other_cat
+        other_cat,
     ):
         if not self.is_bonded(
             cat,
-            other_cat
+            other_cat,
         ):
-            return self._bond_action_denied(
-                cat,
-                other_cat,
-                "follow_bonded_cat"
+            return (
+                self._bond_action_denied(
+                    cat,
+                    other_cat,
+                    "follow_bonded_cat",
+                )
             )
 
         cat.navigation_target = (
@@ -333,21 +401,22 @@ class CatBondingSystem:
             "following_bonded_cat"
         )
 
-        event = {
-            "name": "cat_following_bonded_cat",
-            "cat": cat.name,
-            "other_cat": other_cat.name,
-            "bonded": True,
-            "performed": True
-        }
+        event = (
+            CatFollowingBondedCatEvent(
+                cat=cat.name,
+                other_cat=
+                    other_cat.name,
+            )
+        )
 
         self._record_both(
             cat,
             other_cat,
-            event
+            event,
         )
 
         return event
+
 
     def is_bonded(
         self,
@@ -411,16 +480,20 @@ class CatBondingSystem:
         self,
         cat,
         other_cat,
-        action
+        action,
     ):
-        return {
-            "name": "cat_bond_action_denied",
-            "cat": cat.name,
-            "other_cat": other_cat.name,
-            "action": action,
-            "reason": "cats_not_bonded",
-            "performed": False
-        }
+        return (
+            CatBondActionDeniedResult(
+                cat=cat.name,
+                other_cat=
+                    other_cat.name,
+                action=
+                    action,
+                reason=
+                    "cats_not_bonded",
+            )
+        )
+
 
     def _record_both(
         self,

@@ -21,6 +21,16 @@ from cats.cat_social_objects import (
     CatSocialMemory,
 )
 from cats.cat_bonding_system import CatBondingSystem
+from cats.cat_bonding_result_state import (
+    BondedCatsSleptTogetherEvent,
+    CatBondActionDeniedResult,
+    CatBondEvaluation,
+    CatBondFormedEvent,
+    CatBondNotFormedResult,
+    CatBondPreservedEvent,
+    CatFollowingBondedCatEvent,
+    CatsMutuallyGroomedEvent,
+)
 from cats.cat_family_system import CatFamilySystem
 from cats.development_resolver import CatDevelopmentResolver
 from cats.cat_intention_state import CatIntentionCandidate
@@ -428,11 +438,154 @@ class CatSocialInteractionTests(unittest.TestCase):
         second.social_memory.records[first.name] = CatSocialMemory(**{'meet_count': 3, 'friendly_count': 3, 'uncertain_count': 0, 'hostile_count': 0, 'last_attitude': 'friendly', 'last_outcome': 'head_bunt', 'last_steps': [], 'recent_outcomes': ['nose_touch', 'head_bunt']})
         return (first, second)
 
+    def test_bonding_results_are_object_state(
+        self
+    ):
+        first, second = (
+            self._prepare_bonded_pair()
+        )
+
+        bonding = (
+            CatBondingSystem(
+                self.cats
+            )
+        )
+
+        evaluation = (
+            bonding.evaluate(
+                first,
+                second,
+            )
+        )
+
+        self.assertIsInstance(
+            evaluation,
+            CatBondEvaluation,
+        )
+
+        formed = (
+            bonding.form_bond(
+                first,
+                second,
+            )
+        )
+
+        self.assertIsInstance(
+            formed,
+            CatBondFormedEvent,
+        )
+
+        preserved = (
+            bonding.ensure_bond(
+                first,
+                second,
+            )
+        )
+
+        self.assertIsInstance(
+            preserved,
+            CatBondPreservedEvent,
+        )
+
+        groomed = (
+            bonding.mutual_groom(
+                first,
+                second,
+            )
+        )
+
+        self.assertIsInstance(
+            groomed,
+            CatsMutuallyGroomedEvent,
+        )
+
+        slept = (
+            bonding.sleep_together(
+                first,
+                second,
+            )
+        )
+
+        self.assertIsInstance(
+            slept,
+            BondedCatsSleptTogetherEvent,
+        )
+
+        followed = (
+            bonding.follow(
+                first,
+                second,
+            )
+        )
+
+        self.assertIsInstance(
+            followed,
+            CatFollowingBondedCatEvent,
+        )
+
+        weak_first, weak_second = (
+            self._social_pair()
+        )
+
+        not_formed = (
+            bonding.form_bond(
+                weak_first,
+                weak_second,
+            )
+        )
+
+        self.assertIsInstance(
+            not_formed,
+            CatBondNotFormedResult,
+        )
+
+        denied = (
+            bonding.follow(
+                weak_first,
+                weak_second,
+            )
+        )
+
+        self.assertIsInstance(
+            denied,
+            CatBondActionDeniedResult,
+        )
+
+        for result in (
+            evaluation,
+            formed,
+            preserved,
+            groomed,
+            slept,
+            followed,
+            not_formed,
+            denied,
+        ):
+            for mapping_method in (
+                "get",
+                "keys",
+                "items",
+                "values",
+            ):
+                self.assertFalse(
+                    hasattr(
+                        result,
+                        mapping_method,
+                    )
+                )
+
+            with self.assertRaises(
+                TypeError
+            ):
+                _ = result[
+                    "name"
+                ]
+
     def test_close_cats_can_form_mutual_bond(self):
         first, second = self._prepare_bonded_pair()
         bonding = CatBondingSystem(self.cats)
         result = bonding.form_bond(first, second)
-        self.assertTrue(result['formed'])
+        self.assertTrue(result.formed)
         self.assertIn(second.name, first.bonds.records)
         self.assertIn(first.name, second.bonds.records)
         self.assertTrue(first.bonds.records[second.name].active)
@@ -441,8 +594,8 @@ class CatSocialInteractionTests(unittest.TestCase):
         first, second = self._social_pair()
         bonding = CatBondingSystem(self.cats)
         result = bonding.form_bond(first, second)
-        self.assertFalse(result['formed'])
-        self.assertEqual(result['reason'], 'bond_requirements_not_met')
+        self.assertFalse(result.formed)
+        self.assertEqual(result.reason, 'bond_requirements_not_met')
 
     def test_bonded_cats_can_mutually_groom(self):
         first, second = self._prepare_bonded_pair()
@@ -450,7 +603,7 @@ class CatSocialInteractionTests(unittest.TestCase):
         bonding.form_bond(first, second)
         before = first.bonds.records[second.name].strength
         result = bonding.mutual_groom(first, second)
-        self.assertEqual(result['name'], 'cats_mutually_groomed')
+        self.assertEqual(result.name, 'cats_mutually_groomed')
         self.assertGreater(first.bonds.records[second.name].strength, before)
 
     def test_bonded_cats_can_sleep_together(self):
@@ -458,7 +611,7 @@ class CatSocialInteractionTests(unittest.TestCase):
         bonding = CatBondingSystem(self.cats)
         bonding.form_bond(first, second)
         result = bonding.sleep_together(first, second)
-        self.assertTrue(result['performed'])
+        self.assertTrue(result.performed)
         self.assertEqual(first.state, 'resting_with_bonded_cat')
         self.assertEqual(second.state, 'resting_with_bonded_cat')
 
@@ -467,7 +620,7 @@ class CatSocialInteractionTests(unittest.TestCase):
         bonding = CatBondingSystem(self.cats)
         bonding.form_bond(first, second)
         result = bonding.follow(first, second)
-        self.assertTrue(result['performed'])
+        self.assertTrue(result.performed)
         self.assertEqual(first.navigation_target, second.name)
         self.assertEqual(first.state, 'following_bonded_cat')
 
