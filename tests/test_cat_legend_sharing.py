@@ -3,6 +3,9 @@ import unittest
 from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat_knowledge import CatKnowledge
+from cats.cat_legend_knowledge_system import (
+    CatLegendKnowledgeSystem,
+)
 from cats.cat_social_objects import CatRelationship
 
 class CatLegendSharingTests(unittest.TestCase):
@@ -17,6 +20,14 @@ class CatLegendSharingTests(unittest.TestCase):
         self.storyteller.relationships[self.listener.name] = relationship
         place = CatKnowledge.remember_place(self.storyteller, 'quantum_layer', SpatialVector3(x=7.0, y=2.0, z=0.0))
         self.legend = CatKnowledge.publish_legend(self.universe, self.storyteller, place)
+
+    def test_cat_knowledge_uses_legend_system(
+        self
+    ):
+        self.assertIs(
+            CatKnowledge.LEGEND_SYSTEM,
+            CatLegendKnowledgeSystem,
+        )
 
     def test_cat_can_choose_legend_for_listener(self):
         result = CatKnowledge.choose_legend_to_share(storyteller=self.storyteller, listener=self.listener, universe=self.universe)
