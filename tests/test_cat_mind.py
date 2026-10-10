@@ -2,6 +2,12 @@ import unittest
 from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat_mind import CatMind
+from cats.cat_quantum_intention_considerer import (
+    CatQuantumIntentionConsiderer,
+)
+from cats.cat_scent_intention_considerer import (
+    CatScentIntentionConsiderer,
+)
 from cats.cat_perception_state import CatPerceptionState
 from cats.cat_personality import CatPersonality
 from core.entity.domain_object import DomainObject
@@ -19,6 +25,19 @@ class CatMindTests(unittest.TestCase):
 
     def traits(self):
         return self.cat.personality.traits
+
+    def test_mind_uses_specialized_considerers(
+        self
+    ):
+        self.assertIsInstance(
+            CatMind.SCENT_CONSIDERER,
+            CatScentIntentionConsiderer,
+        )
+
+        self.assertIsInstance(
+            CatMind.QUANTUM_CONSIDERER,
+            CatQuantumIntentionConsiderer,
+        )
 
     def test_new_cat_has_empty_mind(self):
         mind = self.cat.mind
