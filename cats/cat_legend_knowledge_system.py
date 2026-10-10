@@ -11,6 +11,13 @@ from cats.cat_knowledge_objects import (
     CatKnowledgeState,
     CatVerifiedLegendRecord,
 )
+from cats.cat_legend_result_state import (
+    CatLegendContradictionResult,
+    CatLegendNotSharedResult,
+    CatLegendSelectionResult,
+    CatLegendSharedEvent,
+    CatLegendSharingEvaluationResult,
+)
 
 
 class CatLegendKnowledgeSystem:
@@ -376,66 +383,358 @@ class CatLegendKnowledgeSystem:
         return verified
 
     @classmethod
-    def choose_legend_to_share(cls, storyteller, listener, universe):
-        """
-        Vybere legendu, kterou m? smysl
-        sd?lit konkr?tn?mu poslucha?i.
-        """
-        legends = cls.ensure_universe_legends(universe)
-        storyteller_name = storyteller.name
-        listener_name = listener.name
-        knowledge = cls.ensure_cat_knowledge(listener)
-        already_heard = {(item.legend_id, item.storyteller) for item in knowledge.heard_legends}
+    def choose_legend_to_share(
+        cls,
+        storyteller,
+        listener,
+        universe,
+    ):
+        legends = (
+            cls.ensure_universe_legends(
+                universe
+            )
+        )
+
+        storyteller_name = (
+            storyteller.name
+        )
+
+        listener_name = (
+            listener.name
+        )
+
+        knowledge = (
+            cls.ensure_cat_knowledge(
+                listener
+            )
+        )
+
+        already_heard = {
+            (
+                item.legend_id,
+                item.storyteller,
+            )
+            for item
+            in knowledge.heard_legends
+        }
+
         candidates = []
+
         for legend in legends:
-            if not getattr(legend, 'active', True):
+            if not getattr(
+                legend,
+                "active",
+                True,
+            ):
                 continue
-            if storyteller_name not in getattr(legend, 'reported_by', []):
+
+            if (
+                storyteller_name
+                not in getattr(
+                    legend,
+                    "reported_by",
+                    [],
+                )
+            ):
                 continue
-            if (getattr(legend, 'legend_id', None), storyteller_name) in already_heard:
+
+            if (
+                getattr(
+                    legend,
+                    "legend_id",
+                    None,
+                ),
+                storyteller_name,
+            ) in already_heard:
                 continue
-            candidates.append(deepcopy(legend))
+
+            candidates.append(
+                deepcopy(
+                    legend
+                )
+            )
+
         if not candidates:
-            return {'selected': False, 'reason': 'no_shareable_legend', 'storyteller': storyteller_name, 'listener': listener_name}
-        candidates.sort(key=lambda item: (float(getattr(item, 'confidence', 0.0)), int(getattr(item, 'verification_count', 0))), reverse=True)
-        return {'selected': True, 'legend': candidates[0], 'candidate_count': len(candidates), 'storyteller': storyteller_name, 'listener': listener_name}
+            return (
+                CatLegendSelectionResult(
+                    selected=False,
+                    storyteller=
+                        storyteller_name,
+                    listener=
+                        listener_name,
+                    reason=(
+                        "no_shareable_legend"
+                    ),
+                )
+            )
+
+        candidates.sort(
+            key=lambda item: (
+                float(
+                    getattr(
+                        item,
+                        "confidence",
+                        0.0,
+                    )
+                ),
+                int(
+                    getattr(
+                        item,
+                        "verification_count",
+                        0,
+                    )
+                ),
+            ),
+            reverse=True,
+        )
+
+        return (
+            CatLegendSelectionResult(
+                selected=True,
+                legend=
+                    candidates[0],
+                candidate_count=
+                    len(candidates),
+                storyteller=
+                    storyteller_name,
+                listener=
+                    listener_name,
+            )
+        )
+
 
     @classmethod
-    def evaluate_legend_sharing(cls, storyteller, listener, legend):
-        """
-        Rozhodne, zda konkr?tn? ko?ka
-        konkr?tn? legendu konkr?tn?mu
-        poslucha?i v?bec ?ekne.
-        """
-        listener_name = listener.name
-        traits = storyteller.personality.traits
-        curiosity = float(traits.curiosity)
-        patience = float(traits.patience)
-        intellect = float(storyteller.intellect.normalized)
-        trust = cls._trust_in_cat(storyteller, listener_name)
-        confidence = float(getattr(legend, 'confidence', 0.5))
-        verification_count = int(getattr(legend, 'verification_count', 1))
-        information_value = min(1.0, confidence * 0.7 + min(verification_count, 5) * 0.06)
-        share_score = 0.1 + trust * 0.3 + curiosity * 0.2 + patience * 0.1 + intellect * 0.1 + information_value * 0.2
-        share_score = max(0.0, min(1.0, share_score))
-        return {'share': share_score >= 0.55, 'score': share_score, 'trust_in_listener': trust, 'information_value': information_value, 'reasons': ['relationship_to_listener', 'information_value', 'curiosity', 'patience', 'intellect']}
+    def evaluate_legend_sharing(
+        cls,
+        storyteller,
+        listener,
+        legend,
+    ):
+        listener_name = (
+            listener.name
+        )
+
+        traits = (
+            storyteller
+            .personality
+            .traits
+        )
+
+        curiosity = float(
+            traits.curiosity
+        )
+
+        patience = float(
+            traits.patience
+        )
+
+        intellect = float(
+            storyteller
+            .intellect
+            .normalized
+        )
+
+        trust = (
+            cls._trust_in_cat(
+                storyteller,
+                listener_name,
+            )
+        )
+
+        confidence = float(
+            getattr(
+                legend,
+                "confidence",
+                0.5,
+            )
+        )
+
+        verification_count = int(
+            getattr(
+                legend,
+                "verification_count",
+                1,
+            )
+        )
+
+        information_value = min(
+            1.0,
+            confidence * 0.7
+            + min(
+                verification_count,
+                5,
+            ) * 0.06,
+        )
+
+        share_score = (
+            0.1
+            + trust * 0.3
+            + curiosity * 0.2
+            + patience * 0.1
+            + intellect * 0.1
+            + information_value
+            * 0.2
+        )
+
+        share_score = max(
+            0.0,
+            min(
+                1.0,
+                share_score,
+            ),
+        )
+
+        return (
+            CatLegendSharingEvaluationResult(
+                share=(
+                    share_score
+                    >= 0.55
+                ),
+                score=
+                    share_score,
+                trust_in_listener=
+                    trust,
+                information_value=
+                    information_value,
+                reasons=(
+                    "relationship_to_listener",
+                    "information_value",
+                    "curiosity",
+                    "patience",
+                    "intellect",
+                ),
+            )
+        )
+
 
     @classmethod
-    def share_legend(cls, storyteller, listener, universe):
-        """
-        Kompletn? soci?ln? akt:
-        vybere legendu, rozhodne o sd?len?
-        a p??padn? ji p?ed? poslucha?i.
-        """
-        selection = cls.choose_legend_to_share(storyteller=storyteller, listener=listener, universe=universe)
-        if not selection.get('selected', False):
-            return {'name': 'cat_legend_not_shared', 'storyteller': storyteller.name, 'listener': listener.name, 'reason': selection.get('reason'), 'shared': False}
-        legend = selection['legend']
-        evaluation = cls.evaluate_legend_sharing(storyteller=storyteller, listener=listener, legend=legend)
-        if not evaluation['share']:
-            return {'name': 'cat_legend_not_shared', 'storyteller': storyteller.name, 'listener': listener.name, 'legend_id': getattr(legend, 'legend_id', None), 'evaluation': evaluation, 'reason': 'sharing_not_worthwhile', 'shared': False}
-        heard = cls.hear_legend(listener=listener, storyteller=storyteller, legend=legend)
-        return {'name': 'cat_shared_legend', 'storyteller': storyteller.name, 'listener': listener.name, 'legend_id': getattr(legend, 'legend_id', None), 'layer': getattr(legend, 'layer', None), 'position': deepcopy(getattr(legend, 'position', None)), 'evaluation': evaluation, 'heard_legend': heard, 'shared': True}
+    def share_legend(
+        cls,
+        storyteller,
+        listener,
+        universe,
+    ):
+        selection = (
+            cls.choose_legend_to_share(
+                storyteller=
+                    storyteller,
+                listener=
+                    listener,
+                universe=
+                    universe,
+            )
+        )
+
+        if not isinstance(
+            selection,
+            CatLegendSelectionResult,
+        ):
+            raise TypeError(
+                "Legend selection must return "
+                "CatLegendSelectionResult."
+            )
+
+        if not selection.selected:
+            return (
+                CatLegendNotSharedResult(
+                    storyteller=
+                        storyteller.name,
+                    listener=
+                        listener.name,
+                    reason=(
+                        selection.reason
+                        or
+                        "no_shareable_legend"
+                    ),
+                )
+            )
+
+        legend = (
+            selection.legend
+        )
+
+        evaluation = (
+            cls.evaluate_legend_sharing(
+                storyteller=
+                    storyteller,
+                listener=
+                    listener,
+                legend=
+                    legend,
+            )
+        )
+
+        if not isinstance(
+            evaluation,
+            CatLegendSharingEvaluationResult,
+        ):
+            raise TypeError(
+                "Legend sharing evaluation must "
+                "return "
+                "CatLegendSharingEvaluationResult."
+            )
+
+        if not evaluation.share:
+            return (
+                CatLegendNotSharedResult(
+                    storyteller=
+                        storyteller.name,
+                    listener=
+                        listener.name,
+                    legend_id=getattr(
+                        legend,
+                        "legend_id",
+                        None,
+                    ),
+                    evaluation=
+                        evaluation,
+                    reason=(
+                        "sharing_not_worthwhile"
+                    ),
+                )
+            )
+
+        heard = (
+            cls.hear_legend(
+                listener=
+                    listener,
+                storyteller=
+                    storyteller,
+                legend=
+                    legend,
+            )
+        )
+
+        return (
+            CatLegendSharedEvent(
+                storyteller=
+                    storyteller.name,
+                listener=
+                    listener.name,
+                legend_id=getattr(
+                    legend,
+                    "legend_id",
+                    None,
+                ),
+                layer=getattr(
+                    legend,
+                    "layer",
+                    None,
+                ),
+                position=deepcopy(
+                    getattr(
+                        legend,
+                        "position",
+                        None,
+                    )
+                ),
+                evaluation=
+                    evaluation,
+                heard_legend=
+                    heard,
+            )
+        )
+
 
     @classmethod
     def adjust_storyteller_trust(
@@ -507,8 +806,8 @@ class CatLegendKnowledgeSystem:
         cat,
         legend_id,
         reason=(
-            'personal_observation_'
-            'contradicted'
+            "personal_observation_"
+            "contradicted"
         ),
     ):
         knowledge = (
@@ -522,29 +821,39 @@ class CatLegendKnowledgeSystem:
                 item
                 for item
                 in knowledge.heard_legends
-                if item.legend_id
-                == legend_id
+                if (
+                    item.legend_id
+                    == legend_id
+                )
             ),
             None,
         )
 
         if heard is None:
-            return {
-                'contradicted': False,
-                'reason': (
-                    'legend_not_heard'
-                ),
-                'legend_id': legend_id,
-            }
+            return (
+                CatLegendContradictionResult(
+                    contradicted=False,
+                    reason=(
+                        "legend_not_heard"
+                    ),
+                    legend_id=
+                        legend_id,
+                )
+            )
 
         if heard.verified:
-            return {
-                'contradicted': False,
-                'reason': (
-                    'legend_already_verified'
-                ),
-                'legend_id': legend_id,
-            }
+            return (
+                CatLegendContradictionResult(
+                    contradicted=False,
+                    reason=(
+                        "legend_already_verified"
+                    ),
+                    legend_id=
+                        legend_id,
+                    storyteller=
+                        heard.storyteller,
+                )
+            )
 
         storyteller = (
             heard.storyteller
@@ -553,12 +862,12 @@ class CatLegendKnowledgeSystem:
         trust_change = (
             cls.adjust_storyteller_trust(
                 listener=cat,
-                storyteller_name=(
-                    storyteller
-                ),
+                storyteller_name=
+                    storyteller,
                 delta=-0.15,
                 reason=reason,
-                legend_id=legend_id,
+                legend_id=
+                    legend_id,
             )
         )
 
@@ -568,12 +877,18 @@ class CatLegendKnowledgeSystem:
             )
         )
 
-        return {
-            'contradicted': True,
-            'legend_id': legend_id,
-            'storyteller': storyteller,
-            'trust_change': trust_change,
-        }
+        return (
+            CatLegendContradictionResult(
+                contradicted=True,
+                legend_id=
+                    legend_id,
+                storyteller=
+                    storyteller,
+                trust_change=
+                    trust_change,
+            )
+        )
+
 
     @staticmethod
     def _trust_in_cat(

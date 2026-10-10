@@ -7,6 +7,12 @@ from cats.cat_legend_knowledge_system import (
     CatLegendKnowledgeSystem,
 )
 from cats.cat_social_objects import CatRelationship
+from cats.cat_legend_result_state import (
+    CatLegendNotSharedResult,
+    CatLegendSelectionResult,
+    CatLegendSharedEvent,
+    CatLegendSharingEvaluationResult,
+)
 
 class CatLegendSharingTests(unittest.TestCase):
 
@@ -31,20 +37,102 @@ class CatLegendSharingTests(unittest.TestCase):
 
     def test_cat_can_choose_legend_for_listener(self):
         result = CatKnowledge.choose_legend_to_share(storyteller=self.storyteller, listener=self.listener, universe=self.universe)
-        self.assertTrue(result['selected'])
-        self.assertEqual(result['legend'].legend_id, self.legend.legend_id)
+        self.assertTrue(result.selected)
+        self.assertEqual(result.legend.legend_id, self.legend.legend_id)
+
+    def test_legend_results_are_object_state(
+        self
+    ):
+        selection = (
+            CatKnowledge
+            .choose_legend_to_share(
+                storyteller=
+                    self.storyteller,
+                listener=
+                    self.listener,
+                universe=
+                    self.universe,
+            )
+        )
+
+        self.assertIsInstance(
+            selection,
+            CatLegendSelectionResult,
+        )
+
+        evaluation = (
+            CatKnowledge
+            .evaluate_legend_sharing(
+                storyteller=
+                    self.storyteller,
+                listener=
+                    self.listener,
+                legend=
+                    self.legend,
+            )
+        )
+
+        self.assertIsInstance(
+            evaluation,
+            CatLegendSharingEvaluationResult,
+        )
+
+        shared = (
+            CatKnowledge
+            .share_legend(
+                storyteller=
+                    self.storyteller,
+                listener=
+                    self.listener,
+                universe=
+                    self.universe,
+            )
+        )
+
+        self.assertIsInstance(
+            shared,
+            (
+                CatLegendSharedEvent,
+                CatLegendNotSharedResult,
+            ),
+        )
+
+        for result in (
+            selection,
+            evaluation,
+            shared,
+        ):
+            for mapping_method in (
+                "get",
+                "keys",
+                "items",
+                "values",
+            ):
+                self.assertFalse(
+                    hasattr(
+                        result,
+                        mapping_method,
+                    )
+                )
+
+            with self.assertRaises(
+                TypeError
+            ):
+                _ = result[
+                    "name"
+                ]
 
     def test_trusted_cat_shares_valuable_legend(self):
         result = CatKnowledge.share_legend(storyteller=self.storyteller, listener=self.listener, universe=self.universe)
-        self.assertTrue(result['shared'])
+        self.assertTrue(result.shared)
         self.assertEqual(len(self.listener.knowledge.heard_legends), 1)
 
     def test_same_story_is_not_repeated_forever(self):
         first = CatKnowledge.share_legend(self.storyteller, self.listener, self.universe)
         second = CatKnowledge.share_legend(self.storyteller, self.listener, self.universe)
-        self.assertTrue(first['shared'])
-        self.assertFalse(second['shared'])
-        self.assertEqual(second['reason'], 'no_shareable_legend')
+        self.assertTrue(first.shared)
+        self.assertFalse(second.shared)
+        self.assertEqual(second.reason, 'no_shareable_legend')
 
     def test_low_relationship_can_prevent_sharing(self):
         stranger = self.cats.create_cat(name='stranger', color='gray', fur_length='short')
@@ -54,6 +142,6 @@ class CatLegendSharingTests(unittest.TestCase):
         self.storyteller.personality.traits.curiosity = 0.0
         self.storyteller.personality.traits.patience = 0.0
         result = CatKnowledge.share_legend(self.storyteller, stranger, self.universe)
-        self.assertFalse(result['shared'])
+        self.assertFalse(result.shared)
 if __name__ == '__main__':
     unittest.main()

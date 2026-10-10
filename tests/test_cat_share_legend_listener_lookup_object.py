@@ -4,6 +4,13 @@ from unittest.mock import patch
 from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat_knowledge import CatKnowledge
+from cats.cat_legend_result_state import (
+    CatLegendSharedEvent,
+    CatLegendSharingEvaluationResult,
+)
+from cats.cat_knowledge_objects import (
+    CatHeardLegend,
+)
 from cats.cat_intention_state import (
     CatIntentionCandidate,
     CatShareLegendTarget,
@@ -57,14 +64,51 @@ class CatShareLegendListenerLookupObjectTests(
             )
         )
 
-        share_result = {
-            'name': 'cat_shared_legend',
-            'storyteller': (
-                self.storyteller.name
-            ),
-            'listener': listener.name,
-            'shared': True,
-        }
+        share_result = (
+            CatLegendSharedEvent(
+                storyteller=
+                    self.storyteller.name,
+                listener=
+                    listener.name,
+                legend_id=
+                    "test_legend",
+                layer=
+                    "quantum_layer",
+                position=None,
+                evaluation=(
+                    CatLegendSharingEvaluationResult(
+                        share=True,
+                        score=1.0,
+                        trust_in_listener=1.0,
+                        information_value=1.0,
+                        reasons=(
+                            "test",
+                        ),
+                    )
+                ),
+                heard_legend=(
+                    CatHeardLegend(
+                        legend_id=
+                            "test_legend",
+                        claim_type=
+                            "place_discovered",
+                        place_id=
+                            "test_place",
+                        layer=
+                            "quantum_layer",
+                        position=None,
+                        storyteller=
+                            self.storyteller.name,
+                        trust_in_storyteller=
+                            1.0,
+                        source_confidence=
+                            1.0,
+                        credibility=
+                            1.0,
+                    )
+                ),
+            )
+        )
 
         with patch.object(
             CatKnowledge,
@@ -79,11 +123,11 @@ class CatShareLegendListenerLookupObjectTests(
             )
 
         self.assertTrue(
-            result['executed']
+            result.executed
         )
 
         self.assertEqual(
-            result['name'],
+            result.name,
             'cat_shared_legend',
         )
 
@@ -119,11 +163,11 @@ class CatShareLegendListenerLookupObjectTests(
             )
 
         self.assertFalse(
-            result['executed']
+            result.executed
         )
 
         self.assertEqual(
-            result['reason'],
+            result.reason,
             'listener_not_found',
         )
 

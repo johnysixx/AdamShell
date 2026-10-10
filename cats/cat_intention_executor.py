@@ -4,6 +4,11 @@ from core.entity.quantum_cat_route_state import (
     QuantumCatRouteState,
 )
 from cats.cat_knowledge import CatKnowledge
+from cats.cat_legend_result_state import (
+    CAT_LEGEND_SHARE_RESULT_TYPES,
+    CatLegendIntentionExecutedEvent,
+    CatLegendIntentionExecutionFailedResult,
+)
 from cats.cat import Cat
 from cats.cat_intention_state import (
     CatIntentionCandidate,
@@ -347,27 +352,32 @@ class CatIntentionExecutor:
 
 
 
-    def _execute_share_legend(self, cat, intention):
-        target = intention.target
+    def _execute_share_legend(
+        self,
+        cat,
+        intention,
+    ):
+        target = (
+            intention.target
+        )
 
         if not isinstance(
             target,
             CatShareLegendTarget,
         ):
-            return self._record({
-                'name': (
-                    'cat_legend_not_shared'
-                ),
-                'cat': cat.name,
-                'reason': (
-                    'invalid_share_legend_target'
-                ),
-                'executed': False,
-            })
+            return self._record(
+                CatLegendIntentionExecutionFailedResult(
+                    cat=cat.name,
+                    reason=(
+                        "invalid_share_legend_target"
+                    ),
+                )
+            )
 
         target_name = (
             target.listener_name
         )
+
         listener = next(
             (
                 candidate
@@ -378,22 +388,77 @@ class CatIntentionExecutor:
                         candidate,
                         Cat,
                     )
-                    and candidate is not cat
-                    and candidate.name
-                    == target_name
+                    and candidate
+                    is not cat
+                    and (
+                        candidate.name
+                        == target_name
+                    )
                 )
             ),
             None,
         )
+
         if listener is None:
-            return self._record({'name': 'cat_legend_not_shared', 'cat': cat.name, 'listener': target_name, 'reason': 'listener_not_found', 'executed': False})
-        result = CatKnowledge.share_legend(storyteller=cat, listener=listener, universe=self.universe)
-        mind = cat.mind
-        mind.previous_intention = deepcopy(intention)
+            return self._record(
+                CatLegendIntentionExecutionFailedResult(
+                    cat=cat.name,
+                    listener=
+                        target_name,
+                    reason=(
+                        "listener_not_found"
+                    ),
+                )
+            )
+
+        result = (
+            CatKnowledge.share_legend(
+                storyteller=cat,
+                listener=listener,
+                universe=
+                    self.universe,
+            )
+        )
+
+        if not isinstance(
+            result,
+            CAT_LEGEND_SHARE_RESULT_TYPES,
+        ):
+            raise TypeError(
+                "Cat legend sharing must return "
+                "a legend share result object."
+            )
+
+        mind = (
+            cat.mind
+        )
+
+        mind.previous_intention = (
+            deepcopy(
+                intention
+            )
+        )
+
         mind.current_intention = None
-        event = {**result, 'cat': cat.name, 'intention': 'share_legend', 'decision_source': 'cat_mind', 'executed': True}
-        mind.active_body_execution = deepcopy(event)
-        return self._record(event)
+
+        event = (
+            CatLegendIntentionExecutedEvent(
+                cat=cat.name,
+                legend_result=
+                    result,
+            )
+        )
+
+        mind.active_body_execution = (
+            deepcopy(
+                event
+            )
+        )
+
+        return self._record(
+            event
+        )
+
 
 
     def _execute_wander(

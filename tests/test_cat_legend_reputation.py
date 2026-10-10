@@ -8,6 +8,9 @@ from cats.cat_social_objects import (
     CatRelationshipTrustEvent,
 )
 from cats.cat_exploration_planner import CatExplorationPlanner
+from cats.cat_legend_result_state import (
+    CatLegendContradictionResult,
+)
 
 class CatLegendReputationTests(unittest.TestCase):
 
@@ -28,9 +31,40 @@ class CatLegendReputationTests(unittest.TestCase):
 
     def test_contradicted_legend_decreases_trust(self):
         result = CatKnowledge.contradict_heard_legend(cat=self.listener, legend_id=self.legend.legend_id)
-        self.assertTrue(result['contradicted'])
+        self.assertTrue(result.contradicted)
         trust = self.listener.relationships['pazuzu'].trust
         self.assertAlmostEqual(trust, 0.35)
+
+    def test_contradiction_result_is_object_state(
+        self
+    ):
+        result = (
+            CatKnowledge
+            .contradict_heard_legend(
+                cat=self.listener,
+                legend_id=
+                    self.legend.legend_id,
+            )
+        )
+
+        self.assertIsInstance(
+            result,
+            CatLegendContradictionResult,
+        )
+
+        self.assertFalse(
+            hasattr(
+                result,
+                "get",
+            )
+        )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = result[
+                "contradicted"
+            ]
 
     def test_trust_history_is_recorded(self):
         CatKnowledge.contradict_heard_legend(self.listener, self.legend.legend_id)

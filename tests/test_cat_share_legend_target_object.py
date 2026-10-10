@@ -106,11 +106,11 @@ class CatShareLegendTargetObjectTests(
             )
 
             self.assertFalse(
-                result['executed']
+                result.executed
             )
 
             self.assertEqual(
-                result['reason'],
+                result.reason,
                 (
                     'invalid_share_legend_target'
                 ),
