@@ -4,7 +4,15 @@ from multiverse import UniverseRegistry
 from universe.universe import Universe
 from universe.bootstraps.universe_bootstrap import UniverseBootstrap
 from universe.bootstraps.entity_bootstrap import EntityBootstrap
-from cats.kitten_growth_state import KittenGrowthState
+from cats.kitten_growth_state import (
+    KittenGrowthAppliedEvent,
+    KittenGrowthState,
+)
+from meeting_place.cat_bar_lifecycle_state import (
+    CatBartenderMeowExchangeEvent,
+    CatDrankMilkAtBarEvent,
+    CatMilkServiceFailedEvent,
+)
 from meeting_place.cat_meow_event_state import (
     BartenderCatMeowEvent,
     BartenderMeowReplyEvent,
@@ -203,6 +211,45 @@ class QuantumBoxCatBarMeowTests(unittest.TestCase):
             'milk',
         )
 
+        exchange = next(
+            event
+            for event
+            in self.bar.events
+            if isinstance(
+                event,
+                CatBartenderMeowExchangeEvent,
+            )
+        )
+
+        self.assertEqual(
+            exchange.cat,
+            self.cat.name,
+        )
+
+        self.assertIsInstance(
+            exchange.cat_meow,
+            BartenderCatMeowEvent,
+        )
+
+        self.assertIsInstance(
+            exchange.bartender_meow,
+            BartenderMeowReplyEvent,
+        )
+
+        self.assertFalse(
+            hasattr(
+                exchange,
+                'get',
+            )
+        )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = exchange[
+                'cat'
+            ]
+
     def test_bar_milk_makes_quantum_kitten_grow(self):
         size_before = self.cat.size
         strength_before = self.cat.strength
@@ -218,8 +265,101 @@ class QuantumBoxCatBarMeowTests(unittest.TestCase):
             growth.milk_feedings,
             1,
         )
-        milk_event = next((event for event in self.bar.events if isinstance(event, dict) and event.get('name') == 'cat_drank_milk_at_bar'))
-        self.assertTrue(milk_event['served'])
-        self.assertTrue(milk_event['growth']['grew'])
+        milk_event = next(
+            event
+            for event
+            in self.bar.events
+            if isinstance(
+                event,
+                CatDrankMilkAtBarEvent,
+            )
+        )
+
+        self.assertTrue(
+            milk_event.served
+        )
+
+        self.assertIsInstance(
+            milk_event.growth,
+            KittenGrowthAppliedEvent,
+        )
+
+        self.assertTrue(
+            milk_event.growth.grew
+        )
+
+        self.assertFalse(
+            hasattr(
+                milk_event,
+                'get',
+            )
+        )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = milk_event[
+                'served'
+            ]
+    def test_missing_milk_uses_object_event(
+        self
+    ):
+        self.bar.fridge.items.pop(
+            'milk'
+        )
+
+        result = (
+            self.bar
+            .serve_cat_milk(
+                self.cat
+            )
+        )
+
+        self.assertFalse(
+            result[
+                'served'
+            ]
+        )
+
+        self.assertEqual(
+            result[
+                'reason'
+            ],
+            'milk_missing',
+        )
+
+        event = (
+            self.bar.events[-1]
+        )
+
+        self.assertIsInstance(
+            event,
+            CatMilkServiceFailedEvent,
+        )
+
+        self.assertEqual(
+            event.cat,
+            self.cat.name,
+        )
+
+        self.assertFalse(
+            event.served
+        )
+
+        self.assertFalse(
+            hasattr(
+                event,
+                'get',
+            )
+        )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = event[
+                'reason'
+            ]
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -3,6 +3,9 @@ import unittest
 from meeting_place.cat_arrival_state import (
     CatBarArrivalResult,
 )
+from meeting_place.cat_bar_lifecycle_state import (
+    CatDrankMilkAtBarEvent,
+)
 from multiverse import UniverseRegistry
 from universe.universe import Universe
 from meeting_place.meeting_place import MeetingPlace
@@ -112,42 +115,29 @@ class Day0GarfieldOrdinaryCatArrivalTests(
     ):
         self.scene.advance_to_garfield_arrival()
 
-        found = False
+        milk_event = next(
+            (
+                event
+                for event
+                in self.bar.events
+                if (
+                    isinstance(
+                        event,
+                        CatDrankMilkAtBarEvent,
+                    )
+                    and event.cat
+                    == "garfield"
+                )
+            ),
+            None,
+        )
 
-        for event in self.bar.events:
-
-            if (
-                isinstance(
-                    event,
-                    str
-                )
-                and "garfield"
-                in event
-                and "drinks milk"
-                in event
-            ):
-                found = True
-                break
-
-            if (
-                isinstance(
-                    event,
-                    dict
-                )
-                and event.get(
-                    "cat"
-                )
-                == "garfield"
-                and event.get(
-                    "name"
-                )
-                == "cat_drank_milk_at_bar"
-            ):
-                found = True
-                break
+        self.assertIsNotNone(
+            milk_event
+        )
 
         self.assertTrue(
-            found
+            milk_event.served
         )
 
     def test_no_garfield_specific_alarm_methods_exist(

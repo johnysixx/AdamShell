@@ -18,6 +18,11 @@ from meeting_place.bar_objects import (
 from meeting_place.cat_arrival_state import (
     CatBarArrivalResult,
 )
+from meeting_place.cat_bar_lifecycle_state import (
+    CatBartenderMeowExchangeEvent,
+    CatDrankMilkAtBarEvent,
+    CatMilkServiceFailedEvent,
+)
 import random
 from cats.cat import Cat
 from core.entity.components import SpatialVector3
@@ -390,8 +395,13 @@ class MeetingPlace:
         from cats.garfield_training_system import GarfieldTrainingSystem
         return GarfieldTrainingSystem().complete(cat)
 
-    def emit_event(self, event):
-        self.events.append(event)
+    def emit_event(
+        self,
+        event
+    ):
+        self.events.append(
+            event
+        )
 
         if isinstance(
             event,
@@ -404,15 +414,48 @@ class MeetingPlace:
                 tick=self.tick_count,
             )
 
-        elif isinstance(event, dict):
-            self.back_room_black_box.record(event=event.get('name', 'meeting_place_event'), data=event, source='meeting_place', tick=self.tick_count)
+        elif isinstance(
+            event,
+            dict,
+        ):
+            self.back_room_black_box.record(
+                event=event.get(
+                    'name',
+                    'meeting_place_event',
+                ),
+                data=event,
+                source='meeting_place',
+                tick=self.tick_count,
+            )
+
+        elif getattr(
+            event,
+            'name',
+            None,
+        ) is not None:
+            self.back_room_black_box.record(
+                event=event.name,
+                data=event,
+                source='meeting_place',
+                tick=self.tick_count,
+            )
 
         else:
-            self.back_room_black_box.record(event=event, source='meeting_place', tick=self.tick_count)
+            self.back_room_black_box.record(
+                event=event,
+                source='meeting_place',
+                tick=self.tick_count,
+            )
 
-        self.bartender.observe_event(event)
+        self.bartender.observe_event(
+            event
+        )
+
         self.show_bar_story_count()
-        UniverseLogger.event(f'MEETING PLACE EVENT: {event}')
+
+        UniverseLogger.event(
+            f'MEETING PLACE EVENT: {event}'
+        )
 
     def guest_asks_about_dice_vial(self, guest_name):
         self.emit_event(f'{guest_name} asked about the dice vial')
@@ -463,49 +506,137 @@ class MeetingPlace:
             )
         )
 
-        self.emit_event(
-            {
-                'name':
-                    'cat_bartender_meow_exchange',
-                'cat':
-                    self._get_entity_name(
-                        cat
-                    ),
-                'cat_meow':
+        event = (
+            CatBartenderMeowExchangeEvent(
+                cat=self._get_entity_name(
+                    cat
+                ),
+                cat_meow=(
                     meow_exchange
                     .cat_meow
-                    .to_dict(),
-                'bartender_meow':
+                ),
+                bartender_meow=(
                     meow_exchange
                     .bartender_meow
-                    .to_dict(),
-                'tick':
-                    self.tick_count,
-            }
+                ),
+                tick=self.tick_count,
+            )
+        )
+
+        self.emit_event(
+            event
         )
 
         return self.serve_cat_milk(
             cat
         )
 
-    def serve_cat_milk(self, cat):
-        cat_name = self._get_entity_name(cat)
-        milk = self.fridge.get_item('milk')
-        milk_bowl = self.bar_counter.milk_bowl
+    def serve_cat_milk(
+        self,
+        cat
+    ):
+        cat_name = self._get_entity_name(
+            cat
+        )
+
+        milk = self.fridge.get_item(
+            'milk'
+        )
+
+        milk_bowl = (
+            self.bar_counter
+            .milk_bowl
+        )
+
         if milk is None:
-            event = {'name': 'cat_milk_service_failed', 'cat': cat_name, 'reason': 'milk_missing', 'served': False}
-            self.emit_event(event)
-            return event
-        self.bartender.serve_without_order(cat_name, milk, milk_bowl)
+            event = (
+                CatMilkServiceFailedEvent(
+                    cat=cat_name,
+                )
+            )
+
+            self.emit_event(
+                event
+            )
+
+            return event.to_dict()
+
+        self.bartender.serve_without_order(
+            cat_name,
+            milk,
+            milk_bowl,
+        )
+
         growth_event = None
-        if getattr(cat, 'type', None) == 'cat' and hasattr(cat, 'age_days') and (getattr(cat, 'developmental_stage', None) != 'adult'):
-            growth_event = self.kitten_growth.feed_cat_milk(kitten=cat, day=self.tick_count, amount=1.0, source='bartender').to_dict()
-        event = {'name': 'cat_drank_milk_at_bar', 'cat': cat_name, 'milk': 'milk', 'bowl': getattr(milk_bowl, 'name', 'milk_bowl'), 'growth': growth_event, 'served': True, 'tick': self.tick_count}
-        self.emit_event(event)
-        cat_distribution_system = getattr(self, 'cat_distribution_system', None)
-        if cat_distribution_system is not None:
-            event['distribution'] = cat_distribution_system.handle_after_milk(cat)
-        return event
+
+        if (
+            getattr(
+                cat,
+                'type',
+                None,
+            )
+            == 'cat'
+            and hasattr(
+                cat,
+                'age_days',
+            )
+            and getattr(
+                cat,
+                'developmental_stage',
+                None,
+            )
+            != 'adult'
+        ):
+            growth_event = (
+                self.kitten_growth
+                .feed_cat_milk(
+                    kitten=cat,
+                    day=self.tick_count,
+                    amount=1.0,
+                    source='bartender',
+                )
+            )
+
+        distribution_event = None
+
+        cat_distribution_system = getattr(
+            self,
+            'cat_distribution_system',
+            None,
+        )
+
+        if (
+            cat_distribution_system
+            is not None
+        ):
+            distribution_event = (
+                cat_distribution_system
+                .handle_after_milk(
+                    cat
+                )
+            )
+
+        event = (
+            CatDrankMilkAtBarEvent(
+                cat=cat_name,
+                bowl=getattr(
+                    milk_bowl,
+                    'name',
+                    'milk_bowl',
+                ),
+                growth=growth_event,
+                distribution=(
+                    distribution_event
+                ),
+                tick=self.tick_count,
+            )
+        )
+
+        self.emit_event(
+            event
+        )
+
+        return event.to_dict()
 
     def welcome_cat_d20(self, name='cat_d20'):
         existing = next((cat for cat in getattr(getattr(self.universe, 'cats_layer', None), 'cats', []) if getattr(cat, 'name', None) == name), None)
