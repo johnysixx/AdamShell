@@ -1,6 +1,9 @@
 import unittest
 from core.entity.components import SpatialVector3
 from universe.universe import Universe
+from universe.cronenberg_manifestation_state import (
+    CronenbergManifestedEvent,
+)
 from cats.cats import Cats
 from cats.cat_mind import CatMind
 from cats.cat_perception import CatPerception
@@ -110,10 +113,28 @@ class CatKnownQuantumBoxTravelTests(unittest.TestCase):
         self.assertEqual(result.name, 'cat_quantum_box_travel_failed')
         self.assertEqual(len(self.universe.cronenbergs), cronenberg_count_before + 1)
         cronenberg = self.universe.cronenbergs[-1]
-        manifested = next((event for event in reversed(self.universe.quantum_events) if isinstance(event, dict) and event['name'] == 'cronenberg_manifested'))
-        self.assertEqual(manifested['cronenberg_id'], cronenberg.id)
-        self.assertEqual(manifested['source_component'], 'cat_intention_executor')
-        self.assertEqual(manifested['source_operation'], 'quantum_box_travel_failed')
+        manifested = next(
+            event
+            for event in reversed(
+                self.universe.quantum_events
+            )
+            if isinstance(
+                event,
+                CronenbergManifestedEvent,
+            )
+        )
+        self.assertEqual(
+            manifested.cronenberg_id,
+            cronenberg.id,
+        )
+        self.assertEqual(
+            manifested.source_component,
+            'cat_intention_executor',
+        )
+        self.assertEqual(
+            manifested.source_operation,
+            'quantum_box_travel_failed',
+        )
         memories = self.cat.memory.recall(event_type='quantum_box_layer_transfer_failed')
         self.assertEqual(len(memories), 1)
         self.assertEqual(memories[0].participants, [self.source.id, self.target.id])

@@ -16,6 +16,9 @@ from cats.cat_quantum_box_origin_state import CatQuantumBoxOriginState
 from core.entity.quantum_box import QuantumBox
 from universe.universe_statistics import UniverseStatistics
 from universe.cronenberg_population_statistics import CronenbergPopulationStatistics
+from universe.cronenberg_manifestation_state import (
+    CronenbergManifestedEvent,
+)
 from universe.logger import UniverseLogger
 from core.entity.cronenberg import Cronenberg
 from quantum.error_boundary import QuantumErrorBoundary
@@ -499,7 +502,14 @@ class Universe:
         self.cronenbergs.append(cronenberg)
         self.cronenberg_count += 1
         self.add_entity(cronenberg)
-        event = {'name': 'cronenberg_manifested', 'type': 'quantum_error_manifestation', 'cronenberg_id': cronenberg.id, 'source_component': source_component, 'source_operation': source_operation, 'error_type': type(error).__name__, 'error_message': str(error), 'quantum_tick': self.quantum_state.tick_count}
+        event = CronenbergManifestedEvent(
+            cronenberg_id=cronenberg.id,
+            source_component=source_component,
+            source_operation=source_operation,
+            error_type=type(error).__name__,
+            error_message=str(error),
+            quantum_tick=self.quantum_state.tick_count,
+        )
         self.quantum_events.append(event)
         UniverseLogger.event(f'CRONENBERG MANIFESTED: {cronenberg.id} FROM={source_component}.{source_operation} ERROR={type(error).__name__}')
         return cronenberg
