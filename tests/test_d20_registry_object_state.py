@@ -112,7 +112,9 @@ class D20RegistryObjectStateTests(
         with self.assertRaises(TypeError):
             _ = event["scope"]
 
-        result[
+        snapshot = result.to_dict()
+
+        snapshot[
             "results"
         ][0][
             "nested"
@@ -138,7 +140,7 @@ class D20RegistryObjectStateTests(
                 "value"
             ] = 99
 
-    def test_layer_rotation_preserves_boundary_shape(
+    def test_layer_rotation_returns_object_state(
         self
     ):
         result = (
@@ -168,18 +170,21 @@ class D20RegistryObjectStateTests(
             "eden",
         )
 
+        self.assertIs(
+            result,
+            event,
+        )
+
         self.assertEqual(
-            result["layer"],
+            result.layer,
             "eden",
         )
 
         self.assertEqual(
-            result[
-                "artifact_names"
-            ],
-            [
+            result.artifact_names,
+            (
                 "first_die",
-            ],
+            ),
         )
 
     def test_all_rotation_history_uses_object_state(
@@ -210,10 +215,13 @@ class D20RegistryObjectStateTests(
             2,
         )
 
+        self.assertIs(
+            result,
+            event,
+        )
+
         self.assertEqual(
-            result[
-                "rotated_count"
-            ],
+            result.rotated_count,
             2,
         )
 

@@ -133,9 +133,7 @@ class CatBirthEffectResolver:
                 cat=cat_name,
                 d20_rotation=d20_rotation,
                 registered_d20_count=(
-                    d20_rotation[
-                        "rotated_count"
-                    ]
+                    d20_rotation.rotated_count
                 ),
             )
 
@@ -346,9 +344,7 @@ class CatBirthEffectResolver:
                 dice_box_rotation
             ),
             registered_d20_count=(
-                d20_rotation[
-                    "rotated_count"
-                ]
+                d20_rotation.rotated_count
             ),
             bar_dice_count=(
                 dice_box_rotation[

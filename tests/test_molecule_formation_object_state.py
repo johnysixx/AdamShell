@@ -161,10 +161,10 @@ class MoleculeFormationObjectStateTests(
         process.create_molecule = broken_molecule
 
         result = process.form_reference_molecules()
-        cronenberg = result["cronenberg"]
+        cronenberg = result.cronenberg
 
         self.assertEqual(
-            result["type"],
+            result.type,
             "quantum_error",
         )
         self.assertIn(

@@ -242,10 +242,10 @@ class AtomicNucleiObjectStateTests(
         process.add_nucleus = broken_nucleus
 
         result = process.form_light_nuclei()
-        cronenberg = result["cronenberg"]
+        cronenberg = result.cronenberg
 
         self.assertEqual(
-            result["type"],
+            result.type,
             "quantum_error",
         )
         self.assertIn(

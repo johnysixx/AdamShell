@@ -174,10 +174,10 @@ class PeriodicTableObjectStateTests(
         table.create_known_element = broken_element
 
         result = table.build_known_table()
-        cronenberg = result["cronenberg"]
+        cronenberg = result.cronenberg
 
         self.assertEqual(
-            result["type"],
+            result.type,
             "quantum_error",
         )
         self.assertIn(

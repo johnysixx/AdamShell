@@ -157,10 +157,10 @@ class RadioactiveDecayObjectStateTests(
         process.create_decay_pattern = broken_pattern
 
         result = process.define_reference_decay()
-        cronenberg = result["cronenberg"]
+        cronenberg = result.cronenberg
 
         self.assertEqual(
-            result["type"],
+            result.type,
             "quantum_error",
         )
         self.assertIn(

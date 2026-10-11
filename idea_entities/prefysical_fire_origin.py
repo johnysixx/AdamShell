@@ -497,9 +497,7 @@ class PrefysicalFireOrigin:
             }
         )
 
-        if not hidden[
-            "fire_threshold_reached"
-        ]:
+        if not hidden.fire_threshold_reached:
             return {
                 "result": (
                     "fire_not_ignited"

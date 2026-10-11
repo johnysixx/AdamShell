@@ -189,10 +189,10 @@ class StellarFormationObjectStateTests(
 
         result = process.form_first_stars()
 
-        self.assertEqual(result["type"], "quantum_error")
+        self.assertEqual(result.type, "quantum_error")
         self.assertIn(
             "StellarMaterialCloud",
-            result["cronenberg"].origin.error_message,
+            result.cronenberg.origin.error_message,
         )
 
     def test_formation_error_creates_cronenberg(
@@ -218,10 +218,10 @@ class StellarFormationObjectStateTests(
         process.record_history = broken_history
 
         result = process.form_first_stars()
-        cronenberg = result["cronenberg"]
+        cronenberg = result.cronenberg
 
         self.assertEqual(
-            result["type"],
+            result.type,
             "quantum_error",
         )
         self.assertIn(

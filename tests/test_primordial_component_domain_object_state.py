@@ -48,14 +48,12 @@ class PrimordialComponentDomainObjectStateTests(
         ).form_germinal_clouds()
 
         self.assertEqual(
-            result["type"],
+            result.type,
             "quantum_error",
         )
         self.assertIn(
             "PrimordialCosmicComponent",
-            result[
-                "cronenberg"
-            ].origin.error_message,
+            result.cronenberg.origin.error_message,
         )
 
     def test_stellar_nucleosynthesis_keeps_primordial_element_object(

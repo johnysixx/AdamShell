@@ -268,9 +268,9 @@ class CosmicCloudObjectStateTests(unittest.TestCase):
         process.record_history = broken_history
 
         result = process.form_germinal_clouds()
-        cronenberg = result["cronenberg"]
+        cronenberg = result.cronenberg
 
-        self.assertEqual(result["type"], "quantum_error")
+        self.assertEqual(result.type, "quantum_error")
         self.assertIn(cronenberg, universe.cronenbergs)
         self.assertEqual(
             cronenberg.origin.source_component,

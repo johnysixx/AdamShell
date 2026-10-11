@@ -406,14 +406,12 @@ class SupernovaEnrichmentObjectStateTests(
         ).enrich_space()
 
         self.assertEqual(
-            result["type"],
+            result.type,
             "quantum_error",
         )
         self.assertIn(
             "ChemicalElement",
-            result[
-                "cronenberg"
-            ].origin.error_message,
+            result.cronenberg.origin.error_message,
         )
 
     def test_downstream_heavy_element_process_works(
@@ -460,10 +458,10 @@ class SupernovaEnrichmentObjectStateTests(
         process.record_history = broken_history
 
         result = process.enrich_space()
-        cronenberg = result["cronenberg"]
+        cronenberg = result.cronenberg
 
         self.assertEqual(
-            result["type"],
+            result.type,
             "quantum_error",
         )
         self.assertIn(

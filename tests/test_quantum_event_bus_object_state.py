@@ -3,6 +3,7 @@ import unittest
 from quantum.event_bus import (
     QuantumEvent,
     QuantumEventBus,
+    QuantumEventPublicationResult,
 )
 
 
@@ -63,7 +64,18 @@ class QuantumEventBusObjectStateTests(
                 "value"
             ] = 99
 
-        result[
+        self.assertIsInstance(
+            result,
+            QuantumEventPublicationResult,
+        )
+
+        self.assertIs(
+            result.event,
+            event,
+        )
+
+        snapshot = result.to_dict()
+        snapshot[
             "event"
         ][
             "payload"
@@ -115,19 +127,20 @@ class QuantumEventBusObjectStateTests(
         )
 
         self.assertEqual(
-            result["results"],
-            [99],
+            result.results,
+            (99,),
+        )
+
+        self.assertIs(
+            result.event,
+            event,
         )
 
         self.assertEqual(
-            result[
-                "event"
-            ][
-                "payload"
-            ][
+            result.event.payload[
                 "value"
             ],
-            99,
+            7,
         )
 
         self.assertEqual(

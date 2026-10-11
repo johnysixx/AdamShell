@@ -1,5 +1,8 @@
 import unittest
 
+from core.entity.serpent_d20 import (
+    SerpentD20PublicRollEvent,
+)
 from quantum.serpent_roll_resolver import (
     SerpentRollResolutionEvent,
     SerpentRollResolver,
@@ -58,11 +61,15 @@ class SerpentRollResolverObjectStateTests(
         self
     ):
         result = self.resolver.resolve(
-            public_roll={
-                "name": "serpent_d20_rolled",
-                "roll_id": "serpent_roll_test",
-                "value": 7,
-            },
+            public_roll=(
+                SerpentD20PublicRollEvent(
+                    roll_id="serpent_roll_test",
+                    roller="serpent",
+                    die="serpent_d20",
+                    value=7,
+                    roll_number=1,
+                )
+            ),
             rng=FixedResolverRng(),
         )
 
@@ -91,9 +98,14 @@ class SerpentRollResolverObjectStateTests(
             SerpentRollIntensity.MODERATE,
         )
 
-        self.assertEqual(
-            result["intensity"],
-            "moderate",
+        self.assertIs(
+            result,
+            event,
+        )
+
+        self.assertIs(
+            result.intensity,
+            SerpentRollIntensity.MODERATE,
         )
 
         self.assertEqual(
@@ -122,9 +134,10 @@ class SerpentRollResolverObjectStateTests(
         with self.assertRaises(TypeError):
             _ = event["value"]
 
-        result["value"] = 99
+        snapshot = result.to_dict()
+        snapshot["value"] = 99
 
-        result[
+        snapshot[
             "selected_effects"
         ].append(
             "changed"

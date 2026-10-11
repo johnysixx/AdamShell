@@ -81,11 +81,21 @@ class SerpentResolvedConsequence:
         )
 
     def to_dict(self):
+        to_dict = getattr(
+            self.result,
+            "to_dict",
+            None,
+        )
+
+        result = (
+            to_dict()
+            if callable(to_dict)
+            else deepcopy(self.result)
+        )
+
         return {
             "consequence": self.consequence,
-            "result": deepcopy(
-                self.result
-            ),
+            "result": result,
         }
 
 
@@ -250,7 +260,7 @@ class SerpentD20:
         )
 
         hidden_plan = self.roll_resolver.resolve(
-            public_roll=public_snapshot,
+            public_roll=public_event,
             rng=rng
         )
 
@@ -261,18 +271,14 @@ class SerpentD20:
                 fire_threshold_reached=(
                     value > self.fire_threshold
                 ),
-                possible_consequences=tuple(
-                    hidden_plan[
-                        "selected_effects"
-                    ]
+                possible_consequences=(
+                    hidden_plan.selected_effects
                 ),
-                intensity=hidden_plan[
-                    "intensity"
-                ],
+                intensity=(
+                    hidden_plan.intensity.value
+                ),
                 all_effects_triggered=(
-                    hidden_plan[
-                        "all_effects_triggered"
-                    ]
+                    hidden_plan.all_effects_triggered
                 ),
             )
         )
@@ -344,17 +350,14 @@ class SerpentD20:
         if event is None:
             return None
 
-        return event.to_dict()
+        return event
 
     @property
     def last_hidden_resolution(self):
         if not self._hidden_history:
             return None
 
-        return (
-            self._hidden_history[-1]
-            .to_dict()
-        )
+        return self._hidden_history[-1]
 
     def record_resolved_consequences(
         self,
@@ -387,7 +390,7 @@ class SerpentD20:
                 resolved
             )
 
-            return event.to_dict()
+            return event
 
         return None
 

@@ -207,11 +207,12 @@ class D20Registry:
         rng = rng or random
 
         if not self.artifacts:
-            return {
-                "scope": "random",
-                "rotated_count": 0,
-                "results": []
-            }
+            return D20RotationEvent(
+                scope="random",
+                rotated_count=0,
+                artifact_names=(),
+                results=(),
+            )
 
         artifact = rng.choice(
             self.artifacts
@@ -239,7 +240,7 @@ class D20Registry:
             event
         )
 
-        return event.to_dict()
+        return event
 
     def rotate_all(self, rng=None):
         results = []
@@ -274,7 +275,7 @@ class D20Registry:
             event
         )
 
-        return event.to_dict()
+        return event
 
     def rotate_layer(
         self,
@@ -322,7 +323,7 @@ class D20Registry:
             event
         )
 
-        return event.to_dict()
+        return event
 
     def record_rotation(
         self,

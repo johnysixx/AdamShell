@@ -1,8 +1,20 @@
 import unittest
 
+from core.entity.serpent_d20 import (
+    SerpentD20HiddenResolutionEvent,
+)
+from core.entity.components.spatial import (
+    SpatialVector3,
+)
 from quantum.serpent_consequence_executor import (
+    SerpentCatManifestationResult,
     SerpentConsequenceExecutor,
     SerpentConsequencesExecutedEvent,
+    SerpentCronenbergCounterpartResult,
+    SerpentQuantumBoxResult,
+    SerpentQuantumErrorResult,
+    SerpentQuantumGeometryShiftResult,
+    SerpentQuantumGeometryState,
     SerpentResolvedConsequence,
     SerpentUnresolvedConsequence,
 )
@@ -29,12 +41,16 @@ class FakeSerpentD20:
         self,
         roll_id,
     ):
-        return {
-            "roll_id": roll_id,
-            "possible_consequences": list(
+        return SerpentD20HiddenResolutionEvent(
+            roll_id=roll_id,
+            value=7,
+            fire_threshold_reached=False,
+            possible_consequences=tuple(
                 self.consequences
             ),
-        }
+            intensity="moderate",
+            all_effects_triggered=False,
+        )
 
     def record_resolved_consequences(
         self,
@@ -47,9 +63,19 @@ class FakeSerpentD20:
             resolved_consequences
         )
 
-        return {
-            "roll_id": roll_id,
-        }
+        return SerpentD20HiddenResolutionEvent(
+            roll_id=roll_id,
+            value=7,
+            fire_threshold_reached=False,
+            possible_consequences=tuple(
+                self.consequences
+            ),
+            intensity="moderate",
+            all_effects_triggered=False,
+            resolved_consequences=(
+                self.recorded
+            ),
+        )
 
 
 class SerpentConsequenceExecutorObjectStateTests(
@@ -107,12 +133,15 @@ class SerpentConsequenceExecutorObjectStateTests(
             SerpentUnresolvedConsequence,
         )
 
+        self.assertIs(
+            result,
+            event,
+        )
+
         self.assertEqual(
-            result[
-                "unresolved_consequences"
-            ][0][
-                "reason"
-            ],
+            result
+            .unresolved_consequences[0]
+            .reason,
             "handler_not_implemented",
         )
 
@@ -189,7 +218,8 @@ class SerpentConsequenceExecutorObjectStateTests(
             "resolved-roll",
         )
 
-        result[
+        snapshot = result.to_dict()
+        snapshot[
             "resolved_consequences"
         ][0][
             "result"
@@ -231,11 +261,13 @@ class SerpentConsequenceExecutorObjectStateTests(
             .execution_history[-1]
         )
 
-        result[
+        snapshot = result.to_dict()
+
+        snapshot[
             "planned_consequences"
         ][0] = "changed"
 
-        result[
+        snapshot[
             "unresolved_consequences"
         ][0][
             "reason"
@@ -254,6 +286,67 @@ class SerpentConsequenceExecutorObjectStateTests(
             .reason,
             "handler_not_implemented",
         )
+
+    def test_builtin_consequence_results_are_objects(
+        self,
+    ):
+        geometry = (
+            SerpentQuantumGeometryState(
+                configuration_id="config_1",
+                configuration_seed=1,
+                reconfiguration_count=1,
+            )
+        )
+
+        results = (
+            SerpentQuantumBoxResult(
+                box_id="box_1",
+                position=SpatialVector3.zero(),
+                state="superposition",
+            ),
+            SerpentQuantumErrorResult(
+                error_type="RuntimeError",
+                error_message="boom",
+                cronenberg_id="cronenberg_1",
+            ),
+            SerpentCatManifestationResult(
+                cat_name="cat_1",
+                entity_name="cat_1",
+                origin="serpent_roll",
+            ),
+            SerpentQuantumGeometryShiftResult(
+                before=geometry,
+                after=geometry,
+                cause="serpent_roll",
+            ),
+            SerpentCronenbergCounterpartResult(
+                result="counterpart_created",
+                counterpart_created=True,
+                original_id="cronenberg_1",
+                counterpart_id="cronenberg_2",
+                pair_id="pair_1",
+                original_spin=0.5,
+                counterpart_spin=-0.5,
+                counterpart_location="quantum_layer",
+            ),
+        )
+
+        for result in results:
+            for mapping_method in (
+                "get",
+                "keys",
+                "items",
+                "values",
+            ):
+                self.assertFalse(
+                    hasattr(
+                        result,
+                        mapping_method,
+                    )
+                )
+
+            with self.assertRaises(TypeError):
+                _ = result["result"]
 
     def test_execution_history_rejects_mapping(
         self,

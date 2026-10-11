@@ -136,10 +136,10 @@ class StellarDomainObjectStateTests(unittest.TestCase):
 
         result = SupernovaEnrichment(universe).enrich_space()
 
-        self.assertEqual(result["type"], "quantum_error")
+        self.assertEqual(result.type, "quantum_error")
         self.assertIn(
             "PrimordialStar",
-            result["cronenberg"].origin.error_message,
+            result.cronenberg.origin.error_message,
         )
 
 

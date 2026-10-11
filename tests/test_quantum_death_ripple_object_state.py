@@ -4,6 +4,9 @@ from quantum.death_ripple import (
     QuantumDeathRipple,
     QuantumDeathRippleEvent,
 )
+from quantum.d20_registry import (
+    D20RotationEvent,
+)
 
 
 class FixedRng:
@@ -18,28 +21,42 @@ class FakeD20Registry:
         self,
         rng=None,
     ):
-        return {
-            "scope": "random",
-            "rotated_count": 1,
-        }
+        return D20RotationEvent(
+            scope="random",
+            rotated_count=1,
+            artifact_names=("random_die",),
+            results=(None,),
+        )
 
     def rotate_layer(
         self,
         layer,
     ):
-        return {
-            "scope": layer,
-            "rotated_count": 2,
-        }
+        return D20RotationEvent(
+            scope="layer",
+            layer=layer,
+            rotated_count=2,
+            artifact_names=(
+                "layer_die_1",
+                "layer_die_2",
+            ),
+            results=(None, None),
+        )
 
     def rotate_all(
         self,
         rng=None,
     ):
-        return {
-            "scope": "all",
-            "rotated_count": 3,
-        }
+        return D20RotationEvent(
+            scope="all",
+            rotated_count=3,
+            artifact_names=(
+                "die_1",
+                "die_2",
+                "die_3",
+            ),
+            results=(None, None, None),
+        )
 
 
 class QuantumDeathRippleObjectStateTests(
@@ -113,7 +130,13 @@ class QuantumDeathRippleObjectStateTests(
         with self.assertRaises(TypeError):
             _ = event["predator"]
 
-        result[
+        self.assertIs(
+            result,
+            event,
+        )
+
+        snapshot = result.to_dict()
+        snapshot[
             "rotated_count"
         ] = 99
 

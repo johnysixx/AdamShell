@@ -153,10 +153,10 @@ class ParticleFormationObjectStateTests(
         process.form_quarks = broken_quark_formation
 
         result = process.form_particles()
-        cronenberg = result["cronenberg"]
+        cronenberg = result.cronenberg
 
         self.assertEqual(
-            result["type"],
+            result.type,
             "quantum_error",
         )
         self.assertIn(

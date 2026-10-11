@@ -359,9 +359,7 @@ class CatCronenbergEncounter:
                 strength_gain=
                     strength_gain,
                 subscriber_count=(
-                    event_result[
-                        "subscriber_count"
-                    ]
+                    event_result.subscriber_count
                 ),
             )
         )

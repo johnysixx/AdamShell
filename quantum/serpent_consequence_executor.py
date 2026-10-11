@@ -1,9 +1,14 @@
 import uuid
-from copy import deepcopy
 from dataclasses import dataclass, field
 
+from core.entity.components.spatial import (
+    SpatialVector3,
+)
 from core.entity.serpent_d20 import (
     SerpentResolvedConsequence,
+)
+from quantum.error_boundary import (
+    QuantumErrorResult,
 )
 from universe.logger import UniverseLogger
 
@@ -31,6 +36,262 @@ class SerpentUnresolvedConsequence:
         return {
             "consequence": self.consequence,
             "reason": self.reason,
+        }
+
+
+@dataclass(slots=True, frozen=True)
+class SerpentQuantumBoxResult:
+
+    box_id: str
+    position: SpatialVector3
+    state: str
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "box_id",
+            str(self.box_id),
+        )
+
+        if not isinstance(
+            self.position,
+            SpatialVector3,
+        ):
+            raise TypeError(
+                "Serpent quantum-box result requires "
+                "a SpatialVector3 position."
+            )
+
+        object.__setattr__(
+            self,
+            "state",
+            str(self.state),
+        )
+
+    def to_dict(self):
+        return {
+            "box_id": self.box_id,
+            "position": self.position.to_dict(),
+            "state": self.state,
+        }
+
+
+@dataclass(slots=True, frozen=True)
+class SerpentQuantumErrorResult:
+
+    error_type: str
+    error_message: str
+    cronenberg_id: str | None
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "error_type",
+            str(self.error_type),
+        )
+
+        object.__setattr__(
+            self,
+            "error_message",
+            str(self.error_message),
+        )
+
+        if self.cronenberg_id is not None:
+            object.__setattr__(
+                self,
+                "cronenberg_id",
+                str(self.cronenberg_id),
+            )
+
+    def to_dict(self):
+        return {
+            "error_type": self.error_type,
+            "error_message": self.error_message,
+            "cronenberg_id": self.cronenberg_id,
+        }
+
+
+@dataclass(slots=True, frozen=True)
+class SerpentCatManifestationResult:
+
+    cat_name: str
+    entity_name: str
+    origin: str
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "cat_name",
+            str(self.cat_name),
+        )
+        object.__setattr__(
+            self,
+            "entity_name",
+            str(self.entity_name),
+        )
+        object.__setattr__(
+            self,
+            "origin",
+            str(self.origin),
+        )
+
+    def to_dict(self):
+        return {
+            "cat_name": self.cat_name,
+            "entity_name": self.entity_name,
+            "origin": self.origin,
+        }
+
+
+@dataclass(slots=True, frozen=True)
+class SerpentQuantumGeometryState:
+
+    configuration_id: str | None
+    configuration_seed: int | None
+    reconfiguration_count: int
+
+    def __post_init__(self):
+        if self.configuration_id is not None:
+            object.__setattr__(
+                self,
+                "configuration_id",
+                str(self.configuration_id),
+            )
+
+        if self.configuration_seed is not None:
+            object.__setattr__(
+                self,
+                "configuration_seed",
+                int(self.configuration_seed),
+            )
+
+        object.__setattr__(
+            self,
+            "reconfiguration_count",
+            int(self.reconfiguration_count),
+        )
+
+    def to_dict(self):
+        return {
+            "configuration_id": (
+                self.configuration_id
+            ),
+            "configuration_seed": (
+                self.configuration_seed
+            ),
+            "reconfiguration_count": (
+                self.reconfiguration_count
+            ),
+        }
+
+
+@dataclass(slots=True, frozen=True)
+class SerpentQuantumGeometryShiftResult:
+
+    before: SerpentQuantumGeometryState
+    after: SerpentQuantumGeometryState
+    cause: str
+
+    def __post_init__(self):
+        for field_name in (
+            "before",
+            "after",
+        ):
+            if not isinstance(
+                getattr(self, field_name),
+                SerpentQuantumGeometryState,
+            ):
+                raise TypeError(
+                    "Serpent quantum geometry result "
+                    "requires geometry state objects."
+                )
+
+        object.__setattr__(
+            self,
+            "cause",
+            str(self.cause),
+        )
+
+    def to_dict(self):
+        return {
+            "before": self.before.to_dict(),
+            "after": self.after.to_dict(),
+            "cause": self.cause,
+        }
+
+
+@dataclass(slots=True, frozen=True)
+class SerpentCronenbergCounterpartResult:
+
+    result: str
+    counterpart_created: bool
+    original_id: str | None = None
+    counterpart_id: str | None = None
+    pair_id: str | None = None
+    original_spin: float | None = None
+    counterpart_spin: float | None = None
+    counterpart_location: str | None = None
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "result",
+            str(self.result),
+        )
+        object.__setattr__(
+            self,
+            "counterpart_created",
+            bool(self.counterpart_created),
+        )
+
+        for field_name in (
+            "original_id",
+            "counterpart_id",
+            "pair_id",
+            "counterpart_location",
+        ):
+            value = getattr(
+                self,
+                field_name,
+            )
+            if value is not None:
+                object.__setattr__(
+                    self,
+                    field_name,
+                    str(value),
+                )
+
+        for field_name in (
+            "original_spin",
+            "counterpart_spin",
+        ):
+            value = getattr(
+                self,
+                field_name,
+            )
+            if value is not None:
+                object.__setattr__(
+                    self,
+                    field_name,
+                    float(value),
+                )
+
+    def to_dict(self):
+        return {
+            "result": self.result,
+            "counterpart_created": (
+                self.counterpart_created
+            ),
+            "original_id": self.original_id,
+            "counterpart_id": self.counterpart_id,
+            "pair_id": self.pair_id,
+            "original_spin": self.original_spin,
+            "counterpart_spin": (
+                self.counterpart_spin
+            ),
+            "counterpart_location": (
+                self.counterpart_location
+            ),
         }
 
 
@@ -179,10 +440,7 @@ class SerpentConsequenceExecutor:
             )
 
         planned = list(
-            hidden.get(
-                "possible_consequences",
-                []
-            )
+            hidden.possible_consequences
         )
 
         resolved = []
@@ -237,7 +495,7 @@ class SerpentConsequenceExecutor:
             f"{roll_id}"
         )
 
-        return event.to_dict()
+        return event
 
     def record_execution(
         self,
@@ -265,11 +523,11 @@ class SerpentConsequenceExecutor:
     def _execute_quantum_box(self):
         box = self.universe.create_quantum_box()
 
-        return {
-            "box_id": box.id,
-            "position": box.position.to_dict(),
-            "state": box.state
-        }
+        return SerpentQuantumBoxResult(
+            box_id=box.id,
+            position=box.position,
+            state=box.state,
+        )
 
     def _execute_quantum_error(self):
         result = self.universe.trigger_quantum_error(
@@ -280,23 +538,26 @@ class SerpentConsequenceExecutor:
             source_operation="hidden_roll"
         )
 
-        cronenberg = result.get(
-            "cronenberg"
-        )
+        if not isinstance(
+            result,
+            QuantumErrorResult,
+        ):
+            raise TypeError(
+                "Serpent quantum error consequence "
+                "requires QuantumErrorResult."
+            )
 
-        return {
-            "error_type": result.get(
-                "error_type"
-            ),
-            "error_message": result.get(
-                "error_message"
-            ),
-            "cronenberg_id": (
+        cronenberg = result.cronenberg
+
+        return SerpentQuantumErrorResult(
+            error_type=result.error_type,
+            error_message=result.error_message,
+            cronenberg_id=(
                 cronenberg.id
                 if cronenberg is not None
                 else None
-            )
-        }
+            ),
+        )
 
     def _execute_cat_manifestation(self):
         name = (
@@ -311,17 +572,17 @@ class SerpentConsequenceExecutor:
             )
         )
 
-        return {
-            "cat_name": manifestation[
+        return SerpentCatManifestationResult(
+            cat_name=manifestation[
                 "cat"
             ]["name"],
-            "entity_name": manifestation[
+            entity_name=manifestation[
                 "entity"
             ].name,
-            "origin": manifestation[
+            origin=manifestation[
                 "cat"
-            ]["origin"]
-        }
+            ]["origin"],
+        )
 
     def _execute_quantum_geometry_shift(self):
         if not hasattr(
@@ -332,39 +593,39 @@ class SerpentConsequenceExecutor:
 
         space = self.universe.quantum_space
 
-        before = {
-            "configuration_id": (
+        before = SerpentQuantumGeometryState(
+            configuration_id=(
                 space.configuration_id
             ),
-            "configuration_seed": (
+            configuration_seed=(
                 space.configuration_seed
             ),
-            "reconfiguration_count": (
+            reconfiguration_count=(
                 space.reconfiguration_count
-            )
-        }
+            ),
+        )
 
         space.reconfigure(
             cause="serpent_d20_hidden_roll"
         )
 
-        after = {
-            "configuration_id": (
+        after = SerpentQuantumGeometryState(
+            configuration_id=(
                 space.configuration_id
             ),
-            "configuration_seed": (
+            configuration_seed=(
                 space.configuration_seed
             ),
-            "reconfiguration_count": (
+            reconfiguration_count=(
                 space.reconfiguration_count
-            )
-        }
+            ),
+        )
 
-        return {
-            "before": before,
-            "after": after,
-            "cause": "serpent_d20_hidden_roll"
-        }
+        return SerpentQuantumGeometryShiftResult(
+            before=before,
+            after=after,
+            cause="serpent_d20_hidden_roll",
+        )
 
     def _execute_cronenberg_quantum_counterpart(self):
         candidates = [
@@ -376,10 +637,10 @@ class SerpentConsequenceExecutor:
         ]
 
         if not candidates:
-            return {
-                "result": "no_eligible_cronenberg",
-                "counterpart_created": False
-            }
+            return SerpentCronenbergCounterpartResult(
+                result="no_eligible_cronenberg",
+                counterpart_created=False,
+            )
 
         original = candidates[0]
 
@@ -393,22 +654,22 @@ class SerpentConsequenceExecutor:
 
         counterpart = result.counterpart
 
-        return {
-            "result": result.result,
-            "counterpart_created": True,
-            "original_id": original.id,
-            "counterpart_id": counterpart.id,
-            "pair_id": result.pair_id,
-            "original_spin": (
+        return SerpentCronenbergCounterpartResult(
+            result=result.result,
+            counterpart_created=True,
+            original_id=original.id,
+            counterpart_id=counterpart.id,
+            pair_id=result.pair_id,
+            original_spin=(
                 original.quantum_state.spin
             ),
-            "counterpart_spin": (
+            counterpart_spin=(
                 counterpart.quantum_state.spin
             ),
-            "counterpart_location": (
+            counterpart_location=(
                 counterpart.location
-            )
-        }
+            ),
+        )
 
     @property
     def public_state(self):

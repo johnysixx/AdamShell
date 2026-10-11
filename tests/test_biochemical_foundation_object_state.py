@@ -192,9 +192,9 @@ class BiochemicalFoundationObjectStateTests(
         process.record_history = broken_history
 
         result = process.form_biochemical_foundations()
-        cronenberg = result["cronenberg"]
+        cronenberg = result.cronenberg
 
-        self.assertEqual(result["type"], "quantum_error")
+        self.assertEqual(result.type, "quantum_error")
         self.assertIn(cronenberg, universe.cronenbergs)
         self.assertEqual(
             cronenberg.origin.source_component,

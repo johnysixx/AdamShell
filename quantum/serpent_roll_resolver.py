@@ -105,20 +105,23 @@ class SerpentRollResolver:
     ):
         rng = rng or random
 
-        if not isinstance(public_roll, dict):
+        if isinstance(public_roll, dict):
             raise TypeError(
-                "Serpent roll must be a public event."
+                "Serpent roll resolver requires "
+                "an object event."
             )
 
-        if public_roll.get("name") != (
-            "serpent_d20_rolled"
-        ):
+        if getattr(
+            public_roll,
+            "name",
+            None,
+        ) != "serpent_d20_rolled":
             raise ValueError(
                 "Invalid Serpent d20 event."
             )
 
         value = int(
-            public_roll["value"]
+            public_roll.value
         )
 
         if value < 1 or value > 20:
@@ -144,7 +147,7 @@ class SerpentRollResolver:
         )
 
         event = SerpentRollResolutionEvent(
-            roll_id=public_roll["roll_id"],
+            roll_id=public_roll.roll_id,
             value=value,
             intensity=self._intensity(value),
             selected_effects=tuple(
@@ -160,7 +163,7 @@ class SerpentRollResolver:
             event
         )
 
-        return event.to_dict()
+        return event
 
     def record_resolution(
         self,

@@ -174,7 +174,7 @@ class EnergyGateObjectStateTests(unittest.TestCase):
         gate._update_state_unprotected = broken_update
 
         result = gate.collect_energy("idea", 1.0)
-        cronenberg = result["cronenberg"]
+        cronenberg = result.cronenberg
 
         self.assertIn(cronenberg, universe.cronenbergs)
         self.assertEqual(
@@ -192,7 +192,7 @@ class EnergyGateObjectStateTests(unittest.TestCase):
         gate.threshold_j = "broken"
 
         result = gate.update_state()
-        cronenberg = result["cronenberg"]
+        cronenberg = result.cronenberg
 
         self.assertIn(cronenberg, universe.cronenbergs)
         self.assertEqual(
@@ -211,7 +211,7 @@ class EnergyGateObjectStateTests(unittest.TestCase):
         universe.start_big_bang = broken_start
 
         result = gate.try_start_big_bang()
-        cronenberg = result["cronenberg"]
+        cronenberg = result.cronenberg
 
         self.assertIn(cronenberg, universe.cronenbergs)
         self.assertEqual(

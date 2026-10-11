@@ -5,6 +5,19 @@ from types import MappingProxyType
 from universe.logger import UniverseLogger
 
 
+def _serialize_quantum_value(value):
+    to_dict = getattr(
+        value,
+        "to_dict",
+        None,
+    )
+
+    if callable(to_dict):
+        return to_dict()
+
+    return deepcopy(value)
+
+
 @dataclass(slots=True, frozen=True)
 class QuantumEvent:
 
@@ -40,6 +53,60 @@ class QuantumEvent:
                     self.payload
                 )
             ),
+        }
+
+
+@dataclass(slots=True, frozen=True)
+class QuantumEventPublicationResult:
+
+    event: QuantumEvent
+    subscriber_count: int
+    results: tuple[object, ...]
+
+    def __post_init__(self):
+        if not isinstance(
+            self.event,
+            QuantumEvent,
+        ):
+            raise TypeError(
+                "Quantum event publication requires "
+                "a QuantumEvent object."
+            )
+
+        object.__setattr__(
+            self,
+            "subscriber_count",
+            int(self.subscriber_count),
+        )
+
+        object.__setattr__(
+            self,
+            "results",
+            tuple(self.results),
+        )
+
+        if (
+            self.subscriber_count
+            != len(self.results)
+        ):
+            raise ValueError(
+                "Quantum event subscriber count must "
+                "match the result count."
+            )
+
+    def to_dict(self):
+        return {
+            "event": self.event.to_dict(),
+            "subscriber_count": (
+                self.subscriber_count
+            ),
+            "results": [
+                _serialize_quantum_value(
+                    result
+                )
+                for result
+                in self.results
+            ],
         }
 
 
@@ -122,15 +189,17 @@ class QuantumEventBus:
         ):
             results.append(
                 handler(
-                    event_snapshot
+                    deepcopy(
+                        event_snapshot
+                    )
                 )
             )
 
-        return {
-            "event": event_snapshot,
-            "subscriber_count": len(results),
-            "results": results
-        }
+        return QuantumEventPublicationResult(
+            event=event,
+            subscriber_count=len(results),
+            results=tuple(results),
+        )
 
     def record_event(
         self,

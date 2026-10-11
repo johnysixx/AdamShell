@@ -134,10 +134,10 @@ class AtomFormationObjectStateTests(
         process.create_neutral_atom = broken_atom
 
         result = process.form_reference_atoms()
-        cronenberg = result["cronenberg"]
+        cronenberg = result.cronenberg
 
         self.assertEqual(
-            result["type"],
+            result.type,
             "quantum_error",
         )
         self.assertIn(

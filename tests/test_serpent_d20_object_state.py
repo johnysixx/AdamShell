@@ -180,12 +180,18 @@ class SerpentD20ObjectStateTests(
         with self.assertRaises(TypeError):
             _ = event["roll_id"]
 
-        snapshot = (
+        resolved = (
             die.hidden_resolution_for(
                 public["roll_id"]
             )
         )
 
+        self.assertIs(
+            resolved,
+            event,
+        )
+
+        snapshot = resolved.to_dict()
         snapshot[
             "possible_consequences"
         ].append(
@@ -270,7 +276,8 @@ class SerpentD20ObjectStateTests(
                 "consequence"
             ]
 
-        result[
+        snapshot = result.to_dict()
+        snapshot[
             "resolved_consequences"
         ][0][
             "result"

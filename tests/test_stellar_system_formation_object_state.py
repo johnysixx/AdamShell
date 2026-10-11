@@ -259,10 +259,10 @@ class StellarSystemFormationObjectStateTests(
         process.record_history = broken_history
 
         result = process.form_stellar_systems()
-        cronenberg = result["cronenberg"]
+        cronenberg = result.cronenberg
 
         self.assertEqual(
-            result["type"],
+            result.type,
             "quantum_error",
         )
         self.assertIn(

@@ -228,9 +228,7 @@ class CatBirthGibTests(
 
         self.assertEqual(
             set(
-                resonance.d20_rotation[
-                    "artifact_names"
-                ]
+                resonance.d20_rotation.artifact_names
             ),
             registered_names
         )

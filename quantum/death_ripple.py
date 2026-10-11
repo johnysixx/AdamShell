@@ -1,7 +1,7 @@
 import random
 from dataclasses import dataclass
 
-
+from quantum.d20_registry import D20RotationEvent
 
 
 @dataclass(slots=True, frozen=True)
@@ -66,16 +66,20 @@ class QuantumDeathRipple:
         roll = rng.random()
 
         if roll < 0.80:
-            result = {
-                "scope": "none",
-                "rotated_count": 0
-            }
+            result_scope = "none"
+            rotated_count = 0
 
         elif roll < 0.95:
             result = (
                 self.d20_registry
                 .rotate_random(
                     rng=rng
+                )
+            )
+
+            result_scope, rotated_count = (
+                self._rotation_result(
+                    result
                 )
             )
 
@@ -97,11 +101,23 @@ class QuantumDeathRipple:
                 )
             )
 
+            result_scope, rotated_count = (
+                self._rotation_result(
+                    result
+                )
+            )
+
         else:
             result = (
                 self.d20_registry
                 .rotate_all(
                     rng=rng
+                )
+            )
+
+            result_scope, rotated_count = (
+                self._rotation_result(
+                    result
                 )
             )
 
@@ -115,26 +131,33 @@ class QuantumDeathRipple:
                 "payload",
                 {}
             ).get("prey"),
-            result_scope=result.get(
-                "scope"
-            ),
-            rotated_count=result.get(
-                "rotated_count",
-                0
-            ),
+            result_scope=result_scope,
+            rotated_count=rotated_count,
         )
 
         self.record_event(
             record
         )
 
-        return {
-            "scope": result.get("scope"),
-            "rotated_count": result.get(
-                "rotated_count",
-                0
+        return record
+
+    def _rotation_result(
+        self,
+        result,
+    ):
+        if not isinstance(
+            result,
+            D20RotationEvent,
+        ):
+            raise TypeError(
+                "Quantum death ripple requires "
+                "D20RotationEvent results."
             )
-        }
+
+        return (
+            result.scope,
+            result.rotated_count,
+        )
 
     def record_event(
         self,

@@ -159,10 +159,10 @@ class AtomicTimeObjectStateTests(
         process.ensure_isotopes = broken_isotopes
 
         result = process.define_si_second()
-        cronenberg = result["cronenberg"]
+        cronenberg = result.cronenberg
 
         self.assertEqual(
-            result["type"],
+            result.type,
             "quantum_error",
         )
         self.assertIn(
