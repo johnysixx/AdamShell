@@ -72,6 +72,17 @@ def _freeze_cronenberg_pair_payload(
 def _thaw_cronenberg_pair_payload(
     value
 ):
+    to_dict = getattr(
+        value,
+        "to_dict",
+        None,
+    )
+
+    if callable(to_dict):
+        return deepcopy(
+            to_dict()
+        )
+
     if isinstance(
         value,
         MappingProxyType
@@ -131,6 +142,169 @@ def _thaw_cronenberg_pair_payload(
         )
 
     return value
+
+
+@dataclass(slots=True, frozen=True)
+class CronenbergPairSurvivalResult:
+    first_alive: bool
+    second_alive: bool
+    first_id: str
+    second_id: str
+
+    def to_dict(self):
+        return {
+            "first_alive": self.first_alive,
+            "second_alive": self.second_alive,
+            "first_id": self.first_id,
+            "second_id": self.second_id,
+        }
+
+
+@dataclass(slots=True, frozen=True)
+class CronenbergQuantumTickEffectResult:
+    before_tick: int
+    after_tick: int
+    tick_result: object
+
+    def to_dict(self):
+        return {
+            "before_tick": self.before_tick,
+            "after_tick": self.after_tick,
+            "tick_result": deepcopy(self.tick_result),
+        }
+
+
+@dataclass(slots=True, frozen=True)
+class CronenbergSpinStateChange:
+    participant_id: str
+    before: float
+    after: float
+
+    def to_dict(self):
+        return {
+            "id": self.participant_id,
+            "before": self.before,
+            "after": self.after,
+        }
+
+
+@dataclass(slots=True, frozen=True)
+class CronenbergSpinExchangeResult:
+    first: CronenbergSpinStateChange
+    second: CronenbergSpinStateChange
+
+    def to_dict(self):
+        return {
+            "first": self.first.to_dict(),
+            "second": self.second.to_dict(),
+        }
+
+
+@dataclass(slots=True, frozen=True)
+class CronenbergGeometryState:
+    configuration_id: object
+    reconfiguration_count: int
+
+    def to_dict(self):
+        return {
+            "configuration_id": self.configuration_id,
+            "reconfiguration_count": self.reconfiguration_count,
+        }
+
+
+@dataclass(slots=True, frozen=True)
+class CronenbergGeometryShiftResult:
+    before: CronenbergGeometryState
+    after: CronenbergGeometryState
+
+    def to_dict(self):
+        return {
+            "before": self.before.to_dict(),
+            "after": self.after.to_dict(),
+        }
+
+
+@dataclass(slots=True, frozen=True)
+class CronenbergPairPropertyValues:
+    size: float
+    energy: float
+
+    def to_dict(self):
+        return {
+            "size": self.size,
+            "energy": self.energy,
+        }
+
+
+@dataclass(slots=True, frozen=True)
+class CronenbergPairParticipantProperties:
+    participant_id: str
+    size: float
+    energy: float
+    juice_value: float | None = None
+
+    def to_dict(self):
+        result = {
+            "size": self.size,
+            "energy": self.energy,
+        }
+        if self.juice_value is not None:
+            result["juice_value"] = self.juice_value
+        return result
+
+
+@dataclass(slots=True, frozen=True)
+class CronenbergPairPropertySumResult:
+    first_before: CronenbergPairParticipantProperties
+    second_before: CronenbergPairParticipantProperties
+    combined: CronenbergPairPropertyValues
+    first_after: CronenbergPairParticipantProperties
+    second_after: CronenbergPairParticipantProperties
+    mode: str = field(
+        default="sum_to_both",
+        init=False,
+    )
+
+    def to_dict(self):
+        return {
+            "mode": self.mode,
+            "before": {
+                self.first_before.participant_id: self.first_before.to_dict(),
+                self.second_before.participant_id: self.second_before.to_dict(),
+            },
+            "combined": self.combined.to_dict(),
+            "after": {
+                self.first_after.participant_id: self.first_after.to_dict(),
+                self.second_after.participant_id: self.second_after.to_dict(),
+            },
+        }
+
+
+@dataclass(slots=True, frozen=True)
+class CronenbergPairPropertyEqualizationResult:
+    first_before: CronenbergPairParticipantProperties
+    second_before: CronenbergPairParticipantProperties
+    equalized: CronenbergPairPropertyValues
+    first_after: CronenbergPairParticipantProperties
+    second_after: CronenbergPairParticipantProperties
+    mode: str = field(
+        default="equalized_average",
+        init=False,
+    )
+
+    def to_dict(self):
+        return {
+            "mode": self.mode,
+            "before": {
+                self.first_before.participant_id: self.first_before.to_dict(),
+                self.second_before.participant_id: self.second_before.to_dict(),
+            },
+            "equalized": self.equalized.to_dict(),
+            "after": {
+                self.first_after.participant_id: self.first_after.to_dict(),
+                self.second_after.participant_id: self.second_after.to_dict(),
+            },
+        }
 
 
 @dataclass(
@@ -325,7 +499,11 @@ class CronenbergPairEncounterResolver:
     ):
         rng = rng or random
 
-        if not encounter_event.get("encountered"):
+        if not getattr(
+            encounter_event,
+            "encountered",
+            False,
+        ):
             raise ValueError(
                 "Encounter event is not an active pair encounter."
             )
@@ -412,19 +590,13 @@ class CronenbergPairEncounterResolver:
         resolution = (
             CronenbergPairEncounterResolvedEvent(
                 pair_id=(
-                    encounter_event[
-                        "pair_id"
-                    ]
+                    encounter_event.pair_id
                 ),
                 participants=tuple(
-                    encounter_event[
-                        "participants"
-                    ]
+                    encounter_event.participants
                 ),
                 location=(
-                    encounter_event[
-                        "location"
-                    ]
+                    encounter_event.location
                 ),
                 selected_effects=tuple(
                     selected_effects
@@ -436,9 +608,7 @@ class CronenbergPairEncounterResolver:
                     skipped_effects
                 ),
                 universe_tick=(
-                    encounter_event.get(
-                        "universe_tick"
-                    )
+                    encounter_event.universe_tick
                 ),
             )
         )
@@ -453,7 +623,7 @@ class CronenbergPairEncounterResolver:
             f"EFFECTS={selected_effects}"
         )
 
-        return resolution.to_dict()
+        return resolution
 
     def record_resolution(
         self,
@@ -500,12 +670,12 @@ class CronenbergPairEncounterResolver:
         first,
         second
     ):
-        return {
-            "first_alive": first.is_alive,
-            "second_alive": second.is_alive,
-            "first_id": first.id,
-            "second_id": second.id
-        }
+        return CronenbergPairSurvivalResult(
+            first_alive=first.is_alive,
+            second_alive=second.is_alive,
+            first_id=first.id,
+            second_id=second.id,
+        )
 
     def _quantum_tick(self):
         before = self.universe.quantum_state.tick_count
@@ -514,11 +684,11 @@ class CronenbergPairEncounterResolver:
 
         after = self.universe.quantum_state.tick_count
 
-        return {
-            "before_tick": before,
-            "after_tick": after,
-            "tick_result": deepcopy(result)
-        }
+        return CronenbergQuantumTickEffectResult(
+            before_tick=before,
+            after_tick=after,
+            tick_result=deepcopy(result),
+        )
 
     def _spin_exchange(
         self,
@@ -537,18 +707,18 @@ class CronenbergPairEncounterResolver:
             first_before
         )
 
-        return {
-            "first": {
-                "id": first.id,
-                "before": first_before,
-                "after": first.quantum_state.spin
-            },
-            "second": {
-                "id": second.id,
-                "before": second_before,
-                "after": second.quantum_state.spin
-            }
-        }
+        return CronenbergSpinExchangeResult(
+            first=CronenbergSpinStateChange(
+                participant_id=first.id,
+                before=first_before,
+                after=first.quantum_state.spin,
+            ),
+            second=CronenbergSpinStateChange(
+                participant_id=second.id,
+                before=second_before,
+                after=second.quantum_state.spin,
+            ),
+        )
 
     def _geometry_shift(self):
         if not hasattr(
@@ -559,48 +729,48 @@ class CronenbergPairEncounterResolver:
 
         space = self.universe.quantum_space
 
-        before = {
-            "configuration_id": (
+        before = CronenbergGeometryState(
+            configuration_id=(
                 space.configuration_id
             ),
-            "reconfiguration_count": (
+            reconfiguration_count=(
                 space.reconfiguration_count
-            )
-        }
+            ),
+        )
 
         space.reconfigure(
             cause="cronenberg_quantum_pair_encounter"
         )
 
-        after = {
-            "configuration_id": (
+        after = CronenbergGeometryState(
+            configuration_id=(
                 space.configuration_id
             ),
-            "reconfiguration_count": (
+            reconfiguration_count=(
                 space.reconfiguration_count
-            )
-        }
+            ),
+        )
 
-        return {
-            "before": before,
-            "after": after
-        }
+        return CronenbergGeometryShiftResult(
+            before=before,
+            after=after,
+        )
 
     def _property_sum(
         self,
         first,
         second
     ):
-        before = {
-            first.id: {
-                "size": first.size,
-                "energy": first.energy
-            },
-            second.id: {
-                "size": second.size,
-                "energy": second.energy
-            }
-        }
+        first_before = CronenbergPairParticipantProperties(
+            participant_id=first.id,
+            size=first.size,
+            energy=first.energy,
+        )
+        second_before = CronenbergPairParticipantProperties(
+            participant_id=second.id,
+            size=second.size,
+            energy=second.energy,
+        )
 
         combined_size = (
             first.size
@@ -621,42 +791,42 @@ class CronenbergPairEncounterResolver:
         first.juice_value = first.size
         second.juice_value = second.size
 
-        return {
-            "mode": "sum_to_both",
-            "before": before,
-            "combined": {
-                "size": combined_size,
-                "energy": combined_energy
-            },
-            "after": {
-                first.id: {
-                    "size": first.size,
-                    "energy": first.energy,
-                    "juice_value": first.juice_value
-                },
-                second.id: {
-                    "size": second.size,
-                    "energy": second.energy,
-                    "juice_value": second.juice_value
-                }
-            }
-        }
+        return CronenbergPairPropertySumResult(
+            first_before=first_before,
+            second_before=second_before,
+            combined=CronenbergPairPropertyValues(
+                size=combined_size,
+                energy=combined_energy,
+            ),
+            first_after=CronenbergPairParticipantProperties(
+                participant_id=first.id,
+                size=first.size,
+                energy=first.energy,
+                juice_value=first.juice_value,
+            ),
+            second_after=CronenbergPairParticipantProperties(
+                participant_id=second.id,
+                size=second.size,
+                energy=second.energy,
+                juice_value=second.juice_value,
+            ),
+        )
 
     def _property_equalization(
         self,
         first,
         second
     ):
-        before = {
-            first.id: {
-                "size": first.size,
-                "energy": first.energy
-            },
-            second.id: {
-                "size": second.size,
-                "energy": second.energy
-            }
-        }
+        first_before = CronenbergPairParticipantProperties(
+            participant_id=first.id,
+            size=first.size,
+            energy=first.energy,
+        )
+        second_before = CronenbergPairParticipantProperties(
+            participant_id=second.id,
+            size=second.size,
+            energy=second.energy,
+        )
 
         equal_size = (
             first.size
@@ -677,26 +847,26 @@ class CronenbergPairEncounterResolver:
         first.juice_value = first.size
         second.juice_value = second.size
 
-        return {
-            "mode": "equalized_average",
-            "before": before,
-            "equalized": {
-                "size": equal_size,
-                "energy": equal_energy
-            },
-            "after": {
-                first.id: {
-                    "size": first.size,
-                    "energy": first.energy,
-                    "juice_value": first.juice_value
-                },
-                second.id: {
-                    "size": second.size,
-                    "energy": second.energy,
-                    "juice_value": second.juice_value
-                }
-            }
-        }
+        return CronenbergPairPropertyEqualizationResult(
+            first_before=first_before,
+            second_before=second_before,
+            equalized=CronenbergPairPropertyValues(
+                size=equal_size,
+                energy=equal_energy,
+            ),
+            first_after=CronenbergPairParticipantProperties(
+                participant_id=first.id,
+                size=first.size,
+                energy=first.energy,
+                juice_value=first.juice_value,
+            ),
+            second_after=CronenbergPairParticipantProperties(
+                participant_id=second.id,
+                size=second.size,
+                energy=second.energy,
+                juice_value=second.juice_value,
+            ),
+        )
 
     def _order_effects(self, effects):
         priority = {

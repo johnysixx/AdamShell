@@ -27,6 +27,9 @@ from core.entity.cronenberg_system.origin import (
 from core.entity.cronenberg_system.consumption import (
     CronenbergConsumptionRecord
 )
+from core.entity.cronenberg_system.result_state import (
+    CronenbergConsumptionResult,
+)
 from core.entity.cronenberg_system.chemical_marker import (
     CronenbergChemicalMarker
 )
@@ -431,16 +434,16 @@ class Cronenberg(Entity):
             f"days"
         )
 
-        return {
-            "predator": self.name,
-            "prey": other.name,
-            "mass_gained": consumed_mass,
-            "energy_gained": consumed_energy,
-            "new_size": self.size,
-            "digestion_days": (
+        return CronenbergConsumptionResult(
+            predator=self.name,
+            prey=other.name,
+            mass_gained=consumed_mass,
+            energy_gained=consumed_energy,
+            new_size=self.size,
+            digestion_days=(
                 digestion_event.digestion_days
-            )
-        }
+            ),
+        )
 
     def tick_in_pen(self, universe):
         self.age += 1

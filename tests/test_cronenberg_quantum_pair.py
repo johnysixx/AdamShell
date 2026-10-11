@@ -39,7 +39,7 @@ class CronenbergQuantumPairTests(unittest.TestCase):
             universe
             .create_cronenberg_quantum_counterpart(
                 original
-            )["counterpart"]
+            ).counterpart
         )
 
         return universe, original, counterpart
@@ -96,11 +96,11 @@ class CronenbergQuantumPairTests(unittest.TestCase):
         )
 
         self.assertFalse(
-            apart["encountered"]
+            apart.encountered
         )
 
         self.assertEqual(
-            apart["reason"],
+            apart.reason,
             "different_location"
         )
 
@@ -113,11 +113,11 @@ class CronenbergQuantumPairTests(unittest.TestCase):
         )
 
         self.assertTrue(
-            together["encountered"]
+            together.encountered
         )
 
         self.assertEqual(
-            together["pair_id"],
+            together.pair_id,
             original.quantum_state.pair_id
         )
 
@@ -133,7 +133,7 @@ class CronenbergQuantumPairTests(unittest.TestCase):
 
         def fake_resolve(**kwargs):
             calls.append(
-                kwargs["encounter_event"]["pair_id"]
+                kwargs["encounter_event"].pair_id
             )
 
             return {
@@ -196,7 +196,7 @@ class CronenbergQuantumPairTests(unittest.TestCase):
         encounter_events = [
             event
             for event in universe.quantum_events
-            if event.get("name")
+            if getattr(event, "name", None)
             == "cronenberg_quantum_pair_encountered"
         ]
 
@@ -206,20 +206,14 @@ class CronenbergQuantumPairTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            encounter_events[0][
-                "resolution"
-            ][
-                "resolution_number"
-            ],
+            encounter_events[0]
+            .resolution["resolution_number"],
             1
         )
 
         self.assertEqual(
-            encounter_events[1][
-                "resolution"
-            ][
-                "resolution_number"
-            ],
+            encounter_events[1]
+            .resolution["resolution_number"],
             2
         )
 
@@ -250,7 +244,7 @@ class CronenbergQuantumPairTests(unittest.TestCase):
 
         def consumption_only_resolve(**kwargs):
             calls.append(
-                kwargs["encounter_event"]["pair_id"]
+                kwargs["encounter_event"].pair_id
             )
 
             class ConsumptionOnlyRng:
@@ -367,7 +361,7 @@ class CronenbergQuantumPairTests(unittest.TestCase):
         encounter_events = [
             event
             for event in universe.quantum_events
-            if event.get("name")
+            if getattr(event, "name", None)
             == "cronenberg_quantum_pair_encountered"
         ]
 
@@ -397,7 +391,7 @@ class CronenbergQuantumPairTests(unittest.TestCase):
 
         def merge_only_resolve(**kwargs):
             calls.append(
-                kwargs["encounter_event"]["pair_id"]
+                kwargs["encounter_event"].pair_id
             )
 
             class MergeOnlyRng:
@@ -471,7 +465,7 @@ class CronenbergQuantumPairTests(unittest.TestCase):
         encounter_events = [
             event
             for event in universe.quantum_events
-            if event.get("name")
+            if getattr(event, "name", None)
             == "cronenberg_quantum_pair_encountered"
         ]
 
@@ -495,7 +489,7 @@ class CronenbergQuantumPairTests(unittest.TestCase):
 
         def fake_resolve(**kwargs):
             calls.append(
-                kwargs["encounter_event"]["pair_id"]
+                kwargs["encounter_event"].pair_id
             )
 
             return {
@@ -527,12 +521,12 @@ class CronenbergQuantumPairTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            encounter_event["location"],
+            encounter_event.location,
             "stable_kernel"
         )
 
         self.assertEqual(
-            encounter_event["resolution"],
+            encounter_event.resolution,
             {
                 "name": "tick_resolution",
                 "effect": "both_survive"
@@ -565,11 +559,10 @@ class CronenbergQuantumPairTests(unittest.TestCase):
         calls = []
 
         def fake_resolve(**kwargs):
-            pair_id = kwargs[
-                "encounter_event"
-            ][
-                "pair_id"
-            ]
+            pair_id = (
+                kwargs["encounter_event"]
+                .pair_id
+            )
 
             calls.append(pair_id)
 
@@ -608,7 +601,7 @@ class CronenbergQuantumPairTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            first_result[0]["resolution"],
+            first_result[0].resolution,
             {
                 "name": "test_resolution",
                 "effect": "both_survive"
@@ -616,11 +609,8 @@ class CronenbergQuantumPairTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            universe.quantum_events[-1][
-                "resolution"
-            ][
-                "name"
-            ],
+            universe.quantum_events[-1]
+            .resolution["name"],
             "test_resolution"
         )
 
@@ -752,20 +742,18 @@ class CronenbergQuantumPairTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            result["selected_effects"],
-            [
+            result.selected_effects,
+            (
                 "spin_exchange",
                 "property_sum",
                 "quantum_merge"
-            ]
+            )
         )
 
         self.assertEqual(
             [
-                item["effect"]
-                for item in result[
-                    "resolved_effects"
-                ]
+                item.effect
+                for item in result.resolved_effects
             ],
             [
                 "spin_exchange",
@@ -775,8 +763,8 @@ class CronenbergQuantumPairTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            result["skipped_effects"],
-            []
+            result.skipped_effects,
+            ()
         )
 
         self.assertFalse(original.active)
@@ -826,20 +814,18 @@ class CronenbergQuantumPairTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            result["selected_effects"],
-            [
+            result.selected_effects,
+            (
                 "spin_exchange",
                 "quantum_merge",
                 "quantum_pair_consumption"
-            ]
+            )
         )
 
         self.assertEqual(
             [
-                item["effect"]
-                for item in result[
-                    "resolved_effects"
-                ]
+                item.effect
+                for item in result.resolved_effects
             ],
             [
                 "spin_exchange",
@@ -848,10 +834,10 @@ class CronenbergQuantumPairTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            result["skipped_effects"],
-            [
-                "quantum_pair_consumption"
-            ]
+            result.skipped_effects,
+            (
+                "quantum_pair_consumption",
+            )
         )
 
         self.assertFalse(original.active)
@@ -909,13 +895,9 @@ class CronenbergQuantumPairTests(unittest.TestCase):
         )
 
         merged = (
-            merge_result[
-                "resolved_effects"
-            ][0][
-                "result"
-            ][
-                "merged"
-            ]
+            merge_result
+            .resolved_effects[0]
+            .result.merged
         )
 
         self.assertIsNone(
@@ -973,13 +955,9 @@ class CronenbergQuantumPairTests(unittest.TestCase):
         )
 
         recombined = (
-            consumption_result[
-                "resolved_effects"
-            ][0][
-                "result"
-            ][
-                "recombined"
-            ]
+            consumption_result
+            .resolved_effects[0]
+            .result.recombined
         )
 
         self.assertIsNone(
@@ -1035,12 +1013,10 @@ class CronenbergQuantumPairTests(unittest.TestCase):
         )
 
         effect_result = (
-            result["resolved_effects"][0][
-                "result"
-            ]
+            result.resolved_effects[0].result
         )
 
-        merged = effect_result["merged"]
+        merged = effect_result.merged
 
         self.assertFalse(original.active)
         self.assertFalse(counterpart.active)
@@ -1125,12 +1101,10 @@ class CronenbergQuantumPairTests(unittest.TestCase):
         )
 
         effect_result = (
-            result["resolved_effects"][0][
-                "result"
-            ]
+            result.resolved_effects[0].result
         )
 
-        recombined = effect_result["recombined"]
+        recombined = effect_result.recombined
 
         self.assertFalse(original.active)
         self.assertFalse(counterpart.active)

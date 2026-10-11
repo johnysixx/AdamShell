@@ -191,9 +191,7 @@ class QuantumDieResolver:
                 )
             )
 
-            counterpart = result[
-                "counterpart"
-            ]
+            counterpart = result.counterpart
 
             return QuantumDieResolution(
                 result=(
@@ -201,7 +199,7 @@ class QuantumDieResolver:
                 ),
                 original_id=candidate.id,
                 counterpart_id=counterpart.id,
-                pair_id=result["pair_id"],
+                pair_id=result.pair_id,
             )
 
         original = (
@@ -223,15 +221,13 @@ class QuantumDieResolver:
             )
         )
 
-        counterpart = pair_result[
-            "counterpart"
-        ]
+        counterpart = pair_result.counterpart
 
         return QuantumDieResolution(
             result="new_cronenberg_pair_manifested",
             original_id=original.id,
             counterpart_id=counterpart.id,
-            pair_id=pair_result["pair_id"],
+            pair_id=pair_result.pair_id,
         )
 
     def _find_counterpart_candidate(self):

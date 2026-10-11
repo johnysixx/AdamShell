@@ -39,7 +39,7 @@ class CronenbergQuantumObjectStateTests(
             universe
             .create_cronenberg_quantum_counterpart(
                 original
-            )["counterpart"]
+            ).counterpart
         )
 
         return universe, original, counterpart
@@ -88,7 +88,7 @@ class CronenbergQuantumObjectStateTests(
             universe
             .create_cronenberg_quantum_counterpart(
                 original
-            )["counterpart"]
+            ).counterpart
         )
 
         self.assertIs(
@@ -204,7 +204,7 @@ class CronenbergQuantumObjectStateTests(
                 counterpart,
             )
         )
-        recombined = result["recombined"]
+        recombined = result.recombined
 
         self.assertIsInstance(
             recombined.quantum_state,

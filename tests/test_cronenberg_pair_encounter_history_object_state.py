@@ -28,7 +28,7 @@ class CronenbergPairEncounterHistoryObjectStateTests(
             universe
             .create_cronenberg_quantum_counterpart(
                 original
-            )["counterpart"]
+            ).counterpart
         )
 
         original.location = (
@@ -91,11 +91,11 @@ class CronenbergPairEncounterHistoryObjectStateTests(
         )
 
         self.assertEqual(
-            result[
-                "spins"
-            ][
-                original.id
-            ],
+            next(
+                spin.spin
+                for spin in result.spins
+                if spin.participant_id == original.id
+            ),
             original.quantum_state.spin,
         )
 
@@ -138,17 +138,19 @@ class CronenbergPairEncounterHistoryObjectStateTests(
             detector.history[-1]
         )
 
-        result[
+        snapshot = result.to_dict()
+
+        snapshot[
             "participants"
         ][0] = "changed"
 
-        result[
+        snapshot[
             "spins"
         ][
             original.id
         ] = 99.0
 
-        result[
+        snapshot[
             "resolution"
         ] = {
             "changed": True,
@@ -213,7 +215,7 @@ class CronenbergPairEncounterHistoryObjectStateTests(
         )
 
         self.assertEqual(
-            events[0]["resolution"],
+            events[0].resolution,
             {
                 "name":
                     "test_resolution",

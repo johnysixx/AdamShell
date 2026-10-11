@@ -46,6 +46,15 @@ from universe.universe_tick_result_state import (
     UniverseTickPhaseSkippedResult,
     UniverseTickReport,
 )
+from universe.cronenberg_quantum_result_state import (
+    CronenbergQuantumCounterpartAlreadyExistsResult,
+    CronenbergQuantumCounterpartCreatedEvent,
+    CronenbergQuantumCounterpartCreatedResult,
+    CronenbergQuantumPairConsumedEvent,
+    CronenbergQuantumPairConsumptionResult,
+    CronenbergQuantumPairMergedEvent,
+    CronenbergQuantumPairMergeResult,
+)
 
 class Universe:
 
@@ -535,10 +544,26 @@ class Universe:
         self.cronenbergs.append(recombined)
         self.cronenberg_count += 1
         self.add_entity(recombined)
-        event = {'name': 'cronenberg_quantum_pair_consumed', 'pair_id': pair_id, 'participants': [first.id, second.id], 'recombined_id': recombined.id, 'combined_size': combined_size, 'recombined_size': recombined_size, 'combined_energy': combined_energy, 'retained_energy': retained_energy, 'released_energy': released_energy, 'dark_energy_created': dark_energy, 'tick': self.quantum_state.tick_count}
+        event = CronenbergQuantumPairConsumedEvent(
+            pair_id=pair_id,
+            participants=(first.id, second.id),
+            recombined_id=recombined.id,
+            combined_size=combined_size,
+            recombined_size=recombined_size,
+            combined_energy=combined_energy,
+            retained_energy=retained_energy,
+            released_energy=released_energy,
+            dark_energy_created=dark_energy,
+            tick=self.quantum_state.tick_count,
+        )
         self.quantum_events.append(event)
         UniverseLogger.event(f'CRONENBERG QUANTUM PAIR CONSUMED: {first.id} <-> {second.id} -> {recombined.id}')
-        return {'result': 'quantum_pair_consumption_recombined', 'first': first, 'second': second, 'recombined': recombined, 'event': event}
+        return CronenbergQuantumPairConsumptionResult(
+            first=first,
+            second=second,
+            recombined=recombined,
+            event=event,
+        )
 
     def merge_cronenberg_quantum_pair(self, first, second, source='cronenberg_quantum_pair_encounter'):
         if first is second:
@@ -583,10 +608,24 @@ class Universe:
         self.cronenbergs.append(merged)
         self.cronenberg_count += 1
         self.add_entity(merged)
-        event = {'name': 'cronenberg_quantum_pair_merged', 'pair_id': first_pair_id, 'parents': [first.id, second.id], 'merged_id': merged.id, 'merged_size': merged.size, 'merged_energy': merged.energy, 'merged_spin': merged.quantum_state.spin, 'source': source, 'tick': self.quantum_state.tick_count}
+        event = CronenbergQuantumPairMergedEvent(
+            pair_id=first_pair_id,
+            parents=(first.id, second.id),
+            merged_id=merged.id,
+            merged_size=merged.size,
+            merged_energy=merged.energy,
+            merged_spin=merged.quantum_state.spin,
+            source=source,
+            tick=self.quantum_state.tick_count,
+        )
         self.quantum_events.append(event)
         UniverseLogger.event(f'CRONENBERG QUANTUM PAIR MERGED: {first.id} + {second.id} -> {merged.id}')
-        return {'result': 'quantum_pair_merged', 'first': first, 'second': second, 'merged': merged, 'event': event}
+        return CronenbergQuantumPairMergeResult(
+            first=first,
+            second=second,
+            merged=merged,
+            event=event,
+        )
 
     def create_cronenberg_quantum_counterpart(self, original, source='serpent_d20_hidden_roll'):
         if original not in self.cronenbergs:
@@ -597,7 +636,11 @@ class Universe:
         if existing_counterpart_id is not None:
             existing = next((cronenberg for cronenberg in self.cronenbergs if cronenberg.id == existing_counterpart_id), None)
             if existing is not None:
-                return {'result': 'counterpart_already_exists', 'original': original, 'counterpart': existing, 'pair_id': original.quantum_state.pair_id}
+                return CronenbergQuantumCounterpartAlreadyExistsResult(
+                    original=original,
+                    counterpart=existing,
+                    pair_id=original.quantum_state.pair_id,
+                )
         pair_id = f'cronenberg_pair_{uuid.uuid4().hex[:8]}'
         counterpart = Cronenberg(error=RuntimeError('Cronenberg quantum counterpart manifestation.'), source_component='cronenberg_quantum_counterpart', source_operation=source, quantum_tick=self.quantum_state.tick_count)
         counterpart.size = original.size
@@ -625,10 +668,23 @@ class Universe:
         self.cronenbergs.append(counterpart)
         self.cronenberg_count += 1
         self.add_entity(counterpart)
-        event = {'name': 'cronenberg_quantum_counterpart_created', 'original_id': original.id, 'counterpart_id': counterpart.id, 'pair_id': pair_id, 'original_spin': original.quantum_state.spin, 'counterpart_spin': counterpart.quantum_state.spin, 'source': source, 'tick': self.quantum_state.tick_count}
+        event = CronenbergQuantumCounterpartCreatedEvent(
+            original_id=original.id,
+            counterpart_id=counterpart.id,
+            pair_id=pair_id,
+            original_spin=original.quantum_state.spin,
+            counterpart_spin=counterpart.quantum_state.spin,
+            source=source,
+            tick=self.quantum_state.tick_count,
+        )
         self.quantum_events.append(event)
         UniverseLogger.event(f'CRONENBERG QUANTUM COUNTERPART CREATED: {original.id} <-> {counterpart.id}')
-        return {'result': 'counterpart_created', 'original': original, 'counterpart': counterpart, 'pair_id': pair_id, 'event': event}
+        return CronenbergQuantumCounterpartCreatedResult(
+            original=original,
+            counterpart=counterpart,
+            pair_id=pair_id,
+            event=event,
+        )
 
     def trigger_quantum_error(self, error, source_component, source_operation):
         if not isinstance(error, Exception):
@@ -663,12 +719,14 @@ class Universe:
             if encounter_key in self.active_cronenberg_pair_encounters:
                 continue
             event = self.cronenberg_pair_encounter.detect(first, second, universe_tick=self.universe_tick)
-            if not event.get('encountered', False):
+            if not event.encountered:
                 continue
             resolution = self.cronenberg_pair_encounter_resolver.resolve(first=first, second=second, encounter_event=event)
-            event['resolution'] = resolution
-            self.quantum_events.append(event)
-            detected_events.append(event)
+            resolved_event = event.with_resolution(
+                resolution
+            )
+            self.quantum_events.append(resolved_event)
+            detected_events.append(resolved_event)
             UniverseLogger.event(f'CRONENBERG QUANTUM PAIR ENCOUNTERED: {pair_id} AT={first.location}')
         self.active_cronenberg_pair_encounters = current_encounters
         return detected_events

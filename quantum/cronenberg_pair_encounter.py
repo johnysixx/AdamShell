@@ -1,3 +1,4 @@
+from copy import deepcopy
 from dataclasses import dataclass, field
 
 from core.entity.cronenberg_system.quantum_state import (
@@ -49,10 +50,7 @@ class CronenbergQuantumPairEncounteredEvent:
         init=False,
     )
 
-    resolution: None = field(
-        default=None,
-        init=False,
-    )
+    resolution: object | None = None
 
     def __post_init__(self):
         object.__setattr__(
@@ -112,7 +110,23 @@ class CronenbergQuantumPairEncounteredEvent:
                 int(self.universe_tick),
             )
 
+    def with_resolution(self, resolution):
+        return CronenbergQuantumPairEncounteredEvent(
+            pair_id=self.pair_id,
+            location=self.location,
+            participants=self.participants,
+            spins=self.spins,
+            universe_tick=self.universe_tick,
+            resolution=resolution,
+        )
+
     def to_dict(self):
+        resolution = self.resolution
+        if hasattr(resolution, "to_dict"):
+            resolution = resolution.to_dict()
+        else:
+            resolution = deepcopy(resolution)
+
         return {
             "name": self.name,
             "encountered": self.encountered,
@@ -130,7 +144,30 @@ class CronenbergQuantumPairEncounteredEvent:
             "universe_tick": (
                 self.universe_tick
             ),
-            "resolution": self.resolution,
+            "resolution": resolution,
+        }
+
+
+@dataclass(slots=True, frozen=True)
+class CronenbergQuantumPairNotEncounteredResult:
+
+    reason: str
+    name: str = field(
+        default=(
+            "cronenberg_quantum_pair_not_encountered"
+        ),
+        init=False,
+    )
+    encountered: bool = field(
+        default=False,
+        init=False,
+    )
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "encountered": self.encountered,
+            "reason": self.reason,
         }
 
 
@@ -246,7 +283,7 @@ class CronenbergPairEncounter:
             event
         )
 
-        return event.to_dict()
+        return event
 
     def record_event(
         self,
@@ -270,11 +307,9 @@ class CronenbergPairEncounter:
         return event
 
     def _not_encountered(self, reason):
-        return {
-            "name": "cronenberg_quantum_pair_not_encountered",
-            "encountered": False,
-            "reason": reason
-        }
+        return CronenbergQuantumPairNotEncounteredResult(
+            reason=reason,
+        )
 
     @property
     def public_state(self):

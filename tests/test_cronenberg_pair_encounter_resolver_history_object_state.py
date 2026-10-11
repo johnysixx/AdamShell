@@ -1,10 +1,15 @@
 import unittest
 from copy import deepcopy
 
+from quantum.cronenberg_pair_encounter import (
+    CronenbergPairSpin,
+    CronenbergQuantumPairEncounteredEvent,
+)
 from quantum.cronenberg_pair_encounter_resolver import (
     CronenbergPairEncounterResolvedEvent,
     CronenbergPairEncounterResolver,
     CronenbergPairResolvedEffect,
+    CronenbergPairSurvivalResult,
 )
 
 
@@ -52,18 +57,27 @@ class CronenbergPairEncounterResolverHistoryObjectStateTests(
             "second"
         )
 
-        self.encounter = {
-            "encountered": True,
-            "pair_id": (
-                "pair-object-state"
-            ),
-            "participants": [
-                self.first.id,
-                self.second.id,
-            ],
-            "location": "shared_kernel",
-            "universe_tick": 7,
-        }
+        self.encounter = (
+            CronenbergQuantumPairEncounteredEvent(
+                pair_id="pair-object-state",
+                participants=(
+                    self.first.id,
+                    self.second.id,
+                ),
+                location="shared_kernel",
+                universe_tick=7,
+                spins=(
+                    CronenbergPairSpin(
+                        participant_id=self.first.id,
+                        spin=0.5,
+                    ),
+                    CronenbergPairSpin(
+                        participant_id=self.second.id,
+                        spin=-0.5,
+                    ),
+                ),
+            )
+        )
 
     def resolve(self):
         return self.resolver.resolve(
@@ -116,7 +130,7 @@ class CronenbergPairEncounterResolverHistoryObjectStateTests(
         )
 
         self.assertEqual(
-            result["name"],
+            result.name,
             event.name,
         )
 
@@ -151,17 +165,33 @@ class CronenbergPairEncounterResolverHistoryObjectStateTests(
             .resolved_effects[0]
         )
 
+        self.assertIsInstance(
+            effect.result,
+            CronenbergPairSurvivalResult,
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    effect.result,
+                    mapping_method,
+                )
+            )
+
         with self.assertRaises(
             TypeError
         ):
-            effect.result[
-                "first_alive"
-            ] = False
-
-        self.assertTrue(
-            effect.result[
+            _ = effect.result[
                 "first_alive"
             ]
+
+        self.assertTrue(
+            effect.result.first_alive
         )
 
     def test_boundary_snapshot_is_detached(
@@ -174,15 +204,17 @@ class CronenbergPairEncounterResolverHistoryObjectStateTests(
             .history[-1]
         )
 
-        result[
+        snapshot = result.to_dict()
+
+        snapshot[
             "participants"
         ][0] = "changed"
 
-        result[
+        snapshot[
             "selected_effects"
         ][0] = "changed"
 
-        result[
+        snapshot[
             "resolved_effects"
         ][0][
             "result"
@@ -208,9 +240,7 @@ class CronenbergPairEncounterResolverHistoryObjectStateTests(
         self.assertTrue(
             event
             .resolved_effects[0]
-            .result[
-                "first_alive"
-            ]
+            .result.first_alive
         )
 
     def test_history_rejects_mapping_and_is_deepcopy_safe(

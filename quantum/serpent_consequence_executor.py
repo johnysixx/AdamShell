@@ -391,14 +391,14 @@ class SerpentConsequenceExecutor:
             )
         )
 
-        counterpart = result["counterpart"]
+        counterpart = result.counterpart
 
         return {
-            "result": result["result"],
+            "result": result.result,
             "counterpart_created": True,
             "original_id": original.id,
             "counterpart_id": counterpart.id,
-            "pair_id": result["pair_id"],
+            "pair_id": result.pair_id,
             "original_spin": (
                 original.quantum_state.spin
             ),

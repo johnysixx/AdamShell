@@ -31,7 +31,7 @@ class CronenbergOriginObjectStateTests(
             universe
             .create_cronenberg_quantum_counterpart(
                 original
-            )["counterpart"]
+            ).counterpart
         )
 
         return universe, original, counterpart
@@ -84,7 +84,7 @@ class CronenbergOriginObjectStateTests(
             universe
             .create_cronenberg_quantum_counterpart(
                 original
-            )["counterpart"]
+            ).counterpart
         )
         origin = counterpart.origin
 
@@ -121,7 +121,7 @@ class CronenbergOriginObjectStateTests(
             .merge_cronenberg_quantum_pair(
                 original,
                 counterpart,
-            )["merged"]
+            ).merged
         )
 
         self.assertEqual(
@@ -154,7 +154,7 @@ class CronenbergOriginObjectStateTests(
                 counterpart,
             )
         )
-        recombined = result["recombined"]
+        recombined = result.recombined
         origin = recombined.origin
 
         self.assertEqual(
@@ -171,13 +171,11 @@ class CronenbergOriginObjectStateTests(
         )
         self.assertEqual(
             origin.released_energy,
-            result["event"]["released_energy"]
+            result.event.released_energy
         )
         self.assertEqual(
             origin.dark_energy_created,
-            result["event"][
-                "dark_energy_created"
-            ]
+            result.event.dark_energy_created
         )
 
     def test_public_origin_snapshot_is_detached(
@@ -193,7 +191,7 @@ class CronenbergOriginObjectStateTests(
             .merge_cronenberg_quantum_pair(
                 original,
                 counterpart,
-            )["merged"]
+            ).merged
         )
 
         snapshot = merged.public_state["origin"]

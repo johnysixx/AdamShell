@@ -62,7 +62,7 @@ class CronenbergConsumptionObjectStateTests(
         self.assertEqual(record.energy, 0.75)
         self.assertEqual(
             record.digestion_days,
-            event["digestion_days"]
+            event.digestion_days
         )
 
     def test_record_is_immutable_after_capture(

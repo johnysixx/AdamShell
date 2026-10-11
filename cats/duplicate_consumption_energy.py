@@ -486,9 +486,7 @@ class DuplicateConsumptionEnergy:
             )
         )
 
-        counterpart = counterpart_result[
-            "counterpart"
-        ]
+        counterpart = counterpart_result.counterpart
 
         return DuplicateConsumptionEnergyResolutionOutcome(
             resolution=(

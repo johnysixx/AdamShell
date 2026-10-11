@@ -49,3 +49,13 @@ class CronenbergEnergyReceivedEvent:
     required_energy: float
     dark_energy_produced: float
     daily_energy_received: float
+
+
+@dataclass(slots=True, frozen=True)
+class CronenbergConsumptionResult:
+    predator: str
+    prey: str
+    mass_gained: float
+    energy_gained: float
+    new_size: float
+    digestion_days: int

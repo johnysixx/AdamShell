@@ -257,7 +257,7 @@ class CronenbergQuantumLinkObjectStateTests(
             universe
             .create_cronenberg_quantum_counterpart(
                 original
-            )["counterpart"]
+            ).counterpart
         )
 
         original_link = (

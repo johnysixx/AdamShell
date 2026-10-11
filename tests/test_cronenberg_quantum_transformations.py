@@ -23,7 +23,7 @@ class CronenbergQuantumTransformationTests(
             universe
             .create_cronenberg_quantum_counterpart(
                 first
-            )["counterpart"]
+            ).counterpart
         )
 
         first.location = "between_layers"
@@ -50,7 +50,7 @@ class CronenbergQuantumTransformationTests(
             )
         )
 
-        merged = result["merged"]
+        merged = result.merged
 
         self.assertFalse(first.active)
         self.assertFalse(second.active)
@@ -171,8 +171,8 @@ class CronenbergQuantumTransformationTests(
 
         result = first.consume(second)
 
-        recombined = result["recombined"]
-        event = result["event"]
+        recombined = result.recombined
+        event = result.event
 
         self.assertFalse(first.active)
         self.assertFalse(second.active)
@@ -267,32 +267,32 @@ class CronenbergQuantumTransformationTests(
         )
 
         self.assertEqual(
-            event["recombined_id"],
+            event.recombined_id,
             recombined.id
         )
 
         self.assertAlmostEqual(
-            event["combined_size"],
+            event.combined_size,
             2.7
         )
 
         self.assertAlmostEqual(
-            event["combined_energy"],
+            event.combined_energy,
             2.0
         )
 
         self.assertAlmostEqual(
-            event["retained_energy"],
+            event.retained_energy,
             0.8
         )
 
         self.assertAlmostEqual(
-            event["released_energy"],
+            event.released_energy,
             0.7
         )
 
         self.assertAlmostEqual(
-            event["dark_energy_created"],
+            event.dark_energy_created,
             0.5
         )
 
