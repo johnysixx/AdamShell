@@ -452,10 +452,41 @@ class MeetingPlace:
         self.geometry_terminal.cat_detected(cat_id)
         self.bar_counter.red_button.activate_alarm()
 
-    def handle_cat_after_entry(self, cat):
-        meow_exchange = self.bartender.exchange_meow_with_cat(cat)
-        self.emit_event({'name': 'cat_bartender_meow_exchange', 'cat': self._get_entity_name(cat), 'cat_meow': meow_exchange['cat_meow'], 'bartender_meow': meow_exchange['bartender_meow'], 'tick': self.tick_count})
-        return self.serve_cat_milk(cat)
+    def handle_cat_after_entry(
+        self,
+        cat
+    ):
+        meow_exchange = (
+            self.bartender
+            .exchange_meow_with_cat(
+                cat
+            )
+        )
+
+        self.emit_event(
+            {
+                'name':
+                    'cat_bartender_meow_exchange',
+                'cat':
+                    self._get_entity_name(
+                        cat
+                    ),
+                'cat_meow':
+                    meow_exchange
+                    .cat_meow
+                    .to_dict(),
+                'bartender_meow':
+                    meow_exchange
+                    .bartender_meow
+                    .to_dict(),
+                'tick':
+                    self.tick_count,
+            }
+        )
+
+        return self.serve_cat_milk(
+            cat
+        )
 
     def serve_cat_milk(self, cat):
         cat_name = self._get_entity_name(cat)

@@ -5,6 +5,11 @@ from cats.cat_meow_bar_access_state import (
 )
 from .bar_objects import BarOrigin, BouncerPrincipleAttributes, CatEntryPolicy
 from .bouncer_state import BouncerState
+from .cat_meow_event_state import (
+    BouncerCatAllowedEvent,
+    BouncerCatMeowEvent,
+    BouncerCatMeowRecognitionEvent,
+)
 
 class Bouncer(SocialMixin):
 
@@ -45,11 +50,35 @@ class Bouncer(SocialMixin):
     def can_enter(self, entity):
         entity_name = self._get_entity_name(entity)
         if self._is_cat(entity):
-            meow_event = self.receive_cat_meow(entity)
-            self.pet_cat(entity)
-            allow_event = {'name': 'bouncer_allowed_cat', 'cat': entity_name, 'meow_recognized': meow_event['recognized'], 'allowed': True}
-            self.cat_meow_history.append(allow_event)
-            UniverseLogger.event(f'BOUNCER ALLOWS CAT: {entity_name}')
+            recognition_event = (
+                self.receive_cat_meow(
+                    entity
+                )
+            )
+
+            self.pet_cat(
+                entity
+            )
+
+            allow_event = (
+                BouncerCatAllowedEvent(
+                    cat=entity_name,
+                    meow_recognized=(
+                        recognition_event
+                        .recognized
+                    ),
+                )
+            )
+
+            self.cat_meow_history.append(
+                allow_event
+            )
+
+            UniverseLogger.event(
+                f'BOUNCER ALLOWS CAT: '
+                f'{entity_name}'
+            )
+
             return True
         if self.blacklist.is_banned(entity_name):
             UniverseLogger.event(f'BOUNCER DENIES ENTRY: {entity_name}')
@@ -127,18 +156,59 @@ class Bouncer(SocialMixin):
     def _entity_value(self, entity, key, default=None):
         return getattr(entity, key, default)
 
-    def receive_cat_meow(self, cat):
-        cat_name = self._get_entity_name(cat)
-        knows_meow = self._cat_knows_meow(cat)
-        meow_event = {'name': 'cat_meowed_at_bouncer', 'cat': cat_name, 'sound': 'MEOW', 'recognized': knows_meow}
-        self.cat_meow_history.append(meow_event)
-        UniverseLogger.event(f'CAT MEOWS AT BOUNCER: {cat_name}')
-        recognition_event = {'name': 'bouncer_recognized_cat_meow' if knows_meow else 'bouncer_heard_unrecognized_meow', 'cat': cat_name, 'recognized': knows_meow}
-        self.cat_meow_history.append(recognition_event)
+    def receive_cat_meow(
+        self,
+        cat
+    ):
+        cat_name = self._get_entity_name(
+            cat
+        )
+
+        knows_meow = (
+            self._cat_knows_meow(
+                cat
+            )
+        )
+
+        meow_event = (
+            BouncerCatMeowEvent(
+                cat=cat_name,
+                recognized=knows_meow,
+            )
+        )
+
+        self.cat_meow_history.append(
+            meow_event
+        )
+
+        UniverseLogger.event(
+            f'CAT MEOWS AT BOUNCER: '
+            f'{cat_name}'
+        )
+
+        recognition_event = (
+            BouncerCatMeowRecognitionEvent(
+                cat=cat_name,
+                recognized=knows_meow,
+            )
+        )
+
+        self.cat_meow_history.append(
+            recognition_event
+        )
+
         if knows_meow:
-            UniverseLogger.event(f'BOUNCER RECOGNIZES MEOW: {cat_name}')
+            UniverseLogger.event(
+                f'BOUNCER RECOGNIZES MEOW: '
+                f'{cat_name}'
+            )
+
         else:
-            UniverseLogger.event(f'BOUNCER HEARS ORDINARY CAT SOUND: {cat_name}')
+            UniverseLogger.event(
+                f'BOUNCER HEARS ORDINARY '
+                f'CAT SOUND: {cat_name}'
+            )
+
         return recognition_event
 
     def _cat_knows_meow(self, cat):
