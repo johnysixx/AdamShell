@@ -4,6 +4,7 @@ from multiverse import UniverseRegistry
 from universe.universe import Universe
 from meeting_place.back_room_black_box import (
     BackRoomBlackBox,
+    BackRoomBlackBoxEntry,
 )
 from meeting_place.bar_incident_book import (
     BarIncidentBook,
@@ -71,9 +72,8 @@ class BarIncidentObjectStateTests(
         )
 
         self.assertIs(
-            recorder.entries[0][
-                'data'
-            ],
+            recorder.entries[0]
+            .data,
             state,
         )
 
@@ -81,6 +81,75 @@ class BarIncidentObjectStateTests(
             book.incidents[0],
             state,
         )
+
+    def test_recorder_entry_is_object_state(
+        self
+    ):
+        recorder = BackRoomBlackBox()
+
+        state = BarIncidentState(
+            category='disturbance',
+            reason='unknown_disturbance',
+            offender=None,
+        )
+
+        entry = recorder.record(
+            event=state.name,
+            data=state,
+            source='bar_incident_book',
+            tick=7,
+        )
+
+        self.assertIsInstance(
+            entry,
+            BackRoomBlackBoxEntry,
+        )
+
+        self.assertIs(
+            recorder.entries[0],
+            entry,
+        )
+
+        self.assertEqual(
+            entry.tick,
+            7,
+        )
+
+        self.assertEqual(
+            entry.source,
+            'bar_incident_book',
+        )
+
+        self.assertEqual(
+            entry.event,
+            'bar_security_incident',
+        )
+
+        self.assertIs(
+            entry.data,
+            state,
+        )
+
+        for mapping_method in (
+            'get',
+            'keys',
+            'items',
+            'values',
+            'setdefault',
+        ):
+            self.assertFalse(
+                hasattr(
+                    entry,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = entry[
+                'data'
+            ]
 
     def test_resolution_mutates_object_state(
         self
@@ -116,9 +185,8 @@ class BarIncidentObjectStateTests(
         )
 
         self.assertIs(
-            recorder.entries[0][
-                'data'
-            ],
+            recorder.entries[0]
+            .data,
             state,
         )
 
@@ -169,9 +237,8 @@ class BarIncidentObjectStateTests(
         self.assertIs(
             meeting
             .back_room_black_box
-            .entries[-1][
-                'data'
-            ],
+            .entries[-1]
+            .data,
             state,
         )
 

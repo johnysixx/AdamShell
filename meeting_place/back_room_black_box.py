@@ -1,4 +1,32 @@
-﻿from universe.logger import UniverseLogger
+﻿from dataclasses import dataclass
+
+from universe.logger import UniverseLogger
+
+
+@dataclass(slots=True, frozen=True)
+class BackRoomBlackBoxEntry:
+    tick: int | None
+    source: str
+    event: object
+    data: object = None
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "tick",
+            (
+                None
+                if self.tick is None
+                else int(self.tick)
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "source",
+            str(self.source),
+        )
+
 
 class BackRoomBlackBox:
 
@@ -18,16 +46,23 @@ class BackRoomBlackBox:
         source="meeting_place",
         tick=None
     ):
-        entry = {
-            "tick": tick,
-            "source": source,
-            "event": event,
-            "data": data
-        }
+        entry = (
+            BackRoomBlackBoxEntry(
+                tick=tick,
+                source=source,
+                event=event,
+                data=data,
+            )
+        )
 
-        self.entries.append(entry)
+        self.entries.append(
+            entry
+        )
 
-        UniverseLogger.event("BACK ROOM BLACK BOX ENTRY: " f"[{source}] {event}")
+        UniverseLogger.event(
+            "BACK ROOM BLACK BOX ENTRY: "
+            f"[{source}] {event}"
+        )
 
         return entry
 

@@ -4,7 +4,10 @@ from meeting_place.bar_incident_book import BarIncidentBook
 from meeting_place.bar_incident_state import (
     BarIncidentState,
 )
-from meeting_place.back_room_black_box import BackRoomBlackBox
+from meeting_place.back_room_black_box import (
+    BackRoomBlackBox,
+    BackRoomBlackBoxEntry,
+)
 
 class BarIncidentBookTests(unittest.TestCase):
 
@@ -99,11 +102,52 @@ class BarIncidentBookTests(unittest.TestCase):
         book = BarIncidentBook(recorder=black_box)
         incident = BarIncidentState(category='disturbance', reason='unknown_disturbance', offender=None)
         book.record(incident)
-        self.assertEqual(black_box.entry_count, 1)
+        self.assertEqual(
+            black_box.entry_count,
+            1,
+        )
+
         entry = black_box.entries[0]
-        self.assertEqual(entry['source'], 'bar_incident_book')
-        self.assertEqual(entry['event'], 'bar_security_incident')
-        self.assertEqual(entry['data'].reason, 'unknown_disturbance')
+
+        self.assertIsInstance(
+            entry,
+            BackRoomBlackBoxEntry,
+        )
+
+        self.assertEqual(
+            entry.source,
+            'bar_incident_book',
+        )
+
+        self.assertEqual(
+            entry.event,
+            'bar_security_incident',
+        )
+
+        self.assertEqual(
+            entry.data.reason,
+            'unknown_disturbance',
+        )
+
+        for mapping_method in (
+            'get',
+            'keys',
+            'items',
+            'values',
+        ):
+            self.assertFalse(
+                hasattr(
+                    entry,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = entry[
+                'source'
+            ]
 
     def test_meeting_place_incident_book_uses_shared_black_box(self):
         from universe.universe import Universe
@@ -136,10 +180,38 @@ class BarIncidentBookTests(unittest.TestCase):
         service = meeting_place.bar_geometry.find_cell(name='bar_service_floor')
         result = meeting_place.bar_security_protocol.handle_guest_entry(guest, service)
         self.assertTrue(result)
-        incident_entries = [entry for entry in meeting_place.back_room_black_box.entries if entry.get('event') == 'bar_security_incident']
-        self.assertEqual(len(incident_entries), 1)
-        self.assertEqual(incident_entries[0]['data'].reason, 'unauthorized_area')
-        self.assertEqual(incident_entries[0]['data'].offender, 'guest_1')
+        incident_entries = [
+            entry
+            for entry
+            in (
+                meeting_place
+                .back_room_black_box
+                .entries
+            )
+            if (
+                entry.event
+                == 'bar_security_incident'
+            )
+        ]
+
+        self.assertEqual(
+            len(incident_entries),
+            1,
+        )
+
+        self.assertEqual(
+            incident_entries[0]
+            .data
+            .reason,
+            'unauthorized_area',
+        )
+
+        self.assertEqual(
+            incident_entries[0]
+            .data
+            .offender,
+            'guest_1',
+        )
         self.assertIs(meeting_place.bar_incident_book.recorder, meeting_place.back_room_black_box)
 
     def test_real_security_incident_reaches_bartender_event_memory(self):

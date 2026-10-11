@@ -63,17 +63,13 @@ class BarIncidentBook:
             self.recorder.entries
         ):
             if (
-                recorder_entry.get(
-                    "event"
-                )
+                recorder_entry.event
                 != "bar_security_incident"
             ):
                 continue
 
             incident = (
-                recorder_entry.get(
-                    "data"
-                )
+                recorder_entry.data
             )
 
             if not isinstance(
