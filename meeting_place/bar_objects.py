@@ -1026,6 +1026,132 @@ class CatD20Profile:
         }
 
 
+@dataclass(slots=True, frozen=True)
+class CatD20TurnEvent:
+    cat: str
+    box: str
+    previous_value: int | None
+    value: int
+    turn_number: int
+    turned_by: str = "herself"
+    was_thrown: bool = False
+    visibility: str = "secret_cat_event"
+    tick: int = 0
+    turned: bool = True
+
+    name: str = field(
+        default="cat_d20_turned_in_box",
+        init=False,
+    )
+
+    def __post_init__(self):
+        value = int(
+            self.value
+        )
+
+        turn_number = int(
+            self.turn_number
+        )
+
+        if value < 1 or value > 20:
+            raise ValueError(
+                "CatD20 turn value must be "
+                "between 1 and 20."
+            )
+
+        if turn_number < 1:
+            raise ValueError(
+                "CatD20 turn number must "
+                "be positive."
+            )
+
+        object.__setattr__(
+            self,
+            "cat",
+            str(self.cat),
+        )
+
+        object.__setattr__(
+            self,
+            "box",
+            str(self.box),
+        )
+
+        object.__setattr__(
+            self,
+            "previous_value",
+            (
+                None
+                if self.previous_value is None
+                else int(
+                    self.previous_value
+                )
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "value",
+            value,
+        )
+
+        object.__setattr__(
+            self,
+            "turn_number",
+            turn_number,
+        )
+
+        object.__setattr__(
+            self,
+            "turned_by",
+            str(self.turned_by),
+        )
+
+        object.__setattr__(
+            self,
+            "was_thrown",
+            bool(self.was_thrown),
+        )
+
+        object.__setattr__(
+            self,
+            "visibility",
+            str(self.visibility),
+        )
+
+        object.__setattr__(
+            self,
+            "tick",
+            int(self.tick),
+        )
+
+        object.__setattr__(
+            self,
+            "turned",
+            bool(self.turned),
+        )
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "cat": self.cat,
+            "box": self.box,
+            "previous_value":
+                self.previous_value,
+            "value": self.value,
+            "turn_number":
+                self.turn_number,
+            "turned_by":
+                self.turned_by,
+            "was_thrown":
+                self.was_thrown,
+            "visibility":
+                self.visibility,
+            "tick": self.tick,
+            "turned": self.turned,
+        }
+
+
 @dataclass(slots=True)
 class CatD20State:
     is_cat: bool = True
@@ -1040,7 +1166,9 @@ class CatD20State:
     )
     current_value: int | None = None
     turn_count: int = 0
-    turn_history: list[dict] = field(
+    turn_history: list[
+        CatD20TurnEvent
+    ] = field(
         default_factory=list
     )
     canonical_target: str | None = None
@@ -1052,19 +1180,46 @@ class CatD20State:
         str | None
     ) = None
 
+    def __post_init__(
+        self
+    ):
+        for event in self.turn_history:
+            if not isinstance(
+                event,
+                CatD20TurnEvent,
+            ):
+                raise TypeError(
+                    "CatD20 turn history "
+                    "requires "
+                    "CatD20TurnEvent objects."
+                )
+
     def record_turn(
         self,
         event
     ):
-        self.current_value = int(
-            event["value"]
+        if not isinstance(
+            event,
+            CatD20TurnEvent,
+        ):
+            raise TypeError(
+                "CatD20 turn history "
+                "requires "
+                "CatD20TurnEvent objects."
+            )
+
+        self.current_value = (
+            event.value
         )
-        self.turn_count = int(
-            event["turn_number"]
+
+        self.turn_count = (
+            event.turn_number
         )
+
         self.turn_history.append(
             deepcopy(event)
         )
+
         return self.current_value
 
     def prepare_target(
@@ -1102,9 +1257,11 @@ class CatD20State:
             "current_value":
                 self.current_value,
             "turn_count": self.turn_count,
-            "turn_history": deepcopy(
-                self.turn_history
-            ),
+            "turn_history": [
+                event.to_dict()
+                for event
+                in self.turn_history
+            ],
             "canonical_target":
                 self.canonical_target,
             "garfield_pending":

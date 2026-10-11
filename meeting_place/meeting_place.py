@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from meeting_place.cat_invited_guest_state import (
     CatInvitedGuestState,
 )
@@ -60,6 +62,7 @@ from .bar_objects import (
     CatD20Box,
     CatD20Profile,
     CatD20State,
+    CatD20TurnEvent,
 )
 
 class MeetingPlace:
@@ -504,23 +507,87 @@ class MeetingPlace:
         cat_d20_state = cat.cat_d20
         previous_value = cat_d20_state.current_value
         turn_count = cat_d20_state.turn_count + 1
-        turn_event = {'name': 'cat_d20_turned_in_box', 'cat': cat.name, 'box': box.name, 'previous_value': previous_value, 'value': value, 'turn_number': turn_count, 'turned_by': 'herself', 'was_thrown': False, 'visibility': 'secret_cat_event', 'tick': getattr(self.universe, 'universe_tick', 0), 'turned': True}
+
+        turn_event = CatD20TurnEvent(
+            cat=cat.name,
+            box=box.name,
+            previous_value=(
+                previous_value
+            ),
+            value=value,
+            turn_number=turn_count,
+            tick=getattr(
+                self.universe,
+                'universe_tick',
+                0,
+            ),
+        )
+
         cat_d20_state.record_turn(
             turn_event
         )
-        cat.state = 'turned_in_cat_d20_box'
-        box.last_cat_d20_value = value
-        box.turn_count = turn_count
-        if not hasattr(self, 'cat_d20_secret_history'):
+
+        cat.state = (
+            'turned_in_cat_d20_box'
+        )
+
+        box.last_cat_d20_value = (
+            value
+        )
+
+        box.turn_count = (
+            turn_count
+        )
+
+        if not hasattr(
+            self,
+            'cat_d20_secret_history'
+        ):
             self.cat_d20_secret_history = []
-        self.cat_d20_secret_history.append(dict(turn_event))
-        self.universe.quantum_events.append(dict(turn_event))
-        UniverseLogger.event('CAT D20 SECRET ROTATION RECORDED')
-        interpretation = self.interpret_cat_d20_value(value)
-        turn_event['interpretation'] = interpretation
-        energy_resolution = self.duplicate_consumption_energy.resolve_next(cat_d20_value=value)
-        turn_event['duplicate_consumption_energy'] = energy_resolution
-        return turn_event
+
+        self.cat_d20_secret_history.append(
+            deepcopy(
+                turn_event
+            )
+        )
+
+        self.universe.quantum_events.append(
+            deepcopy(
+                turn_event
+            )
+        )
+
+        UniverseLogger.event(
+            'CAT D20 SECRET ROTATION RECORDED'
+        )
+
+        boundary = (
+            turn_event.to_dict()
+        )
+
+        interpretation = (
+            self.interpret_cat_d20_value(
+                value
+            )
+        )
+
+        boundary[
+            'interpretation'
+        ] = interpretation
+
+        energy_resolution = (
+            self
+            .duplicate_consumption_energy
+            .resolve_next(
+                cat_d20_value=value
+            )
+        )
+
+        boundary[
+            'duplicate_consumption_energy'
+        ] = energy_resolution
+
+        return boundary
 
     def cat_d20_prepare_pazuzu_profile(self):
         cats_layer = getattr(self.universe, 'cats_layer', None)

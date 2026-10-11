@@ -8,6 +8,9 @@ from universe.bootstraps.universe_bootstrap import (
 from universe.bootstraps.entity_bootstrap import (
     EntityBootstrap
 )
+from meeting_place.bar_objects import (
+    CatD20TurnEvent,
+)
 
 
 class FixedD20:
@@ -110,6 +113,38 @@ class CatD20TurningTests(unittest.TestCase):
             ),
             1
         )
+
+        secret = (
+            self.bar
+            .cat_d20_secret_history[-1]
+        )
+
+        quantum = (
+            self.universe
+            .quantum_events[-1]
+        )
+
+        self.assertIsInstance(
+            secret,
+            CatD20TurnEvent,
+        )
+
+        self.assertIsInstance(
+            quantum,
+            CatD20TurnEvent,
+        )
+
+        self.assertEqual(
+            secret.value,
+            17
+        )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = secret[
+                "value"
+            ]
 
     def test_cat_d20_value_meanings(self):
         expected = {

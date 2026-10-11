@@ -9,6 +9,7 @@ from library import Library
 from meeting_place.bar_objects import (
     CatD20Profile,
     CatD20State,
+    CatD20TurnEvent,
 )
 from meeting_place.meeting_place import (
     MeetingPlace,
@@ -145,15 +146,52 @@ class BarCatD20ObjectStateTests(
             state.turn_count,
             1
         )
+        stored = (
+            state.turn_history[0]
+        )
+
+        self.assertIsInstance(
+            stored,
+            CatD20TurnEvent,
+        )
+
         self.assertEqual(
-            state.turn_history[0][
-                "value"
-            ],
+            stored.value,
             event["value"]
         )
+
+        self._assert_object_only(
+            stored,
+            "value"
+        )
+
+        secret = (
+            bar.cat_d20_secret_history[-1]
+        )
+
+        quantum = (
+            bar.universe
+            .quantum_events[-1]
+        )
+
+        self.assertIsInstance(
+            secret,
+            CatD20TurnEvent,
+        )
+
+        self.assertIsInstance(
+            quantum,
+            CatD20TurnEvent,
+        )
+
         self.assertIsNot(
-            state.turn_history[0],
-            event
+            stored,
+            secret,
+        )
+
+        self.assertIsNot(
+            secret,
+            quantum,
         )
 
     def test_canonical_profile_is_object(
@@ -236,9 +274,13 @@ class BarCatD20ObjectStateTests(
             current_value=17,
             turn_count=1,
             turn_history=[
-                {
-                    "value": 17,
-                }
+                CatD20TurnEvent(
+                    cat="cat_d20",
+                    box="cat_d20_box",
+                    previous_value=None,
+                    value=17,
+                    turn_number=1,
+                )
             ],
             canonical_target="garfield",
             canonical_profile=profile,
@@ -254,15 +296,24 @@ class BarCatD20ObjectStateTests(
         ] = "changed"
 
         self.assertEqual(
-            state.turn_history[0][
-                "value"
-            ],
+            state.turn_history[0].value,
             17
         )
         self.assertEqual(
             state.canonical_profile.color,
             "black"
         )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            CatD20State(
+                turn_history=[
+                    {
+                        "value": 17,
+                    }
+                ]
+            )
 
 
 if __name__ == "__main__":
