@@ -1,8 +1,9 @@
-﻿import unittest
+import unittest
 
 from core.entity.cronenberg_system.quantum_links import (
     CronenbergQuantumLink,
     CronenbergQuantumLinkHistoryEvent,
+    CronenbergQuantumLinkSnapshot,
     CronenbergQuantumLinks,
 )
 from universe.universe import Universe
@@ -75,7 +76,7 @@ class CronenbergQuantumLinkObjectStateTests(
             link.link_type,
             "quantum_counterpart"
         )
-        self.assertEqual(event["strength"], 0.75)
+        self.assertEqual(event.strength, 0.75)
 
     def test_duplicate_strengthens_same_object(
         self
@@ -98,10 +99,10 @@ class CronenbergQuantumLinkObjectStateTests(
 
         self.assertIs(links.links[0], link)
         self.assertEqual(link.strength, 0.9)
-        self.assertEqual(event["strength"], 0.9)
+        self.assertEqual(event.strength, 0.9)
         self.assertEqual(len(links.history), 1)
 
-    def test_returned_link_snapshot_is_detached(
+    def test_returned_link_snapshot_is_object_and_detached(
         self
     ):
         links = CronenbergQuantumLinks(
@@ -117,8 +118,13 @@ class CronenbergQuantumLinkObjectStateTests(
             },
         )
 
-        event["strength"] = 99.0
-        event["metadata"]["route"][
+        self.assertIsInstance(
+            event,
+            CronenbergQuantumLinkSnapshot,
+        )
+        self._assert_object_only(event)
+
+        event.metadata["route"][
             "layer"
         ] = "changed"
 
@@ -163,6 +169,7 @@ class CronenbergQuantumLinkObjectStateTests(
         self.assertIsInstance(
             history_event,
             CronenbergQuantumLinkHistoryEvent,
+    CronenbergQuantumLinkSnapshot,
         )
         self._assert_history_event_object_only(
             history_event
@@ -197,6 +204,7 @@ class CronenbergQuantumLinkObjectStateTests(
         self.assertIsInstance(
             history_event,
             CronenbergQuantumLinkHistoryEvent,
+    CronenbergQuantumLinkSnapshot,
         )
         self._assert_history_event_object_only(
             history_event
@@ -278,9 +286,7 @@ class CronenbergQuantumLinkObjectStateTests(
             original.id
         )
         self.assertEqual(
-            original.quantum_links[0][
-                "target_id"
-            ],
+            original.quantum_links[0].target_id,
             counterpart.id
         )
 

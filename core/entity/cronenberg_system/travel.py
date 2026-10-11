@@ -1,4 +1,10 @@
-﻿class CronenbergTravel:
+from core.entity.cronenberg_system.result_state import (
+    CronenbergLayerCrossedResult,
+    CronenbergTravelStepResult,
+)
+
+
+class CronenbergTravel:
 
     def __init__(
         self,
@@ -40,14 +46,12 @@
 
         self.layers_crossed += 1
 
-        return {
-            "old_size": float(size),
-            "new_size": new_size,
-            "growth": self.layer_growth,
-            "layers_crossed": (
-                self.layers_crossed
-            )
-        }
+        return CronenbergLayerCrossedResult(
+            old_size=float(size),
+            new_size=new_size,
+            growth=self.layer_growth,
+            layers_crossed=self.layers_crossed,
+        )
 
     def travel_step(
         self,
@@ -84,16 +88,12 @@
             dark_energy
         )
 
-        return {
-            "energy_cost": energy_cost,
-            "energy_spent": energy_spent,
-            "dark_energy_produced": (
-                dark_energy
-            ),
-            "travel_steps": (
-                self.travel_steps
-            )
-        }
+        return CronenbergTravelStepResult(
+            energy_cost=energy_cost,
+            energy_spent=energy_spent,
+            dark_energy_produced=dark_energy,
+            travel_steps=self.travel_steps,
+        )
 
     def cat_response(
         self,

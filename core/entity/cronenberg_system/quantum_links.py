@@ -1,4 +1,4 @@
-﻿from copy import deepcopy
+from copy import deepcopy
 from dataclasses import dataclass, field
 
 
@@ -36,6 +36,45 @@ class CronenbergQuantumLink:
             "metadata": deepcopy(
                 self.metadata
             ),
+        }
+
+
+@dataclass(slots=True, frozen=True)
+class CronenbergQuantumLinkSnapshot:
+    target_id: str
+    link_type: str
+    strength: float
+    created_tick: int | None = None
+    metadata: dict = field(default_factory=dict)
+
+    def __post_init__(self):
+        object.__setattr__(self, "target_id", str(self.target_id))
+        object.__setattr__(self, "link_type", str(self.link_type))
+        object.__setattr__(self, "strength", float(self.strength))
+        object.__setattr__(self, "metadata", deepcopy(self.metadata))
+
+    @classmethod
+    def capture(cls, link):
+        if not isinstance(link, CronenbergQuantumLink):
+            raise TypeError(
+                "Cronenberg quantum link snapshot requires a "
+                "CronenbergQuantumLink object."
+            )
+        return cls(
+            target_id=link.target_id,
+            link_type=link.link_type,
+            strength=link.strength,
+            created_tick=link.created_tick,
+            metadata=link.metadata,
+        )
+
+    def to_dict(self):
+        return {
+            "target_id": self.target_id,
+            "link_type": self.link_type,
+            "strength": self.strength,
+            "created_tick": self.created_tick,
+            "metadata": deepcopy(self.metadata),
         }
 
 
@@ -153,7 +192,7 @@ class CronenbergQuantumLinks:
                 strength
             )
 
-            return existing.to_dict()
+            return CronenbergQuantumLinkSnapshot.capture(existing)
 
         link = CronenbergQuantumLink(
             target_id=target_id,
@@ -171,7 +210,7 @@ class CronenbergQuantumLinks:
             )
         )
 
-        return link.to_dict()
+        return CronenbergQuantumLinkSnapshot.capture(link)
 
     def has_link_to(self, target_id):
         return any(
@@ -181,7 +220,7 @@ class CronenbergQuantumLinks:
 
     def links_to(self, target_id):
         return [
-            link.to_dict()
+            CronenbergQuantumLinkSnapshot.capture(link)
             for link in self.links
             if link.target_id == str(target_id)
         ]

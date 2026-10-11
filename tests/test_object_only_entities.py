@@ -28,7 +28,7 @@ class ObjectOnlyEntityTests(unittest.TestCase):
         manifestation = self.universe.manifest_cat(name='test_social_cat', source='test')
         cat = manifestation['cat']
         event = actor.pet_cat(cat)
-        self.assertEqual(event['actor'], 'lilith')
+        self.assertEqual(event.actor, 'lilith')
         self.assertGreater(cat.affinity_toward(actor), 0.0)
 
     def test_petting_sets_next_social_target(self):

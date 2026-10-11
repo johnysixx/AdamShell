@@ -44,7 +44,7 @@ class EternalFlame:
                 tick=tick,
             )
             self.history.append(record)
-            return record.to_dict()
+            return record
 
         captured_source = EternalFlameSourceIdea.capture(
             source_idea
@@ -63,7 +63,7 @@ class EternalFlame:
             tick=tick,
         )
         self.history.append(record)
-        return record.to_dict()
+        return record
 
     @property
     def public_state(self):

@@ -365,15 +365,10 @@ class EternalFirePotentialObjectStateTests(unittest.TestCase):
             keeper="pazuzu",
         )
 
-        self.assertEqual(result["name"], "eternal_flame_ignited")
-        self.assertEqual(
-            result["source_idea"],
-            {
-                "name": "eternal_fire",
-                "type": "idea_focal_point",
-                "state": "burning",
-            },
-        )
+        self.assertEqual(result.name, "eternal_flame_ignited")
+        self.assertEqual(result.source_idea.name, "eternal_fire")
+        self.assertEqual(result.source_idea.type, "idea_focal_point")
+        self.assertEqual(result.source_idea.state, "burning")
         self.assertIsInstance(
             flame.source_idea,
             EternalFlameSourceIdea,
@@ -407,7 +402,7 @@ class EternalFirePotentialObjectStateTests(unittest.TestCase):
             keeper="pazuzu",
         )
         self.assertEqual(
-            second["name"],
+            second.name,
             "eternal_flame_already_burns",
         )
         self.assertIsInstance(

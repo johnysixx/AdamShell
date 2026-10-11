@@ -1,4 +1,9 @@
-﻿class CronenbergMetabolism:
+from core.entity.cronenberg_system.result_state import (
+    CronenbergEnergyReceivedEvent,
+)
+
+
+class CronenbergMetabolism:
 
     def __init__(
         self,
@@ -54,18 +59,18 @@
             dark_energy_amount
         )
 
-        return {
-            "energy_received": amount,
-            "required_energy": (
+        return CronenbergEnergyReceivedEvent(
+            energy_received=amount,
+            required_energy=(
                 self.required_daily_energy(size)
             ),
-            "dark_energy_produced": (
+            dark_energy_produced=(
                 dark_energy_amount
             ),
-            "daily_energy_received": (
+            daily_energy_received=(
                 self.daily_energy_received
-            )
-        }
+            ),
+        )
 
     def is_fed_enough(
         self,

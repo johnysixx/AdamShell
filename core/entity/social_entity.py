@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass(slots=True, frozen=True)
@@ -22,6 +22,41 @@ class SocialInteractionRecord:
         return {
             "type": self.interaction_type,
             "actor": self.actor,
+        }
+
+
+
+
+@dataclass(slots=True, frozen=True)
+class CatPettedEvent:
+    cat: str
+    actor: str
+    pet_count: int
+    affinity_before: float
+    affinity_after: float
+    next_social_target: str
+    name: str = field(
+        default="cat_petted",
+        init=False,
+    )
+
+    def __post_init__(self):
+        object.__setattr__(self, "cat", str(self.cat))
+        object.__setattr__(self, "actor", str(self.actor))
+        object.__setattr__(self, "pet_count", int(self.pet_count))
+        object.__setattr__(self, "affinity_before", float(self.affinity_before))
+        object.__setattr__(self, "affinity_after", float(self.affinity_after))
+        object.__setattr__(self, "next_social_target", str(self.next_social_target))
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "cat": self.cat,
+            "actor": self.actor,
+            "pet_count": self.pet_count,
+            "affinity_before": self.affinity_before,
+            "affinity_after": self.affinity_after,
+            "next_social_target": self.next_social_target,
         }
 
 
@@ -114,15 +149,14 @@ class SocialMixin:
                 actor=actor_name,
             )
         )
-        return {
-            'name': 'cat_petted',
-            'cat': cat_name,
-            'actor': actor_name,
-            'pet_count': relation.pet_count,
-            'affinity_before': affinity_before,
-            'affinity_after': relation.affinity,
-            'next_social_target': cat.next_social_target,
-        }
+        return CatPettedEvent(
+            cat=cat_name,
+            actor=actor_name,
+            pet_count=relation.pet_count,
+            affinity_before=affinity_before,
+            affinity_after=relation.affinity,
+            next_social_target=cat.next_social_target,
+        )
 
     def receive_pet(self, actor, affinity_gain=0.1):
         actor_name = getattr(actor, 'name', None)
@@ -139,15 +173,14 @@ class SocialMixin:
                 actor=actor_name,
             )
         )
-        return {
-            'name': 'cat_petted',
-            'cat': getattr(self, 'name', None),
-            'actor': actor_name,
-            'pet_count': relation.pet_count,
-            'affinity_before': affinity_before,
-            'affinity_after': relation.affinity,
-            'next_social_target': self.next_social_target,
-        }
+        return CatPettedEvent(
+            cat=getattr(self, 'name', None),
+            actor=actor_name,
+            pet_count=relation.pet_count,
+            affinity_before=affinity_before,
+            affinity_after=relation.affinity,
+            next_social_target=self.next_social_target,
+        )
 
     def affinity_toward(self, actor):
         actor_name = (

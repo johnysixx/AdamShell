@@ -66,7 +66,7 @@ class Day0BouncerTastingAndJudgeTests(
 
         self.assertEqual(
             [
-                event["actor"]
+                event.actor
                 for event in scratches
             ],
             [
@@ -80,7 +80,7 @@ class Day0BouncerTastingAndJudgeTests(
 
         self.assertTrue(
             all(
-                event["cat"] == "garfield"
+                event.cat == "garfield"
                 for event in scratches
             )
         )

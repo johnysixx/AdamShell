@@ -1,4 +1,9 @@
-﻿class CronenbergGrowth:
+from core.entity.cronenberg_system.result_state import (
+    CronenbergGrowthResult,
+)
+
+
+class CronenbergGrowth:
 
     def __init__(
         self,
@@ -46,12 +51,12 @@
             self.fed_growth
         )
 
-        return {
-            "cause": "feeding",
-            "old_size": old_size,
-            "new_size": new_size,
-            "growth": self.fed_growth
-        }
+        return CronenbergGrowthResult(
+            cause="feeding",
+            old_size=old_size,
+            new_size=new_size,
+            growth=self.fed_growth,
+        )
 
     def grow_from_layer(
         self,
@@ -67,12 +72,12 @@
             self.layer_growth
         )
 
-        return {
-            "cause": "layer_crossing",
-            "old_size": old_size,
-            "new_size": new_size,
-            "growth": self.layer_growth
-        }
+        return CronenbergGrowthResult(
+            cause="layer_crossing",
+            old_size=old_size,
+            new_size=new_size,
+            growth=self.layer_growth,
+        )
 
     def apply_starvation(
         self,
@@ -86,12 +91,12 @@
             hungry_days
             < self.starvation_loss_starts_day
         ):
-            return {
-                "cause": "starvation",
-                "old_size": old_size,
-                "new_size": old_size,
-                "mass_lost": 0.0
-            }
+            return CronenbergGrowthResult(
+                cause="starvation",
+                old_size=old_size,
+                new_size=old_size,
+                mass_lost=0.0,
+            )
 
         new_size = max(
             self.minimum_size,
@@ -108,12 +113,12 @@
             mass_lost
         )
 
-        return {
-            "cause": "starvation",
-            "old_size": old_size,
-            "new_size": new_size,
-            "mass_lost": mass_lost
-        }
+        return CronenbergGrowthResult(
+            cause="starvation",
+            old_size=old_size,
+            new_size=new_size,
+            mass_lost=mass_lost,
+        )
 
     def absorb_mass(
         self,
@@ -135,12 +140,12 @@
             consumed_mass
         )
 
-        return {
-            "cause": "consumption",
-            "old_size": old_size,
-            "new_size": new_size,
-            "mass_gained": consumed_mass
-        }
+        return CronenbergGrowthResult(
+            cause="consumption",
+            old_size=old_size,
+            new_size=new_size,
+            mass_gained=consumed_mass,
+        )
 
     @property
     def public_state(self):

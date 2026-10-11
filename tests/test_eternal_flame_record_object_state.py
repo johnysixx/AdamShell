@@ -87,7 +87,7 @@ class EternalFlameRecordObjectStateTests(unittest.TestCase):
         result = flame.ignite(fire, tick=2)
 
         self.assertEqual(
-            result["name"],
+            result.name,
             "eternal_flame_already_burns",
         )
         self.assertIsInstance(

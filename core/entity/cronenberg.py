@@ -14,7 +14,10 @@ from core.entity.cronenberg_system.growth import (
     CronenbergGrowth
 )
 from core.entity.cronenberg_system.traits import CronenbergTraits
-from core.entity.cronenberg_system.quantum_links import CronenbergQuantumLinks
+from core.entity.cronenberg_system.quantum_links import (
+    CronenbergQuantumLinkSnapshot,
+    CronenbergQuantumLinks,
+)
 from core.entity.cronenberg_system.quantum_state import (
     CronenbergQuantumState
 )
@@ -118,9 +121,9 @@ class Cronenberg(Entity):
 
     @property
     def quantum_links(self):
-        return (
-            self.quantum_link_system
-            .snapshot()
+        return tuple(
+            CronenbergQuantumLinkSnapshot.capture(link)
+            for link in self.quantum_link_system.links
         )
 
     @property
@@ -197,13 +200,11 @@ class Cronenberg(Entity):
         )
 
         self.energy -= (
-            travel_event["energy_spent"]
+            travel_event.energy_spent
         )
 
         travel_dark_energy = (
-            travel_event[
-                "dark_energy_produced"
-            ]
+            travel_event.dark_energy_produced
         )
 
         self.metabolism.pending_dark_energy += (
@@ -221,7 +222,7 @@ class Cronenberg(Entity):
         )
 
         self.size = (
-            layer_event["new_size"]
+            layer_event.new_size
         )
 
         self.juice_value = self.size
@@ -230,7 +231,7 @@ class Cronenberg(Entity):
         print(
             f"{self.name} travels -> "
             f"energy spent "
-            f"{travel_event['energy_spent']:.2f}, "
+            f"{travel_event.energy_spent:.2f}, "
             f"dark energy "
             f"{travel_dark_energy:.3f}, "
             f"size {self.size:.2f}"
@@ -284,22 +285,20 @@ class Cronenberg(Entity):
         )
 
         self.energy += (
-            event["energy_received"]
+            event.energy_received
         )
 
         print(
             f"{self.name} receives "
-            f"{event['energy_received']:.2f} "
+            f"{event.energy_received:.2f} "
             f"energy; needs "
-            f"{event['required_energy']:.2f}; "
+            f"{event.required_energy:.2f}; "
             f"produces "
-            f"{event['dark_energy_produced']:.3f} "
+            f"{event.dark_energy_produced:.3f} "
             f"dark energy"
         )
 
-        return event[
-            "dark_energy_produced"
-        ]
+        return event.dark_energy_produced
 
     def collect_dark_energy(self):
         return (
@@ -387,7 +386,7 @@ class Cronenberg(Entity):
         )
 
         self.size = (
-            growth_event["new_size"]
+            growth_event.new_size
         )
 
         self.energy += consumed_energy
@@ -405,9 +404,7 @@ class Cronenberg(Entity):
                 mass=consumed_mass,
                 energy=consumed_energy,
                 digestion_days=(
-                    digestion_event[
-                        "digestion_days"
-                    ]
+                    digestion_event.digestion_days
                 ),
             )
         )
@@ -430,7 +427,7 @@ class Cronenberg(Entity):
             f"new size "
             f"{self.size:.2f}; "
             f"digestion "
-            f"{digestion_event['digestion_days']} "
+            f"{digestion_event.digestion_days} "
             f"days"
         )
 
@@ -441,9 +438,7 @@ class Cronenberg(Entity):
             "energy_gained": consumed_energy,
             "new_size": self.size,
             "digestion_days": (
-                digestion_event[
-                    "digestion_days"
-                ]
+                digestion_event.digestion_days
             )
         }
 
@@ -481,7 +476,7 @@ class Cronenberg(Entity):
             )
 
             self.size = (
-                growth_event["new_size"]
+                growth_event.new_size
             )
 
             self.juice_value = self.size
@@ -516,9 +511,7 @@ class Cronenberg(Entity):
             )
 
             self.size = (
-                starvation_event[
-                    "new_size"
-                ]
+                starvation_event.new_size
             )
 
             self.juice_value = self.size
@@ -594,7 +587,9 @@ class Cronenberg(Entity):
                 self.growth.public_state
             ),
             "traits": self.traits.public_state,
-            "quantum_links": self.quantum_links,
+            "quantum_links": (
+                self.quantum_link_system.snapshot()
+            ),
             "consumed_cronenbergs": [
                 record.to_dict()
                 for record in

@@ -1,4 +1,9 @@
-﻿import math
+import math
+
+from core.entity.cronenberg_system.result_state import (
+    CronenbergDigestionStartedEvent,
+    CronenbergHungerDayResult,
+)
 
 
 class CronenbergHunger:
@@ -81,33 +86,33 @@ class CronenbergHunger:
             self.satiety_days_remaining -= 1
             self.hungry_days = 0
 
-            return {
-                "state": "digesting",
-                "hungry_days": 0,
-                "satiety_days_remaining": (
+            return CronenbergHungerDayResult(
+                state="digesting",
+                hungry_days=0,
+                satiety_days_remaining=(
                     self.satiety_days_remaining
                 ),
-                "can_hunt": False
-            }
+                can_hunt=False,
+            )
 
         if fed_enough:
             self.hungry_days = 0
 
-            return {
-                "state": "fed",
-                "hungry_days": 0,
-                "satiety_days_remaining": 0,
-                "can_hunt": False
-            }
+            return CronenbergHungerDayResult(
+                state="fed",
+                hungry_days=0,
+                satiety_days_remaining=0,
+                can_hunt=False,
+            )
 
         self.hungry_days += 1
 
-        return {
-            "state": "hungry",
-            "hungry_days": self.hungry_days,
-            "satiety_days_remaining": 0,
-            "can_hunt": self.can_hunt
-        }
+        return CronenbergHungerDayResult(
+            state="hungry",
+            hungry_days=self.hungry_days,
+            satiety_days_remaining=0,
+            can_hunt=self.can_hunt,
+        )
 
     def start_digestion(
         self,
@@ -137,14 +142,14 @@ class CronenbergHunger:
 
         self.hungry_days = 0
 
-        return {
-            "state": "digesting",
-            "consumed_mass": consumed_mass,
-            "digestion_days": digestion_days,
-            "satiety_days_remaining": (
+        return CronenbergDigestionStartedEvent(
+            state="digesting",
+            consumed_mass=consumed_mass,
+            digestion_days=digestion_days,
+            satiety_days_remaining=(
                 self.satiety_days_remaining
-            )
-        }
+            ),
+        )
 
     @property
     def public_state(self):

@@ -1,4 +1,7 @@
-from core.entity.social_entity import SocialInteractionRecord
+from core.entity.social_entity import (
+    CatPettedEvent,
+    SocialInteractionRecord,
+)
 import unittest
 
 from core.entity.social_entity import SocialRelationship
@@ -83,8 +86,13 @@ class SocialRelationshipObjectStateTests(unittest.TestCase):
             'lilith',
         )
 
+        self.assertIsInstance(event, CatPettedEvent)
+        self.assertFalse(hasattr(event, 'get'))
+        with self.assertRaises(TypeError):
+            _ = event['actor']
+
         self.assertEqual(
-            event['actor'],
+            event.actor,
             'lilith',
         )
 

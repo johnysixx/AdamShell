@@ -87,23 +87,17 @@ class CatSocialRelationshipsTests(
         )
 
         self.assertEqual(
-            event[
-                "name"
-            ],
+            event.name,
             "cat_petted"
         )
 
         self.assertEqual(
-            event[
-                "actor"
-            ],
+            event.actor,
             "lilith"
         )
 
         self.assertEqual(
-            event[
-                "cat"
-            ],
+            event.cat,
             "social_cat"
         )
 

@@ -1,3 +1,12 @@
+from dataclasses import dataclass
+
+
+@dataclass(slots=True, frozen=True)
+class ExistenceRemovalResult:
+    world: str | None
+    removed_existence_pct: float
+
+
 class ExistenceResolver:
 
     @staticmethod
@@ -21,11 +30,17 @@ class ExistenceResolver:
         strongest_world = ExistenceResolver.get_strongest_world(entity)
         existence_by_world = ExistenceResolver._get(entity, 'existence_by_world', {})
         if strongest_world is None:
-            return {'world': None, 'removed_existence_pct': 0.0}
+            return ExistenceRemovalResult(
+                world=None,
+                removed_existence_pct=0.0,
+            )
         removed_existence_pct = float(existence_by_world.get(strongest_world, 0.0))
         if strongest_world in existence_by_world:
             existence_by_world[strongest_world] = 0.0
-        return {'world': strongest_world, 'removed_existence_pct': removed_existence_pct}
+        return ExistenceRemovalResult(
+            world=strongest_world,
+            removed_existence_pct=removed_existence_pct,
+        )
 
     @staticmethod
     def exists_anywhere(entity):

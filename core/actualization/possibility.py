@@ -1,3 +1,11 @@
+from dataclasses import dataclass
+
+
+@dataclass(slots=True, frozen=True)
+class PossibilityActualizedEvent:
+    name: str
+
+
 class Possibility:
 
     def __init__(
@@ -29,9 +37,9 @@ class Possibility:
 
     def actualize(self):
         if self.action is None:
-            return {
-                "name": self.name
-            }
+            return PossibilityActualizedEvent(
+                name=self.name
+            )
 
         return self.action()
 

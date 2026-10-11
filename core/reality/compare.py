@@ -1,4 +1,13 @@
+from dataclasses import dataclass
+
 from core.word.word import Word
+
+
+@dataclass(slots=True, frozen=True)
+class RealityDifference:
+    index: int
+    a: str | None
+    b: str | None
 
 
 class RealityComparison:
@@ -18,11 +27,13 @@ class RealityComparison:
             word_b = words_b[i] if i < len(words_b) else None
 
             if not self._same(word_a, word_b):
-                differences.append({
-                    "index": i,
-                    "a": word_a.name if word_a else None,
-                    "b": word_b.name if word_b else None
-                })
+                differences.append(
+                    RealityDifference(
+                        index=i,
+                        a=(word_a.name if word_a else None),
+                        b=(word_b.name if word_b else None),
+                    )
+                )
 
         return differences
 

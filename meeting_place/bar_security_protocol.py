@@ -132,15 +132,12 @@ class BarSecurityProtocol:
             )
         )
         guest.energy_j = 0.0
-        if existence_result['world'] is not None:
+        if existence_result.world is not None:
             self.last_confiscation.record_existence_removal(
-                world=existence_result[
-                    'world'
-                ],
-                removed_existence_pct=
-                    existence_result[
-                        'removed_existence_pct'
-                    ],
+                world=existence_result.world,
+                removed_existence_pct=(
+                    existence_result.removed_existence_pct
+                ),
             )
         self.last_energy_allocation = self.split_confiscated_energy(energy_j)
         self.last_creation_energy_j = self.last_energy_allocation.entity_energy_j

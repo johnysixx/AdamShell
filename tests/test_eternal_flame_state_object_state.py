@@ -78,7 +78,7 @@ class EternalFlameStateObjectStateTests(
             "burning",
         )
         self.assertEqual(
-            result["state"],
+            result.state,
             "burning",
         )
 
