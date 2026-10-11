@@ -92,14 +92,12 @@ class WoodooBirthEffectsTests(
         )
 
         self.assertEqual(
-            result["name"],
+            result.name,
             "woodoo_birth_d20_rotation"
         )
 
         self.assertEqual(
-            result[
-                "registered_d20_count"
-            ],
+            result.registered_d20_count,
             len(
                 self.universe
                 .d20_registry
@@ -108,7 +106,7 @@ class WoodooBirthEffectsTests(
         )
 
         self.assertFalse(
-            result["bar_dice_rotated"]
+            result.bar_dice_rotated
         )
 
     def test_later_woodoo_reconfigures_space_and_marks_next_cat(self):
@@ -132,7 +130,7 @@ class WoodooBirthEffectsTests(
         )
 
         self.assertEqual(
-            result["name"],
+            result.name,
             (
                 "woodoo_rebirth_quantum_"
                 "reconfiguration"

@@ -40,7 +40,7 @@ class CatMEOWGuestResponsibilityTests(unittest.TestCase):
         self.invitations.interpret(offered.id, self.human, understood=True)
         guidance = CatBarGuidanceSystem(self.invitations, self.meeting)
         result = guidance.guide(self.cat, self.human, offered.id)
-        self.assertTrue(result['guided'])
+        self.assertTrue(result.guided)
         return offered
 
     def test_guest_incident_permanently_bans_human(self):
@@ -63,8 +63,8 @@ class CatMEOWGuestResponsibilityTests(unittest.TestCase):
         self._bring_first_guest()
         self.meeting.record_cat_guest_incident(self.human, category='guest_misbehavior', cooldown_ticks=24)
         result = self.invitations.offer(self.cat, self.other_human)
-        self.assertFalse(result['offered'])
-        self.assertEqual(result['reason'], 'cat_MEOW_cooldown')
+        self.assertFalse(result.offered)
+        self.assertEqual(result.reason, 'cat_MEOW_cooldown')
 
     def test_cat_is_sent_to_Garfield_training(self):
         self._bring_first_guest()
@@ -79,8 +79,8 @@ class CatMEOWGuestResponsibilityTests(unittest.TestCase):
         incident = self.meeting.record_cat_guest_incident(self.human, category='guest_misbehavior')
         self.meeting.tick_count = incident.suspended_until_tick
         result = self.invitations.offer(self.cat, self.other_human)
-        self.assertFalse(result['offered'])
-        self.assertEqual(result['reason'], 'garfield_training_required')
+        self.assertFalse(result.offered)
+        self.assertEqual(result.reason, 'garfield_training_required')
 
     def test_training_and_elapsed_cooldown_restore_MEOW(self):
         self._bring_first_guest()

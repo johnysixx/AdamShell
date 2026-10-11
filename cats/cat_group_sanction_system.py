@@ -1,6 +1,7 @@
 from cats.cat_culture_objects import CatViolation
 from cats.cat_social_objects import CatRelationship
 from copy import deepcopy
+from cats.cat_group_sanction_state import CatGroupSanctionEvent
 
 class CatGroupSanctionSystem:
 
@@ -24,7 +25,13 @@ class CatGroupSanctionSystem:
             sanction_type = 'role_suspension'
         else:
             sanction_type = 'expulsion_recommended'
-        event = {'name': 'cat_group_sanction', 'group_id': group_id, 'cat': cat.name, 'sanction': sanction_type, 'severity': round(effective, 4), 'source_violation': deepcopy(violation)}
+        event = CatGroupSanctionEvent(
+            group_id=group_id,
+            cat=cat.name,
+            sanction=sanction_type,
+            severity=round(effective, 4),
+            source_violation=deepcopy(violation),
+        )
         self._apply(group, cat, sanction_type, effective)
         group.sanction_history.append(deepcopy(event))
         cat.norms.sanctions.append(deepcopy(event))

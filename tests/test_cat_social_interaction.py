@@ -52,9 +52,9 @@ class CatSocialInteractionTests(unittest.TestCase):
         cat = self.cats.create_cat(name='pet_cat', color='orange', fur_length='short')
         human = SocialEntity.from_mapping({'name': 'human_1', 'type': 'human'})
         result = cat.accept_pet(human)
-        self.assertTrue(result['accepted'])
-        self.assertEqual(result['cat'], 'pet_cat')
-        self.assertEqual(result['by'], 'human_1')
+        self.assertTrue(result.accepted)
+        self.assertEqual(result.cat, 'pet_cat')
+        self.assertEqual(result.by, 'human_1')
         self.assertEqual(cat.pet_count, 1)
         self.assertIn(result, cat.social_interactions)
 
@@ -62,23 +62,23 @@ class CatSocialInteractionTests(unittest.TestCase):
         cat = self.cats.create_cat(name='talking_cat', color='black', fur_length='short', origin='dice_manifestation')
         listener = SocialEntity.from_mapping({'name': 'listener_1', 'type': 'idea_entity'})
         result = cat.meow_to(listener)
-        self.assertTrue(result['spoken'])
-        self.assertEqual(result['listener'], 'listener_1')
-        self.assertIn('bar_knowledge', result['contains'])
+        self.assertTrue(result.spoken)
+        self.assertEqual(result.listener, 'listener_1')
+        self.assertIn('bar_knowledge', result.contains)
         self.assertEqual(cat.meow_count, 1)
 
     def test_cat_can_meow_specific_known_topic(self):
         cat = self.cats.create_cat(name='bar_cat', color='orange', fur_length='short')
         listener = SocialEntity.from_mapping({'name': 'listener_2'})
         result = cat.meow_to(listener, topic='bar_knowledge')
-        self.assertTrue(result['spoken'])
-        self.assertEqual(result['contains'], ['bar_knowledge'])
+        self.assertTrue(result.spoken)
+        self.assertEqual(result.contains, ('bar_knowledge',))
 
     def test_cat_refuses_unknown_meow_topic(self):
         cat = self.cats.create_cat(name='honest_cat', color='white', fur_length='short')
         result = cat.meow_to({'name': 'listener_3'}, topic='knowledge_of_everything')
-        self.assertFalse(result['spoken'])
-        self.assertEqual(result['reason'], 'unknown_meow_topic')
+        self.assertFalse(result.spoken)
+        self.assertEqual(result.reason, 'unknown_meow_topic')
 
     def test_newborn_cannot_use_adult_meow_before_learning(self):
         kitten = self.cats.create_cat(name='kitten', color='white', fur_length='short', origin='kitten_birth_resolver')
@@ -86,8 +86,8 @@ class CatSocialInteractionTests(unittest.TestCase):
         development = CatDevelopmentResolver(self.universe)
         development.initialize_newborn(kitten, birth_day=0)
         result = kitten.meow_to({'name': 'listener_4'})
-        self.assertFalse(result['spoken'])
-        self.assertEqual(result['reason'], 'meow_not_learned')
+        self.assertFalse(result.spoken)
+        self.assertEqual(result.reason, 'meow_not_learned')
 
     def _relationship(self, **values):
         relationship = CatRelationship.create()
@@ -317,10 +317,10 @@ class CatSocialInteractionTests(unittest.TestCase):
         first, second = self._social_pair()
         first.mind.current_intention = CatIntentionCandidate(type='approach_cat', target=CatApproachCatTarget(cat_name=second.name))
         result = self.cats.execute_cat_intention(first)
-        self.assertEqual(result['name'], 'cat_approach_completed')
-        self.assertTrue(result['executed'])
-        self.assertIn('social', result)
-        self.assertEqual(result['social'].name, 'cat_social_meeting')
+        self.assertEqual(result.name, 'cat_approach_completed')
+        self.assertTrue(result.executed)
+        self.assertIsNotNone(result.social)
+        self.assertEqual(result.social.name, 'cat_social_meeting')
 
     def test_social_system_does_not_repeat_greeting_while_still_near(self):
         first, second = self._social_pair()

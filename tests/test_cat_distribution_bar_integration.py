@@ -3,6 +3,9 @@ import unittest
 from multiverse import UniverseRegistry
 from universe.universe import Universe
 from cats.cats import Cats
+from cats.cat_distribution_status import (
+    CatDistributionStatus,
+)
 from universe.bootstraps.universe_bootstrap import UniverseBootstrap
 
 class CatDistributionBarIntegrationTests(unittest.TestCase):
@@ -26,9 +29,9 @@ class CatDistributionBarIntegrationTests(unittest.TestCase):
         self.assertEqual(event['name'], 'cat_drank_milk_at_bar')
         self.assertIn('distribution', event)
         distribution = event['distribution']
-        self.assertTrue(distribution['distributed'])
-        self.assertEqual(distribution['status'], 'assigned')
-        self.assertEqual(distribution['recipient'], 'alice')
+        self.assertTrue(distribution.distributed)
+        self.assertEqual(distribution.status, CatDistributionStatus.ASSIGNED)
+        self.assertEqual(distribution.recipient, 'alice')
         self.assertEqual(cat.recipient, 'alice')
         self.assertIn(cat, self.meeting_place.entities)
         self.assertNotIn(cat, self.idea_universe.entities)

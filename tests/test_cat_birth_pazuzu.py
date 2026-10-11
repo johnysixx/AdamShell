@@ -19,6 +19,9 @@ from cats.cat_birth_objects import (
 from cats.cat_birth_resolver import (
     CatBirthResolver
 )
+from cats.cat_birth_result_state import (
+    CatBirthProfileResolvedEvent,
+)
 from cats.cat_trait_dice_mapping import (
     CatTraitDiceMappingResult,
 )
@@ -80,10 +83,10 @@ class CatBirthPazuzuTests(
             sex="female",
         )
 
-        return {
-            "profile": profile,
-            "rolled_profile": profile,
-            "canonical": (
+        return CatBirthProfileResolvedEvent(
+            profile= profile,
+            rolled_profile= profile,
+            canonical= (
                 CatCanonicalBirthResolution(
                     matched=True,
                     occurrence=1,
@@ -94,7 +97,7 @@ class CatBirthPazuzuTests(
                     ),
                 )
             ),
-            "genetics": CatBirthGeneticsResult(
+            genetics= CatBirthGeneticsResult(
                 profile=profile,
                 validation=CatGeneticsValidation(
                     valid=True,
@@ -106,7 +109,7 @@ class CatBirthPazuzuTests(
                     karyotype="XX",
                 ),
             ),
-            "trait_dice_mapping": (
+            trait_dice_mapping= (
                 CatTraitDiceMappingResult(
                     cat_d20_value=1,
                     permutation_index=0,
@@ -114,12 +117,12 @@ class CatBirthPazuzuTests(
                     trait_to_die={},
                 )
             ),
-            "percentile": (
+            percentile= (
                 CatBirthPercentileResult.single(
                     value=70
                 )
             )
-        }
+        )
 
     def test_first_canonical_birth_creates_pazuzu(self):
         birth = self._pazuzu_birth()
@@ -136,13 +139,11 @@ class CatBirthPazuzuTests(
             rng=FixedPazuzuRng()
         )
 
-        cat = result["cat"]
-        resonance = result[
-            "special_birth_result"
-        ]
+        cat = result.cat
+        resonance = result.special_birth_result
 
         self.assertTrue(
-            result["created"]
+            result.created
         )
 
         self.assertEqual(
@@ -191,7 +192,7 @@ class CatBirthPazuzuTests(
         )
 
         self.assertTrue(
-            resonance["triggered"]
+            resonance.triggered
         )
 
         self.assertEqual(
@@ -200,16 +201,16 @@ class CatBirthPazuzuTests(
         )
 
         self.assertTrue(
-            resonance["cat_d20"]["turned"]
+            resonance.cat_d20["turned"]
         )
 
         self.assertEqual(
-            resonance["dice_vial"]["name"],
+            resonance.dice_vial["name"],
             "dice_vial_secret_rotation"
         )
 
         self.assertTrue(
-            resonance["dice_box"]["rotated"]
+            resonance.dice_box["rotated"]
         )
 
     def test_pazuzu_birth_resonance_remains_one_time(self):
@@ -231,9 +232,7 @@ class CatBirthPazuzuTests(
         )
 
         self.assertTrue(
-            first["special_birth_result"][
-                "triggered"
-            ]
+            first.special_birth_result.triggered
         )
 
         self.assertTrue(

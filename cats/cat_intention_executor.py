@@ -15,7 +15,12 @@ from cats.cat_intention_state import (
 )
 from cats.cat_social_system import CatSocialSystem
 from cats.cat_basic_intention_result_state import (
+    CatApproachCompletedEvent,
+    CatApproachFailedResult,
+    CatApproachStartedEvent,
     CatIntentionBodyActionDeferredEvent,
+    CatIntentionExecutionFailedResult,
+    CatIntentionExecutionSkippedResult,
     CatRestStartedEvent,
     CatWanderedEvent,
     CatWanderFailedResult,
@@ -98,15 +103,45 @@ class CatIntentionExecutor:
             )
         )
 
-    def execute_current_intention(self, cat, cronenbergs=None, step_size=None):
-        if not isinstance(cat, Cat):
-            return self._record({'name': 'cat_intention_execution_failed', 'reason': 'invalid_cat', 'executed': False})
-        if cat.type != 'cat':
-            return self._record({'name': 'cat_intention_execution_failed', 'cat': cat.name, 'reason': 'entity_is_not_cat', 'executed': False})
+    def execute_current_intention(
+        self,
+        cat,
+        cronenbergs=None,
+        step_size=None,
+    ):
+        if not isinstance(
+            cat,
+            Cat,
+        ):
+            return self._record(
+                CatIntentionExecutionFailedResult(
+                    reason="invalid_cat",
+                )
+            )
+
+        if cat.type != "cat":
+            return self._record(
+                CatIntentionExecutionFailedResult(
+                    cat=cat.name,
+                    reason="entity_is_not_cat",
+                )
+            )
+
         mind = cat.mind
-        intention = getattr(mind, 'current_intention', None)
+
+        intention = getattr(
+            mind,
+            "current_intention",
+            None,
+        )
+
         if not intention:
-            return self._record({'name': 'cat_intention_execution_skipped', 'cat': cat.name, 'reason': 'no_current_intention', 'executed': False})
+            return self._record(
+                CatIntentionExecutionSkippedResult(
+                    cat=cat.name,
+                    reason="no_current_intention",
+                )
+            )
 
         if not isinstance(
             intention,
@@ -117,34 +152,113 @@ class CatIntentionExecutor:
                 "CatIntentionCandidate."
             )
 
-        intention_type = intention.type
+        intention_type = (
+            intention.type
+        )
+
         if intention_type in self.NAVIGATION_INTENTS:
-            return self._execute_navigation(cat=cat, intention=intention, cronenbergs=cronenbergs, step_size=step_size)
-        if intention_type == 'wander':
-            return self._execute_wander(cat=cat, intention=intention, step_size=step_size)
-        if intention_type == 'rest':
-            return self._execute_rest(cat=cat, intention=intention)
-        if intention_type == 'follow_scent_through_box':
-            return self.scent_box_intentions.execute(cat=cat, intention=intention, cronenbergs=cronenbergs, step_size=step_size)
-        if intention_type == 'sense_quantum_counterpart':
-            return self.quantum_box_intentions.sense(cat=cat, intention=intention)
-        if intention_type == 'travel_through_known_quantum_box':
-            return self.quantum_box_intentions.travel(cat=cat, intention=intention)
-        if intention_type == 'explore_box':
-            return self.quantum_box_intentions.explore(cat=cat, intention=intention, cronenbergs=cronenbergs, step_size=step_size)
-        if intention_type == 'search_for_scent':
-            return self.scent_search_intentions.execute(cat=cat, intention=intention, cronenbergs=cronenbergs, step_size=step_size)
-        if intention_type == 'follow_known_scent':
-            return self.known_scent_intentions.execute(cat=cat, intention=intention, cronenbergs=cronenbergs, step_size=step_size)
-        if intention_type == 'share_legend':
-            return self._execute_share_legend(cat=cat, intention=intention)
-        if intention_type == 'create_exploration_pair':
-            return self.exploration_pair_intentions.execute(cat=cat, intention=intention)
-        if intention_type == 'approach_cat':
-            return self._execute_approach_cat(cat=cat, intention=intention, step_size=step_size)
+            return self._execute_navigation(
+                cat=cat,
+                intention=intention,
+                cronenbergs=cronenbergs,
+                step_size=step_size,
+            )
+
+        if intention_type == "wander":
+            return self._execute_wander(
+                cat=cat,
+                intention=intention,
+                step_size=step_size,
+            )
+
+        if intention_type == "rest":
+            return self._execute_rest(
+                cat=cat,
+                intention=intention,
+            )
+
+        if intention_type == "follow_scent_through_box":
+            return self.scent_box_intentions.execute(
+                cat=cat,
+                intention=intention,
+                cronenbergs=cronenbergs,
+                step_size=step_size,
+            )
+
+        if intention_type == "sense_quantum_counterpart":
+            return self.quantum_box_intentions.sense(
+                cat=cat,
+                intention=intention,
+            )
+
+        if intention_type == "travel_through_known_quantum_box":
+            return self.quantum_box_intentions.travel(
+                cat=cat,
+                intention=intention,
+            )
+
+        if intention_type == "explore_box":
+            return self.quantum_box_intentions.explore(
+                cat=cat,
+                intention=intention,
+                cronenbergs=cronenbergs,
+                step_size=step_size,
+            )
+
+        if intention_type == "search_for_scent":
+            return self.scent_search_intentions.execute(
+                cat=cat,
+                intention=intention,
+                cronenbergs=cronenbergs,
+                step_size=step_size,
+            )
+
+        if intention_type == "follow_known_scent":
+            return self.known_scent_intentions.execute(
+                cat=cat,
+                intention=intention,
+                cronenbergs=cronenbergs,
+                step_size=step_size,
+            )
+
+        if intention_type == "share_legend":
+            return self._execute_share_legend(
+                cat=cat,
+                intention=intention,
+            )
+
+        if intention_type == "create_exploration_pair":
+            return (
+                self.exploration_pair_intentions
+                .execute(
+                    cat=cat,
+                    intention=intention,
+                )
+            )
+
+        if intention_type == "approach_cat":
+            return self._execute_approach_cat(
+                cat=cat,
+                intention=intention,
+                step_size=step_size,
+            )
+
         if intention_type in self.DEFERRED_INTENTS:
-            return self._defer_intention(cat=cat, intention=intention)
-        return self._record({'name': 'cat_intention_execution_failed', 'cat': cat.name, 'intention': intention_type, 'reason': 'unsupported_intention', 'executed': False})
+            return self._defer_intention(
+                cat=cat,
+                intention=intention,
+            )
+
+        return self._record(
+            CatIntentionExecutionFailedResult(
+                cat=cat.name,
+                intention=
+                    intention_type,
+                reason=
+                    "unsupported_intention",
+            )
+        )
+
 
     def _execute_navigation(
         self,
@@ -614,55 +728,231 @@ class CatIntentionExecutor:
             event
         )
 
-    def _execute_approach_cat(self, cat, intention, step_size=None):
+    def _execute_approach_cat(
+        self,
+        cat,
+        intention,
+        step_size=None,
+    ):
         target = intention.target
 
         if not isinstance(
             target,
             CatApproachCatTarget,
         ):
-            return self._record({
-                'name': 'cat_approach_failed',
-                'cat': cat.name,
-                'reason': (
-                    'invalid_approach_cat_target'
-                ),
-                'executed': False,
-            })
+            return self._record(
+                CatApproachFailedResult(
+                    cat=cat.name,
+                    reason=(
+                        "invalid_approach_cat_target"
+                    ),
+                )
+            )
 
-        target_name = target.cat_name
+        target_name = (
+            target.cat_name
+        )
+
         if not target_name:
-            return self._record({'name': 'cat_approach_failed', 'cat': cat.name, 'reason': 'missing_target_cat', 'executed': False})
-        target_cat = next((candidate for candidate in self.cats_layer.cats if isinstance(candidate, Cat) and candidate is not cat and (candidate.name == target_name)), None)
+            return self._record(
+                CatApproachFailedResult(
+                    cat=cat.name,
+                    reason="missing_target_cat",
+                )
+            )
+
+        target_cat = next(
+            (
+                candidate
+                for candidate
+                in self.cats_layer.cats
+                if (
+                    isinstance(
+                        candidate,
+                        Cat,
+                    )
+                    and candidate is not cat
+                    and candidate.name
+                    == target_name
+                )
+            ),
+            None,
+        )
+
         if target_cat is None:
-            return self._record({'name': 'cat_approach_failed', 'cat': cat.name, 'target': target_name, 'reason': 'target_cat_not_found', 'executed': False})
-        if target_cat.current_layer != cat.current_layer:
-            return self._record({'name': 'cat_approach_failed', 'cat': cat.name, 'target': target_name, 'reason': 'target_cat_in_other_layer', 'cat_layer': cat.current_layer, 'target_layer': target_cat.current_layer, 'executed': False})
-        cat_position = cat.position
-        target_position = target_cat.position
-        if not isinstance(cat_position, SpatialVector3) or not isinstance(target_position, SpatialVector3):
-            return self._record({'name': 'cat_approach_failed', 'cat': cat.name, 'target': target_name, 'reason': 'missing_position', 'executed': False})
-        if self._same_position(cat_position, target_position):
-            cat.state = 'near_target_cat'
-            social_event = self.social_system.meet(cat, target_cat)
-            event = {'name': 'cat_approach_completed', 'cat': cat.name, 'target': target_name, 'position': cat_position.to_dict(), 'arrived': True, 'decision_source': 'cat_mind', 'social': deepcopy(social_event), 'executed': True}
-            cat.mind.active_body_execution = deepcopy(event)
-            return self._record(event)
-        quantum_space = getattr(self.universe, 'quantum_space', None)
+            return self._record(
+                CatApproachFailedResult(
+                    cat=cat.name,
+                    target=target_name,
+                    reason="target_cat_not_found",
+                )
+            )
+
+        if (
+            target_cat.current_layer
+            != cat.current_layer
+        ):
+            return self._record(
+                CatApproachFailedResult(
+                    cat=cat.name,
+                    target=target_name,
+                    reason=(
+                        "target_cat_in_other_layer"
+                    ),
+                    cat_layer=
+                        cat.current_layer,
+                    target_layer=
+                        target_cat.current_layer,
+                )
+            )
+
+        cat_position = (
+            cat.position
+        )
+
+        target_position = (
+            target_cat.position
+        )
+
+        if (
+            not isinstance(
+                cat_position,
+                SpatialVector3,
+            )
+            or not isinstance(
+                target_position,
+                SpatialVector3,
+            )
+        ):
+            return self._record(
+                CatApproachFailedResult(
+                    cat=cat.name,
+                    target=target_name,
+                    reason="missing_position",
+                )
+            )
+
+        if self._same_position(
+            cat_position,
+            target_position,
+        ):
+            cat.state = (
+                "near_target_cat"
+            )
+
+            social_event = (
+                self.social_system.meet(
+                    cat,
+                    target_cat,
+                )
+            )
+
+            event = (
+                CatApproachCompletedEvent(
+                    cat=cat.name,
+                    target=target_name,
+                    position=deepcopy(
+                        cat_position
+                    ),
+                    social=deepcopy(
+                        social_event
+                    ),
+                )
+            )
+
+            cat.mind.active_body_execution = (
+                deepcopy(
+                    event
+                )
+            )
+
+            return self._record(
+                event
+            )
+
+        quantum_space = getattr(
+            self.universe,
+            "quantum_space",
+            None,
+        )
+
         if quantum_space is None:
             self.universe.enable_quantum_layer()
-            quantum_space = getattr(self.universe, 'quantum_space', None)
+
+            quantum_space = getattr(
+                self.universe,
+                "quantum_space",
+                None,
+            )
+
         if quantum_space is None:
-            return self._record({'name': 'cat_approach_failed', 'cat': cat.name, 'target': target_name, 'reason': 'quantum_space_unavailable', 'executed': False})
-        planned = quantum_space.plan_direct_cat_route(cat_id=cat.name, start_position=cat_position, destination_position=target_position, destination=f'cat:{target_name}', step_size=step_size)
-        route = planned.route
-        route.state = QuantumCatRouteState.READY
-        cat.active_route_id = route.route_id
-        cat.navigation_target = target_name
-        cat.state = 'approaching_cat'
-        event = {'name': 'cat_approach_started', 'cat': cat.name, 'target': target_name, 'route_id': route.route_id, 'destination': target_position.to_dict(), 'arrived': False, 'decision_source': 'cat_mind', 'executed': True}
-        cat.mind.active_body_execution = deepcopy(event)
-        return self._record(event)
+            return self._record(
+                CatApproachFailedResult(
+                    cat=cat.name,
+                    target=target_name,
+                    reason=(
+                        "quantum_space_unavailable"
+                    ),
+                )
+            )
+
+        planned = (
+            quantum_space
+            .plan_direct_cat_route(
+                cat_id=cat.name,
+                start_position=
+                    cat_position,
+                destination_position=
+                    target_position,
+                destination=
+                    f"cat:{target_name}",
+                step_size=
+                    step_size,
+            )
+        )
+
+        route = (
+            planned.route
+        )
+
+        route.state = (
+            QuantumCatRouteState.READY
+        )
+
+        cat.active_route_id = (
+            route.route_id
+        )
+
+        cat.navigation_target = (
+            target_name
+        )
+
+        cat.state = (
+            "approaching_cat"
+        )
+
+        event = (
+            CatApproachStartedEvent(
+                cat=cat.name,
+                target=target_name,
+                route_id=
+                    route.route_id,
+                destination=deepcopy(
+                    target_position
+                ),
+            )
+        )
+
+        cat.mind.active_body_execution = (
+            deepcopy(
+                event
+            )
+        )
+
+        return self._record(
+            event
+        )
+
 
     def _defer_intention(
         self,

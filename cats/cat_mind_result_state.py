@@ -99,3 +99,39 @@ class CatIntentionSelectedEvent:
         return len(
             self.finalists
         )
+
+
+@dataclass(
+    slots=True,
+    frozen=True,
+)
+class CatIntentionClearedEvent:
+
+    cat: str
+    previous_intention: CatIntentionCandidate | None
+    reason: str
+
+    name: str = field(
+        default="cat_intention_cleared",
+        init=False,
+    )
+
+    cleared: bool = field(
+        default=True,
+        init=False,
+    )
+
+    def __post_init__(
+        self,
+    ):
+        if (
+            self.previous_intention is not None
+            and not isinstance(
+                self.previous_intention,
+                CatIntentionCandidate,
+            )
+        ):
+            raise TypeError(
+                "Cleared previous intention must be "
+                "CatIntentionCandidate or None."
+            )

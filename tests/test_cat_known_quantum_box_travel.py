@@ -34,7 +34,7 @@ class CatKnownQuantumBoxTravelTests(unittest.TestCase):
         intention = next((candidate for candidate in candidates if candidate.type == 'sense_quantum_counterpart'))
         self.cat.mind.current_intention = intention
         result = self.cats.execute_cat_intention(self.cat)
-        self.assertTrue(result['executed'])
+        self.assertTrue(result.executed)
 
     def test_current_observation_creates_travel_intention(self):
         self.sense_counterpart()
@@ -49,8 +49,8 @@ class CatKnownQuantumBoxTravelTests(unittest.TestCase):
         travel = next((candidate for candidate in candidates if candidate.type == 'travel_through_known_quantum_box'))
         self.cat.mind.current_intention = travel
         result = self.cats.execute_cat_intention(self.cat)
-        self.assertTrue(result['executed'])
-        self.assertEqual(result['name'], 'cat_traveled_through_known_quantum_box')
+        self.assertTrue(result.executed)
+        self.assertEqual(result.name, 'cat_traveled_through_known_quantum_box')
         self.assertEqual(self.cat.current_layer, self.target.current_layer)
         self.assertEqual(self.cat.position, self.target.position)
 
@@ -61,8 +61,8 @@ class CatKnownQuantumBoxTravelTests(unittest.TestCase):
         self.cat.position = SpatialVector3(x=100.0, y=100.0, z=0.0)
         self.cat.mind.current_intention = travel
         result = self.cats.execute_cat_intention(self.cat)
-        self.assertFalse(result['executed'])
-        self.assertEqual(result['reason'], 'cat_not_at_source_box')
+        self.assertFalse(result.executed)
+        self.assertEqual(result.reason, 'cat_not_at_source_box')
         self.assertEqual(self.cat.current_layer, 'quantum_layer')
 
     def test_successful_travel_is_remembered_as_route(self):
@@ -71,7 +71,7 @@ class CatKnownQuantumBoxTravelTests(unittest.TestCase):
         travel = next((candidate for candidate in candidates if candidate.type == 'travel_through_known_quantum_box'))
         self.cat.mind.current_intention = travel
         result = self.cats.execute_cat_intention(self.cat)
-        self.assertTrue(result['executed'])
+        self.assertTrue(result.executed)
         memories = self.cat.memory.recall(event_type='quantum_box_layer_transfer')
         self.assertTrue(memories)
         memory = memories[-1]
@@ -106,11 +106,11 @@ class CatKnownQuantumBoxTravelTests(unittest.TestCase):
             )
         self.universe.cat_box_transfer.transfer_cat = fail_transfer
         result = self.cats.execute_cat_intention(self.cat)
-        self.assertFalse(result['executed'])
-        self.assertEqual(result['name'], 'cat_quantum_box_travel_failed')
+        self.assertFalse(result.executed)
+        self.assertEqual(result.name, 'cat_quantum_box_travel_failed')
         self.assertEqual(len(self.universe.cronenbergs), cronenberg_count_before + 1)
         cronenberg = self.universe.cronenbergs[-1]
-        manifested = next((event for event in reversed(self.universe.quantum_events) if event.get('name') == 'cronenberg_manifested'))
+        manifested = next((event for event in reversed(self.universe.quantum_events) if isinstance(event, dict) and event['name'] == 'cronenberg_manifested'))
         self.assertEqual(manifested['cronenberg_id'], cronenberg.id)
         self.assertEqual(manifested['source_component'], 'cat_intention_executor')
         self.assertEqual(manifested['source_operation'], 'quantum_box_travel_failed')

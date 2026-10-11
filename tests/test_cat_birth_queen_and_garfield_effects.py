@@ -65,24 +65,20 @@ class CatBirthQueenAndGarfieldEffectsTests(
             )
         )
 
-        rotation = result[
-            "dice_rotation"
-        ]
+        rotation = result.dice_rotation
 
         self.assertEqual(
-            result["name"],
+            result.name,
             "queen_elisabeth_birth_effects"
         )
 
         self.assertEqual(
-            rotation["bar_dice_count"],
+            rotation.bar_dice_count,
             6
         )
 
         self.assertEqual(
-            rotation[
-                "registered_d20_count"
-            ],
+            rotation.registered_d20_count,
             len(
                 self.universe
                 .d20_registry
@@ -91,16 +87,12 @@ class CatBirthQueenAndGarfieldEffectsTests(
         )
 
         self.assertEqual(
-            result[
-                "selected_non_dice_effect"
-            ],
+            result.selected_non_dice_effect,
             "woodoo_birth_chaos"
         )
 
         self.assertEqual(
-            result[
-                "non_dice_result"
-            ]["effect_type"],
+            result.non_dice_result.effect_type,
             "non_dice"
         )
 
@@ -118,37 +110,37 @@ class CatBirthQueenAndGarfieldEffectsTests(
         )
 
         self.assertEqual(
-            result["name"],
+            result.name,
             "garfield_birth_effect_combination"
         )
 
         self.assertEqual(
-            result["effect_mask"],
+            result.effect_mask,
             1
         )
 
         self.assertEqual(
-            result["effect_names"],
-            [
-                "force_next_woodoo"
-            ]
+            result.effect_names,
+            (
+                "force_next_woodoo",
+            )
         )
 
         self.assertEqual(
-            result["effect_count"],
+            result.effect_count,
             1
         )
 
         self.assertTrue(
-            result["force_next_woodoo"]
+            result.force_next_woodoo
         )
 
         self.assertFalse(
-            result["cat_d20_rotated"]
+            result.cat_d20_rotated
         )
 
         self.assertFalse(
-            result["quantum_d20_rotated"]
+            result.quantum_d20_rotated
         )
 
         self.assertTrue(
@@ -157,7 +149,7 @@ class CatBirthQueenAndGarfieldEffectsTests(
         )
 
         self.assertTrue(
-            result["triggered"]
+            result.triggered
         )
 
 

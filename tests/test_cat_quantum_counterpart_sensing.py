@@ -48,13 +48,13 @@ class CatQuantumCounterpartSensingTests(unittest.TestCase):
         intention = next((candidate for candidate in candidates if candidate.type == 'sense_quantum_counterpart'))
         self.cat.mind.current_intention = intention
         result = self.cats.execute_cat_intention(self.cat)
-        self.assertEqual(result['name'], 'cat_sensed_quantum_counterpart')
-        observation = result['observation']
-        self.assertEqual(observation['counterpart_box_id'], self.target.id)
-        self.assertEqual(observation['counterpart_layer'], 'meeting_place')
-        self.assertEqual(observation['counterpart_position'], self.target.position.to_dict())
-        self.assertTrue(observation['temporary'])
-        self.assertTrue(observation['pair_currently_valid'])
+        self.assertEqual(result.name, 'cat_sensed_quantum_counterpart')
+        observation = result.observation
+        self.assertEqual(observation.counterpart_box_id, self.target.id)
+        self.assertEqual(observation.counterpart_layer, 'meeting_place')
+        self.assertEqual(observation.counterpart_position, self.target.position)
+        self.assertTrue(observation.temporary)
+        self.assertTrue(observation.pair_currently_valid)
         self.assertIsInstance(
             self.cat.current_quantum_counterpart_observation,
             CatQuantumCounterpartObservation,
@@ -65,7 +65,7 @@ class CatQuantumCounterpartSensingTests(unittest.TestCase):
         intention = next((candidate for candidate in candidates if candidate.type == 'sense_quantum_counterpart'))
         self.cat.mind.current_intention = intention
         result = self.cats.execute_cat_intention(self.cat)
-        self.assertTrue(result['observation']['pair_currently_valid'])
+        self.assertTrue(result.observation.pair_currently_valid)
         before = self.observations()
         self.assertIsNotNone(before.quantum_counterpart_observation)
         self.universe.quantum_boxes.remove(self.target)
@@ -102,7 +102,7 @@ class CatQuantumCounterpartSensingTests(unittest.TestCase):
         sense = next((candidate for candidate in candidates if candidate.type == 'sense_quantum_counterpart'))
         self.cat.mind.current_intention = sense
         result = self.cats.execute_cat_intention(self.cat)
-        self.assertTrue(result['executed'])
+        self.assertTrue(result.executed)
         before_candidates = CatMind.consider(cat=self.cat, observations=self.observations())
         before = next((candidate for candidate in before_candidates if candidate.type == 'travel_through_known_quantum_box'))
         self.cat.memory.remember(event_type='quantum_box_layer_transfer_failed', universe_tick=1, location=self.cat.position.to_dict(), participants=[self.source.id, self.target.id], details={'source_layer': 'quantum_layer', 'target_layer': 'meeting_place', 'reason': 'test_quantum_failure', 'cronenberg_id': 'test_cronenberg'})
@@ -119,7 +119,7 @@ class CatQuantumCounterpartSensingTests(unittest.TestCase):
             'counterpart_box_id': self.target.id,
             'source_layer': 'quantum_layer',
             'counterpart_layer': 'meeting_place',
-            'counterpart_position': self.target.position.to_dict(),
+            'counterpart_position': self.target.position,
             'observed_tick': 0,
             'temporary': True,
             'pair_currently_valid': True,

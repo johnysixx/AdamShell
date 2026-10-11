@@ -37,7 +37,7 @@ class CatBoxExplorationLifecycleTests(unittest.TestCase):
 
         )
         first = self.cats.execute_cat_intention(self.cat)
-        self.assertEqual(first['name'], 'cat_approaching_box_to_explore')
+        self.assertEqual(first.name, 'cat_approaching_box_to_explore')
         self.assertEqual(
             self.cat.position,
             SpatialVector3(x=0.0, y=0.0, z=0.0)
@@ -45,9 +45,9 @@ class CatBoxExplorationLifecycleTests(unittest.TestCase):
         result = first
         for _ in range(10):
             result = self.cats.execute_cat_intention(self.cat)
-            if result['name'] == 'cat_explored_quantum_box':
+            if result.name == 'cat_explored_quantum_box':
                 break
-        self.assertEqual(result['name'], 'cat_explored_quantum_box')
+        self.assertEqual(result.name, 'cat_explored_quantum_box')
         self.assertEqual(self.cat.position, self.box.position)
         self.assertIsInstance(
             self.cat.box_exploration,

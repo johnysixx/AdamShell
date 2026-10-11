@@ -321,3 +321,44 @@ class CatSocialMeetingEvent:
             "steps",
             normalized_steps,
         )
+
+
+@dataclass(
+    slots=True,
+    frozen=True,
+)
+class CatPetAcceptedEvent:
+
+    cat: str
+    by: str | None
+    pet_number: int
+
+    type: str = field(
+        default="cat_pet",
+        init=False,
+    )
+
+    accepted: bool = field(
+        default=True,
+        init=False,
+    )
+
+
+@dataclass(
+    slots=True,
+    frozen=True,
+)
+class CatMeowEvent:
+
+    cat: str
+    listener: str | None
+    spoken: bool
+    reason: str | None = None
+    topic: str | None = None
+    meow_number: int | None = None
+    contains: tuple[str, ...] = ()
+
+    type: str = field(
+        default="cat_meow",
+        init=False,
+    )

@@ -63,7 +63,7 @@ class CatMEOWEscortRequirementTests(unittest.TestCase):
     def test_guidance_brings_cat_and_human_together(self):
         guidance = CatBarGuidanceSystem(self.invitations, self.meeting)
         result = guidance.guide(self.cat, self.human, self.offered.id)
-        self.assertTrue(result['guided'])
+        self.assertTrue(result.guided)
         self.assertIn(self.cat, self.meeting.entities)
         self.assertIn(self.human, self.meeting.entities)
         self.assertEqual(self.cat.current_layer, 'meeting_place')
@@ -85,7 +85,7 @@ class CatMEOWEscortRequirementTests(unittest.TestCase):
         before = self.invitations.get(self.offered.id)
         self.assertFalse(before.used)
         result = guidance.guide(self.cat, self.human, self.offered.id)
-        self.assertTrue(result['guided'])
+        self.assertTrue(result.guided)
         after = self.invitations.get(self.offered.id)
         self.assertTrue(after.used)
 if __name__ == '__main__':

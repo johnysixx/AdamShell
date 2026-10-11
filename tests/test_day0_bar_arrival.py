@@ -67,6 +67,9 @@ class Day0BarArrivalTests(unittest.TestCase):
         from cats.cat_birth_resolver import (
             CatBirthResolver
         )
+        from cats.cat_birth_result_state import (
+            CatBirthProfileResolvedEvent,
+        )
 
         universe = Universe()
         registry = UniverseRegistry()
@@ -99,10 +102,10 @@ class Day0BarArrivalTests(unittest.TestCase):
             sex="female",
         )
 
-        birth = {
-            "profile": profile,
-            "rolled_profile": profile,
-            "canonical": (
+        birth = CatBirthProfileResolvedEvent(
+            profile= profile,
+            rolled_profile= profile,
+            canonical= (
                 CatCanonicalBirthResolution(
                     matched=True,
                     occurrence=1,
@@ -113,7 +116,7 @@ class Day0BarArrivalTests(unittest.TestCase):
                     ),
                 )
             ),
-            "genetics": CatBirthGeneticsResult(
+            genetics= CatBirthGeneticsResult(
                 profile=profile,
                 validation=CatGeneticsValidation(
                     valid=True,
@@ -125,7 +128,7 @@ class Day0BarArrivalTests(unittest.TestCase):
                     karyotype="XX",
                 ),
             ),
-            "trait_dice_mapping": (
+            trait_dice_mapping= (
                 CatTraitDiceMappingResult(
                     cat_d20_value=1,
                     permutation_index=0,
@@ -133,12 +136,12 @@ class Day0BarArrivalTests(unittest.TestCase):
                     trait_to_die={},
                 )
             ),
-            "percentile": (
+            percentile= (
                 CatBirthPercentileResult.single(
                     value=70
                 )
             )
-        }
+        )
 
         resolver.resolve_profile = (
             lambda rng=None: birth
@@ -146,10 +149,10 @@ class Day0BarArrivalTests(unittest.TestCase):
 
         result = resolver.create_cat()
 
-        pazuzu = result["cat"]
+        pazuzu = result.cat
 
         self.assertTrue(
-            result["created"]
+            result.created
         )
 
         self.assertEqual(

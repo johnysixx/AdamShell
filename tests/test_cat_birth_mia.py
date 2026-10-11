@@ -19,6 +19,9 @@ from cats.cat_birth_objects import (
 from cats.cat_birth_resolver import (
     CatBirthResolver
 )
+from cats.cat_birth_result_state import (
+    CatBirthProfileResolvedEvent,
+)
 from cats.cat_trait_dice_mapping import (
     CatTraitDiceMappingResult,
 )
@@ -86,10 +89,10 @@ class CatBirthMiaTests(
             .queen_elisabeth_profile
         )
 
-        return {
-            "profile": profile,
-            "rolled_profile": profile,
-            "canonical": (
+        return CatBirthProfileResolvedEvent(
+            profile= profile,
+            rolled_profile= profile,
+            canonical= (
                 CatCanonicalBirthResolution(
                     matched=True,
                     occurrence=2,
@@ -100,7 +103,7 @@ class CatBirthMiaTests(
                     ),
                 )
             ),
-            "genetics": CatBirthGeneticsResult(
+            genetics= CatBirthGeneticsResult(
                 profile=profile,
                 validation=CatGeneticsValidation(
                     valid=True,
@@ -112,7 +115,7 @@ class CatBirthMiaTests(
                     karyotype="XX",
                 ),
             ),
-            "trait_dice_mapping": (
+            trait_dice_mapping= (
                 CatTraitDiceMappingResult(
                     cat_d20_value=1,
                     permutation_index=0,
@@ -120,12 +123,12 @@ class CatBirthMiaTests(
                     trait_to_die={},
                 )
             ),
-            "percentile": (
+            percentile= (
                 CatBirthPercentileResult.single(
                     value=50
                 )
             )
-        }
+        )
 
     def test_mia_rotates_all_registered_dice(self):
         self.resolver.resolve_profile = (
@@ -144,37 +147,33 @@ class CatBirthMiaTests(
             rng=FixedMiaRng()
         )
 
-        rotation = result[
-            "special_birth_result"
-        ]
+        rotation = result.special_birth_result
 
         self.assertTrue(
-            result["created"]
+            result.created
         )
 
         self.assertEqual(
-            result["identity"],
+            result.identity,
             "mia"
         )
 
         self.assertEqual(
-            rotation["name"],
+            rotation.name,
             "mia_birth_global_rotation"
         )
 
         self.assertTrue(
-            rotation["triggered"]
+            rotation.triggered
         )
 
         self.assertEqual(
-            rotation["bar_dice_count"],
+            rotation.bar_dice_count,
             6
         )
 
         self.assertEqual(
-            rotation[
-                "registered_d20_count"
-            ],
+            rotation.registered_d20_count,
             len(
                 self.universe
                 .d20_registry
@@ -184,9 +183,7 @@ class CatBirthMiaTests(
 
         self.assertEqual(
             len(
-                rotation[
-                    "dice_box_rotation"
-                ]["results"]
+                rotation.dice_box_rotation["results"]
             ),
             6
         )

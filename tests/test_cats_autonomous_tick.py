@@ -13,18 +13,18 @@ class CatsAutonomousTickTests(unittest.TestCase):
     def test_unpositioned_cat_is_skipped_without_error(self):
         cat = self.cats.create_cat(name='cat', color='black', fur_length='short')
         report = self.cats.tick()
-        self.assertTrue(report['ok'])
-        self.assertEqual(report['cats'][0]['result']['reason'], 'no_position')
+        self.assertTrue(report.ok)
+        self.assertEqual(report.cats[0].result.reason, 'no_position')
         self.assertEqual(cat.mind.decision_count, 0)
 
     def test_positioned_cat_runs_thought_cycle(self):
         cat = self.cats.create_cat(name='cat', color='black', fur_length='short')
         cat.position = SpatialVector3(x=0.0, y=0.0, z=0.0)
         report = self.cats.tick()
-        self.assertTrue(report['ok'])
+        self.assertTrue(report.ok)
         self.assertGreaterEqual(cat.mind.decision_count, 1)
-        result = report['cats'][0]['result']
-        self.assertEqual(result['mode'], 'thought_cycle')
+        result = report.cats[0].result
+        self.assertEqual(result.mode, 'thought_cycle')
 
     def test_one_broken_cat_does_not_stop_other_cats(self):
         broken = self.cats.create_cat(name='broken', color='black', fur_length='short')
@@ -39,8 +39,8 @@ class CatsAutonomousTickTests(unittest.TestCase):
             return original(cat)
         self.cats._tick_cat_autonomously = sometimes_broken
         report = self.cats.tick()
-        self.assertFalse(report['ok'])
-        self.assertEqual(report['error_count'], 1)
+        self.assertFalse(report.ok)
+        self.assertEqual(report.error_count, 1)
         self.assertEqual(self.universe.cronenberg_count, 1)
         self.assertGreaterEqual(healthy.mind.decision_count, 1)
 
@@ -55,6 +55,6 @@ class CatsAutonomousTickTests(unittest.TestCase):
         report = self.cats.tick()
         after = groups.groups[group_id].age_ticks
         self.assertEqual(after, before + 1)
-        self.assertEqual(len(report['groups']), 1)
+        self.assertEqual(len(report.groups), 1)
 if __name__ == '__main__':
     unittest.main()

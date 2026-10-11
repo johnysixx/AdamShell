@@ -111,6 +111,24 @@ class CatBarGuidanceAdmissionSnapshot:
 
 
 @dataclass(slots=True, frozen=True)
+class CatBarGuidanceFailedResult:
+
+    cat: str | None
+    human: str | None
+    reason: str
+
+    name: str = field(
+        default="cat_bar_guidance_failed",
+        init=False,
+    )
+
+    guided: bool = field(
+        default=False,
+        init=False,
+    )
+
+
+@dataclass(slots=True, frozen=True)
 class CatGuidedHumanToBarEvent:
 
     cat: str
@@ -253,12 +271,10 @@ class CatBarGuidanceSystem:
         )
 
         cat.meow_invitations.history.append(
-            event.to_dict()
+            event
         )
 
-        return event.to_dict(
-            access_state=temporary_access
-        )
+        return event
 
     def record_event(
         self,
@@ -281,7 +297,11 @@ class CatBarGuidanceSystem:
         return event
 
     def _failed(self, cat, human, reason):
-        return {'name': 'cat_bar_guidance_failed', 'cat': getattr(cat, 'name', None), 'human': self._name(human), 'reason': reason, 'guided': False}
+        return CatBarGuidanceFailedResult(
+            cat=getattr(cat, 'name', None),
+            human=self._name(human),
+            reason=reason,
+        )
 
     def _name(self, entity):
         return getattr(entity, 'name', None)

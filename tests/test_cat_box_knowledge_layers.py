@@ -48,10 +48,10 @@ class CatBoxKnowledgeLayerTests(unittest.TestCase):
         )
         result = self.cats.execute_cat_intention(self.cat)
         for _ in range(10):
-            if result['name'] == 'cat_explored_quantum_box':
+            if result.name == 'cat_explored_quantum_box':
                 break
             result = self.cats.execute_cat_intention(self.cat)
-        self.assertEqual(result['name'], 'cat_explored_quantum_box')
+        self.assertEqual(result.name, 'cat_explored_quantum_box')
         detail = self._box_detail()
         self.assertTrue(detail.explored)
         self.assertIsNotNone(detail.state)

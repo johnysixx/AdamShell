@@ -157,7 +157,7 @@ class CatInvitedGuestObjectStateTests(
         result = self._guide()
 
         self.assertTrue(
-            result['guided']
+            result.guided
         )
 
         record = (

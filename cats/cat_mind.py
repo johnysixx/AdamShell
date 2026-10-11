@@ -19,6 +19,7 @@ from cats.cat_scent_intention_considerer import (
 )
 
 from cats.cat_mind_result_state import (
+    CatIntentionClearedEvent,
     CatIntentionNotSelectedResult,
     CatIntentionSelectedEvent,
 )
@@ -600,14 +601,46 @@ class CatMind:
         return event
 
     @classmethod
-    def clear_intention(cls, cat, reason):
-        mind = cls.ensure_state(cat)
-        previous = mind.current_intention
-        mind.previous_intention = deepcopy(previous)
+    def clear_intention(
+        cls,
+        cat,
+        reason,
+    ):
+        mind = cls.ensure_state(
+            cat
+        )
+
+        previous = (
+            mind.current_intention
+        )
+
+        mind.previous_intention = (
+            deepcopy(
+                previous
+            )
+        )
+
         mind.current_intention = None
-        event = {'name': 'cat_intention_cleared', 'cat': cat.name, 'previous_intention': deepcopy(previous), 'reason': reason, 'cleared': True}
-        mind.history.append(deepcopy(event))
+
+        event = (
+            CatIntentionClearedEvent(
+                cat=cat.name,
+                previous_intention=
+                    deepcopy(
+                        previous
+                    ),
+                reason=reason,
+            )
+        )
+
+        mind.history.append(
+            deepcopy(
+                event
+            )
+        )
+
         return event
+
 
     @classmethod
     def _candidate(cls, intention_type, score, reasons, target=None):

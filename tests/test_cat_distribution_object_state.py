@@ -83,7 +83,7 @@ class CatDistributionObjectStateTests(
         )
 
         self.assertFalse(
-            result['distributed']
+            result.distributed
         )
 
         self.assertIs(

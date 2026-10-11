@@ -22,6 +22,9 @@ from cats.cat_birth_objects import (
 from cats.cat_birth_resolver import (
     CatBirthResolver
 )
+from cats.cat_birth_result_state import (
+    CatBirthProfileResolvedEvent,
+)
 from cats.cat_trait_dice_mapping import (
     CatTraitDiceMappingResult,
 )
@@ -97,10 +100,10 @@ class CatBirthGibTests(
             )
         )
 
-        return {
-            "profile": resolved_profile,
-            "rolled_profile": rolled_profile,
-            "canonical": (
+        return CatBirthProfileResolvedEvent(
+            profile= resolved_profile,
+            rolled_profile= rolled_profile,
+            canonical= (
                 CatCanonicalBirthResolution(
                     matched=True,
                     occurrence=2,
@@ -111,7 +114,7 @@ class CatBirthGibTests(
                     ),
                 )
             ),
-            "genetics": CatBirthGeneticsResult(
+            genetics= CatBirthGeneticsResult(
                 profile=resolved_profile,
                 validation=CatGeneticsValidation(
                     valid=True,
@@ -123,7 +126,7 @@ class CatBirthGibTests(
                     karyotype="XX",
                 ),
             ),
-            "trait_dice_mapping": (
+            trait_dice_mapping= (
                 CatTraitDiceMappingResult(
                     cat_d20_value=1,
                     permutation_index=0,
@@ -131,12 +134,12 @@ class CatBirthGibTests(
                     trait_to_die={},
                 )
             ),
-            "percentile": (
+            percentile= (
                 CatBirthPercentileResult.single(
                     value=70
                 )
             )
-        }
+        )
 
     def test_second_canonical_birth_creates_gib(self):
         birth = self._gib_birth()
@@ -162,13 +165,11 @@ class CatBirthGibTests(
             rng=FixedGibRng()
         )
 
-        cat = result["cat"]
-        resonance = result[
-            "special_birth_result"
-        ]
+        cat = result.cat
+        resonance = result.special_birth_result
 
         self.assertTrue(
-            result["created"]
+            result.created
         )
 
         self.assertEqual(
@@ -217,19 +218,17 @@ class CatBirthGibTests(
         )
 
         self.assertEqual(
-            resonance["name"],
+            resonance.name,
             "gib_birth_global_resonance"
         )
 
         self.assertTrue(
-            resonance["triggered"]
+            resonance.triggered
         )
 
         self.assertEqual(
             set(
-                resonance[
-                    "d20_rotation"
-                ][
+                resonance.d20_rotation[
                     "artifact_names"
                 ]
             ),
@@ -257,25 +256,19 @@ class CatBirthGibTests(
         )
 
         self.assertEqual(
-            resonance[
-                "registered_d20_count"
-            ],
+            resonance.registered_d20_count,
             len(registered_names)
         )
 
         self.assertEqual(
-            resonance[
-                "bar_dice_count"
-            ],
+            resonance.bar_dice_count,
             6
         )
 
         self.assertEqual(
             {
                 result["die"]
-                for result in resonance[
-                    "dice_box_rotation"
-                ][
+                for result in resonance.dice_box_rotation[
                     "results"
                 ]
             },
@@ -300,9 +293,7 @@ class CatBirthGibTests(
             rng=FixedGibRng()
         )
 
-        resonance = result[
-            "special_birth_result"
-        ]
+        resonance = result.special_birth_result
 
         self.assertIn(
             resonance,

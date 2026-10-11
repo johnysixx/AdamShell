@@ -219,6 +219,26 @@ class DuplicateConsumptionEnergyResolvedEvent:
         }
 
 
+@dataclass(slots=True, frozen=True)
+class DuplicateConsumptionEnergyResolutionOutcome:
+    resolution: DuplicateConsumptionEnergyResolution
+    resolved_entity_id: str | None = None
+    original_cronenberg_id: str | None = None
+    counterpart_id: str | None = None
+    fallback_reason: str | None = None
+
+    def __post_init__(self):
+        if not isinstance(
+            self.resolution,
+            DuplicateConsumptionEnergyResolution,
+        ):
+            raise TypeError(
+                "Duplicate consumption energy outcome "
+                "resolution must use "
+                "DuplicateConsumptionEnergyResolution."
+            )
+
+
 class DuplicateConsumptionEnergy:
 
     QUEUE_ATTRIBUTE = (
@@ -379,14 +399,10 @@ class DuplicateConsumptionEnergy:
             )
 
         pending.resolve(
-            resolution=result[
-                "resolution"
-            ],
+            resolution=result.resolution,
             cat_d20_value=value,
             resolved_entity_id=(
-                result.get(
-                    "resolved_entity_id"
-                )
+                result.resolved_entity_id
             ),
         )
 
@@ -397,24 +413,18 @@ class DuplicateConsumptionEnergy:
                 source=pending.source,
                 amount=pending.amount,
                 cat_d20_value=value,
-                resolution=result[
-                    "resolution"
-                ],
+                resolution=result.resolution,
                 resolved_entity_id=(
-                    result.get(
-                        "resolved_entity_id"
-                    )
+                    result.resolved_entity_id
                 ),
                 original_cronenberg_id=(
-                    result.get(
-                        "original_cronenberg_id"
-                    )
+                    result.original_cronenberg_id
                 ),
-                counterpart_id=result.get(
-                    "counterpart_id"
+                counterpart_id=(
+                    result.counterpart_id
                 ),
-                fallback_reason=result.get(
-                    "fallback_reason"
+                fallback_reason=(
+                    result.fallback_reason
                 ),
             )
         )
@@ -456,13 +466,15 @@ class DuplicateConsumptionEnergy:
                 )
             )
 
-            fallback[
-                "fallback_reason"
-            ] = (
-                "quantum_twin_target_unavailable"
+            return DuplicateConsumptionEnergyResolutionOutcome(
+                resolution=fallback.resolution,
+                resolved_entity_id=(
+                    fallback.resolved_entity_id
+                ),
+                fallback_reason=(
+                    "quantum_twin_target_unavailable"
+                ),
             )
-
-            return fallback
 
         counterpart_result = (
             self.universe
@@ -478,19 +490,15 @@ class DuplicateConsumptionEnergy:
             "counterpart"
         ]
 
-        return {
-            "resolution": (
+        return DuplicateConsumptionEnergyResolutionOutcome(
+            resolution=(
                 DuplicateConsumptionEnergyResolution
                 .CRONENBERG_QUANTUM_COUNTERPART_CREATED
             ),
-            "resolved_entity_id": (
-                counterpart.id
-            ),
-            "original_cronenberg_id": (
-                original.id
-            ),
-            "counterpart_id": counterpart.id
-        }
+            resolved_entity_id=counterpart.id,
+            original_cronenberg_id=original.id,
+            counterpart_id=counterpart.id,
+        )
 
     def _manifest_cronenberg(
         self,
@@ -511,15 +519,13 @@ class DuplicateConsumptionEnergy:
             )
         )
 
-        return {
-            "resolution": (
+        return DuplicateConsumptionEnergyResolutionOutcome(
+            resolution=(
                 DuplicateConsumptionEnergyResolution
                 .CRONENBERG_MANIFESTED
             ),
-            "resolved_entity_id": (
-                cronenberg.id
-            )
-        }
+            resolved_entity_id=cronenberg.id,
+        )
 
     def _record(
         self,

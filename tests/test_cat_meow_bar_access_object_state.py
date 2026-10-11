@@ -150,7 +150,7 @@ class CatMeowBarAccessObjectStateTests(
         )
 
         self.assertTrue(
-            result['guided']
+            result.guided
         )
 
         state = (
@@ -182,8 +182,8 @@ class CatMeowBarAccessObjectStateTests(
             state.permanent
         )
 
-        self.assertIs(
-            result['access'],
+        self.assertEqual(
+            result.access.to_state(),
             state,
         )
 

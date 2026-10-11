@@ -77,11 +77,11 @@ class CatQuantumCounterpartSenseTargetObjectTests(
         )
 
         self.assertFalse(
-            result['executed']
+            result.executed
         )
 
         self.assertEqual(
-            result['reason'],
+            result.reason,
             (
                 'invalid_quantum_counterpart_sense_target'
             ),

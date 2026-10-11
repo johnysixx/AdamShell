@@ -133,3 +133,156 @@ class CatIntentionBodyActionDeferredEvent:
         default=True,
         init=False,
     )
+
+
+@dataclass(
+    slots=True,
+    frozen=True,
+)
+class CatIntentionExecutionFailedResult:
+
+    reason: str
+    cat: str | None = None
+    intention: str | None = None
+
+    name: str = field(
+        default="cat_intention_execution_failed",
+        init=False,
+    )
+
+    executed: bool = field(
+        default=False,
+        init=False,
+    )
+
+
+@dataclass(
+    slots=True,
+    frozen=True,
+)
+class CatIntentionExecutionSkippedResult:
+
+    cat: str
+    reason: str
+
+    name: str = field(
+        default="cat_intention_execution_skipped",
+        init=False,
+    )
+
+    executed: bool = field(
+        default=False,
+        init=False,
+    )
+
+
+@dataclass(
+    slots=True,
+    frozen=True,
+)
+class CatApproachFailedResult:
+
+    cat: str
+    reason: str
+
+    target: str | None = None
+    cat_layer: str | None = None
+    target_layer: str | None = None
+
+    name: str = field(
+        default="cat_approach_failed",
+        init=False,
+    )
+
+    executed: bool = field(
+        default=False,
+        init=False,
+    )
+
+
+@dataclass(
+    slots=True,
+    frozen=True,
+)
+class CatApproachStartedEvent:
+
+    cat: str
+    target: str
+    route_id: object
+    destination: SpatialVector3
+
+    name: str = field(
+        default="cat_approach_started",
+        init=False,
+    )
+
+    arrived: bool = field(
+        default=False,
+        init=False,
+    )
+
+    decision_source: str = field(
+        default="cat_mind",
+        init=False,
+    )
+
+    executed: bool = field(
+        default=True,
+        init=False,
+    )
+
+    def __post_init__(
+        self,
+    ):
+        if not isinstance(
+            self.destination,
+            SpatialVector3,
+        ):
+            raise TypeError(
+                "Cat approach destination must be "
+                "SpatialVector3."
+            )
+
+
+@dataclass(
+    slots=True,
+    frozen=True,
+)
+class CatApproachCompletedEvent:
+
+    cat: str
+    target: str
+    position: SpatialVector3
+    social: object
+
+    name: str = field(
+        default="cat_approach_completed",
+        init=False,
+    )
+
+    arrived: bool = field(
+        default=True,
+        init=False,
+    )
+
+    decision_source: str = field(
+        default="cat_mind",
+        init=False,
+    )
+
+    executed: bool = field(
+        default=True,
+        init=False,
+    )
+
+    def __post_init__(
+        self,
+    ):
+        if not isinstance(
+            self.position,
+            SpatialVector3,
+        ):
+            raise TypeError(
+                "Completed cat approach position "
+                "must be SpatialVector3."
+            )

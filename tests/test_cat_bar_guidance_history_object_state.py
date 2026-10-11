@@ -162,13 +162,13 @@ class CatBarGuidanceHistoryObjectStateTests(
             _ = event["cat"]
 
         self.assertIs(
-            result["access"],
-            self.human.meow_bar_invitation,
+            result,
+            event,
         )
 
-        self.assertIsInstance(
-            result["access"],
-            CatMeowBarAccessState,
+        self.assertEqual(
+            result.access.to_state(),
+            self.human.meow_bar_invitation,
         )
 
     def test_boundary_mutation_does_not_change_history(
@@ -185,13 +185,19 @@ class CatBarGuidanceHistoryObjectStateTests(
             .history[-1]
         )
 
-        result[
+        boundary = result.to_dict(
+            access_state=(
+                self.human.meow_bar_invitation
+            )
+        )
+
+        boundary[
             "admission_result"
         ][
             "human"
         ] = "changed"
 
-        result[
+        boundary[
             "admission_result"
         ][
             "entered"
@@ -223,36 +229,27 @@ class CatBarGuidanceHistoryObjectStateTests(
 
         self.assertIsInstance(
             audit,
-            dict,
+            CatGuidedHumanToBarEvent,
         )
 
-        self.assertEqual(
-            audit["name"],
-            "cat_guided_human_to_bar",
+        self.assertIs(
+            audit,
+            result,
         )
 
-        self.assertIsInstance(
-            audit["access"],
-            CatMeowBarAccessState,
+        boundary = result.to_dict(
+            access_state=(
+                self.human.meow_bar_invitation
+            )
         )
-
-        self.assertIsNot(
-            audit["access"],
-            result["access"],
-        )
-
-        result[
+        boundary[
             "admission_result"
         ][
             "human"
         ] = "changed"
 
         self.assertEqual(
-            audit[
-                "admission_result"
-            ][
-                "human"
-            ],
+            audit.admission.human,
             self.human.name,
         )
 

@@ -24,9 +24,9 @@ class CatDistributionSystemTests(unittest.TestCase):
         idea_entities = []
         system = CatDistributionSystem(meeting_entities=meeting_entities, idea_entities=idea_entities)
         result = system.handle_after_milk(cat)
-        self.assertFalse(result['distributed'])
-        self.assertEqual(result['status'], 'unassigned')
-        self.assertEqual(result['suggested_layer'], 'idea_universe')
+        self.assertFalse(result.distributed)
+        self.assertEqual(result.status, CatDistributionStatus.UNASSIGNED)
+        self.assertEqual(result.suggested_layer, 'idea_universe')
         self.assertIn(cat, meeting_entities)
         self.assertNotIn(cat, idea_entities)
         self.assertEqual(cat.current_layer, 'meeting_place')
@@ -38,8 +38,8 @@ class CatDistributionSystemTests(unittest.TestCase):
         idea_entities = []
         system = CatDistributionSystem(meeting_entities=meeting_entities, idea_entities=idea_entities)
         result = system.handle_after_milk(cat)
-        self.assertFalse(result['distributed'])
-        self.assertEqual(result['reason'], 'cat_already_has_recipient')
+        self.assertFalse(result.distributed)
+        self.assertEqual(result.reason, 'cat_already_has_recipient')
         self.assertIn(cat, meeting_entities)
         self.assertNotIn(cat, idea_entities)
 
@@ -52,9 +52,9 @@ class CatDistributionSystemTests(unittest.TestCase):
         recipient_registry.register(recipient)
         system = CatDistributionSystem(meeting_entities=meeting_entities, idea_entities=idea_entities, recipient_registry=recipient_registry)
         result = system.handle_after_milk(cat)
-        self.assertTrue(result['distributed'])
-        self.assertEqual(result['status'], 'assigned')
-        self.assertEqual(result['recipient'], 'alice')
+        self.assertTrue(result.distributed)
+        self.assertEqual(result.status, CatDistributionStatus.ASSIGNED)
+        self.assertEqual(result.recipient, 'alice')
         self.assertEqual(cat.recipient, 'alice')
         self.assertIs(
             cat.distribution.status,
@@ -74,7 +74,7 @@ class CatDistributionSystemTests(unittest.TestCase):
         recipient_registry.register(second)
         system = CatDistributionSystem(meeting_entities=[cat], idea_entities=[], recipient_registry=recipient_registry)
         result = system.handle_after_milk(cat)
-        self.assertEqual(result['recipient'], 'alice')
+        self.assertEqual(result.recipient, 'alice')
         self.assertEqual(cat.recipient, 'alice')
         self.assertFalse(first.needs_cat)
         self.assertTrue(second.needs_cat)

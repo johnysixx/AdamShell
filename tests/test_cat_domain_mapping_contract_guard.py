@@ -79,39 +79,7 @@ REAL_MAPPING_ALLOWLIST = {
 }
 
 
-LEGACY_DOMAIN_DEBT = {
-    'cats/cat.py::Cat.accept_pet',
-    'cats/cat.py::Cat.meow_to',
-    'cats/cat_bar_guidance_system.py::CatBarGuidanceSystem._failed',
-    'cats/cat_birth_effect_resolver.py::CatBirthEffectResolver._emit_non_dice_effect',
-    'cats/cat_birth_effect_resolver.py::CatBirthEffectResolver._execute_garfield_effects',
-    'cats/cat_birth_effect_resolver.py::CatBirthEffectResolver._rotate_all_dice',
-    'cats/cat_birth_effect_resolver.py::CatBirthEffectResolver.execute',
-    'cats/cat_birth_resolver.py::CatBirthResolver.create_cat',
-    'cats/cat_birth_resolver.py::CatBirthResolver.resolve_profile',
-    'cats/cat_distribution_system.py::CatDistributionSystem.handle_after_milk',
-    'cats/cat_group_sanction_system.py::CatGroupSanctionSystem.sanction',
-    'cats/cat_intention_executor.py::CatIntentionExecutor._execute_approach_cat',
-    'cats/cat_intention_executor.py::CatIntentionExecutor.execute_current_intention',
-    'cats/cat_meow_invitation_system.py::CatMeowInvitationSystem.interpret',
-    'cats/cat_meow_invitation_system.py::CatMeowInvitationSystem.offer',
-    'cats/cat_mind.py::CatMind.clear_intention',
-    'cats/cat_quantum_box_intention_handler.py::CatQuantumBoxIntentionHandler._advance_box_exploration',
-    'cats/cat_quantum_box_intention_handler.py::CatQuantumBoxIntentionHandler._finish_box_exploration',
-    'cats/cat_quantum_box_intention_handler.py::CatQuantumBoxIntentionHandler.explore',
-    'cats/cat_quantum_box_intention_handler.py::CatQuantumBoxIntentionHandler.sense',
-    'cats/cat_quantum_box_intention_handler.py::CatQuantumBoxIntentionHandler.travel',
-    'cats/cats.py::Cats._cat_tick_error',
-    'cats/cats.py::Cats._run_cat_tick_operation',
-    'cats/cats.py::Cats._run_group_tick_operation',
-    'cats/cats.py::Cats._tick_cat_autonomously',
-    'cats/cats.py::Cats.think_and_act',
-    'cats/cats.py::Cats.tick',
-    'cats/duplicate_consumption_energy.py::DuplicateConsumptionEnergy._create_counterpart_or_fallback',
-    'cats/duplicate_consumption_energy.py::DuplicateConsumptionEnergy._manifest_cronenberg',
-    'cats/garfield_training_system.py::GarfieldTrainingSystem.assign',
-    'cats/garfield_training_system.py::GarfieldTrainingSystem.complete',
-}
+LEGACY_DOMAIN_DEBT = set()
 
 
 

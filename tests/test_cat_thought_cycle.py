@@ -18,9 +18,9 @@ class CatThoughtCycleTests(unittest.TestCase):
 
     def test_cat_can_think_and_start_bar_route(self):
         result = self.cats.think_and_act(cat=self.cat)
-        self.assertTrue(result['completed'])
-        self.assertEqual(result['decision'].intention, 'visit_bar')
-        self.assertTrue(result['execution'].executed)
+        self.assertTrue(result.completed)
+        self.assertEqual(result.decision.intention, 'visit_bar')
+        self.assertTrue(result.execution.executed)
         self.assertEqual(self.cat.intent, 'return_to_bar')
 
     def test_curious_cat_notices_new_box(self):
@@ -28,16 +28,16 @@ class CatThoughtCycleTests(unittest.TestCase):
         box = self.universe.create_quantum_box()
         box.position = SpatialVector3(x=1.5, y=0.0, z=0.0)
         result = self.cats.think_and_act(cat=self.cat)
-        self.assertEqual(result['decision'].intention, 'explore_box')
-        self.assertTrue(result['execution']['executed'])
-        self.assertEqual(result['execution']['name'], 'cat_approaching_box_to_explore')
-        self.assertEqual(result['execution']['box_id'], box.id)
+        self.assertEqual(result.decision.intention, 'explore_box')
+        self.assertTrue(result.execution.executed)
+        self.assertEqual(result.execution.name, 'cat_approaching_box_to_explore')
+        self.assertEqual(result.execution.box_id, box.id)
 
     def test_missing_position_stops_cycle(self):
         delattr(self.cat, 'position')
         result = self.cats.think_and_act(cat=self.cat)
-        self.assertFalse(result['completed'])
-        self.assertEqual(result['observation'].reason, 'cat_has_no_position')
+        self.assertFalse(result.completed)
+        self.assertEqual(result.observation.reason, 'cat_has_no_position')
 
     def test_cat_autonomously_senses_and_uses_quantum_box(self):
         self.cat.personality.traits.curiosity = 1.0
@@ -53,17 +53,17 @@ class CatThoughtCycleTests(unittest.TestCase):
         self.cat.position = source.position
         self.cat.memory.remember(event_type='quantum_box_observed', universe_tick=0, location='quantum_layer', participants=[source.id], details={'box_id': source.id})
         first_cycle = self.cats.think_and_act(cat=self.cat)
-        self.assertTrue(first_cycle['completed'])
-        self.assertEqual(first_cycle['decision'].intention, 'sense_quantum_counterpart')
-        self.assertTrue(first_cycle['execution']['executed'])
+        self.assertTrue(first_cycle.completed)
+        self.assertEqual(first_cycle.decision.intention, 'sense_quantum_counterpart')
+        self.assertTrue(first_cycle.execution.executed)
         self.assertIsInstance(
             self.cat.current_quantum_counterpart_observation,
             CatQuantumCounterpartObservation,
         )
         second_cycle = self.cats.think_and_act(cat=self.cat)
-        self.assertTrue(second_cycle['completed'])
-        self.assertEqual(second_cycle['decision'].intention, 'travel_through_known_quantum_box')
-        self.assertTrue(second_cycle['execution']['executed'])
+        self.assertTrue(second_cycle.completed)
+        self.assertEqual(second_cycle.decision.intention, 'travel_through_known_quantum_box')
+        self.assertTrue(second_cycle.execution.executed)
         self.assertEqual(self.cat.current_layer, target.current_layer)
         self.assertEqual(self.cat.position, target.position)
 if __name__ == '__main__':

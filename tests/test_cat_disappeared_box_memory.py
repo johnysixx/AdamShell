@@ -36,10 +36,10 @@ class CatDisappearedBoxMemoryTests(unittest.TestCase):
         )
         result = self.cats.execute_cat_intention(self.cat)
         for _ in range(10):
-            if result['name'] == 'cat_explored_quantum_box':
+            if result.name == 'cat_explored_quantum_box':
                 break
             result = self.cats.execute_cat_intention(self.cat)
-        self.assertEqual(result['name'], 'cat_explored_quantum_box')
+        self.assertEqual(result.name, 'cat_explored_quantum_box')
         memories = self.cat.memory.recall(event_type='quantum_box_observed')
         self.assertTrue(any((box_id in memory.participants for memory in memories)))
         self.universe.quantum_boxes.remove(self.box)

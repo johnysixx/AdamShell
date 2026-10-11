@@ -4,6 +4,11 @@ from cats.cat_distribution_state import CatDistributionState
 from cats.cat_distribution_status import (
     CatDistributionStatus,
 )
+from cats.cat_distribution_result_state import (
+    CatAssignedToRecipientEvent,
+    CatDistributionSkippedResult,
+    CatDistributionSuggestedResult,
+)
 
 class CatDistributionSystem:
 
@@ -27,7 +32,10 @@ class CatDistributionSystem:
         if not isinstance(cat, Cat):
             raise TypeError('CatDistributionSystem requires Cat.')
         if cat.recipient is not None:
-            return {'name': 'cat_distribution_skipped', 'cat': cat.name, 'reason': 'cat_already_has_recipient', 'distributed': False}
+            return CatDistributionSkippedResult(
+                cat=cat.name,
+                reason='cat_already_has_recipient',
+            )
         recipient = self._find_waiting_recipient()
         if recipient is not None:
             recipient_id = getattr(recipient, 'id', None) or getattr(recipient, 'world_key', None) or getattr(recipient, 'name', None)
@@ -36,12 +44,20 @@ class CatDistributionSystem:
             distribution.status = CatDistributionStatus.ASSIGNED
             distribution.suggested_layer = None
             recipient.needs_cat = False
-            return {'name': 'cat_assigned_to_recipient', 'cat': cat.name, 'recipient': recipient_id, 'status': distribution.status.value, 'distributed': True}
+            return CatAssignedToRecipientEvent(
+                cat=cat.name,
+                recipient=recipient_id,
+                status=distribution.status,
+            )
         suggested_layer = 'idea_universe'
         distribution.recipient = None
         distribution.status = CatDistributionStatus.UNASSIGNED
         distribution.suggested_layer = suggested_layer
-        return {'name': 'cat_distribution_suggested', 'cat': cat.name, 'status': distribution.status.value, 'suggested_layer': suggested_layer, 'distributed': False}
+        return CatDistributionSuggestedResult(
+            cat=cat.name,
+            status=distribution.status,
+            suggested_layer=suggested_layer,
+        )
 
     def _find_waiting_recipient(self):
         if self.recipient_registry is None:

@@ -64,7 +64,7 @@ class CatGroupNormTests(unittest.TestCase):
         )
         sanctions = CatGroupSanctionSystem(self.groups)
         result = sanctions.sanction(self.group_id, self.second, violation)
-        self.assertEqual(result['sanction'], 'expulsion_recommended')
+        self.assertEqual(result.sanction, 'expulsion_recommended')
         self.assertEqual(self.second.state, 'group_expulsion_recommended')
 
     def test_repeated_minor_violations_escalate(self):
@@ -79,7 +79,7 @@ class CatGroupNormTests(unittest.TestCase):
                 created.norm_id,
             )
             last = sanctions.sanction(self.group_id, self.second, violation)
-        self.assertNotEqual(last['sanction'], 'warning')
+        self.assertNotEqual(last.sanction, 'warning')
 
     def test_norm_can_belong_to_institution(self):
         institutions = CatGroupInstitutionSystem(self.groups)
@@ -113,7 +113,7 @@ class CatGroupNormTests(unittest.TestCase):
         )
 
         relation = self.second.relationships[self.first.name]
-        self.assertEqual(result['sanction'], 'social_avoidance')
+        self.assertEqual(result.sanction, 'social_avoidance')
         self.assertIsInstance(relation, CatRelationship)
         self.assertEqual(relation.affiliation, 0.0)
         self.assertEqual(relation.trust, 0.5)
@@ -128,7 +128,7 @@ class CatGroupNormTests(unittest.TestCase):
         )
 
         relation = self.second.relationships[self.first.name]
-        self.assertEqual(result['sanction'], 'trust_loss')
+        self.assertEqual(result.sanction, 'trust_loss')
         self.assertIsInstance(relation, CatRelationship)
         self.assertAlmostEqual(relation.trust, 0.26)
         self.assertEqual(relation.affiliation, 0.0)
@@ -151,7 +151,7 @@ class CatGroupNormTests(unittest.TestCase):
             avoidance = sanctions.sanction(
                 self.group_id, cat, CatViolation(severity=0.3)
             )
-            self.assertEqual(avoidance['sanction'], 'social_avoidance')
+            self.assertEqual(avoidance.sanction, 'social_avoidance')
             self.assertAlmostEqual(relation.affiliation, 0.35)
             self.assertEqual(relation.trust, 0.8)
 
@@ -159,8 +159,8 @@ class CatGroupNormTests(unittest.TestCase):
                 self.group_id, cat, CatViolation(severity=0.5)
             )
 
-            self.assertEqual(loss['sanction'], 'trust_loss')
-            self.assertAlmostEqual(loss['severity'], 0.58)
+            self.assertEqual(loss.sanction, 'trust_loss')
+            self.assertAlmostEqual(loss.severity, 0.58)
             self.assertIs(cat.relationships[other.name], relation)
             self.assertAlmostEqual(relation.trust, 0.563)
             self.assertAlmostEqual(relation.affiliation, 0.35)

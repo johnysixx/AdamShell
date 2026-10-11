@@ -1,3 +1,4 @@
+from dataclasses import replace
 import unittest
 
 from cats.cat_genetics_validation_status import (
@@ -18,6 +19,9 @@ from cats.cat_birth_objects import (
 )
 from cats.cat_birth_resolver import (
     CatBirthResolver
+)
+from cats.cat_birth_result_state import (
+    CatBirthProfileResolvedEvent,
 )
 from cats.cat_trait_dice_mapping import (
     CatTraitDiceMappingResult,
@@ -61,10 +65,10 @@ class CatBirthCreationTests(
             sex="female",
         )
 
-        return {
-            "profile": profile,
-            "rolled_profile": profile,
-            "canonical": (
+        return CatBirthProfileResolvedEvent(
+            profile= profile,
+            rolled_profile= profile,
+            canonical= (
                 CatCanonicalBirthResolution(
                     matched=False,
                     occurrence=0,
@@ -73,7 +77,7 @@ class CatBirthCreationTests(
                     special_birth_event=None,
                 )
             ),
-            "genetics": CatBirthGeneticsResult(
+            genetics= CatBirthGeneticsResult(
                 profile=profile,
                 validation=CatGeneticsValidation(
                     valid=True,
@@ -85,7 +89,7 @@ class CatBirthCreationTests(
                     karyotype="XX",
                 ),
             ),
-            "trait_dice_mapping": (
+            trait_dice_mapping= (
                 CatTraitDiceMappingResult(
                     cat_d20_value=8,
                     permutation_index=0,
@@ -93,12 +97,12 @@ class CatBirthCreationTests(
                     trait_to_die={},
                 )
             ),
-            "percentile": (
+            percentile= (
                 CatBirthPercentileResult.single(
                     value=70
                 )
             )
-        }
+        )
 
     def test_create_cat_manifests_ordinary_cat(self):
         birth = self._ordinary_birth()
@@ -109,14 +113,14 @@ class CatBirthCreationTests(
 
         result = self.resolver.create_cat()
 
-        cat = result["cat"]
+        cat = result.cat
 
         self.assertTrue(
-            result["created"]
+            result.created
         )
 
         self.assertEqual(
-            result["name"],
+            result.name,
             "cat_born_from_dice"
         )
 
@@ -161,17 +165,17 @@ class CatBirthCreationTests(
 
         self.assertEqual(
             cat.birth_profile,
-            birth["profile"]
+            birth.profile
         )
 
         self.assertEqual(
             cat.rolled_birth_profile,
-            birth["rolled_profile"]
+            birth.rolled_profile
         )
 
         self.assertIs(
             cat.birth_percentile,
-            birth["percentile"]
+            birth.percentile
         )
         self.assertIsInstance(
             cat.birth_percentile,
@@ -181,12 +185,15 @@ class CatBirthCreationTests(
 
     def test_create_cat_rejects_legacy_trait_dice_mapping(self):
         birth = self._ordinary_birth()
-        birth["trait_dice_mapping"] = {
-            "cat_d20_value": 8,
-            "permutation_index": 0,
-            "die_to_trait": {},
-            "trait_to_die": {},
-        }
+        birth = replace(
+            birth,
+            trait_dice_mapping={
+                "cat_d20_value": 8,
+                "permutation_index": 0,
+                "die_to_trait": {},
+                "trait_to_die": {},
+            },
+        )
 
         self.resolver.resolve_profile = (
             lambda rng=None: birth
@@ -197,10 +204,13 @@ class CatBirthCreationTests(
 
     def test_create_cat_rejects_legacy_percentile_dict(self):
         birth = self._ordinary_birth()
-        birth["percentile"] = {
-            "die": "d10_percentile",
-            "value": 70,
-        }
+        birth = replace(
+            birth,
+            percentile={
+                "die": "d10_percentile",
+                "value": 70,
+            },
+        )
 
         self.resolver.resolve_profile = (
             lambda rng=None: birth
@@ -220,12 +230,12 @@ class CatBirthCreationTests(
         second = self.resolver.create_cat()
 
         self.assertEqual(
-            first["cat"].name,
+            first.cat.name,
             "cat_0001"
         )
 
         self.assertEqual(
-            second["cat"].name,
+            second.cat.name,
             "cat_0002"
         )
 
@@ -241,11 +251,11 @@ class CatBirthCreationTests(
         )
 
         self.assertTrue(
-            result["created"]
+            result.created
         )
 
         self.assertEqual(
-            result["cat"].name,
+            result.cat.name,
             "micka"
         )
 

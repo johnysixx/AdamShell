@@ -55,9 +55,9 @@ class CatAutonomousExplorationPairTests(unittest.TestCase):
         before_boxes = len(self.universe.quantum_boxes)
         before_energy = self.cat.idea_energy
         result = self.cats.think_and_act(cat=self.cat)
-        self.assertTrue(result['completed'])
-        self.assertEqual(result['decision'].intention, 'create_exploration_pair')
-        execution = result['execution']
+        self.assertTrue(result.completed)
+        self.assertEqual(result.decision.intention, 'create_exploration_pair')
+        execution = result.execution
         self.assertTrue(execution.executed)
         self.assertEqual(execution.name, 'cat_started_autonomous_exploration_through_new_pair')
         self.assertEqual(len(self.universe.quantum_boxes), before_boxes + 2)

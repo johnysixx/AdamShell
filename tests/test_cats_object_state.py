@@ -162,10 +162,10 @@ class CatsObjectStateTests(unittest.TestCase):
         self.assertEqual(state.tick_count, 1)
         self.assertEqual(len(state.events), 1)
         self.assertEqual(
-            state.events[0]["name"],
+            state.events[0].name,
             "cats_tick_completed",
         )
-        self.assertEqual(report["tick"], 1)
+        self.assertEqual(report.tick, 1)
         self.assertEqual(
             universe.world["cats"]["cats_state"]["tick_count"],
             1,

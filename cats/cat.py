@@ -9,6 +9,10 @@ from cats.cat_parentage_state import CatParentageState
 from cats.cat_spatial_state import (
     CatPositionChangedEvent,
 )
+from cats.cat_social_interaction_result_state import (
+    CatMeowEvent,
+    CatPetAcceptedEvent,
+)
 
 
 class Cat(SocialMixin):
@@ -165,7 +169,11 @@ class Cat(SocialMixin):
     def accept_pet(self, by_entity):
         actor_name = self._entity_name(by_entity)
         self.pet_count += 1
-        event = {'type': 'cat_pet', 'cat': self.name, 'by': actor_name, 'accepted': True, 'pet_number': self.pet_count}
+        event = CatPetAcceptedEvent(
+            cat=self.name,
+            by=actor_name,
+            pet_number=self.pet_count,
+        )
         self.social_interactions.append(event)
         return event
 
@@ -175,12 +183,31 @@ class Cat(SocialMixin):
             'meow_knowledge',
             None,
         )
+        listener_name = self._entity_name(listener)
         if meow_knowledge is None or not meow_knowledge.can_speak:
-            return {'type': 'cat_meow', 'cat': self.name, 'listener': self._entity_name(listener), 'spoken': False, 'reason': 'meow_not_learned'}
-        known_contents = list(meow_knowledge.contains)
+            return CatMeowEvent(
+                cat=self.name,
+                listener=listener_name,
+                spoken=False,
+                reason='meow_not_learned',
+            )
+        known_contents = tuple(meow_knowledge.contains)
         if topic is not None and topic not in known_contents:
-            return {'type': 'cat_meow', 'cat': self.name, 'listener': self._entity_name(listener), 'spoken': False, 'reason': 'unknown_meow_topic', 'topic': topic}
+            return CatMeowEvent(
+                cat=self.name,
+                listener=listener_name,
+                spoken=False,
+                reason='unknown_meow_topic',
+                topic=topic,
+            )
         self.meow_count += 1
-        event = {'type': 'cat_meow', 'cat': self.name, 'listener': self._entity_name(listener), 'spoken': True, 'meow_number': self.meow_count, 'topic': topic, 'contains': [topic] if topic is not None else known_contents}
+        event = CatMeowEvent(
+            cat=self.name,
+            listener=listener_name,
+            spoken=True,
+            meow_number=self.meow_count,
+            topic=topic,
+            contains=((topic,) if topic is not None else known_contents),
+        )
         self.social_interactions.append(event)
         return event

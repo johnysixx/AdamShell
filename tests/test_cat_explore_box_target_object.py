@@ -85,11 +85,11 @@ class CatExploreBoxTargetObjectTests(
                 )
 
                 self.assertFalse(
-                    result['executed']
+                    result.executed
                 )
 
                 self.assertEqual(
-                    result['reason'],
+                    result.reason,
                     (
                         'invalid_explore_box_target'
                     ),

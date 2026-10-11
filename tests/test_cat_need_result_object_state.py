@@ -220,33 +220,21 @@ class CatNeedResultObjectStateTests(
         report = self.cats.tick()
 
         tick_result = (
-            report[
-                "cats"
-            ][
-                0
-            ][
-                "result"
-            ]
+            report.cats[0].result
         )
 
         self.assertEqual(
-            tick_result[
-                "mode"
-            ],
+            tick_result.mode,
             "thought_cycle",
         )
 
         self.assertIsInstance(
-            tick_result[
-                "needs"
-            ],
+            tick_result.needs,
             CatNeedsAdvancedResult,
         )
 
         self.assertIsInstance(
-            tick_result[
-                "needs_after_action"
-            ],
+            tick_result.needs_after_action,
             CatNeedsSnapshot,
         )
 

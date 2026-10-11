@@ -236,9 +236,7 @@ class CatStableExplorationPairObjectStateTests(
         )
 
         execution = (
-            result[
-                "execution"
-            ]
+            result.execution
         )
 
         self.assertIsInstance(

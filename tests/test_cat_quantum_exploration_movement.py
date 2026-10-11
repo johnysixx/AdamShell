@@ -26,7 +26,7 @@ class CatQuantumExplorationMovementTests(unittest.TestCase):
 
     def test_pair_entry_is_not_final_destination(self):
         result = self.cats.think_and_act(cat=self.cat)
-        self.assertTrue(result['completed'])
+        self.assertTrue(result.completed)
         self.assertEqual(self.cat.current_layer, 'quantum_layer')
         self.assertNotEqual(
             self.cat.position,

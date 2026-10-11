@@ -99,14 +99,14 @@ class CatQuantumBoxTravelTargetObjectTests(
         )
 
         self.assertEqual(
-            result['reason'],
+            result.reason,
             (
                 'invalid_quantum_box_travel_target'
             ),
         )
 
         self.assertFalse(
-            result['executed']
+            result.executed
         )
 
 

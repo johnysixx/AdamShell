@@ -3,6 +3,11 @@ from cats.cat_social_objects import GarfieldTraining
 from cats.cat_emergency_lactation_result_state import (
     CatEmergencyLactationAdviceEvent,
 )
+from cats.garfield_training_result_state import (
+    GarfieldTrainingAssignedEvent,
+    GarfieldTrainingCompletedEvent,
+    GarfieldTrainingNotRequiredResult,
+)
 
 class GarfieldTrainingSystem:
     LESSONS = ['choose_humans_carefully', 'invitation_means_responsibility', 'observe_before_MEOW', 'do_not_MEOW_every_idiot', 'when_uncertain_go_sleep_on_a_box']
@@ -11,18 +16,24 @@ class GarfieldTrainingSystem:
         training = GarfieldTraining(**{'name': 'garfield_MEOW_responsibility_training', 'instructor': 'Garfield', 'cat': cat.name, 'lessons': list(self.LESSONS), 'incident': deepcopy(incident), 'required': True, 'completed': False})
         cat.meow_invitations.garfield_training_required = True
         cat.meow_invitations.garfield_training = training
-        event = {'name': 'garfield_training_assigned', 'cat': cat.name, 'instructor': 'Garfield', 'required': True}
+        event = GarfieldTrainingAssignedEvent(
+            cat=cat.name,
+        )
         cat.meow_invitations.history.append(deepcopy(event))
         return event
 
     def complete(self, cat):
         training = getattr(cat.meow_invitations, 'garfield_training', None)
         if not isinstance(training, GarfieldTraining):
-            return {'name': 'garfield_training_not_required', 'cat': cat.name, 'completed': False}
+            return GarfieldTrainingNotRequiredResult(
+                cat=cat.name,
+            )
         training.completed = True
         training.required = False
         cat.meow_invitations.garfield_training_required = False
-        event = {'name': 'garfield_training_completed', 'cat': cat.name, 'instructor': 'Garfield', 'completed': True}
+        event = GarfieldTrainingCompletedEvent(
+            cat=cat.name,
+        )
         cat.meow_invitations.history.append(deepcopy(event))
         return event
 

@@ -28,6 +28,16 @@ from .cat_mind_result_state import (
     CatIntentionNotSelectedResult,
     CatIntentionSelectedEvent,
 )
+from .cat_autonomy_result_state import (
+    CatAutonomousTickCompletedEvent,
+    CatAutonomousTickSkippedResult,
+    CatGroupTickOperationResult,
+    CatsTickCompletedEvent,
+    CatThoughtCycleCompletedEvent,
+    CatThoughtCycleFailedResult,
+    CatTickErrorResult,
+    CatTickOperationResult,
+)
 from .cat_overpopulation_activation_state import (
     CatOverpopulationActivatedEvent,
     CatOverpopulationActivationDeniedResult,
@@ -400,46 +410,96 @@ class Cats:
     def observe_cat(self, cat, vision_radius=None):
         return self.perception.observe(cat=cat, vision_radius=vision_radius)
 
-    def think_and_act(self, cat, quantum_roll=None, vision_radius=None, cronenbergs=None, step_size=None):
-        from .cat_mind import CatMind
-        observations = self.observe_cat(cat=cat, vision_radius=vision_radius)
+    def think_and_act(
+        self,
+        cat,
+        quantum_roll=None,
+        vision_radius=None,
+        cronenbergs=None,
+        step_size=None,
+    ):
+        observations = (
+            self.observe_cat(
+                cat=cat,
+                vision_radius=
+                    vision_radius,
+            )
+        )
+
         if not observations.observed:
-            return {'name': 'cat_thought_cycle_failed', 'cat': getattr(cat, 'name', None), 'observation': observations, 'completed': False}
-        decision = CatMind.decide(
-            cat=cat,
-            observations=observations,
-            quantum_roll=quantum_roll,
+            return (
+                CatThoughtCycleFailedResult(
+                    cat=getattr(
+                        cat,
+                        "name",
+                        None,
+                    ),
+                    observation=
+                        observations,
+                )
+            )
+
+        decision = (
+            CatMind.decide(
+                cat=cat,
+                observations=
+                    observations,
+                quantum_roll=
+                    quantum_roll,
+            )
         )
 
         if isinstance(
             decision,
             CatIntentionNotSelectedResult,
         ):
-            return {
-                'name': 'cat_thought_cycle_failed',
-                'cat': cat.name,
-                'observations': observations,
-                'decision': decision,
-                'completed': False,
-            }
+            return (
+                CatThoughtCycleFailedResult(
+                    cat=cat.name,
+                    observation=
+                        observations,
+                    decision=
+                        decision,
+                )
+            )
 
         if not isinstance(
             decision,
             CatIntentionSelectedEvent,
         ):
             raise TypeError(
-                'Cat thought cycle requires '
-                'a cat intention decision object.'
+                "Cat thought cycle requires "
+                "a cat intention decision object."
             )
 
-        execution = self.execute_cat_intention(
-            cat=cat,
-            cronenbergs=cronenbergs,
-            step_size=step_size,
+        execution = (
+            self.execute_cat_intention(
+                cat=cat,
+                cronenbergs=
+                    cronenbergs,
+                step_size=
+                    step_size,
+            )
         )
-        event = {'name': 'cat_thought_cycle_completed', 'cat': cat.name, 'observations': observations, 'decision': decision, 'execution': execution, 'completed': True}
-        self.emit_event(event)
+
+        event = (
+            CatThoughtCycleCompletedEvent(
+                cat=cat.name,
+                observations=
+                    observations,
+                decision=
+                    decision,
+                execution=
+                    execution,
+            )
+        )
+
+        self.emit_event(
+            event
+        )
+
         return event
+
 
     def advance_cat_quantum_exploration(
         self,
@@ -519,36 +579,114 @@ class Cats:
         self.write_to_world()
         UniverseLogger.event(f'CATS EVENT: {event}')
 
-    def tick(self):
+    def tick(
+        self,
+    ):
         self._clear_events()
+
         self.tick_count += 1
-        report = {'name': 'cats_tick_completed', 'tick': self.tick_count, 'cats': [], 'groups': [], 'errors': [], 'cronenbergs_created': []}
-        UniverseLogger.event(f'CATS TICK {self.tick_count}')
-        for cat in list(self.cats):
-            result = self._run_cat_tick_operation(cat=cat, operation=self._tick_cat_autonomously)
-            report['cats'].append(result)
-            if not result.get('ok', True):
-                report['errors'].append(result)
-                cronenberg_id = result.get('cronenberg_id')
-                if cronenberg_id is not None:
-                    report['cronenbergs_created'].append(cronenberg_id)
-        group_results = self._tick_groups()
-        report['groups'].extend(group_results)
+
+        UniverseLogger.event(
+            f"CATS TICK {self.tick_count}"
+        )
+
+        cat_results = []
+        group_results = []
+        errors = []
+        cronenbergs_created = []
+
+        for cat in list(
+            self.cats
+        ):
+            result = (
+                self._run_cat_tick_operation(
+                    cat=cat,
+                    operation=
+                        self._tick_cat_autonomously,
+                )
+            )
+
+            cat_results.append(
+                result
+            )
+
+            if not result.ok:
+                errors.append(
+                    result
+                )
+
+                if (
+                    result.cronenberg_id
+                    is not None
+                ):
+                    cronenbergs_created.append(
+                        result.cronenberg_id
+                    )
+
+        group_results.extend(
+            self._tick_groups()
+        )
+
         for result in group_results:
-            if not result.get('ok', True):
-                report['errors'].append(result)
-                cronenberg_id = result.get('cronenberg_id')
-                if cronenberg_id is not None:
-                    report['cronenbergs_created'].append(cronenberg_id)
-        report['ok'] = not report['errors']
-        report['error_count'] = len(report['errors'])
-        self.emit_event({'name': 'cats_tick_completed', 'tick': self.tick_count, 'cats_processed': len(report['cats']), 'groups_processed': len(report['groups']), 'error_count': report['error_count'], 'cronenbergs_created': list(report['cronenbergs_created'])})
+            if not result.ok:
+                errors.append(
+                    result
+                )
+
+                if (
+                    result.cronenberg_id
+                    is not None
+                ):
+                    cronenbergs_created.append(
+                        result.cronenberg_id
+                    )
+
+        report = (
+            CatsTickCompletedEvent(
+                tick=self.tick_count,
+                cats=tuple(
+                    cat_results
+                ),
+                groups=tuple(
+                    group_results
+                ),
+                errors=tuple(
+                    errors
+                ),
+                cronenbergs_created=tuple(
+                    cronenbergs_created
+                ),
+            )
+        )
+
+        self.emit_event(
+            report
+        )
+
         return report
 
-    def _tick_cat_autonomously(self, cat):
-        if not getattr(cat, 'active', True):
-            return {'name': 'cat_autonomous_tick_skipped', 'cat': cat.name, 'reason': 'inactive', 'completed': False}
-        quantum_return = getattr(cat, 'quantum_return', None)
+
+    def _tick_cat_autonomously(
+        self,
+        cat,
+    ):
+        if not getattr(
+            cat,
+            "active",
+            True,
+        ):
+            return (
+                CatAutonomousTickSkippedResult(
+                    cat=cat.name,
+                    reason="inactive",
+                )
+            )
+
+        quantum_return = getattr(
+            cat,
+            "quantum_return",
+            None,
+        )
 
         if (
             quantum_return is not None
@@ -558,8 +696,8 @@ class Cats:
             )
         ):
             raise TypeError(
-                'Cat quantum return state '
-                'must be CatQuantumReturnState.'
+                "Cat quantum return state "
+                "must be CatQuantumReturnState."
             )
 
         if (
@@ -569,9 +707,26 @@ class Cats:
             )
             and quantum_return.active
         ):
-            result = self.advance_cat_quantum_return(cat)
-            return {'name': 'cat_autonomous_tick_completed', 'cat': cat.name, 'mode': 'quantum_return', 'result': result, 'completed': True}
-        quantum_exploration = getattr(cat, 'quantum_exploration', None)
+            result = (
+                self.advance_cat_quantum_return(
+                    cat
+                )
+            )
+
+            return (
+                CatAutonomousTickCompletedEvent(
+                    cat=cat.name,
+                    mode="quantum_return",
+                    result=result,
+                    completed=True,
+                )
+            )
+
+        quantum_exploration = getattr(
+            cat,
+            "quantum_exploration",
+            None,
+        )
 
         if (
             quantum_exploration is not None
@@ -581,9 +736,9 @@ class Cats:
             )
         ):
             raise TypeError(
-                'Cat quantum exploration state '
-                'must be '
-                'CatQuantumExplorationState.'
+                "Cat quantum exploration state "
+                "must be "
+                "CatQuantumExplorationState."
             )
 
         if (
@@ -593,22 +748,67 @@ class Cats:
             )
             and quantum_exploration.active
         ):
-            result = self.advance_cat_quantum_exploration(cat)
-            return {'name': 'cat_autonomous_tick_completed', 'cat': cat.name, 'mode': 'quantum_exploration', 'result': result, 'completed': True}
-        if getattr(cat, 'position', None) is None:
-            return {'name': 'cat_autonomous_tick_skipped', 'cat': cat.name, 'reason': 'no_position', 'completed': False}
-        needs_event = CatNeedSystem.advance(cat)
-        thought = self.think_and_act(
-            cat=cat,
-            cronenbergs=getattr(
-                self.universe,
-                "cronenbergs",
-                [],
-            ),
+            result = (
+                self.advance_cat_quantum_exploration(
+                    cat
+                )
+            )
+
+            return (
+                CatAutonomousTickCompletedEvent(
+                    cat=cat.name,
+                    mode=(
+                        "quantum_exploration"
+                    ),
+                    result=result,
+                    completed=True,
+                )
+            )
+
+        if getattr(
+            cat,
+            "position",
+            None,
+        ) is None:
+            return (
+                CatAutonomousTickSkippedResult(
+                    cat=cat.name,
+                    reason="no_position",
+                )
+            )
+
+        needs_event = (
+            CatNeedSystem.advance(
+                cat
+            )
         )
 
-        decision = thought.get(
-            "decision"
+        thought = (
+            self.think_and_act(
+                cat=cat,
+                cronenbergs=
+                    getattr(
+                        self.universe,
+                        "cronenbergs",
+                        [],
+                    ),
+            )
+        )
+
+        if not isinstance(
+            thought,
+            (
+                CatThoughtCycleFailedResult,
+                CatThoughtCycleCompletedEvent,
+            ),
+        ):
+            raise TypeError(
+                "Cat autonomous tick thought "
+                "must be a thought cycle result."
+            )
+
+        decision = (
+            thought.decision
         )
 
         if isinstance(
@@ -645,8 +845,29 @@ class Cats:
                 if current is not None
                 else None
             )
-        needs_after_action = CatNeedSystem.apply_action(cat, intention_type)
-        return {'name': 'cat_autonomous_tick_completed', 'cat': cat.name, 'mode': 'thought_cycle', 'needs': needs_event, 'needs_after_action': needs_after_action, 'thought': thought, 'completed': bool(thought.get('completed', False))}
+
+        needs_after_action = (
+            CatNeedSystem.apply_action(
+                cat,
+                intention_type,
+            )
+        )
+
+        return (
+            CatAutonomousTickCompletedEvent(
+                cat=cat.name,
+                mode="thought_cycle",
+                needs=
+                    needs_event,
+                needs_after_action=
+                    needs_after_action,
+                thought=
+                    thought,
+                completed=
+                    thought.completed,
+            )
+        )
+
 
     def _tick_groups(self):
         group_system = getattr(self, 'group_system', None)
@@ -663,27 +884,127 @@ class Cats:
             results.append(result)
         return results
 
-    def _run_cat_tick_operation(self, cat, operation):
+    def _run_cat_tick_operation(
+        self,
+        cat,
+        operation,
+    ):
         try:
-            value = operation(cat)
-            return {'cat': cat.name, 'ok': True, 'result': value}
-        except Exception as error:
-            return self._cat_tick_error(error=error, source_component=f'cat:{cat.name}', source_operation='autonomous_tick', cat_name=cat.name)
+            value = operation(
+                cat
+            )
 
-    def _run_group_tick_operation(self, group_id, operation):
+            return (
+                CatTickOperationResult(
+                    cat=cat.name,
+                    result=value,
+                )
+            )
+
+        except Exception as error:
+            return self._cat_tick_error(
+                error=error,
+                source_component=
+                    f"cat:{cat.name}",
+                source_operation=
+                    "autonomous_tick",
+                cat_name=
+                    cat.name,
+            )
+
+
+    def _run_group_tick_operation(
+        self,
+        group_id,
+        operation,
+    ):
         try:
-            value = operation(group_id, self.cats)
-            return {'group_id': group_id, 'ok': True, 'result': value}
-        except Exception as error:
-            return self._cat_tick_error(error=error, source_component=f'cat_group:{group_id}', source_operation='lifecycle_advance', group_id=group_id)
+            value = operation(
+                group_id,
+                self.cats,
+            )
 
-    def _cat_tick_error(self, error, source_component, source_operation, **context):
-        UniverseLogger.event(f'CATS TICK ERROR: SOURCE={source_component}.{source_operation} ERROR={type(error).__name__}: {error}')
+            return (
+                CatGroupTickOperationResult(
+                    group_id=
+                        group_id,
+                    result=
+                        value,
+                )
+            )
+
+        except Exception as error:
+            return self._cat_tick_error(
+                error=error,
+                source_component=
+                    f"cat_group:{group_id}",
+                source_operation=
+                    "lifecycle_advance",
+                group_id=
+                    group_id,
+            )
+
+
+    def _cat_tick_error(
+        self,
+        error,
+        source_component,
+        source_operation,
+        cat_name=None,
+        group_id=None,
+    ):
+        UniverseLogger.event(
+            "CATS TICK ERROR: "
+            f"SOURCE={source_component}."
+            f"{source_operation} "
+            f"ERROR={type(error).__name__}: "
+            f"{error}"
+        )
+
         cronenberg = None
-        create_cronenberg = getattr(self.universe, 'create_cronenberg_from_quantum_error', None)
-        if callable(create_cronenberg):
-            cronenberg = create_cronenberg(error=error, source_component=source_component, source_operation=source_operation)
-        return {**context, 'ok': False, 'source_component': source_component, 'source_operation': source_operation, 'error_type': type(error).__name__, 'error_message': str(error), 'cronenberg_id': getattr(cronenberg, 'id', None)}
+
+        create_cronenberg = getattr(
+            self.universe,
+            "create_cronenberg_from_quantum_error",
+            None,
+        )
+
+        if callable(
+            create_cronenberg
+        ):
+            cronenberg = (
+                create_cronenberg(
+                    error=error,
+                    source_component=
+                        source_component,
+                    source_operation=
+                        source_operation,
+                )
+            )
+
+        return (
+            CatTickErrorResult(
+                source_component=
+                    source_component,
+                source_operation=
+                    source_operation,
+                error_type=
+                    type(error).__name__,
+                error_message=
+                    str(error),
+                cat_name=
+                    cat_name,
+                group_id=
+                    group_id,
+                cronenberg_id=
+                    getattr(
+                        cronenberg,
+                        "id",
+                        None,
+                    ),
+            )
+        )
+
 
     def _clear_events(self):
         self.events.clear()

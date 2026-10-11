@@ -42,7 +42,7 @@ class CatQuantumBoxPairingPrincipleTests(unittest.TestCase):
         )
         result = self.cats.execute_cat_intention(self.cat)
         for _ in range(10):
-            if result['name'] == 'cat_explored_quantum_box':
+            if result.name == 'cat_explored_quantum_box':
                 return result
             result = self.cats.execute_cat_intention(self.cat)
         return result
@@ -54,7 +54,7 @@ class CatQuantumBoxPairingPrincipleTests(unittest.TestCase):
         self.assertFalse(before.explored)
         self.assertIsNone(before.paired)
         result = self.explore_box()
-        self.assertEqual(result['name'], 'cat_explored_quantum_box')
+        self.assertEqual(result.name, 'cat_explored_quantum_box')
         after = self.box_detail()
         self.assertTrue(after.recognized_as_quantum_box)
         self.assertTrue(after.paired)
@@ -65,7 +65,7 @@ class CatQuantumBoxPairingPrincipleTests(unittest.TestCase):
 
     def test_disappearing_box_leaves_memory_not_perception(self):
         result = self.explore_box()
-        self.assertEqual(result['name'], 'cat_explored_quantum_box')
+        self.assertEqual(result.name, 'cat_explored_quantum_box')
         memories = self.cat.memory.recall(event_type='quantum_box_observed')
         self.assertTrue(any((self.box.id in memory.participants for memory in memories)))
         self.universe.quantum_boxes.remove(self.box)

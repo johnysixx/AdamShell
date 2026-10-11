@@ -7,6 +7,11 @@ from .cat_trait_dice_mapping import (
     CatTraitDiceMappingResult,
 )
 from .cat_genetics_validator import CatGeneticsValidator
+from .cat_birth_result_state import (
+    CatBirthManifestationFailedResult,
+    CatBirthProfileResolvedEvent,
+    CatBornFromDiceEvent,
+)
 from .cat_birth_objects import (
     CatBirthProfile,
     cat_birth_profile_snapshot,
@@ -257,36 +262,22 @@ class CatBirthResolver:
 
         resolved_profile = canonical_result.profile
 
-        event = {
-            "name": "cat_birth_profile_resolved",
-            "profile": resolved_profile,
-            "rolled_profile": rolled_profile,
-            "canonical": canonical_result,
-            "genetics": genetics_result,
-            "trait_dice_mapping": mapping,
-            "cat_d20": cat_d20_result,
-            "dice_box": dice_result,
-            "percentile": percentile_result,
-            "percentile_history": (
-                percentile_result.history
-            ),
-            "percentile_reroll_count": (
-                percentile_result.reroll_count
-            ),
-            "cronenbergs_created": (
+        event = CatBirthProfileResolvedEvent(
+            profile=resolved_profile,
+            rolled_profile=rolled_profile,
+            canonical=canonical_result,
+            genetics=genetics_result,
+            trait_dice_mapping=mapping,
+            cat_d20=cat_d20_result,
+            dice_box=dice_result,
+            percentile=percentile_result,
+            cronenbergs_created=tuple(
                 cronenbergs_created
             ),
-            "cronenberg_count": len(
-                cronenbergs_created
-            ),
-            "woodoo_white_trace_applied": (
+            woodoo_white_trace_applied=(
                 woodoo_white_trace_applied
             ),
-            "resolved": True,
-            "visibility": (
-                "secret_cat_birth_event"
-            )
-        }
+        )
 
         self.history.append(
             event
@@ -369,8 +360,17 @@ class CatBirthResolver:
             rng=rng
         )
 
-        profile = birth["profile"]
-        canonical = birth["canonical"]
+        if not isinstance(
+            birth,
+            CatBirthProfileResolvedEvent,
+        ):
+            raise TypeError(
+                "Cat birth creation requires a "
+                "CatBirthProfileResolvedEvent object."
+            )
+
+        profile = birth.profile
+        canonical = birth.canonical
 
         if not isinstance(
             profile,
@@ -425,14 +425,12 @@ class CatBirthResolver:
         )
 
         if existing is not None:
-            return {
-                "name": "cat_birth_manifestation_failed",
-                "result": "cat_name_already_exists",
-                "cat_name": cat_name,
-                "cat": existing,
-                "birth": birth,
-                "created": False
-            }
+            return CatBirthManifestationFailedResult(
+                result="cat_name_already_exists",
+                cat_name=cat_name,
+                cat=existing,
+                birth=birth,
+            )
 
         manifestation = (
             self.universe.manifest_cat(
@@ -447,20 +445,18 @@ class CatBirthResolver:
         )
 
         if manifestation is None:
-            return {
-                "name": "cat_birth_manifestation_failed",
-                "result": "manifest_cat_failed",
-                "cat_name": cat_name,
-                "birth": birth,
-                "created": False
-            }
+            return CatBirthManifestationFailedResult(
+                result="manifest_cat_failed",
+                cat_name=cat_name,
+                birth=birth,
+            )
 
         cat = manifestation[
             "cat"
         ]
 
         rolled_birth_profile = (
-            birth["rolled_profile"]
+            birth.rolled_profile
         )
 
         if not isinstance(
@@ -478,7 +474,7 @@ class CatBirthResolver:
         )
         cat.birth_canonical = canonical
 
-        birth_genetics = birth["genetics"]
+        birth_genetics = birth.genetics
 
         if not isinstance(
             birth_genetics,
@@ -492,7 +488,7 @@ class CatBirthResolver:
         cat.birth_genetics = birth_genetics
 
         birth_trait_dice_mapping = (
-            birth["trait_dice_mapping"]
+            birth.trait_dice_mapping
         )
 
         if not isinstance(
@@ -508,7 +504,7 @@ class CatBirthResolver:
             birth_trait_dice_mapping
         )
 
-        birth_percentile = birth["percentile"]
+        birth_percentile = birth.percentile
 
         if not isinstance(
             birth_percentile,
@@ -552,32 +548,28 @@ class CatBirthResolver:
             )
         )
 
-        event = {
-            "name": "cat_born_from_dice",
-            "cat": cat_name,
-            "cat_id": getattr(
+        event = CatBornFromDiceEvent(
+            cat=cat,
+            cat_name=cat_name,
+            cat_id=getattr(
                 cat,
                 "id",
                 None
             ),
-            "identity": identity,
-            "profile": (
-                cat_birth_profile_snapshot(
-                    profile
-                )
-            ),
-            "canonical_occurrence": (
+            identity=identity,
+            profile=profile,
+            canonical_occurrence=(
                 canonical.occurrence
             ),
-            "special_birth_event": (
+            special_birth_event=(
                 canonical.special_birth_event
             ),
-            "special_birth_result": (
+            special_birth_result=(
                 special_birth_result
             ),
-            "birth": birth,
-            "created": True
-        }
+            birth=birth,
+            manifestation=manifestation,
+        )
 
         self.history.append(
             event
@@ -603,11 +595,7 @@ class CatBirthResolver:
             )
         )
 
-        return {
-            **event,
-            "cat": cat,
-            "manifestation": manifestation
-        }
+        return event
 
     def _next_generated_cat_name(
         self

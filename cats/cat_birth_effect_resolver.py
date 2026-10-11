@@ -1,5 +1,16 @@
 import random
 
+from cats.cat_birth_effect_result_state import (
+    CatBirthDiceRotationEvent,
+    CatBirthNonDiceEffectEvent,
+    GarfieldBirthEffectAction,
+    GarfieldBirthEffectCombinationEvent,
+    QueenElisabethBirthEffectsEvent,
+    PazuzuBirthDiceResonanceResult,
+    WoodooBirthD20RotationEvent,
+    WoodooRebirthQuantumReconfigurationEvent,
+)
+
 
 class CatBirthEffectResolver:
 
@@ -26,9 +37,12 @@ class CatBirthEffectResolver:
     ):
         if identity == "pazuzu":
             result = (
-                self.meeting_place
-                .trigger_pazuzu_birth_dice_resonance(
-                    rng=rng
+                PazuzuBirthDiceResonanceResult
+                .from_boundary(
+                    self.meeting_place
+                    .trigger_pazuzu_birth_dice_resonance(
+                        rng=rng
+                    )
                 )
             )
 
@@ -80,21 +94,16 @@ class CatBirthEffectResolver:
                 )
             )
 
-            result = {
-                "name": (
-                    "queen_elisabeth_birth_effects"
-                ),
-                "cat": cat_name,
-                "identity": "queen_elisabeth",
-                "dice_rotation": rotation,
-                "selected_non_dice_effect": (
+            result = QueenElisabethBirthEffectsEvent(
+                cat=cat_name,
+                dice_rotation=rotation,
+                selected_non_dice_effect=(
                     selected_effect
                 ),
-                "non_dice_result": (
+                non_dice_result=(
                     non_dice_result
                 ),
-                "triggered": True
-            }
+            )
 
             self._record(
                 result,
@@ -120,21 +129,15 @@ class CatBirthEffectResolver:
                 )
             )
 
-            result = {
-                "name": (
-                    "woodoo_birth_d20_rotation"
-                ),
-                "cat": cat_name,
-                "identity": "woodoo",
-                "d20_rotation": d20_rotation,
-                "registered_d20_count": (
+            result = WoodooBirthD20RotationEvent(
+                cat=cat_name,
+                d20_rotation=d20_rotation,
+                registered_d20_count=(
                     d20_rotation[
                         "rotated_count"
                     ]
                 ),
-                "bar_dice_rotated": False,
-                "triggered": True
-            }
+            )
 
             self._record(
                 result,
@@ -178,29 +181,22 @@ class CatBirthEffectResolver:
 
             self.universe.next_cat_birth_white = True
 
-            result = {
-                "name": (
-                    "woodoo_rebirth_quantum_"
-                    "reconfiguration"
-                ),
-                "cat": cat_name,
-                "identity": "woodoo",
-                "previous_configuration": (
+            result = WoodooRebirthQuantumReconfigurationEvent(
+                cat=cat_name,
+                previous_configuration=(
                     previous_configuration
                 ),
-                "new_configuration": (
+                new_configuration=(
                     quantum_space.configuration_id
                 ),
-                "previous_reconfiguration_count": (
+                previous_reconfiguration_count=(
                     previous_reconfiguration_count
                 ),
-                "reconfiguration_count": (
+                reconfiguration_count=(
                     quantum_space
                     .reconfiguration_count
                 ),
-                "next_cat_birth_white": True,
-                "triggered": True
-            }
+            )
 
             self._record(
                 result,
@@ -247,15 +243,16 @@ class CatBirthEffectResolver:
         if force_next_woodoo:
             self.universe.force_next_woodoo_birth = True
 
-            effects.append({
-                "name": (
-                    "garfield_forces_next_"
-                    "woodoo_birth"
-                ),
-                "effect": "force_next_woodoo",
-                "pending": True,
-                "triggered": True
-            })
+            effects.append(
+                GarfieldBirthEffectAction(
+                    name=(
+                        "garfield_forces_next_"
+                        "woodoo_birth"
+                    ),
+                    effect="force_next_woodoo",
+                    pending=True,
+                )
+            )
 
         if rotate_cat_d20:
             cat_d20_result = (
@@ -265,14 +262,15 @@ class CatBirthEffectResolver:
                 )
             )
 
-            effects.append({
-                "name": (
-                    "garfield_rotates_cat_d20"
-                ),
-                "effect": "rotate_cat_d20",
-                "result": cat_d20_result,
-                "triggered": True
-            })
+            effects.append(
+                GarfieldBirthEffectAction(
+                    name=(
+                        "garfield_rotates_cat_d20"
+                    ),
+                    effect="rotate_cat_d20",
+                    result=cat_d20_result,
+                )
+            )
 
         if rotate_quantum_d20:
             quantum_d20_result = (
@@ -283,39 +281,30 @@ class CatBirthEffectResolver:
                 )
             )
 
-            effects.append({
-                "name": (
-                    "garfield_rotates_quantum_d20"
-                ),
-                "effect": "rotate_quantum_d20",
-                "result": quantum_d20_result,
-                "triggered": True
-            })
+            effects.append(
+                GarfieldBirthEffectAction(
+                    name=(
+                        "garfield_rotates_quantum_d20"
+                    ),
+                    effect="rotate_quantum_d20",
+                    result=quantum_d20_result,
+                )
+            )
 
-        result = {
-            "name": (
-                "garfield_birth_effect_combination"
-            ),
-            "cat": cat_name,
-            "identity": "garfield",
-            "effect_mask": effect_mask,
-            "effect_names": [
-                effect["effect"]
-                for effect in effects
-            ],
-            "effects": effects,
-            "force_next_woodoo": (
+        result = GarfieldBirthEffectCombinationEvent(
+            cat=cat_name,
+            effect_mask=effect_mask,
+            effects=tuple(effects),
+            force_next_woodoo=(
                 force_next_woodoo
             ),
-            "cat_d20_rotated": (
+            cat_d20_rotated=(
                 rotate_cat_d20
             ),
-            "quantum_d20_rotated": (
+            quantum_d20_rotated=(
                 rotate_quantum_d20
             ),
-            "effect_count": len(effects),
-            "triggered": True
-        }
+        )
 
         self._record(
             result,
@@ -348,26 +337,25 @@ class CatBirthEffectResolver:
             )
         )
 
-        result = {
-            "name": event_name,
-            "cat": cat_name,
-            "identity": identity,
-            "d20_rotation": d20_rotation,
-            "dice_box_rotation": (
+        result = CatBirthDiceRotationEvent(
+            name=event_name,
+            cat=cat_name,
+            identity=identity,
+            d20_rotation=d20_rotation,
+            dice_box_rotation=(
                 dice_box_rotation
             ),
-            "registered_d20_count": (
+            registered_d20_count=(
                 d20_rotation[
                     "rotated_count"
                 ]
             ),
-            "bar_dice_count": (
+            bar_dice_count=(
                 dice_box_rotation[
                     "rotated_count"
                 ]
             ),
-            "triggered": True
-        }
+        )
 
         self._record(
             result,
@@ -384,13 +372,11 @@ class CatBirthEffectResolver:
         cat_name,
         identity
     ):
-        result = {
-            "name": effect_name,
-            "cat": cat_name,
-            "identity": identity,
-            "effect_type": "non_dice",
-            "triggered": True
-        }
+        result = CatBirthNonDiceEffectEvent(
+            name=effect_name,
+            cat=cat_name,
+            identity=identity,
+        )
 
         self._record(
             result,

@@ -113,22 +113,22 @@ class CatBirthGarfieldEffectsTests(
         result = self.execute_mask(1)
 
         self.assertEqual(
-            result["effect_names"],
-            [
-                "force_next_woodoo"
-            ]
+            result.effect_names,
+            (
+                "force_next_woodoo",
+            )
         )
 
         self.assertTrue(
-            result["force_next_woodoo"]
+            result.force_next_woodoo
         )
 
         self.assertFalse(
-            result["cat_d20_rotated"]
+            result.cat_d20_rotated
         )
 
         self.assertFalse(
-            result["quantum_d20_rotated"]
+            result.quantum_d20_rotated
         )
 
         self.assertTrue(
@@ -145,22 +145,22 @@ class CatBirthGarfieldEffectsTests(
         result = self.execute_mask(2)
 
         self.assertEqual(
-            result["effect_names"],
-            [
-                "rotate_cat_d20"
-            ]
+            result.effect_names,
+            (
+                "rotate_cat_d20",
+            )
         )
 
         self.assertFalse(
-            result["force_next_woodoo"]
+            result.force_next_woodoo
         )
 
         self.assertTrue(
-            result["cat_d20_rotated"]
+            result.cat_d20_rotated
         )
 
         self.assertFalse(
-            result["quantum_d20_rotated"]
+            result.quantum_d20_rotated
         )
 
         self.assertEqual(
@@ -181,22 +181,22 @@ class CatBirthGarfieldEffectsTests(
         result = self.execute_mask(4)
 
         self.assertEqual(
-            result["effect_names"],
-            [
-                "rotate_quantum_d20"
-            ]
+            result.effect_names,
+            (
+                "rotate_quantum_d20",
+            )
         )
 
         self.assertFalse(
-            result["force_next_woodoo"]
+            result.force_next_woodoo
         )
 
         self.assertFalse(
-            result["cat_d20_rotated"]
+            result.cat_d20_rotated
         )
 
         self.assertTrue(
-            result["quantum_d20_rotated"]
+            result.quantum_d20_rotated
         )
 
         self.assertEqual(
@@ -210,29 +210,29 @@ class CatBirthGarfieldEffectsTests(
         result = self.execute_mask(7)
 
         self.assertEqual(
-            result["effect_names"],
-            [
+            result.effect_names,
+            (
                 "force_next_woodoo",
                 "rotate_cat_d20",
-                "rotate_quantum_d20"
-            ]
+                "rotate_quantum_d20",
+            )
         )
 
         self.assertEqual(
-            result["effect_count"],
+            result.effect_count,
             3
         )
 
         self.assertTrue(
-            result["force_next_woodoo"]
+            result.force_next_woodoo
         )
 
         self.assertTrue(
-            result["cat_d20_rotated"]
+            result.cat_d20_rotated
         )
 
         self.assertTrue(
-            result["quantum_d20_rotated"]
+            result.quantum_d20_rotated
         )
 
     def test_all_seven_masks_are_nonempty(self):
@@ -245,19 +245,19 @@ class CatBirthGarfieldEffectsTests(
                 )
 
                 self.assertEqual(
-                    result["effect_mask"],
+                    result.effect_mask,
                     mask
                 )
 
                 self.assertGreaterEqual(
-                    result["effect_count"],
+                    result.effect_count,
                     1
                 )
 
                 self.assertEqual(
-                    result["effect_count"],
+                    result.effect_count,
                     len(
-                        result["effect_names"]
+                        result.effect_names
                     )
                 )
 
@@ -273,9 +273,7 @@ class CatBirthGarfieldEffectsTests(
             rng=GarfieldMaskRng(1)
         )
 
-        canonical = result[
-            "canonical"
-        ]
+        canonical = result.canonical
 
         self.assertEqual(
             canonical.identity,

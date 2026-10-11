@@ -142,8 +142,8 @@ class CatIntentionExecutorTests(unittest.TestCase):
 
     def test_no_intention_does_nothing(self):
         result = self.cats.execute_cat_intention(self.cat)
-        self.assertFalse(result['executed'])
-        self.assertEqual(result['reason'], 'no_current_intention')
+        self.assertFalse(result.executed)
+        self.assertEqual(result.reason, 'no_current_intention')
 
     def test_visit_recipient_requests_follow_entity_navigation(self):
         self.set_intention('visit_recipient', target=CatVisitRecipientTarget(recipient_id='wizard'))
@@ -209,9 +209,9 @@ class CatIntentionExecutorTests(unittest.TestCase):
         target_cat.current_layer = self.cat.current_layer
         self.set_intention('approach_cat', target=CatApproachCatTarget(cat_name='target_cat'))
         result = self.cats.execute_cat_intention(self.cat)
-        self.assertTrue(result['executed'])
-        self.assertEqual(result['name'], 'cat_approach_started')
-        self.assertEqual(result['target'], 'target_cat')
+        self.assertTrue(result.executed)
+        self.assertEqual(result.name, 'cat_approach_started')
+        self.assertEqual(result.target, 'target_cat')
         self.assertEqual(self.cat.state, 'approaching_cat')
         self.assertEqual(self.cat.navigation_target, 'target_cat')
         self.assertTrue(hasattr(self.cat, 'active_route_id'))
@@ -222,9 +222,9 @@ class CatIntentionExecutorTests(unittest.TestCase):
         target_cat.current_layer = self.cat.current_layer
         self.set_intention('approach_cat', target=CatApproachCatTarget(cat_name='target_cat'))
         result = self.cats.execute_cat_intention(self.cat)
-        self.assertTrue(result['executed'])
-        self.assertTrue(result['arrived'])
-        self.assertEqual(result['name'], 'cat_approach_completed')
+        self.assertTrue(result.executed)
+        self.assertTrue(result.arrived)
+        self.assertEqual(result.name, 'cat_approach_completed')
         self.assertEqual(self.cat.state, 'near_target_cat')
 if __name__ == '__main__':
     unittest.main()

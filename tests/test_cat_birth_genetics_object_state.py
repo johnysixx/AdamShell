@@ -18,6 +18,9 @@ from cats.cat_birth_objects import (
     CatBirthPercentileResult,
 )
 from cats.cat_birth_resolver import CatBirthResolver
+from cats.cat_birth_result_state import (
+    CatBirthProfileResolvedEvent,
+)
 from cats.cat_trait_dice_mapping import (
     CatTraitDiceMappingResult,
 )
@@ -176,34 +179,34 @@ class CatBirthGeneticsObjectStateTests(unittest.TestCase):
 
     def test_create_cat_rejects_legacy_genetics_dict(self):
         profile = self._profile()
-        birth = {
-            "profile": profile,
-            "rolled_profile": profile,
-            "canonical": CatCanonicalBirthResolution(
+        birth = CatBirthProfileResolvedEvent(
+            profile=profile,
+            rolled_profile=profile,
+            canonical=CatCanonicalBirthResolution(
                 matched=False,
                 occurrence=0,
                 identity=None,
                 profile=profile,
                 special_birth_event=None,
             ),
-            "genetics": {
+            genetics={
                 "valid": True,
                 "conflict_count": 0,
                 "conflict_history": [],
                 "cronenberg_count": 0,
             },
-            "trait_dice_mapping": CatTraitDiceMappingResult(
+            trait_dice_mapping=CatTraitDiceMappingResult(
                 cat_d20_value=1,
                 permutation_index=0,
                 die_to_trait={},
                 trait_to_die={},
             ),
-            "percentile": (
+            percentile=(
                 CatBirthPercentileResult.single(
                     value=50
                 )
             ),
-        }
+        )
 
         self.resolver.resolve_profile = (
             lambda rng=None: birth
