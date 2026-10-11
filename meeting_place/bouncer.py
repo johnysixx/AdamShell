@@ -7,6 +7,7 @@ from .bar_objects import BarOrigin, BouncerPrincipleAttributes, CatEntryPolicy
 from .bouncer_state import BouncerState
 from .cat_meow_event_state import (
     BouncerCatAllowedEvent,
+    BouncerCatInvitedGuestAuthorizedEvent,
     BouncerCatMeowEvent,
     BouncerCatMeowRecognitionEvent,
 )
@@ -148,10 +149,24 @@ class Bouncer(SocialMixin):
             return {'authorized': False, 'reason': 'MEOW_already_used'}
         if invitation.escort_required and escorting_cat is None:
             return {'authorized': False, 'reason': 'inviting_cat_not_present'}
-        result = {'name': 'bouncer_allows_cat_invited_guest', 'authorized': True, 'human': human_name, 'inviting_cat': cat_name, 'invitation_id': invitation_id, 'guest_type': 'cat_invited_guest'}
-        self.cat_invited_guest_history.append(dict(result))
-        UniverseLogger.event(f'BOUNCER ALLOWS CAT INVITED GUEST: {human_name} WITH CAT {cat_name}')
-        return result
+        event = (
+            BouncerCatInvitedGuestAuthorizedEvent(
+                human=human_name,
+                inviting_cat=cat_name,
+                invitation_id=invitation_id,
+            )
+        )
+
+        self.cat_invited_guest_history.append(
+            event
+        )
+
+        UniverseLogger.event(
+            f'BOUNCER ALLOWS CAT INVITED GUEST: '
+            f'{human_name} WITH CAT {cat_name}'
+        )
+
+        return event.to_dict()
 
     def _entity_value(self, entity, key, default=None):
         return getattr(entity, key, default)

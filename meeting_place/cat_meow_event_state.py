@@ -2,6 +2,64 @@ from dataclasses import dataclass, field
 
 
 @dataclass(slots=True, frozen=True)
+class BouncerCatInvitedGuestAuthorizedEvent:
+    human: str
+    inviting_cat: str
+    invitation_id: str
+
+    name: str = field(
+        default=(
+            "bouncer_allows_"
+            "cat_invited_guest"
+        ),
+        init=False,
+    )
+
+    authorized: bool = field(
+        default=True,
+        init=False,
+    )
+
+    guest_type: str = field(
+        default="cat_invited_guest",
+        init=False,
+    )
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "human",
+            str(self.human),
+        )
+
+        object.__setattr__(
+            self,
+            "inviting_cat",
+            str(self.inviting_cat),
+        )
+
+        object.__setattr__(
+            self,
+            "invitation_id",
+            str(self.invitation_id),
+        )
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "authorized":
+                self.authorized,
+            "human": self.human,
+            "inviting_cat":
+                self.inviting_cat,
+            "invitation_id":
+                self.invitation_id,
+            "guest_type":
+                self.guest_type,
+        }
+
+
+@dataclass(slots=True, frozen=True)
 class BouncerCatMeowEvent:
     cat: str
     recognized: bool

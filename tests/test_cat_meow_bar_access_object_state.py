@@ -3,6 +3,9 @@ import unittest
 from universe.universe import Universe
 from multiverse import UniverseRegistry
 from meeting_place.meeting_place import MeetingPlace
+from meeting_place.cat_meow_event_state import (
+    BouncerCatInvitedGuestAuthorizedEvent,
+)
 from cats.cats import Cats
 from cats.cat_human_bond_system import (
     CatHumanBondSystem
@@ -215,6 +218,70 @@ class CatMeowBarAccessObjectStateTests(
         self.assertEqual(
             result['invitation_id'],
             self.offered.id,
+        )
+
+        stored = (
+            self.meeting
+            .bouncer
+            .cat_invited_guest_history[-1]
+        )
+
+        self.assertIsInstance(
+            stored,
+            BouncerCatInvitedGuestAuthorizedEvent,
+        )
+
+        self.assertTrue(
+            stored.authorized
+        )
+
+        self.assertEqual(
+            stored.human,
+            self.human.name,
+        )
+
+        self.assertEqual(
+            stored.inviting_cat,
+            self.cat.name,
+        )
+
+        self.assertEqual(
+            stored.invitation_id,
+            self.offered.id,
+        )
+
+        self.assertEqual(
+            stored.guest_type,
+            'cat_invited_guest',
+        )
+
+        for mapping_method in (
+            'get',
+            'keys',
+            'items',
+            'values',
+        ):
+            self.assertFalse(
+                hasattr(
+                    stored,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = stored[
+                'authorized'
+            ]
+
+        result[
+            'human'
+        ] = 'changed'
+
+        self.assertEqual(
+            stored.human,
+            self.human.name,
         )
 
     def test_missing_state_is_normal_denial(
