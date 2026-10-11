@@ -8,6 +8,25 @@ from universe.bootstraps.universe_bootstrap import (
 from universe.bootstraps.entity_bootstrap import (
     EntityBootstrap
 )
+from core.entity.quantum_die import (
+    QuantumDieRollEvent,
+)
+from meeting_place.bar_objects import (
+    CatD20TurnEvent,
+)
+from meeting_place.dice_box import (
+    DiceBoxRotationEvent,
+)
+from meeting_place.dice_vial import (
+    DiceVialSecretRotationEvent,
+)
+from meeting_place.pazuzu_birth_dice_resonance_state import (
+    PazuzuBirthDiceResonanceEvent,
+    PazuzuCatD20ResonanceTurn,
+)
+from quantum.quantum_die_resolver import (
+    QuantumDieResolutionEvent,
+)
 
 
 class FixedResonanceRng:
@@ -138,11 +157,119 @@ class PazuzuBirthDiceResonanceTests(
             ]
         )
 
+        stored = (
+            self.meeting
+            .pazuzu_birth_dice_resonance_event
+        )
+
+        secret = (
+            self.meeting
+            .cat_d20_secret_history[-1]
+        )
+
+        quantum = (
+            self.universe
+            .quantum_events[-1]
+        )
+
+        self.assertIsInstance(
+            stored,
+            PazuzuBirthDiceResonanceEvent,
+        )
+
+        self.assertIsInstance(
+            secret,
+            PazuzuBirthDiceResonanceEvent,
+        )
+
+        self.assertIsInstance(
+            quantum,
+            PazuzuBirthDiceResonanceEvent,
+        )
+
+        self.assertIsInstance(
+            stored.quantum_d20,
+            QuantumDieRollEvent,
+        )
+
+        self.assertIsInstance(
+            stored.quantum_resolution,
+            QuantumDieResolutionEvent,
+        )
+
+        self.assertIsInstance(
+            stored.cat_d20,
+            PazuzuCatD20ResonanceTurn,
+        )
+
+        self.assertIsInstance(
+            stored.cat_d20.turn,
+            CatD20TurnEvent,
+        )
+
+        self.assertIsInstance(
+            stored.dice_vial,
+            DiceVialSecretRotationEvent,
+        )
+
+        self.assertIsInstance(
+            stored.dice_box,
+            DiceBoxRotationEvent,
+        )
+
+        self.assertIsInstance(
+            self.meeting
+            .dice_vial
+            .secret_event,
+            DiceVialSecretRotationEvent,
+        )
+
         self.assertEqual(
-            self.universe.quantum_events[-1][
-                "name"
-            ],
+            quantum.name,
             "pazuzu_birth_dice_resonance"
+        )
+
+        for value, key in (
+            (
+                stored,
+                "triggered",
+            ),
+            (
+                stored.cat_d20,
+                "turn",
+            ),
+            (
+                stored.dice_vial,
+                "roll",
+            ),
+        ):
+            for mapping_method in (
+                "get",
+                "keys",
+                "items",
+                "values",
+            ):
+                self.assertFalse(
+                    hasattr(
+                        value,
+                        mapping_method,
+                    )
+                )
+
+            with self.assertRaises(
+                TypeError
+            ):
+                _ = value[key]
+
+        result[
+            "dice_vial"
+        ][
+            "roll"
+        ] = 1
+
+        self.assertEqual(
+            stored.dice_vial.roll,
+            7
         )
 
     def test_pazuzu_birth_resonance_runs_only_once(self):

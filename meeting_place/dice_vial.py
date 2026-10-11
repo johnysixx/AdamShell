@@ -1,7 +1,61 @@
 import random
+from dataclasses import dataclass, field
 
 from universe.logger import UniverseLogger
 from .bar_objects import DiceVialContainer, DiceVialMedium, DiceVialDie
+
+
+@dataclass(slots=True, frozen=True)
+class DiceVialSecretRotationEvent:
+    roll: int
+    box_created: bool
+    quantum_tick_requested: bool
+
+    name: str = field(
+        default="dice_vial_secret_rotation",
+        init=False,
+    )
+
+    def __post_init__(self):
+        roll = int(
+            self.roll
+        )
+
+        if not 1 <= roll <= 20:
+            raise ValueError(
+                "Dice vial D20 roll must be "
+                "between 1 and 20."
+            )
+
+        object.__setattr__(
+            self,
+            "roll",
+            roll,
+        )
+
+        object.__setattr__(
+            self,
+            "box_created",
+            bool(self.box_created),
+        )
+
+        object.__setattr__(
+            self,
+            "quantum_tick_requested",
+            bool(
+                self.quantum_tick_requested
+            ),
+        )
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "roll": self.roll,
+            "box_created":
+                self.box_created,
+            "quantum_tick_requested":
+                self.quantum_tick_requested,
+        }
 
 
 class DiceVial:
@@ -61,16 +115,24 @@ class DiceVial:
             [True, False]
         )
 
-        self._secret_event = {
-            "name": "dice_vial_secret_rotation",
-            "roll": self._secret_roll,
-            "box_created": box_created,
-            "quantum_tick_requested": (
-                quantum_tick_requested
+        self._secret_event = (
+            DiceVialSecretRotationEvent(
+                roll=self._secret_roll,
+                box_created=box_created,
+                quantum_tick_requested=(
+                    quantum_tick_requested
+                ),
             )
-        }
+        )
 
-        return self._secret_event.copy()
+        return (
+            self._secret_event
+            .to_dict()
+        )
+
+    @property
+    def secret_event(self):
+        return self._secret_event
 
     def resolve_missing_universe(self, rng=None):
         event = self.roll(

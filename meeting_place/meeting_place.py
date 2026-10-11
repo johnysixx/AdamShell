@@ -31,6 +31,10 @@ from .bar_blacklist import BarBlacklist
 from .bar_incident_book import BarIncidentBook
 from .dice_vial import DiceVial
 from .dice_box import DiceBox
+from .pazuzu_birth_dice_resonance_state import (
+    PazuzuBirthDiceResonanceEvent,
+    PazuzuCatD20ResonanceTurn,
+)
 from .cat_d20_adapter import CatD20Adapter
 from .fridge import BarFridge
 from .reservoirs import BarEnergyReservoir, BarEntropyReservoir
@@ -1003,26 +1007,200 @@ class MeetingPlace:
 
         return boundary
 
-    def trigger_pazuzu_birth_dice_resonance(self, rng=None):
-        existing_event = getattr(self, 'pazuzu_birth_dice_resonance_event', None)
+    def trigger_pazuzu_birth_dice_resonance(
+        self,
+        rng=None
+    ):
+        existing_event = getattr(
+            self,
+            'pazuzu_birth_dice_resonance_event',
+            None,
+        )
+
         if existing_event is not None:
-            return {**existing_event, 'already_triggered': True}
-        cats_layer = getattr(self.universe, 'cats_layer', None)
-        cat_d20 = next((cat for cat in (cats_layer.cats if cats_layer is not None else []) if 'd20_cat' in getattr(cat, 'special_traits', [])), None)
+            if not isinstance(
+                existing_event,
+                PazuzuBirthDiceResonanceEvent,
+            ):
+                raise TypeError(
+                    "Stored Pazuzu resonance must use "
+                    "PazuzuBirthDiceResonanceEvent."
+                )
+
+            boundary = (
+                existing_event
+                .to_dict()
+            )
+
+            boundary[
+                'already_triggered'
+            ] = True
+
+            return boundary
+
+        cats_layer = getattr(
+            self.universe,
+            'cats_layer',
+            None,
+        )
+
+        cat_d20 = next(
+            (
+                cat
+                for cat
+                in (
+                    cats_layer.cats
+                    if cats_layer is not None
+                    else []
+                )
+                if (
+                    'd20_cat'
+                    in getattr(
+                        cat,
+                        'special_traits',
+                        [],
+                    )
+                )
+            ),
+            None,
+        )
+
         if cat_d20 is None:
-            return {'name': 'pazuzu_birth_dice_resonance_failed', 'result': 'cat_d20_missing', 'triggered': False}
-        quantum_d20_result = self.universe.quantum_die.roll(rng=rng)
-        cat_d20_result = self.turn_cat_d20_in_box(rng=rng)
-        dice_vial_result = self.dice_vial.roll(rng=rng)
-        dice_box_result = self.dice_box.rotate_random_die(rng=rng)
-        event = {'name': 'pazuzu_birth_dice_resonance', 'quantum_d20': quantum_d20_result, 'cat_d20': cat_d20_result, 'dice_vial': dice_vial_result, 'dice_box': dice_box_result, 'triggered': True, 'visibility': 'secret_multiverse_event', 'tick': getattr(self.universe, 'universe_tick', 0)}
-        if not hasattr(self, 'cat_d20_secret_history'):
+            return {
+                'name':
+                    'pazuzu_birth_dice_resonance_failed',
+                'result':
+                    'cat_d20_missing',
+                'triggered':
+                    False,
+            }
+
+        self.universe.quantum_die.roll(
+            rng=rng
+        )
+
+        quantum_d20_event = (
+            self.universe
+            .quantum_die
+            .history[-1]
+        )
+
+        quantum_resolution_event = None
+
+        resolver = getattr(
+            self.universe,
+            'quantum_die_resolver',
+            None,
+        )
+
+        if (
+            resolver is not None
+            and resolver.history
+        ):
+            quantum_resolution_event = (
+                resolver.history[-1]
+            )
+
+        cat_d20_boundary = (
+            self.turn_cat_d20_in_box(
+                rng=rng
+            )
+        )
+
+        cat_d20_event = (
+            cat_d20
+            .cat_d20
+            .turn_history[-1]
+        )
+
+        energy_result = (
+            cat_d20_boundary[
+                'duplicate_consumption_energy'
+            ]
+        )
+
+        cat_d20_result = (
+            PazuzuCatD20ResonanceTurn(
+                turn=cat_d20_event,
+                duplicate_consumption_energy=(
+                    energy_result
+                ),
+            )
+        )
+
+        self.dice_vial.roll(
+            rng=rng
+        )
+
+        dice_vial_event = (
+            self.dice_vial
+            .secret_event
+        )
+
+        self.dice_box.rotate_random_die(
+            rng=rng
+        )
+
+        dice_box_event = (
+            self.dice_box
+            .rotation_history[-1]
+        )
+
+        event = (
+            PazuzuBirthDiceResonanceEvent(
+                quantum_d20=(
+                    quantum_d20_event
+                ),
+                quantum_resolution=(
+                    quantum_resolution_event
+                ),
+                cat_d20=(
+                    cat_d20_result
+                ),
+                dice_vial=(
+                    dice_vial_event
+                ),
+                dice_box=(
+                    dice_box_event
+                ),
+                tick=getattr(
+                    self.universe,
+                    'universe_tick',
+                    0,
+                ),
+            )
+        )
+
+        if not hasattr(
+            self,
+            'cat_d20_secret_history'
+        ):
             self.cat_d20_secret_history = []
-        self.cat_d20_secret_history.append(dict(event))
-        self.universe.quantum_events.append(dict(event))
-        self.pazuzu_birth_dice_resonance_event = dict(event)
-        UniverseLogger.event('PAZUZU BIRTH DICE RESONANCE RECORDED')
-        return event
+
+        self.cat_d20_secret_history.append(
+            deepcopy(
+                event
+            )
+        )
+
+        self.universe.quantum_events.append(
+            deepcopy(
+                event
+            )
+        )
+
+        self.pazuzu_birth_dice_resonance_event = (
+            deepcopy(
+                event
+            )
+        )
+
+        UniverseLogger.event(
+            'PAZUZU BIRTH DICE '
+            'RESONANCE RECORDED'
+        )
+
+        return event.to_dict()
 
     def interpret_cat_d20_value(self, value):
         value = int(value)
