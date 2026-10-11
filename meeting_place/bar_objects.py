@@ -1027,6 +1027,142 @@ class CatD20Profile:
 
 
 @dataclass(slots=True, frozen=True)
+class CatD20CanonicalProfilePreparedEvent:
+    cat: str
+    profile: CatD20Profile
+    base_profile: CatD20Profile
+    profile_occurrence: int
+    target_name: str | None
+    all_dice_rotation_requested: bool
+    tick: int = 0
+    mode: str = field(
+        default="canonical_turn",
+        init=False,
+    )
+    random: bool = field(
+        default=False,
+        init=False,
+    )
+    visibility: str = field(
+        default="secret_cat_event",
+        init=False,
+    )
+    name: str = field(
+        default=(
+            "cat_d20_prepared_"
+            "canonical_pazuzu_profile"
+        ),
+        init=False,
+    )
+
+    def __post_init__(self):
+        if not isinstance(
+            self.profile,
+            CatD20Profile,
+        ):
+            raise TypeError(
+                "Canonical CatD20 profile "
+                "must be CatD20Profile."
+            )
+
+        if not isinstance(
+            self.base_profile,
+            CatD20Profile,
+        ):
+            raise TypeError(
+                "Canonical CatD20 base profile "
+                "must be CatD20Profile."
+            )
+
+        occurrence = int(
+            self.profile_occurrence
+        )
+
+        if occurrence < 1:
+            raise ValueError(
+                "Canonical CatD20 profile occurrence "
+                "must be positive."
+            )
+
+        object.__setattr__(
+            self,
+            "cat",
+            str(self.cat),
+        )
+
+        object.__setattr__(
+            self,
+            "profile",
+            deepcopy(self.profile),
+        )
+
+        object.__setattr__(
+            self,
+            "base_profile",
+            deepcopy(self.base_profile),
+        )
+
+        object.__setattr__(
+            self,
+            "profile_occurrence",
+            occurrence,
+        )
+
+        object.__setattr__(
+            self,
+            "target_name",
+            (
+                None
+                if self.target_name is None
+                else str(self.target_name)
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "all_dice_rotation_requested",
+            bool(
+                self.all_dice_rotation_requested
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "tick",
+            int(self.tick),
+        )
+
+    @property
+    def prepared(self):
+        return (
+            self.target_name
+            is not None
+        )
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "cat": self.cat,
+            "profile":
+                self.profile.to_dict(),
+            "base_profile":
+                self.base_profile.to_dict(),
+            "profile_occurrence":
+                self.profile_occurrence,
+            "target_name":
+                self.target_name,
+            "all_dice_rotation_requested":
+                self.all_dice_rotation_requested,
+            "mode": self.mode,
+            "random": self.random,
+            "prepared": self.prepared,
+            "visibility":
+                self.visibility,
+            "tick": self.tick,
+        }
+
+
+@dataclass(slots=True, frozen=True)
 class CatD20TurnEvent:
     cat: str
     box: str

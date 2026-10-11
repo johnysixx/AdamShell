@@ -63,6 +63,7 @@ from .bar_objects import (
     CatD20Profile,
     CatD20State,
     CatD20TurnEvent,
+    CatD20CanonicalProfilePreparedEvent,
 )
 
 class MeetingPlace:
@@ -590,44 +591,163 @@ class MeetingPlace:
         return boundary
 
     def cat_d20_prepare_pazuzu_profile(self):
-        cats_layer = getattr(self.universe, 'cats_layer', None)
+        cats_layer = getattr(
+            self.universe,
+            'cats_layer',
+            None,
+        )
+
         if cats_layer is None:
-            return {'name': 'cat_d20_pazuzu_profile_failed', 'result': 'cats_layer_missing', 'prepared': False}
-        cat_d20 = next((cat for cat in cats_layer.cats if 'd20_cat' in getattr(cat, 'special_traits', [])), None)
+            return {
+                'name':
+                    'cat_d20_pazuzu_profile_failed',
+                'result':
+                    'cats_layer_missing',
+                'prepared':
+                    False,
+            }
+
+        cat_d20 = next(
+            (
+                cat
+                for cat
+                in cats_layer.cats
+                if (
+                    'd20_cat'
+                    in getattr(
+                        cat,
+                        'special_traits',
+                        [],
+                    )
+                )
+            ),
+            None,
+        )
+
         if cat_d20 is None:
-            return {'name': 'cat_d20_pazuzu_profile_failed', 'result': 'cat_d20_missing', 'prepared': False}
-        base_profile = {'color': 'black', 'fur_length': 'short', 'pattern': 'solid', 'eye_color': 'green', 'sex': 'female'}
-        if not hasattr(self, 'cat_d20_canonical_profile_counts'):
+            return {
+                'name':
+                    'cat_d20_pazuzu_profile_failed',
+                'result':
+                    'cat_d20_missing',
+                'prepared':
+                    False,
+            }
+
+        base_profile = CatD20Profile(
+            color='black',
+            fur_length='short',
+            pattern='solid',
+            eye_color='green',
+            sex='female',
+        )
+
+        profile_key = (
+            base_profile.color,
+            base_profile.fur_length,
+            base_profile.pattern,
+            base_profile.eye_color,
+            base_profile.sex,
+        )
+
+        if not hasattr(
+            self,
+            'cat_d20_canonical_profile_counts'
+        ):
             self.cat_d20_canonical_profile_counts = {}
-        profile_key = (base_profile['color'], base_profile['fur_length'], base_profile['pattern'], base_profile['eye_color'], base_profile['sex'])
-        occurrence = self.cat_d20_canonical_profile_counts.get(profile_key, 0) + 1
-        self.cat_d20_canonical_profile_counts[profile_key] = occurrence
+
+        occurrence = (
+            self
+            .cat_d20_canonical_profile_counts
+            .get(
+                profile_key,
+                0,
+            )
+            + 1
+        )
+
+        self.cat_d20_canonical_profile_counts[
+            profile_key
+        ] = occurrence
+
         if occurrence == 1:
             target_name = 'pazuzu'
-            profile = dict(base_profile)
+            profile = deepcopy(
+                base_profile
+            )
             all_dice_rotation_requested = False
+
         elif occurrence == 2:
             target_name = 'gib'
-            profile = dict(base_profile)
-            profile['fur_length'] = 'long'
+
+            profile = CatD20Profile(
+                color=base_profile.color,
+                fur_length='long',
+                pattern=base_profile.pattern,
+                eye_color=base_profile.eye_color,
+                sex=base_profile.sex,
+            )
+
             all_dice_rotation_requested = True
+
         else:
             target_name = None
-            profile = dict(base_profile)
+
+            profile = deepcopy(
+                base_profile
+            )
+
             all_dice_rotation_requested = False
-        event = {'name': 'cat_d20_prepared_canonical_pazuzu_profile', 'cat': cat_d20.name, 'profile': dict(profile), 'base_profile': dict(base_profile), 'profile_occurrence': occurrence, 'target_name': target_name, 'all_dice_rotation_requested': all_dice_rotation_requested, 'mode': 'canonical_turn', 'random': False, 'prepared': target_name is not None, 'visibility': 'secret_cat_event', 'tick': getattr(self.universe, 'universe_tick', 0)}
+
+        event = (
+            CatD20CanonicalProfilePreparedEvent(
+                cat=cat_d20.name,
+                profile=profile,
+                base_profile=base_profile,
+                profile_occurrence=occurrence,
+                target_name=target_name,
+                all_dice_rotation_requested=(
+                    all_dice_rotation_requested
+                ),
+                tick=getattr(
+                    self.universe,
+                    'universe_tick',
+                    0,
+                ),
+            )
+        )
+
         cat_d20.cat_d20.prepare_target(
             target=target_name,
-            profile=CatD20Profile.from_dict(
-                profile
+            profile=deepcopy(
+                event.profile
             ),
         )
-        if not hasattr(self, 'cat_d20_secret_history'):
+
+        if not hasattr(
+            self,
+            'cat_d20_secret_history'
+        ):
             self.cat_d20_secret_history = []
-        self.cat_d20_secret_history.append(dict(event))
-        self.universe.quantum_events.append(dict(event))
-        UniverseLogger.event('CAT D20 CANONICAL ROTATION FOR PAZUZU RECORDED')
-        return event
+
+        self.cat_d20_secret_history.append(
+            deepcopy(
+                event
+            )
+        )
+
+        self.universe.quantum_events.append(
+            deepcopy(
+                event
+            )
+        )
+
+        UniverseLogger.event(
+            'CAT D20 CANONICAL ROTATION '
+            'FOR PAZUZU RECORDED'
+        )
+
+        return event.to_dict()
 
     def manifest_gib_from_cat_d20(self, prepared_event):
         if not isinstance(prepared_event, dict):

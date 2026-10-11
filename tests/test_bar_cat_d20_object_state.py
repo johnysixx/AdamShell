@@ -10,6 +10,7 @@ from meeting_place.bar_objects import (
     CatD20Profile,
     CatD20State,
     CatD20TurnEvent,
+    CatD20CanonicalProfilePreparedEvent,
 )
 from meeting_place.meeting_place import (
     MeetingPlace,
@@ -220,11 +221,57 @@ class BarCatD20ObjectStateTests(
             profile.to_dict(),
             event["profile"]
         )
+
+        secret = (
+            bar.cat_d20_secret_history[-1]
+        )
+
+        quantum = (
+            bar.universe
+            .quantum_events[-1]
+        )
+
+        self.assertIsInstance(
+            secret,
+            CatD20CanonicalProfilePreparedEvent,
+        )
+
+        self.assertIsInstance(
+            quantum,
+            CatD20CanonicalProfilePreparedEvent,
+        )
+
+        self._assert_object_only(
+            secret,
+            "profile"
+        )
+
+        self.assertEqual(
+            secret.profile.color,
+            "black"
+        )
+
+        self.assertEqual(
+            quantum.target_name,
+            "pazuzu"
+        )
+
+        self.assertIsNot(
+            secret,
+            quantum,
+        )
+
         event["profile"]["color"] = (
             "changed"
         )
+
         self.assertEqual(
             profile.color,
+            "black"
+        )
+
+        self.assertEqual(
+            secret.profile.color,
             "black"
         )
 
