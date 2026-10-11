@@ -1163,6 +1163,187 @@ class CatD20CanonicalProfilePreparedEvent:
 
 
 @dataclass(slots=True, frozen=True)
+class CatD20CanonicalOrigin:
+    base_profile: CatD20Profile
+    profile_occurrence: int
+    created_by: str = "cat_d20"
+    mutation_trait: str = "fur_length"
+    mutation_from: str = "short"
+    mutation_to: str = "long"
+
+    def __post_init__(self):
+        if not isinstance(
+            self.base_profile,
+            CatD20Profile,
+        ):
+            raise TypeError(
+                "CatD20 canonical origin "
+                "base profile must be "
+                "CatD20Profile."
+            )
+
+        occurrence = int(
+            self.profile_occurrence
+        )
+
+        if occurrence < 1:
+            raise ValueError(
+                "CatD20 canonical origin "
+                "occurrence must be positive."
+            )
+
+        object.__setattr__(
+            self,
+            "base_profile",
+            deepcopy(
+                self.base_profile
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "profile_occurrence",
+            occurrence,
+        )
+
+        object.__setattr__(
+            self,
+            "created_by",
+            str(self.created_by),
+        )
+
+        object.__setattr__(
+            self,
+            "mutation_trait",
+            str(self.mutation_trait),
+        )
+
+        object.__setattr__(
+            self,
+            "mutation_from",
+            str(self.mutation_from),
+        )
+
+        object.__setattr__(
+            self,
+            "mutation_to",
+            str(self.mutation_to),
+        )
+
+    def to_dict(self):
+        return {
+            "base_profile":
+                self.base_profile.to_dict(),
+            "mutation": {
+                self.mutation_trait: {
+                    "from":
+                        self.mutation_from,
+                    "to":
+                        self.mutation_to,
+                }
+            },
+            "profile_occurrence":
+                self.profile_occurrence,
+            "created_by":
+                self.created_by,
+        }
+
+
+@dataclass(slots=True, frozen=True)
+class CatD20GibManifestedEvent:
+    cat: str
+    profile: CatD20Profile
+    profile_occurrence: int
+    all_dice_rotation_requested: bool
+    tick: int = 0
+
+    name: str = field(
+        default="gib_manifested",
+        init=False,
+    )
+
+    created: bool = field(
+        default=True,
+        init=False,
+    )
+
+    visibility: str = field(
+        default="secret_cat_event",
+        init=False,
+    )
+
+    def __post_init__(self):
+        if not isinstance(
+            self.profile,
+            CatD20Profile,
+        ):
+            raise TypeError(
+                "Gib manifestation profile "
+                "must be CatD20Profile."
+            )
+
+        occurrence = int(
+            self.profile_occurrence
+        )
+
+        if occurrence != 2:
+            raise ValueError(
+                "Gib manifestation requires "
+                "canonical occurrence 2."
+            )
+
+        object.__setattr__(
+            self,
+            "cat",
+            str(self.cat),
+        )
+
+        object.__setattr__(
+            self,
+            "profile",
+            deepcopy(
+                self.profile
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "profile_occurrence",
+            occurrence,
+        )
+
+        object.__setattr__(
+            self,
+            "all_dice_rotation_requested",
+            bool(
+                self.all_dice_rotation_requested
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "tick",
+            int(self.tick),
+        )
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "cat": self.cat,
+            "profile":
+                self.profile.to_dict(),
+            "profile_occurrence":
+                self.profile_occurrence,
+            "all_dice_rotation_requested":
+                self.all_dice_rotation_requested,
+            "created": self.created,
+            "visibility":
+                self.visibility,
+            "tick": self.tick,
+        }
+
+
+@dataclass(slots=True, frozen=True)
 class CatD20TurnEvent:
     cat: str
     box: str

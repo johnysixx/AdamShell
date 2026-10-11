@@ -64,6 +64,8 @@ from .bar_objects import (
     CatD20State,
     CatD20TurnEvent,
     CatD20CanonicalProfilePreparedEvent,
+    CatD20CanonicalOrigin,
+    CatD20GibManifestedEvent,
 )
 
 class MeetingPlace:
@@ -749,34 +751,257 @@ class MeetingPlace:
 
         return event.to_dict()
 
-    def manifest_gib_from_cat_d20(self, prepared_event):
-        if not isinstance(prepared_event, dict):
-            return {'name': 'gib_manifestation_failed', 'result': 'invalid_prepared_event', 'created': False}
-        if prepared_event.get('target_name') != 'gib':
-            return {'name': 'gib_manifestation_failed', 'result': 'prepared_target_is_not_gib', 'created': False}
-        if prepared_event.get('profile_occurrence') != 2:
-            return {'name': 'gib_manifestation_failed', 'result': 'invalid_profile_occurrence', 'created': False}
-        profile = dict(prepared_event.get('profile', {}))
-        required_fields = {'color', 'fur_length', 'pattern', 'eye_color', 'sex'}
-        if not required_fields.issubset(profile):
-            return {'name': 'gib_manifestation_failed', 'result': 'incomplete_gib_profile', 'created': False}
-        cats_layer = getattr(self.universe, 'cats_layer', None)
-        existing = next((cat for cat in (cats_layer.cats if cats_layer is not None else []) if getattr(cat, 'name', None) == 'gib'), None)
+    def manifest_gib_from_cat_d20(
+        self,
+        prepared_event
+    ):
+        if not isinstance(
+            prepared_event,
+            dict,
+        ):
+            return {
+                'name':
+                    'gib_manifestation_failed',
+                'result':
+                    'invalid_prepared_event',
+                'created':
+                    False,
+            }
+
+        if (
+            prepared_event.get(
+                'target_name'
+            )
+            != 'gib'
+        ):
+            return {
+                'name':
+                    'gib_manifestation_failed',
+                'result':
+                    'prepared_target_is_not_gib',
+                'created':
+                    False,
+            }
+
+        if (
+            prepared_event.get(
+                'profile_occurrence'
+            )
+            != 2
+        ):
+            return {
+                'name':
+                    'gib_manifestation_failed',
+                'result':
+                    'invalid_profile_occurrence',
+                'created':
+                    False,
+            }
+
+        profile_payload = (
+            prepared_event.get(
+                'profile'
+            )
+        )
+
+        base_profile_payload = (
+            prepared_event.get(
+                'base_profile'
+            )
+        )
+
+        required_fields = {
+            'color',
+            'fur_length',
+            'pattern',
+            'eye_color',
+            'sex',
+        }
+
+        if (
+            not isinstance(
+                profile_payload,
+                dict,
+            )
+            or not required_fields.issubset(
+                profile_payload
+            )
+        ):
+            return {
+                'name':
+                    'gib_manifestation_failed',
+                'result':
+                    'incomplete_gib_profile',
+                'created':
+                    False,
+            }
+
+        if (
+            not isinstance(
+                base_profile_payload,
+                dict,
+            )
+            or not required_fields.issubset(
+                base_profile_payload
+            )
+        ):
+            return {
+                'name':
+                    'gib_manifestation_failed',
+                'result':
+                    'incomplete_gib_base_profile',
+                'created':
+                    False,
+            }
+
+        profile = (
+            CatD20Profile.from_dict(
+                profile_payload
+            )
+        )
+
+        base_profile = (
+            CatD20Profile.from_dict(
+                base_profile_payload
+            )
+        )
+
+        cats_layer = getattr(
+            self.universe,
+            'cats_layer',
+            None,
+        )
+
+        existing = next(
+            (
+                cat
+                for cat
+                in (
+                    cats_layer.cats
+                    if cats_layer is not None
+                    else []
+                )
+                if getattr(
+                    cat,
+                    'name',
+                    None,
+                )
+                == 'gib'
+            ),
+            None,
+        )
+
         if existing is not None:
-            return {'name': 'gib_already_exists', 'cat': existing, 'created': False}
-        manifestation = self.universe.manifest_cat(name='gib', source='cat_d20_second_canonical_profile', color=profile['color'], fur_length=profile['fur_length'], pattern=profile['pattern'], eye_color=profile['eye_color'], sex=profile['sex'])
+            return {
+                'name':
+                    'gib_already_exists',
+                'cat':
+                    existing,
+                'created':
+                    False,
+            }
+
+        manifestation = (
+            self.universe.manifest_cat(
+                name='gib',
+                source=(
+                    'cat_d20_second_'
+                    'canonical_profile'
+                ),
+                color=profile.color,
+                fur_length=(
+                    profile.fur_length
+                ),
+                pattern=profile.pattern,
+                eye_color=(
+                    profile.eye_color
+                ),
+                sex=profile.sex,
+            )
+        )
+
         if manifestation is None:
-            return {'name': 'gib_manifestation_failed', 'result': 'manifest_cat_failed', 'created': False}
+            return {
+                'name':
+                    'gib_manifestation_failed',
+                'result':
+                    'manifest_cat_failed',
+                'created':
+                    False,
+            }
+
         gib = manifestation.cat
-        gib.special_traits.extend(['gib', 'pazuzu_profile_echo', 'second_canonical_cat'])
-        gib.canonical_origin = {'base_profile': dict(prepared_event['base_profile']), 'mutation': {'fur_length': {'from': 'short', 'to': 'long'}}, 'profile_occurrence': 2, 'created_by': 'cat_d20'}
-        event = {'name': 'gib_manifested', 'cat': gib.name, 'profile': dict(profile), 'profile_occurrence': 2, 'all_dice_rotation_requested': prepared_event.get('all_dice_rotation_requested', False), 'created': True, 'visibility': 'secret_cat_event', 'tick': getattr(self.universe, 'universe_tick', 0)}
-        if not hasattr(self, 'cat_d20_secret_history'):
+
+        gib.special_traits.extend(
+            [
+                'gib',
+                'pazuzu_profile_echo',
+                'second_canonical_cat',
+            ]
+        )
+
+        gib.canonical_origin = (
+            CatD20CanonicalOrigin(
+                base_profile=base_profile,
+                profile_occurrence=2,
+            )
+        )
+
+        event = (
+            CatD20GibManifestedEvent(
+                cat=gib.name,
+                profile=profile,
+                profile_occurrence=2,
+                all_dice_rotation_requested=(
+                    prepared_event.get(
+                        'all_dice_rotation_requested',
+                        False,
+                    )
+                ),
+                tick=getattr(
+                    self.universe,
+                    'universe_tick',
+                    0,
+                ),
+            )
+        )
+
+        if not hasattr(
+            self,
+            'cat_d20_secret_history'
+        ):
             self.cat_d20_secret_history = []
-        self.cat_d20_secret_history.append(dict(event))
-        self.universe.quantum_events.append(dict(event))
-        UniverseLogger.event('GIB MANIFESTED FROM THE SECOND CANONICAL CAT D20 PROFILE')
-        return {**event, 'cat': gib, 'entity': manifestation.entity}
+
+        self.cat_d20_secret_history.append(
+            deepcopy(
+                event
+            )
+        )
+
+        self.universe.quantum_events.append(
+            deepcopy(
+                event
+            )
+        )
+
+        UniverseLogger.event(
+            'GIB MANIFESTED FROM THE '
+            'SECOND CANONICAL CAT D20 PROFILE'
+        )
+
+        boundary = (
+            event.to_dict()
+        )
+
+        boundary[
+            'cat'
+        ] = gib
+
+        boundary[
+            'entity'
+        ] = manifestation.entity
+
+        return boundary
 
     def trigger_pazuzu_birth_dice_resonance(self, rng=None):
         existing_event = getattr(self, 'pazuzu_birth_dice_resonance_event', None)

@@ -11,6 +11,8 @@ from meeting_place.bar_objects import (
     CatD20State,
     CatD20TurnEvent,
     CatD20CanonicalProfilePreparedEvent,
+    CatD20CanonicalOrigin,
+    CatD20GibManifestedEvent,
 )
 from meeting_place.meeting_place import (
     MeetingPlace,
@@ -273,6 +275,130 @@ class BarCatD20ObjectStateTests(
         self.assertEqual(
             secret.profile.color,
             "black"
+        )
+
+    def test_gib_manifestation_uses_object_history(
+        self
+    ):
+        bar = self._bar()
+
+        bar.welcome_cat_d20()
+
+        bar.cat_d20_prepare_pazuzu_profile()
+
+        prepared = (
+            bar.cat_d20_prepare_pazuzu_profile()
+        )
+
+        self.assertEqual(
+            prepared["target_name"],
+            "gib"
+        )
+
+        result = (
+            bar.manifest_gib_from_cat_d20(
+                prepared
+            )
+        )
+
+        gib = result["cat"]
+
+        self.assertTrue(
+            result["created"]
+        )
+
+        self.assertEqual(
+            gib.name,
+            "gib"
+        )
+
+        self.assertIsInstance(
+            gib.canonical_origin,
+            CatD20CanonicalOrigin,
+        )
+
+        self._assert_object_only(
+            gib.canonical_origin,
+            "base_profile"
+        )
+
+        self.assertEqual(
+            gib.canonical_origin
+            .base_profile
+            .fur_length,
+            "short"
+        )
+
+        self.assertEqual(
+            gib.canonical_origin
+            .mutation_trait,
+            "fur_length"
+        )
+
+        self.assertEqual(
+            gib.canonical_origin
+            .mutation_from,
+            "short"
+        )
+
+        self.assertEqual(
+            gib.canonical_origin
+            .mutation_to,
+            "long"
+        )
+
+        secret = (
+            bar.cat_d20_secret_history[-1]
+        )
+
+        quantum = (
+            bar.universe
+            .quantum_events[-1]
+        )
+
+        self.assertIsInstance(
+            secret,
+            CatD20GibManifestedEvent,
+        )
+
+        self.assertIsInstance(
+            quantum,
+            CatD20GibManifestedEvent,
+        )
+
+        self._assert_object_only(
+            secret,
+            "profile"
+        )
+
+        self.assertEqual(
+            secret.profile.fur_length,
+            "long"
+        )
+
+        self.assertTrue(
+            secret.all_dice_rotation_requested
+        )
+
+        self.assertIsNot(
+            secret,
+            quantum,
+        )
+
+        result["profile"][
+            "fur_length"
+        ] = "changed"
+
+        self.assertEqual(
+            secret.profile.fur_length,
+            "long"
+        )
+
+        self.assertEqual(
+            gib.canonical_origin
+            .base_profile
+            .fur_length,
+            "short"
         )
 
     def test_garfield_lifecycle_reuses_state(
