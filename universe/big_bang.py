@@ -7,6 +7,7 @@ from universe.big_bang_process_state import (
     BigBangProcessState,
 )
 from universe.primordial_objects import PrimordialCosmicComponent
+from universe.physical_record_state import CosmicHistoryEvent
 
 
 class BigBang:
@@ -47,7 +48,10 @@ class BigBang:
             "name": self.name,
             "type": self.type,
             "state": self.state.value,
-            "phases": deepcopy(self.phases),
+            "phases": [
+                phase.to_dict()
+                for phase in self.phases
+            ],
             "primordial_elements": {
                 name: component.to_dict()
                 for name, component in self.primordial_elements.items()
@@ -170,13 +174,15 @@ class BigBang:
         print("BIG BANG PROCESS COMPLETED")
 
     def record_phase(self, name, description):
-        phase = {
-            "name": name,
-            "description": description
-        }
+        phase = CosmicHistoryEvent(
+            name=name,
+            description=description,
+        )
 
         self.phases.append(phase)
         self._refresh_public_state()
+
+        return phase
 
     def write_to_world(self):
         self.universe.world["big_bang"] = self.public_state

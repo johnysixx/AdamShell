@@ -139,7 +139,7 @@ class RadioactiveDecayObjectStateTests(
         self.assertEqual(
             process.decay_patterns[
                 "carbon_14_decay"
-            ]["state"],
+            ].state,
             "available",
         )
 

@@ -1,3 +1,4 @@
+from universe.physical_record_state import CosmicHistoryEvent
 from universe.chemical_objects import ChemicalElement
 from universe.cosmic_objects import StellarMaterialCloud
 from universe.primordial_objects import PrimordialCosmicComponent
@@ -195,14 +196,16 @@ class SupernovaEnrichment:
             [],
         )
 
-        history.append({
-            "name": "supernova_enrichment",
-            "description": (
-                "The first supernova releases elements up to "
-                "iron into space, forming enriched clouds for "
-                "future stellar systems."
-            ),
-        })
+        history.append(
+            CosmicHistoryEvent(
+                name="supernova_enrichment",
+                description=(
+                    "The first supernova releases elements up to "
+                    "iron into space, forming enriched clouds for "
+                    "future stellar systems."
+                ),
+            )
+        )
 
     def write_to_world(self):
         self._refresh_public_state()

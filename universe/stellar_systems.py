@@ -1,3 +1,4 @@
+from universe.physical_record_state import CosmicHistoryEvent
 from universe.cosmic_objects import StellarMaterialCloud
 from universe.stellar_system_objects import (
     ProtoplanetaryDisk,
@@ -185,10 +186,14 @@ class StellarSystems:
     def record_history(self):
         history = self.universe.world.setdefault("cosmic_history", [])
 
-        history.append({
-            "name": "stellar_systems_formed",
-            "description": "Enriched clouds collapse into second-generation stellar systems, including the solar system."
-        })
+        history.append(
+            CosmicHistoryEvent(
+                name="stellar_systems_formed",
+                description=(
+                    "Enriched clouds collapse into second-generation stellar systems, including the solar system."
+                ),
+            )
+        )
 
     def write_to_world(self):
         self._refresh_public_state()

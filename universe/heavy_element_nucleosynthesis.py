@@ -1,3 +1,4 @@
+from universe.physical_record_state import CosmicHistoryEvent
 from universe.chemical_objects import ChemicalElement
 from universe.cosmic_objects import StellarMaterialCloud
 from universe.primordial_objects import PrimordialCosmicComponent
@@ -204,14 +205,16 @@ class HeavyElementNucleosynthesis:
     def record_history(self):
         history = self.universe.world.setdefault("cosmic_history", [])
 
-        history.append({
-            "name": "heavy_elements_forged",
-            "description": (
-                "After the iron limit, neutron capture and explosive "
-                "stellar processes forge heavy elements and enrich "
-                "stellar clouds."
-            ),
-        })
+        history.append(
+            CosmicHistoryEvent(
+                name="heavy_elements_forged",
+                description=(
+                    "After the iron limit, neutron capture and explosive "
+                    "stellar processes forge heavy elements and enrich "
+                    "stellar clouds."
+                ),
+            )
+        )
 
     def write_to_world(self):
         elements_up_to_iron = self.universe.world.get(

@@ -1,3 +1,4 @@
+from universe.physical_record_state import CosmicHistoryEvent
 from universe.chemical_objects import ChemicalMolecule
 from universe.molecule_state import MoleculeFormationState
 from universe.molecules_process_state import (
@@ -215,10 +216,14 @@ class Molecules:
     def record_history(self):
         history = self.universe.world.setdefault("cosmic_history", [])
 
-        history.append({
-            "name": "reference_molecules_formed",
-            "description": "Simple molecules and simple alcohols form from available elements."
-        })
+        history.append(
+            CosmicHistoryEvent(
+                name="reference_molecules_formed",
+                description=(
+                    "Simple molecules and simple alcohols form from available elements."
+                ),
+            )
+        )
 
     def write_to_world(self):
         self._refresh_public_state()

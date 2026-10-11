@@ -1,3 +1,4 @@
+from universe.physical_record_state import CosmicHistoryEvent
 from universe.cosmic_cloud_state import (
     CosmicCloudFormationState,
 )
@@ -172,14 +173,16 @@ class CosmicClouds:
             [],
         )
 
-        history.append({
-            "name": "germinal_clouds_formed",
-            "description": (
-                "Hydrogen and helium gather into the first "
-                "germinal clouds, preparing the universe for "
-                "star formation."
-            ),
-        })
+        history.append(
+            CosmicHistoryEvent(
+                name="germinal_clouds_formed",
+                description=(
+                    "Hydrogen and helium gather into the first "
+                    "germinal clouds, preparing the universe for "
+                    "star formation."
+                ),
+            )
+        )
 
     def write_to_world(self):
         self._refresh_public_state()

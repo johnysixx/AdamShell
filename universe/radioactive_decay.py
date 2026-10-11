@@ -1,6 +1,8 @@
-from copy import deepcopy
-
 from universe.decay_state import RadioactiveDecayState
+from universe.physical_record_state import (
+    CosmicHistoryEvent,
+    RadioactiveDecayPattern,
+)
 from universe.radioactive_decay_process_state import (
     RadioactiveDecayProcessState,
 )
@@ -44,7 +46,11 @@ class RadioactiveDecay:
             "name": self.name,
             "type": self.type,
             "state": self.state.value,
-            "decay_patterns": deepcopy(self.decay_patterns),
+            "decay_patterns": {
+                name: pattern.to_dict()
+                for name, pattern
+                in self.decay_patterns.items()
+            },
             "decay_state": self.decay_state.to_dict(),
         }
 
@@ -141,20 +147,26 @@ class RadioactiveDecay:
         isotope = known_isotopes[isotope_name]
         decay_name = f"{isotope_name}_decay"
 
-        decay_pattern = {
-            "name": decay_name,
-            "type": "radioactive_decay_pattern",
-            "state": "available",
-            "parent_isotope": isotope_name,
-            "parent_element": isotope.element_name,
-            "parent_symbol": isotope.symbol,
-            "daughter_product": daughter_product,
-            "half_life_years": half_life_years,
-            "half_life_precision": "reference_approximation",
-            "time_scale": time_scale,
-            "use": use,
-            "future_use": ["age_estimation", "cosmic_history", "geological_history"]
-        }
+        decay_pattern = RadioactiveDecayPattern(
+            name=decay_name,
+            type="radioactive_decay_pattern",
+            state="available",
+            parent_isotope=isotope_name,
+            parent_element=isotope.element_name,
+            parent_symbol=isotope.symbol,
+            daughter_product=daughter_product,
+            half_life_years=half_life_years,
+            half_life_precision=(
+                "reference_approximation"
+            ),
+            time_scale=time_scale,
+            use=use,
+            future_use=(
+                "age_estimation",
+                "cosmic_history",
+                "geological_history",
+            ),
+        )
 
         self.decay_patterns[decay_name] = decay_pattern
 
@@ -163,10 +175,18 @@ class RadioactiveDecay:
     def record_history(self):
         history = self.universe.world.setdefault("cosmic_history", [])
 
-        history.append({
-            "name": "radioactive_decay_patterns_recorded",
-            "description": "Radioactive isotopes provide decay patterns that can be used as long-scale timekeepers."
-        })
+        history.append(
+            CosmicHistoryEvent(
+                name=(
+                    "radioactive_decay_patterns_recorded"
+                ),
+                description=(
+                    "Radioactive isotopes provide decay "
+                    "patterns that can be used as long-scale "
+                    "timekeepers."
+                ),
+            )
+        )
 
     def write_to_world(self):
         self._refresh_public_state()

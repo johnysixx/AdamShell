@@ -1,6 +1,8 @@
-from copy import deepcopy
-
 from universe.atomic_time_state import AtomicTimeState
+from universe.physical_record_state import (
+    AtomicTimeStandard,
+    CosmicHistoryEvent,
+)
 from universe.atomic_time_process_state import (
     AtomicTimeProcessState,
 )
@@ -41,18 +43,15 @@ class AtomicTime:
         self._state = state
 
     def _build_public_state(self):
-        time_standards = deepcopy(self.time_standards)
-
-        for standard in time_standards.values():
-            isotope = standard.get("isotope")
-            if isotope is not None:
-                standard["isotope"] = isotope.to_dict()
-
         return {
             "name": self.name,
             "type": self.type,
             "state": self.state.value,
-            "time_standards": time_standards,
+            "time_standards": {
+                name: standard.to_dict()
+                for name, standard
+                in self.time_standards.items()
+            },
             "atomic_time_state": self.atomic_time_state.to_dict(),
         }
 
@@ -84,18 +83,31 @@ class AtomicTime:
 
         caesium_133 = isotopes["caesium_133"]
 
-        self.time_standards["si_second"] = {
-            "name": "si_second",
-            "type": "atomic_time_standard",
-            "state": "defined",
-            "based_on": "caesium_133",
-            "isotope": caesium_133,
-            "transition": "unperturbed_ground_state_hyperfine_transition",
-            "frequency_hz": 9_192_631_770,
-            "frequency_unit": "Hz",
-            "meaning": "one second is defined through the caesium-133 transition frequency",
-            "future_use": ["clocks", "calendars", "simulation_time", "cosmic_history"]
-        }
+        self.time_standards[
+            "si_second"
+        ] = AtomicTimeStandard(
+            name="si_second",
+            type="atomic_time_standard",
+            state="defined",
+            based_on="caesium_133",
+            isotope=caesium_133,
+            transition=(
+                "unperturbed_ground_state_"
+                "hyperfine_transition"
+            ),
+            frequency_hz=9_192_631_770,
+            frequency_unit="Hz",
+            meaning=(
+                "one second is defined through the "
+                "caesium-133 transition frequency"
+            ),
+            future_use=(
+                "clocks",
+                "calendars",
+                "simulation_time",
+                "cosmic_history",
+            ),
+        )
 
         self.state = AtomicTimeProcessState.DEFINED
 
@@ -122,10 +134,15 @@ class AtomicTime:
     def record_history(self):
         history = self.universe.world.setdefault("cosmic_history", [])
 
-        history.append({
-            "name": "atomic_time_defined",
-            "description": "The SI second is defined using the caesium-133 atomic transition frequency."
-        })
+        history.append(
+            CosmicHistoryEvent(
+                name="atomic_time_defined",
+                description=(
+                    "The SI second is defined using the "
+                    "caesium-133 atomic transition frequency."
+                ),
+            )
+        )
 
     def write_to_world(self):
         self._refresh_public_state()

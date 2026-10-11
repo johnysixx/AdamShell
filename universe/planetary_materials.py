@@ -1,3 +1,4 @@
+from universe.physical_record_state import CosmicHistoryEvent
 from universe.planet_state import PlanetFormationState
 from universe.planetary_material_objects import (
     PlanetaryMaterial,
@@ -141,10 +142,14 @@ class PlanetaryMaterials:
     def record_history(self):
         history = self.universe.world.setdefault("cosmic_history", [])
 
-        history.append({
-            "name": "planetary_materials_materialized",
-            "description": "Earth makes water, ice, minerals, and organic molecules available as planetary materials."
-        })
+        history.append(
+            CosmicHistoryEvent(
+                name="planetary_materials_materialized",
+                description=(
+                    "Earth makes water, ice, minerals, and organic molecules available as planetary materials."
+                ),
+            )
+        )
 
     def write_to_world(self):
         self._refresh_public_state()

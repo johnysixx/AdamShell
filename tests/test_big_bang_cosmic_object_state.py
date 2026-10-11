@@ -149,7 +149,7 @@ class BigBangCosmicObjectStateTests(
             "formed",
         )
         self.assertEqual(
-            process.phases[0]["name"],
+            process.phases[0].name,
             "primordial_void",
         )
 

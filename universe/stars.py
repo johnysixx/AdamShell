@@ -1,3 +1,4 @@
+from universe.physical_record_state import CosmicHistoryEvent
 from universe.cosmic_objects import StellarMaterialCloud
 from universe.stellar_objects import PrimordialStar
 from universe.stellar_state import StellarFormationState
@@ -132,10 +133,14 @@ class Stars:
     def record_history(self):
         history = self.universe.world.setdefault("cosmic_history", [])
 
-        history.append({
-            "name": "first_stars_formed",
-            "description": "The first stars ignite inside germinal cosmic clouds. Stellar fusion becomes possible."
-        })
+        history.append(
+            CosmicHistoryEvent(
+                name="first_stars_formed",
+                description=(
+                    "The first stars ignite inside germinal cosmic clouds. Stellar fusion becomes possible."
+                ),
+            )
+        )
 
     def write_to_world(self):
         self._refresh_public_state()

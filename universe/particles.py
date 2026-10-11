@@ -1,3 +1,4 @@
+from universe.physical_record_state import CosmicHistoryEvent
 from universe.particle_objects import (
     CompositeParticle,
     ElementaryParticle,
@@ -290,10 +291,14 @@ class Particles:
     def record_history(self):
         history = self.universe.world.setdefault("cosmic_history", [])
 
-        history.append({
-            "name": "particles_formed",
-            "description": "Elementary particles, force carriers, the Higgs mechanism, and composite nucleons form after the origin process."
-        })
+        history.append(
+            CosmicHistoryEvent(
+                name="particles_formed",
+                description=(
+                    "Elementary particles, force carriers, the Higgs mechanism, and composite nucleons form after the origin process."
+                ),
+            )
+        )
 
     def write_to_world(self):
         self._refresh_public_state()

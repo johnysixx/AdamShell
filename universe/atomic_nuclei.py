@@ -1,3 +1,4 @@
+from universe.physical_record_state import CosmicHistoryEvent
 from universe.nuclear_objects import AtomicNucleus
 from universe.nuclear_state import (
     NuclearFormationState,
@@ -128,10 +129,14 @@ class AtomicNuclei:
     def record_history(self):
         history = self.universe.world.setdefault("cosmic_history", [])
 
-        history.append({
-            "name": "light_atomic_nuclei_formed",
-            "description": "Protons and neutrons combine into the first light atomic nuclei: hydrogen, deuterium, helium, and trace lithium."
-        })
+        history.append(
+            CosmicHistoryEvent(
+                name="light_atomic_nuclei_formed",
+                description=(
+                    "Protons and neutrons combine into the first light atomic nuclei: hydrogen, deuterium, helium, and trace lithium."
+                ),
+            )
+        )
 
     def write_to_world(self):
         self._refresh_public_state()

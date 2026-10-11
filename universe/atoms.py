@@ -1,3 +1,4 @@
+from universe.physical_record_state import CosmicHistoryEvent
 from universe.atom_state import AtomFormationState
 from universe.atoms_process_state import (
     AtomsProcessState,
@@ -107,10 +108,14 @@ class Atoms:
     def record_history(self):
         history = self.universe.world.setdefault("cosmic_history", [])
 
-        history.append({
-            "name": "reference_atoms_formed",
-            "description": "Neutral reference atoms form when electrons bind to element nuclei according to atomic number."
-        })
+        history.append(
+            CosmicHistoryEvent(
+                name="reference_atoms_formed",
+                description=(
+                    "Neutral reference atoms form when electrons bind to element nuclei according to atomic number."
+                ),
+            )
+        )
 
     def write_to_world(self):
         self._refresh_public_state()

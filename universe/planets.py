@@ -1,3 +1,4 @@
+from universe.physical_record_state import CosmicHistoryEvent
 from universe.planet_objects import EarthPlanet, Planet
 from universe.planetary_material_objects import PlanetaryMaterial
 from universe.planet_state import PlanetFormationState
@@ -238,10 +239,14 @@ class Planets:
     def record_history(self):
         history = self.universe.world.setdefault("cosmic_history", [])
 
-        history.append({
-            "name": "planets_formed",
-            "description": "Planets form from the solar protoplanetary disk. Earth appears as a rocky world with the potential for water and organic molecules."
-        })
+        history.append(
+            CosmicHistoryEvent(
+                name="planets_formed",
+                description=(
+                    "Planets form from the solar protoplanetary disk. Earth appears as a rocky world with the potential for water and organic molecules."
+                ),
+            )
+        )
 
     def write_to_world(self):
         self._refresh_public_state()

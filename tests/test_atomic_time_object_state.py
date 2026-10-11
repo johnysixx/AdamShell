@@ -128,7 +128,7 @@ class AtomicTimeObjectStateTests(
         )
         live_isotope = process.time_standards[
             "si_second"
-        ]["isotope"]
+        ].isotope
 
         self.assertIsInstance(
             live_isotope,

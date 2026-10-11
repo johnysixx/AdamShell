@@ -1,3 +1,4 @@
+from universe.physical_record_state import CosmicHistoryEvent
 from universe.chemical_objects import ChemicalElement
 from universe.stellar_objects import PrimordialStar
 from universe.primordial_objects import PrimordialCosmicComponent
@@ -196,13 +197,15 @@ class StellarNucleosynthesis:
     def record_history(self):
         history = self.universe.world.setdefault("cosmic_history", [])
 
-        history.append({
-            "name": "elements_up_to_iron_forged",
-            "description": (
-                "The first stars forge elements through stellar "
-                "nucleosynthesis, reaching the iron limit."
+        history.append(
+            CosmicHistoryEvent(
+                name="elements_up_to_iron_forged",
+                description=(
+                    "The first stars forge elements through stellar "
+                    "nucleosynthesis, reaching the iron limit."
+                ),
             )
-        })
+        )
 
     def write_to_world(self):
         self._refresh_public_state()

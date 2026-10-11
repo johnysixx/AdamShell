@@ -1,3 +1,4 @@
+from universe.physical_record_state import CosmicHistoryEvent
 from universe.biochemical_objects import (
     BiochemicalCompound,
 )
@@ -155,10 +156,14 @@ class BiochemicalFoundations:
     def record_history(self):
         history = self.universe.world.setdefault("cosmic_history", [])
 
-        history.append({
-            "name": "biochemical_foundations_formed",
-            "description": "Water and organic molecules allow sugars, amino acids, lipids, and fermentation substrates to become possible."
-        })
+        history.append(
+            CosmicHistoryEvent(
+                name="biochemical_foundations_formed",
+                description=(
+                    "Water and organic molecules allow sugars, amino acids, lipids, and fermentation substrates to become possible."
+                ),
+            )
+        )
 
     def write_to_world(self):
         self._refresh_public_state()
