@@ -184,6 +184,12 @@ class DuplicateConsumptionEnergyObjectStateTests(
             1.0,
         )
 
+        self.assertIs(
+            self.universe
+            .quantum_events[-1],
+            event,
+        )
+
         for mapping_method in (
             "get",
             "keys",
@@ -242,6 +248,12 @@ class DuplicateConsumptionEnergyObjectStateTests(
 
         self.assertIs(
             result,
+            event,
+        )
+
+        self.assertIs(
+            self.universe
+            .quantum_events[-1],
             event,
         )
 

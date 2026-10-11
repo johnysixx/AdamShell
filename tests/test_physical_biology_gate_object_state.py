@@ -142,16 +142,15 @@ class PhysicalBiologyGateObjectStateTests(
             "cronenberg_gate_test",
         )
 
-        universe.quantum_events[
-            0
-        ][
-            "operation"
-        ] = "changed_again"
-
-        self.assertEqual(
-            event.operation,
-            "reproduce",
+        self.assertIs(
+            universe.quantum_events[0],
+            event,
         )
+
+        with self.assertRaises(TypeError):
+            _ = universe.quantum_events[0][
+                "operation"
+            ]
 
     def test_allowed_path_does_not_record_history(
         self

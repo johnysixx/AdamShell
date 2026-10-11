@@ -705,7 +705,7 @@ class CatPerception:
 
         if quantum_events is not None:
             quantum_events.append(
-                event.to_dict()
+                deepcopy(event)
             )
 
         emit_event = getattr(

@@ -435,7 +435,7 @@ class CatDevelopmentResolver:
             "quantum_events"
         ):
             self.universe.quantum_events.append(
-                event.to_dict()
+                event
             )
 
         return event

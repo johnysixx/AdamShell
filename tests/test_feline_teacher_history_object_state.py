@@ -345,7 +345,7 @@ class FelineTeacherHistoryObjectStateTests(
             "no_teacher_knows_requested_method",
         )
 
-    def test_lesson_history_freezes_nested_lesson_and_keeps_boundary_dict(
+    def test_lesson_history_freezes_nested_lesson_and_keeps_object_audit(
         self
     ):
         result = (
@@ -442,14 +442,15 @@ class FelineTeacherHistoryObjectStateTests(
             .quantum_events[-1]
         )
 
-        self.assertIsInstance(
+        self.assertIs(
             audit,
-            dict,
+            event,
         )
 
-        audit[
-            "learned"
-        ] = False
+        with self.assertRaises(TypeError):
+            _ = audit[
+                "learned"
+            ]
 
         self.assertTrue(
             event.learned

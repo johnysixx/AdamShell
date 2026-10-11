@@ -70,6 +70,12 @@ class KittenGrowthHistoryObjectStateTests(
             resolver_event,
         )
 
+        self.assertIs(
+            self.universe
+            .quantum_events[-1],
+            state_event,
+        )
+
         self.assertEqual(
             state_event.source,
             "cat_milk",
@@ -167,6 +173,12 @@ class KittenGrowthHistoryObjectStateTests(
 
         self.assertIs(
             result,
+            event,
+        )
+
+        self.assertIs(
+            self.universe
+            .quantum_events[-1],
             event,
         )
 

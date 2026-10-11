@@ -65,6 +65,10 @@ class KittenBirthResolverTests(unittest.TestCase):
         self.assertTrue(all((hasattr(kitten, 'genotype') for kitten in kittens)))
         self.assertTrue(all((hasattr(kitten, 'phenotype') for kitten in kittens)))
         self.assertTrue(all((kitten.reproduction.reproductive_maturity is False for kitten in kittens)))
+        self.assertIs(
+            self.universe.quantum_events[-1],
+            result.litter,
+        )
 
     def test_newborn_kittens_enter_development_system(self):
         self._start_pregnancy(embryo_count=1)

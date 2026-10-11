@@ -394,7 +394,7 @@ class CatPregnancyStartedObjectStateTests(
             "changed",
         )
 
-    def test_quantum_audit_is_detached_boundary(
+    def test_quantum_audit_uses_domain_event(
         self
     ):
         self._start_pregnancy()
@@ -409,41 +409,35 @@ class CatPregnancyStartedObjectStateTests(
             .quantum_events[-1]
         )
 
-        self.assertIsInstance(
+        self.assertIs(
             audit,
-            dict,
-        )
-
-        audit[
-            "father_names"
-        ].append(
-            "changed"
-        )
-
-        audit[
-            "paternity_results"
-        ][0][
-            "selection"
-        ][
-            "weighted_candidate_names"
-        ].append(
-            "changed"
+            event,
         )
 
         self.assertEqual(
-            event.father_names,
+            audit.father_names,
             (
                 "father",
             ),
         )
 
-        self.assertNotIn(
-            "changed",
-            event
-            .paternity_results[0]
-            .selection
-            .weighted_candidate_names,
-        )
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    audit,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(TypeError):
+            _ = audit[
+                "father_names"
+            ]
 
     def test_nested_paternity_rejects_mapping(
         self

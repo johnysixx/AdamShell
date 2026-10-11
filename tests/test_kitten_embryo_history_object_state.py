@@ -205,15 +205,24 @@ class KittenEmbryoHistoryObjectStateTests(
             ),
         )
 
-        self.assertEqual(
+        quantum_event = (
             self.universe
             .quantum_events[-1]
-            ["viability"]
-            ["details"]
-            ["lethal_mutations"],
-            [
+        )
+
+        self.assertIs(
+            quantum_event,
+            event,
+        )
+
+        self.assertEqual(
+            quantum_event
+            .viability
+            .details
+            .lethal_mutations,
+            (
                 "embryonic_lethal",
-            ],
+            ),
         )
 
     def test_history_rejects_mapping_event(

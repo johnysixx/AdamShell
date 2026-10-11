@@ -149,7 +149,12 @@ class CatPerceptionHistoryObjectStateTests(
 
         self.assertIsInstance(
             quantum_audit,
-            dict,
+            CatEnvironmentObservedEvent,
+        )
+
+        self.assertIsNot(
+            quantum_audit,
+            event,
         )
 
         self.assertIsInstance(
@@ -163,9 +168,9 @@ class CatPerceptionHistoryObjectStateTests(
             "observations"
         ].cat = "changed"
 
-        quantum_audit[
-            "observations"
-        ].cat = "changed_again"
+        quantum_audit.observations.cat = (
+            "changed_again"
+        )
 
         self.assertEqual(
             event.observations.cat,

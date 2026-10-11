@@ -201,7 +201,7 @@ class PhysicalBiologyGate:
         )
 
         self.universe.quantum_events.append(
-            event.to_dict()
+            event
         )
 
         return PhysicalBiologyGateResult(

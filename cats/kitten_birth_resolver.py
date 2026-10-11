@@ -141,7 +141,7 @@ class KittenBirthResolver:
         reproduction.litters.append(litter)
         self.history.append(litter)
         self.universe.quantum_events.append(
-            litter.to_dict()
+            litter
         )
 
         return CatLitterBirthResult(

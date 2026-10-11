@@ -192,12 +192,21 @@ class CatDevelopmentHistoryObjectStateTests(
             CatDevelopmentStage.SOCIALIZING_KITTEN,
         )
 
-        self.assertEqual(
+        quantum_event = (
             self.universe
             .quantum_events[-1]
-            ["transitions"][0]
-            ["stage"],
-            "socializing_kitten",
+        )
+
+        self.assertIs(
+            quantum_event,
+            event,
+        )
+
+        self.assertIs(
+            quantum_event
+            .transitions[0]
+            .stage,
+            CatDevelopmentStage.SOCIALIZING_KITTEN,
         )
 
     def test_history_rejects_mapping_event(

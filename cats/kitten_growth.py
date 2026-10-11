@@ -163,5 +163,5 @@ class KittenGrowth:
 
         if quantum_events is not None:
             quantum_events.append(
-                event.to_dict()
+                event
             )
