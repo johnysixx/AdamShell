@@ -1,6 +1,9 @@
 from math import sqrt
 
 from universe.energy_gate import SPEED_OF_LIGHT_M_S
+from universe.relativistic_travel_result_state import (
+    RelativisticTravelResult,
+)
 
 
 CAT_SPEED_RATIO = 0.99
@@ -33,11 +36,13 @@ def calculate_relativistic_travel(
     coordinate_time_s = distance_m / speed_m_s
     proper_time_s = coordinate_time_s / gamma
 
-    return {
-        "distance_m": distance_m,
-        "speed_m_s": speed_m_s,
-        "speed_ratio_c": speed_m_s / SPEED_OF_LIGHT_M_S,
-        "lorentz_factor": gamma,
-        "coordinate_time_s": coordinate_time_s,
-        "proper_time_s": proper_time_s
-    }
+    return RelativisticTravelResult(
+        distance_m=distance_m,
+        speed_m_s=speed_m_s,
+        speed_ratio_c=(
+            speed_m_s / SPEED_OF_LIGHT_M_S
+        ),
+        lorentz_factor=gamma,
+        coordinate_time_s=coordinate_time_s,
+        proper_time_s=proper_time_s,
+    )

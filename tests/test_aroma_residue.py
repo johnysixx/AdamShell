@@ -20,7 +20,7 @@ class AromaResidueTests(unittest.TestCase):
     def test_aroma_can_transfer_to_object(self):
         box = self.universe.create_quantum_box()
         result = AromaResidue.transfer(source_profile=self.pazuzu.aroma, target=box, source_identity='pazuzu', fraction=0.2)
-        self.assertTrue(result['transferred'])
+        self.assertTrue(result.transferred)
         aroma = box.aroma.current()
         self.assertGreater(aroma['cat'], 0.0)
 

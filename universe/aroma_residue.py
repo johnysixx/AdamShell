@@ -1,6 +1,7 @@
-from copy import deepcopy
-
 from universe.aroma_profile import AromaProfile
+from universe.aroma_residue_result_state import (
+    AromaResidueTransferResult,
+)
 
 
 class AromaResidue:
@@ -67,12 +68,12 @@ class AromaResidue:
             decay_rate=decay_rate,
         )
 
-        return {
-            "transferred": True,
-            "source": source_identity,
-            "components": deepcopy(transferred),
-            "residue": residue.to_dict(),
-        }
+        return AromaResidueTransferResult(
+            transferred=True,
+            source=source_identity,
+            components=transferred,
+            residue=residue,
+        )
 
     @classmethod
     def transfer_existing(
@@ -91,12 +92,12 @@ class AromaResidue:
         source_profile = getattr(source, "aroma", None)
 
         if source_profile is None:
-            return {
-                "transferred": False,
-                "source": source_identity,
-                "components": {},
-                "reason": "source_has_no_aroma",
-            }
+            return AromaResidueTransferResult(
+                transferred=False,
+                source=source_identity,
+                components={},
+                reason="source_has_no_aroma",
+            )
 
         if not isinstance(source_profile, AromaProfile):
             raise TypeError(
@@ -106,12 +107,12 @@ class AromaResidue:
         current = source_profile.current()
 
         if not current:
-            return {
-                "transferred": False,
-                "source": source_identity,
-                "components": {},
-                "reason": "source_aroma_is_empty",
-            }
+            return AromaResidueTransferResult(
+                transferred=False,
+                source=source_identity,
+                components={},
+                reason="source_aroma_is_empty",
+            )
 
         return cls.transfer(
             source_profile=source_profile,
