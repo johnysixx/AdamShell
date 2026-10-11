@@ -573,15 +573,9 @@ class SerpentConsequenceExecutor:
         )
 
         return SerpentCatManifestationResult(
-            cat_name=manifestation[
-                "cat"
-            ]["name"],
-            entity_name=manifestation[
-                "entity"
-            ].name,
-            origin=manifestation[
-                "cat"
-            ]["origin"],
+            cat_name=manifestation.cat.name,
+            entity_name=manifestation.entity.name,
+            origin=manifestation.cat.origin,
         )
 
     def _execute_quantum_geometry_shift(self):

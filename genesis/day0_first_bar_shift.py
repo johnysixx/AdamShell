@@ -1589,7 +1589,7 @@ class Day0FirstBarShift:
             manifestation = self.universe.manifest_cat(name='garfield', source='cat_d20_garfield_setting', color=profile['color'], fur_length=profile['fur_length'], pattern=profile['pattern'], eye_color=profile['eye_color'], sex=profile['sex'])
             if manifestation is None:
                 raise RuntimeError('Garfield manifestation failed.')
-            garfield = manifestation['cat']
+            garfield = manifestation.cat
             created = True
         traits = getattr(
             garfield,

@@ -12,6 +12,7 @@ from core.entity.quantum_die_box import QuantumDieBox
 from universe.quantum_universe_space import QuantumUniverseSpace
 from universe.big_bang import BigBang
 from cats.cat_development_stage import CatDevelopmentStage
+from cats.cat_quantum_box_origin_state import CatQuantumBoxOriginState
 from core.entity.quantum_box import QuantumBox
 from universe.universe_statistics import UniverseStatistics
 from universe.cronenberg_population_statistics import CronenbergPopulationStatistics
@@ -54,6 +55,12 @@ from universe.cronenberg_quantum_result_state import (
     CronenbergQuantumPairConsumptionResult,
     CronenbergQuantumPairMergedEvent,
     CronenbergQuantumPairMergeResult,
+)
+
+from universe.manifestation_result_state import (
+    CatManifestationResult,
+    CatManifestedEvent,
+    EmptyQuantumBoxOpenedEvent,
 )
 
 class Universe:
@@ -344,21 +351,43 @@ class Universe:
         result = box.collapse_state(cause='opened', observer=observer, tick=self.quantum_state.tick_count, rng=rng)
         self.statistics.record_quantum_collapse()
         if result == 'cat':
-            manifestation = self.manifest_cat(name=f'cat_from_{box.id}', source='quantum_box_opened', position=box.position)
-            event = manifestation['event']
-            event['collapse_cause'] = 'opened'
-            event['box_id'] = box.id
-            event['observer'] = observer
+            manifestation = self.manifest_cat(
+                name=f'cat_from_{box.id}',
+                source='quantum_box_opened',
+                position=box.position,
+                collapse_cause='opened',
+                box_id=box.id,
+                observer=observer,
+            )
+            event = manifestation.event
             UniverseLogger.event(f'CAT JUMPS OUT OF QUANTUM BOX: {box.id}')
         else:
-            event = {'name': 'empty_quantum_box_opened', 'collapse_cause': 'opened', 'box_id': box.id, 'position': box.position.to_dict(), 'observer': observer, 'tick': self.quantum_state.tick_count}
+            event = EmptyQuantumBoxOpenedEvent(
+                box_id=box.id,
+                position=box.position,
+                observer=observer,
+                tick=self.quantum_state.tick_count,
+            )
             UniverseLogger.event(f'QUANTUM BOX WAS EMPTY: {box.id}')
         self.quantum_boxes.remove(box)
         self.statistics.record_quantum_box_disappeared()
         UniverseLogger.event(f'QUANTUM BOX DISAPPEARED: {box.id}')
         return event
 
-    def manifest_cat(self, name, source, position=None, color='black', fur_length='short', pattern='solid', eye_color='green', sex='female'):
+    def manifest_cat(
+        self,
+        name,
+        source,
+        position=None,
+        color='black',
+        fur_length='short',
+        pattern='solid',
+        eye_color='green',
+        sex='female',
+        collapse_cause=None,
+        box_id=None,
+        observer=None,
+    ):
         cats = getattr(self, 'cats_layer', None)
         if cats is None:
             cats = Cats(self)
@@ -376,11 +405,23 @@ class Universe:
             self._prepare_quantum_box_cat(cat=cat, source=source)
         entity = self.create_entity(name=name, profile=cat)
         entity.cat_data = cat
-        event = {'name': 'cat_manifested', 'cat': name, 'source': source, 'position': position.to_dict() if position is not None else None, 'tick': self.quantum_state.tick_count}
+        event = CatManifestedEvent(
+            cat_name=name,
+            source=source,
+            position=position,
+            tick=self.quantum_state.tick_count,
+            collapse_cause=collapse_cause,
+            box_id=box_id,
+            observer=observer,
+        )
         self.quantum_events.append(event)
         self.statistics.record_cat_created()
         UniverseLogger.event(f'CAT MANIFESTED: {name} FROM={source}')
-        return {'cat': cat, 'entity': entity, 'event': event}
+        return CatManifestationResult(
+            cat=cat,
+            entity=entity,
+            event=event,
+        )
 
     def _prepare_quantum_box_cat(self, cat, source):
         learning = cat.learning
@@ -392,7 +433,11 @@ class Universe:
         cat.reproduction.developmental_stage = (
             CatDevelopmentStage.JUVENILE
         )
-        cat.quantum_box_origin = {'manifested_from_box': True, 'source': source, 'born_in_quantum_layer': True}
+        cat.quantum_box_origin = (
+            CatQuantumBoxOriginState(
+                source=source,
+            )
+        )
         traits = _entity_attr_setdefault(cat, 'special_traits', [])
         for trait in ('quantum_box_cat', 'juvenile_quantum_cat', 'sees_direct_path_to_bar'):
             if trait not in traits:
@@ -470,11 +515,14 @@ class Universe:
             result = box.collapse_state(cause='spontaneous', observer=None, tick=self.quantum_state.tick_count)
             self.statistics.record_quantum_collapse()
             if result == 'cat':
-                manifestation = self.manifest_cat(name=f'cat_from_{box.id}', source='quantum_box_spontaneous_collapse', position=box.position)
-                event = manifestation['event']
-                event['collapse_cause'] = 'spontaneous'
-                event['box_id'] = box.id
-                event['observer'] = None
+                self.manifest_cat(
+                    name=f'cat_from_{box.id}',
+                    source='quantum_box_spontaneous_collapse',
+                    position=box.position,
+                    collapse_cause='spontaneous',
+                    box_id=box.id,
+                    observer=None,
+                )
                 UniverseLogger.event(f'CAT MANIFESTS FROM SPONTANEOUS QUANTUM COLLAPSE: {box.id}')
             else:
                 UniverseLogger.event(f'SPONTANEOUSLY COLLAPSED BOX WAS EMPTY: {box.id}')

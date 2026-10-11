@@ -471,7 +471,7 @@ class MeetingPlace:
         if existing is not None:
             return {'name': 'cat_d20_already_present', 'cat': existing, 'box': getattr(self, 'cat_d20_box', None), 'created': False}
         manifestation = self.universe.manifest_cat(name=name, source='cat_d20_arrival', position=SpatialVector3.zero(), color='black', fur_length='short', pattern='solid', eye_color='gold', sex='female')
-        cat = manifestation['cat']
+        cat = manifestation.cat
         if not hasattr(self, 'cat_d20_secret_history'):
             self.cat_d20_secret_history = []
         cat.special_traits.extend(['d20_cat', 'born_as_cat_d20', 'secret_probability_sense'])
@@ -485,7 +485,7 @@ class MeetingPlace:
         event = {'name': 'cat_d20_welcomed_at_bar', 'cat': cat.name, 'milk_served': self.bar_counter.milk_bowl.contains == 'milk', 'box': cat_box.name, 'box_location': cat_box.location, 'cat_entered_box': True, 'tick': getattr(self.universe, 'universe_tick', 0)}
         self.emit_event(event)
         UniverseLogger.event('CAT D20 ARRIVED AS A CAT, DRANK MILK, AND ENTERED HER OWN BOX ON THE BAR')
-        return {'name': 'cat_d20_arrival_completed', 'cat': cat, 'entity': manifestation['entity'], 'box': cat_box, 'event': event, 'created': True}
+        return {'name': 'cat_d20_arrival_completed', 'cat': cat, 'entity': manifestation.entity, 'box': cat_box, 'event': event, 'created': True}
 
     def turn_cat_d20_in_box(self, rng=None):
         cats_layer = getattr(self.universe, 'cats_layer', None)
@@ -580,7 +580,7 @@ class MeetingPlace:
         manifestation = self.universe.manifest_cat(name='gib', source='cat_d20_second_canonical_profile', color=profile['color'], fur_length=profile['fur_length'], pattern=profile['pattern'], eye_color=profile['eye_color'], sex=profile['sex'])
         if manifestation is None:
             return {'name': 'gib_manifestation_failed', 'result': 'manifest_cat_failed', 'created': False}
-        gib = manifestation['cat']
+        gib = manifestation.cat
         gib.special_traits.extend(['gib', 'pazuzu_profile_echo', 'second_canonical_cat'])
         gib.canonical_origin = {'base_profile': dict(prepared_event['base_profile']), 'mutation': {'fur_length': {'from': 'short', 'to': 'long'}}, 'profile_occurrence': 2, 'created_by': 'cat_d20'}
         event = {'name': 'gib_manifested', 'cat': gib.name, 'profile': dict(profile), 'profile_occurrence': 2, 'all_dice_rotation_requested': prepared_event.get('all_dice_rotation_requested', False), 'created': True, 'visibility': 'secret_cat_event', 'tick': getattr(self.universe, 'universe_tick', 0)}
@@ -589,7 +589,7 @@ class MeetingPlace:
         self.cat_d20_secret_history.append(dict(event))
         self.universe.quantum_events.append(dict(event))
         UniverseLogger.event('GIB MANIFESTED FROM THE SECOND CANONICAL CAT D20 PROFILE')
-        return {**event, 'cat': gib, 'entity': manifestation['entity']}
+        return {**event, 'cat': gib, 'entity': manifestation.entity}
 
     def trigger_pazuzu_birth_dice_resonance(self, rng=None):
         existing_event = getattr(self, 'pazuzu_birth_dice_resonance_event', None)

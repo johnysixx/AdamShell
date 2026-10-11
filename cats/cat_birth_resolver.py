@@ -451,9 +451,7 @@ class CatBirthResolver:
                 birth=birth,
             )
 
-        cat = manifestation[
-            "cat"
-        ]
+        cat = manifestation.cat
 
         rolled_birth_profile = (
             birth.rolled_profile

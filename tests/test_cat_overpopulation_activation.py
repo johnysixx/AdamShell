@@ -21,7 +21,7 @@ class CatOverpopulationActivationTests(
             source="test"
         )
 
-        cat = created["cat"]
+        cat = created.cat
 
         result = (
             universe
@@ -80,7 +80,7 @@ class CatOverpopulationActivationTests(
             position=SpatialVector3(x=0.0, y=0.0, z=0.0)
         )
 
-        cat = created["cat"]
+        cat = created.cat
 
         universe.cats_layer.activate_for_cronenberg_overpopulation(
             cat
@@ -150,7 +150,7 @@ class CatOverpopulationActivationTests(
             position=SpatialVector3(x=0.0, y=0.0, z=0.0)
         )
 
-        cat = created["cat"]
+        cat = created.cat
 
         universe.cats_layer.activate_for_cronenberg_overpopulation(
             cat
@@ -217,7 +217,7 @@ class CatOverpopulationActivationTests(
             source="test"
         )
 
-        cat = created["cat"]
+        cat = created.cat
 
         cat.cronenbergs_eaten = 10
 

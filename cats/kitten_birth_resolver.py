@@ -62,7 +62,7 @@ class KittenBirthResolver:
                     )
                 )
                 continue
-            kitten = manifestation['cat']
+            kitten = manifestation.cat
             kitten.state = 'newborn'
             self.development_resolver.initialize_newborn(kitten, birth_day=current_day)
             kitten.genotype = embryo.genotype

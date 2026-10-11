@@ -26,14 +26,14 @@ class ObjectOnlyEntityTests(unittest.TestCase):
     def test_social_entity_can_pet_cat(self):
         actor = IdeaEntities(self.universe).create_idea_entity(name='lilith', active=True)
         manifestation = self.universe.manifest_cat(name='test_social_cat', source='test')
-        cat = manifestation['cat']
+        cat = manifestation.cat
         event = actor.pet_cat(cat)
         self.assertEqual(event.actor, 'lilith')
         self.assertGreater(cat.affinity_toward(actor), 0.0)
 
     def test_petting_sets_next_social_target(self):
         actor = IdeaEntities(self.universe).create_idea_entity(name='serpent', active=True)
-        cat = self.universe.manifest_cat(name='social_target_cat', source='test')['cat']
+        cat = self.universe.manifest_cat(name='social_target_cat', source='test').cat
         actor.pet_cat(cat)
         self.assertEqual(cat.next_social_target, 'serpent')
         self.assertGreater(cat.social_attention_bias, 0.0)

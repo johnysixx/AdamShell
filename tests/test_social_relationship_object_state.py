@@ -23,7 +23,7 @@ class SocialRelationshipObjectStateTests(unittest.TestCase):
         self.cat = self.universe.manifest_cat(
             name='social_relationship_object_cat',
             source='test',
-        )['cat']
+        ).cat
 
     def test_petting_creates_social_relationship_object(self):
         self.actor.pet_cat(self.cat)

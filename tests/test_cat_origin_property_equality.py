@@ -23,7 +23,7 @@ class CatOriginPropertyEqualityTests(
             self.universe.manifest_cat(
                 name=f"cat_{index}",
                 source=origin
-            )["cat"]
+            ).cat
             for index, origin
             in enumerate(
                 self.origins,

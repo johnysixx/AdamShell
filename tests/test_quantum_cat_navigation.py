@@ -18,7 +18,7 @@ class QuantumCatNavigationTests(
             position=SpatialVector3(x=0.0, y=0.0, z=0.0)
         )
 
-        cat = cat_result["cat"]
+        cat = cat_result.cat
 
         far = (
             universe
@@ -120,7 +120,7 @@ class QuantumCatNavigationTests(
             position=SpatialVector3(x=0.0, y=0.0, z=0.0)
         )
 
-        cat = cat_result["cat"]
+        cat = cat_result.cat
 
         large = (
             universe

@@ -237,9 +237,7 @@ class CatRoutePlanningResultsObjectStateTests(
             source="test",
             position=
                 SpatialVector3.zero(),
-        )[
-            "cat"
-        ]
+        ).cat
 
         cronenberg = (
             universe
@@ -306,9 +304,7 @@ class CatRoutePlanningResultsObjectStateTests(
             source="test",
             position=
                 SpatialVector3.zero(),
-        )[
-            "cat"
-        ]
+        ).cat
 
         result = (
             universe

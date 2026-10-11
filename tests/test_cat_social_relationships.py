@@ -48,9 +48,7 @@ class CatSocialRelationshipsTests(
             )
         )
 
-        self.cat = manifestation[
-            "cat"
-        ]
+        self.cat = manifestation.cat
 
     def test_people_are_objects(
         self

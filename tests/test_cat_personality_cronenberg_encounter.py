@@ -16,7 +16,7 @@ class CatPersonalityCronenbergEncounterTests(unittest.TestCase):
         self.universe = Universe()
         self.universe.enable_quantum_layer()
         result = self.universe.manifest_cat(name='hunter', source='test', position=SpatialVector3(x=0.0, y=0.0, z=0.0))
-        self.cat = result['cat']
+        self.cat = result.cat
 
     def create_cronenberg(self, size):
         cronenberg = self.universe.create_cronenberg_from_quantum_error(error=RuntimeError('Personality encounter test.'), source_component='test', source_operation='personality_encounter')

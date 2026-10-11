@@ -15,7 +15,7 @@ class QuantumBoxCatBarMeowTests(unittest.TestCase):
         EntityBootstrap(self.universe, idea_universe, root_transition).run()
         self.bar = self.layers.get('meeting')
         manifestation = self.universe.manifest_cat(name='quantum_kitten', source='quantum_box_opened', position=SpatialVector3(x=10.0, y=5.0, z=-2.0))
-        self.cat = manifestation['cat']
+        self.cat = manifestation.cat
 
     def test_cat_meows_at_bouncer_before_entry(self):
         self.bar.add_entity(self.cat)

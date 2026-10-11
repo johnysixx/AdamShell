@@ -36,9 +36,7 @@ class GeneralCatArrivalTests(
             )
         )
 
-        cat = manifestation[
-            "cat"
-        ]
+        cat = manifestation.cat
 
         self.assertFalse(
             any(
@@ -62,7 +60,7 @@ class GeneralCatArrivalTests(
         result = (
             self.bar
             .admit_cat(
-                manifestation["cat"]
+                manifestation.cat
             )
         )
 
@@ -106,9 +104,7 @@ class GeneralCatArrivalTests(
             )
         )
 
-        cat = manifestation[
-            "cat"
-        ]
+        cat = manifestation.cat
 
         result = (
             self.bar
@@ -141,9 +137,7 @@ class GeneralCatArrivalTests(
             )
         )
 
-        cat = manifestation[
-            "cat"
-        ]
+        cat = manifestation.cat
 
         self.bar.admit_cat(
             cat
@@ -175,9 +169,7 @@ class GeneralCatArrivalTests(
             )
         )
 
-        cat = manifestation[
-            "cat"
-        ]
+        cat = manifestation.cat
 
         result = (
             self.bar
