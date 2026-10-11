@@ -1344,6 +1344,66 @@ class CatD20GibManifestedEvent:
 
 
 @dataclass(slots=True, frozen=True)
+class CatD20GarfieldTargetPreparedEvent:
+    cat: str
+    profile: CatD20Profile
+
+    name: str = field(
+        default=(
+            "cat_d20_sets_next_birth_"
+            "to_garfield"
+        ),
+        init=False,
+    )
+
+    target_name: str = field(
+        default="garfield",
+        init=False,
+    )
+
+    pending: bool = field(
+        default=True,
+        init=False,
+    )
+
+    def __post_init__(self):
+        if not isinstance(
+            self.profile,
+            CatD20Profile,
+        ):
+            raise TypeError(
+                "Garfield target profile must "
+                "be CatD20Profile."
+            )
+
+        object.__setattr__(
+            self,
+            "cat",
+            str(self.cat),
+        )
+
+        object.__setattr__(
+            self,
+            "profile",
+            deepcopy(
+                self.profile
+            ),
+        )
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "cat": self.cat,
+            "target_name":
+                self.target_name,
+            "profile":
+                self.profile.to_dict(),
+            "pending":
+                self.pending,
+        }
+
+
+@dataclass(slots=True, frozen=True)
 class CatD20TurnEvent:
     cat: str
     box: str

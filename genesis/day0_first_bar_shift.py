@@ -1,7 +1,10 @@
+from copy import deepcopy
+
 from meeting_place.bar_objects import (
     BarBeerHypothesis,
     CatD20Profile,
     CatD20State,
+    CatD20GarfieldTargetPreparedEvent,
     BarConversation,
     BarDrink,
     BarDrinkGarnish,
@@ -35,10 +38,6 @@ from meeting_place.bouncer_state import (
     BouncerState,
 )
 from cats.cat_birth_resolver import CatBirthResolver
-from cats.cat_birth_objects import (
-    cat_birth_profile_snapshot,
-)
-
 class Day0FirstBarShift:
 
     def _entity_attr_setdefault(self, entity, name, default):
@@ -1505,53 +1504,94 @@ class Day0FirstBarShift:
         _entity_attr_setdefault(self.cat_d20, 'social_state', {})['scratched_by'] = list(scratchers)
         return events
 
-    def cat_d20_sets_next_birth_to_garfield(self):
+    def cat_d20_sets_next_birth_to_garfield(
+        self
+    ):
         if self.cat_d20 is None:
-            raise RuntimeError('CatD20 does not exist.')
-        resolver = CatBirthResolver(self.universe, self.meeting_place)
-        garfield_profile = resolver.garfield_profile
+            raise RuntimeError(
+                'CatD20 does not exist.'
+            )
+
+        resolver = CatBirthResolver(
+            self.universe,
+            self.meeting_place,
+        )
+
+        garfield_profile = (
+            resolver.garfield_profile
+        )
+
         cat_d20_state = getattr(
             self.cat_d20,
             'cat_d20',
-            None
+            None,
         )
+
         if not isinstance(
             cat_d20_state,
-            CatD20State
+            CatD20State,
         ):
             raise RuntimeError(
                 'CatD20 state is missing.'
             )
+
+        profile = CatD20Profile(
+            color=garfield_profile.color,
+            fur_length=(
+                garfield_profile.fur_length
+            ),
+            pattern=garfield_profile.pattern,
+            eye_color=(
+                garfield_profile.eye_color
+            ),
+            sex=garfield_profile.sex,
+        )
+
         cat_d20_state.prepare_target(
             target='garfield',
-            profile=CatD20Profile(
-                color=garfield_profile.color,
-                fur_length=garfield_profile.fur_length,
-                pattern=garfield_profile.pattern,
-                eye_color=garfield_profile.eye_color,
-                sex=garfield_profile.sex,
+            profile=deepcopy(
+                profile
             ),
             pending=True,
         )
-        event = {
-            "name": (
-                "cat_d20_sets_next_birth_to_garfield"
-            ),
-            "cat": "cat_d20",
-            "target_name": "garfield",
-            "profile": (
-                cat_birth_profile_snapshot(
-                    garfield_profile
+
+        event = (
+            CatD20GarfieldTargetPreparedEvent(
+                cat='cat_d20',
+                profile=profile,
+            )
+        )
+
+        if not hasattr(
+            self.meeting_place,
+            'cat_d20_secret_history',
+        ):
+            (
+                self.meeting_place
+                .cat_d20_secret_history
+            ) = []
+
+        (
+            self.meeting_place
+            .cat_d20_secret_history
+            .append(
+                deepcopy(
+                    event
                 )
-            ),
-            "pending": True,
-        }
-        if not hasattr(self.meeting_place, 'cat_d20_secret_history'):
-            self.meeting_place.cat_d20_secret_history = []
-        self.meeting_place.cat_d20_secret_history.append(dict(event))
-        self.universe.quantum_events.append(dict(event))
-        self.history.append(event)
-        return event
+            )
+        )
+
+        self.universe.quantum_events.append(
+            deepcopy(
+                event
+            )
+        )
+
+        self.history.append(
+            event
+        )
+
+        return event.to_dict()
 
     def garfield_arrives_from_cat_d20_setting(self):
         cat_d20_state = getattr(

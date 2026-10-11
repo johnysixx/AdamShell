@@ -2,6 +2,9 @@ import unittest
 from multiverse import UniverseRegistry
 from universe.universe import Universe
 from meeting_place.meeting_place import MeetingPlace
+from meeting_place.bar_objects import (
+    CatD20GarfieldTargetPreparedEvent,
+)
 from library import Library
 from gods import Gods
 from idea_entities import IdeaEntities
@@ -36,8 +39,109 @@ class Day0GarfieldArrivalTests(unittest.TestCase):
 
     def test_cat_d20_sets_garfield_target(self):
         result = self.scene.advance_to_garfield_arrival()
-        self.assertEqual(result['prepared']['target_name'], 'garfield')
-        self.assertEqual(self.scene.cat_d20.cat_d20.last_manifested_target, 'garfield')
+
+        self.assertEqual(
+            result['prepared']['target_name'],
+            'garfield'
+        )
+
+        self.assertEqual(
+            self.scene
+            .cat_d20
+            .cat_d20
+            .last_manifested_target,
+            'garfield'
+        )
+
+        history_event = next(
+            event
+            for event
+            in self.scene.history
+            if isinstance(
+                event,
+                CatD20GarfieldTargetPreparedEvent,
+            )
+        )
+
+        secret_event = next(
+            event
+            for event
+            in self.bar.cat_d20_secret_history
+            if isinstance(
+                event,
+                CatD20GarfieldTargetPreparedEvent,
+            )
+        )
+
+        quantum_event = next(
+            event
+            for event
+            in self.universe.quantum_events
+            if isinstance(
+                event,
+                CatD20GarfieldTargetPreparedEvent,
+            )
+        )
+
+        for event in (
+            history_event,
+            secret_event,
+            quantum_event,
+        ):
+            self.assertEqual(
+                event.target_name,
+                'garfield'
+            )
+
+            self.assertTrue(
+                event.pending
+            )
+
+            self.assertEqual(
+                event.profile.color,
+                'orange'
+            )
+
+            for mapping_method in (
+                'get',
+                'keys',
+                'items',
+                'values',
+            ):
+                self.assertFalse(
+                    hasattr(
+                        event,
+                        mapping_method,
+                    )
+                )
+
+            with self.assertRaises(
+                TypeError
+            ):
+                _ = event['target_name']
+
+        self.assertIsNot(
+            history_event,
+            secret_event,
+        )
+
+        self.assertIsNot(
+            secret_event,
+            quantum_event,
+        )
+
+        result[
+            'prepared'
+        ][
+            'profile'
+        ][
+            'color'
+        ] = 'changed'
+
+        self.assertEqual(
+            history_event.profile.color,
+            'orange'
+        )
 
     def test_garfield_arrives(self):
         result = self.scene.advance_to_garfield_arrival()
@@ -54,7 +158,18 @@ class Day0GarfieldArrivalTests(unittest.TestCase):
 
     def test_scratching_precedes_garfield_setting_and_arrival(self):
         self.scene.advance_to_garfield_arrival()
-        names = [event['name'] for event in self.scene.history]
+        names = [
+            (
+                event['name']
+                if isinstance(
+                    event,
+                    dict,
+                )
+                else event.name
+            )
+            for event
+            in self.scene.history
+        ]
         last_scratch = max((index for index, name in enumerate(names) if name == 'cat_d20_scratched'))
         prepared = names.index('cat_d20_sets_next_birth_to_garfield')
         arrival = names.index('garfield_arrives_at_bar')
