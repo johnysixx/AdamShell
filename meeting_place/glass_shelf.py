@@ -1,5 +1,8 @@
 from universe.logger import UniverseLogger
 from meeting_place.bar_objects import BarGlass
+from meeting_place.bar_entity_policy_state import (
+    BarEntityPolicyDecision,
+)
 
 
 class GlassShelf:
@@ -37,17 +40,55 @@ class GlassShelf:
         )
         return glass
 
-    def register_policy_decision(self, decision):
-        glass_mode = decision.get("glass_mode")
-        entity_id = decision.get("entity_id")
+    def register_policy_decision(
+        self,
+        decision,
+    ):
+        if not isinstance(
+            decision,
+            BarEntityPolicyDecision,
+        ):
+            raise TypeError(
+                "Glass shelf policy decision "
+                "must use "
+                "BarEntityPolicyDecision."
+            )
+
+        glass_mode = (
+            decision.glass_mode
+        )
+
+        entity_id = (
+            decision.entity_id
+        )
+
         if glass_mode == "none":
             return None
+
         if glass_mode == "personal_named":
-            return self._create_personal_glass(entity_id)
-        if glass_mode == "reserved_unnamed":
-            return self._create_reserved_glass(entity_id)
+            return (
+                self._create_personal_glass(
+                    entity_id
+                )
+            )
+
+        if (
+            glass_mode
+            == "reserved_unnamed"
+        ):
+            return (
+                self._create_reserved_glass(
+                    entity_id
+                )
+            )
+
         if glass_mode == "shared":
-            return self._create_shared_glass(entity_id)
+            return (
+                self._create_shared_glass(
+                    entity_id
+                )
+            )
+
         return None
 
     def _create_personal_glass(self, entity_id):
