@@ -178,9 +178,7 @@ class Day0GodLilithSerpentCheckpointTests(
         )
 
         self.assertFalse(
-            event[
-                "bartender_present"
-            ]
+            event.bartender_present
         )
 
 

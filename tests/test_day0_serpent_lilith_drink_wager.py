@@ -65,14 +65,18 @@ class Day0SerpentLilithDrinkWagerTests(
         )
 
         self.assertEqual(
-            result[
-                "serpent_reaction"
-            ],
-            {
-                "wine": "dislikes",
-                "beer": "dislikes",
-                "mead": "dislikes"
-            }
+            result.serpent_reaction.wine,
+            "dislikes"
+        )
+
+        self.assertEqual(
+            result.serpent_reaction.beer,
+            "dislikes"
+        )
+
+        self.assertEqual(
+            result.serpent_reaction.mead,
+            "dislikes"
         )
 
     def test_lilith_tastes_serpents_drinks_and_dislikes_them_too(
@@ -84,28 +88,28 @@ class Day0SerpentLilithDrinkWagerTests(
         )
 
         self.assertEqual(
-            result[
-                "offered_by"
-            ],
+            result.offered_by,
             "serpent"
         )
 
         self.assertEqual(
-            result[
-                "shared_with"
-            ],
+            result.shared_with,
             "lilith"
         )
 
         self.assertEqual(
-            result[
-                "lilith_reaction"
-            ],
-            {
-                "wine": "dislikes",
-                "beer": "dislikes",
-                "mead": "dislikes"
-            }
+            result.lilith_reaction.wine,
+            "dislikes"
+        )
+
+        self.assertEqual(
+            result.lilith_reaction.beer,
+            "dislikes"
+        )
+
+        self.assertEqual(
+            result.lilith_reaction.mead,
+            "dislikes"
         )
 
     def test_they_recognize_these_are_only_existing_examples(

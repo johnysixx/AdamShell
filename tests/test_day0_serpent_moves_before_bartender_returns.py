@@ -21,13 +21,13 @@ class Day0SerpentMovesBeforeBartenderReturnsTests(unittest.TestCase):
 
     def test_they_agree_on_table_before_bartender_returns(self):
         event = self.scene.serpent_and_lilith_agree_on_table()
-        self.assertTrue(event['agreed'])
+        self.assertTrue(event.agreed)
         self.assertEqual(self.bar.bartender.current_location, 'bar_yard')
 
     def test_serpent_moves_to_existing_table_first(self):
         self.scene.serpent_and_lilith_agree_on_table()
         event = self.scene.serpent_moves_from_bar_to_existing_table()
-        self.assertEqual(event['from'], 'bar_counter')
+        self.assertEqual(event.source, 'bar_counter')
         self.assertEqual(self.scene.serpent.bar_state.location, 'table')
         self.assertEqual(self.scene.serpent.bar_state.activity, 'waiting_for_lilith')
 

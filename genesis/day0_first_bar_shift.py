@@ -34,6 +34,28 @@ from meeting_place.bar_objects import (
 )
 from core.entity.social_entity import _entity_attr_setdefault
 from meeting_place.bar_yard import BarYard
+from genesis.day0_first_conversation_state import (
+    FirstBarDrinkReactionState,
+    InitialBarDrinkWagerSnapshot,
+    LilithAcceptsDrinkWagerEvent,
+    SerpentLilithAgreeOnTableEvent,
+    SerpentLilithConversationStartedEvent,
+    SerpentLilithFirstConversationResult,
+    SerpentLilithFirstDrinksTastedEvent,
+    SerpentMovesToExistingTableEvent,
+    SerpentProposesDrinkWagerEvent,
+)
+from genesis.day0_first_conversation_state import (
+    FirstBarDrinkReactionState,
+    InitialBarDrinkWagerSnapshot,
+    LilithAcceptsDrinkWagerEvent,
+    SerpentLilithAgreeOnTableEvent,
+    SerpentLilithConversationStartedEvent,
+    SerpentLilithFirstConversationResult,
+    SerpentLilithFirstDrinksTastedEvent,
+    SerpentMovesToExistingTableEvent,
+    SerpentProposesDrinkWagerEvent,
+)
 from genesis.day0_lemon_service_state import (
     BartenderLemonRestockResult,
     BartenderLemonRestockReturnedEvent,
@@ -251,33 +273,87 @@ class Day0FirstBarShift:
 
     def serpent_and_lilith_begin_conversation(self):
         if self.serpent is None:
-            raise RuntimeError('Serpent is not in the scene.')
+            raise RuntimeError(
+                'Serpent is not in the scene.'
+            )
+
         if self.lilith is None:
-            raise RuntimeError('Lilith is not in the scene.')
-        if self.meeting_place.bartender.current_location != 'bar_yard':
-            raise RuntimeError('This conversation begins while the bartender is away for the lemon.')
+            raise RuntimeError(
+                'Lilith is not in the scene.'
+            )
+
+        if (
+            self.meeting_place
+            .bartender
+            .current_location
+            != 'bar_yard'
+        ):
+            raise RuntimeError(
+                'This conversation begins while '
+                'the bartender is away for the lemon.'
+            )
+
         self.serpent_lilith_conversation.begin(
             participants=[
                 'serpent',
                 'lilith',
             ]
         )
-        event = {'name': 'serpent_and_lilith_begin_conversation', 'participants': ['serpent', 'lilith'], 'bartender_present': False}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
+
+        event = (
+            SerpentLilithConversationStartedEvent()
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
         return event
 
     def serpent_and_lilith_taste_first_drinks(self):
         if not self.serpent_lilith_conversation.started:
-            raise RuntimeError('Serpent and Lilith are not talking yet.')
-        drinks = ['wine', 'beer', 'mead']
-        serpent_tasting = {drink: 'dislikes' for drink in drinks}
-        lilith_tasting = {drink: 'dislikes' for drink in drinks}
-        event = {'name': 'serpent_and_lilith_taste_first_drinks', 'offered_by': 'serpent', 'shared_with': 'lilith', 'drinks': list(drinks), 'serpent_reaction': serpent_tasting, 'lilith_reaction': lilith_tasting}
-        self.serpent.first_bar_drink_tasting = serpent_tasting
-        self.lilith.first_bar_drink_tasting = lilith_tasting
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
+            raise RuntimeError(
+                'Serpent and Lilith are not '
+                'talking yet.'
+            )
+
+        serpent_tasting = (
+            FirstBarDrinkReactionState()
+        )
+
+        lilith_tasting = (
+            FirstBarDrinkReactionState()
+        )
+
+        self.serpent.first_bar_drink_tasting = (
+            serpent_tasting
+        )
+
+        self.lilith.first_bar_drink_tasting = (
+            lilith_tasting
+        )
+
+        event = (
+            SerpentLilithFirstDrinksTastedEvent(
+                serpent_reaction=(
+                    serpent_tasting
+                ),
+                lilith_reaction=(
+                    lilith_tasting
+                ),
+            )
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
         self.serpent_lilith_conversation.add_line(
             speaker='serpent',
             meaning=(
@@ -285,80 +361,224 @@ class Day0FirstBarShift:
                 'beer_or_mead_tastes_good'
             ),
         )
+
         self.serpent_lilith_conversation.add_line(
             speaker='lilith',
             meaning='agrees',
         )
+
         return event
 
     def serpent_proposes_drink_wager_to_lilith(self):
         if not self.serpent_lilith_conversation.started:
-            raise RuntimeError('Serpent and Lilith are not talking yet.')
-        if not hasattr(self.serpent, 'first_bar_drink_tasting') or not hasattr(self.lilith, 'first_bar_drink_tasting'):
-            raise RuntimeError('They must taste the drinks first.')
+            raise RuntimeError(
+                'Serpent and Lilith are not '
+                'talking yet.'
+            )
+
+        if (
+            not hasattr(
+                self.serpent,
+                'first_bar_drink_tasting',
+            )
+            or not hasattr(
+                self.lilith,
+                'first_bar_drink_tasting',
+            )
+        ):
+            raise RuntimeError(
+                'They must taste the drinks first.'
+            )
+
         wager = BarDrinkWager()
-        self.serpent_lilith_drink_wager = wager
-        event = {'name': 'serpent_proposes_drink_wager_to_lilith', 'wager': wager.to_dict()}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
+
+        self.serpent_lilith_drink_wager = (
+            wager
+        )
+
+        event = (
+            SerpentProposesDrinkWagerEvent(
+                wager=(
+                    InitialBarDrinkWagerSnapshot
+                    .from_wager(
+                        wager
+                    )
+                )
+            )
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
         self.serpent_lilith_conversation.add_line(
             speaker='serpent',
             meaning='proposes_drink_wager',
         )
+
         return wager
 
     def lilith_accepts_drink_wager(self):
-        wager = getattr(self, 'serpent_lilith_drink_wager', None)
+        wager = getattr(
+            self,
+            'serpent_lilith_drink_wager',
+            None,
+        )
+
         if wager is None:
-            raise RuntimeError('Serpent has not proposed the wager.')
+            raise RuntimeError(
+                'Serpent has not proposed '
+                'the wager.'
+            )
+
         if wager.accepted:
-            raise RuntimeError('The wager is already accepted.')
+            raise RuntimeError(
+                'The wager is already accepted.'
+            )
+
         wager.accept(
             participant='lilith'
         )
-        event = {'name': 'lilith_accepts_drink_wager', 'wager': wager.to_dict()}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
+
+        event = (
+            LilithAcceptsDrinkWagerEvent(
+                wager=(
+                    InitialBarDrinkWagerSnapshot
+                    .from_wager(
+                        wager
+                    )
+                )
+            )
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
         self.serpent_lilith_conversation.add_line(
             speaker='lilith',
             meaning='accepts_drink_wager',
         )
+
         return wager
 
     def play_serpent_lilith_first_conversation(self):
-        tasting = self.serpent_and_lilith_taste_first_drinks()
-        wager = self.serpent_proposes_drink_wager_to_lilith()
-        accepted = self.lilith_accepts_drink_wager()
-        return {'tasting': tasting, 'wager': wager, 'accepted': accepted}
+        tasting = (
+            self
+            .serpent_and_lilith_taste_first_drinks()
+        )
+
+        wager = (
+            self
+            .serpent_proposes_drink_wager_to_lilith()
+        )
+
+        accepted = (
+            self
+            .lilith_accepts_drink_wager()
+        )
+
+        return (
+            SerpentLilithFirstConversationResult(
+                tasting=tasting,
+                wager=wager,
+                accepted=accepted,
+            )
+        )
 
     def serpent_and_lilith_agree_on_table(self):
         if not self.serpent_lilith_conversation.started:
-            raise RuntimeError('Serpent and Lilith are not talking.')
-        wager = getattr(self, 'serpent_lilith_drink_wager', None)
-        if wager is None or not wager.accepted:
-            raise RuntimeError('Their wager must already be accepted.')
-        event = {'name': 'serpent_and_lilith_agree_on_table', 'participants': ['serpent', 'lilith'], 'agreed': True}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
+            raise RuntimeError(
+                'Serpent and Lilith are '
+                'not talking.'
+            )
+
+        wager = getattr(
+            self,
+            'serpent_lilith_drink_wager',
+            None,
+        )
+
+        if (
+            wager is None
+            or not wager.accepted
+        ):
+            raise RuntimeError(
+                'Their wager must already '
+                'be accepted.'
+            )
+
+        event = (
+            SerpentLilithAgreeOnTableEvent()
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
         self.serpent_lilith_conversation.add_line(
             speaker='serpent_and_lilith',
             meaning='agree_to_move_to_table',
         )
+
         return event
 
     def serpent_moves_from_bar_to_existing_table(self):
         if self.serpent is None:
-            raise RuntimeError('Serpent does not exist.')
-        seating_cells = [cell for cell in self.meeting_place.bar_geometry.cells if cell.seating]
+            raise RuntimeError(
+                'Serpent does not exist.'
+            )
+
+        seating_cells = [
+            cell
+            for cell
+            in self.meeting_place
+            .bar_geometry
+            .cells
+            if cell.seating
+        ]
+
         if not seating_cells:
-            raise RuntimeError('No existing seating place in bar.')
+            raise RuntimeError(
+                'No existing seating place in bar.'
+            )
+
         seat = seating_cells[0]
-        self.serpent.bar_state.seat = seat.name
-        self.serpent.bar_state.location = 'table'
-        self.serpent.bar_state.activity = 'waiting_for_lilith'
-        event = {'name': 'serpent_moves_to_existing_table', 'guest': 'serpent', 'from': 'bar_counter', 'to': seat.name}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
+
+        self.serpent.bar_state.seat = (
+            seat.name
+        )
+
+        self.serpent.bar_state.location = (
+            'table'
+        )
+
+        self.serpent.bar_state.activity = (
+            'waiting_for_lilith'
+        )
+
+        event = (
+            SerpentMovesToExistingTableEvent(
+                destination=seat.name
+            )
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
         return event
 
     def bartender_returns_with_lemon(self):
