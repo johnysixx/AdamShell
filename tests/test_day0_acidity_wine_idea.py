@@ -17,23 +17,23 @@ class Day0AcidityWineIdeaTests(unittest.TestCase):
 
     def test_serpent_explains_existing_ideas_to_god(self):
         result = self.scene.advance_to_acidity_wine_idea()
-        summary = result['explained']['summary']
-        self.assertTrue(summary['fuller_flavor'])
-        self.assertTrue(summary['sweetness'])
-        self.assertTrue(summary['bitterness'])
+        summary = result['explained'].summary
+        self.assertTrue(summary.fuller_flavor)
+        self.assertTrue(summary.sweetness)
+        self.assertTrue(summary.bitterness)
 
     def test_lilith_rejects_bitterness(self):
         result = self.scene.advance_to_acidity_wine_idea()
-        self.assertEqual(result['revised']['rejection']['rejected_property'], 'bitterness')
+        self.assertEqual(result['revised'].rejection.rejected_property, 'bitterness')
 
     def test_lilith_proposes_acidity(self):
         result = self.scene.advance_to_acidity_wine_idea()
-        idea = result['revised']['idea']
+        idea = result['revised'].idea
         self.assertTrue(idea.desired_property.acidity)
 
     def test_lilith_revision_replaces_bitterness_with_acidity(self):
         result = self.scene.advance_to_acidity_wine_idea()
-        revision = result['revised']['idea'].revision
+        revision = result['revised'].idea.revision
         self.assertEqual(revision.remove, 'bitterness')
         self.assertEqual(revision.add, 'acidity')
 
@@ -48,9 +48,9 @@ class Day0AcidityWineIdeaTests(unittest.TestCase):
     def test_lilith_gives_serpent_her_drink_to_taste(self):
         result = self.scene.advance_to_acidity_wine_idea()
         event = result['tasted']
-        self.assertEqual(event['giver'], 'lilith')
-        self.assertEqual(event['taster'], 'serpent')
-        self.assertEqual(event['drink'], 'lilith')
+        self.assertEqual(event.giver, 'lilith')
+        self.assertEqual(event.taster, 'serpent')
+        self.assertEqual(event.drink, 'lilith')
 
     def test_serpent_receives_lilith_effect_on_tasting(self):
         self.scene.advance_to_god_at_table()

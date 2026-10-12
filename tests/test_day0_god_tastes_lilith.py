@@ -24,7 +24,7 @@ class Day0GodTastesLilithTests(unittest.TestCase):
         event = self.scene.god_tastes_lilith()
         self.assertEqual(self.scene.god.energy_j, energy_before + float(effects.get('energy_j', 0.0)))
         self.assertEqual(self.scene.god.creative_will, will_before + float(effects.get('creative_will', 0.0)))
-        self.assertTrue(event['effects_applied'])
+        self.assertTrue(event.effects_applied)
 
     def test_god_is_now_tasting_lilith(self):
         self.scene.advance_to_god_first_lilith_taste()

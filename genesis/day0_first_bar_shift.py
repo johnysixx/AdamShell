@@ -84,6 +84,17 @@ from genesis.day0_table_wine_state import (
     SerpentFinishesWineAtTableEvent,
     SerpentLilithContinueWineDiscussionEvent,
 )
+from genesis.day0_god_wine_discussion_state import (
+    GodJoinsSerpentLilithTableEvent,
+    GodTastesLilithEvent,
+    LilithAcidityRevisionResult,
+    LilithGivesSerpentLilithTasteEvent,
+    LilithProposesAcidityEvent,
+    LilithRejectsBitternessEvent,
+    SerpentCallsGodToTableEvent,
+    SerpentExplainsWineDiscussionEvent,
+    WineDiscussionSummaryState,
+)
 from genesis.day0_god_lilith_service_state import (
     BartenderMixesGodsLilithEvent,
     BartenderServesGodsLilithEvent,
@@ -2129,152 +2140,327 @@ class Day0FirstBarShift:
 
     def god_tastes_lilith(self):
         if self.god is None:
-            raise RuntimeError('God does not exist.')
+            raise RuntimeError(
+                'God does not exist.'
+            )
+
         bar_state = getattr(
             self.god,
             'bar_state',
             None
         )
+
         if (
             bar_state is None
-            or bar_state.activity != 'holding_lilith'
+            or bar_state.activity
+            != 'holding_lilith'
         ):
-            raise RuntimeError('God is not holding lilith.')
+            raise RuntimeError(
+                'God is not holding lilith.'
+            )
+
         drink = bar_state.drink
+
         if drink is None:
-            raise RuntimeError('God has no lilith to taste.')
+            raise RuntimeError(
+                'God has no lilith to taste.'
+            )
+
         effects = drink.effects
-        energy_gain = float(effects.get('energy_j', 0.0))
-        creative_will_gain = float(effects.get('creative_will', 0.0))
-        energy_before = float(getattr(self.god, 'energy_j', 0.0))
-        creative_will_before = float(getattr(self.god, 'creative_will', 0.0))
-        self.god.energy_j = energy_before + energy_gain
-        self.god.creative_will = creative_will_before + creative_will_gain
-        bar_state.activity = 'tasting_lilith'
+
+        energy_gain = float(
+            effects.get(
+                'energy_j',
+                0.0,
+            )
+        )
+
+        creative_will_gain = float(
+            effects.get(
+                'creative_will',
+                0.0,
+            )
+        )
+
+        energy_before = float(
+            getattr(
+                self.god,
+                'energy_j',
+                0.0,
+            )
+        )
+
+        creative_will_before = float(
+            getattr(
+                self.god,
+                'creative_will',
+                0.0,
+            )
+        )
+
+        self.god.energy_j = (
+            energy_before
+            + energy_gain
+        )
+
+        self.god.creative_will = (
+            creative_will_before
+            + creative_will_gain
+        )
+
+        bar_state.activity = (
+            'tasting_lilith'
+        )
         bar_state.lilith_tasted = True
-        event = {'name': 'god_tastes_lilith', 'guest': 'god', 'drink': 'lilith', 'energy_before': energy_before, 'energy_after': self.god.energy_j, 'creative_will_before': creative_will_before, 'creative_will_after': self.god.creative_will, 'effects_applied': True}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
+
+        event = GodTastesLilithEvent(
+            energy_before=energy_before,
+            energy_after=self.god.energy_j,
+            creative_will_before=(
+                creative_will_before
+            ),
+            creative_will_after=(
+                self.god.creative_will
+            ),
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
         return event
 
-    def serpent_notices_god_and_calls_him_over(self):
+    def serpent_notices_god_and_calls_him_over(
+        self
+    ):
         if self.god is None:
-            raise RuntimeError('God does not exist.')
-        if getattr(
+            raise RuntimeError(
+                'God does not exist.'
+            )
+
+        if (
             getattr(
-                self.serpent,
-                'bar_state',
+                getattr(
+                    self.serpent,
+                    'bar_state',
+                    None
+                ),
+                'location',
                 None
-            ),
-            'location',
-            None
-        ) != 'table':
-            raise RuntimeError('Serpent is not at the table.')
-        if getattr(
+            )
+            != 'table'
+        ):
+            raise RuntimeError(
+                'Serpent is not at the table.'
+            )
+
+        if (
             getattr(
-                self.god,
-                'bar_state',
+                getattr(
+                    self.god,
+                    'bar_state',
+                    None
+                ),
+                'activity',
                 None
-            ),
-            'activity',
-            None
-        ) != 'tasting_lilith':
-            raise RuntimeError('God is not at the expected bar checkpoint.')
-        event = {'name': 'serpent_notices_god_and_calls_him_over', 'caller': 'serpent', 'called': 'god', 'from': 'table'}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
-        self.god.bar_state.called_to_table_by = 'serpent'
+            )
+            != 'tasting_lilith'
+        ):
+            raise RuntimeError(
+                'God is not at the expected '
+                'bar checkpoint.'
+            )
+
+        event = (
+            SerpentCallsGodToTableEvent()
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
+        self.god.bar_state.called_to_table_by = (
+            'serpent'
+        )
+
         return event
 
-    def god_joins_serpent_and_lilith_at_table(self):
-        if getattr(
+    def god_joins_serpent_and_lilith_at_table(
+        self
+    ):
+        if (
             getattr(
-                self.god,
-                'bar_state',
+                getattr(
+                    self.god,
+                    'bar_state',
+                    None
+                ),
+                'called_to_table_by',
                 None
-            ),
-            'called_to_table_by',
-            None
-        ) != 'serpent':
-            raise RuntimeError('Serpent has not called God over.')
-        if getattr(
+            )
+            != 'serpent'
+        ):
+            raise RuntimeError(
+                'Serpent has not called God over.'
+            )
+
+        if (
             getattr(
-                self.lilith,
-                'bar_state',
+                getattr(
+                    self.lilith,
+                    'bar_state',
+                    None
+                ),
+                'location',
                 None
-            ),
-            'location',
-            None
-        ) != 'table':
-            raise RuntimeError('Lilith is not at the table.')
-        if getattr(
+            )
+            != 'table'
+        ):
+            raise RuntimeError(
+                'Lilith is not at the table.'
+            )
+
+        if (
             getattr(
-                self.serpent,
-                'bar_state',
+                getattr(
+                    self.serpent,
+                    'bar_state',
+                    None
+                ),
+                'location',
                 None
-            ),
-            'location',
-            None
-        ) != 'table':
-            raise RuntimeError('Serpent is not at the table.')
-        self.god.bar_state.location = 'table'
+            )
+            != 'table'
+        ):
+            raise RuntimeError(
+                'Serpent is not at the table.'
+            )
+
+        self.god.bar_state.location = (
+            'table'
+        )
+
         self.god.bar_state.table_with = [
             'serpent',
             'lilith',
         ]
-        self.god.bar_state.activity = 'at_table'
-        event = {'name': 'god_joins_serpent_and_lilith_at_table', 'guest': 'god', 'with': ['serpent', 'lilith'], 'drink_in_hand': 'lilith'}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
+
+        self.god.bar_state.activity = (
+            'at_table'
+        )
+
+        event = (
+            GodJoinsSerpentLilithTableEvent()
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
         return event
 
-    def serpent_explains_wine_discussion_to_god(self):
-        if getattr(
+    def serpent_explains_wine_discussion_to_god(
+        self
+    ):
+        if (
             getattr(
-                self.god,
-                'bar_state',
+                getattr(
+                    self.god,
+                    'bar_state',
+                    None
+                ),
+                'location',
                 None
-            ),
-            'location',
-            None
-        ) != 'table':
-            raise RuntimeError('God is not at the table.')
-        discussion = self.serpent_lilith_good_drink_discussion
-        event = {'name': 'serpent_explains_wine_discussion_to_god', 'speaker': 'serpent', 'listener': 'god', 'summary': {'fuller_flavor': True, 'sweetness': True, 'bitterness': True}}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
-        knowledge = self._entity_attr_setdefault(
-            self.god,
-            'bar_knowledge',
-            BarGuestKnowledge()
+            )
+            != 'table'
+        ):
+            raise RuntimeError(
+                'God is not at the table.'
+            )
+
+        discussion = (
+            self.serpent_lilith_good_drink_discussion
         )
+
+        event = (
+            SerpentExplainsWineDiscussionEvent(
+                summary=(
+                    WineDiscussionSummaryState()
+                )
+            )
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
+        knowledge = (
+            self._entity_attr_setdefault(
+                self.god,
+                'bar_knowledge',
+                BarGuestKnowledge()
+            )
+        )
+
         knowledge.wine_discussion = (
             BarWineDiscussionKnowledge
             .from_discussion(
                 discussion
             )
         )
+
         return event
 
-    def lilith_rejects_bitterness_and_proposes_acidity(self):
-        discussion = self.serpent_lilith_good_drink_discussion
-        event = {'name': 'lilith_rejects_bitterness_for_wine', 'speaker': 'lilith', 'rejected_property': 'bitterness', 'reason': 'does_not_feel_right_for_wine'}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
+    def lilith_rejects_bitterness_and_proposes_acidity(
+        self
+    ):
+        discussion = (
+            self.serpent_lilith_good_drink_discussion
+        )
+
+        rejection = (
+            LilithRejectsBitternessEvent()
+        )
+
+        self.meeting_place.emit_event(
+            rejection
+        )
+        self.history.append(
+            rejection.to_dict()
+        )
+
         idea = BarDrinkIdea(
             subject='wine',
             source='lilith',
-            revision=BarDrinkRevision(
-                remove='bitterness',
-                add='acidity',
+            revision=(
+                BarDrinkRevision(
+                    remove='bitterness',
+                    add='acidity',
+                )
             ),
-            desired_property=BarDrinkDesiredProperty(
-                acidity=True,
+            desired_property=(
+                BarDrinkDesiredProperty(
+                    acidity=True,
+                )
             ),
         )
+
         discussion.add_idea(
             idea
         )
+
         discussion.current_hypothesis = (
             BarWineHypothesis(
                 fuller_flavor=True,
@@ -2283,25 +2469,101 @@ class Day0FirstBarShift:
                 acidity=True,
             )
         )
-        proposal_event = {'name': 'lilith_proposes_acidity_for_wine', 'subject': 'wine', 'desired_property': 'acidity'}
-        self.meeting_place.emit_event(proposal_event)
-        self.history.append(proposal_event)
-        return {'rejection': event, 'idea': idea, 'proposal': proposal_event}
 
-    def lilith_gives_serpent_taste_of_lilith(self):
-        drink = self.lilith_order.final_drink
+        proposal = (
+            LilithProposesAcidityEvent()
+        )
+
+        self.meeting_place.emit_event(
+            proposal
+        )
+        self.history.append(
+            proposal.to_dict()
+        )
+
+        return LilithAcidityRevisionResult(
+            rejection=rejection,
+            idea=idea,
+            proposal=proposal,
+        )
+
+    def lilith_gives_serpent_taste_of_lilith(
+        self
+    ):
+        drink = (
+            self.lilith_order
+            .final_drink
+        )
+
         if drink is None:
-            raise RuntimeError('Lilith does not have her drink.')
+            raise RuntimeError(
+                'Lilith does not have her drink.'
+            )
+
         effects = drink.effects
-        energy_gain = float(effects.get('energy_j', 0.0))
-        will_gain = float(effects.get('creative_will', 0.0))
-        energy_before = float(getattr(self.serpent, 'energy_j', 0.0))
-        will_before = float(getattr(self.serpent, 'creative_will', 0.0))
-        self.serpent.energy_j = energy_before + energy_gain
-        self.serpent.creative_will = will_before + will_gain
-        event = {'name': 'lilith_gives_serpent_taste_of_lilith', 'giver': 'lilith', 'taster': 'serpent', 'drink': 'lilith', 'energy_before': energy_before, 'energy_after': self.serpent.energy_j, 'creative_will_before': will_before, 'creative_will_after': self.serpent.creative_will, 'effects_applied': True}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
+
+        energy_gain = float(
+            effects.get(
+                'energy_j',
+                0.0,
+            )
+        )
+
+        will_gain = float(
+            effects.get(
+                'creative_will',
+                0.0,
+            )
+        )
+
+        energy_before = float(
+            getattr(
+                self.serpent,
+                'energy_j',
+                0.0,
+            )
+        )
+
+        will_before = float(
+            getattr(
+                self.serpent,
+                'creative_will',
+                0.0,
+            )
+        )
+
+        self.serpent.energy_j = (
+            energy_before
+            + energy_gain
+        )
+
+        self.serpent.creative_will = (
+            will_before
+            + will_gain
+        )
+
+        event = (
+            LilithGivesSerpentLilithTasteEvent(
+                energy_before=energy_before,
+                energy_after=(
+                    self.serpent.energy_j
+                ),
+                creative_will_before=(
+                    will_before
+                ),
+                creative_will_after=(
+                    self.serpent.creative_will
+                ),
+            )
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
         return event
 
     def serpent_grimaces_at_lilith_and_turns_to_god(self):
