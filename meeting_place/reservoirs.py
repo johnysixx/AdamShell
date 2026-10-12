@@ -1,6 +1,13 @@
 ﻿from universe.logger import UniverseLogger
 import random
 
+from meeting_place.reservoir_event_state import (
+    BarEnergyAddedEvent,
+    BarEnergySpentEvent,
+    BarEntropyAddedEvent,
+    EntropyServedEvent,
+    QuantumEntropyTickEvent,
+)
 from universe.pre_cosmic_rules import (
     QUANTUM_ENTROPY_TICK_MAX_UNITS,
     ENTROPY_DRINK_BAR_ENERGY_GAIN_J,
@@ -23,7 +30,11 @@ class BarEnergyReservoir:
             "name": self.name,
             "type": self.type,
             "energy_j": self.energy_j,
-            "events": self.events
+            "events": [
+                event.to_dict()
+                for event
+                in self.events
+            ]
         }
 
     def add_energy(self, source, amount_j):
@@ -32,19 +43,20 @@ class BarEnergyReservoir:
 
         self.energy_j += amount_j
 
-        event = {
-            "name": "bar_energy_added",
-            "source": source,
-            "amount_j": amount_j,
-            "total_energy_j": self.energy_j
-        }
+        event = BarEnergyAddedEvent(
+            source=source,
+            amount_j=amount_j,
+            total_energy_j=self.energy_j,
+        )
 
-        self.events.append(event)
+        self.events.append(
+            event
+        )
 
         UniverseLogger.event(f"BAR ENERGY ADDED: {amount_j:.3f} J from {source}")
         UniverseLogger.event(f"BAR ENERGY TOTAL: {self.energy_j:.3f} J")
 
-        return event
+        return event.to_dict()
 
     def spend_energy(self, purpose, amount_j):
         if amount_j <= 0:
@@ -55,19 +67,20 @@ class BarEnergyReservoir:
 
         self.energy_j -= amount_j
 
-        event = {
-            "name": "bar_energy_spent",
-            "purpose": purpose,
-            "amount_j": amount_j,
-            "total_energy_j": self.energy_j
-        }
+        event = BarEnergySpentEvent(
+            purpose=purpose,
+            amount_j=amount_j,
+            total_energy_j=self.energy_j,
+        )
 
-        self.events.append(event)
+        self.events.append(
+            event
+        )
 
         UniverseLogger.event(f"BAR ENERGY SPENT: {amount_j:.3f} J for {purpose}")
         UniverseLogger.event(f"BAR ENERGY TOTAL: {self.energy_j:.3f} J")
 
-        return event
+        return event.to_dict()
 
 
 class BarEntropyReservoir:
@@ -84,7 +97,11 @@ class BarEntropyReservoir:
             "name": self.name,
             "type": self.type,
             "entropy_units": self.entropy_units,
-            "events": self.events
+            "events": [
+                event.to_dict()
+                for event
+                in self.events
+            ]
         }
 
     def quantum_tick(self, rng=None):
@@ -93,18 +110,21 @@ class BarEntropyReservoir:
 
         self.entropy_units += amount_units
 
-        event = {
-            "name": "quantum_entropy_tick",
-            "amount_units": amount_units,
-            "total_entropy_units": self.entropy_units
-        }
+        event = QuantumEntropyTickEvent(
+            amount_units=amount_units,
+            total_entropy_units=(
+                self.entropy_units
+            ),
+        )
 
-        self.events.append(event)
+        self.events.append(
+            event
+        )
 
         UniverseLogger.event(f"BAR ENTROPY TICK: +{amount_units:.6f} units")
         UniverseLogger.event(f"BAR ENTROPY TOTAL: {self.entropy_units:.6f} units")
 
-        return event
+        return event.to_dict()
 
     def add_entropy(self, source, amount_units):
         if amount_units <= 0:
@@ -112,19 +132,22 @@ class BarEntropyReservoir:
 
         self.entropy_units += amount_units
 
-        event = {
-            "name": "bar_entropy_added",
-            "source": source,
-            "amount_units": amount_units,
-            "total_entropy_units": self.entropy_units
-        }
+        event = BarEntropyAddedEvent(
+            source=source,
+            amount_units=amount_units,
+            total_entropy_units=(
+                self.entropy_units
+            ),
+        )
 
-        self.events.append(event)
+        self.events.append(
+            event
+        )
 
         UniverseLogger.event(f"BAR ENTROPY ADDED: {amount_units:.6f} units from {source}")
         UniverseLogger.event(f"BAR ENTROPY TOTAL: {self.entropy_units:.6f} units")
 
-        return event
+        return event.to_dict()
 
     def serve_entropy(self, energy_reservoir, drinker_name="entity"):
         if self.entropy_units < ENTROPY_DRINK_UNITS:
@@ -141,20 +164,29 @@ class BarEntropyReservoir:
             bar_energy_gain_j
         )
 
-        event = {
-            "name": "entropy_served",
-            "drinker": drinker_name,
-            "entropy_units_spent": ENTROPY_DRINK_UNITS,
-            "bar_energy_gain_j": bar_energy_gain_j,
-            "entity_energy_gain_j": entity_energy_gain_j,
-            "total_entropy_units": self.entropy_units
-        }
+        event = EntropyServedEvent(
+            drinker=drinker_name,
+            entropy_units_spent=(
+                ENTROPY_DRINK_UNITS
+            ),
+            bar_energy_gain_j=(
+                bar_energy_gain_j
+            ),
+            entity_energy_gain_j=(
+                entity_energy_gain_j
+            ),
+            total_entropy_units=(
+                self.entropy_units
+            ),
+        )
 
-        self.events.append(event)
+        self.events.append(
+            event
+        )
 
         UniverseLogger.event(f"{drinker_name} WAS SERVED ENTROPY")
         UniverseLogger.event(f"ENTITY ENERGY GAIN: {entity_energy_gain_j:.3f} J")
         UniverseLogger.event(f"BAR ENTROPY TOTAL: {self.entropy_units:.6f} units")
 
-        return event
+        return event.to_dict()
 
