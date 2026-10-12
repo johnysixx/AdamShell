@@ -62,10 +62,27 @@ class BartenderObservedEventEntry:
     )
 
     def to_dict(self):
+        observed_event = (
+            self.observed_event
+        )
+
+        serializer = getattr(
+            observed_event,
+            "to_dict",
+            None,
+        )
+
+        if callable(
+            serializer
+        ):
+            observed_event = (
+                serializer()
+            )
+
         return {
             "kind": self.kind,
             "observed_event":
-                self.observed_event,
+                observed_event,
         }
 
 
