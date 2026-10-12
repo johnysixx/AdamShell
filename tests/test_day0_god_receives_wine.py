@@ -18,29 +18,29 @@ class Day0GodReceivesWineTests(unittest.TestCase):
     def test_serpent_grimaces_and_turns_to_god(self):
         result = self.scene.advance_to_god_receives_wine()
         reaction = result['reaction']
-        self.assertEqual(reaction['reaction'], 'grimace')
-        self.assertEqual(reaction['drink'], 'lilith')
-        self.assertEqual(reaction['turns_to'], 'god')
+        self.assertEqual(reaction.reaction, 'grimace')
+        self.assertEqual(reaction.drink, 'lilith')
+        self.assertEqual(reaction.turns_to, 'god')
 
     def test_god_orders_wine_for_comparison(self):
         result = self.scene.advance_to_god_receives_wine()
         order = result['order']
-        self.assertEqual(order['drink'], 'wine')
-        self.assertEqual(order['purpose'], 'judge_wine_discussion')
+        self.assertEqual(order.drink, 'wine')
+        self.assertEqual(order.purpose, 'judge_wine_discussion')
 
     def test_bartender_serves_god_wine(self):
         result = self.scene.advance_to_god_receives_wine()
-        self.assertEqual(result['service']['drink'].name, 'wine')
+        self.assertEqual(result['service'].drink.name, 'wine')
         self.assertTrue(self.scene.god.bar_state.wine_order.served)
 
     def test_god_has_not_tasted_wine_yet(self):
         result = self.scene.advance_to_god_receives_wine()
         self.assertFalse(self.scene.god.bar_state.wine_order.tasted)
-        self.assertFalse(result['service']['event']['tasted'])
+        self.assertFalse(result['service'].event.tasted)
 
     def test_wine_is_added_to_existing_open_tab(self):
         result = self.scene.advance_to_god_receives_wine()
-        receipt = result['service']['receipt']
+        receipt = result['service'].receipt
         self.assertFalse(receipt.paid)
         self.assertEqual(receipt.status, 'open_unpaid')
 

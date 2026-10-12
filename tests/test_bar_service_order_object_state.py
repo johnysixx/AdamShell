@@ -3,6 +3,9 @@ import unittest
 from genesis.day0_first_bar_shift import (
     Day0FirstBarShift,
 )
+from genesis.day0_god_wine_service_state import (
+    GodOrdersWineToJudgeDiscussionEvent,
+)
 from genesis.day0_lemon_service_state import (
     LilithVodkaWithLemonOrderResult,
 )
@@ -106,7 +109,7 @@ class BarServiceOrderObjectStateTests(
         )
         self.assertIs(
             order.final_drink,
-            result["service"]["drink"]
+            result["service"].drink
         )
         self.assertTrue(
             order.served
@@ -116,7 +119,7 @@ class BarServiceOrderObjectStateTests(
         )
         self.assertEqual(
             order.receipt_number,
-            result["service"]["receipt"]
+            result["service"].receipt
             .receipt_number
         )
         self._assert_object_only(
@@ -174,7 +177,7 @@ class BarServiceOrderObjectStateTests(
             "final_drink"
         )
 
-    def test_order_events_remain_boundary_dicts(
+    def test_wine_order_event_is_object_only(
         self
     ):
         scene = self._scene()
@@ -184,10 +187,16 @@ class BarServiceOrderObjectStateTests(
 
         self.assertIsInstance(
             event,
-            dict
+            GodOrdersWineToJudgeDiscussionEvent
         )
-        event["drink"] = "changed"
-
+        self.assertEqual(
+            event.drink,
+            "wine"
+        )
+        self.assertEqual(
+            event.purpose,
+            "judge_wine_discussion"
+        )
         self.assertEqual(
             order.drink,
             "wine"
@@ -195,6 +204,10 @@ class BarServiceOrderObjectStateTests(
         self.assertEqual(
             order.purpose,
             "judge_wine_discussion"
+        )
+        self._assert_object_only(
+            event,
+            "drink"
         )
 
     def test_lilith_order_result_keeps_order_object(

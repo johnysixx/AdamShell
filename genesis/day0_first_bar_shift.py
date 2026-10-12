@@ -84,6 +84,12 @@ from genesis.day0_table_wine_state import (
     SerpentFinishesWineAtTableEvent,
     SerpentLilithContinueWineDiscussionEvent,
 )
+from genesis.day0_god_wine_service_state import (
+    BartenderServesGodWineEvent,
+    GodOrdersWineToJudgeDiscussionEvent,
+    GodWineServiceResult,
+    SerpentGrimacesAtLilithEvent,
+)
 from genesis.day0_god_wine_discussion_state import (
     GodJoinsSerpentLilithTableEvent,
     GodTastesLilithEvent,
@@ -2566,39 +2572,82 @@ class Day0FirstBarShift:
 
         return event
 
-    def serpent_grimaces_at_lilith_and_turns_to_god(self):
-        if not self.history or self.history[-1].get('name') != 'lilith_gives_serpent_taste_of_lilith':
-            raise RuntimeError('Serpent has not just tasted lilith.')
-        event = {'name': 'serpent_grimaces_at_lilith_and_turns_to_god', 'serpent': 'serpent', 'reaction': 'grimace', 'drink': 'lilith', 'turns_to': 'god'}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
+    def serpent_grimaces_at_lilith_and_turns_to_god(
+        self
+    ):
+        if (
+            not self.history
+            or self.history[-1].get(
+                'name'
+            )
+            != (
+                'lilith_gives_serpent_'
+                'taste_of_lilith'
+            )
+        ):
+            raise RuntimeError(
+                'Serpent has not just tasted lilith.'
+            )
+
+        event = (
+            SerpentGrimacesAtLilithEvent()
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
         return event
 
-    def god_orders_wine_to_judge_discussion(self):
-        if getattr(
+    def god_orders_wine_to_judge_discussion(
+        self
+    ):
+        if (
             getattr(
-                self.god,
-                'bar_state',
+                getattr(
+                    self.god,
+                    'bar_state',
+                    None
+                ),
+                'location',
                 None
-            ),
-            'location',
-            None
-        ) != 'table':
-            raise RuntimeError('God is not at the table.')
+            )
+            != 'table'
+        ):
+            raise RuntimeError(
+                'God is not at the table.'
+            )
+
         self.god.bar_state.wine_order = (
             BarDrinkOrder(
                 guest='god',
                 drink='wine',
-                purpose='judge_wine_discussion',
+                purpose=(
+                    'judge_wine_discussion'
+                ),
                 tasted=False,
             )
         )
-        event = {'name': 'god_orders_wine_to_judge_discussion', 'guest': 'god', 'drink': 'wine', 'purpose': 'judge_wine_discussion'}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
+
+        event = (
+            GodOrdersWineToJudgeDiscussionEvent()
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
         return event
 
-    def bartender_serves_god_wine_and_receipt(self):
+    def bartender_serves_god_wine_and_receipt(
+        self
+    ):
         order = getattr(
             getattr(
                 self.god,
@@ -2608,30 +2657,75 @@ class Day0FirstBarShift:
             'wine_order',
             None
         )
-        if order is None or order.drink != 'wine':
-            raise RuntimeError('God has not ordered wine.')
+
+        if (
+            order is None
+            or order.drink != 'wine'
+        ):
+            raise RuntimeError(
+                'God has not ordered wine.'
+            )
+
         drink = BarDrink(
             name='wine',
             type='basic_bar_drink',
             category='basic_drink',
         )
-        cash_register = self.meeting_place.bar_counter.cash_register
-        cash_register.add_to_tab(entity=self.god, drink=drink)
-        receipt = cash_register.print_open_tab_receipt(self.god)
+
+        cash_register = (
+            self.meeting_place
+            .bar_counter
+            .cash_register
+        )
+
+        cash_register.add_to_tab(
+            entity=self.god,
+            drink=drink,
+        )
+
+        receipt = (
+            cash_register
+            .print_open_tab_receipt(
+                self.god
+            )
+        )
+
         order.complete(
             drink
         )
+
         order.attach_receipt(
             receipt.receipt_number
         )
-        self.god.bar_state.wine = drink
+
+        self.god.bar_state.wine = (
+            drink
+        )
+
         self.god.bar_state.receipt_number = (
             receipt.receipt_number
         )
-        event = {'name': 'bartender_serves_god_wine_and_receipt', 'guest': 'god', 'drink': 'wine', 'receipt_number': receipt.receipt_number, 'paid': False, 'tasted': False}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
-        return {'drink': drink, 'receipt': receipt, 'event': event}
+
+        event = (
+            BartenderServesGodWineEvent(
+                receipt_number=(
+                    receipt.receipt_number
+                )
+            )
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
+        return GodWineServiceResult(
+            drink=drink,
+            receipt=receipt,
+            event=event,
+        )
 
     def serpent_agrees_with_acidity_but_wants_balance(self):
         discussion = self.serpent_lilith_good_drink_discussion
