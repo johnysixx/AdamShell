@@ -92,7 +92,7 @@ class BarMenuSignIntegrationTests(unittest.TestCase):
         self.assertEqual(
             meeting_place
             .bar_menu_sign
-            .current_screen["screen"],
+            .current_screen.screen,
             "drink_detail"
         )
 
@@ -101,7 +101,7 @@ class BarMenuSignIntegrationTests(unittest.TestCase):
         self.assertEqual(
             meeting_place
             .bar_menu_sign
-            .current_screen["screen"],
+            .current_screen.screen,
             "home"
         )
 
@@ -123,7 +123,7 @@ class BarMenuSignIntegrationTests(unittest.TestCase):
         self.assertEqual(
             meeting_place
             .bar_menu_sign
-            .current_screen["screen"],
+            .current_screen.screen,
             "home"
         )
 

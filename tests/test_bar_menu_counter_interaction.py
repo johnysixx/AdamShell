@@ -46,14 +46,14 @@ class BarMenuCounterInteractionTests(unittest.TestCase):
         self.assertEqual(
             meeting_place
             .bar_menu_sign
-            .current_screen["screen"],
+            .current_screen.screen,
             "drink_detail"
         )
 
         self.assertEqual(
             meeting_place
             .bar_menu_sign
-            .current_screen["drink"],
+            .current_screen.drink,
             "singularity"
         )
 
@@ -91,7 +91,7 @@ class BarMenuCounterInteractionTests(unittest.TestCase):
         self.assertEqual(
             meeting_place
             .bar_menu_sign
-            .current_screen["screen"],
+            .current_screen.screen,
             "menu"
         )
 
@@ -128,7 +128,7 @@ class BarMenuCounterInteractionTests(unittest.TestCase):
         self.assertEqual(
             meeting_place
             .bar_menu_sign
-            .current_screen["screen"],
+            .current_screen.screen,
             "drink_detail"
         )
 
@@ -139,7 +139,7 @@ class BarMenuCounterInteractionTests(unittest.TestCase):
         self.assertEqual(
             meeting_place
             .bar_menu_sign
-            .current_screen["screen"],
+            .current_screen.screen,
             "menu"
         )
 
@@ -214,7 +214,7 @@ class BarMenuCounterInteractionTests(unittest.TestCase):
         self.assertEqual(
             meeting_place
             .bar_menu_sign
-            .current_screen["screen"],
+            .current_screen.screen,
             "home"
         )
 

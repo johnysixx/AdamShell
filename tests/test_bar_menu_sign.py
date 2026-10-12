@@ -4,6 +4,12 @@ from meeting_place.bar_menu_sign import (
     BarMenuSign
 )
 from meeting_place.bar_objects import BarMenuItem, DrinkRecipe
+from meeting_place.bar_menu_screen_state import (
+    BarMenuDrinkDetailScreen,
+    BarMenuHomeScreen,
+    BarMenuListScreen,
+    BarMenuNewScreen,
+)
 from meeting_place.drink_recipe_status import (
     DrinkRecipeStatus,
 )
@@ -140,6 +146,117 @@ class BarMenuSignTests(unittest.TestCase):
             ]
         )
 
+    def test_screen_history_uses_object_state(
+        self
+    ):
+        sign = BarMenuSign(
+            drink_menu={
+                "raspberry_rum":
+                    self._menu_item(
+                        "raspberry_rum"
+                    ),
+            },
+            new_drinks={
+                "singularity":
+                    self._new_drink(
+                        ingredients=(
+                            "raspberry_rum",
+                            "lemonade",
+                        ),
+                        status=(
+                            DrinkRecipeStatus
+                            .APPROVED
+                        ),
+                    ),
+            },
+        )
+
+        home_boundary = sign.open()
+
+        self.assertIsInstance(
+            home_boundary,
+            dict,
+        )
+
+        self.assertIsInstance(
+            sign.current_screen,
+            BarMenuHomeScreen,
+        )
+
+        sign.open_section(
+            "menu"
+        )
+
+        self.assertIsInstance(
+            sign.current_screen,
+            BarMenuListScreen,
+        )
+
+        self.assertIsInstance(
+            sign.screen_history[-1],
+            BarMenuHomeScreen,
+        )
+
+        sign.open_section(
+            "new"
+        )
+
+        self.assertIsInstance(
+            sign.current_screen,
+            BarMenuNewScreen,
+        )
+
+        sign.open_drink(
+            "singularity"
+        )
+
+        detail = (
+            sign.current_screen
+        )
+
+        self.assertIsInstance(
+            detail,
+            BarMenuDrinkDetailScreen,
+        )
+
+        self.assertEqual(
+            detail.drink,
+            "singularity",
+        )
+
+        self.assertEqual(
+            detail.ingredients,
+            (
+                "raspberry_rum",
+                "lemonade",
+            ),
+        )
+
+        for screen in (
+            detail,
+            sign.screen_history[-1],
+        ):
+            for mapping_method in (
+                "get",
+                "keys",
+                "items",
+                "values",
+                "setdefault",
+            ):
+                self.assertFalse(
+                    hasattr(
+                        screen,
+                        mapping_method,
+                    )
+                )
+
+            with self.assertRaises(
+                TypeError
+            ):
+                _ = screen[
+                    "screen"
+                ]
+
     def test_sign_can_open_drink_detail(
         self
     ):
@@ -222,7 +339,7 @@ class BarMenuSignTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            sign.current_screen["screen"],
+            sign.current_screen.screen,
             "drink_detail"
         )
 
@@ -234,7 +351,7 @@ class BarMenuSignTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            sign.current_screen["screen"],
+            sign.current_screen.screen,
             "new"
         )
 
@@ -246,7 +363,7 @@ class BarMenuSignTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            sign.current_screen["screen"],
+            sign.current_screen.screen,
             "home"
         )
 
@@ -534,7 +651,7 @@ class BarMenuSignTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            sign.current_screen["screen"],
+            sign.current_screen.screen,
             "drink_detail"
         )
 
@@ -542,7 +659,7 @@ class BarMenuSignTests(unittest.TestCase):
             sign.idle_minute()
 
         self.assertEqual(
-            sign.current_screen["screen"],
+            sign.current_screen.screen,
             "home"
         )
 
@@ -582,7 +699,7 @@ class BarMenuSignTests(unittest.TestCase):
         sign.idle_minute()
 
         self.assertEqual(
-            sign.current_screen["screen"],
+            sign.current_screen.screen,
             "drink_detail"
         )
 
@@ -622,7 +739,7 @@ class BarMenuSignTests(unittest.TestCase):
         sign.idle_minute()
 
         self.assertEqual(
-            sign.current_screen["screen"],
+            sign.current_screen.screen,
             "drink_detail"
         )
 
