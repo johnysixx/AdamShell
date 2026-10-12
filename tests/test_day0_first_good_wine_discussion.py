@@ -22,7 +22,9 @@ class Day0FirstGoodWineDiscussionTests(unittest.TestCase):
         lilith_index = names.index('lilith_takes_first_sip_of_lilith')
         serpent_index = names.index('serpent_finishes_wine_at_table')
         self.assertLess(lilith_index, serpent_index)
-        self.assertTrue(result['serpent']['finished'])
+        self.assertTrue(
+            result.serpent.finished
+        )
 
     def test_lilith_drink_applies_its_effects_when_drunk(self):
         energy_before = getattr(self.scene.lilith, 'energy_j', 0.0)
