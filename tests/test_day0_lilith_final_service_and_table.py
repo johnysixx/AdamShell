@@ -24,9 +24,9 @@ class Day0LilithFinalServiceAndTableTests(unittest.TestCase):
 
     def test_lilith_gets_drink_and_receipt(self):
         result = self.scene.advance_to_good_drink_discussion()
-        self.assertEqual(result['served']['drink'].name, 'lilith')
-        self.assertFalse(result['served']['receipt'].paid)
-        self.assertEqual(result['served']['receipt'].status, 'open_unpaid')
+        self.assertEqual(result['served'].drink.name, 'lilith')
+        self.assertFalse(result['served'].receipt.paid)
+        self.assertEqual(result['served'].receipt.status, 'open_unpaid')
 
     def test_first_served_lilith_has_one_sugar_cube(self):
         result = self.scene.advance_to_good_drink_discussion()
@@ -35,25 +35,36 @@ class Day0LilithFinalServiceAndTableTests(unittest.TestCase):
 
     def test_lilith_requests_one_more_sugar_cube(self):
         result = self.scene.advance_to_good_drink_discussion()
-        self.assertEqual(result['tasted']['request'], {'ingredient': 'sugar', 'amount': 1, 'unit': 'cube'})
+        self.assertEqual(
+            result['tasted'].request.ingredient,
+            'sugar'
+        )
+        self.assertEqual(
+            result['tasted'].request.amount,
+            1
+        )
+        self.assertEqual(
+            result['tasted'].request.unit,
+            'cube'
+        )
 
     def test_final_recipe_has_two_sugar_cubes(self):
         result = self.scene.advance_to_good_drink_discussion()
-        recipe = result['revised']['recipe']
+        recipe = result['revised'].recipe
         self.assertEqual(recipe.ingredients['sugar'].shots, 2)
         self.assertEqual(recipe.revision, 2)
 
     def test_price_stays_same_as_vodka(self):
         result = self.scene.advance_to_good_drink_discussion()
-        self.assertEqual(result['revised']['recipe'].price_basis, 'vodka')
+        self.assertEqual(result['revised'].recipe.price_basis, 'vodka')
 
     def test_effects_remain_only_energy_and_creative_will(self):
         result = self.scene.advance_to_good_drink_discussion()
-        self.assertEqual(set(result['revised']['recipe'].effects.keys()), {'energy_j', 'creative_will'})
+        self.assertEqual(set(result['revised'].recipe.effects.keys()), {'energy_j', 'creative_will'})
 
     def test_lilith_then_joins_serpent(self):
         result = self.scene.advance_to_good_drink_discussion()
-        self.assertEqual(result['moved']['with'], 'serpent')
+        self.assertEqual(result['moved'].companion, 'serpent')
         self.assertEqual(self.scene.lilith.bar_state.location, 'table')
 
     def test_discussion_starts_without_answer_yet(self):

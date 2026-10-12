@@ -45,16 +45,22 @@ from genesis.day0_first_conversation_state import (
     SerpentMovesToExistingTableEvent,
     SerpentProposesDrinkWagerEvent,
 )
-from genesis.day0_first_conversation_state import (
-    FirstBarDrinkReactionState,
-    InitialBarDrinkWagerSnapshot,
-    LilithAcceptsDrinkWagerEvent,
-    SerpentLilithAgreeOnTableEvent,
-    SerpentLilithConversationStartedEvent,
-    SerpentLilithFirstConversationResult,
-    SerpentLilithFirstDrinksTastedEvent,
-    SerpentMovesToExistingTableEvent,
-    SerpentProposesDrinkWagerEvent,
+from genesis.day0_lilith_service_state import (
+    BartenderAddsSecondSugarCubeEvent,
+    BartenderHandsLilithDrinkEvent,
+    BartenderLearnsLilithDrinkEvent,
+    BartenderLearnsLilithDrinkResult,
+    BartenderMakesVodkaWithLemonEvent,
+    BartenderMixesFinalLilithEvent,
+    DrinkIngredientRequestState,
+    LilithCorrectsVodkaWithLemonEvent,
+    LilithDrinkEffectAppliedResult,
+    LilithDrinkRecipeSnapshot,
+    LilithDrinkRevisionResult,
+    LilithDrinkServiceResult,
+    LilithJoinsSerpentAtTableEvent,
+    LilithRequestedRecipeState,
+    LilithRequestsSecondSugarCubeEvent,
 )
 from genesis.day0_lemon_service_state import (
     BartenderLemonRestockResult,
@@ -662,61 +668,280 @@ class Day0FirstBarShift:
         )
 
     def bartender_makes_vodka_with_lemon(self):
-        if 'lemon' not in self.meeting_place.back_room.bar_ingredients:
-            raise RuntimeError('No lemon in bar stock.')
-        drink = self.meeting_place.mix_basic_drink('vodka_with_lemon')
+        if (
+            'lemon'
+            not in self.meeting_place
+            .back_room
+            .bar_ingredients
+        ):
+            raise RuntimeError(
+                'No lemon in bar stock.'
+            )
+
+        drink = (
+            self.meeting_place
+            .mix_basic_drink(
+                'vodka_with_lemon'
+            )
+        )
+
         drink.price_basis = 'vodka'
         drink.effects = {}
-        drink.preparation = BarDrinkPreparation(
-            vodka=1,
-            lemon='drop',
+
+        drink.preparation = (
+            BarDrinkPreparation(
+                vodka=1,
+                lemon='drop',
+            )
         )
+
         self.lilith_order.record_attempt(
             drink
         )
-        event = {'name': 'bartender_makes_vodka_with_lemon', 'guest': 'lilith', 'drink': 'vodka_with_lemon', 'price_basis': 'vodka', 'effects': {}}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
+
+        event = (
+            BartenderMakesVodkaWithLemonEvent()
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
         return drink
 
     def lilith_corrects_vodka_with_lemon(self):
         if self.lilith_order is None:
-            raise RuntimeError('Lilith has no pending order.')
-        correction = {'name': 'lilith_corrects_vodka_with_lemon', 'guest': 'lilith', 'requested_recipe': {'vodka': 1, 'lemon': 'whole', 'sugar': 1}}
-        self.meeting_place.emit_event(correction)
-        self.history.append(correction)
+            raise RuntimeError(
+                'Lilith has no pending order.'
+            )
+
+        correction = (
+            LilithCorrectsVodkaWithLemonEvent(
+                requested_recipe=(
+                    LilithRequestedRecipeState()
+                )
+            )
+        )
+
+        self.meeting_place.emit_event(
+            correction
+        )
+        self.history.append(
+            correction.to_dict()
+        )
+
         return correction
 
     def bartender_learns_lilith_drink(self):
-        mix_book = self.meeting_place.how_to_mix_drinks
-        recipe = DrinkRecipe(name='lilith', origin='taught_by_lilith', hidden=False, learned=True, teacher='lilith', category='learned_drink', price_basis='vodka', effects={'energy_j': 1.0, 'creative_will': 0.1}, ingredients={'vodka': RecipeIngredientRequirement(shots=1, consumed=False), 'lemon': RecipeIngredientRequirement(shots=1, consumed=True, use='whole'), 'sugar': RecipeIngredientRequirement(shots=1, consumed=True, unit='cube')})
-        mix_book.recipes['lilith'] = recipe
-        learned = self.meeting_place.bartender.learn_guest_drink(drink_name='lilith', teacher='lilith', ingredients=['vodka', 'whole_lemon', 'sugar_cube'], effects={'energy_j': 1.0, 'creative_will': 0.1}, price_basis='vodka')
-        self.meeting_place.refresh_basic_drinks()
-        self.history.append({'name': 'bartender_learns_lilith', 'recipe': recipe})
-        return {'recipe': recipe, 'learned': learned}
+        mix_book = (
+            self.meeting_place
+            .how_to_mix_drinks
+        )
 
-    def apply_lilith_drink_effect(self, entity):
-        recipe = self.meeting_place.how_to_mix_drinks.recipes['lilith']
+        recipe = DrinkRecipe(
+            name='lilith',
+            origin='taught_by_lilith',
+            hidden=False,
+            learned=True,
+            teacher='lilith',
+            category='learned_drink',
+            price_basis='vodka',
+            effects={
+                'energy_j': 1.0,
+                'creative_will': 0.1,
+            },
+            ingredients={
+                'vodka':
+                    RecipeIngredientRequirement(
+                        shots=1,
+                        consumed=False,
+                    ),
+                'lemon':
+                    RecipeIngredientRequirement(
+                        shots=1,
+                        consumed=True,
+                        use='whole',
+                    ),
+                'sugar':
+                    RecipeIngredientRequirement(
+                        shots=1,
+                        consumed=True,
+                        unit='cube',
+                    ),
+            },
+        )
+
+        mix_book.recipes[
+            'lilith'
+        ] = recipe
+
+        self.meeting_place.bartender.learn_guest_drink(
+            drink_name='lilith',
+            teacher='lilith',
+            ingredients=[
+                'vodka',
+                'whole_lemon',
+                'sugar_cube',
+            ],
+            effects={
+                'energy_j': 1.0,
+                'creative_will': 0.1,
+            },
+            price_basis='vodka',
+        )
+
+        learned = (
+            self.meeting_place
+            .bartender
+            .chronicle_memory[-1]
+        )
+
+        self.meeting_place.refresh_basic_drinks()
+
+        event = (
+            BartenderLearnsLilithDrinkEvent(
+                recipe=(
+                    LilithDrinkRecipeSnapshot
+                    .from_recipe(
+                        recipe
+                    )
+                )
+            )
+        )
+
+        self.history.append(
+            event.to_dict()
+        )
+
+        return (
+            BartenderLearnsLilithDrinkResult(
+                recipe=recipe,
+                learned=learned,
+            )
+        )
+
+    def apply_lilith_drink_effect(
+        self,
+        entity
+    ):
+        recipe = (
+            self.meeting_place
+            .how_to_mix_drinks
+            .recipes['lilith']
+        )
+
         effects = recipe.effects
-        entity.energy_j = float(getattr(entity, 'energy_j', 0.0)) + float(effects['energy_j'])
-        entity.creative_will = float(getattr(entity, 'creative_will', 0.0)) + float(effects['creative_will'])
-        return {'name': 'lilith_drink_effect_applied', 'energy_j': effects['energy_j'], 'creative_will': effects['creative_will']}
+
+        entity.energy_j = (
+            float(
+                getattr(
+                    entity,
+                    'energy_j',
+                    0.0,
+                )
+            )
+            + float(
+                effects['energy_j']
+            )
+        )
+
+        entity.creative_will = (
+            float(
+                getattr(
+                    entity,
+                    'creative_will',
+                    0.0,
+                )
+            )
+            + float(
+                effects['creative_will']
+            )
+        )
+
+        return (
+            LilithDrinkEffectAppliedResult(
+                energy_j=effects[
+                    'energy_j'
+                ],
+                creative_will=effects[
+                    'creative_will'
+                ],
+            )
+        )
 
     def bartender_mixes_final_lilith(self):
-        recipe = self.meeting_place.how_to_mix_drinks.recipes.get('lilith')
+        recipe = (
+            self.meeting_place
+            .how_to_mix_drinks
+            .recipes.get(
+                'lilith'
+            )
+        )
+
         if recipe is None:
-            raise RuntimeError('Bartender has not learned lilith.')
-        stock = self.meeting_place.back_room.bar_ingredients
-        for ingredient_name in ('vodka', 'lemon', 'sugar'):
+            raise RuntimeError(
+                'Bartender has not learned lilith.'
+            )
+
+        stock = (
+            self.meeting_place
+            .back_room
+            .bar_ingredients
+        )
+
+        for ingredient_name in (
+            'vodka',
+            'lemon',
+            'sugar',
+        ):
             if ingredient_name not in stock:
-                raise RuntimeError(f'Missing ingredient for lilith: {ingredient_name}')
+                raise RuntimeError(
+                    'Missing ingredient for lilith: '
+                    f'{ingredient_name}'
+                )
+
         if stock['lemon'].shots < 1:
-            return self.universe.create_cronenberg_from_quantum_error(error=RuntimeError('No lemon for lilith.'), source_component='meeting_place', source_operation='bartender_mixes_final_lilith')
+            return (
+                self.universe
+                .create_cronenberg_from_quantum_error(
+                    error=RuntimeError(
+                        'No lemon for lilith.'
+                    ),
+                    source_component=(
+                        'meeting_place'
+                    ),
+                    source_operation=(
+                        'bartender_mixes_final_lilith'
+                    ),
+                )
+            )
+
         if stock['sugar'].shots < 1:
-            return self.universe.create_cronenberg_from_quantum_error(error=RuntimeError('No sugar for lilith.'), source_component='meeting_place', source_operation='bartender_mixes_final_lilith')
-        stock['lemon'].consume(1)
-        stock['sugar'].consume(1)
+            return (
+                self.universe
+                .create_cronenberg_from_quantum_error(
+                    error=RuntimeError(
+                        'No sugar for lilith.'
+                    ),
+                    source_component=(
+                        'meeting_place'
+                    ),
+                    source_operation=(
+                        'bartender_mixes_final_lilith'
+                    ),
+                )
+            )
+
+        stock['lemon'].consume(
+            1
+        )
+        stock['sugar'].consume(
+            1
+        )
+
         drink = BarDrink(
             name='lilith',
             type='learned_bar_drink',
@@ -727,74 +952,230 @@ class Day0FirstBarShift:
                 'sugar': 1,
             },
             price_basis='vodka',
-            effects=dict(recipe.effects),
+            effects=dict(
+                recipe.effects
+            ),
         )
+
         self.lilith_order.complete(
             drink
         )
-        event = {'name': 'bartender_mixes_final_lilith', 'guest': 'lilith', 'drink': 'lilith', 'sugar_cubes': 1}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
+
+        event = (
+            BartenderMixesFinalLilithEvent()
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
         return drink
 
-    def bartender_hands_lilith_drink_and_receipt(self):
-        drink = self.bartender_mixes_final_lilith()
-        self.meeting_place.bar_counter.cash_register.add_to_tab(entity=self.lilith, drink=drink)
-        receipt = self.meeting_place.bar_counter.cash_register.print_open_tab_receipt(self.lilith)
+    def bartender_hands_lilith_drink_and_receipt(
+        self
+    ):
+        drink = (
+            self.bartender_mixes_final_lilith()
+        )
+
+        self.meeting_place.bar_counter.cash_register.add_to_tab(
+            entity=self.lilith,
+            drink=drink,
+        )
+
+        receipt = (
+            self.meeting_place
+            .bar_counter
+            .cash_register
+            .print_open_tab_receipt(
+                self.lilith
+            )
+        )
+
         self.lilith_order.attach_receipt(
             receipt.receipt_number
         )
-        event = {'name': 'bartender_hands_lilith_drink_and_receipt', 'guest': 'lilith', 'drink': 'lilith', 'receipt_number': receipt.receipt_number, 'paid': False}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
-        return {'drink': drink, 'receipt': receipt}
 
-    def lilith_tastes_and_requests_second_sugar_cube(self):
-        drink = self.lilith_order.final_drink
+        event = (
+            BartenderHandsLilithDrinkEvent(
+                receipt_number=(
+                    receipt.receipt_number
+                )
+            )
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
+        return (
+            LilithDrinkServiceResult(
+                drink=drink,
+                receipt=receipt,
+            )
+        )
+
+    def lilith_tastes_and_requests_second_sugar_cube(
+        self
+    ):
+        drink = (
+            self.lilith_order
+            .final_drink
+        )
+
         if drink is None:
-            raise RuntimeError('Lilith has no drink to taste.')
-        event = {'name': 'lilith_tastes_and_requests_second_sugar_cube', 'guest': 'lilith', 'drink': 'lilith', 'request': {'ingredient': 'sugar', 'amount': 1, 'unit': 'cube'}}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
+            raise RuntimeError(
+                'Lilith has no drink to taste.'
+            )
+
+        event = (
+            LilithRequestsSecondSugarCubeEvent(
+                request=(
+                    DrinkIngredientRequestState(
+                        ingredient='sugar',
+                        amount=1,
+                        unit='cube',
+                    )
+                )
+            )
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
         return event
 
     def bartender_adds_second_sugar_cube(self):
-        sugar = self.meeting_place.back_room.bar_ingredients.get('sugar')
-        if sugar is None:
-            raise RuntimeError('Sugar is not in bar stock.')
-        if sugar.shots < 1:
-            return self.universe.create_cronenberg_from_quantum_error(error=RuntimeError('Bar sugar depleted.'), source_component='meeting_place', source_operation='bartender_adds_second_sugar_cube')
-        sugar.consume(1)
-        drink = self.lilith_order.final_drink
-        drink.ingredients['sugar'] = 2
-        recipe = self.meeting_place.how_to_mix_drinks.recipes['lilith']
-        recipe.ingredients['sugar'].shots = 2
-        recipe.revision = 2
-        recipe.revision_reason = 'lilith_requested_second_sugar_cube'
-        event = {'name': 'bartender_adds_second_sugar_cube', 'guest': 'lilith', 'drink': 'lilith', 'final_sugar_cubes': 2, 'recipe_updated': True}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
-        return {'drink': drink, 'recipe': recipe}
+        sugar = (
+            self.meeting_place
+            .back_room
+            .bar_ingredients
+            .get(
+                'sugar'
+            )
+        )
 
-    def lilith_joins_serpent_at_existing_table(self):
-        if self.serpent.bar_state.location != 'table':
-            raise RuntimeError('Serpent is not waiting at table.')
+        if sugar is None:
+            raise RuntimeError(
+                'Sugar is not in bar stock.'
+            )
+
+        if sugar.shots < 1:
+            return (
+                self.universe
+                .create_cronenberg_from_quantum_error(
+                    error=RuntimeError(
+                        'Bar sugar depleted.'
+                    ),
+                    source_component=(
+                        'meeting_place'
+                    ),
+                    source_operation=(
+                        'bartender_adds_second_sugar_cube'
+                    ),
+                )
+            )
+
+        sugar.consume(
+            1
+        )
+
+        drink = (
+            self.lilith_order
+            .final_drink
+        )
+
+        drink.ingredients[
+            'sugar'
+        ] = 2
+
+        recipe = (
+            self.meeting_place
+            .how_to_mix_drinks
+            .recipes['lilith']
+        )
+
+        recipe.ingredients[
+            'sugar'
+        ].shots = 2
+
+        recipe.revision = 2
+        recipe.revision_reason = (
+            'lilith_requested_second_sugar_cube'
+        )
+
+        event = (
+            BartenderAddsSecondSugarCubeEvent()
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
+        return (
+            LilithDrinkRevisionResult(
+                drink=drink,
+                recipe=recipe,
+            )
+        )
+
+    def lilith_joins_serpent_at_existing_table(
+        self
+    ):
+        if (
+            self.serpent
+            .bar_state
+            .location
+            != 'table'
+        ):
+            raise RuntimeError(
+                'Serpent is not waiting at table.'
+            )
+
         self._entity_attr_setdefault(
             self.lilith,
             'bar_state',
             BarGuestState()
         )
-        self.lilith.bar_state.location = 'table'
-        self.lilith.bar_state.table_with = 'serpent'
+
+        self.lilith.bar_state.location = (
+            'table'
+        )
+        self.lilith.bar_state.table_with = (
+            'serpent'
+        )
         self.lilith.bar_state.activity = (
             'discussing_good_drinks'
         )
+
         self.serpent.bar_state.activity = (
             'discussing_good_drinks'
         )
-        event = {'name': 'lilith_joins_serpent_at_table', 'guest': 'lilith', 'with': 'serpent', 'drink_in_hand': 'lilith'}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
+
+        event = (
+            LilithJoinsSerpentAtTableEvent()
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
         return event
 
     def lilith_and_serpent_take_first_table_drinks(self):

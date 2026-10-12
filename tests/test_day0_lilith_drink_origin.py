@@ -56,7 +56,7 @@ class Day0LilithDrinkOriginTests(unittest.TestCase):
         self.scene.bartender_makes_vodka_with_lemon()
         self.scene.lilith_corrects_vodka_with_lemon()
         learned = self.scene.bartender_learns_lilith_drink()
-        recipe = learned['recipe']
+        recipe = learned.recipe
         self.assertEqual(recipe.ingredients['lemon'].use, 'whole')
         self.assertEqual(recipe.ingredients['sugar'].shots, 1)
         self.assertEqual(recipe.price_basis, 'vodka')
@@ -66,7 +66,7 @@ class Day0LilithDrinkOriginTests(unittest.TestCase):
         self.scene.bartender_makes_vodka_with_lemon()
         self.scene.lilith_corrects_vodka_with_lemon()
         learned = self.scene.bartender_learns_lilith_drink()
-        self.assertEqual(set(learned['recipe'].effects.keys()), {'energy_j', 'creative_will'})
+        self.assertEqual(set(learned.recipe.effects.keys()), {'energy_j', 'creative_will'})
 
     def test_lilith_effect_increases_energy_and_creative_will(self):
         self.scene.bartender_returns_with_lemon()
@@ -78,6 +78,17 @@ class Day0LilithDrinkOriginTests(unittest.TestCase):
         result = self.scene.apply_lilith_drink_effect(self.scene.lilith)
         self.assertGreater(self.scene.lilith.energy_j, before_energy)
         self.assertGreater(self.scene.lilith.creative_will, before_will)
-        self.assertEqual(set(result.keys()), {'name', 'energy_j', 'creative_will'})
+        self.assertEqual(
+            result.name,
+            'lilith_drink_effect_applied'
+        )
+        self.assertEqual(
+            result.energy_j,
+            1.0
+        )
+        self.assertEqual(
+            result.creative_will,
+            0.1
+        )
 if __name__ == '__main__':
     unittest.main()
