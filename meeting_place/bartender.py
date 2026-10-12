@@ -6,6 +6,18 @@ from meeting_place.bar_incident_state import (
 from meeting_place.bartender_state import (
     BartenderState,
 )
+from meeting_place.bartender_chronicle_state import (
+    BARTENDER_CHRONICLE_MEMORY_TYPES,
+    BartenderCocktailDecisionEntry,
+    BartenderCreatedCocktailEntry,
+    BartenderInterestingGuestEntry,
+    BartenderLearnedCocktailEntry,
+    BartenderLearnedGuestDrinkEntry,
+    BartenderNewDrinkEntry,
+    BartenderObservedEjectionEntry,
+    BartenderObservedEventEntry,
+    BartenderShiftChronicle,
+)
 from meeting_place.drink_recipe_status import (
     DrinkRecipeStatus,
 )
@@ -117,15 +129,65 @@ class Bartender(SocialMixin):
         UniverseLogger.event('BARTENDER RETURNS WITH LEMON')
         return event
 
-    def learn_guest_drink(self, drink_name, teacher, ingredients, effects=None, price_basis=None):
-        effects = dict(effects or {})
-        entry = {'kind': 'learned_cocktail', 'drink': drink_name, 'teacher': teacher, 'ingredients': list(ingredients), 'effects': effects, 'price_basis': price_basis}
-        self.chronicle_memory.append(entry)
-        UniverseLogger.event(f'BARTENDER LEARNED DRINK: {drink_name} FROM {teacher}')
+    def record_chronicle_entry(
+        self,
+        entry,
+    ):
+        if not isinstance(
+            entry,
+            BARTENDER_CHRONICLE_MEMORY_TYPES,
+        ):
+            raise TypeError(
+                "Bartender chronicle memory "
+                "requires a typed chronicle "
+                "entry object."
+            )
+
+        self.chronicle_memory.append(
+            entry
+        )
+
         return entry
 
-    def end_shift(self, bar_day=None, shift_start_tick=None, shift_end_tick=None):
+    def learn_guest_drink(
+        self,
+        drink_name,
+        teacher,
+        ingredients,
+        effects=None,
+        price_basis=None,
+    ):
+        entry = (
+            BartenderLearnedGuestDrinkEntry(
+                drink=drink_name,
+                teacher=teacher,
+                ingredients=tuple(
+                    ingredients
+                ),
+                effects=effects or {},
+                price_basis=price_basis,
+            )
+        )
+
+        self.record_chronicle_entry(
+            entry
+        )
+
+        UniverseLogger.event(
+            f'BARTENDER LEARNED DRINK: '
+            f'{drink_name} FROM {teacher}'
+        )
+
+        return entry.to_dict()
+
+    def end_shift(
+        self,
+        bar_day=None,
+        shift_start_tick=None,
+        shift_end_tick=None,
+    ):
         observed_events = []
+
         for event in self.event_memory:
             if (
                 isinstance(
@@ -135,43 +197,107 @@ class Bartender(SocialMixin):
                 and event.resolution
                 == 'ejected_and_blacklisted'
             ):
-                observed = {
-                    'kind':
-                        'ejection',
-                    'subject':
-                        event.offender,
-                    'observed_reason':
-                        event.reason,
-                    'observed_outcome':
-                        'ejected',
-                }
-
-            elif isinstance(event, dict) and event.get('name') == 'bar_security_incident' and (event.get('resolution') == 'ejected_and_blacklisted'):
-                observed = {'kind': 'ejection', 'subject': event.get('offender'), 'observed_reason': event.get('reason'), 'observed_outcome': 'ejected'}
+                observed = (
+                    BartenderObservedEjectionEntry(
+                        subject=event.offender,
+                        observed_reason=(
+                            event.reason
+                        ),
+                    )
+                )
 
             else:
-                observed = {'kind': 'ordinary', 'observed_event': event}
-            observed_events.append(observed)
-        observed_events.extend(self.chronicle_memory)
+                observed = (
+                    BartenderObservedEventEntry(
+                        observed_event=event,
+                    )
+                )
+
+            observed_events.append(
+                observed
+            )
+
+        observed_events.extend(
+            self.chronicle_memory
+        )
+
         shift_entries = []
+
         if observed_events:
-            chronicle = {'type': 'bartender_shift_chronicle', 'observer': self.name, 'perspective': 'subjective', 'bar_day': bar_day, 'shift_start_tick': shift_start_tick, 'shift_end_tick': shift_end_tick, 'events': observed_events}
-            self.story_book.write_entry(chronicle)
-            shift_entries.append(chronicle)
+            chronicle = (
+                BartenderShiftChronicle(
+                    observer=self.name,
+                    bar_day=bar_day,
+                    shift_start_tick=(
+                        shift_start_tick
+                    ),
+                    shift_end_tick=(
+                        shift_end_tick
+                    ),
+                    events=tuple(
+                        observed_events
+                    ),
+                )
+            )
+
+            self.story_book.write_entry(
+                chronicle
+            )
+
+            shift_entries.append(
+                chronicle.to_dict()
+            )
+
         self.event_memory = []
         self.chronicle_memory = []
-        UniverseLogger.event('BARTENDER SHIFT ENDED')
+
+        UniverseLogger.event(
+            'BARTENDER SHIFT ENDED'
+        )
+
         return shift_entries
 
-    def learn_cocktail(self, drink, teacher, ingredients):
-        entry = {'kind': 'learned_cocktail', 'drink': drink, 'teacher': teacher, 'ingredients': list(ingredients)}
-        self.chronicle_memory.append(entry)
-        UniverseLogger.event(f'BARTENDER LEARNED COCKTAIL: {drink} FROM {teacher}')
-        return entry
+    def learn_cocktail(
+        self,
+        drink,
+        teacher,
+        ingredients,
+    ):
+        entry = (
+            BartenderLearnedCocktailEntry(
+                drink=drink,
+                teacher=teacher,
+                ingredients=tuple(
+                    ingredients
+                ),
+            )
+        )
 
-    def create_cocktail(self, drink, ingredients):
+        self.record_chronicle_entry(
+            entry
+        )
+
+        UniverseLogger.event(
+            f'BARTENDER LEARNED COCKTAIL: '
+            f'{drink} FROM {teacher}'
+        )
+
+        return entry.to_dict()
+
+    def create_cocktail(
+        self,
+        drink,
+        ingredients,
+    ):
         if self.mix_book is not None:
-            recipe = self.mix_book.add_created_recipe(name=drink, ingredients=ingredients)
+            recipe = (
+                self.mix_book
+                .add_created_recipe(
+                    name=drink,
+                    ingredients=ingredients,
+                )
+            )
+
         else:
             recipe = DrinkRecipe(
                 name=drink,
@@ -179,24 +305,73 @@ class Bartender(SocialMixin):
                 initial_status=(
                     DrinkRecipeStatus.TESTING
                 ),
-                ingredients=list(ingredients),
+                ingredients=list(
+                    ingredients
+                ),
             )
-        event = {'kind': 'created_cocktail', 'drink': drink}
-        self.chronicle_memory.append(event)
-        UniverseLogger.event(f'BARTENDER CREATED COCKTAIL: {drink}')
+
+        entry = (
+            BartenderCreatedCocktailEntry(
+                drink=drink,
+            )
+        )
+
+        self.record_chronicle_entry(
+            entry
+        )
+
+        UniverseLogger.event(
+            f'BARTENDER CREATED COCKTAIL: '
+            f'{drink}'
+        )
+
         return recipe
 
-    def note_new_drink(self, drink, source):
-        entry = {'kind': 'new_drink', 'drink': drink, 'source': source}
-        self.chronicle_memory.append(entry)
-        UniverseLogger.event(f'BARTENDER NOTED NEW DRINK: {drink} FROM {source}')
-        return entry
+    def note_new_drink(
+        self,
+        drink,
+        source,
+    ):
+        entry = (
+            BartenderNewDrinkEntry(
+                drink=drink,
+                source=source,
+            )
+        )
 
-    def note_interesting_guest(self, guest, reason):
-        entry = {'kind': 'interesting_guest', 'guest': guest, 'reason': reason}
-        self.chronicle_memory.append(entry)
-        UniverseLogger.event(f'BARTENDER NOTED INTERESTING GUEST: {guest} BECAUSE {reason}')
-        return entry
+        self.record_chronicle_entry(
+            entry
+        )
+
+        UniverseLogger.event(
+            f'BARTENDER NOTED NEW DRINK: '
+            f'{drink} FROM {source}'
+        )
+
+        return entry.to_dict()
+
+    def note_interesting_guest(
+        self,
+        guest,
+        reason,
+    ):
+        entry = (
+            BartenderInterestingGuestEntry(
+                guest=guest,
+                reason=reason,
+            )
+        )
+
+        self.record_chronicle_entry(
+            entry
+        )
+
+        UniverseLogger.event(
+            f'BARTENDER NOTED INTERESTING GUEST: '
+            f'{guest} BECAUSE {reason}'
+        )
+
+        return entry.to_dict()
 
     def offer_cocktail_tasting(self, guest, drink):
         if guest not in self.regular_guests:
@@ -211,27 +386,91 @@ class Bartender(SocialMixin):
         UniverseLogger.event(f'BARTENDER OFFERS COCKTAIL TASTING: {drink} TO {guest}')
         return True
 
-    def record_cocktail_tasting(self, guest, drink, liked, comment=None):
+    def record_cocktail_tasting(
+        self,
+        guest,
+        drink,
+        liked,
+        comment=None,
+    ):
         if guest not in self.regular_guests:
-            raise ValueError('Cocktail tasting requires regular guest.')
+            raise ValueError(
+                'Cocktail tasting requires '
+                'regular guest.'
+            )
+
         if self.mix_book is None:
-            raise ValueError('Bartender has no mix book.')
-        recipe = self.mix_book.recipes.get(drink)
+            raise ValueError(
+                'Bartender has no mix book.'
+            )
+
+        recipe = self.mix_book.recipes.get(
+            drink
+        )
+
         if recipe is None:
-            raise ValueError('Unknown cocktail recipe.')
-        if recipe.status is not DrinkRecipeStatus.TESTING:
-            raise ValueError('Cocktail is not in testing.')
-        tasting = self.mix_book.record_tasting(drink=drink, guest=guest, liked=liked, comment=comment)
-        recipe = self.mix_book.recipes[drink]
+            raise ValueError(
+                'Unknown cocktail recipe.'
+            )
+
+        if (
+            recipe.status
+            is not DrinkRecipeStatus.TESTING
+        ):
+            raise ValueError(
+                'Cocktail is not in testing.'
+            )
+
+        tasting = (
+            self.mix_book.record_tasting(
+                drink=drink,
+                guest=guest,
+                liked=liked,
+                comment=comment,
+            )
+        )
+
+        recipe = self.mix_book.recipes[
+            drink
+        ]
+
         if len(recipe.tastings) == 5:
-            if recipe.status is DrinkRecipeStatus.APPROVED:
-                result_event = {'kind': 'cocktail_approved', 'drink': drink, 'votes_for': recipe.votes_for, 'votes_against': recipe.votes_against}
-                if self.on_cocktail_approved is not None:
-                    self.on_cocktail_approved(recipe)
-            else:
-                result_event = {'kind': 'cocktail_rejected', 'drink': drink, 'votes_for': recipe.votes_for, 'votes_against': recipe.votes_against}
-            self.chronicle_memory.append(result_event)
-        UniverseLogger.event(f'BARTENDER RECORDS COCKTAIL TASTING: {drink} BY {guest}')
+            approved = (
+                recipe.status
+                is DrinkRecipeStatus.APPROVED
+            )
+
+            result_event = (
+                BartenderCocktailDecisionEntry(
+                    drink=drink,
+                    votes_for=(
+                        recipe.votes_for
+                    ),
+                    votes_against=(
+                        recipe.votes_against
+                    ),
+                    approved=approved,
+                )
+            )
+
+            if (
+                approved
+                and self.on_cocktail_approved
+                is not None
+            ):
+                self.on_cocktail_approved(
+                    recipe
+                )
+
+            self.record_chronicle_entry(
+                result_event
+            )
+
+        UniverseLogger.event(
+            f'BARTENDER RECORDS COCKTAIL '
+            f'TASTING: {drink} BY {guest}'
+        )
+
         return tasting
 
     def knows_guest(self, guest_name):

@@ -2,6 +2,11 @@ import unittest
 
 from meeting_place.bar_counter import BarCounter
 from meeting_place.bartender import Bartender
+from meeting_place.bartender_chronicle_state import (
+    BartenderCocktailDecisionEntry,
+    BartenderCreatedCocktailEntry,
+    BartenderNewMenuDrinkEntry,
+)
 from meeting_place.bar_objects import RecipeTasting
 from meeting_place.drink_recipe_status import (
     DrinkRecipeStatus,
@@ -79,12 +84,19 @@ class HowToMixDrinksTests(unittest.TestCase):
             recipe.approved
         )
 
+        entry = (
+            bartender
+            .chronicle_memory[-1]
+        )
+
+        self.assertIsInstance(
+            entry,
+            BartenderCreatedCocktailEntry,
+        )
+
         self.assertEqual(
-            bartender.chronicle_memory[-1],
-            {
-                "kind": "created_cocktail",
-                "drink": "singularity"
-            }
+            entry.drink,
+            "singularity",
         )
 
 
@@ -412,14 +424,38 @@ class HowToMixDrinksTests(unittest.TestCase):
             DrinkRecipeStatus.APPROVED,
         )
 
-        self.assertIn(
-            {
-                "kind": "cocktail_approved",
-                "drink": "singularity",
-                "votes_for": 4,
-                "votes_against": 1
-            },
-            bartender.chronicle_memory
+        decision = (
+            bartender
+            .chronicle_memory[-1]
+        )
+
+        self.assertIsInstance(
+            decision,
+            BartenderCocktailDecisionEntry,
+        )
+
+        self.assertTrue(
+            decision.approved
+        )
+
+        self.assertEqual(
+            decision.kind,
+            "cocktail_approved",
+        )
+
+        self.assertEqual(
+            decision.drink,
+            "singularity",
+        )
+
+        self.assertEqual(
+            decision.votes_for,
+            4,
+        )
+
+        self.assertEqual(
+            decision.votes_against,
+            1,
         )
 
 
@@ -497,14 +533,38 @@ class HowToMixDrinksTests(unittest.TestCase):
             DrinkRecipeStatus.REJECTED,
         )
 
-        self.assertIn(
-            {
-                "kind": "cocktail_rejected",
-                "drink": "singularity",
-                "votes_for": 3,
-                "votes_against": 2
-            },
-            bartender.chronicle_memory
+        decision = (
+            bartender
+            .chronicle_memory[-1]
+        )
+
+        self.assertIsInstance(
+            decision,
+            BartenderCocktailDecisionEntry,
+        )
+
+        self.assertFalse(
+            decision.approved
+        )
+
+        self.assertEqual(
+            decision.kind,
+            "cocktail_rejected",
+        )
+
+        self.assertEqual(
+            decision.drink,
+            "singularity",
+        )
+
+        self.assertEqual(
+            decision.votes_for,
+            3,
+        )
+
+        self.assertEqual(
+            decision.votes_against,
+            2,
         )
 
 
@@ -1114,15 +1174,56 @@ class HowToMixDrinksTests(unittest.TestCase):
                 liked=liked
             )
 
-        self.assertIn(
-            {
-                "kind": "new_menu_drink",
-                "drink": "singularity"
-            },
-            meeting_place
-            .bartender
-            .chronicle_memory
+        new_menu_entry = next(
+            (
+                entry
+                for entry
+                in (
+                    meeting_place
+                    .bartender
+                    .chronicle_memory
+                )
+                if isinstance(
+                    entry,
+                    BartenderNewMenuDrinkEntry,
+                )
+            ),
+            None,
         )
+
+        self.assertIsNotNone(
+            new_menu_entry
+        )
+
+        self.assertEqual(
+            new_menu_entry.drink,
+            "singularity",
+        )
+
+        self.assertEqual(
+            new_menu_entry.kind,
+            "new_menu_drink",
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    new_menu_entry,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = new_menu_entry[
+                "drink"
+            ]
 
 
     def test_book_hides_raspberry_rum_until_god_teaches_it(

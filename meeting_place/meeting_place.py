@@ -3,6 +3,10 @@ from copy import deepcopy
 from meeting_place.cat_invited_guest_state import (
     CatInvitedGuestState,
 )
+from meeting_place.bartender_chronicle_state import (
+    BartenderDrinkPromotedEntry,
+    BartenderNewMenuDrinkEntry,
+)
 from meeting_place.drink_recipe_status import (
     DrinkRecipeStatus,
 )
@@ -1515,8 +1519,16 @@ class MeetingPlace:
             raise ValueError('Approved cocktail requires name.')
         recipe.menu_added_day = self.bar_clock.day
         self.new_drinks[drink_name] = recipe
-        self.bartender.chronicle_memory.append({'kind': 'new_menu_drink', 'drink': drink_name})
-        UniverseLogger.event(f'BAR NEW DRINK ADDED: {drink_name}')
+
+        self.bartender.record_chronicle_entry(
+            BartenderNewMenuDrinkEntry(
+                drink=drink_name,
+            )
+        )
+
+        UniverseLogger.event(
+            f'BAR NEW DRINK ADDED: {drink_name}'
+        )
         return recipe
 
     def serve_basic_drinks_on_tab(self, entity, drink_names):
@@ -1662,8 +1674,15 @@ class MeetingPlace:
         self.drink_menu[drink_name] = BarMenuItem.from_recipe(
             recipe, menu_source='promoted_recipe'
         )
-        self.bartender.chronicle_memory.append({'kind': 'drink_promoted', 'drink': drink_name})
-        UniverseLogger.event(f'BAR DRINK PROMOTED: {drink_name}')
+        self.bartender.record_chronicle_entry(
+            BartenderDrinkPromotedEntry(
+                drink=drink_name,
+            )
+        )
+
+        UniverseLogger.event(
+            f'BAR DRINK PROMOTED: {drink_name}'
+        )
         return recipe
 
     def remove_drink(self, drink_name):
