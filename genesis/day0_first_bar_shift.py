@@ -296,7 +296,7 @@ class Day0FirstBarShift:
         if self.meeting_place.bartender.current_location != 'bar_yard':
             raise RuntimeError('Bartender is not in the bar yard.')
         result = self.bar_yard.pick_lemon('bartender')
-        if not result['picked']:
+        if not result.picked:
             raise RuntimeError('Bartender failed to pick lemon.')
         stock = self.meeting_place.back_room.bar_ingredients
         lemon_stock = stock.get('lemon')
@@ -309,7 +309,7 @@ class Day0FirstBarShift:
         self.meeting_place.refresh_basic_drinks()
         self.history.append({'name': 'lemon_added_to_bar_stock', 'amount': 1})
         self.history.append(returned)
-        return {'picked': result, 'stock': lemon_stock.to_dict(), 'returned': returned}
+        return {'picked': result.to_dict(), 'stock': lemon_stock.to_dict(), 'returned': returned}
 
     def bartender_makes_vodka_with_lemon(self):
         if 'lemon' not in self.meeting_place.back_room.bar_ingredients:
@@ -690,9 +690,9 @@ class Day0FirstBarShift:
         picked = []
         for _ in range(amount):
             result = self.bar_yard.pick_lemon('bartender')
-            if not result.get('picked', False):
+            if not result.picked:
                 raise RuntimeError('Bartender failed while restocking lemons.')
-            picked.append(result)
+            picked.append(result.to_dict())
         stock = self.meeting_place.back_room.bar_ingredients
         lemon_stock = stock.get('lemon')
         if lemon_stock is None:
