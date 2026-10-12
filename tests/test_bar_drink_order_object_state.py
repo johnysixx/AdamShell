@@ -3,6 +3,9 @@ import unittest
 from genesis.day0_first_bar_shift import (
     Day0FirstBarShift,
 )
+from genesis.day0_lemon_service_state import (
+    LilithVodkaWithLemonOrderResult,
+)
 from gods import Gods
 from idea_entities import IdeaEntities
 from library import Library
@@ -167,7 +170,7 @@ class BarDrinkOrderObjectStateTests(
             dict
         )
 
-    def test_scene_keeps_order_object_and_returns_snapshot(
+    def test_scene_keeps_order_object_and_returns_object_result(
         self
     ):
         scene = self._scene()
@@ -184,13 +187,23 @@ class BarDrinkOrderObjectStateTests(
             BarDrinkOrder
         )
         self.assertIsInstance(
-            result["order"],
-            dict
+            result,
+            LilithVodkaWithLemonOrderResult
         )
-        result["order"]["served"] = True
+        self.assertIs(
+            result.order,
+            order
+        )
+
+        snapshot = result.to_dict()
+        snapshot["order"]["served"] = True
 
         self.assertFalse(
             order.served
+        )
+        self._assert_object_only(
+            result,
+            "order"
         )
         self._assert_object_only(
             order,

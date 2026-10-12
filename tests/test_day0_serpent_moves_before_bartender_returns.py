@@ -66,6 +66,9 @@ class Day0SerpentMovesBeforeBartenderReturnsTests(unittest.TestCase):
             ),
             'table'
         )
-        self.assertEqual(result['returned']['ingredient'], 'lemon')
+        self.assertEqual(
+            result.returned.ingredient,
+            'lemon'
+        )
 if __name__ == '__main__':
     unittest.main()

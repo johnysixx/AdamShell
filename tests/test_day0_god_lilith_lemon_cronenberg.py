@@ -100,20 +100,12 @@ class Day0GodLilithLemonCronenbergTests(
         )
 
         self.assertEqual(
-            result[
-                "returned"
-            ][
-                "amount"
-            ],
+            result.returned.amount,
             6
         )
 
         self.assertGreater(
-            result[
-                "stock"
-            ][
-                "shots"
-            ],
+            result.stock.shots,
             1
         )
 

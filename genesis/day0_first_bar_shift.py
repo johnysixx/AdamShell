@@ -34,6 +34,17 @@ from meeting_place.bar_objects import (
 )
 from core.entity.social_entity import _entity_attr_setdefault
 from meeting_place.bar_yard import BarYard
+from genesis.day0_lemon_service_state import (
+    BartenderLemonRestockResult,
+    BartenderLemonRestockReturnedEvent,
+    BartenderLemonRestockStartedEvent,
+    BartenderLemonReturnResult,
+    BartenderReportsMissingLemonEvent,
+    LemonAddedToBarStockEvent,
+    LilithPointsOutLemonTreeEvent,
+    LilithVodkaWithLemonOrderedEvent,
+    LilithVodkaWithLemonOrderResult,
+)
 from meeting_place.bouncer_state import (
     BouncerState,
 )
@@ -156,7 +167,10 @@ class Day0FirstBarShift:
 
     def lilith_orders_vodka_with_lemon(self):
         if self.lilith is None:
-            raise RuntimeError('Lilith does not exist yet.')
+            raise RuntimeError(
+                'Lilith does not exist yet.'
+            )
+
         self.lilith_order = BarDrinkOrder(
             guest='lilith',
             drink='vodka_with_lemon',
@@ -164,21 +178,76 @@ class Day0FirstBarShift:
             garnish='lemon',
             waiting_for='lemon',
         )
-        self.history.append({'name': 'lilith_orders_vodka_with_lemon'})
-        unavailable = {'name': 'bartender_reports_missing_lemon', 'guest': 'lilith', 'ingredient': 'lemon', 'available': False}
-        self.meeting_place.emit_event(unavailable)
-        self.history.append(unavailable)
-        points_out_tree = {'name': 'lilith_points_out_lemon_tree', 'guest': 'lilith', 'location': 'bar_yard', 'tree': 'lemon_tree'}
-        self.meeting_place.emit_event(points_out_tree)
-        self.history.append(points_out_tree)
-        learned = self.meeting_place.bartender.learn_requested_drink(guest_name='lilith', drink_name='vodka_with_lemon')
-        self.history.append(learned)
-        left = self.meeting_place.bartender.leave_for_lemon(guest_name='lilith')
-        self.history.append(left)
-        return {
-            'order': self.lilith_order.to_dict(),
-            'bartender': left,
-        }
+
+        order_event = (
+            LilithVodkaWithLemonOrderedEvent()
+        )
+
+        self.history.append(
+            order_event.to_dict()
+        )
+
+        unavailable = (
+            BartenderReportsMissingLemonEvent(
+                guest='lilith',
+            )
+        )
+
+        self.meeting_place.emit_event(
+            unavailable
+        )
+        self.history.append(
+            unavailable.to_dict()
+        )
+
+        points_out_tree = (
+            LilithPointsOutLemonTreeEvent()
+        )
+
+        self.meeting_place.emit_event(
+            points_out_tree
+        )
+        self.history.append(
+            points_out_tree.to_dict()
+        )
+
+        learned = (
+            self.meeting_place
+            .bartender
+            .learn_requested_drink(
+                guest_name='lilith',
+                drink_name='vodka_with_lemon',
+            )
+        )
+
+        self.history.append(
+            learned
+        )
+
+        left_boundary = (
+            self.meeting_place
+            .bartender
+            .leave_for_lemon(
+                guest_name='lilith'
+            )
+        )
+
+        self.history.append(
+            left_boundary
+        )
+
+        left_event = (
+            self.meeting_place
+            .bartender
+            .event_memory[-1]
+        )
+
+        return (
+            LilithVodkaWithLemonOrderResult(
+                order=self.lilith_order,
+                bartender=left_event,
+            )
+        )
 
     def serpent_and_lilith_begin_conversation(self):
         if self.serpent is None:
@@ -293,23 +362,84 @@ class Day0FirstBarShift:
         return event
 
     def bartender_returns_with_lemon(self):
-        if self.meeting_place.bartender.current_location != 'bar_yard':
-            raise RuntimeError('Bartender is not in the bar yard.')
-        result = self.bar_yard.pick_lemon('bartender')
-        if not result.picked:
-            raise RuntimeError('Bartender failed to pick lemon.')
-        stock = self.meeting_place.back_room.bar_ingredients
-        lemon_stock = stock.get('lemon')
+        if (
+            self.meeting_place
+            .bartender
+            .current_location
+            != 'bar_yard'
+        ):
+            raise RuntimeError(
+                'Bartender is not in the bar yard.'
+            )
+
+        picked = self.bar_yard.pick_lemon(
+            'bartender'
+        )
+
+        if not picked.picked:
+            raise RuntimeError(
+                'Bartender failed to pick lemon.'
+            )
+
+        stock = (
+            self.meeting_place
+            .back_room
+            .bar_ingredients
+        )
+
+        lemon_stock = stock.get(
+            'lemon'
+        )
+
         if lemon_stock is None:
-            lemon_stock = BarIngredientStock(name='lemon', available=True, fundamental=False, serve_directly=False, shots=0, unit='fruit')
+            lemon_stock = BarIngredientStock(
+                name='lemon',
+                available=True,
+                fundamental=False,
+                serve_directly=False,
+                shots=0,
+                unit='fruit',
+            )
+
             stock['lemon'] = lemon_stock
+
         lemon_stock.shots += 1
         lemon_stock.available = True
-        returned = self.meeting_place.bartender.return_with_lemon(guest_name='lilith')
+
+        returned_boundary = (
+            self.meeting_place
+            .bartender
+            .return_with_lemon(
+                guest_name='lilith'
+            )
+        )
+
+        returned_event = (
+            self.meeting_place
+            .bartender
+            .event_memory[-1]
+        )
+
         self.meeting_place.refresh_basic_drinks()
-        self.history.append({'name': 'lemon_added_to_bar_stock', 'amount': 1})
-        self.history.append(returned)
-        return {'picked': result.to_dict(), 'stock': lemon_stock.to_dict(), 'returned': returned}
+
+        stock_event = (
+            LemonAddedToBarStockEvent(
+                amount=1
+            )
+        )
+
+        self.history.append(
+            stock_event.to_dict()
+        )
+        self.history.append(
+            returned_boundary
+        )
+
+        return BartenderLemonReturnResult(
+            picked=picked,
+            stock=lemon_stock,
+            returned=returned_event,
+        )
 
     def bartender_makes_vodka_with_lemon(self):
         if 'lemon' not in self.meeting_place.back_room.bar_ingredients:
@@ -679,33 +809,104 @@ class Day0FirstBarShift:
         self.history.append(event)
         return {'event': event, 'cronenberg': cronenberg}
 
-    def bartender_runs_to_yard_for_more_lemons(self, amount=6):
-        amount = int(amount)
+    def bartender_runs_to_yard_for_more_lemons(
+        self,
+        amount=6
+    ):
+        amount = int(
+            amount
+        )
+
         if amount <= 1:
-            raise ValueError('Bartender must bring back more than one lemon.')
-        self.meeting_place.bartender.current_location = 'bar_yard'
-        departure = {'name': 'bartender_runs_to_yard_for_more_lemons', 'destination': 'bar_yard', 'reason': 'restock_lemons', 'target_amount': amount}
-        self.meeting_place.emit_event(departure)
-        self.history.append(departure)
+            raise ValueError(
+                'Bartender must bring back '
+                'more than one lemon.'
+            )
+
+        self.meeting_place.bartender.current_location = (
+            'bar_yard'
+        )
+
+        departure = (
+            BartenderLemonRestockStartedEvent(
+                target_amount=amount
+            )
+        )
+
+        self.meeting_place.emit_event(
+            departure
+        )
+        self.history.append(
+            departure.to_dict()
+        )
+
         picked = []
+
         for _ in range(amount):
-            result = self.bar_yard.pick_lemon('bartender')
+            result = self.bar_yard.pick_lemon(
+                'bartender'
+            )
+
             if not result.picked:
-                raise RuntimeError('Bartender failed while restocking lemons.')
-            picked.append(result.to_dict())
-        stock = self.meeting_place.back_room.bar_ingredients
-        lemon_stock = stock.get('lemon')
+                raise RuntimeError(
+                    'Bartender failed while '
+                    'restocking lemons.'
+                )
+
+            picked.append(
+                result
+            )
+
+        stock = (
+            self.meeting_place
+            .back_room
+            .bar_ingredients
+        )
+
+        lemon_stock = stock.get(
+            'lemon'
+        )
+
         if lemon_stock is None:
-            lemon_stock = BarIngredientStock(name='lemon', available=True, fundamental=False, serve_directly=False, shots=0, unit='fruit')
+            lemon_stock = BarIngredientStock(
+                name='lemon',
+                available=True,
+                fundamental=False,
+                serve_directly=False,
+                shots=0,
+                unit='fruit',
+            )
+
             stock['lemon'] = lemon_stock
+
         lemon_stock.shots += amount
         lemon_stock.available = True
-        self.meeting_place.bartender.current_location = 'bar'
-        returned = {'name': 'bartender_returns_with_lemon_stock', 'source': 'bar_yard', 'ingredient': 'lemon', 'amount': amount, 'stock_after': lemon_stock.shots}
-        self.meeting_place.emit_event(returned)
-        self.history.append(returned)
+
+        self.meeting_place.bartender.current_location = (
+            'bar'
+        )
+
+        returned = (
+            BartenderLemonRestockReturnedEvent(
+                amount=amount,
+                stock_after=lemon_stock.shots,
+            )
+        )
+
+        self.meeting_place.emit_event(
+            returned
+        )
+        self.history.append(
+            returned.to_dict()
+        )
+
         self.meeting_place.refresh_basic_drinks()
-        return {'picked': picked, 'returned': returned, 'stock': lemon_stock.to_dict()}
+
+        return BartenderLemonRestockResult(
+            picked=tuple(picked),
+            returned=returned,
+            stock=lemon_stock,
+        )
 
     def bartender_mixes_gods_lilith_after_restock(self):
         if getattr(

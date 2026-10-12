@@ -3,6 +3,9 @@ import unittest
 from genesis.day0_first_bar_shift import (
     Day0FirstBarShift,
 )
+from genesis.day0_lemon_service_state import (
+    LilithVodkaWithLemonOrderResult,
+)
 from gods import Gods
 from idea_entities import IdeaEntities
 from library import Library
@@ -194,7 +197,7 @@ class BarServiceOrderObjectStateTests(
             "judge_wine_discussion"
         )
 
-    def test_lilith_order_snapshot_contract_is_unchanged(
+    def test_lilith_order_result_keeps_order_object(
         self
     ):
         scene = self._scene()
@@ -205,16 +208,40 @@ class BarServiceOrderObjectStateTests(
             .lilith_orders_vodka_with_lemon()
         )
 
+        self.assertIsInstance(
+            result,
+            LilithVodkaWithLemonOrderResult
+        )
+        self.assertIs(
+            result.order,
+            scene.lilith_order
+        )
         self.assertEqual(
-            result["order"],
-            {
-                "guest": "lilith",
-                "drink": "vodka_with_lemon",
-                "base": "vodka",
-                "garnish": "lemon",
-                "served": False,
-                "waiting_for": "lemon",
-            }
+            result.order.guest,
+            "lilith"
+        )
+        self.assertEqual(
+            result.order.drink,
+            "vodka_with_lemon"
+        )
+        self.assertEqual(
+            result.order.base,
+            "vodka"
+        )
+        self.assertEqual(
+            result.order.garnish,
+            "lemon"
+        )
+        self.assertFalse(
+            result.order.served
+        )
+        self.assertEqual(
+            result.order.waiting_for,
+            "lemon"
+        )
+        self._assert_object_only(
+            result,
+            "order"
         )
 
 

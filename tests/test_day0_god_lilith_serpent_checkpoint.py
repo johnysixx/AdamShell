@@ -89,20 +89,12 @@ class Day0GodLilithSerpentCheckpointTests(
         )
 
         self.assertEqual(
-            result[
-                "order"
-            ][
-                "drink"
-            ],
+            result.order.drink,
             "vodka_with_lemon"
         )
 
         self.assertFalse(
-            result[
-                "order"
-            ][
-                "served"
-            ]
+            result.order.served
         )
 
         self.assertEqual(
