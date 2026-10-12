@@ -62,6 +62,18 @@ from genesis.day0_lilith_service_state import (
     LilithRequestedRecipeState,
     LilithRequestsSecondSugarCubeEvent,
 )
+from genesis.day0_wine_ideas_state import (
+    BartenderAsksGodForOrderEvent,
+    GodOrdersLilithEvent,
+    GodStillChoosingEvent,
+    LilithSweetnessWineIdeaEvent,
+    LilithSweetnessWineIdeaResult,
+    LilithTastesMeadEvent,
+    SerpentMeadBeerTastingResult,
+    SerpentProposesBitternessForWineEvent,
+    SerpentTastesBeerEvent,
+    SerpentTastesMeadEvent,
+)
 from genesis.day0_table_wine_state import (
     FirstGoodWineObservationEvent,
     FirstTableDrinksResult,
@@ -1469,64 +1481,137 @@ class Day0FirstBarShift:
         return event
 
     def bartender_asks_god_for_order(self):
-        if getattr(
+        if (
             getattr(
-                self.god,
-                'bar_state',
+                getattr(
+                    self.god,
+                    'bar_state',
+                    None
+                ),
+                'activity',
                 None
-            ),
-            'activity',
-            None
-        ) != 'browsing_drinks':
-            raise RuntimeError('God is not browsing the drink menu.')
-        event = {'name': 'bartender_asks_god_for_order', 'guest': 'god', 'question': 'what_will_you_have'}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
+            )
+            != 'browsing_drinks'
+        ):
+            raise RuntimeError(
+                'God is not browsing the drink menu.'
+            )
+
+        event = (
+            BartenderAsksGodForOrderEvent()
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
         return event
 
     def god_says_still_choosing(self):
-        if getattr(
+        if (
             getattr(
-                self.god,
-                'bar_state',
+                getattr(
+                    self.god,
+                    'bar_state',
+                    None
+                ),
+                'activity',
                 None
-            ),
-            'activity',
-            None
-        ) != 'browsing_drinks':
-            raise RuntimeError('God is not choosing a drink.')
-        self.god.bar_state.activity = 'still_choosing'
-        event = {'name': 'god_says_still_choosing', 'guest': 'god', 'ordered': False}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
+            )
+            != 'browsing_drinks'
+        ):
+            raise RuntimeError(
+                'God is not choosing a drink.'
+            )
+
+        self.god.bar_state.activity = (
+            'still_choosing'
+        )
+
+        event = (
+            GodStillChoosingEvent()
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
         return event
 
-    def lilith_tastes_mead_and_adds_sweetness_idea(self):
-        discussion = getattr(self, 'serpent_lilith_good_drink_discussion', None)
+    def lilith_tastes_mead_and_adds_sweetness_idea(
+        self
+    ):
+        discussion = getattr(
+            self,
+            'serpent_lilith_good_drink_discussion',
+            None,
+        )
+
         if discussion is None:
-            raise RuntimeError('Good drink discussion has not started.')
-        tasting = {'name': 'lilith_tastes_mead', 'guest': 'lilith', 'drink': 'mead'}
-        self.meeting_place.emit_event(tasting)
-        self.history.append(tasting)
+            raise RuntimeError(
+                'Good drink discussion has not started.'
+            )
+
+        tasting = (
+            LilithTastesMeadEvent()
+        )
+
+        self.meeting_place.emit_event(
+            tasting
+        )
+        self.history.append(
+            tasting.to_dict()
+        )
+
         idea = BarDrinkIdea(
             subject='wine',
             source='lilith',
-            observation='wine_should_be_sweet',
-            desired_property=BarDrinkDesiredProperty(
-                sweetness=True,
+            observation=(
+                'wine_should_be_sweet'
+            ),
+            desired_property=(
+                BarDrinkDesiredProperty(
+                    sweetness=True,
+                )
             ),
         )
+
         discussion.add_idea(
             idea
         )
-        event = {'name': 'lilith_says_wine_should_be_sweet', 'subject': 'wine', 'desired_property': 'sweet'}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
-        return {'tasting': tasting, 'idea': idea}
 
-    def god_finishes_browsing_and_orders_lilith(self):
+        event = (
+            LilithSweetnessWineIdeaEvent()
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
+        return (
+            LilithSweetnessWineIdeaResult(
+                tasting=tasting,
+                idea=idea,
+            )
+        )
+
+    def god_finishes_browsing_and_orders_lilith(
+        self
+    ):
         if self.god is None:
-            raise RuntimeError('God does not exist.')
+            raise RuntimeError(
+                'God does not exist.'
+            )
+
         activity = getattr(
             getattr(
                 self.god,
@@ -1536,50 +1621,131 @@ class Day0FirstBarShift:
             'activity',
             None
         )
-        if activity not in ('browsing_drinks', 'still_choosing'):
-            raise RuntimeError('God is not choosing from the menu.')
-        if 'lilith' not in self.meeting_place.how_to_mix_drinks.recipes:
-            raise RuntimeError('Lilith drink has not been learned yet.')
-        self.god.bar_state.activity = 'ordered_lilith'
-        self.god.bar_state.order = 'lilith'
-        event = {'name': 'god_orders_lilith', 'guest': 'god', 'drink': 'lilith'}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
+
+        if activity not in (
+            'browsing_drinks',
+            'still_choosing',
+        ):
+            raise RuntimeError(
+                'God is not choosing from the menu.'
+            )
+
+        if (
+            'lilith'
+            not in self.meeting_place
+            .how_to_mix_drinks
+            .recipes
+        ):
+            raise RuntimeError(
+                'Lilith drink has not been learned yet.'
+            )
+
+        self.god.bar_state.activity = (
+            'ordered_lilith'
+        )
+        self.god.bar_state.order = (
+            'lilith'
+        )
+
+        event = (
+            GodOrdersLilithEvent()
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
         return event
 
     def serpent_tastes_mead_then_beer(self):
-        discussion = getattr(self, 'serpent_lilith_good_drink_discussion', None)
-        if discussion is None:
-            raise RuntimeError('Good drink discussion has not started.')
-        mead_event = {'name': 'serpent_tastes_mead', 'guest': 'serpent', 'drink': 'mead'}
-        self.meeting_place.emit_event(mead_event)
-        self.history.append(mead_event)
-        beer_event = {'name': 'serpent_tastes_beer', 'guest': 'serpent', 'drink': 'beer'}
-        self.meeting_place.emit_event(beer_event)
-        self.history.append(beer_event)
-        return {'mead': mead_event, 'beer': beer_event}
+        discussion = getattr(
+            self,
+            'serpent_lilith_good_drink_discussion',
+            None,
+        )
 
-    def serpent_adds_bitterness_as_wine_idea(self):
-        discussion = getattr(self, 'serpent_lilith_good_drink_discussion', None)
         if discussion is None:
-            raise RuntimeError('Good drink discussion has not started.')
+            raise RuntimeError(
+                'Good drink discussion has not started.'
+            )
+
+        mead_event = (
+            SerpentTastesMeadEvent()
+        )
+
+        self.meeting_place.emit_event(
+            mead_event
+        )
+        self.history.append(
+            mead_event.to_dict()
+        )
+
+        beer_event = (
+            SerpentTastesBeerEvent()
+        )
+
+        self.meeting_place.emit_event(
+            beer_event
+        )
+        self.history.append(
+            beer_event.to_dict()
+        )
+
+        return (
+            SerpentMeadBeerTastingResult(
+                mead=mead_event,
+                beer=beer_event,
+            )
+        )
+
+    def serpent_adds_bitterness_as_wine_idea(
+        self
+    ):
+        discussion = getattr(
+            self,
+            'serpent_lilith_good_drink_discussion',
+            None,
+        )
+
+        if discussion is None:
+            raise RuntimeError(
+                'Good drink discussion has not started.'
+            )
+
         observation = BarDrinkIdea(
             subject='wine',
             source='serpent',
-            assessment=BarDrinkAssessment(
-                sweetness='good',
-                full_body='still_missing',
+            assessment=(
+                BarDrinkAssessment(
+                    sweetness='good',
+                    full_body='still_missing',
+                )
             ),
-            proposal=BarDrinkProposal(
-                bitterness=True,
+            proposal=(
+                BarDrinkProposal(
+                    bitterness=True,
+                )
             ),
         )
+
         discussion.add_idea(
             observation
         )
-        event = {'name': 'serpent_proposes_bitterness_for_wine', 'subject': 'wine', 'sweetness': 'good_but_not_enough', 'desired_property': 'bitterness'}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
+
+        event = (
+            SerpentProposesBitternessForWineEvent()
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
         return observation
 
     def bartender_attempts_gods_lilith_without_lemon(self):
