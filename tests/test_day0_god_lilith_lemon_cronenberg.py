@@ -72,17 +72,13 @@ class Day0GodLilithLemonCronenbergTests(
         )
 
         self.assertTrue(
-            result[
-                "event"
-            ][
-                "cronenberg_created"
-            ]
+            result
+            .event
+            .cronenberg_created
         )
 
         self.assertIsNotNone(
-            result[
-                "cronenberg"
-            ]
+            result.cronenberg
         )
 
     def test_bartender_runs_to_yard_after_failure(

@@ -84,6 +84,13 @@ from genesis.day0_table_wine_state import (
     SerpentFinishesWineAtTableEvent,
     SerpentLilithContinueWineDiscussionEvent,
 )
+from genesis.day0_god_lilith_service_state import (
+    BartenderMixesGodsLilithEvent,
+    BartenderServesGodsLilithEvent,
+    GodsLilithFailsWithoutLemonEvent,
+    GodsLilithFailureResult,
+    GodsLilithServiceResult,
+)
 from genesis.day0_lemon_service_state import (
     BartenderLemonRestockResult,
     BartenderLemonRestockReturnedEvent,
@@ -1748,27 +1755,74 @@ class Day0FirstBarShift:
 
         return observation
 
-    def bartender_attempts_gods_lilith_without_lemon(self):
-        if getattr(
+    def bartender_attempts_gods_lilith_without_lemon(
+        self
+    ):
+        if (
             getattr(
-                self.god,
-                'bar_state',
+                getattr(
+                    self.god,
+                    'bar_state',
+                    None
+                ),
+                'order',
                 None
-            ),
-            'order',
-            None
-        ) != 'lilith':
-            raise RuntimeError('God has not ordered lilith.')
-        lemon = self.meeting_place.back_room.bar_ingredients.get('lemon')
-        lemon_count = lemon.shots if lemon is not None else 0
+            )
+            != 'lilith'
+        ):
+            raise RuntimeError(
+                'God has not ordered lilith.'
+            )
+
+        lemon = (
+            self.meeting_place
+            .back_room
+            .bar_ingredients
+            .get('lemon')
+        )
+
+        lemon_count = (
+            lemon.shots
+            if lemon is not None
+            else 0
+        )
+
         if lemon_count > 0:
-            raise RuntimeError('This scene requires the bar to be out of lemons.')
-        error = RuntimeError("No lemon available for God's lilith.")
-        cronenberg = self.universe.create_cronenberg_from_quantum_error(error=error, source_component='meeting_place', source_operation='bartender_attempts_gods_lilith')
-        event = {'name': 'gods_lilith_fails_without_lemon', 'guest': 'god', 'drink': 'lilith', 'reason': 'no_lemon', 'cronenberg_created': True}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
-        return {'event': event, 'cronenberg': cronenberg}
+            raise RuntimeError(
+                'This scene requires the bar '
+                'to be out of lemons.'
+            )
+
+        error = RuntimeError(
+            "No lemon available for God's lilith."
+        )
+
+        cronenberg = (
+            self.universe
+            .create_cronenberg_from_quantum_error(
+                error=error,
+                source_component='meeting_place',
+                source_operation=(
+                    'bartender_attempts_gods_lilith'
+                ),
+            )
+        )
+
+        event = (
+            GodsLilithFailsWithoutLemonEvent()
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
+        return GodsLilithFailureResult(
+            event=event,
+            cronenberg=cronenberg,
+        )
 
     def bartender_runs_to_yard_for_more_lemons(
         self,
@@ -1869,30 +1923,100 @@ class Day0FirstBarShift:
             stock=lemon_stock,
         )
 
-    def bartender_mixes_gods_lilith_after_restock(self):
-        if getattr(
+    def bartender_mixes_gods_lilith_after_restock(
+        self
+    ):
+        if (
             getattr(
-                self.god,
-                'bar_state',
+                getattr(
+                    self.god,
+                    'bar_state',
+                    None
+                ),
+                'order',
                 None
-            ),
-            'order',
-            None
-        ) != 'lilith':
-            raise RuntimeError('God is not waiting for lilith.')
-        recipe = self.meeting_place.how_to_mix_drinks.recipes.get('lilith')
+            )
+            != 'lilith'
+        ):
+            raise RuntimeError(
+                'God is not waiting for lilith.'
+            )
+
+        recipe = (
+            self.meeting_place
+            .how_to_mix_drinks
+            .recipes
+            .get('lilith')
+        )
+
         if recipe is None:
-            raise RuntimeError('Bartender does not know lilith.')
-        stock = self.meeting_place.back_room.bar_ingredients
-        lemon = stock.get('lemon')
-        sugar = stock.get('sugar')
-        if lemon is None or lemon.shots < 1:
-            return self.universe.create_cronenberg_from_quantum_error(error=RuntimeError('No lemon after lemon restock.'), source_component='meeting_place', source_operation='bartender_mixes_gods_lilith_after_restock')
-        required_sugar = recipe.ingredients['sugar'].shots
-        if sugar is None or sugar.shots < required_sugar:
-            return self.universe.create_cronenberg_from_quantum_error(error=RuntimeError("Not enough sugar for God's lilith."), source_component='meeting_place', source_operation='bartender_mixes_gods_lilith_after_restock')
-        lemon.consume(1)
-        sugar.consume(required_sugar)
+            raise RuntimeError(
+                'Bartender does not know lilith.'
+            )
+
+        stock = (
+            self.meeting_place
+            .back_room
+            .bar_ingredients
+        )
+
+        lemon = stock.get(
+            'lemon'
+        )
+        sugar = stock.get(
+            'sugar'
+        )
+
+        if (
+            lemon is None
+            or lemon.shots < 1
+        ):
+            return (
+                self.universe
+                .create_cronenberg_from_quantum_error(
+                    error=RuntimeError(
+                        'No lemon after lemon restock.'
+                    ),
+                    source_component='meeting_place',
+                    source_operation=(
+                        'bartender_mixes_'
+                        'gods_lilith_after_restock'
+                    ),
+                )
+            )
+
+        required_sugar = (
+            recipe
+            .ingredients['sugar']
+            .shots
+        )
+
+        if (
+            sugar is None
+            or sugar.shots < required_sugar
+        ):
+            return (
+                self.universe
+                .create_cronenberg_from_quantum_error(
+                    error=RuntimeError(
+                        "Not enough sugar for "
+                        "God's lilith."
+                    ),
+                    source_component='meeting_place',
+                    source_operation=(
+                        'bartender_mixes_'
+                        'gods_lilith_after_restock'
+                    ),
+                )
+            )
+
+        lemon.consume(
+            1
+        )
+        sugar.consume(
+            required_sugar
+        )
+
         drink = BarDrink(
             name='lilith',
             type='learned_bar_drink',
@@ -1902,19 +2026,42 @@ class Day0FirstBarShift:
                 'lemon': 'whole',
                 'sugar': required_sugar,
             },
-            price_basis=recipe.price_basis or 'vodka',
-            effects=dict(recipe.effects),
+            price_basis=(
+                recipe.price_basis
+                or 'vodka'
+            ),
+            effects=dict(
+                recipe.effects
+            ),
         )
-        self.god.bar_state.prepared_drink = drink
+
+        self.god.bar_state.prepared_drink = (
+            drink
+        )
+
         self.god.bar_state.activity = (
             'waiting_for_lilith_service'
         )
-        event = {'name': 'bartender_mixes_gods_lilith', 'guest': 'god', 'drink': 'lilith', 'lemon_used': 1, 'sugar_cubes_used': required_sugar, 'lemons_remaining': lemon.shots}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
+
+        event = (
+            BartenderMixesGodsLilithEvent(
+                sugar_cubes_used=required_sugar,
+                lemons_remaining=lemon.shots,
+            )
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
         return drink
 
-    def bartender_serves_gods_lilith_with_receipt(self):
+    def bartender_serves_gods_lilith_with_receipt(
+        self
+    ):
         drink = getattr(
             getattr(
                 self.god,
@@ -1924,19 +2071,61 @@ class Day0FirstBarShift:
             'prepared_drink',
             None
         )
+
         if drink is None:
-            raise RuntimeError("God's lilith has not been prepared.")
-        self.meeting_place.bar_counter.cash_register.add_to_tab(entity=self.god, drink=drink)
-        receipt = self.meeting_place.bar_counter.cash_register.print_open_tab_receipt(self.god)
-        self.god.bar_state.drink = drink
+            raise RuntimeError(
+                "God's lilith has not been prepared."
+            )
+
+        cash_register = (
+            self.meeting_place
+            .bar_counter
+            .cash_register
+        )
+
+        cash_register.add_to_tab(
+            entity=self.god,
+            drink=drink,
+        )
+
+        receipt = (
+            cash_register
+            .print_open_tab_receipt(
+                self.god
+            )
+        )
+
+        self.god.bar_state.drink = (
+            drink
+        )
+
         self.god.bar_state.receipt_number = (
             receipt.receipt_number
         )
-        self.god.bar_state.activity = 'holding_lilith'
-        event = {'name': 'bartender_serves_gods_lilith', 'guest': 'god', 'drink': 'lilith', 'receipt_number': receipt.receipt_number, 'paid': False, 'drunk': False}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
-        return {'drink': drink, 'receipt': receipt}
+
+        self.god.bar_state.activity = (
+            'holding_lilith'
+        )
+
+        event = (
+            BartenderServesGodsLilithEvent(
+                receipt_number=(
+                    receipt.receipt_number
+                )
+            )
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
+        return GodsLilithServiceResult(
+            drink=drink,
+            receipt=receipt,
+        )
 
     def god_tastes_lilith(self):
         if self.god is None:
