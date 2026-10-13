@@ -84,6 +84,14 @@ from genesis.day0_table_wine_state import (
     SerpentFinishesWineAtTableEvent,
     SerpentLilithContinueWineDiscussionEvent,
 )
+from genesis.day0_bartender_judge_and_water_state import (
+    BartenderServesSerpentWaterEvent,
+    GodRejectsParticipantVoteEvent,
+    LilithGodMoveToBarEvent,
+    SerpentOrdersWaterEvent,
+    SerpentWaterServiceResult,
+    WagerDecisionMethodSnapshot,
+)
 from genesis.day0_wager_vote_proposal_state import (
     GodAsksWhoDecidesWagerEvent,
     LilithProposesParticipantVoteEvent,
@@ -3408,7 +3416,9 @@ class Day0FirstBarShift:
 
         return proposal
 
-    def serpent_orders_water_at_bar(self):
+    def serpent_orders_water_at_bar(
+        self
+    ):
         if getattr(
             getattr(
                 self.serpent,
@@ -3418,10 +3428,10 @@ class Day0FirstBarShift:
             'location',
             None
         ) != 'bar_counter':
-            raise RuntimeError('Serpent is not at the bar.')
-        order = {'name': 'serpent_orders_water', 'guest': 'serpent', 'drink': 'water'}
-        self.meeting_place.emit_event(order)
-        self.history.append(order)
+            raise RuntimeError(
+                'Serpent is not at the bar.'
+            )
+
         self.serpent.bar_state.water_order = (
             BarDrinkOrder(
                 guest='serpent',
@@ -3429,9 +3439,21 @@ class Day0FirstBarShift:
                 tasted=False,
             )
         )
-        return order
 
-    def bartender_serves_serpent_water_with_free_lemon_slice(self):
+        event = SerpentOrdersWaterEvent()
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
+        return event
+
+    def bartender_serves_serpent_water_with_free_lemon_slice(
+        self
+    ):
         order = getattr(
             getattr(
                 self.serpent,
@@ -3441,11 +3463,39 @@ class Day0FirstBarShift:
             'water_order',
             None
         )
+
         if order is None:
-            raise RuntimeError('Serpent has not ordered water.')
-        lemon = self.meeting_place.back_room.bar_ingredients.get('lemon')
-        if lemon is None or lemon.shots < 1:
-            return self.universe.create_cronenberg_from_quantum_error(error=RuntimeError('No lemon available for water garnish.'), source_component='meeting_place', source_operation='bartender_serves_serpent_water')
+            raise RuntimeError(
+                'Serpent has not ordered water.'
+            )
+
+        lemon = (
+            self.meeting_place
+            .back_room
+            .bar_ingredients
+            .get('lemon')
+        )
+
+        if (
+            lemon is None
+            or lemon.shots < 1
+        ):
+            return (
+                self.universe
+                .create_cronenberg_from_quantum_error(
+                    error=RuntimeError(
+                        'No lemon available '
+                        'for water garnish.'
+                    ),
+                    source_component=(
+                        'meeting_place'
+                    ),
+                    source_operation=(
+                        'bartender_serves_serpent_water'
+                    ),
+                )
+            )
+
         drink = BarDrink(
             name='water_with_lemon_slice',
             type='basic_bar_drink',
@@ -3458,23 +3508,52 @@ class Day0FirstBarShift:
             ),
             price_basis='water',
         )
+
         order.complete(
             drink
         )
-        self.serpent.bar_state.drink = drink
-        self.serpent.bar_state.activity = 'holding_water'
-        event = {'name': 'bartender_serves_serpent_water_with_free_lemon_slice', 'guest': 'serpent', 'drink': 'water', 'lemon_slice': True, 'lemon_slice_price': 0, 'whole_lemon_consumed': False}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
-        return {'drink': drink, 'event': event}
 
-    def god_rejects_participant_vote_and_proposes_bartender(self):
-        wager = self.serpent_lilith_drink_wager
-        proposal = wager.decision_method_proposal
-        if proposal is None:
-            raise RuntimeError('Lilith has not proposed participant voting.')
-        event = {'name': 'god_rejects_participant_vote_and_proposes_bartender', 'speaker': 'god', 'rejects': {'type': 'participant_vote'}, 'proposes': {'type': 'bartender_judges', 'judge': 'bartender'}}
-        wager.bartender_judge_proposal = (
+        self.serpent.bar_state.drink = (
+            drink
+        )
+        self.serpent.bar_state.activity = (
+            'holding_water'
+        )
+
+        event = (
+            BartenderServesSerpentWaterEvent()
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
+        return SerpentWaterServiceResult(
+            drink=drink,
+            event=event,
+        )
+
+    def god_rejects_participant_vote_and_proposes_bartender(
+        self
+    ):
+        wager = (
+            self.serpent_lilith_drink_wager
+        )
+
+        rejected_method = (
+            wager.decision_method_proposal
+        )
+
+        if rejected_method is None:
+            raise RuntimeError(
+                'Lilith has not proposed '
+                'participant voting.'
+            )
+
+        proposed_method = (
             BarWagerDecisionMethod(
                 type='bartender_judges',
                 judge='bartender',
@@ -3482,11 +3561,40 @@ class Day0FirstBarShift:
                 accepted=False,
             )
         )
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
+
+        wager.bartender_judge_proposal = (
+            proposed_method
+        )
+
+        event = (
+            GodRejectsParticipantVoteEvent(
+                rejects=(
+                    WagerDecisionMethodSnapshot
+                    .from_method(
+                        rejected_method
+                    )
+                ),
+                proposes=(
+                    WagerDecisionMethodSnapshot
+                    .from_method(
+                        proposed_method
+                    )
+                ),
+            )
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
         return event
 
-    def lilith_and_god_leave_table_for_bar(self):
+    def lilith_and_god_leave_table_for_bar(
+        self
+    ):
         if getattr(
             getattr(
                 self.lilith,
@@ -3496,7 +3604,10 @@ class Day0FirstBarShift:
             'location',
             None
         ) != 'table':
-            raise RuntimeError('Lilith is not at the table.')
+            raise RuntimeError(
+                'Lilith is not at the table.'
+            )
+
         if getattr(
             getattr(
                 self.god,
@@ -3506,14 +3617,33 @@ class Day0FirstBarShift:
             'location',
             None
         ) != 'table':
-            raise RuntimeError('God is not at the table.')
-        self.lilith.bar_state.location = 'bar_counter'
-        self.lilith.bar_state.activity = 'at_bar'
-        self.god.bar_state.location = 'bar_counter'
-        self.god.bar_state.activity = 'at_bar'
-        event = {'name': 'lilith_and_god_move_to_bar', 'guests': ['lilith', 'god'], 'from': 'table', 'to': 'bar_counter'}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
+            raise RuntimeError(
+                'God is not at the table.'
+            )
+
+        event = LilithGodMoveToBarEvent()
+
+        self.lilith.bar_state.location = (
+            event.to_location
+        )
+        self.lilith.bar_state.activity = (
+            'at_bar'
+        )
+
+        self.god.bar_state.location = (
+            event.to_location
+        )
+        self.god.bar_state.activity = (
+            'at_bar'
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
         return event
 
     def lilith_explains_wager_and_bartender_judge_proposal(self):

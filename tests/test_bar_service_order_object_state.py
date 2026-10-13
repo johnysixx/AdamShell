@@ -164,7 +164,7 @@ class BarServiceOrderObjectStateTests(
         )
         self.assertIs(
             order.final_drink,
-            result["water"]["drink"]
+            result["water"].drink
         )
         self.assertTrue(
             order.served
