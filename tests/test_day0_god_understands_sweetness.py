@@ -31,25 +31,25 @@ class Day0GodUnderstandsSweetnessTests(unittest.TestCase):
 
     def test_lilith_explains_sweetness(self):
         result = self.scene.advance_to_god_understands_sweetness()
-        self.assertEqual(result['explanation']['principle'], 'sweetness')
+        self.assertEqual(result['explanation'].principle, 'sweetness')
         self.assertTrue(self.scene.god.bar_knowledge.sweetness_explained)
 
     def test_god_finishes_serpents_mead(self):
         result = self.scene.advance_to_god_understands_sweetness()
         mead = result['mead']
-        self.assertTrue(mead['finished'])
-        self.assertEqual(mead['source'], 'serpent')
+        self.assertTrue(mead.finished)
+        self.assertEqual(mead.source, 'serpent')
         self.assertEqual(self.scene.serpent.bar_state.mead_finished_by, 'god')
 
     def test_mead_teaches_god_sweetness(self):
         result = self.scene.advance_to_god_understands_sweetness()
         mead = result['mead']
-        self.assertTrue(mead['understands']['sweetness'])
-        self.assertTrue(mead['assessment']['sweet'])
+        self.assertTrue(mead.understands.sweetness)
+        self.assertTrue(mead.assessment.sweet)
 
     def test_god_still_says_mead_is_not_good(self):
         result = self.scene.advance_to_god_understands_sweetness()
-        self.assertFalse(result['mead']['assessment']['good'])
+        self.assertFalse(result['mead'].assessment.good)
 
     def test_wine_hypothesis_remains_unresolved(self):
         self.scene.advance_to_god_understands_sweetness()

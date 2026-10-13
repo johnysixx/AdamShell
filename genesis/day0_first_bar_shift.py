@@ -84,6 +84,12 @@ from genesis.day0_table_wine_state import (
     SerpentFinishesWineAtTableEvent,
     SerpentLilithContinueWineDiscussionEvent,
 )
+from genesis.day0_sweetness_understanding_state import (
+    GodFinishesSerpentsMeadEvent,
+    LilithExplainsSweetnessEvent,
+    MeadSweetnessAssessmentState,
+    SweetnessUnderstandingState,
+)
 from genesis.day0_wine_assessment_state import (
     GodTastesExistingWineEvent,
     SerpentModerateAcidityEvent,
@@ -2864,46 +2870,96 @@ class Day0FirstBarShift:
 
         return event
 
-    def lilith_explains_sweetness_to_god(self):
-        discussion = self.serpent_lilith_good_drink_discussion
-        hypothesis = discussion.current_hypothesis
-        if hypothesis is None or not hypothesis.sweetness:
-            raise RuntimeError('Sweetness is not part of the wine hypothesis.')
-        explanation = {'name': 'lilith_explains_sweetness_to_god', 'speaker': 'lilith', 'listener': 'god', 'principle': 'sweetness', 'meaning': 'good_wine_should_have_some_sweetness'}
-        self.meeting_place.emit_event(explanation)
-        self.history.append(explanation)
+    def lilith_explains_sweetness_to_god(
+        self
+    ):
+        discussion = (
+            self.serpent_lilith_good_drink_discussion
+        )
+
+        hypothesis = (
+            discussion.current_hypothesis
+        )
+
+        if (
+            hypothesis is None
+            or not hypothesis.sweetness
+        ):
+            raise RuntimeError(
+                'Sweetness is not part of '
+                'the wine hypothesis.'
+            )
+
+        explanation = (
+            LilithExplainsSweetnessEvent()
+        )
+
+        self.meeting_place.emit_event(
+            explanation
+        )
+        self.history.append(
+            explanation.to_dict()
+        )
+
         self._entity_attr_setdefault(
             self.god,
             'bar_knowledge',
             BarGuestKnowledge()
         ).sweetness_explained = True
+
         return explanation
 
-    def god_finishes_serpents_mead_and_understands_sweetness(self):
+    def god_finishes_serpents_mead_and_understands_sweetness(
+        self
+    ):
         knowledge = getattr(
             self.god,
             'bar_knowledge',
             None
         )
+
         if (
             knowledge is None
             or not knowledge.sweetness_explained
         ):
-            raise RuntimeError('Lilith has not explained sweetness yet.')
-        event = {'name': 'god_finishes_serpents_mead_and_understands_sweetness', 'guest': 'god', 'drink': 'mead', 'source': 'serpent', 'finished': True, 'understands': {'sweetness': True}, 'assessment': {'sweet': True, 'good': False}}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
-        knowledge.sweetness = BarTasteKnowledge(
-            understood=True,
-            example='mead',
-            example_is_sweet=True,
-            example_is_good=False,
+            raise RuntimeError(
+                'Lilith has not explained '
+                'sweetness yet.'
+            )
+
+        event = (
+            GodFinishesSerpentsMeadEvent(
+                understands=(
+                    SweetnessUnderstandingState()
+                ),
+                assessment=(
+                    MeadSweetnessAssessmentState()
+                ),
+            )
         )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
+        knowledge.sweetness = (
+            BarTasteKnowledge(
+                understood=True,
+                example='mead',
+                example_is_sweet=True,
+                example_is_good=False,
+            )
+        )
+
         self._entity_attr_setdefault(
             self.serpent,
             'bar_state',
             BarGuestState()
         ).mead_finished_by = 'god'
+
         return event
 
     def serpent_tells_god_about_drink_wager(self):
