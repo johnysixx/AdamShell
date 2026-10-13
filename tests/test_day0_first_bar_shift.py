@@ -36,17 +36,17 @@ class Day0FirstBarShiftTests(unittest.TestCase):
         self.scene.start_shift()
         self.scene.serpent_is_born_and_enters()
         result = self.scene.serpent_orders_first_drinks()
-        self.assertEqual([drink.name for drink in result['drinks']], ['wine', 'beer', 'mead'])
-        self.assertIsNone(result['payment'])
-        self.assertFalse(result['receipt'].paid)
-        self.assertEqual(result['receipt'].status, 'open_unpaid')
+        self.assertEqual([drink.name for drink in result.drinks], ['wine', 'beer', 'mead'])
+        self.assertIsNone(result.payment)
+        self.assertFalse(result.receipt.paid)
+        self.assertEqual(result.receipt.status, 'open_unpaid')
 
     def test_bartender_refuses_serpent_bet(self):
         self.scene.start_shift()
         self.scene.serpent_is_born_and_enters()
         self.scene.serpent_orders_first_drinks()
         result = self.scene.serpent_proposes_bet()
-        self.assertFalse(result['response']['accepted'])
+        self.assertFalse(result.response.accepted)
 
     def test_requested_checkpoint(self):
         state = self.scene.advance_to_lilith_entry()

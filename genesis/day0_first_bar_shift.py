@@ -33,6 +33,14 @@ from meeting_place.bar_objects import (
     RecipeIngredientRequirement,
 )
 from meeting_place.bar_yard import BarYard
+from genesis.day0_serpent_opening_state import (
+    SerpentBetProposalResult,
+    SerpentBornEvent,
+    SerpentEnteredBarEvent,
+    SerpentFirstDrinksServiceResult,
+    SerpentOrdersFirstDrinksEvent,
+    SerpentProposesBetEvent,
+)
 from genesis.day0_first_conversation_state import (
     FirstBarDrinkReactionState,
     InitialBarDrinkWagerSnapshot,
@@ -191,6 +199,11 @@ from genesis.day0_lemon_service_state import (
     LilithVodkaWithLemonOrderedEvent,
     LilithVodkaWithLemonOrderResult,
 )
+from meeting_place.bartender_event_state import (
+    BartenderRefusedBetEvent,
+    BartenderShiftAlreadyActiveResult,
+    BartenderShiftStartedEvent,
+)
 from meeting_place.bouncer_state import (
     BouncerState,
 )
@@ -222,60 +235,280 @@ class Day0FirstBarShift:
         )
 
     def start_shift(self):
-        event = self.meeting_place.bartender.begin_shift(bar_day=0, shift_start_tick=self.meeting_place.tick_count)
-        self.history.append(event)
-        return event
+        bartender = (
+            self.meeting_place.bartender
+        )
 
-    def serpent_is_born_and_enters(self):
-        while self.meeting_place.bar_clock.hour < 4:
-            self.meeting_place.bar_clock.tick()
-        while self.meeting_place.bar_clock.minute < 20:
-            self.meeting_place.bar_clock.advance_minute()
-        self.serpent = self.idea_entities.create_idea_entity(name='serpent', role='primordial_idea_entity', active=True, existence_pct=100.0, native_world='idea_universe', existence_by_world={'idea_universe': 100.0, 'root_universe': 0.0, 'eden': 0.0})
-        self.serpent.energy_j = 0.0
-        self.serpent.access = {'meeting_place': True, 'quantum_layer': 'via_meeting_place'}
-        self.universe.world['serpent'] = self.serpent
-        self.history.append({'name': 'serpent_born'})
-        self.meeting_place.add_entity(self.serpent)
-        self.history.append({'name': 'serpent_entered_bar', 'bar_time': self.meeting_place.bar_clock.time_text, 'bar_hour': self.meeting_place.bar_clock.hour, 'bar_minute': self.meeting_place.bar_clock.minute})
-        return self.serpent
+        already_active = bool(
+            getattr(
+                bartender,
+                'shift_active',
+                False,
+            )
+        )
 
-    def serpent_orders_first_drinks(self):
-        if self.serpent is None:
-            raise RuntimeError('Serpent does not exist yet.')
-        result = self.meeting_place.serve_basic_drinks_on_tab(entity=self.serpent, drink_names=['wine', 'beer', 'mead'])
-        self.serpent.bar_state = BarGuestState(
-            seat='at_bar',
-            drinks=[
-                'wine',
-                'beer',
-                'mead',
-            ],
-            activity='tasting_ordered_drinks',
-            tab='open',
-            paid=False,
-            receipt_number=(
-                result['receipt']
-                .receipt_number
+        bartender.begin_shift(
+            bar_day=0,
+            shift_start_tick=(
+                self.meeting_place.tick_count
             ),
         )
-        self.history.append({'name': 'serpent_orders_wine_beer_and_mead'})
+
+        if already_active:
+            current_shift = (
+                bartender.current_shift
+            )
+
+            result = (
+                BartenderShiftAlreadyActiveResult(
+                    bar_day=(
+                        current_shift.bar_day
+                    ),
+                    shift_start_tick=(
+                        current_shift
+                        .shift_start_tick
+                    ),
+                )
+            )
+
+            self.history.append(
+                result.to_dict()
+            )
+
+            return result
+
+        event = (
+            bartender.event_memory[-1]
+        )
+
+        if not isinstance(
+            event,
+            BartenderShiftStartedEvent,
+        ):
+            raise RuntimeError(
+                'Bartender shift start did not '
+                'create object event.'
+            )
+
+        self.history.append(
+            event.to_dict()
+        )
+
+        return event
+
+    def serpent_is_born_and_enters(
+        self
+    ):
+        while (
+            self.meeting_place
+            .bar_clock
+            .hour
+            < 4
+        ):
+            (
+                self.meeting_place
+                .bar_clock
+                .tick()
+            )
+
+        while (
+            self.meeting_place
+            .bar_clock
+            .minute
+            < 20
+        ):
+            (
+                self.meeting_place
+                .bar_clock
+                .advance_minute()
+            )
+
+        self.serpent = (
+            self.idea_entities
+            .create_idea_entity(
+                name='serpent',
+                role=(
+                    'primordial_idea_entity'
+                ),
+                active=True,
+                existence_pct=100.0,
+                native_world='idea_universe',
+                existence_by_world={
+                    'idea_universe': 100.0,
+                    'root_universe': 0.0,
+                    'eden': 0.0,
+                },
+            )
+        )
+
+        self.serpent.energy_j = 0.0
+
+        self.serpent.access = {
+            'meeting_place': True,
+            'quantum_layer':
+                'via_meeting_place',
+        }
+
+        self.universe.world[
+            'serpent'
+        ] = self.serpent
+
+        born = SerpentBornEvent()
+
+        self.history.append(
+            born.to_dict()
+        )
+
+        self.meeting_place.add_entity(
+            self.serpent
+        )
+
+        entered = SerpentEnteredBarEvent(
+            bar_time=(
+                self.meeting_place
+                .bar_clock
+                .time_text
+            ),
+            bar_hour=(
+                self.meeting_place
+                .bar_clock
+                .hour
+            ),
+            bar_minute=(
+                self.meeting_place
+                .bar_clock
+                .minute
+            ),
+        )
+
+        self.history.append(
+            entered.to_dict()
+        )
+
+        return self.serpent
+
+    def serpent_orders_first_drinks(
+        self
+    ):
+        if self.serpent is None:
+            raise RuntimeError(
+                'Serpent does not exist yet.'
+            )
+
+        boundary = (
+            self.meeting_place
+            .serve_basic_drinks_on_tab(
+                entity=self.serpent,
+                drink_names=(
+                    'wine',
+                    'beer',
+                    'mead',
+                ),
+            )
+        )
+
+        event = (
+            SerpentOrdersFirstDrinksEvent(
+                drinks=tuple(
+                    drink.name
+                    for drink
+                    in boundary['drinks']
+                ),
+            )
+        )
+
+        result = (
+            SerpentFirstDrinksServiceResult
+            .from_mapping(
+                boundary,
+                event,
+            )
+        )
+
+        self.serpent.bar_state = (
+            BarGuestState(
+                seat='at_bar',
+                drinks=[
+                    drink.name
+                    for drink
+                    in result.drinks
+                ],
+                activity=(
+                    'tasting_ordered_drinks'
+                ),
+                tab='open',
+                paid=False,
+                receipt_number=(
+                    result.receipt
+                    .receipt_number
+                ),
+            )
+        )
+
+        self.history.append(
+            event.to_dict()
+        )
+
         return result
 
-    def serpent_proposes_bet(self):
+    def serpent_proposes_bet(
+        self
+    ):
         if self.serpent is None:
-            raise RuntimeError('Serpent does not exist yet.')
-        proposal = {'name': 'serpent_proposes_bet', 'guest': 'serpent', 'target': 'bartender'}
-        self.meeting_place.emit_event(proposal)
-        refusal = self.meeting_place.bartender.refuse_bet('serpent')
+            raise RuntimeError(
+                'Serpent does not exist yet.'
+            )
+
+        proposal = (
+            SerpentProposesBetEvent()
+        )
+
+        self.meeting_place.emit_event(
+            proposal
+        )
+
+        (
+            self.meeting_place
+            .bartender
+            .refuse_bet(
+                'serpent'
+            )
+        )
+
+        refusal = (
+            self.meeting_place
+            .bartender
+            .event_memory[-1]
+        )
+
+        if not isinstance(
+            refusal,
+            BartenderRefusedBetEvent,
+        ):
+            raise RuntimeError(
+                'Bartender refusal did not '
+                'create object event.'
+            )
+
         self.serpent.bar_state.bet = (
             BarGuestBet(
                 offered=True,
                 accepted=False,
             )
         )
-        self.history.extend([proposal, refusal])
-        return {'proposal': proposal, 'response': refusal}
+
+        self.history.append(
+            proposal.to_dict()
+        )
+
+        self.history.append(
+            refusal.to_dict()
+        )
+
+        return SerpentBetProposalResult(
+            proposal=proposal,
+            response=refusal,
+        )
 
     def god_is_born_and_goes_to_library(self):
         self.god = self.gods.create_god(name='god', role='librarian')
