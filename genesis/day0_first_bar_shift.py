@@ -84,6 +84,10 @@ from genesis.day0_table_wine_state import (
     SerpentFinishesWineAtTableEvent,
     SerpentLilithContinueWineDiscussionEvent,
 )
+from genesis.day0_serpent_returns_to_bar_state import (
+    LilithGodContinueTalkingAtTableEvent,
+    SerpentLeavesTableForBarEvent,
+)
 from genesis.day0_beer_bitterness_state import (
     BeerBitternessConclusionState,
     BeerTasteAssessmentState,
@@ -3234,7 +3238,9 @@ class Day0FirstBarShift:
 
         return event
 
-    def serpent_leaves_table_for_bar(self):
+    def serpent_leaves_table_for_bar(
+        self
+    ):
         if getattr(
             getattr(
                 self.serpent,
@@ -3244,15 +3250,33 @@ class Day0FirstBarShift:
             'location',
             None
         ) != 'table':
-            raise RuntimeError('Serpent is not at the table.')
-        event = {'name': 'serpent_leaves_table_for_bar', 'guest': 'serpent', 'reason': 'nothing_good_left_to_drink', 'remaining_drink': 'bad_beer', 'from': 'table', 'to': 'bar_counter'}
-        self.serpent.bar_state.location = 'bar_counter'
-        self.serpent.bar_state.activity = 'at_bar'
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
+            raise RuntimeError(
+                'Serpent is not at the table.'
+            )
+
+        event = (
+            SerpentLeavesTableForBarEvent()
+        )
+
+        self.serpent.bar_state.location = (
+            event.to_location
+        )
+        self.serpent.bar_state.activity = (
+            'at_bar'
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
         return event
 
-    def lilith_and_god_continue_talking_at_table(self):
+    def lilith_and_god_continue_talking_at_table(
+        self
+    ):
         if getattr(
             getattr(
                 self.lilith,
@@ -3262,7 +3286,10 @@ class Day0FirstBarShift:
             'location',
             None
         ) != 'table':
-            raise RuntimeError('Lilith is not at the table.')
+            raise RuntimeError(
+                'Lilith is not at the table.'
+            )
+
         if getattr(
             getattr(
                 self.god,
@@ -3272,10 +3299,21 @@ class Day0FirstBarShift:
             'location',
             None
         ) != 'table':
-            raise RuntimeError('God is not at the table.')
-        event = {'name': 'lilith_and_god_continue_talking_at_table', 'participants': ['lilith', 'god'], 'serpent_present': False, 'new_conclusion': None}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
+            raise RuntimeError(
+                'God is not at the table.'
+            )
+
+        event = (
+            LilithGodContinueTalkingAtTableEvent()
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
         return event
 
     def god_asks_who_will_decide_wager(self):

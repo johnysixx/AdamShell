@@ -17,14 +17,14 @@ class Day0SerpentReturnsToBarTests(unittest.TestCase):
 
     def test_serpent_leaves_table_for_bar(self):
         result = self.scene.advance_to_serpent_at_bar_lilith_with_god()
-        self.assertEqual(result['serpent']['from'], 'table')
-        self.assertEqual(result['serpent']['to'], 'bar_counter')
+        self.assertEqual(result['serpent'].from_location, 'table')
+        self.assertEqual(result['serpent'].to_location, 'bar_counter')
         self.assertEqual(self.scene.serpent.bar_state.location, 'bar_counter')
 
     def test_serpent_leaves_because_only_bad_beer_remains(self):
         result = self.scene.advance_to_serpent_at_bar_lilith_with_god()
-        self.assertEqual(result['serpent']['remaining_drink'], 'bad_beer')
-        self.assertEqual(result['serpent']['reason'], 'nothing_good_left_to_drink')
+        self.assertEqual(result['serpent'].remaining_drink, 'bad_beer')
+        self.assertEqual(result['serpent'].reason, 'nothing_good_left_to_drink')
 
     def test_lilith_and_god_remain_at_table(self):
         self.scene.advance_to_serpent_at_bar_lilith_with_god()
@@ -34,9 +34,9 @@ class Day0SerpentReturnsToBarTests(unittest.TestCase):
     def test_lilith_and_god_continue_talking(self):
         result = self.scene.advance_to_serpent_at_bar_lilith_with_god()
         conversation = result['conversation']
-        self.assertEqual(conversation['participants'], ['lilith', 'god'])
-        self.assertFalse(conversation['serpent_present'])
-        self.assertIsNone(conversation['new_conclusion'])
+        self.assertEqual(conversation.participants, ('lilith', 'god'))
+        self.assertFalse(conversation.serpent_present)
+        self.assertIsNone(conversation.new_conclusion)
 
     def test_serpent_move_happens_before_private_table_talk(self):
         self.scene.advance_to_serpent_at_bar_lilith_with_god()
