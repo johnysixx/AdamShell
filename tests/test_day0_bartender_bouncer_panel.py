@@ -56,25 +56,17 @@ class Day0BartenderBouncerPanelTests(
         ]
 
         self.assertEqual(
-            explanation[
-                "speaker"
-            ],
+            explanation.speaker,
             "lilith"
         )
 
         self.assertEqual(
-            explanation[
-                "listener"
-            ],
+            explanation.listener,
             "bartender"
         )
 
         self.assertEqual(
-            explanation[
-                "proposal"
-            ][
-                "judge"
-            ],
+            explanation.proposal.judge,
             "bartender"
         )
 
@@ -89,9 +81,7 @@ class Day0BartenderBouncerPanelTests(
         self.assertEqual(
             result[
                 "objection"
-            ][
-                "objection"
-            ],
+            ].objection,
             "one_judge_is_not_enough"
         )
 
@@ -105,25 +95,19 @@ class Day0BartenderBouncerPanelTests(
 
         proposal = result[
             "panel"
-        ][
-            "proposal"
-        ]
+        ].proposal
 
         self.assertEqual(
-            proposal[
-                "type"
-            ],
+            proposal.type,
             "tasting_panel"
         )
 
         self.assertEqual(
-            proposal[
-                "judges"
-            ],
-            [
+            proposal.judges,
+            (
                 "bartender",
                 "bouncer"
-            ]
+            )
         )
 
     def test_panel_is_only_proposed(

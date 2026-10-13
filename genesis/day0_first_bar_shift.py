@@ -84,6 +84,12 @@ from genesis.day0_table_wine_state import (
     SerpentFinishesWineAtTableEvent,
     SerpentLilithContinueWineDiscussionEvent,
 )
+from genesis.day0_bartender_bouncer_panel_state import (
+    BartenderProposesBouncerPanelEvent,
+    LilithExplainsWagerToBartenderEvent,
+    SerpentObjectsSingleJudgeEvent,
+    WagerExplanationState,
+)
 from genesis.day0_bartender_judge_and_water_state import (
     BartenderServesSerpentWaterEvent,
     GodRejectsParticipantVoteEvent,
@@ -3646,39 +3652,107 @@ class Day0FirstBarShift:
 
         return event
 
-    def lilith_explains_wager_and_bartender_judge_proposal(self):
-        wager = self.serpent_lilith_drink_wager
+    def lilith_explains_wager_and_bartender_judge_proposal(
+        self
+    ):
+        wager = (
+            self.serpent_lilith_drink_wager
+        )
+
         bartender_proposal = (
             wager.bartender_judge_proposal
         )
+
         if bartender_proposal is None:
-            raise RuntimeError('God has not proposed bartender as judge.')
-        event = {'name': 'lilith_explains_wager_and_bartender_judge_proposal', 'speaker': 'lilith', 'listener': 'bartender', 'wager': {'participants': list(wager.participants), 'contest': ['wine', 'mead', 'beer']}, 'proposal': {'judge': 'bartender'}}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
-        return event
+            raise RuntimeError(
+                'God has not proposed bartender '
+                'as judge.'
+            )
 
-    def serpent_objects_single_bartender_is_not_enough(self):
-        event = {'name': 'serpent_objects_single_judge_is_not_enough', 'speaker': 'serpent', 'single_judge': 'bartender', 'objection': 'one_judge_is_not_enough'}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
-        return event
-
-    def bartender_proposes_bouncer_as_second_taster(self):
-        wager = self.serpent_lilith_drink_wager
-        proposal = BarWagerDecisionMethod(
-            type='tasting_panel',
-            judges=[
-                'bartender',
-                'bouncer',
-            ],
-            proposed_by='bartender',
-            accepted=False,
+        event = (
+            LilithExplainsWagerToBartenderEvent(
+                wager=(
+                    WagerExplanationState(
+                        participants=tuple(
+                            wager.participants
+                        ),
+                    )
+                ),
+                proposal=(
+                    WagerDecisionMethodSnapshot
+                    .from_method(
+                        bartender_proposal
+                    )
+                ),
+            )
         )
-        wager.tasting_panel_proposal = proposal
-        event = {'name': 'bartender_proposes_bouncer_as_second_taster', 'speaker': 'bartender', 'proposal': proposal.to_dict()}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
+        return event
+
+    def serpent_objects_single_bartender_is_not_enough(
+        self
+    ):
+        event = (
+            SerpentObjectsSingleJudgeEvent()
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
+        return event
+
+    def bartender_proposes_bouncer_as_second_taster(
+        self
+    ):
+        wager = (
+            self.serpent_lilith_drink_wager
+        )
+
+        proposal = (
+            BarWagerDecisionMethod(
+                type='tasting_panel',
+                judges=[
+                    'bartender',
+                    'bouncer',
+                ],
+                proposed_by='bartender',
+                accepted=False,
+            )
+        )
+
+        wager.tasting_panel_proposal = (
+            proposal
+        )
+
+        event = (
+            BartenderProposesBouncerPanelEvent(
+                proposal=(
+                    WagerDecisionMethodSnapshot
+                    .from_method(
+                        proposal
+                    )
+                )
+            )
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
         return event
 
     def cat_d20_arrives_during_judge_discussion(self):
