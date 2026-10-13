@@ -1,5 +1,9 @@
 from copy import deepcopy
 
+from idea_entities.archetype_state import (
+    ArchetypePrincipleState,
+    IdeaEntityAccessProfile,
+)
 from meeting_place.bar_objects import (
     BarBeerHypothesis,
     CatD20Profile,
@@ -33,6 +37,11 @@ from meeting_place.bar_objects import (
     RecipeIngredientRequirement,
 )
 from meeting_place.bar_yard import BarYard
+from genesis.day0_lilith_entry_state import (
+    LilithBornEvent,
+    LilithEnteredBarEvent,
+    LilithEntryResult,
+)
 from genesis.day0_god_library_state import (
     GodBeginsFirstUnnamedBookEvent,
     GodBornEvent,
@@ -352,11 +361,14 @@ class Day0FirstBarShift:
 
         self.serpent.energy_j = 0.0
 
-        self.serpent.access = {
-            'meeting_place': True,
-            'quantum_layer':
-                'via_meeting_place',
-        }
+        self.serpent.access = (
+            IdeaEntityAccessProfile(
+                meeting_place=True,
+                quantum_layer=(
+                    'via_meeting_place'
+                ),
+            )
+        )
 
         self.universe.world[
             'serpent'
@@ -5066,15 +5078,78 @@ class Day0FirstBarShift:
         conversation = self.serpent_and_lilith_begin_conversation()
         return {'previous_checkpoint': state, 'current': self.checkpoint(), 'conversation': conversation}
 
-    def lilith_is_born_and_enters_bar(self):
-        self.lilith = self.idea_entities.create_idea_entity(name='lilith', role='archetype_principle', active=True)
-        self.lilith.principle = {'name': 'feminine_principle', 'domain': ['woman', 'creation', 'feminine_archetype'], 'origin': 'lilith'}
-        self.lilith.access = {'meeting_place': True, 'library': 'read', 'quantum_layer': 'via_meeting_place'}
-        self.universe.world['lilith'] = self.lilith
-        self.history.append({'name': 'lilith_born'})
-        self.meeting_place.add_entity(self.lilith)
-        self.history.append({'name': 'lilith_entered_bar'})
-        return self.lilith
+    def lilith_is_born_and_enters_bar(
+        self
+    ):
+        self.lilith = (
+            self.idea_entities
+            .create_idea_entity(
+                name='lilith',
+                role='archetype_principle',
+                active=True,
+            )
+        )
+
+        principle = (
+            ArchetypePrincipleState(
+                name='feminine_principle',
+                domain=(
+                    'woman',
+                    'creation',
+                    'feminine_archetype',
+                ),
+                origin='lilith',
+            )
+        )
+
+        access = (
+            IdeaEntityAccessProfile(
+                meeting_place=True,
+                library='read',
+                quantum_layer=(
+                    'via_meeting_place'
+                ),
+            )
+        )
+
+        self.lilith.principle = (
+            principle
+        )
+
+        self.lilith.access = access
+
+        self.universe.world[
+            'lilith'
+        ] = self.lilith
+
+        born = LilithBornEvent(
+            principle=principle,
+            access=access,
+        )
+
+        self.history.append(
+            born.to_dict()
+        )
+
+        self.meeting_place.add_entity(
+            self.lilith
+        )
+
+        entered = (
+            LilithEnteredBarEvent()
+        )
+
+        self.history.append(
+            entered.to_dict()
+        )
+
+        return LilithEntryResult(
+            lilith=self.lilith,
+            principle=principle,
+            access=access,
+            born=born,
+            entered=entered,
+        )
 
     def advance_to_lilith_entry(self):
         self.start_shift()

@@ -101,7 +101,7 @@ class Day0FirstBarShiftTests(unittest.TestCase):
         self.assertIsNotNone(lilith)
         self.assertIn(lilith, self.bar.entities)
         self.assertEqual(lilith.type, 'idea_entity')
-        self.assertEqual(lilith.principle['name'], 'feminine_principle')
+        self.assertEqual(lilith.principle.name, 'feminine_principle')
         self.assertFalse(hasattr(lilith, 'met_god'))
         self.assertNotIn('god', getattr(lilith, 'knowledge', {}))
         names = [event['name'] for event in state['history']]
