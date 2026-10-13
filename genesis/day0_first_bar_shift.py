@@ -100,14 +100,21 @@ from genesis.day0_wine_ideas_state import (
     SerpentTastesMeadEvent,
 )
 from genesis.day0_advance_state import (
+    AcidityWineIdeaAdvanceResult,
+    BalancedAcidityAdvanceResult,
+    BeerBitternessAdvanceResult,
+    GodAtTableAdvanceResult,
     GodBrowsingMenuAdvanceResult,
     GodFirstLilithTasteAdvanceResult,
     GodHoldingLilithAdvanceResult,
+    GodReceivesWineAdvanceResult,
+    GodUnderstandsSweetnessAdvanceResult,
     GoodDrinkDiscussionAdvanceResult,
     LemonRestockAdvanceResult,
     LilithDrinkLearnedAdvanceResult,
     SecondWineIdeaAdvanceResult,
     ThirdWineIdeaAdvanceResult,
+    ThreeWayDrinkWagerAdvanceResult,
 )
 from genesis.day0_good_drink_discussion_state import (
     SerpentLilithGoodDrinkDiscussionStartedEvent,
@@ -4952,46 +4959,91 @@ class Day0FirstBarShift:
         previous = self.advance_to_three_way_drink_wager()
         god_beer = self.god_tastes_beer_and_understands_bitterness()
         lilith = self.lilith_sips_lilith_and_reacts_to_beer()
-        return {'previous': previous, 'god_beer': god_beer, 'lilith': lilith}
+        return (
+            BeerBitternessAdvanceResult(
+                previous=previous,
+                god_beer=god_beer,
+                lilith=lilith,
+            )
+        )
 
     def advance_to_three_way_drink_wager(self):
         previous = self.advance_to_god_understands_sweetness()
         explained = self.serpent_tells_god_about_drink_wager()
         offered = self.serpent_offers_god_wager_participation()
         accepted = self.god_accepts_drink_wager()
-        return {'previous': previous, 'explained': explained, 'offered': offered, 'accepted': accepted}
+        return (
+            ThreeWayDrinkWagerAdvanceResult(
+                previous=previous,
+                explained=explained,
+                offered=offered,
+                accepted=accepted,
+            )
+        )
 
     def advance_to_god_understands_sweetness(self):
         previous = self.advance_to_balanced_acidity_idea()
         wine = self.god_tastes_existing_wine_and_rejects_it()
         explanation = self.lilith_explains_sweetness_to_god()
         mead = self.god_finishes_serpents_mead_and_understands_sweetness()
-        return {'previous': previous, 'wine': wine, 'explanation': explanation, 'mead': mead}
+        return (
+            GodUnderstandsSweetnessAdvanceResult(
+                previous=previous,
+                wine=wine,
+                explanation=explanation,
+                mead=mead,
+            )
+        )
 
     def advance_to_balanced_acidity_idea(self):
         previous = self.advance_to_god_receives_wine()
         balance = self.serpent_agrees_with_acidity_but_wants_balance()
-        return {'previous': previous, 'balance': balance}
+        return (
+            BalancedAcidityAdvanceResult(
+                previous=previous,
+                balance=balance,
+            )
+        )
 
     def advance_to_god_receives_wine(self):
         previous = self.advance_to_acidity_wine_idea()
         reaction = self.serpent_grimaces_at_lilith_and_turns_to_god()
         order = self.god_orders_wine_to_judge_discussion()
         service = self.bartender_serves_god_wine_and_receipt()
-        return {'previous': previous, 'reaction': reaction, 'order': order, 'service': service}
+        return (
+            GodReceivesWineAdvanceResult(
+                previous=previous,
+                reaction=reaction,
+                order=order,
+                service=service,
+            )
+        )
 
     def advance_to_acidity_wine_idea(self):
         previous = self.advance_to_god_at_table()
         explained = self.serpent_explains_wine_discussion_to_god()
         revised = self.lilith_rejects_bitterness_and_proposes_acidity()
         tasted = self.lilith_gives_serpent_taste_of_lilith()
-        return {'previous': previous, 'explained': explained, 'revised': revised, 'tasted': tasted}
+        return (
+            AcidityWineIdeaAdvanceResult(
+                previous=previous,
+                explained=explained,
+                revised=revised,
+                tasted=tasted,
+            )
+        )
 
     def advance_to_god_at_table(self):
         previous = self.advance_to_god_first_lilith_taste()
         called = self.serpent_notices_god_and_calls_him_over()
         joined = self.god_joins_serpent_and_lilith_at_table()
-        return {'previous': previous, 'called': called, 'joined': joined}
+        return (
+            GodAtTableAdvanceResult(
+                previous=previous,
+                called=called,
+                joined=joined,
+            )
+        )
 
     def advance_to_god_first_lilith_taste(self):
         previous = self.advance_to_god_holding_lilith()

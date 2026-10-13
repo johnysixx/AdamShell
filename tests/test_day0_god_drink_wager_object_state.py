@@ -185,12 +185,8 @@ class Day0GodDrinkWagerObjectStateTests(
             scene.advance_to_three_way_drink_wager()
         )
 
-        offer = result[
-            "offered"
-        ]
-        accepted = result[
-            "accepted"
-        ]
+        offer = result.offered
+        accepted = result.accepted
 
         self.assertIsInstance(
             offer,

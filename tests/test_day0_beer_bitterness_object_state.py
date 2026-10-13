@@ -85,9 +85,7 @@ class Day0BeerBitternessObjectStateTests(
             .advance_to_bitterness_split_between_wine_and_beer()
         )
 
-        event = result[
-            "god_beer"
-        ]
+        event = result.god_beer
 
         self.assertIsInstance(
             event,
@@ -184,9 +182,7 @@ class Day0BeerBitternessObjectStateTests(
             .advance_to_bitterness_split_between_wine_and_beer()
         )
 
-        event = result[
-            "lilith"
-        ]
+        event = result.lilith
 
         self.assertIsInstance(
             event,

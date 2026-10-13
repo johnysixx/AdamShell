@@ -17,25 +17,25 @@ class Day0BeerBitternessTests(unittest.TestCase):
 
     def test_god_says_beer_is_not_so_bad(self):
         result = self.scene.advance_to_bitterness_split_between_wine_and_beer()
-        self.assertTrue(result['god_beer'].assessment.not_so_bad)
+        self.assertTrue(result.god_beer.assessment.not_so_bad)
 
     def test_god_understands_bitterness(self):
         result = self.scene.advance_to_bitterness_split_between_wine_and_beer()
-        self.assertTrue(result['god_beer'].understands.bitterness)
+        self.assertTrue(result.god_beer.understands.bitterness)
         self.assertTrue(self.scene.god.bar_knowledge.bitterness.understood)
 
     def test_god_rejects_bitterness_for_wine(self):
         result = self.scene.advance_to_bitterness_split_between_wine_and_beer()
-        self.assertFalse(result['god_beer'].wine_conclusion.bitterness_belongs_in_wine)
+        self.assertFalse(result.god_beer.wine_conclusion.bitterness_belongs_in_wine)
         self.assertFalse(self.scene.serpent_lilith_good_drink_discussion.current_hypothesis.bitterness)
 
     def test_lilith_disagrees_that_beer_is_good(self):
         result = self.scene.advance_to_bitterness_split_between_wine_and_beer()
-        self.assertTrue(result['lilith'].disagrees_beer_is_good)
+        self.assertTrue(result.lilith.disagrees_beer_is_good)
 
     def test_lilith_accepts_bitterness_for_good_beer(self):
         result = self.scene.advance_to_bitterness_split_between_wine_and_beer()
-        self.assertTrue(result['lilith'].beer_conclusion.bitterness_allowed)
+        self.assertTrue(result.lilith.beer_conclusion.bitterness_allowed)
         beer = self.scene.serpent_lilith_good_drink_discussion.beer_hypothesis
         self.assertEqual(beer.bitterness, 'allowed')
         self.assertFalse(beer.resolved)

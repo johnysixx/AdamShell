@@ -109,7 +109,7 @@ class BarServiceOrderObjectStateTests(
         )
         self.assertIs(
             order.final_drink,
-            result["service"].drink
+            result.service.drink
         )
         self.assertTrue(
             order.served
@@ -119,7 +119,7 @@ class BarServiceOrderObjectStateTests(
         )
         self.assertEqual(
             order.receipt_number,
-            result["service"].receipt
+            result.service.receipt
             .receipt_number
         )
         self._assert_object_only(
@@ -183,7 +183,7 @@ class BarServiceOrderObjectStateTests(
         scene = self._scene()
         result = scene.advance_to_god_receives_wine()
         order = scene.god.bar_state.wine_order
-        event = result["order"]
+        event = result.order
 
         self.assertIsInstance(
             event,

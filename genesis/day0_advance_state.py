@@ -1,11 +1,30 @@
 from dataclasses import dataclass
 
+from genesis.day0_beer_bitterness_state import (
+    GodTastesBeerAndUnderstandsBitternessEvent,
+    LilithSipsLilithAndReactsToBeerEvent,
+)
+from genesis.day0_god_drink_wager_state import (
+    GodAcceptsDrinkWagerEvent,
+    SerpentOffersGodWagerParticipationEvent,
+    SerpentTellsGodAboutDrinkWagerEvent,
+)
 from genesis.day0_god_lilith_service_state import (
     GodsLilithFailureResult,
     GodsLilithServiceResult,
 )
 from genesis.day0_god_wine_discussion_state import (
+    GodJoinsSerpentLilithTableEvent,
     GodTastesLilithEvent,
+    LilithAcidityRevisionResult,
+    LilithGivesSerpentLilithTasteEvent,
+    SerpentCallsGodToTableEvent,
+    SerpentExplainsWineDiscussionEvent,
+)
+from genesis.day0_god_wine_service_state import (
+    GodOrdersWineToJudgeDiscussionEvent,
+    GodWineServiceResult,
+    SerpentGrimacesAtLilithEvent,
 )
 from genesis.day0_lemon_service_state import (
     BartenderLemonRestockResult,
@@ -19,10 +38,18 @@ from genesis.day0_lilith_service_state import (
     LilithJoinsSerpentAtTableEvent,
     LilithRequestsSecondSugarCubeEvent,
 )
+from genesis.day0_sweetness_understanding_state import (
+    GodFinishesSerpentsMeadEvent,
+    LilithExplainsSweetnessEvent,
+)
 from genesis.day0_table_wine_state import (
     GodBrowsesDrinkMenuEvent,
     GodLooksAroundBarEvent,
     SerpentLilithContinueWineDiscussionEvent,
+)
+from genesis.day0_wine_assessment_state import (
+    GodTastesExistingWineEvent,
+    SerpentModerateAcidityResult,
 )
 from genesis.day0_wine_ideas_state import (
     BartenderAsksGodForOrderEvent,
@@ -94,3 +121,55 @@ class GodHoldingLilithAdvanceResult:
 class GodFirstLilithTasteAdvanceResult:
     previous: GodHoldingLilithAdvanceResult
     tasting: GodTastesLilithEvent
+
+
+@dataclass(slots=True, frozen=True)
+class GodAtTableAdvanceResult:
+    previous: GodFirstLilithTasteAdvanceResult
+    called: SerpentCallsGodToTableEvent
+    joined: GodJoinsSerpentLilithTableEvent
+
+
+@dataclass(slots=True, frozen=True)
+class AcidityWineIdeaAdvanceResult:
+    previous: GodAtTableAdvanceResult
+    explained: SerpentExplainsWineDiscussionEvent
+    revised: LilithAcidityRevisionResult
+    tasted: LilithGivesSerpentLilithTasteEvent
+
+
+@dataclass(slots=True, frozen=True)
+class GodReceivesWineAdvanceResult:
+    previous: AcidityWineIdeaAdvanceResult
+    reaction: SerpentGrimacesAtLilithEvent
+    order: GodOrdersWineToJudgeDiscussionEvent
+    service: GodWineServiceResult
+
+
+@dataclass(slots=True, frozen=True)
+class BalancedAcidityAdvanceResult:
+    previous: GodReceivesWineAdvanceResult
+    balance: SerpentModerateAcidityResult
+
+
+@dataclass(slots=True, frozen=True)
+class GodUnderstandsSweetnessAdvanceResult:
+    previous: BalancedAcidityAdvanceResult
+    wine: GodTastesExistingWineEvent
+    explanation: LilithExplainsSweetnessEvent
+    mead: GodFinishesSerpentsMeadEvent
+
+
+@dataclass(slots=True, frozen=True)
+class ThreeWayDrinkWagerAdvanceResult:
+    previous: GodUnderstandsSweetnessAdvanceResult
+    explained: SerpentTellsGodAboutDrinkWagerEvent
+    offered: SerpentOffersGodWagerParticipationEvent
+    accepted: GodAcceptsDrinkWagerEvent
+
+
+@dataclass(slots=True, frozen=True)
+class BeerBitternessAdvanceResult:
+    previous: ThreeWayDrinkWagerAdvanceResult
+    god_beer: GodTastesBeerAndUnderstandsBitternessEvent
+    lilith: LilithSipsLilithAndReactsToBeerEvent

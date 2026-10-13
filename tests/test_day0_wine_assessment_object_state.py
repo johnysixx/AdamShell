@@ -79,10 +79,10 @@ class Day0WineAssessmentObjectStateTests(
         scene = self._scene()
 
         result = (
-            scene.advance_to_balanced_acidity_idea()
-        )[
-            "balance"
-        ]
+            scene
+            .advance_to_balanced_acidity_idea()
+            .balance
+        )
 
         self.assertIsInstance(
             result,

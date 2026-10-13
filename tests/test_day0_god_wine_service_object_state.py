@@ -151,9 +151,7 @@ class Day0GodWineServiceObjectStateTests(
             scene.advance_to_god_receives_wine()
         )
 
-        service = result[
-            "service"
-        ]
+        service = result.service
 
         self.assertIsInstance(
             service,
