@@ -152,19 +152,40 @@ class Universe:
 
     def start_big_bang(self):
         if self.big_bang_started:
-            UniverseLogger.event('BIG BANG ALREADY STARTED')
-            return self.world.get('big_bang')
+            UniverseLogger.event(
+                'BIG BANG ALREADY STARTED'
+            )
+
+            if (
+                self.big_bang is None
+                or self.big_bang.result is None
+            ):
+                raise RuntimeError(
+                    "Started Big Bang has no "
+                    "runtime result."
+                )
+
+            return self.big_bang.result
+
         self.big_bang = BigBang(self)
-        self.big_bang.explode()
+
+        result = self.big_bang.explode()
+
         self.big_bang_started = True
         self.physical_universe_started = True
         self.universe_exists = True
         self.state = (
             UniverseLifecycleState.PHYSICAL_UNIVERSE
         )
-        UniverseLogger.boot('PHYSICAL UNIVERSE STARTED')
-        UniverseLogger.boot('THE UNIVERSE EXISTS')
-        return self.world.get('big_bang')
+
+        UniverseLogger.boot(
+            'PHYSICAL UNIVERSE STARTED'
+        )
+        UniverseLogger.boot(
+            'THE UNIVERSE EXISTS'
+        )
+
+        return result
 
     def hear(self, word):
         if word.name == 'LetThereBeLight':

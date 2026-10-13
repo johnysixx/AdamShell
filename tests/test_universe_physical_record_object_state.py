@@ -72,10 +72,18 @@ class UniversePhysicalRecordObjectStateTests(
             phase.name,
             "primordial_void",
         )
+        self.assertIs(
+            result.phases[0],
+            phase,
+        )
+
+        snapshot = result.to_dict()
+
         self.assertIsInstance(
-            result["phases"][0],
+            snapshot["phases"][0],
             dict,
         )
+
         self._assert_object_only(
             phase,
             "name",

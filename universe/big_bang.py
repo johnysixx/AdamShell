@@ -2,6 +2,7 @@ from copy import deepcopy
 
 from universe.big_bang_state import (
     BigBangCosmicState,
+    BigBangRunResult,
 )
 from universe.big_bang_process_state import (
     BigBangProcessState,
@@ -23,6 +24,8 @@ class BigBang:
         self.primordial_elements = {}
 
         self.cosmic_state = BigBangCosmicState()
+
+        self.result = None
 
         self.public_state = self._build_public_state()
 
@@ -74,7 +77,18 @@ class BigBang:
         self.complete()
         self.write_to_world()
 
-        return self.public_state
+        self.result = BigBangRunResult(
+            state=self.state,
+            phases=tuple(
+                self.phases
+            ),
+            primordial_elements=(
+                self.primordial_elements
+            ),
+            cosmic_state=self.cosmic_state,
+        )
+
+        return self.result
 
     def begin(self):
         self.state = BigBangProcessState.IN_PROGRESS

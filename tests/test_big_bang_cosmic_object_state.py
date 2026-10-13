@@ -3,6 +3,7 @@ import unittest
 from universe.big_bang import BigBang
 from universe.big_bang_state import (
     BigBangCosmicState,
+    BigBangRunResult,
 )
 from universe.primordial_objects import PrimordialCosmicComponent
 from universe.universe import Universe
@@ -101,25 +102,75 @@ class BigBangCosmicObjectStateTests(
         )
         self.assertIsInstance(universe.world, dict)
 
-    def test_public_state_remains_dict_boundary(
+    def test_runtime_result_is_object_and_public_snapshot_is_dict(
         self
     ):
         universe = Universe()
 
         result = universe.start_big_bang()
 
-        self.assertIsInstance(result, dict)
         self.assertIsInstance(
-            result["cosmic_state"],
+            result,
+            BigBangRunResult,
+        )
+        self.assertIs(
+            result.cosmic_state,
+            universe.big_bang.cosmic_state,
+        )
+        self.assertIs(
+            result.phases[0],
+            universe.big_bang.phases[0],
+        )
+        self.assertIs(
+            result.primordial_elements[
+                "hydrogen"
+            ],
+            universe.big_bang
+            .primordial_elements[
+                "hydrogen"
+            ],
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    result,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = result["cosmic_state"]
+
+        snapshot = result.to_dict()
+
+        self.assertIsInstance(
+            snapshot,
             dict,
         )
         self.assertIsInstance(
-            result["primordial_elements"],
+            snapshot["cosmic_state"],
             dict,
         )
         self.assertIsInstance(
-            result["phases"],
+            snapshot["primordial_elements"],
+            dict,
+        )
+        self.assertIsInstance(
+            snapshot["phases"],
             list,
+        )
+
+        self.assertIsInstance(
+            universe.big_bang.public_state,
+            dict,
         )
 
     def test_public_snapshot_is_deeply_detached(
@@ -128,13 +179,15 @@ class BigBangCosmicObjectStateTests(
         universe = Universe()
         result = universe.start_big_bang()
 
-        result["cosmic_state"][
+        snapshot = result.to_dict()
+
+        snapshot["cosmic_state"][
             "spacetime_expanded"
         ] = False
-        result["primordial_elements"][
+        snapshot["primordial_elements"][
             "hydrogen"
         ]["state"] = "changed"
-        result["phases"][0][
+        snapshot["phases"][0][
             "name"
         ] = "changed"
 
@@ -205,20 +258,46 @@ class BigBangCosmicObjectStateTests(
             "primordial_elements"
         ]["hydrogen"]
 
+        self.assertIs(
+            result.primordial_elements[
+                "hydrogen"
+            ],
+            hydrogen,
+        )
+
+        snapshot = result.to_dict()
+
         self.assertIsInstance(
-            result[
+            snapshot[
                 "primordial_elements"
             ]["hydrogen"],
             dict,
         )
 
-        result[
+        snapshot[
             "primordial_elements"
         ]["hydrogen"]["state"] = "changed"
 
         self.assertEqual(
             hydrogen.state,
             "formed",
+        )
+
+    def test_repeated_start_returns_same_runtime_result(
+        self
+    ):
+        universe = Universe()
+
+        first = universe.start_big_bang()
+        second = universe.start_big_bang()
+
+        self.assertIs(
+            second,
+            first,
+        )
+        self.assertIs(
+            second,
+            universe.big_bang.result,
         )
 
     def test_to_dict_is_detached_boundary(
