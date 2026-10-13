@@ -33,7 +33,7 @@ class Day0GodReceivesLilithTests(unittest.TestCase):
 
     def test_gods_lilith_uses_current_two_sugar_recipe(self):
         result = self.scene.advance_to_god_holding_lilith()
-        drink = result['drink']
+        drink = result.drink
         self.assertEqual(drink.ingredients['lemon'], 'whole')
         self.assertEqual(drink.ingredients['sugar'], 2)
 
@@ -43,13 +43,13 @@ class Day0GodReceivesLilithTests(unittest.TestCase):
 
     def test_god_receives_open_unpaid_receipt(self):
         result = self.scene.advance_to_god_holding_lilith()
-        receipt = result['service'].receipt
+        receipt = result.service.receipt
         self.assertFalse(receipt.paid)
         self.assertEqual(receipt.status, 'open_unpaid')
 
     def test_god_has_not_drunk_lilith_yet(self):
         result = self.scene.advance_to_god_holding_lilith()
-        self.assertFalse(result['service'].receipt.paid)
+        self.assertFalse(result.service.receipt.paid)
         self.assertEqual(self.scene.god.bar_state.activity, 'holding_lilith')
 
     def test_cronenberg_precedes_successful_second_attempt(self):

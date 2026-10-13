@@ -99,6 +99,16 @@ from genesis.day0_wine_ideas_state import (
     SerpentTastesBeerEvent,
     SerpentTastesMeadEvent,
 )
+from genesis.day0_advance_state import (
+    GodBrowsingMenuAdvanceResult,
+    GodFirstLilithTasteAdvanceResult,
+    GodHoldingLilithAdvanceResult,
+    GoodDrinkDiscussionAdvanceResult,
+    LemonRestockAdvanceResult,
+    LilithDrinkLearnedAdvanceResult,
+    SecondWineIdeaAdvanceResult,
+    ThirdWineIdeaAdvanceResult,
+)
 from genesis.day0_good_drink_discussion_state import (
     SerpentLilithGoodDrinkDiscussionStartedEvent,
 )
@@ -4986,33 +4996,62 @@ class Day0FirstBarShift:
     def advance_to_god_first_lilith_taste(self):
         previous = self.advance_to_god_holding_lilith()
         tasting = self.god_tastes_lilith()
-        return {'previous': previous, 'tasting': tasting}
+        return (
+            GodFirstLilithTasteAdvanceResult(
+                previous=previous,
+                tasting=tasting,
+            )
+        )
 
     def advance_to_god_holding_lilith(self):
         previous = self.advance_to_lemon_restock_after_god_order()
         drink = self.bartender_mixes_gods_lilith_after_restock()
         service = self.bartender_serves_gods_lilith_with_receipt()
-        return {'previous': previous, 'drink': drink, 'service': service}
+        return (
+            GodHoldingLilithAdvanceResult(
+                previous=previous,
+                drink=drink,
+                service=service,
+            )
+        )
 
     def advance_to_lemon_restock_after_god_order(self):
         state = self.advance_to_third_wine_idea()
         failure = self.bartender_attempts_gods_lilith_without_lemon()
         restock = self.bartender_runs_to_yard_for_more_lemons(amount=6)
-        return {'previous': state, 'failure': failure, 'restock': restock}
+        return (
+            LemonRestockAdvanceResult(
+                previous=state,
+                failure=failure,
+                restock=restock,
+            )
+        )
 
     def advance_to_third_wine_idea(self):
         self.advance_to_second_wine_idea()
         god_order = self.god_finishes_browsing_and_orders_lilith()
         tasting = self.serpent_tastes_mead_then_beer()
         idea = self.serpent_adds_bitterness_as_wine_idea()
-        return {'god_order': god_order, 'tasting': tasting, 'wine_idea': idea}
+        return (
+            ThirdWineIdeaAdvanceResult(
+                god_order=god_order,
+                tasting=tasting,
+                wine_idea=idea,
+            )
+        )
 
     def advance_to_second_wine_idea(self):
         self.advance_to_god_browsing_menu()
         asked = self.bartender_asks_god_for_order()
         answer = self.god_says_still_choosing()
         wine_idea = self.lilith_tastes_mead_and_adds_sweetness_idea()
-        return {'bartender': asked, 'god': answer, 'wine_idea': wine_idea}
+        return (
+            SecondWineIdeaAdvanceResult(
+                bartender=asked,
+                god=answer,
+                wine_idea=wine_idea,
+            )
+        )
 
     def advance_to_god_browsing_menu(self):
         self.advance_to_good_drink_discussion()
@@ -5022,7 +5061,13 @@ class Day0FirstBarShift:
         looked = self.god_looks_around_bar()
         continued = self.serpent_and_lilith_continue_wine_discussion()
         browsed = self.god_moves_to_drink_menu()
-        return {'looked': looked, 'continued': continued, 'browsed': browsed}
+        return (
+            GodBrowsingMenuAdvanceResult(
+                looked=looked,
+                continued=continued,
+                browsed=browsed,
+            )
+        )
 
     def serpent_and_lilith_begin_good_drink_discussion(self):
         if self.serpent.bar_state.location != 'table':
@@ -5078,7 +5123,15 @@ class Day0FirstBarShift:
         revised = self.bartender_adds_second_sugar_cube()
         moved = self.lilith_joins_serpent_at_existing_table()
         discussion = self.serpent_and_lilith_begin_good_drink_discussion()
-        return {'served': served, 'tasted': tasted, 'revised': revised, 'moved': moved, 'discussion': discussion}
+        return (
+            GoodDrinkDiscussionAdvanceResult(
+                served=served,
+                tasted=tasted,
+                revised=revised,
+                moved=moved,
+                discussion=discussion,
+            )
+        )
 
     def advance_to_lilith_drink_learned(self):
         self.advance_to_lilith_entry()
@@ -5091,7 +5144,16 @@ class Day0FirstBarShift:
         vodka_with_lemon = self.bartender_makes_vodka_with_lemon()
         correction = self.lilith_corrects_vodka_with_lemon()
         learned = self.bartender_learns_lilith_drink()
-        return {'returned': returned, 'vodka_with_lemon': vodka_with_lemon, 'correction': correction, 'learned': learned}
+        return (
+            LilithDrinkLearnedAdvanceResult(
+                returned=returned,
+                vodka_with_lemon=(
+                    vodka_with_lemon
+                ),
+                correction=correction,
+                learned=learned,
+            )
+        )
 
     def advance_to_first_private_conversation(self):
         state = self.advance_to_lilith_entry()

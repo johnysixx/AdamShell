@@ -250,9 +250,7 @@ class Day0WineIdeasObjectStateTests(
             scene.advance_to_third_wine_idea()
         )
 
-        idea = result[
-            "wine_idea"
-        ]
+        idea = result.wine_idea
 
         self.assertEqual(
             idea.assessment.sweetness,

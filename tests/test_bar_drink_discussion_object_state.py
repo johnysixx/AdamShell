@@ -548,9 +548,7 @@ class BarDrinkDiscussionObjectStateTests(
             .advance_to_good_drink_discussion()
         )
 
-        discussion = result[
-            "discussion"
-        ]
+        discussion = result.discussion
 
         emitted = (
             scene.meeting_place

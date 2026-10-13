@@ -17,7 +17,7 @@ class Day0ThirdWineIdeaTests(unittest.TestCase):
 
     def test_god_finishes_browsing_and_orders_lilith(self):
         result = self.scene.advance_to_third_wine_idea()
-        self.assertEqual(result['god_order'].drink, 'lilith')
+        self.assertEqual(result.god_order.drink, 'lilith')
         self.assertEqual(self.scene.god.bar_state.activity, 'ordered_lilith')
 
     def test_serpent_tastes_mead_then_beer(self):
@@ -29,13 +29,13 @@ class Day0ThirdWineIdeaTests(unittest.TestCase):
 
     def test_serpent_says_sweetness_is_good_but_not_full_body(self):
         result = self.scene.advance_to_third_wine_idea()
-        idea = result['wine_idea']
+        idea = result.wine_idea
         self.assertEqual(idea.assessment.sweetness, 'good')
         self.assertEqual(idea.assessment.full_body, 'still_missing')
 
     def test_serpent_proposes_bitterness(self):
         result = self.scene.advance_to_third_wine_idea()
-        self.assertTrue(result['wine_idea'].proposal.bitterness)
+        self.assertTrue(result.wine_idea.proposal.bitterness)
 
     def test_wine_discussion_has_three_ideas(self):
         self.scene.advance_to_third_wine_idea()

@@ -33,7 +33,7 @@ class Day0GodTastesLilithTests(unittest.TestCase):
 
     def test_gods_bill_remains_open_and_unpaid(self):
         result = self.scene.advance_to_god_first_lilith_taste()
-        receipt = result['previous']['service'].receipt
+        receipt = result.previous.service.receipt
         self.assertFalse(receipt.paid)
         self.assertEqual(receipt.status, 'open_unpaid')
 

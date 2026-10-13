@@ -17,19 +17,19 @@ class Day0GodBrowsesDrinkMenuTests(unittest.TestCase):
 
     def test_god_looks_around_after_entering(self):
         result = self.scene.advance_to_god_browsing_menu()
-        self.assertEqual(result['looked'].activity, 'looking_around')
+        self.assertEqual(result.looked.activity, 'looking_around')
 
     def test_god_moves_to_menu_and_browses_drinks(self):
         result = self.scene.advance_to_god_browsing_menu()
         self.assertEqual(self.scene.god.bar_state.location, 'drink_menu')
         self.assertEqual(self.scene.god.bar_state.activity, 'browsing_drinks')
-        self.assertTrue(isinstance(result['browsed'].available_drinks, tuple))
+        self.assertTrue(isinstance(result.browsed.available_drinks, tuple))
 
     def test_lilith_and_serpent_continue_talking_while_god_browses(self):
         result = self.scene.advance_to_god_browsing_menu()
-        self.assertEqual(result['continued'].subject, 'wine')
-        self.assertEqual(result['continued'].previous_idea, 'flavor_should_be_fuller')
-        self.assertIsNone(result['continued'].new_idea)
+        self.assertEqual(result.continued.subject, 'wine')
+        self.assertEqual(result.continued.previous_idea, 'flavor_should_be_fuller')
+        self.assertIsNone(result.continued.new_idea)
 
     def test_discussion_remains_unresolved(self):
         self.scene.advance_to_god_browsing_menu()
