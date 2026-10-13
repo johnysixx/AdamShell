@@ -1,5 +1,8 @@
 import unittest
 
+from genesis.day0_wine_assessment_state import (
+    GodTastesExistingWineEvent,
+)
 from genesis.day0_first_bar_shift import (
     Day0FirstBarShift,
 )
@@ -171,7 +174,7 @@ class BarKnowledgeObjectStateTests(
             "wine_tastes_like_water"
         )
 
-    def test_assessment_event_is_detached_dict(
+    def test_assessment_event_is_detached_object(
         self
     ):
         scene = self._scene()
@@ -187,16 +190,34 @@ class BarKnowledgeObjectStateTests(
         )
 
         self.assertIsInstance(
-            event["assessment"],
-            dict
+            event,
+            GodTastesExistingWineEvent
         )
-        event["assessment"]["quality"] = (
+        self.assertIsInstance(
+            event.assessment,
+            BarWineAssessment
+        )
+        self.assertIsNot(
+            event.assessment,
+            assessment
+        )
+
+        event.assessment.quality = (
             "changed"
         )
 
         self.assertEqual(
             assessment.quality,
             "bad"
+        )
+
+        self._assert_object_only(
+            event,
+            "assessment"
+        )
+        self._assert_object_only(
+            event.assessment,
+            "quality"
         )
         self._assert_object_only(
             assessment,

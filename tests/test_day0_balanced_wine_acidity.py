@@ -18,17 +18,17 @@ class Day0BalancedWineAcidityTests(unittest.TestCase):
 
     def test_serpent_agrees_with_acidity(self):
         result = self.scene.advance_to_balanced_acidity_idea()
-        event = result['balance']['event']
-        self.assertTrue(event['agrees_acidity'])
+        event = result['balance'].event
+        self.assertTrue(event.agrees_acidity)
 
     def test_serpent_says_too_much_acidity_is_bad(self):
         result = self.scene.advance_to_balanced_acidity_idea()
-        event = result['balance']['event']
-        self.assertEqual(event['too_much_acidity'], 'bad')
+        event = result['balance'].event
+        self.assertEqual(event.too_much_acidity, 'bad')
 
     def test_balance_idea_keeps_qualification_object(self):
         result = self.scene.advance_to_balanced_acidity_idea()
-        idea = result['balance']['idea']
+        idea = result['balance'].idea
         self.assertIsInstance(
             idea.qualification,
             BarDrinkQualification,

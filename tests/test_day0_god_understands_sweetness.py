@@ -17,13 +17,13 @@ class Day0GodUnderstandsSweetnessTests(unittest.TestCase):
 
     def test_god_tastes_wine_and_calls_it_bad(self):
         result = self.scene.advance_to_god_understands_sweetness()
-        assessment = result['wine']['assessment']
-        self.assertEqual(assessment['quality'], 'bad')
-        self.assertEqual(assessment['body'], 'watery')
+        assessment = result['wine'].assessment
+        self.assertEqual(assessment.quality, 'bad')
+        self.assertEqual(assessment.body, 'watery')
 
     def test_god_compares_wine_to_water_with_grapes(self):
         result = self.scene.advance_to_god_understands_sweetness()
-        self.assertEqual(result['wine']['assessment']['comparison'], 'water_in_which_someone_soaked_grapes')
+        self.assertEqual(result['wine'].assessment.comparison, 'water_in_which_someone_soaked_grapes')
 
     def test_god_has_now_tasted_the_wine(self):
         self.scene.advance_to_god_understands_sweetness()

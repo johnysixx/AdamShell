@@ -84,6 +84,11 @@ from genesis.day0_table_wine_state import (
     SerpentFinishesWineAtTableEvent,
     SerpentLilithContinueWineDiscussionEvent,
 )
+from genesis.day0_wine_assessment_state import (
+    GodTastesExistingWineEvent,
+    SerpentModerateAcidityEvent,
+    SerpentModerateAcidityResult,
+)
 from genesis.day0_god_wine_service_state import (
     BartenderServesGodWineEvent,
     GodOrdersWineToJudgeDiscussionEvent,
@@ -2727,35 +2732,70 @@ class Day0FirstBarShift:
             event=event,
         )
 
-    def serpent_agrees_with_acidity_but_wants_balance(self):
-        discussion = self.serpent_lilith_good_drink_discussion
-        hypothesis = discussion.current_hypothesis
+    def serpent_agrees_with_acidity_but_wants_balance(
+        self
+    ):
+        discussion = (
+            self.serpent_lilith_good_drink_discussion
+        )
+
+        hypothesis = (
+            discussion.current_hypothesis
+        )
+
         if hypothesis is None:
-            raise RuntimeError('Current wine hypothesis does not exist.')
+            raise RuntimeError(
+                'Current wine hypothesis '
+                'does not exist.'
+            )
+
         if not hypothesis.acidity:
-            raise RuntimeError('Acidity has not been proposed yet.')
+            raise RuntimeError(
+                'Acidity has not been proposed yet.'
+            )
+
         idea = BarDrinkIdea(
             subject='wine',
             source='serpent',
             agrees_with='acidity',
-            qualification=BarDrinkQualification(
-                acidity='moderate',
+            qualification=(
+                BarDrinkQualification(
+                    acidity='moderate',
+                )
             ),
             meaning=(
                 'acidity_is_right_but_too_much_'
                 'would_make_the_wine_bad'
             ),
         )
+
         discussion.add_idea(
             idea
         )
-        hypothesis.acidity = 'moderate'
-        event = {'name': 'serpent_says_wine_needs_moderate_acidity', 'speaker': 'serpent', 'subject': 'wine', 'agrees_acidity': True, 'too_much_acidity': 'bad', 'desired_acidity': 'moderate'}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
-        return {'idea': idea, 'event': event}
 
-    def god_tastes_existing_wine_and_rejects_it(self):
+        hypothesis.acidity = (
+            'moderate'
+        )
+
+        event = (
+            SerpentModerateAcidityEvent()
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
+        return SerpentModerateAcidityResult(
+            idea=idea,
+            event=event,
+        )
+
+    def god_tastes_existing_wine_and_rejects_it(
+        self
+    ):
         wine_order = getattr(
             getattr(
                 self.god,
@@ -2765,28 +2805,63 @@ class Day0FirstBarShift:
             'wine_order',
             None
         )
+
         if wine_order is None:
-            raise RuntimeError('God has no wine to taste.')
+            raise RuntimeError(
+                'God has no wine to taste.'
+            )
+
         if not wine_order.served:
-            raise RuntimeError("God's wine has not been served.")
+            raise RuntimeError(
+                "God's wine has not been served."
+            )
+
         wine_order.mark_tasted()
-        assessment = BarWineAssessment(
-            quality='bad',
-            body='watery',
-            comparison=(
-                'water_in_which_someone_'
-                'soaked_grapes'
-            ),
+
+        assessment = (
+            BarWineAssessment(
+                quality='bad',
+                body='watery',
+                comparison=(
+                    'water_in_which_someone_'
+                    'soaked_grapes'
+                ),
+            )
         )
-        knowledge = self._entity_attr_setdefault(
-            self.god,
-            'bar_knowledge',
-            BarGuestKnowledge()
+
+        knowledge = (
+            self._entity_attr_setdefault(
+                self.god,
+                'bar_knowledge',
+                BarGuestKnowledge()
+            )
         )
-        knowledge.existing_wine = assessment
-        event = {'name': 'god_tastes_existing_wine', 'guest': 'god', 'drink': 'wine', 'assessment': assessment.to_dict()}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
+
+        knowledge.existing_wine = (
+            assessment
+        )
+
+        event = (
+            GodTastesExistingWineEvent(
+                assessment=(
+                    BarWineAssessment(
+                        quality=assessment.quality,
+                        body=assessment.body,
+                        comparison=(
+                            assessment.comparison
+                        ),
+                    )
+                )
+            )
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
         return event
 
     def lilith_explains_sweetness_to_god(self):
