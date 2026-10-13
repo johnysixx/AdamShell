@@ -124,21 +124,15 @@ class GenesisDay0FireOriginTests(
         )
 
         self.assertIsNone(
-            event[
-                "universe_tick"
-            ]
+            event.universe_tick
         )
 
         self.assertIsNone(
-            event[
-                "location"
-            ]
+            event.location
         )
 
         self.assertEqual(
-            event[
-                "ordering_kind"
-            ],
+            event.ordering_kind,
             "logical_precedence"
         )
 

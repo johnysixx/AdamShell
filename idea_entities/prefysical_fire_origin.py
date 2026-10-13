@@ -1133,13 +1133,10 @@ class PrefysicalFireOrigin:
         universe_tick=None,
         details=None
     ):
-        return (
-            self._event_object(
-                name=name,
-                universe_tick=universe_tick,
-                details=details,
-            )
-            .to_dict()
+        return self._event_object(
+            name=name,
+            universe_tick=universe_tick,
+            details=details,
         )
 
     @property

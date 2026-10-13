@@ -252,9 +252,7 @@ class PrefysicalFireStoryTests(
         )
 
         self.assertEqual(
-            first[
-                "details"
-            ][
+            first.details[
                 "consumed"
             ][
                 "dry_grass"
@@ -291,24 +289,20 @@ class PrefysicalFireStoryTests(
         )
 
         self.assertEqual(
-            understood[
-                "details"
-            ][
+            understood.details[
                 "fire_guardian"
             ],
             "pazuzu_masculine_principle"
         )
 
         self.assertEqual(
-            understood[
-                "details"
-            ][
+            understood.details[
                 "fuel_seekers"
             ],
-            [
+            (
                 "lilith",
                 "serpent"
-            ]
+            )
         )
 
         self.assertTrue(

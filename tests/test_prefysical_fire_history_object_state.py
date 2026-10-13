@@ -60,9 +60,9 @@ class PrefysicalFireHistoryObjectStateTests(
             ),
         )
 
-        self.assertEqual(
-            result["name"],
-            event.name,
+        self.assertIs(
+            result,
+            event,
         )
 
         for mapping_method in (
@@ -109,7 +109,14 @@ class PrefysicalFireHistoryObjectStateTests(
                 "handed_to"
             ] = "changed"
 
-        result[
+        self.assertIs(
+            result,
+            event,
+        )
+
+        snapshot = result.to_dict()
+
+        snapshot[
             "details"
         ][
             "materials"

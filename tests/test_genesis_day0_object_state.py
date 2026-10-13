@@ -1,7 +1,10 @@
 import unittest
 
 from genesis.day0 import GenesisDay0
-from genesis.day0_state import GenesisDay0State
+from genesis.day0_state import (
+    GenesisDay0PrinciplesPresentEvent,
+    GenesisDay0State,
+)
 from idea_entities import IdeaEntities
 from idea_entities.prefysical_fire_origin import (
     PrefysicalFireAlreadyBurningResult,
@@ -87,7 +90,14 @@ class GenesisDay0ObjectStateTests(unittest.TestCase):
 
         self.assertIs(day0.genesis_day0_state, state)
         self.assertEqual(state.status, "ready_for_fire_origin")
-        self.assertEqual(state.history, [event])
+        self.assertIsInstance(
+            event,
+            GenesisDay0PrinciplesPresentEvent,
+        )
+        self.assertIs(
+            state.history[-1],
+            event,
+        )
 
     def test_begin_mutates_same_object(self):
         _, _, day0 = self._day0()
@@ -97,8 +107,14 @@ class GenesisDay0ObjectStateTests(unittest.TestCase):
 
         self.assertIs(day0.genesis_day0_state, state)
         self.assertEqual(state.status, "seeking_warmth")
-        self.assertEqual(state.history[-1], event)
-        self.assertEqual(len(state.history), 2)
+        self.assertIs(
+            state.history[-1],
+            event,
+        )
+        self.assertEqual(
+            len(state.history),
+            2,
+        )
 
     def test_failed_attempt_updates_object_status(self):
         _, _, day0 = self._day0()
@@ -141,7 +157,10 @@ class GenesisDay0ObjectStateTests(unittest.TestCase):
             state.status,
             "fire_guarded_fuel_search_active",
         )
-        self.assertEqual(state.history[-1], result)
+        self.assertIs(
+            state.history[-1],
+            result,
+        )
 
     def test_advance_fire_records_history_on_same_object(self):
         _, _, day0 = self._day0()
@@ -153,7 +172,10 @@ class GenesisDay0ObjectStateTests(unittest.TestCase):
 
         self.assertIs(day0.genesis_day0_state, state)
         self.assertEqual(len(state.history), before + 1)
-        self.assertEqual(state.history[-1], result)
+        self.assertIs(
+            state.history[-1],
+            result,
+        )
 
     def test_fire_result_public_state_is_snapshot_boundary(
         self

@@ -71,22 +71,16 @@ class GenesisDay0Tests(
         )
 
         self.assertEqual(
-            result[
-                "ordering_kind"
-            ],
+            result.ordering_kind,
             "logical_precedence"
         )
 
         self.assertIsNone(
-            result[
-                "physical_time"
-            ]
+            result.physical_time
         )
 
         self.assertIsNone(
-            result[
-                "physical_space"
-            ]
+            result.physical_space
         )
 
     def test_eternal_fire_does_not_exist_initially(
@@ -120,21 +114,15 @@ class GenesisDay0Tests(
         )
 
         self.assertIsNone(
-            event[
-                "universe_tick"
-            ]
+            event.universe_tick
         )
 
         self.assertIsNone(
-            event[
-                "location"
-            ]
+            event.location
         )
 
         self.assertEqual(
-            event[
-                "ordering_kind"
-            ],
+            event.ordering_kind,
             "logical_precedence"
         )
 

@@ -109,9 +109,16 @@ class PrefysicalFireOriginObjectStateTests(unittest.TestCase):
             materials.handed_to,
             "pazuzu_masculine_principle",
         )
-        self.assertIsInstance(event["details"]["materials"], dict)
+        self.assertIsInstance(
+            event,
+            PrefysicalFireEvent,
+        )
         self.assertEqual(
-            event["details"]["materials"]["handed_to"],
+            event.details[
+                "materials"
+            ][
+                "handed_to"
+            ],
             "pazuzu_masculine_principle",
         )
 
@@ -186,18 +193,44 @@ class PrefysicalFireOriginObjectStateTests(unittest.TestCase):
             ["lilith", "serpent"],
         )
 
-    def test_repeated_significance_event_keeps_dict_boundary(self):
+    def test_repeated_significance_event_uses_object_state(self):
         _, _, origin = self._origin()
         origin.attempt_ignition(rng=FixedRng(20))
         origin.understand_fire_significance()
 
         event = origin.understand_fire_significance()
 
-        self.assertIsInstance(event["details"]["roles"], dict)
-        self.assertEqual(
-            event["details"]["roles"]["fuel_seekers"],
-            ["lilith", "serpent"],
+        self.assertIsInstance(
+            event,
+            PrefysicalFireEvent,
         )
+        self.assertEqual(
+            event.details[
+                "roles"
+            ][
+                "fuel_seekers"
+            ],
+            (
+                "lilith",
+                "serpent",
+            ),
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    event,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(TypeError):
+            _ = event["details"]
 
     def test_public_state_keeps_detached_dict_boundaries(self):
         _, _, origin = self._origin()

@@ -1,6 +1,9 @@
 from copy import deepcopy
 
-from genesis.day0_state import GenesisDay0State
+from genesis.day0_state import (
+    GenesisDay0PrinciplesPresentEvent,
+    GenesisDay0State,
+)
 from idea_entities.prefysical_fire_origin import (
     PrefysicalFireAlreadyBurningResult,
     PrefysicalFireIgnitedResult,
@@ -74,22 +77,13 @@ class GenesisDay0:
                 f"{missing}"
             )
 
-        event = {
-            "name": (
-                "genesis_day0_principles_present"
-            ),
-
-            "participants": list(
-                self.REQUIRED_PRINCIPLES
-            ),
-
-            "physical_time": None,
-            "physical_space": None,
-
-            "ordering_kind": (
-                "logical_precedence"
+        event = (
+            GenesisDay0PrinciplesPresentEvent(
+                participants=(
+                    self.REQUIRED_PRINCIPLES
+                ),
             )
-        }
+        )
 
         self.history.append(
             event
@@ -99,9 +93,7 @@ class GenesisDay0:
             "ready_for_fire_origin"
         )
 
-        return deepcopy(
-            event
-        )
+        return event
 
     def begin_fire_origin(
         self
@@ -117,18 +109,14 @@ class GenesisDay0:
         )
 
         self.history.append(
-            deepcopy(
-                event
-            )
+            event
         )
 
         self.status = (
             "seeking_warmth"
         )
 
-        return deepcopy(
-            event
-        )
+        return event
 
     def attempt_fire(
         self,
@@ -190,18 +178,14 @@ class GenesisDay0:
         )
 
         self.history.append(
-            deepcopy(
-                result
-            )
+            result
         )
 
         self.status = (
             "fire_guarded_fuel_search_active"
         )
 
-        return deepcopy(
-            result
-        )
+        return result
 
     def advance_fire(
         self
@@ -217,14 +201,10 @@ class GenesisDay0:
         )
 
         self.history.append(
-            deepcopy(
-                result
-            )
-        )
-
-        return deepcopy(
             result
         )
+
+        return result
 
     @property
     def eternal_fire_exists(
