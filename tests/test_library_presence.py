@@ -6,6 +6,9 @@ from library import Library
 from library.god_book_library_status import (
     GodBookLibraryStatus,
 )
+from library.library_state import (
+    GodLeftLibraryEvent,
+)
 
 
 class LibraryPresenceTests(unittest.TestCase):
@@ -373,10 +376,38 @@ class LibraryPresenceTests(unittest.TestCase):
             god
         )
 
+        self.assertIsInstance(
+            result,
+            GodLeftLibraryEvent,
+        )
+
         self.assertEqual(
-            result["event"],
+            result.name,
             "god_left_library"
         )
+
+        self.assertIs(
+            result.god,
+            god,
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    result,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = result["event"]
 
         self.assertFalse(
             library.god_present

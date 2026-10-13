@@ -2,7 +2,12 @@ import unittest
 
 from gods.gods import Gods
 from library import Library
-from library.library_state import LibraryState
+from library.library_state import (
+    GodEnteredLibraryEvent,
+    GodLeftLibraryEvent,
+    LibraryPresenceStatusResult,
+    LibraryState,
+)
 from universe.universe import Universe
 
 
@@ -151,6 +156,104 @@ class LibraryObjectStateTests(unittest.TestCase):
         self.assertIs(
             universe.world["library"]["books"],
             state.books,
+        )
+
+    def test_presence_results_use_object_state(
+        self
+    ):
+        _, library, _, god = (
+            self._library_with_god()
+        )
+
+        presence = library.update_presence()
+
+        self.assertIsInstance(
+            presence,
+            LibraryPresenceStatusResult,
+        )
+        self.assertFalse(
+            presence.god_present
+        )
+        self.assertTrue(
+            presence.is_open
+        )
+        self.assertEqual(
+            presence.door_sign,
+            "OPEN",
+        )
+
+        entered = library.god_enters(
+            god
+        )
+
+        self.assertIsInstance(
+            entered,
+            GodEnteredLibraryEvent,
+        )
+        self.assertIs(
+            entered.god,
+            god,
+        )
+        self.assertEqual(
+            entered.name,
+            "god_entered_library",
+        )
+        self.assertEqual(
+            entered.door_sign,
+            "GOD IS: IN",
+        )
+
+        left = library.god_leaves(
+            god
+        )
+
+        self.assertIsInstance(
+            left,
+            GodLeftLibraryEvent,
+        )
+        self.assertIs(
+            left.god,
+            god,
+        )
+        self.assertEqual(
+            left.name,
+            "god_left_library",
+        )
+
+        for result in (
+            presence,
+            entered,
+            left,
+        ):
+            for mapping_method in (
+                "get",
+                "keys",
+                "items",
+                "values",
+            ):
+                self.assertFalse(
+                    hasattr(
+                        result,
+                        mapping_method,
+                    )
+                )
+
+            with self.assertRaises(
+                TypeError
+            ):
+                _ = result["name"]
+
+        self.assertIsInstance(
+            presence.to_dict(),
+            dict,
+        )
+        self.assertIsInstance(
+            entered.to_dict(),
+            dict,
+        )
+        self.assertIsInstance(
+            left.to_dict(),
+            dict,
         )
 
     def test_permissions_remain_collection_boundary(self):

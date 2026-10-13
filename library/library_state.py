@@ -28,6 +28,100 @@ def _default_permissions():
     }
 
 
+@dataclass(
+    slots=True,
+    frozen=True,
+)
+class LibraryPresenceStatusResult:
+
+    god_present: bool
+    is_open: bool = True
+    door_sign: str = "OPEN"
+
+    def __post_init__(
+        self,
+    ):
+        object.__setattr__(
+            self,
+            "god_present",
+            bool(self.god_present),
+        )
+        object.__setattr__(
+            self,
+            "is_open",
+            bool(self.is_open),
+        )
+        object.__setattr__(
+            self,
+            "door_sign",
+            str(self.door_sign),
+        )
+
+    def to_dict(
+        self,
+    ):
+        return {
+            "god_present": self.god_present,
+            "is_open": self.is_open,
+            "door_sign": self.door_sign,
+        }
+
+
+@dataclass(
+    slots=True,
+    frozen=True,
+)
+class GodEnteredLibraryEvent:
+
+    god: object
+    door_sign: str
+
+    name: str = field(
+        default="god_entered_library",
+        init=False,
+    )
+
+    def __post_init__(
+        self,
+    ):
+        object.__setattr__(
+            self,
+            "door_sign",
+            str(self.door_sign),
+        )
+
+    def to_dict(
+        self,
+    ):
+        return {
+            "event": self.name,
+            "god": self.god,
+            "door_sign": self.door_sign,
+        }
+
+
+@dataclass(
+    slots=True,
+    frozen=True,
+)
+class GodLeftLibraryEvent:
+
+    god: object
+
+    name: str = field(
+        default="god_left_library",
+        init=False,
+    )
+
+    def to_dict(
+        self,
+    ):
+        return {
+            "event": self.name,
+            "god": self.god,
+        }
+
+
 @dataclass(slots=True)
 class LibraryState:
 

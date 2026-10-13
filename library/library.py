@@ -1,4 +1,9 @@
-from library.library_state import LibraryState
+from library.library_state import (
+    GodEnteredLibraryEvent,
+    GodLeftLibraryEvent,
+    LibraryPresenceStatusResult,
+    LibraryState,
+)
 from library.god_book_library_status import (
     GodBookLibraryStatus,
 )
@@ -152,11 +157,11 @@ class Library:
 
         self.write_to_world()
 
-        return {
-            "god_present": self.god_present,
-            "is_open": True,
-            "door_sign": "OPEN"
-        }
+        return LibraryPresenceStatusResult(
+            god_present=self.god_present,
+            is_open=True,
+            door_sign="OPEN",
+        )
 
     def enter(
         self,
@@ -203,11 +208,12 @@ class Library:
 
         self.write_to_world()
 
-        return {
-            "event": "god_entered_library",
-            "god": god,
-            "door_sign": self.door["god_sign"]
-        }
+        return GodEnteredLibraryEvent(
+            god=god,
+            door_sign=self.door[
+                "god_sign"
+            ],
+        )
 
     def god_leaves(
         self,
@@ -247,10 +253,9 @@ class Library:
 
         self.write_to_world()
 
-        return {
-            "event": "god_left_library",
-            "god": god
-        }
+        return GodLeftLibraryEvent(
+            god=god,
+        )
 
     def shelve_book(
         self,
