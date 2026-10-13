@@ -25,17 +25,22 @@ class Day0GarfieldArrivalTests(unittest.TestCase):
 
     def test_all_three_competitors_accept_panel(self):
         result = self.scene.advance_to_garfield_arrival()
-        self.assertEqual(result['accepted']['accepted_by'], ['lilith', 'god', 'serpent'])
+        self.assertEqual(result['accepted'].accepted_by, ('lilith', 'god', 'serpent'))
 
     def test_bartender_suggests_inviting_bouncer(self):
         result = self.scene.advance_to_garfield_arrival()
-        self.assertEqual(result['invite']['invite'], 'bouncer')
-        self.assertFalse(result['invite']['bouncer_entered'])
+        self.assertEqual(result['invite'].invite, 'bouncer')
+        self.assertFalse(result['invite'].bouncer_entered)
 
     def test_everyone_present_scratches_cat_d20(self):
         result = self.scene.advance_to_garfield_arrival()
-        scratchers = [event['scratched_by'] for event in result['scratches']]
-        self.assertEqual(scratchers, ['serpent', 'lilith', 'god', 'bartender'])
+        scratchers = [event.scratched_by for event in result['scratches']]
+        self.assertEqual(scratchers, [
+                'serpent',
+                'lilith',
+                'god',
+                'bartender'
+            ])
 
     def test_cat_d20_sets_garfield_target(self):
         result = self.scene.advance_to_garfield_arrival()

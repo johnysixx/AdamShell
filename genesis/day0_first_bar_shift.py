@@ -32,7 +32,6 @@ from meeting_place.bar_objects import (
     DrinkRecipe,
     RecipeIngredientRequirement,
 )
-from core.entity.social_entity import _entity_attr_setdefault
 from meeting_place.bar_yard import BarYard
 from genesis.day0_first_conversation_state import (
     FirstBarDrinkReactionState,
@@ -83,6 +82,15 @@ from genesis.day0_table_wine_state import (
     LilithTakesFirstTableSipEvent,
     SerpentFinishesWineAtTableEvent,
     SerpentLilithContinueWineDiscussionEvent,
+)
+from genesis.day0_cat_d20_arrival_state import (
+    BartenderSuggestsInvitingBouncerEvent,
+    CatD20ArrivesDuringJudgeDiscussionEvent,
+    CatD20DiscussionArrivalResult,
+    CatD20ScratchedEvent,
+    CatD20SocialState,
+    CatD20WelcomeResultState,
+    TwoJudgePanelAcceptedEvent,
 )
 from genesis.day0_bartender_bouncer_panel_state import (
     BartenderProposesBouncerPanelEvent,
@@ -3755,63 +3763,182 @@ class Day0FirstBarShift:
 
         return event
 
-    def cat_d20_arrives_during_judge_discussion(self):
-        result = self.meeting_place.welcome_cat_d20()
-        cat = result.get('cat')
-        if cat is None:
-            raise RuntimeError('CatD20 arrival returned no cat.')
-        self.cat_d20 = cat
-        event = {'name': 'cat_d20_arrives_during_judge_discussion', 'cat': cat.name, 'current_layer': getattr(cat, 'current_layer', None), 'state': getattr(cat, 'state', None)}
-        self.history.append(event)
-        return {'arrival': result, 'event': event, 'cat': cat}
+    def cat_d20_arrives_during_judge_discussion(
+        self
+    ):
+        arrival = (
+            CatD20WelcomeResultState
+            .from_mapping(
+                self.meeting_place
+                .welcome_cat_d20()
+            )
+        )
 
-    def wager_participants_accept_two_judge_panel(self):
-        wager = self.serpent_lilith_drink_wager
-        proposal = wager.tasting_panel_proposal
+        cat = arrival.cat
+
+        if cat is None:
+            raise RuntimeError(
+                'CatD20 arrival returned no cat.'
+            )
+
+        self.cat_d20 = cat
+
+        event = (
+            CatD20ArrivesDuringJudgeDiscussionEvent(
+                cat=cat.name,
+                current_layer=getattr(
+                    cat,
+                    'current_layer',
+                    None,
+                ),
+                state=getattr(
+                    cat,
+                    'state',
+                    None,
+                ),
+            )
+        )
+
+        self.history.append(
+            event.to_dict()
+        )
+
+        return CatD20DiscussionArrivalResult(
+            arrival=arrival,
+            event=event,
+            cat=cat,
+        )
+
+    def wager_participants_accept_two_judge_panel(
+        self
+    ):
+        wager = (
+            self.serpent_lilith_drink_wager
+        )
+
+        proposal = (
+            wager.tasting_panel_proposal
+        )
+
         if proposal is None:
-            raise RuntimeError('Bartender+bouncer panel was not proposed.')
-        approvals = ['lilith', 'god', 'serpent']
+            raise RuntimeError(
+                'Bartender+bouncer panel '
+                'was not proposed.'
+            )
+
+        approvals = (
+            'lilith',
+            'god',
+            'serpent',
+        )
+
+        judges = (
+            'bartender',
+            'bouncer',
+        )
+
         proposal.accept(
             participants=approvals
         )
+
         wager.decision_method = (
             BarWagerDecisionMethod(
                 type='tasting_panel',
-                judges=[
-                    'bartender',
-                    'bouncer',
-                ],
+                judges=list(
+                    judges
+                ),
             )
         )
-        event = {'name': 'wager_participants_accept_two_judge_panel', 'accepted_by': approvals, 'judges': ['bartender', 'bouncer']}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
+
+        event = (
+            TwoJudgePanelAcceptedEvent(
+                accepted_by=approvals,
+                judges=judges,
+            )
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
         return event
 
-    def bartender_suggests_inviting_bouncer_inside(self):
+    def bartender_suggests_inviting_bouncer_inside(
+        self
+    ):
         proposal = (
             self.serpent_lilith_drink_wager
             .tasting_panel_proposal
         )
-        if proposal is None or not proposal.accepted:
-            raise RuntimeError('Two-judge panel has not been accepted.')
-        event = {'name': 'bartender_suggests_inviting_bouncer_inside', 'speaker': 'bartender', 'invite': 'bouncer', 'purpose': 'agree_on_wager_judging', 'bouncer_entered': False}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
+
+        if (
+            proposal is None
+            or not proposal.accepted
+        ):
+            raise RuntimeError(
+                'Two-judge panel has not '
+                'been accepted.'
+            )
+
+        event = (
+            BartenderSuggestsInvitingBouncerEvent()
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
         return event
 
-    def everyone_scratches_cat_d20(self):
+    def everyone_scratches_cat_d20(
+        self
+    ):
         if self.cat_d20 is None:
-            raise RuntimeError('CatD20 is not in the bar.')
-        scratchers = ['serpent', 'lilith', 'god', 'bartender']
+            raise RuntimeError(
+                'CatD20 is not in the bar.'
+            )
+
+        scratchers = (
+            'serpent',
+            'lilith',
+            'god',
+            'bartender',
+        )
+
         events = []
+
         for scratcher in scratchers:
-            event = {'name': 'cat_d20_scratched', 'cat': 'cat_d20', 'scratched_by': scratcher, 'pleasant': True}
-            self.meeting_place.emit_event(event)
-            self.history.append(event)
-            events.append(event)
-        _entity_attr_setdefault(self.cat_d20, 'social_state', {})['scratched_by'] = list(scratchers)
-        return events
+            event = (
+                CatD20ScratchedEvent(
+                    scratched_by=scratcher
+                )
+            )
+
+            self.meeting_place.emit_event(
+                event
+            )
+            self.history.append(
+                event.to_dict()
+            )
+            events.append(
+                event
+            )
+
+        self.cat_d20.social_state = (
+            CatD20SocialState(
+                scratched_by=scratchers
+            )
+        )
+
+        return tuple(
+            events
+        )
 
     def cat_d20_sets_next_birth_to_garfield(
         self
