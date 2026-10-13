@@ -84,6 +84,14 @@ from genesis.day0_table_wine_state import (
     SerpentFinishesWineAtTableEvent,
     SerpentLilithContinueWineDiscussionEvent,
 )
+from genesis.day0_beer_bitterness_state import (
+    BeerBitternessConclusionState,
+    BeerTasteAssessmentState,
+    BitternessUnderstandingState,
+    GodTastesBeerAndUnderstandsBitternessEvent,
+    LilithSipsLilithAndReactsToBeerEvent,
+    WineBitternessConclusionState,
+)
 from genesis.day0_god_drink_wager_state import (
     DrinkWagerExplanationSnapshot,
     GodAcceptsDrinkWagerEvent,
@@ -3105,41 +3113,125 @@ class Day0FirstBarShift:
 
         return event
 
-    def god_tastes_beer_and_understands_bitterness(self):
-        event = {'name': 'god_tastes_beer_and_understands_bitterness', 'guest': 'god', 'drink': 'beer', 'assessment': {'good': None, 'not_so_bad': True}, 'understands': {'bitterness': True}, 'wine_conclusion': {'bitterness_belongs_in_wine': False}}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
+    def god_tastes_beer_and_understands_bitterness(
+        self
+    ):
+        event = (
+            GodTastesBeerAndUnderstandsBitternessEvent(
+                assessment=(
+                    BeerTasteAssessmentState()
+                ),
+                understands=(
+                    BitternessUnderstandingState()
+                ),
+                wine_conclusion=(
+                    WineBitternessConclusionState()
+                ),
+            )
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
         self._entity_attr_setdefault(
             self.god,
             'bar_knowledge',
             BarGuestKnowledge()
-        ).bitterness = BarTasteKnowledge(
-            understood=True,
-            example='beer',
+        ).bitterness = (
+            BarTasteKnowledge(
+                understood=True,
+                example='beer',
+            )
         )
-        discussion = self.serpent_lilith_good_drink_discussion
-        discussion.current_hypothesis.bitterness = False
+
+        discussion = (
+            self.serpent_lilith_good_drink_discussion
+        )
+
+        discussion.current_hypothesis.bitterness = (
+            False
+        )
+
         return event
 
-    def lilith_sips_lilith_and_reacts_to_beer(self):
-        drink = self.lilith_order.final_drink
+    def lilith_sips_lilith_and_reacts_to_beer(
+        self
+    ):
+        drink = (
+            self.lilith_order.final_drink
+        )
+
         if drink is None:
-            raise RuntimeError('Lilith has no lilith to sip.')
+            raise RuntimeError(
+                'Lilith has no lilith to sip.'
+            )
+
         effects = drink.effects
-        self.lilith.energy_j = getattr(self.lilith, 'energy_j', 0.0) + float(effects.get('energy_j', 0.0))
-        self.lilith.creative_will = getattr(self.lilith, 'creative_will', 0.0) + float(effects.get('creative_will', 0.0))
-        event = {'name': 'lilith_sips_lilith_and_reacts_to_beer', 'guest': 'lilith', 'drink': 'lilith', 'disagrees_beer_is_good': True, 'beer_conclusion': {'bitterness_allowed': True}, 'effects_applied': True}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
-        discussion = self.serpent_lilith_good_drink_discussion
+
+        self.lilith.energy_j = (
+            getattr(
+                self.lilith,
+                'energy_j',
+                0.0
+            )
+            + float(
+                effects.get(
+                    'energy_j',
+                    0.0
+                )
+            )
+        )
+
+        self.lilith.creative_will = (
+            getattr(
+                self.lilith,
+                'creative_will',
+                0.0
+            )
+            + float(
+                effects.get(
+                    'creative_will',
+                    0.0
+                )
+            )
+        )
+
+        event = (
+            LilithSipsLilithAndReactsToBeerEvent(
+                beer_conclusion=(
+                    BeerBitternessConclusionState()
+                )
+            )
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
+        discussion = (
+            self.serpent_lilith_good_drink_discussion
+        )
+
         if discussion.beer_hypothesis is None:
             discussion.beer_hypothesis = (
                 BarBeerHypothesis()
             )
+
         discussion.beer_hypothesis.bitterness = (
             'allowed'
         )
-        discussion.beer_hypothesis.resolved = False
+
+        discussion.beer_hypothesis.resolved = (
+            False
+        )
+
         return event
 
     def serpent_leaves_table_for_bar(self):
