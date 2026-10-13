@@ -381,18 +381,14 @@ class BarDrinkDiscussion:
     name: str = (
         "serpent_lilith_good_drink_discussion"
     )
-    participants: list[str] = field(
-        default_factory=lambda: [
-            "serpent",
-            "lilith",
-        ]
+    participants: tuple[str, ...] = (
+        "serpent",
+        "lilith",
     )
-    subjects: list[str] = field(
-        default_factory=lambda: [
-            "wine",
-            "mead",
-            "beer",
-        ]
+    subjects: tuple[str, ...] = (
+        "wine",
+        "mead",
+        "beer",
     )
     question: str = (
         "what_should_good_wine_mead_or_beer_be_like"
@@ -408,11 +404,90 @@ class BarDrinkDiscussion:
         BarBeerHypothesis | None
     ) = None
 
-    def add_idea(self, idea):
+    def __post_init__(self):
+        self.name = str(
+            self.name
+        )
+
+        self.participants = tuple(
+            str(value)
+            for value
+            in self.participants
+        )
+
+        self.subjects = tuple(
+            str(value)
+            for value
+            in self.subjects
+        )
+
+        self.question = str(
+            self.question
+        )
+
+        ideas = list(
+            self.ideas
+        )
+
+        if not all(
+            isinstance(
+                idea,
+                BarDrinkIdea,
+            )
+            for idea in ideas
+        ):
+            raise TypeError(
+                "BarDrinkDiscussion ideas "
+                "must contain BarDrinkIdea."
+            )
+
+        self.ideas = ideas
+
+        if (
+            self.current_hypothesis
+            is not None
+            and not isinstance(
+                self.current_hypothesis,
+                BarWineHypothesis,
+            )
+        ):
+            raise TypeError(
+                "Current wine hypothesis must "
+                "be BarWineHypothesis."
+            )
+
+        if (
+            self.beer_hypothesis
+            is not None
+            and not isinstance(
+                self.beer_hypothesis,
+                BarBeerHypothesis,
+            )
+        ):
+            raise TypeError(
+                "Beer hypothesis must be "
+                "BarBeerHypothesis."
+            )
+
+    def add_idea(
+        self,
+        idea,
+    ):
+        if not isinstance(
+            idea,
+            BarDrinkIdea,
+        ):
+            raise TypeError(
+                "BarDrinkDiscussion requires "
+                "BarDrinkIdea."
+            )
+
         self.ideas.append(
             idea
         )
+
         self.resolved = False
+
         return idea
 
     def to_dict(self):
@@ -449,7 +524,6 @@ class BarDrinkDiscussion:
             )
 
         return result
-
 
 @dataclass(slots=True)
 class BarDrinkWagerChallenge:

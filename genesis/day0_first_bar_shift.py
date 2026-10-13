@@ -99,6 +99,9 @@ from genesis.day0_wine_ideas_state import (
     SerpentTastesBeerEvent,
     SerpentTastesMeadEvent,
 )
+from genesis.day0_good_drink_discussion_state import (
+    SerpentLilithGoodDrinkDiscussionStartedEvent,
+)
 from genesis.day0_table_wine_state import (
     FirstGoodWineObservationEvent,
     FirstTableDrinksResult,
@@ -5034,11 +5037,29 @@ class Day0FirstBarShift:
             None
         ) != 'table':
             raise RuntimeError('Lilith is not at table.')
-        discussion = BarDrinkDiscussion()
-        self.serpent_lilith_good_drink_discussion = discussion
-        event = discussion.to_dict()
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
+        discussion = (
+            BarDrinkDiscussion()
+        )
+
+        self.serpent_lilith_good_drink_discussion = (
+            discussion
+        )
+
+        event = (
+            SerpentLilithGoodDrinkDiscussionStartedEvent
+            .from_discussion(
+                discussion
+            )
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+
+        self.history.append(
+            event.to_dict()
+        )
+
         return discussion
 
     def advance_to_good_drink_discussion(self):

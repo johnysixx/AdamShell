@@ -3,6 +3,9 @@ import unittest
 from genesis.day0_first_bar_shift import (
     Day0FirstBarShift,
 )
+from genesis.day0_good_drink_discussion_state import (
+    SerpentLilithGoodDrinkDiscussionStartedEvent,
+)
 from gods import Gods
 from idea_entities import IdeaEntities
 from library import Library
@@ -403,6 +406,21 @@ class BarDrinkDiscussionObjectStateTests(
                 },
             )
 
+    def test_discussion_rejects_mapping_idea(
+        self
+    ):
+        discussion = BarDrinkDiscussion()
+
+        with self.assertRaisesRegex(
+            TypeError,
+            "BarDrinkIdea",
+        ):
+            discussion.add_idea(
+                {
+                    "subject": "wine",
+                }
+            )
+
     def test_snapshot_is_detached_boundary_dict(
         self
     ):
@@ -468,10 +486,10 @@ class BarDrinkDiscussionObjectStateTests(
 
         self.assertEqual(
             discussion.participants,
-            [
+            (
                 "serpent",
                 "lilith",
-            ]
+            )
         )
         self.assertEqual(
             idea.serpent.proposal,
@@ -501,13 +519,14 @@ class BarDrinkDiscussionObjectStateTests(
             .acidity
         )
 
-    def test_scene_keeps_object_and_emits_snapshot(
+    def test_scene_keeps_object_emits_object_and_serializes_history(
         self
     ):
         universe = Universe()
         universe.universe_registry = (
             UniverseRegistry()
         )
+
         scene = Day0FirstBarShift(
             universe=universe,
             meeting_place=MeetingPlace(
@@ -528,11 +547,23 @@ class BarDrinkDiscussionObjectStateTests(
             scene
             .advance_to_good_drink_discussion()
         )
-        discussion = result["discussion"]
-        event = next(
+
+        discussion = result[
+            "discussion"
+        ]
+
+        emitted = (
+            scene.meeting_place
+            .events[-1]
+        )
+
+        history_event = next(
             item
-            for item in scene.history
-            if item.get("name")
+            for item
+            in scene.history
+            if item.get(
+                "name"
+            )
             == (
                 "serpent_lilith_good_"
                 "drink_discussion"
@@ -541,29 +572,85 @@ class BarDrinkDiscussionObjectStateTests(
 
         self.assertIsInstance(
             discussion,
-            BarDrinkDiscussion
+            BarDrinkDiscussion,
         )
+
         self.assertIs(
             discussion,
             scene
-            .serpent_lilith_good_drink_discussion
-        )
-        self.assertIsInstance(
-            event,
-            dict
+            .serpent_lilith_good_drink_discussion,
         )
 
-        event["subjects"].append(
+        self.assertEqual(
+            discussion.participants,
+            (
+                "serpent",
+                "lilith",
+            ),
+        )
+
+        self.assertEqual(
+            discussion.subjects,
+            (
+                "wine",
+                "mead",
+                "beer",
+            ),
+        )
+
+        self.assertIsInstance(
+            emitted,
+            SerpentLilithGoodDrinkDiscussionStartedEvent,
+        )
+
+        self.assertEqual(
+            emitted.participants,
+            discussion.participants,
+        )
+
+        self.assertEqual(
+            emitted.subjects,
+            discussion.subjects,
+        )
+
+        self.assertEqual(
+            emitted.question,
+            discussion.question,
+        )
+
+        self.assertFalse(
+            emitted.resolved
+        )
+
+        self._assert_object_only(
+            emitted,
+            "subjects",
+        )
+
+        self.assertIsInstance(
+            history_event,
+            dict,
+        )
+
+        history_event[
+            "subjects"
+        ].append(
             "water"
         )
 
         self.assertNotIn(
             "water",
-            discussion.subjects
+            discussion.subjects,
         )
+
+        self.assertNotIn(
+            "water",
+            emitted.subjects,
+        )
+
         self._assert_object_only(
             discussion,
-            "subjects"
+            "subjects",
         )
 
 
