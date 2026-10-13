@@ -1,6 +1,9 @@
 import unittest
 from universe.universe import Universe
 from gods.gods import Gods
+from gods.gods_state import (
+    GodMaskReleasedResult,
+)
 
 class GodMaskTests(unittest.TestCase):
 
@@ -38,7 +41,42 @@ class GodMaskTests(unittest.TestCase):
         knowledge = god.knowledge
         research_book = god.research_book
         released = gods.release_mask(god=god, mask_name='marduk')
-        self.assertEqual(released['released_mask'], 'marduk')
+        self.assertIsInstance(
+            released,
+            GodMaskReleasedResult,
+        )
+        self.assertEqual(
+            released.released_mask,
+            'marduk',
+        )
+        self.assertIs(
+            released.god,
+            god,
+        )
+        self.assertIs(
+            released.mask,
+            marduk,
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    released,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = released[
+                'released_mask'
+            ]
         self.assertIsNone(god.active_mask)
         self.assertIs(god.knowledge, knowledge)
         self.assertIs(god.research_book, research_book)

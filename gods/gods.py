@@ -3,7 +3,11 @@ from core.entity.departure_state import EntityDepartureIntent
 from core.entity.social_entity import _entity_attr_setdefault
 from core.entity.social_entity import SocialEntity
 from gods.god_actor_state import GodCreationLimits, GodDivineAttributes
-from gods.gods_state import GodsState
+from gods.gods_state import (
+    GodBookCreatedEvent,
+    GodMaskReleasedResult,
+    GodsState,
+)
 from universe.pre_cosmic_rules import GOD_INITIAL_ENERGY_J
 from universe.logger import UniverseLogger
 
@@ -95,12 +99,31 @@ class Gods:
         )
         god.book = book
         god.book_created = True
-        event = {'name': 'god_book_created', 'god': god.name, 'book': book}
+        event = GodBookCreatedEvent(
+            god=god.name,
+            book=book,
+        )
         self.emit_event(event)
         UniverseLogger.event(f'GOD BOOK CREATED: {god.name}')
         return book
 
     def emit_event(self, event):
+        if isinstance(
+            event,
+            dict,
+        ):
+            raise TypeError(
+                "Gods events must use object state."
+            )
+
+        if not hasattr(
+            event,
+            "name",
+        ):
+            raise TypeError(
+                "Gods event must expose a name."
+            )
+
         self.events.append(event)
         self.write_to_world()
         UniverseLogger.event(f'GODS EVENT: {event}')
@@ -118,7 +141,15 @@ class Gods:
         knowledge = _entity_attr_setdefault(god, 'knowledge', set())
         research_book = _entity_attr_setdefault(god, 'research_book', [])
         masks = _entity_attr_setdefault(god, 'masks', {})
-        mask = SocialEntity.from_mapping({'name': mask_name, 'type': 'god_mask', 'role': role, 'active': True, 'mask_of': god, 'knowledge': knowledge, 'research_book': research_book})
+        mask = SocialEntity(
+            name=mask_name,
+            type='god_mask',
+            role=role,
+            active=True,
+            mask_of=god,
+            knowledge=knowledge,
+            research_book=research_book,
+        )
         masks[mask_name] = mask
         god.active_mask = mask_name
         return mask
@@ -131,4 +162,8 @@ class Gods:
         mask.active = False
         if getattr(god, 'active_mask', None) == mask_name:
             god.active_mask = None
-        return {'released_mask': mask_name, 'god': god, 'mask': mask}
+        return GodMaskReleasedResult(
+            released_mask=mask_name,
+            god=god,
+            mask=mask,
+        )

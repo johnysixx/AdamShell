@@ -1,7 +1,10 @@
 import unittest
 
 from gods.gods import Gods
-from gods.gods_state import GodsState
+from gods.gods_state import (
+    GodBookCreatedEvent,
+    GodsState,
+)
 from universe.universe import Universe
 
 
@@ -105,25 +108,103 @@ class GodsObjectStateTests(unittest.TestCase):
     def test_events_and_tick_mutate_same_state_object(self):
         universe, gods = self._layer()
         state = gods.gods_state
-        event = {
-            "name": "god_seen",
-        }
 
-        gods.emit_event(event)
-
-        self.assertEqual(state.events, [event])
-        self.assertEqual(
-            universe.world["gods"]["gods_state"]["events"],
-            [event],
+        god = gods.create_god(
+            name="god",
+            role="librarian",
         )
+
+        book = gods.create_book(
+            god
+        )
+
+        event = state.events[-1]
+
+        self.assertIsInstance(
+            event,
+            GodBookCreatedEvent,
+        )
+        self.assertEqual(
+            event.god,
+            "god",
+        )
+        self.assertIs(
+            event.book,
+            book,
+        )
+        self.assertIs(
+            state.events[-1],
+            event,
+        )
+
+        boundary_event = (
+            universe.world[
+                "gods"
+            ][
+                "gods_state"
+            ][
+                "events"
+            ][0]
+        )
+
+        self.assertIsInstance(
+            boundary_event,
+            dict,
+        )
+        self.assertEqual(
+            boundary_event["name"],
+            "god_book_created",
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    event,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = event["name"]
+
+        with self.assertRaises(
+            TypeError
+        ):
+            gods.emit_event(
+                {
+                    "name": "legacy_event",
+                }
+            )
 
         gods.tick()
 
-        self.assertIs(gods.gods_state, state)
-        self.assertEqual(state.tick_count, 1)
-        self.assertEqual(state.events, [])
+        self.assertIs(
+            gods.gods_state,
+            state,
+        )
         self.assertEqual(
-            universe.world["gods"]["gods_state"]["tick_count"],
+            state.tick_count,
+            1,
+        )
+        self.assertEqual(
+            state.events,
+            [],
+        )
+        self.assertEqual(
+            universe.world[
+                "gods"
+            ][
+                "gods_state"
+            ][
+                "tick_count"
+            ],
             1,
         )
 
