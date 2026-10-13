@@ -3,6 +3,11 @@ import unittest
 from genesis.day0 import GenesisDay0
 from genesis.day0_state import GenesisDay0State
 from idea_entities import IdeaEntities
+from idea_entities.prefysical_fire_origin import (
+    PrefysicalFireAlreadyBurningResult,
+    PrefysicalFireIgnitedResult,
+    PrefysicalFireIgnitionFailedResult,
+)
 from multiverse import UniverseRegistry
 from universe.universe import Universe
 
@@ -104,9 +109,9 @@ class GenesisDay0ObjectStateTests(unittest.TestCase):
         )
 
         self.assertIs(day0.genesis_day0_state, state)
-        self.assertEqual(result["result"], "fire_not_ignited")
+        self.assertEqual(result.result, "fire_not_ignited")
         self.assertEqual(state.status, "seeking_warmth")
-        self.assertEqual(state.history[-1], result)
+        self.assertIs(state.history[-1], result)
 
     def test_successful_attempt_updates_object_status(self):
         _, _, day0 = self._day0()
@@ -118,11 +123,11 @@ class GenesisDay0ObjectStateTests(unittest.TestCase):
 
         self.assertIs(day0.genesis_day0_state, state)
         self.assertEqual(
-            result["result"],
+            result.result,
             "prefysical_fire_ignited",
         )
         self.assertEqual(state.status, "eternal_fire_exists")
-        self.assertEqual(state.history[-1], result)
+        self.assertIs(state.history[-1], result)
 
     def test_understanding_fire_updates_same_object(self):
         _, _, day0 = self._day0()
@@ -149,6 +154,75 @@ class GenesisDay0ObjectStateTests(unittest.TestCase):
         self.assertIs(day0.genesis_day0_state, state)
         self.assertEqual(len(state.history), before + 1)
         self.assertEqual(state.history[-1], result)
+
+    def test_fire_result_public_state_is_snapshot_boundary(
+        self
+    ):
+        _, _, day0 = self._day0()
+
+        result = day0.attempt_fire(
+            rng=FixedRng([10, 1])
+        )
+
+        self.assertIsInstance(
+            result,
+            PrefysicalFireIgnitionFailedResult,
+        )
+        self.assertIs(
+            day0.history[-1],
+            result,
+        )
+
+        public_state = day0.public_state
+
+        self.assertIsInstance(
+            public_state["history"][-1],
+            dict,
+        )
+        self.assertEqual(
+            public_state["history"][-1],
+            result.to_dict(),
+        )
+        self.assertIsInstance(
+            public_state[
+                "genesis_day0_state"
+            ]["history"][-1],
+            dict,
+        )
+
+    def test_repeated_fire_attempt_stays_object_state(
+        self
+    ):
+        _, _, day0 = self._day0()
+
+        ignited = day0.attempt_fire(
+            rng=FixedRng([20, 1])
+        )
+
+        repeated = day0.attempt_fire(
+            rng=FixedRng([])
+        )
+
+        self.assertIsInstance(
+            ignited,
+            PrefysicalFireIgnitedResult,
+        )
+        self.assertIsInstance(
+            repeated,
+            PrefysicalFireAlreadyBurningResult,
+        )
+        self.assertEqual(
+            repeated.result,
+            "prefysical_eternal_fire_already_burns",
+        )
+        self.assertEqual(
+            day0.status,
+            "eternal_fire_exists",
+        )
+        self.assertIs(
+            day0.history[-1],
+            repeated,
+        )
 
     def test_public_state_keeps_detached_dict_boundary(self):
         _, _, day0 = self._day0()

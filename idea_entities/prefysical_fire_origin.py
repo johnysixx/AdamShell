@@ -1,5 +1,8 @@
-from copy import deepcopy
 from dataclasses import dataclass, field
+
+from core.entity.serpent_d20 import (
+    SerpentD20PublicRollEvent,
+)
 from types import MappingProxyType
 
 from idea_entities.eternal_fire_objects import (
@@ -253,6 +256,233 @@ class PrefysicalFireEvent:
         }
 
 
+@dataclass(
+    slots=True,
+    frozen=True,
+)
+class PrefysicalFireEnergyConversionEvent:
+
+    source: str
+    source_energy_before_j: float
+    source_energy_after_j: float
+    converted_to_friction_heat_j: float
+    friction_heat_total_j: float
+
+    energy_destroyed_j: float = field(
+        default=0.0,
+        init=False,
+    )
+
+    def __post_init__(
+        self,
+    ):
+        object.__setattr__(
+            self,
+            "source",
+            str(self.source),
+        )
+
+        for field_name in (
+            "source_energy_before_j",
+            "source_energy_after_j",
+            "converted_to_friction_heat_j",
+            "friction_heat_total_j",
+        ):
+            object.__setattr__(
+                self,
+                field_name,
+                float(
+                    getattr(
+                        self,
+                        field_name,
+                    )
+                ),
+            )
+
+    def to_dict(
+        self,
+    ):
+        return {
+            "source": self.source,
+            "source_energy_before_j": (
+                self.source_energy_before_j
+            ),
+            "source_energy_after_j": (
+                self.source_energy_after_j
+            ),
+            "converted_to_friction_heat_j": (
+                self.converted_to_friction_heat_j
+            ),
+            "friction_heat_total_j": (
+                self.friction_heat_total_j
+            ),
+            "energy_destroyed_j": (
+                self.energy_destroyed_j
+            ),
+        }
+
+
+@dataclass(
+    slots=True,
+    frozen=True,
+)
+class PrefysicalFireIgnitionFailedResult:
+
+    public_roll: SerpentD20PublicRollEvent
+    energy_conversion: PrefysicalFireEnergyConversionEvent
+    attempt_event: PrefysicalFireEvent
+
+    result: str = field(
+        default="fire_not_ignited",
+        init=False,
+    )
+
+    def __post_init__(
+        self,
+    ):
+        if not isinstance(
+            self.public_roll,
+            SerpentD20PublicRollEvent,
+        ):
+            raise TypeError(
+                "Failed fire result requires "
+                "SerpentD20PublicRollEvent."
+            )
+
+        if not isinstance(
+            self.energy_conversion,
+            PrefysicalFireEnergyConversionEvent,
+        ):
+            raise TypeError(
+                "Failed fire result requires "
+                "PrefysicalFireEnergyConversionEvent."
+            )
+
+        if not isinstance(
+            self.attempt_event,
+            PrefysicalFireEvent,
+        ):
+            raise TypeError(
+                "Failed fire result requires "
+                "PrefysicalFireEvent."
+            )
+
+    def to_dict(
+        self,
+    ):
+        return {
+            "result": self.result,
+            "public_roll": (
+                self.public_roll.to_dict()
+            ),
+            "energy_conversion": (
+                self.energy_conversion.to_dict()
+            ),
+            "attempt_event": (
+                self.attempt_event.to_dict()
+            ),
+        }
+
+
+@dataclass(
+    slots=True,
+    frozen=True,
+)
+class PrefysicalFireIgnitedResult:
+
+    public_roll: SerpentD20PublicRollEvent
+    energy_conversion: PrefysicalFireEnergyConversionEvent
+    ignition_event: PrefysicalFireEvent
+
+    result: str = field(
+        default="prefysical_fire_ignited",
+        init=False,
+    )
+
+    def __post_init__(
+        self,
+    ):
+        if not isinstance(
+            self.public_roll,
+            SerpentD20PublicRollEvent,
+        ):
+            raise TypeError(
+                "Ignited fire result requires "
+                "SerpentD20PublicRollEvent."
+            )
+
+        if not isinstance(
+            self.energy_conversion,
+            PrefysicalFireEnergyConversionEvent,
+        ):
+            raise TypeError(
+                "Ignited fire result requires "
+                "PrefysicalFireEnergyConversionEvent."
+            )
+
+        if not isinstance(
+            self.ignition_event,
+            PrefysicalFireEvent,
+        ):
+            raise TypeError(
+                "Ignited fire result requires "
+                "PrefysicalFireEvent."
+            )
+
+    def to_dict(
+        self,
+    ):
+        return {
+            "result": self.result,
+            "public_roll": (
+                self.public_roll.to_dict()
+            ),
+            "energy_conversion": (
+                self.energy_conversion.to_dict()
+            ),
+            "ignition_event": (
+                self.ignition_event.to_dict()
+            ),
+        }
+
+
+@dataclass(
+    slots=True,
+    frozen=True,
+)
+class PrefysicalFireAlreadyBurningResult:
+
+    event: PrefysicalFireEvent
+
+    result: str = field(
+        default=(
+            "prefysical_eternal_fire_"
+            "already_burns"
+        ),
+        init=False,
+    )
+
+    def __post_init__(
+        self,
+    ):
+        if not isinstance(
+            self.event,
+            PrefysicalFireEvent,
+        ):
+            raise TypeError(
+                "Already-burning result requires "
+                "PrefysicalFireEvent."
+            )
+
+    def to_dict(
+        self,
+    ):
+        return {
+            "result": self.result,
+            "event": self.event.to_dict(),
+        }
+
+
 class PrefysicalFireOrigin:
 
     # Each attempt converts 5 % of the masculine
@@ -419,10 +649,16 @@ class PrefysicalFireOrigin:
             self.eternal_fire.state
             is EternalFirePotentialState.BURNING
         ):
-            return self._event(
+            event = self._event_object(
                 name=(
                     "prefysical_eternal_fire_"
                     "already_burns"
+                )
+            )
+
+            return (
+                PrefysicalFireAlreadyBurningResult(
+                    event=event,
                 )
             )
 
@@ -469,7 +705,7 @@ class PrefysicalFireOrigin:
             )
         )
 
-        attempt_event = self._event(
+        attempt_event = self._event_object(
             name=(
                 "prefysical_fire_"
                 "ignition_attempt"
@@ -478,41 +714,24 @@ class PrefysicalFireOrigin:
                 "attempt": (
                     self.friction_attempts
                 ),
-
                 "public_roll": (
                     public_roll.to_dict()
                 ),
-
                 "friction_active": True,
-
                 "energy_conversion": (
-                    deepcopy(
-                        energy_event
-                    )
-                )
+                    energy_event.to_dict()
+                ),
             }
         )
 
         if not hidden.fire_threshold_reached:
-            return {
-                "result": (
-                    "fire_not_ignited"
-                ),
-
-                "public_roll": public_roll.to_dict(),
-
-                "energy_conversion": (
-                    deepcopy(
-                        energy_event
-                    )
-                ),
-
-                "attempt_event": (
-                    deepcopy(
-                        attempt_event
-                    )
+            return (
+                PrefysicalFireIgnitionFailedResult(
+                    public_roll=public_roll,
+                    energy_conversion=energy_event,
+                    attempt_event=attempt_event,
                 )
-            }
+            )
 
         # ----------------------------------------------------
         # SUCCESS:
@@ -523,7 +742,7 @@ class PrefysicalFireOrigin:
             public_roll
         )
 
-        ignition_event = self._event(
+        ignition_event = self._event_object(
             name=(
                 "prefysical_eternal_fire_ignited"
             ),
@@ -531,18 +750,19 @@ class PrefysicalFireOrigin:
                 "public_roll": (
                     public_roll.to_dict()
                 ),
-
                 "ignited_by": (
                     "pazuzu_masculine_principle"
                 ),
-
                 "flame_state": "small",
-
-                "fuel": self.eternal_fire.fuel.to_dict(),
-
+                "fuel": (
+                    self.eternal_fire
+                    .fuel
+                    .to_dict()
+                ),
                 "heat_energy_j": (
-                    self.eternal_fire.heat_energy_j
-                )
+                    self.eternal_fire
+                    .heat_energy_j
+                ),
             }
         )
 
@@ -550,21 +770,13 @@ class PrefysicalFireOrigin:
             "PREFYSICAL ETERNAL FIRE IGNITED"
         )
 
-        return {
-            "result": (
-                "prefysical_fire_ignited"
-            ),
-
-            "public_roll": public_roll.to_dict(),
-
-            "energy_conversion": deepcopy(
-                energy_event
-            ),
-
-            "ignition_event": deepcopy(
-                ignition_event
+        return (
+            PrefysicalFireIgnitedResult(
+                public_roll=public_roll,
+                energy_conversion=energy_event,
+                ignition_event=ignition_event,
             )
-        }
+        )
 
     def understand_fire_significance(
         self
@@ -741,7 +953,9 @@ class PrefysicalFireOrigin:
             converted
         )
 
-        self.energy_conversion.friction_heat_j += converted
+        self.energy_conversion.friction_heat_j += (
+            converted
+        )
 
         after = float(
             masculine[
@@ -749,26 +963,22 @@ class PrefysicalFireOrigin:
             ]
         )
 
-        return {
-            "source": (
-                "pazuzu_masculine_principle"
-            ),
-
-            "source_energy_before_j": before,
-
-            "source_energy_after_j": after,
-
-            "converted_to_friction_heat_j": (
-                converted
-            ),
-
-            "friction_heat_total_j": (
-                self.energy_conversion.friction_heat_j
-            ),
-
-            # Explicit conservation invariant.
-            "energy_destroyed_j": 0.0
-        }
+        return (
+            PrefysicalFireEnergyConversionEvent(
+                source=(
+                    "pazuzu_masculine_principle"
+                ),
+                source_energy_before_j=before,
+                source_energy_after_j=after,
+                converted_to_friction_heat_j=(
+                    converted
+                ),
+                friction_heat_total_j=(
+                    self.energy_conversion
+                    .friction_heat_j
+                ),
+            )
+        )
 
     def _actualize_eternal_fire(
         self,
@@ -891,7 +1101,7 @@ class PrefysicalFireOrigin:
 
         return event
 
-    def _event(
+    def _event_object(
         self,
         name,
         universe_tick=None,
@@ -915,7 +1125,22 @@ class PrefysicalFireOrigin:
             event
         )
 
-        return event.to_dict()
+        return event
+
+    def _event(
+        self,
+        name,
+        universe_tick=None,
+        details=None
+    ):
+        return (
+            self._event_object(
+                name=name,
+                universe_tick=universe_tick,
+                details=details,
+            )
+            .to_dict()
+        )
 
     @property
     def public_state(

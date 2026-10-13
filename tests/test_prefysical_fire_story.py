@@ -154,11 +154,11 @@ class PrefysicalFireStoryTests(
             before_energy
         )
 
-        converted = result[
-            "energy_conversion"
-        ][
-            "converted_to_friction_heat_j"
-        ]
+        converted = (
+            result
+            .energy_conversion
+            .converted_to_friction_heat_j
+        )
 
         self.assertAlmostEqual(
             before_energy - after_energy,
@@ -172,11 +172,9 @@ class PrefysicalFireStoryTests(
         )
 
         self.assertEqual(
-            result[
-                "energy_conversion"
-            ][
-                "energy_destroyed_j"
-            ],
+            result
+            .energy_conversion
+            .energy_destroyed_j,
             0.0
         )
 
@@ -205,9 +203,7 @@ class PrefysicalFireStoryTests(
         )
 
         self.assertEqual(
-            result[
-                "result"
-            ],
+            result.result,
             "prefysical_fire_ignited"
         )
 

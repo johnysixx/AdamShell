@@ -1,6 +1,13 @@
 import unittest
 
 from idea_entities import IdeaEntities
+from idea_entities.prefysical_fire_origin import (
+    PrefysicalFireAlreadyBurningResult,
+    PrefysicalFireEnergyConversionEvent,
+    PrefysicalFireEvent,
+    PrefysicalFireIgnitedResult,
+    PrefysicalFireIgnitionFailedResult,
+)
 from idea_entities.prefysical_fire_state import (
     PrefysicalFireEnergyConversion,
     PrefysicalFireMaterials,
@@ -129,10 +136,23 @@ class PrefysicalFireOriginObjectStateTests(unittest.TestCase):
             conversion.friction_heat_j,
         )
         self.assertEqual(
-            result["energy_conversion"][
-                "source_energy_before_j"
-            ],
+            result
+            .energy_conversion
+            .source_energy_before_j,
             before,
+        )
+
+        self.assertIsInstance(
+            result,
+            PrefysicalFireIgnitionFailedResult,
+        )
+        self.assertIsInstance(
+            result.energy_conversion,
+            PrefysicalFireEnergyConversionEvent,
+        )
+        self.assertIsInstance(
+            result.attempt_event,
+            PrefysicalFireEvent,
         )
 
     def test_success_reads_object_records(self):
@@ -231,6 +251,86 @@ class PrefysicalFireOriginObjectStateTests(unittest.TestCase):
         self.assertEqual(
             roles.fuel_seekers,
             ["lilith", "serpent"],
+        )
+
+
+    def test_ignition_results_are_object_only(
+        self
+    ):
+        _, _, origin = self._origin()
+
+        failed = origin.attempt_ignition(
+            rng=FixedRng(10)
+        )
+
+        ignited = origin.attempt_ignition(
+            rng=FixedRng(20)
+        )
+
+        already = origin.attempt_ignition()
+
+        self.assertIsInstance(
+            failed,
+            PrefysicalFireIgnitionFailedResult,
+        )
+        self.assertIsInstance(
+            ignited,
+            PrefysicalFireIgnitedResult,
+        )
+        self.assertIsInstance(
+            already,
+            PrefysicalFireAlreadyBurningResult,
+        )
+
+        self.assertIsInstance(
+            failed.energy_conversion,
+            PrefysicalFireEnergyConversionEvent,
+        )
+        self.assertIsInstance(
+            ignited.energy_conversion,
+            PrefysicalFireEnergyConversionEvent,
+        )
+
+        for result in (
+            failed,
+            ignited,
+            already,
+        ):
+            for mapping_method in (
+                "get",
+                "keys",
+                "items",
+                "values",
+            ):
+                self.assertFalse(
+                    hasattr(
+                        result,
+                        mapping_method,
+                    )
+                )
+
+            with self.assertRaises(
+                TypeError
+            ):
+                _ = result["result"]
+
+        snapshot = ignited.to_dict()
+
+        self.assertIsInstance(
+            snapshot,
+            dict,
+        )
+        self.assertIsInstance(
+            snapshot["public_roll"],
+            dict,
+        )
+        self.assertIsInstance(
+            snapshot["energy_conversion"],
+            dict,
+        )
+        self.assertIsInstance(
+            snapshot["ignition_event"],
+            dict,
         )
 
 

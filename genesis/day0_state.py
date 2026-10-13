@@ -2,6 +2,25 @@ from copy import deepcopy
 from dataclasses import dataclass, field
 
 
+def _serialize_day0_history_value(
+    value,
+):
+    to_dict = getattr(
+        value,
+        "to_dict",
+        None,
+    )
+
+    if callable(to_dict):
+        return deepcopy(
+            to_dict()
+        )
+
+    return deepcopy(
+        value
+    )
+
+
 @dataclass(slots=True)
 class GenesisDay0State:
 
@@ -17,5 +36,10 @@ class GenesisDay0State:
             "status": self.status,
             "physical_time_exists": self.physical_time_exists,
             "physical_space_exists": self.physical_space_exists,
-            "history": deepcopy(self.history),
+            "history": [
+                _serialize_day0_history_value(
+                    item
+                )
+                for item in self.history
+            ],
         }

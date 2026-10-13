@@ -155,7 +155,7 @@ class GenesisDay0FireOriginTests(
         )
 
         self.assertEqual(
-            result["result"],
+            result.result,
             "fire_not_ignited"
         )
 
@@ -177,7 +177,7 @@ class GenesisDay0FireOriginTests(
         )
 
         self.assertEqual(
-            result["result"],
+            result.result,
             "prefysical_fire_ignited"
         )
 

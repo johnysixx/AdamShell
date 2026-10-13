@@ -155,7 +155,7 @@ class EternalFirePotentialObjectStateTests(unittest.TestCase):
             rng=FixedRng(10)
         )
 
-        self.assertEqual(result["result"], "fire_not_ignited")
+        self.assertEqual(result.result, "fire_not_ignited")
         self.assertIs(idea_entities.eternal_fire, fire)
         self.assertFalse(fire.actualized)
         self.assertIs(
@@ -180,7 +180,7 @@ class EternalFirePotentialObjectStateTests(unittest.TestCase):
         ]
 
         self.assertEqual(
-            result["result"],
+            result.result,
             "prefysical_fire_ignited",
         )
         self.assertIs(idea_entities.eternal_fire, fire)

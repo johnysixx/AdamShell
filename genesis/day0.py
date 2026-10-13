@@ -1,6 +1,10 @@
 from copy import deepcopy
 
 from genesis.day0_state import GenesisDay0State
+from idea_entities.prefysical_fire_origin import (
+    PrefysicalFireAlreadyBurningResult,
+    PrefysicalFireIgnitedResult,
+)
 from idea_entities.prefysical_fire_origin_state import (
     PrefysicalFireOriginState,
 )
@@ -151,14 +155,15 @@ class GenesisDay0:
         )
 
         self.history.append(
-            deepcopy(
-                result
-            )
+            result
         )
 
-        if (
-            result["result"]
-            == "prefysical_fire_ignited"
+        if isinstance(
+            result,
+            (
+                PrefysicalFireIgnitedResult,
+                PrefysicalFireAlreadyBurningResult,
+            ),
         ):
             self.status = (
                 "eternal_fire_exists"
@@ -169,9 +174,7 @@ class GenesisDay0:
                 "seeking_warmth"
             )
 
-        return deepcopy(
-            result
-        )
+        return result
 
     def understand_fire(
         self
@@ -242,6 +245,11 @@ class GenesisDay0:
     def public_state(
         self
     ):
+        state_snapshot = (
+            self.genesis_day0_state
+            .to_dict()
+        )
+
         return {
             "name": self.genesis_day0_state.name,
             "state": self.status,
@@ -258,10 +266,12 @@ class GenesisDay0:
             ),
 
             "history": deepcopy(
-                self.history
+                state_snapshot[
+                    "history"
+                ]
             ),
 
             "genesis_day0_state": (
-                self.genesis_day0_state.to_dict()
+                state_snapshot
             )
         }
