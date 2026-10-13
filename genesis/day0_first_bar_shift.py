@@ -84,6 +84,10 @@ from genesis.day0_table_wine_state import (
     SerpentFinishesWineAtTableEvent,
     SerpentLilithContinueWineDiscussionEvent,
 )
+from genesis.day0_wager_vote_proposal_state import (
+    GodAsksWhoDecidesWagerEvent,
+    LilithProposesParticipantVoteEvent,
+)
 from genesis.day0_serpent_returns_to_bar_state import (
     LilithGodContinueTalkingAtTableEvent,
     SerpentLeavesTableForBarEvent,
@@ -3316,7 +3320,9 @@ class Day0FirstBarShift:
 
         return event
 
-    def god_asks_who_will_decide_wager(self):
+    def god_asks_who_will_decide_wager(
+        self
+    ):
         if getattr(
             getattr(
                 self.god,
@@ -3326,7 +3332,10 @@ class Day0FirstBarShift:
             'location',
             None
         ) != 'table':
-            raise RuntimeError('God is not at the table.')
+            raise RuntimeError(
+                'God is not at the table.'
+            )
+
         if getattr(
             getattr(
                 self.lilith,
@@ -3336,30 +3345,67 @@ class Day0FirstBarShift:
             'location',
             None
         ) != 'table':
-            raise RuntimeError('Lilith is not at the table.')
-        event = {'name': 'god_asks_who_will_decide_wager', 'speaker': 'god', 'listener': 'lilith', 'question': 'who_decides_winner'}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
+            raise RuntimeError(
+                'Lilith is not at the table.'
+            )
+
+        event = (
+            GodAsksWhoDecidesWagerEvent()
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
         return event
 
-    def lilith_proposes_participant_vote(self):
-        wager = getattr(self, 'serpent_lilith_drink_wager', None)
-        if wager is None:
-            raise RuntimeError('Drink wager does not exist.')
-        method = BarWagerDecisionMethod(
-            type='participant_vote',
-            voters=[
-                'serpent',
-                'lilith',
-                'god',
-            ],
-            proposed=True,
-            accepted=False,
+    def lilith_proposes_participant_vote(
+        self
+    ):
+        wager = getattr(
+            self,
+            'serpent_lilith_drink_wager',
+            None
         )
-        wager.decision_method_proposal = method
-        proposal = {'name': 'lilith_proposes_participant_vote', 'speaker': 'lilith', 'decision_method': method.to_dict()}
-        self.meeting_place.emit_event(proposal)
-        self.history.append(proposal)
+
+        if wager is None:
+            raise RuntimeError(
+                'Drink wager does not exist.'
+            )
+
+        method = (
+            BarWagerDecisionMethod(
+                type='participant_vote',
+                voters=[
+                    'serpent',
+                    'lilith',
+                    'god',
+                ],
+                proposed=True,
+                accepted=False,
+            )
+        )
+
+        wager.decision_method_proposal = (
+            method
+        )
+
+        proposal = (
+            LilithProposesParticipantVoteEvent(
+                decision_method=method
+            )
+        )
+
+        self.meeting_place.emit_event(
+            proposal
+        )
+        self.history.append(
+            proposal.to_dict()
+        )
+
         return proposal
 
     def serpent_orders_water_at_bar(self):

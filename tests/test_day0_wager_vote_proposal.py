@@ -54,9 +54,7 @@ class Day0WagerVoteProposalTests(
         self.assertEqual(
             result[
                 "question"
-            ][
-                "question"
-            ],
+            ].question,
             "who_decides_winner"
         )
 
@@ -71,22 +69,16 @@ class Day0WagerVoteProposalTests(
         method = (
             result[
                 "proposal"
-            ][
-                "decision_method"
-            ]
+            ].decision_method
         )
 
         self.assertEqual(
-            method[
-                "type"
-            ],
+            method.type,
             "participant_vote"
         )
 
         self.assertEqual(
-            method[
-                "voters"
-            ],
+            method.voters,
             [
                 "serpent",
                 "lilith",
