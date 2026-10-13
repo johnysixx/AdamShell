@@ -65,9 +65,7 @@ class Day0GodLilithSerpentCheckpointTests(
             .god_is_born_and_goes_to_library()
         )
 
-        book = result[
-            "book"
-        ]
+        book = result.book
 
         self.assertIsNone(
             book.title
@@ -114,10 +112,12 @@ class Day0GodLilithSerpentCheckpointTests(
     ):
         self.scene.advance_to_lilith_entry()
 
-        god = (
+        departure = (
             self.scene
             .god_leaves_library_and_enters_bar()
         )
+
+        god = departure.god
 
         self.assertFalse(
             self.library.god_present

@@ -33,6 +33,15 @@ from meeting_place.bar_objects import (
     RecipeIngredientRequirement,
 )
 from meeting_place.bar_yard import BarYard
+from genesis.day0_god_library_state import (
+    GodBeginsFirstUnnamedBookEvent,
+    GodBornEvent,
+    GodEnteredBarEvent,
+    GodEnteredLibraryEvent,
+    GodLeftLibraryEvent,
+    GodLibraryDepartureResult,
+    GodLibraryOpeningResult,
+)
 from genesis.day0_serpent_opening_state import (
     SerpentBetProposalResult,
     SerpentBornEvent,
@@ -510,39 +519,150 @@ class Day0FirstBarShift:
             response=refusal,
         )
 
-    def god_is_born_and_goes_to_library(self):
-        self.god = self.gods.create_god(name='god', role='librarian')
+    def god_is_born_and_goes_to_library(
+        self
+    ):
+        self.god = (
+            self.gods.create_god(
+                name='god',
+                role='librarian',
+            )
+        )
+
         self.universe.god = self.god
-        self.universe.world['god'] = self.god
-        self.history.append({'name': 'god_born'})
-        self.library.assign_librarian(self.god)
-        self.library.god_enters(self.god)
-        self.history.append({'name': 'god_entered_library'})
-        self.first_book = self.gods.create_book(self.god)
+
+        self.universe.world[
+            'god'
+        ] = self.god
+
+        born = GodBornEvent()
+
+        self.history.append(
+            born.to_dict()
+        )
+
+        self.library.assign_librarian(
+            self.god
+        )
+
+        (
+            self.library
+            .god_enters(
+                self.god
+            )
+        )
+
+        entered = GodEnteredLibraryEvent(
+            door_sign=(
+                self.library
+                .door[
+                    'god_sign'
+                ]
+            ),
+        )
+
+        self.history.append(
+            entered.to_dict()
+        )
+
+        self.first_book = (
+            self.gods.create_book(
+                self.god
+            )
+        )
+
         self.first_book.title = None
         self.first_book.entries = []
-        self.first_book.state = 'being_written'
-        self.first_book.location = 'library_with_author'
-        self.history.append({'name': 'god_begins_first_unnamed_book'})
-        return {'god': self.god, 'book': self.first_book}
+        self.first_book.state = (
+            'being_written'
+        )
+        self.first_book.location = (
+            'library_with_author'
+        )
 
-    def god_leaves_library_and_enters_bar(self):
+        began_book = (
+            GodBeginsFirstUnnamedBookEvent()
+        )
+
+        self.history.append(
+            began_book.to_dict()
+        )
+
+        return GodLibraryOpeningResult(
+            god=self.god,
+            book=self.first_book,
+            born=born,
+            entered=entered,
+            began_book=began_book,
+        )
+
+    def god_leaves_library_and_enters_bar(
+        self
+    ):
         if self.god is None:
-            raise RuntimeError('God does not exist yet.')
+            raise RuntimeError(
+                'God does not exist yet.'
+            )
+
         if self.first_book is None:
-            raise RuntimeError('God has not created his first book.')
+            raise RuntimeError(
+                'God has not created his '
+                'first book.'
+            )
+
         if self.first_book.entries != []:
-            raise RuntimeError("God's first book must still be empty.")
-        if self.first_book not in self.library.books:
-            self.library.shelve_book(self.first_book)
+            raise RuntimeError(
+                "God's first book must "
+                "still be empty."
+            )
+
+        if (
+            self.first_book
+            not in self.library.books
+        ):
+            self.library.shelve_book(
+                self.first_book
+            )
+
         self.first_book.title = None
-        self.first_book.state = 'being_written'
-        self.first_book.location = 'library'
-        leave_result = self.library.god_leaves(self.god)
-        self.history.append({'name': 'god_left_library', 'result': leave_result})
-        self.meeting_place.add_entity(self.god)
-        self.history.append({'name': 'god_entered_bar'})
-        return self.god
+        self.first_book.state = (
+            'being_written'
+        )
+        self.first_book.location = (
+            'library'
+        )
+
+        (
+            self.library
+            .god_leaves(
+                self.god
+            )
+        )
+
+        left = GodLeftLibraryEvent()
+
+        self.history.append(
+            left.to_dict()
+        )
+
+        self.meeting_place.add_entity(
+            self.god
+        )
+
+        entered_bar = (
+            GodEnteredBarEvent()
+        )
+
+        self.history.append(
+            entered_bar.to_dict()
+        )
+
+        return GodLibraryDepartureResult(
+            god=self.god,
+            book=self.first_book,
+            left=left,
+            entered_bar=entered_bar,
+        )
 
     def lilith_orders_vodka_with_lemon(self):
         if self.lilith is None:
@@ -1678,9 +1798,11 @@ class Day0FirstBarShift:
                 'happened yet.'
             )
 
-        god = (
+        departure = (
             self.god_leaves_library_and_enters_bar()
         )
+
+        god = departure.god
 
         event = (
             GodArrivesDuringWineDiscussionEvent()
