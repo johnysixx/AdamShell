@@ -32,6 +32,31 @@ def _default_permissions():
     slots=True,
     frozen=True,
 )
+class LibraryEvent:
+
+    name: str
+
+    def __post_init__(
+        self,
+    ):
+        object.__setattr__(
+            self,
+            "name",
+            str(self.name),
+        )
+
+    def to_dict(
+        self,
+    ):
+        return {
+            "name": self.name,
+        }
+
+
+@dataclass(
+    slots=True,
+    frozen=True,
+)
 class LibraryPresenceStatusResult:
 
     god_present: bool
@@ -155,7 +180,10 @@ class LibraryState:
             "permissions": dict(self.permissions),
             "books": list(self.books),
             "catalog": list(self.catalog),
-            "events": list(self.events),
+            "events": [
+                event.to_dict()
+                for event in self.events
+            ],
             "visitors": list(self.visitors),
             "tick_count": self.tick_count,
         }

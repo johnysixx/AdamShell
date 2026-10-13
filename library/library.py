@@ -1,6 +1,7 @@
 from library.library_state import (
     GodEnteredLibraryEvent,
     GodLeftLibraryEvent,
+    LibraryEvent,
     LibraryPresenceStatusResult,
     LibraryState,
 )
@@ -466,9 +467,22 @@ class Library:
         return self.books
 
     def emit_event(self, event):
-        self.events.append(event)
+        if not isinstance(
+            event,
+            LibraryEvent,
+        ):
+            raise TypeError(
+                "Library events must use "
+                "LibraryEvent object state."
+            )
+
+        self.events.append(
+            event
+        )
         self.write_to_world()
-        UniverseLogger.event(f"LIBRARY EVENT: {event}")
+        UniverseLogger.event(
+            f"LIBRARY EVENT: {event.name}"
+        )
 
     def tick(self):
         self.tick_count += 1

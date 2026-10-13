@@ -5,6 +5,7 @@ from library import Library
 from library.library_state import (
     GodEnteredLibraryEvent,
     GodLeftLibraryEvent,
+    LibraryEvent,
     LibraryPresenceStatusResult,
     LibraryState,
 )
@@ -264,18 +265,86 @@ class LibraryObjectStateTests(unittest.TestCase):
         self.assertFalse(library.can_write("serpent"))
 
     def test_events_and_tick_mutate_same_state_object(self):
-        _, library = self._library()
+        universe, library = self._library()
         state = library.library_state
 
-        library.emit_event("book_opened")
+        event = LibraryEvent(
+            name="book_opened",
+        )
 
-        self.assertEqual(state.events, ["book_opened"])
+        library.emit_event(
+            event
+        )
+
+        self.assertEqual(
+            state.events,
+            [event],
+        )
+        self.assertIs(
+            state.events[0],
+            event,
+        )
+
+        boundary_event = (
+            universe.world[
+                "library"
+            ][
+                "library_state"
+            ][
+                "events"
+            ][0]
+        )
+
+        self.assertIsInstance(
+            boundary_event,
+            dict,
+        )
+        self.assertEqual(
+            boundary_event,
+            {
+                "name": "book_opened",
+            },
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    event,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = event["name"]
+
+        with self.assertRaises(
+            TypeError
+        ):
+            library.emit_event(
+                "legacy_event"
+            )
 
         library.tick()
 
-        self.assertIs(library.library_state, state)
-        self.assertEqual(state.tick_count, 1)
-        self.assertEqual(state.events, [])
+        self.assertIs(
+            library.library_state,
+            state,
+        )
+        self.assertEqual(
+            state.tick_count,
+            1,
+        )
+        self.assertEqual(
+            state.events,
+            [],
+        )
 
     def test_public_state_snapshot_is_detached(self):
         _, library = self._library()
