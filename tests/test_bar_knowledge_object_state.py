@@ -1,5 +1,8 @@
 import unittest
 
+from genesis.day0_bouncer_wager_entry_state import (
+    SerpentExplainsWagerToBouncerEvent,
+)
 from genesis.day0_wine_assessment_state import (
     GodTastesExistingWineEvent,
 )
@@ -282,7 +285,11 @@ class BarKnowledgeObjectStateTests(
         )
         self.assertIsInstance(
             result["explanation"],
-            dict
+            SerpentExplainsWagerToBouncerEvent
+        )
+        self._assert_object_only(
+            result["explanation"],
+            "participants"
         )
         self._assert_object_only(
             knowledge,

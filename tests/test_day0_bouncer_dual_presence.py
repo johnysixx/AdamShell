@@ -132,27 +132,21 @@ class Day0BouncerDualPresenceTests(
         ]
 
         self.assertEqual(
-            explanation[
-                "speaker"
-            ],
+            explanation.speaker,
             "serpent"
         )
 
         self.assertEqual(
-            explanation[
-                "listener"
-            ],
+            explanation.listener,
             "bouncer"
         )
 
         self.assertEqual(
-            explanation[
-                "proposed_judges"
-            ],
-            [
+            explanation.proposed_judges,
+            (
                 "bartender",
                 "bouncer"
-            ]
+            )
         )
 
     def test_bouncer_now_knows_wager(

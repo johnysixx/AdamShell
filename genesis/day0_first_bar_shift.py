@@ -83,6 +83,10 @@ from genesis.day0_table_wine_state import (
     SerpentFinishesWineAtTableEvent,
     SerpentLilithContinueWineDiscussionEvent,
 )
+from genesis.day0_bouncer_wager_entry_state import (
+    BouncerEntersBarWithGarfieldEvent,
+    SerpentExplainsWagerToBouncerEvent,
+)
 from genesis.day0_garfield_manifestation_state import (
     GarfieldArrivalResult,
     GarfieldArrivesAtBarEvent,
@@ -4193,46 +4197,95 @@ class Day0FirstBarShift:
             ordinary_arrival=ordinary_arrival,
         )
 
-    def bouncer_enters_bar_with_garfield(self):
-        bouncer = self.meeting_place.bouncer
-        locations = ['outside_bar', 'inside_bar']
-        bouncer.locations = list(locations)
-        bouncer.location = 'dual_presence'
+    def bouncer_enters_bar_with_garfield(
+        self
+    ):
+        bouncer = (
+            self.meeting_place.bouncer
+        )
+
+        event = (
+            BouncerEntersBarWithGarfieldEvent()
+        )
+
+        bouncer.locations = list(
+            event.locations
+        )
+        bouncer.location = (
+            'dual_presence'
+        )
         bouncer.state = (
             BouncerState.INSIDE_AND_OUTSIDE_BAR
         )
-        bouncer.guards_entrance = True
-        bouncer.present_in_bar = True
-        event = {'name': 'bouncer_enters_bar_with_garfield', 'bouncer': 'bouncer', 'with': 'garfield', 'locations': list(locations), 'still_guards_entrance': True, 'present_inside': True, 'purpose': 'discuss_wager_judging'}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
+        bouncer.guards_entrance = (
+            event.still_guards_entrance
+        )
+        bouncer.present_in_bar = (
+            event.present_inside
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
         proposal = (
             self.serpent_lilith_drink_wager
             .tasting_panel_proposal
         )
+
         if proposal is not None:
             proposal.bouncer_present = True
+
         return event
 
-    def serpent_explains_wager_to_bouncer(self):
-        bouncer = self.meeting_place.bouncer
+    def serpent_explains_wager_to_bouncer(
+        self
+    ):
+        bouncer = (
+            self.meeting_place.bouncer
+        )
+
         present_inside = getattr(
             bouncer,
             'present_in_bar',
             False
         )
+
         if not present_inside:
-            raise RuntimeError('Bouncer is not present inside the bar.')
-        wager = self.serpent_lilith_drink_wager
-        event = {'name': 'serpent_explains_wager_to_bouncer', 'speaker': 'serpent', 'listener': 'bouncer', 'participants': list(wager.participants), 'contest': ['wine', 'mead', 'beer'], 'proposed_judges': ['bartender', 'bouncer']}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
+            raise RuntimeError(
+                'Bouncer is not present '
+                'inside the bar.'
+            )
+
+        wager = (
+            self.serpent_lilith_drink_wager
+        )
+
+        event = (
+            SerpentExplainsWagerToBouncerEvent(
+                participants=tuple(
+                    wager.participants
+                ),
+            )
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
         bouncer.wager_knowledge = (
             BarWagerKnowledge(
                 known=True,
                 source='serpent',
             )
         )
+
         return event
 
     def everyone_scratches_garfield(self):
