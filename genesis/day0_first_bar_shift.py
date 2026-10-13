@@ -102,7 +102,15 @@ from genesis.day0_wine_ideas_state import (
 from genesis.day0_advance_state import (
     AcidityWineIdeaAdvanceResult,
     BalancedAcidityAdvanceResult,
+    BartenderBouncerPanelAdvanceResult,
     BeerBitternessAdvanceResult,
+    BouncerAcceptsJudgeAdvanceResult,
+    BouncerInsideAdvanceResult,
+    BouncerKnowsWagerAdvanceResult,
+    CatD20ArrivalAdvanceResult,
+    EveryoneAtBarWithWaterAdvanceResult,
+    FirstPrivateConversationAdvanceResult,
+    GarfieldArrivalAdvanceResult,
     GodAtTableAdvanceResult,
     GodBrowsingMenuAdvanceResult,
     GodFirstLilithTasteAdvanceResult,
@@ -113,8 +121,10 @@ from genesis.day0_advance_state import (
     LemonRestockAdvanceResult,
     LilithDrinkLearnedAdvanceResult,
     SecondWineIdeaAdvanceResult,
+    SerpentAtBarAdvanceResult,
     ThirdWineIdeaAdvanceResult,
     ThreeWayDrinkWagerAdvanceResult,
+    WagerVoteProposalAdvanceResult,
 )
 from genesis.day0_good_drink_discussion_state import (
     SerpentLilithGoodDrinkDiscussionStartedEvent,
@@ -4902,17 +4912,34 @@ class Day0FirstBarShift:
         scratches = self.everyone_scratches_garfield()
         service = self.bouncer_orders_tasting_drinks()
         tasting = self.bouncer_tastes_and_accepts_judge_role(service)
-        return {'previous': previous, 'garfield_scratches': scratches, 'service': service, 'tasting': tasting}
+        return (
+            BouncerAcceptsJudgeAdvanceResult(
+                previous=previous,
+                garfield_scratches=scratches,
+                service=service,
+                tasting=tasting,
+            )
+        )
 
     def advance_to_bouncer_knows_wager(self):
         previous = self.advance_to_bouncer_inside_after_garfield()
         explanation = self.serpent_explains_wager_to_bouncer()
-        return {'previous': previous, 'explanation': explanation}
+        return (
+            BouncerKnowsWagerAdvanceResult(
+                previous=previous,
+                explanation=explanation,
+            )
+        )
 
     def advance_to_bouncer_inside_after_garfield(self):
         previous = self.advance_to_garfield_arrival()
         bouncer = self.bouncer_enters_bar_with_garfield()
-        return {'previous': previous, 'bouncer': bouncer}
+        return (
+            BouncerInsideAdvanceResult(
+                previous=previous,
+                bouncer=bouncer,
+            )
+        )
 
     def advance_to_garfield_arrival(self):
         previous = self.advance_to_cat_d20_arrival()
@@ -4921,19 +4948,40 @@ class Day0FirstBarShift:
         scratches = self.everyone_scratches_cat_d20()
         prepared = self.cat_d20_sets_next_birth_to_garfield()
         garfield = self.garfield_arrives_from_cat_d20_setting()
-        return {'previous': previous, 'accepted': accepted, 'invite': invite, 'scratches': scratches, 'prepared': prepared, 'garfield': garfield}
+        return (
+            GarfieldArrivalAdvanceResult(
+                previous=previous,
+                accepted=accepted,
+                invite=invite,
+                scratches=scratches,
+                prepared=prepared,
+                garfield=garfield,
+            )
+        )
 
     def advance_to_cat_d20_arrival(self):
         previous = self.advance_to_bartender_bouncer_panel_proposal()
         cat_d20 = self.cat_d20_arrives_during_judge_discussion()
-        return {'previous': previous, 'cat_d20': cat_d20}
+        return (
+            CatD20ArrivalAdvanceResult(
+                previous=previous,
+                cat_d20=cat_d20,
+            )
+        )
 
     def advance_to_bartender_bouncer_panel_proposal(self):
         previous = self.advance_to_everyone_at_bar_with_serpents_water()
         explanation = self.lilith_explains_wager_and_bartender_judge_proposal()
         objection = self.serpent_objects_single_bartender_is_not_enough()
         panel = self.bartender_proposes_bouncer_as_second_taster()
-        return {'previous': previous, 'explanation': explanation, 'objection': objection, 'panel': panel}
+        return (
+            BartenderBouncerPanelAdvanceResult(
+                previous=previous,
+                explanation=explanation,
+                objection=objection,
+                panel=panel,
+            )
+        )
 
     def advance_to_everyone_at_bar_with_serpents_water(self):
         previous = self.advance_to_wager_vote_proposal()
@@ -4941,19 +4989,39 @@ class Day0FirstBarShift:
         judge_proposal = self.god_rejects_participant_vote_and_proposes_bartender()
         move = self.lilith_and_god_leave_table_for_bar()
         water = self.bartender_serves_serpent_water_with_free_lemon_slice()
-        return {'previous': previous, 'water_order': water_order, 'judge_proposal': judge_proposal, 'move': move, 'water': water}
+        return (
+            EveryoneAtBarWithWaterAdvanceResult(
+                previous=previous,
+                water_order=water_order,
+                judge_proposal=judge_proposal,
+                move=move,
+                water=water,
+            )
+        )
 
     def advance_to_wager_vote_proposal(self):
         previous = self.advance_to_serpent_at_bar_lilith_with_god()
         question = self.god_asks_who_will_decide_wager()
         proposal = self.lilith_proposes_participant_vote()
-        return {'previous': previous, 'question': question, 'proposal': proposal}
+        return (
+            WagerVoteProposalAdvanceResult(
+                previous=previous,
+                question=question,
+                proposal=proposal,
+            )
+        )
 
     def advance_to_serpent_at_bar_lilith_with_god(self):
         previous = self.advance_to_bitterness_split_between_wine_and_beer()
         serpent = self.serpent_leaves_table_for_bar()
         conversation = self.lilith_and_god_continue_talking_at_table()
-        return {'previous': previous, 'serpent': serpent, 'conversation': conversation}
+        return (
+            SerpentAtBarAdvanceResult(
+                previous=previous,
+                serpent=serpent,
+                conversation=conversation,
+            )
+        )
 
     def advance_to_bitterness_split_between_wine_and_beer(self):
         previous = self.advance_to_three_way_drink_wager()
@@ -5211,7 +5279,13 @@ class Day0FirstBarShift:
         state = self.advance_to_lilith_entry()
         self.lilith_orders_vodka_with_lemon()
         conversation = self.serpent_and_lilith_begin_conversation()
-        return {'previous_checkpoint': state, 'current': self.checkpoint(), 'conversation': conversation}
+        return (
+            FirstPrivateConversationAdvanceResult(
+                previous_checkpoint=state,
+                current=self.checkpoint(),
+                conversation=conversation,
+            )
+        )
 
     def lilith_is_born_and_enters_bar(
         self

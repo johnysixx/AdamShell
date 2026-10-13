@@ -127,9 +127,7 @@ class Day0BouncerDualPresenceTests(
             .advance_to_bouncer_knows_wager()
         )
 
-        explanation = result[
-            "explanation"
-        ]
+        explanation = result.explanation
 
         self.assertEqual(
             explanation.speaker,

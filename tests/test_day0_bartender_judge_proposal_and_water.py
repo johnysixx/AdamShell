@@ -17,15 +17,15 @@ class Day0BartenderJudgeProposalAndWaterTests(unittest.TestCase):
 
     def test_serpent_orders_water_at_bar(self):
         result = self.scene.advance_to_everyone_at_bar_with_serpents_water()
-        self.assertEqual(result['water_order'].drink, 'water')
+        self.assertEqual(result.water_order.drink, 'water')
 
     def test_god_rejects_participant_vote(self):
         result = self.scene.advance_to_everyone_at_bar_with_serpents_water()
-        self.assertEqual(result['judge_proposal'].rejects.type, 'participant_vote')
+        self.assertEqual(result.judge_proposal.rejects.type, 'participant_vote')
 
     def test_god_proposes_bartender_as_judge(self):
         result = self.scene.advance_to_everyone_at_bar_with_serpents_water()
-        proposal = result['judge_proposal'].proposes
+        proposal = result.judge_proposal.proposes
         self.assertEqual(proposal.type, 'bartender_judges')
         self.assertEqual(proposal.judge, 'bartender')
 
@@ -41,7 +41,7 @@ class Day0BartenderJudgeProposalAndWaterTests(unittest.TestCase):
 
     def test_serpent_gets_water_with_free_lemon_slice(self):
         result = self.scene.advance_to_everyone_at_bar_with_serpents_water()
-        drink = result['water'].drink
+        drink = result.water.drink
         self.assertEqual(drink.name, 'water_with_lemon_slice')
         self.assertEqual(drink.garnish.ingredient, 'lemon')
         self.assertEqual(drink.garnish.price, 0)

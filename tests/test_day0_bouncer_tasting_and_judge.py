@@ -60,9 +60,7 @@ class Day0BouncerTastingAndJudgeTests(
     def test_everyone_scratches_garfield(
         self
     ):
-        scratches = self.result[
-            "garfield_scratches"
-        ]
+        scratches = self.result.garfield_scratches
 
         self.assertEqual(
             [
@@ -88,9 +86,7 @@ class Day0BouncerTastingAndJudgeTests(
     def test_bouncer_orders_three_tasting_drinks(
         self
     ):
-        service = self.result[
-            "service"
-        ]
+        service = self.result.service
 
         self.assertEqual(
             [
@@ -107,9 +103,7 @@ class Day0BouncerTastingAndJudgeTests(
     def test_receipt_is_staff_purchase(
         self
     ):
-        receipt = self.result[
-            "service"
-        ].receipt
+        receipt = self.result.service.receipt
 
         self.assertEqual(
             receipt.receipt_kind,
@@ -148,9 +142,7 @@ class Day0BouncerTastingAndJudgeTests(
     def test_bouncer_tastes_all_three(
         self
     ):
-        tasting = self.result[
-            "tasting"
-        ].tastings
+        tasting = self.result.tasting.tastings
 
         self.assertEqual(
             [
@@ -167,9 +159,7 @@ class Day0BouncerTastingAndJudgeTests(
     def test_bouncer_calls_them_disgusting(
         self
     ):
-        verdict = self.result[
-            "tasting"
-        ].verdict
+        verdict = self.result.tasting.verdict
 
         self.assertEqual(
             verdict.verdict,
@@ -179,9 +169,7 @@ class Day0BouncerTastingAndJudgeTests(
     def test_bouncer_accepts_judge_role(
         self
     ):
-        accepted = self.result[
-            "tasting"
-        ].accepted
+        accepted = self.result.tasting.accepted
 
         self.assertTrue(
             accepted.accepted

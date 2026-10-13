@@ -84,9 +84,7 @@ class Day0BouncerWagerEntryObjectStateTests(
             .advance_to_bouncer_inside_after_garfield()
         )
 
-        event = result[
-            "bouncer"
-        ]
+        event = result.bouncer
 
         bouncer = (
             scene.meeting_place.bouncer
@@ -155,9 +153,7 @@ class Day0BouncerWagerEntryObjectStateTests(
             .advance_to_bouncer_knows_wager()
         )
 
-        event = result[
-            "explanation"
-        ]
+        event = result.explanation
 
         self.assertIsInstance(
             event,

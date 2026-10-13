@@ -4,6 +4,9 @@ from genesis.day0_beer_bitterness_state import (
     GodTastesBeerAndUnderstandsBitternessEvent,
     LilithSipsLilithAndReactsToBeerEvent,
 )
+from genesis.day0_first_conversation_state import (
+    SerpentLilithConversationStartedEvent,
+)
 from genesis.day0_god_drink_wager_state import (
     GodAcceptsDrinkWagerEvent,
     SerpentOffersGodWagerParticipationEvent,
@@ -57,6 +60,48 @@ from genesis.day0_wine_ideas_state import (
     GodStillChoosingEvent,
     LilithSweetnessWineIdeaResult,
     SerpentMeadBeerTastingResult,
+)
+from core.entity.social_entity import (
+    CatPettedEvent,
+)
+from genesis.day0_bartender_bouncer_panel_state import (
+    BartenderProposesBouncerPanelEvent,
+    LilithExplainsWagerToBartenderEvent,
+    SerpentObjectsSingleJudgeEvent,
+)
+from genesis.day0_bartender_judge_and_water_state import (
+    GodRejectsParticipantVoteEvent,
+    LilithGodMoveToBarEvent,
+    SerpentOrdersWaterEvent,
+    SerpentWaterServiceResult,
+)
+from genesis.day0_bouncer_tasting_state import (
+    BouncerJudgeAcceptanceResult,
+    BouncerTastingServiceResult,
+)
+from genesis.day0_bouncer_wager_entry_state import (
+    BouncerEntersBarWithGarfieldEvent,
+    SerpentExplainsWagerToBouncerEvent,
+)
+from genesis.day0_cat_d20_arrival_state import (
+    BartenderSuggestsInvitingBouncerEvent,
+    CatD20DiscussionArrivalResult,
+    CatD20ScratchedEvent,
+    TwoJudgePanelAcceptedEvent,
+)
+from genesis.day0_garfield_manifestation_state import (
+    GarfieldArrivalResult,
+)
+from genesis.day0_serpent_returns_to_bar_state import (
+    LilithGodContinueTalkingAtTableEvent,
+    SerpentLeavesTableForBarEvent,
+)
+from genesis.day0_wager_vote_proposal_state import (
+    GodAsksWhoDecidesWagerEvent,
+    LilithProposesParticipantVoteEvent,
+)
+from meeting_place.bar_objects import (
+    CatD20GarfieldTargetPreparedEvent,
 )
 from meeting_place.bar_objects import (
     BarDrink,
@@ -173,3 +218,76 @@ class BeerBitternessAdvanceResult:
     previous: ThreeWayDrinkWagerAdvanceResult
     god_beer: GodTastesBeerAndUnderstandsBitternessEvent
     lilith: LilithSipsLilithAndReactsToBeerEvent
+
+@dataclass(slots=True, frozen=True)
+class SerpentAtBarAdvanceResult:
+    previous: BeerBitternessAdvanceResult
+    serpent: SerpentLeavesTableForBarEvent
+    conversation: LilithGodContinueTalkingAtTableEvent
+
+
+@dataclass(slots=True, frozen=True)
+class WagerVoteProposalAdvanceResult:
+    previous: SerpentAtBarAdvanceResult
+    question: GodAsksWhoDecidesWagerEvent
+    proposal: LilithProposesParticipantVoteEvent
+
+
+@dataclass(slots=True, frozen=True)
+class EveryoneAtBarWithWaterAdvanceResult:
+    previous: WagerVoteProposalAdvanceResult
+    water_order: SerpentOrdersWaterEvent
+    judge_proposal: GodRejectsParticipantVoteEvent
+    move: LilithGodMoveToBarEvent
+    water: SerpentWaterServiceResult
+
+
+@dataclass(slots=True, frozen=True)
+class BartenderBouncerPanelAdvanceResult:
+    previous: EveryoneAtBarWithWaterAdvanceResult
+    explanation: LilithExplainsWagerToBartenderEvent
+    objection: SerpentObjectsSingleJudgeEvent
+    panel: BartenderProposesBouncerPanelEvent
+
+
+@dataclass(slots=True, frozen=True)
+class CatD20ArrivalAdvanceResult:
+    previous: BartenderBouncerPanelAdvanceResult
+    cat_d20: CatD20DiscussionArrivalResult
+
+
+@dataclass(slots=True, frozen=True)
+class GarfieldArrivalAdvanceResult:
+    previous: CatD20ArrivalAdvanceResult
+    accepted: TwoJudgePanelAcceptedEvent
+    invite: BartenderSuggestsInvitingBouncerEvent
+    scratches: tuple[CatD20ScratchedEvent, ...]
+    prepared: CatD20GarfieldTargetPreparedEvent
+    garfield: GarfieldArrivalResult
+
+
+@dataclass(slots=True, frozen=True)
+class BouncerInsideAdvanceResult:
+    previous: GarfieldArrivalAdvanceResult
+    bouncer: BouncerEntersBarWithGarfieldEvent
+
+
+@dataclass(slots=True, frozen=True)
+class BouncerKnowsWagerAdvanceResult:
+    previous: BouncerInsideAdvanceResult
+    explanation: SerpentExplainsWagerToBouncerEvent
+
+
+@dataclass(slots=True, frozen=True)
+class BouncerAcceptsJudgeAdvanceResult:
+    previous: BouncerKnowsWagerAdvanceResult
+    garfield_scratches: tuple[CatPettedEvent, ...]
+    service: BouncerTastingServiceResult
+    tasting: BouncerJudgeAcceptanceResult
+
+@dataclass(slots=True, frozen=True)
+class FirstPrivateConversationAdvanceResult:
+    previous_checkpoint: dict[str, object]
+    current: dict[str, object]
+    conversation: SerpentLilithConversationStartedEvent
+

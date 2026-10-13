@@ -52,9 +52,7 @@ class Day0WagerVoteProposalTests(
         )
 
         self.assertEqual(
-            result[
-                "question"
-            ].question,
+            result.question.question,
             "who_decides_winner"
         )
 
@@ -67,9 +65,7 @@ class Day0WagerVoteProposalTests(
         )
 
         method = (
-            result[
-                "proposal"
-            ].decision_method
+            result.proposal.decision_method
         )
 
         self.assertEqual(

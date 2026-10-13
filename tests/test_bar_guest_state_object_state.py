@@ -258,7 +258,7 @@ class BarGuestStateObjectStateTests(
 
         self.assertIs(
             scene.serpent.bar_state.water_order.final_drink,
-            result["water"].drink
+            result.water.drink
         )
         self.assertIsInstance(
             scene.god.bar_state.wine_order,

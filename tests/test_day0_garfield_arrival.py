@@ -25,16 +25,16 @@ class Day0GarfieldArrivalTests(unittest.TestCase):
 
     def test_all_three_competitors_accept_panel(self):
         result = self.scene.advance_to_garfield_arrival()
-        self.assertEqual(result['accepted'].accepted_by, ('lilith', 'god', 'serpent'))
+        self.assertEqual(result.accepted.accepted_by, ('lilith', 'god', 'serpent'))
 
     def test_bartender_suggests_inviting_bouncer(self):
         result = self.scene.advance_to_garfield_arrival()
-        self.assertEqual(result['invite'].invite, 'bouncer')
-        self.assertFalse(result['invite'].bouncer_entered)
+        self.assertEqual(result.invite.invite, 'bouncer')
+        self.assertFalse(result.invite.bouncer_entered)
 
     def test_everyone_present_scratches_cat_d20(self):
         result = self.scene.advance_to_garfield_arrival()
-        scratchers = [event.scratched_by for event in result['scratches']]
+        scratchers = [event.scratched_by for event in result.scratches]
         self.assertEqual(scratchers, [
                 'serpent',
                 'lilith',
@@ -46,7 +46,7 @@ class Day0GarfieldArrivalTests(unittest.TestCase):
         result = self.scene.advance_to_garfield_arrival()
 
         self.assertEqual(
-            result['prepared'].target_name,
+            result.prepared.target_name,
             'garfield'
         )
 
@@ -135,9 +135,7 @@ class Day0GarfieldArrivalTests(unittest.TestCase):
             quantum_event,
         )
 
-        returned_event = result[
-            'prepared'
-        ]
+        returned_event = result.prepared
 
         returned_event.profile.color = (
             'changed'
@@ -155,15 +153,15 @@ class Day0GarfieldArrivalTests(unittest.TestCase):
 
     def test_garfield_arrives(self):
         result = self.scene.advance_to_garfield_arrival()
-        garfield = result['garfield'].garfield
+        garfield = result.garfield.garfield
         self.assertEqual(self._name(garfield), 'garfield')
         self.assertIs(self.scene.garfield, garfield)
         self.assertIn(garfield, self.bar.entities)
 
     def test_garfield_uses_real_garfield_profile(self):
         result = self.scene.advance_to_garfield_arrival()
-        prepared = result['prepared'].profile
-        manifested = result['garfield'].profile
+        prepared = result.prepared.profile
+        manifested = result.garfield.profile
         self.assertEqual(prepared, manifested)
 
     def test_scratching_precedes_garfield_setting_and_arrival(self):

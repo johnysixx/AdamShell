@@ -96,9 +96,7 @@ class Day0BouncerTastingObjectStateTests(
     def test_garfield_scratches_are_object_events(
         self
     ):
-        scratches = self.result[
-            "garfield_scratches"
-        ]
+        scratches = self.result.garfield_scratches
 
         self.assertIsInstance(
             scratches,
@@ -145,9 +143,7 @@ class Day0BouncerTastingObjectStateTests(
     def test_tasting_service_is_object_graph(
         self
     ):
-        service = self.result[
-            "service"
-        ]
+        service = self.result.service
 
         self.assertIsInstance(
             service,
@@ -214,9 +210,7 @@ class Day0BouncerTastingObjectStateTests(
     def test_tasting_result_is_object_graph(
         self
     ):
-        tasting = self.result[
-            "tasting"
-        ]
+        tasting = self.result.tasting
 
         self.assertIsInstance(
             tasting,
@@ -292,13 +286,9 @@ class Day0BouncerTastingObjectStateTests(
     def test_service_and_tasting_share_receipt_object(
         self
     ):
-        service = self.result[
-            "service"
-        ]
+        service = self.result.service
 
-        tasting = self.result[
-            "tasting"
-        ]
+        tasting = self.result.tasting
 
         self.assertIs(
             tasting.receipt,

@@ -80,9 +80,7 @@ class Day0WagerVoteProposalObjectStateTests(
             scene.advance_to_wager_vote_proposal()
         )
 
-        event = result[
-            "question"
-        ]
+        event = result.question
 
         self.assertIsInstance(
             event,
@@ -118,9 +116,7 @@ class Day0WagerVoteProposalObjectStateTests(
             scene.advance_to_wager_vote_proposal()
         )
 
-        event = result[
-            "proposal"
-        ]
+        event = result.proposal
 
         method = (
             scene

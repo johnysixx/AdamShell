@@ -78,9 +78,7 @@ class Day0SerpentReturnsToBarObjectStateTests(
             .advance_to_serpent_at_bar_lilith_with_god()
         )
 
-        event = result[
-            "serpent"
-        ]
+        event = result.serpent
 
         self.assertIsInstance(
             event,
@@ -129,9 +127,7 @@ class Day0SerpentReturnsToBarObjectStateTests(
             .advance_to_serpent_at_bar_lilith_with_god()
         )
 
-        event = result[
-            "conversation"
-        ]
+        event = result.conversation
 
         self.assertIsInstance(
             event,

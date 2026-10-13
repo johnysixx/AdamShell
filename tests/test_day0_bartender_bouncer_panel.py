@@ -51,9 +51,7 @@ class Day0BartenderBouncerPanelTests(
             .advance_to_bartender_bouncer_panel_proposal()
         )
 
-        explanation = result[
-            "explanation"
-        ]
+        explanation = result.explanation
 
         self.assertEqual(
             explanation.speaker,
@@ -79,9 +77,7 @@ class Day0BartenderBouncerPanelTests(
         )
 
         self.assertEqual(
-            result[
-                "objection"
-            ].objection,
+            result.objection.objection,
             "one_judge_is_not_enough"
         )
 
@@ -93,9 +89,7 @@ class Day0BartenderBouncerPanelTests(
             .advance_to_bartender_bouncer_panel_proposal()
         )
 
-        proposal = result[
-            "panel"
-        ].proposal
+        proposal = result.panel.proposal
 
         self.assertEqual(
             proposal.type,

@@ -20,26 +20,26 @@ class Day0CatD20ArrivalTests(unittest.TestCase):
 
     def test_cat_d20_arrives_now(self):
         result = self.scene.advance_to_cat_d20_arrival()
-        cat = result['cat_d20'].cat
+        cat = result.cat_d20.cat
         self.assertEqual(cat.name, 'cat_d20')
         self.assertIs(self.scene.cat_d20, cat)
 
     def test_cat_d20_is_in_meeting_place(self):
         result = self.scene.advance_to_cat_d20_arrival()
-        cat = result['cat_d20'].cat
+        cat = result.cat_d20.cat
         self.assertEqual(cat.current_layer, 'meeting_place')
         self.assertIn(cat, self.bar.entities)
 
     def test_cat_d20_keeps_canonical_d20_trait(self):
         result = self.scene.advance_to_cat_d20_arrival()
-        cat = result['cat_d20'].cat
+        cat = result.cat_d20.cat
         self.assertIn('d20_cat', getattr(cat, 'special_traits', []))
         self.assertTrue(cat.cat_d20.is_cat)
         self.assertFalse(cat.cat_d20.is_die)
 
     def test_existing_welcome_lifecycle_is_used(self):
         result = self.scene.advance_to_cat_d20_arrival()
-        arrival = result['cat_d20'].arrival
+        arrival = result.cat_d20.arrival
         self.assertEqual(arrival.name, 'cat_d20_arrival_completed')
 
     def test_cat_d20_arrives_after_bouncer_panel_is_proposed(self):
@@ -51,7 +51,7 @@ class Day0CatD20ArrivalTests(unittest.TestCase):
 
     def test_second_arrival_does_not_create_duplicate_cat(self):
         first = self.scene.advance_to_cat_d20_arrival()
-        cat = first['cat_d20'].cat
+        cat = first.cat_d20.cat
         count_before = sum((1 for entity in self.bar.entities if isinstance(entity, dict) and getattr(entity, 'name', None) == 'cat_d20'))
         second = self.scene.cat_d20_arrives_during_judge_discussion()
         count_after = sum((1 for entity in self.bar.entities if isinstance(entity, dict) and getattr(entity, 'name', None) == 'cat_d20'))

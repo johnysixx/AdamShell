@@ -284,11 +284,11 @@ class BarKnowledgeObjectStateTests(
             "serpent"
         )
         self.assertIsInstance(
-            result["explanation"],
+            result.explanation,
             SerpentExplainsWagerToBouncerEvent
         )
         self._assert_object_only(
-            result["explanation"],
+            result.explanation,
             "participants"
         )
         self._assert_object_only(

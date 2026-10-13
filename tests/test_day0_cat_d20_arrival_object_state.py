@@ -86,9 +86,7 @@ class Day0CatD20ArrivalObjectStateTests(
             scene.advance_to_cat_d20_arrival()
         )
 
-        arrival = result[
-            "cat_d20"
-        ]
+        arrival = result.cat_d20
 
         self.assertIsInstance(
             arrival,
@@ -150,8 +148,9 @@ class Day0CatD20ArrivalObjectStateTests(
         scene = self._scene()
 
         first = (
-            scene.advance_to_cat_d20_arrival()
-            ["cat_d20"]
+            scene
+            .advance_to_cat_d20_arrival()
+            .cat_d20
         )
 
         second = (

@@ -202,9 +202,7 @@ class Day0BartenderJudgeAndWaterObjectStateTests(
             .advance_to_everyone_at_bar_with_serpents_water()
         )
 
-        event = result[
-            "move"
-        ]
+        event = result.move
 
         self.assertIsInstance(
             event,
@@ -258,9 +256,7 @@ class Day0BartenderJudgeAndWaterObjectStateTests(
             .advance_to_everyone_at_bar_with_serpents_water()
         )
 
-        service = result[
-            "water"
-        ]
+        service = result.water
 
         order = (
             scene.serpent

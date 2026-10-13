@@ -86,9 +86,7 @@ class Day0BartenderBouncerPanelObjectStateTests(
             .advance_to_bartender_bouncer_panel_proposal()
         )
 
-        event = result[
-            "explanation"
-        ]
+        event = result.explanation
 
         self.assertIsInstance(
             event,
@@ -153,9 +151,7 @@ class Day0BartenderBouncerPanelObjectStateTests(
             .advance_to_bartender_bouncer_panel_proposal()
         )
 
-        event = result[
-            "objection"
-        ]
+        event = result.objection
 
         self.assertIsInstance(
             event,
@@ -187,9 +183,7 @@ class Day0BartenderBouncerPanelObjectStateTests(
             .advance_to_bartender_bouncer_panel_proposal()
         )
 
-        event = result[
-            "panel"
-        ]
+        event = result.panel
 
         proposal = (
             scene
@@ -263,9 +257,7 @@ class Day0BartenderBouncerPanelObjectStateTests(
             .advance_to_bartender_bouncer_panel_proposal()
         )
 
-        event = result[
-            "panel"
-        ]
+        event = result.panel
 
         proposal = (
             scene
