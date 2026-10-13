@@ -83,6 +83,15 @@ from genesis.day0_table_wine_state import (
     SerpentFinishesWineAtTableEvent,
     SerpentLilithContinueWineDiscussionEvent,
 )
+from genesis.day0_bouncer_tasting_state import (
+    BartenderServesBouncerTastingDrinksEvent,
+    BouncerAcceptsWagerJudgeRoleEvent,
+    BouncerInitialDrinkVerdictEvent,
+    BouncerJudgeAcceptanceResult,
+    BouncerOrdersTastingDrinksEvent,
+    BouncerTastesDrinkEvent,
+    BouncerTastingServiceResult,
+)
 from genesis.day0_bouncer_wager_entry_state import (
     BouncerEntersBarWithGarfieldEvent,
     SerpentExplainsWagerToBouncerEvent,
@@ -4288,64 +4297,218 @@ class Day0FirstBarShift:
 
         return event
 
-    def everyone_scratches_garfield(self):
+    def everyone_scratches_garfield(
+        self
+    ):
         if self.garfield is None:
-            raise RuntimeError('Garfield is not present.')
-        actors = [self.serpent, self.lilith, self.god, self.meeting_place.bartender, self.meeting_place.bouncer]
-        events = []
-        for actor in actors:
-            event = actor.pet_cat(self.garfield)
-            self.meeting_place.emit_event(event)
-            self.history.append(event)
-            events.append(event)
-        return events
-
-    def bouncer_orders_tasting_drinks(self):
-        bouncer = self.meeting_place.bouncer
-        drink_names = ['wine', 'mead', 'beer']
-        self.meeting_place.refresh_basic_drinks()
-        drinks = []
-        for drink_name in drink_names:
-            menu_item = self.meeting_place.drink_menu.get(drink_name)
-            if menu_item is None:
-                raise RuntimeError(f'{drink_name} is not available.')
-            drink = BarDrink(
-                name=drink_name,
-                type='basic_bar_drink',
-                category='basic_drink',
+            raise RuntimeError(
+                'Garfield is not present.'
             )
-            drinks.append(drink)
-        order_event = {'name': 'bouncer_orders_tasting_drinks', 'bouncer': 'bouncer', 'drinks': list(drink_names), 'purpose': 'judge_wager'}
-        self.meeting_place.emit_event(order_event)
-        self.history.append(order_event)
-        receipt = self.meeting_place.bar_counter.cash_register.print_staff_purchase_receipt(entity=bouncer, drinks=drinks)
-        served_event = {'name': 'bartender_serves_bouncer_tasting_drinks', 'bartender': 'bartender', 'bouncer': 'bouncer', 'drinks': list(drink_names), 'receipt_number': receipt.receipt_number, 'receipt_kind': 'staff_purchase', 'paid': False, 'charge': 0}
-        self.meeting_place.emit_event(served_event)
-        self.history.append(served_event)
-        return {'drinks': drinks, 'receipt': receipt, 'order_event': order_event, 'served_event': served_event}
 
-    def bouncer_tastes_and_accepts_judge_role(self, service):
+        actors = (
+            self.serpent,
+            self.lilith,
+            self.god,
+            self.meeting_place.bartender,
+            self.meeting_place.bouncer,
+        )
+
+        events = []
+
+        for actor in actors:
+            event = actor.pet_cat(
+                self.garfield
+            )
+
+            self.meeting_place.emit_event(
+                event
+            )
+
+            self.history.append(
+                event
+            )
+
+            events.append(
+                event
+            )
+
+        return tuple(
+            events
+        )
+
+    def bouncer_orders_tasting_drinks(
+        self
+    ):
+        bouncer = (
+            self.meeting_place.bouncer
+        )
+
+        drink_names = (
+            'wine',
+            'mead',
+            'beer',
+        )
+
+        self.meeting_place.refresh_basic_drinks()
+
+        drinks = []
+
+        for drink_name in drink_names:
+            menu_item = (
+                self.meeting_place
+                .drink_menu
+                .get(
+                    drink_name
+                )
+            )
+
+            if menu_item is None:
+                raise RuntimeError(
+                    f'{drink_name} is not available.'
+                )
+
+            drinks.append(
+                BarDrink(
+                    name=drink_name,
+                    type='basic_bar_drink',
+                    category='basic_drink',
+                )
+            )
+
+        order_event = (
+            BouncerOrdersTastingDrinksEvent(
+                drinks=drink_names,
+            )
+        )
+
+        self.meeting_place.emit_event(
+            order_event
+        )
+
+        self.history.append(
+            order_event.to_dict()
+        )
+
+        receipt = (
+            self.meeting_place
+            .bar_counter
+            .cash_register
+            .print_staff_purchase_receipt(
+                entity=bouncer,
+                drinks=drinks,
+            )
+        )
+
+        served_event = (
+            BartenderServesBouncerTastingDrinksEvent(
+                drinks=drink_names,
+                receipt_number=(
+                    receipt.receipt_number
+                ),
+            )
+        )
+
+        self.meeting_place.emit_event(
+            served_event
+        )
+
+        self.history.append(
+            served_event.to_dict()
+        )
+
+        return BouncerTastingServiceResult(
+            drinks=tuple(
+                drinks
+            ),
+            receipt=receipt,
+            order_event=order_event,
+            served_event=served_event,
+        )
+
+    def bouncer_tastes_and_accepts_judge_role(
+        self,
+        service
+    ):
+        if not isinstance(
+            service,
+            BouncerTastingServiceResult,
+        ):
+            raise TypeError(
+                'Bouncer tasting requires '
+                'BouncerTastingServiceResult.'
+            )
+
         tasting_events = []
-        for drink_name in ('wine', 'mead', 'beer'):
-            event = {'name': 'bouncer_tastes_drink', 'bouncer': 'bouncer', 'drink': drink_name, 'purpose': 'judge_wager'}
-            self.meeting_place.emit_event(event)
-            self.history.append(event)
-            tasting_events.append(event)
-        verdict = {'name': 'bouncer_gives_initial_drink_verdict', 'bouncer': 'bouncer', 'drinks': ['wine', 'mead', 'beer'], 'verdict': 'disgusting', 'statement': 'this_is_disgusting'}
-        self.meeting_place.emit_event(verdict)
-        self.history.append(verdict)
-        accepted = {'name': 'bouncer_accepts_wager_judge_role', 'bouncer': 'bouncer', 'role': 'tasting_judge', 'accepted': True}
-        self.meeting_place.emit_event(accepted)
-        self.history.append(accepted)
+
+        for drink_name in (
+            'wine',
+            'mead',
+            'beer',
+        ):
+            event = (
+                BouncerTastesDrinkEvent(
+                    drink=drink_name,
+                )
+            )
+
+            self.meeting_place.emit_event(
+                event
+            )
+
+            self.history.append(
+                event.to_dict()
+            )
+
+            tasting_events.append(
+                event
+            )
+
+        verdict = (
+            BouncerInitialDrinkVerdictEvent()
+        )
+
+        self.meeting_place.emit_event(
+            verdict
+        )
+
+        self.history.append(
+            verdict.to_dict()
+        )
+
+        accepted = (
+            BouncerAcceptsWagerJudgeRoleEvent()
+        )
+
+        self.meeting_place.emit_event(
+            accepted
+        )
+
+        self.history.append(
+            accepted.to_dict()
+        )
+
         proposal = (
             self.serpent_lilith_drink_wager
             .tasting_panel_proposal
         )
+
         if proposal is not None:
             proposal.bouncer_accepted = True
-        bouncer = self.meeting_place.bouncer
+
+        bouncer = (
+            self.meeting_place.bouncer
+        )
+
         bouncer.wager_judge = True
-        return {'tastings': tasting_events, 'verdict': verdict, 'accepted': accepted, 'receipt': service['receipt']}
+
+        return BouncerJudgeAcceptanceResult(
+            tastings=tuple(
+                tasting_events
+            ),
+            verdict=verdict,
+            accepted=accepted,
+            receipt=service.receipt,
+        )
 
     def advance_to_bouncer_accepts_judge_role(self):
         previous = self.advance_to_bouncer_knows_wager()

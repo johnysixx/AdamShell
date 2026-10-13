@@ -95,7 +95,7 @@ class Day0BouncerTastingAndJudgeTests(
         self.assertEqual(
             [
                 drink.name
-                for drink in service["drinks"]
+                for drink in service.drinks
             ],
             [
                 "wine",
@@ -109,9 +109,7 @@ class Day0BouncerTastingAndJudgeTests(
     ):
         receipt = self.result[
             "service"
-        ][
-            "receipt"
-        ]
+        ].receipt
 
         self.assertEqual(
             receipt.receipt_kind,
@@ -152,13 +150,11 @@ class Day0BouncerTastingAndJudgeTests(
     ):
         tasting = self.result[
             "tasting"
-        ][
-            "tastings"
-        ]
+        ].tastings
 
         self.assertEqual(
             [
-                event["drink"]
+                event.drink
                 for event in tasting
             ],
             [
@@ -173,12 +169,10 @@ class Day0BouncerTastingAndJudgeTests(
     ):
         verdict = self.result[
             "tasting"
-        ][
-            "verdict"
-        ]
+        ].verdict
 
         self.assertEqual(
-            verdict["verdict"],
+            verdict.verdict,
             "disgusting"
         )
 
@@ -187,16 +181,14 @@ class Day0BouncerTastingAndJudgeTests(
     ):
         accepted = self.result[
             "tasting"
-        ][
-            "accepted"
-        ]
+        ].accepted
 
         self.assertTrue(
-            accepted["accepted"]
+            accepted.accepted
         )
 
         self.assertEqual(
-            accepted["role"],
+            accepted.role,
             "tasting_judge"
         )
 
