@@ -17,19 +17,19 @@ class Day0GodJoinsDrinkWagerTests(unittest.TestCase):
 
     def test_serpent_tells_god_about_existing_wager(self):
         result = self.scene.advance_to_three_way_drink_wager()
-        self.assertEqual(result['explained']['speaker'], 'serpent')
-        self.assertEqual(result['explained']['listener'], 'god')
+        self.assertEqual(result['explained'].speaker, 'serpent')
+        self.assertEqual(result['explained'].listener, 'god')
         self.assertTrue(self.scene.god.bar_knowledge.drink_wager.known)
 
     def test_serpent_offers_participation(self):
         result = self.scene.advance_to_three_way_drink_wager()
-        self.assertEqual(result['offered']['offered_by'], 'serpent')
-        self.assertEqual(result['offered']['offered_to'], 'god')
-        self.assertTrue(result['offered']['accepted'])
+        self.assertEqual(result['offered'].offered_by, 'serpent')
+        self.assertEqual(result['offered'].offered_to, 'god')
+        self.assertTrue(result['offered'].accepted)
 
     def test_god_accepts(self):
         result = self.scene.advance_to_three_way_drink_wager()
-        self.assertEqual(result['accepted']['participant'], 'god')
+        self.assertEqual(result['accepted'].participant, 'god')
         self.assertTrue(self.scene.god.bar_state.participates_in_drink_wager)
 
     def test_wager_now_has_three_participants(self):

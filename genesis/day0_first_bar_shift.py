@@ -84,6 +84,12 @@ from genesis.day0_table_wine_state import (
     SerpentFinishesWineAtTableEvent,
     SerpentLilithContinueWineDiscussionEvent,
 )
+from genesis.day0_god_drink_wager_state import (
+    DrinkWagerExplanationSnapshot,
+    GodAcceptsDrinkWagerEvent,
+    SerpentOffersGodWagerParticipationEvent,
+    SerpentTellsGodAboutDrinkWagerEvent,
+)
 from genesis.day0_sweetness_understanding_state import (
     GodFinishesSerpentsMeadEvent,
     LilithExplainsSweetnessEvent,
@@ -2962,56 +2968,141 @@ class Day0FirstBarShift:
 
         return event
 
-    def serpent_tells_god_about_drink_wager(self):
-        wager = getattr(self, 'serpent_lilith_drink_wager', None)
+    def serpent_tells_god_about_drink_wager(
+        self
+    ):
+        wager = getattr(
+            self,
+            'serpent_lilith_drink_wager',
+            None
+        )
+
         if wager is None:
-            raise RuntimeError('Serpent and Lilith have no drink wager.')
-        event = {'name': 'serpent_tells_god_about_drink_wager', 'speaker': 'serpent', 'listener': 'god', 'wager': wager.to_dict(), 'contest': ['wine', 'mead', 'beer']}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
+            raise RuntimeError(
+                'Serpent and Lilith have '
+                'no drink wager.'
+            )
+
+        event = (
+            SerpentTellsGodAboutDrinkWagerEvent(
+                wager=(
+                    DrinkWagerExplanationSnapshot
+                    .from_wager(
+                        wager
+                    )
+                )
+            )
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
         self._entity_attr_setdefault(
             self.god,
             'bar_knowledge',
             BarGuestKnowledge()
-        ).drink_wager = BarWagerKnowledge(
-            known=True,
-            source='serpent',
+        ).drink_wager = (
+            BarWagerKnowledge(
+                known=True,
+                source='serpent',
+            )
         )
+
         return event
 
-    def serpent_offers_god_wager_participation(self):
+    def serpent_offers_god_wager_participation(
+        self
+    ):
         knowledge = getattr(
             self.god,
             'bar_knowledge',
             None
         )
+
         if (
             knowledge is None
             or knowledge.drink_wager is None
             or not knowledge.drink_wager.known
         ):
-            raise RuntimeError('God does not know about the wager.')
-        event = {'name': 'serpent_offers_god_wager_participation', 'offered_by': 'serpent', 'offered_to': 'god', 'accepted': None}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
+            raise RuntimeError(
+                'God does not know about the wager.'
+            )
+
+        event = (
+            SerpentOffersGodWagerParticipationEvent()
+        )
+
+        self.god_wager_participation_offer = (
+            event
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
         return event
 
-    def god_accepts_drink_wager(self):
-        offers = [event for event in self.history if event.get('name') == 'serpent_offers_god_wager_participation']
-        if not offers:
-            raise RuntimeError('God has not been offered participation.')
-        offers[-1]['accepted'] = True
-        wager = self.serpent_lilith_drink_wager
+    def god_accepts_drink_wager(
+        self
+    ):
+        offer = getattr(
+            self,
+            'god_wager_participation_offer',
+            None
+        )
+
+        if not isinstance(
+            offer,
+            SerpentOffersGodWagerParticipationEvent,
+        ):
+            raise RuntimeError(
+                'God has not been offered '
+                'participation.'
+            )
+
+        if offer.accepted is True:
+            raise RuntimeError(
+                'God has already accepted '
+                'wager participation.'
+            )
+
+        offer.accept()
+
+        wager = (
+            self.serpent_lilith_drink_wager
+        )
+
         wager.add_participant(
             participant='god',
-            wager_type='three_way_drink_wager'
+            wager_type=(
+                'three_way_drink_wager'
+            ),
         )
+
         self.god.bar_state.participates_in_drink_wager = (
             True
         )
-        event = {'name': 'god_accepts_drink_wager', 'participant': 'god', 'participants': list(wager.participants), 'resolved': False}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
+
+        event = GodAcceptsDrinkWagerEvent(
+            participants=tuple(
+                wager.participants
+            )
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
         return event
 
     def god_tastes_beer_and_understands_bitterness(self):
