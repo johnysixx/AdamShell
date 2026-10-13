@@ -46,7 +46,7 @@ class Day0GarfieldArrivalTests(unittest.TestCase):
         result = self.scene.advance_to_garfield_arrival()
 
         self.assertEqual(
-            result['prepared']['target_name'],
+            result['prepared'].target_name,
             'garfield'
         )
 
@@ -135,30 +135,35 @@ class Day0GarfieldArrivalTests(unittest.TestCase):
             quantum_event,
         )
 
-        result[
+        returned_event = result[
             'prepared'
-        ][
-            'profile'
-        ][
-            'color'
-        ] = 'changed'
+        ]
+
+        returned_event.profile.color = (
+            'changed'
+        )
 
         self.assertEqual(
             history_event.profile.color,
             'orange'
         )
 
+        self.assertIsNot(
+            returned_event,
+            history_event,
+        )
+
     def test_garfield_arrives(self):
         result = self.scene.advance_to_garfield_arrival()
-        garfield = result['garfield']['garfield']
+        garfield = result['garfield'].garfield
         self.assertEqual(self._name(garfield), 'garfield')
         self.assertIs(self.scene.garfield, garfield)
         self.assertIn(garfield, self.bar.entities)
 
     def test_garfield_uses_real_garfield_profile(self):
         result = self.scene.advance_to_garfield_arrival()
-        prepared = result['prepared']['profile']
-        manifested = result['garfield']['profile']
+        prepared = result['prepared'].profile
+        manifested = result['garfield'].profile
         self.assertEqual(prepared, manifested)
 
     def test_scratching_precedes_garfield_setting_and_arrival(self):

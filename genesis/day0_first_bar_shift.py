@@ -83,6 +83,10 @@ from genesis.day0_table_wine_state import (
     SerpentFinishesWineAtTableEvent,
     SerpentLilithContinueWineDiscussionEvent,
 )
+from genesis.day0_garfield_manifestation_state import (
+    GarfieldArrivalResult,
+    GarfieldArrivesAtBarEvent,
+)
 from genesis.day0_cat_d20_arrival_state import (
     BartenderSuggestsInvitingBouncerEvent,
     CatD20ArrivesDuringJudgeDiscussionEvent,
@@ -4023,18 +4027,25 @@ class Day0FirstBarShift:
             )
         )
 
+        # Keep the Day 0 history snapshot
+        # detached from the returned runtime event.
         self.history.append(
-            event
+            deepcopy(
+                event
+            )
         )
 
-        return event.to_dict()
+        return event
 
-    def garfield_arrives_from_cat_d20_setting(self):
+    def garfield_arrives_from_cat_d20_setting(
+        self
+    ):
         cat_d20_state = getattr(
             self.cat_d20,
             'cat_d20',
             None
         )
+
         if not isinstance(
             cat_d20_state,
             CatD20State
@@ -4042,53 +4053,145 @@ class Day0FirstBarShift:
             raise RuntimeError(
                 'CatD20 state is missing.'
             )
+
         if not cat_d20_state.garfield_pending:
-            raise RuntimeError('CatD20 has not prepared Garfield.')
-        if cat_d20_state.canonical_target != 'garfield':
-            raise RuntimeError('CatD20 target is not Garfield.')
+            raise RuntimeError(
+                'CatD20 has not prepared Garfield.'
+            )
+
+        if (
+            cat_d20_state.canonical_target
+            != 'garfield'
+        ):
+            raise RuntimeError(
+                'CatD20 target is not Garfield.'
+            )
+
         profile = (
             cat_d20_state
             .canonical_profile
-            .to_dict()
         )
-        cats_layer = getattr(self.universe, 'cats_layer', None)
+
+        if not isinstance(
+            profile,
+            CatD20Profile,
+        ):
+            raise RuntimeError(
+                'Garfield profile is missing.'
+            )
+
+        cats_layer = getattr(
+            self.universe,
+            'cats_layer',
+            None
+        )
+
         if cats_layer is None:
-            raise RuntimeError('Garfield arrival requires cats_layer.')
+            raise RuntimeError(
+                'Garfield arrival requires '
+                'cats_layer.'
+            )
 
         def cat_name_of(cat):
-            return getattr(cat, 'name', None)
-        existing = next((cat for cat in cats_layer.cats if cat_name_of(cat) == 'garfield'), None)
+            return getattr(
+                cat,
+                'name',
+                None
+            )
+
+        existing = next(
+            (
+                cat
+                for cat in cats_layer.cats
+                if cat_name_of(cat)
+                == 'garfield'
+            ),
+            None,
+        )
+
         created = False
+
         if existing is not None:
             garfield = existing
         else:
-            manifestation = self.universe.manifest_cat(name='garfield', source='cat_d20_garfield_setting', color=profile['color'], fur_length=profile['fur_length'], pattern=profile['pattern'], eye_color=profile['eye_color'], sex=profile['sex'])
+            manifestation = (
+                self.universe.manifest_cat(
+                    name='garfield',
+                    source=(
+                        'cat_d20_garfield_setting'
+                    ),
+                    color=profile.color,
+                    fur_length=profile.fur_length,
+                    pattern=profile.pattern,
+                    eye_color=profile.eye_color,
+                    sex=profile.sex,
+                )
+            )
+
             if manifestation is None:
-                raise RuntimeError('Garfield manifestation failed.')
+                raise RuntimeError(
+                    'Garfield manifestation failed.'
+                )
+
             garfield = manifestation.cat
             created = True
+
         traits = getattr(
             garfield,
             'special_traits',
             None
         )
+
         if traits is None:
             garfield.special_traits = []
-            traits = garfield.special_traits
+            traits = (
+                garfield.special_traits
+            )
 
-        garfield.canonical_identity = 'garfield'
-        for trait in ('garfield', 'canonical_cat_garfield'):
+        garfield.canonical_identity = (
+            'garfield'
+        )
+
+        for trait in (
+            'garfield',
+            'canonical_cat_garfield',
+        ):
             if trait not in traits:
-                traits.append(trait)
-        ordinary_arrival = self.meeting_place.admit_cat(garfield, bartender_available=True)
+                traits.append(
+                    trait
+                )
+
+        ordinary_arrival = (
+            self.meeting_place.admit_cat(
+                garfield,
+                bartender_available=True,
+            )
+        )
+
         cat_d20_state.mark_manifested(
             'garfield'
         )
+
         self.garfield = garfield
-        event = {'name': 'garfield_arrives_at_bar', 'cat': 'garfield', 'source': 'cat_d20', 'created': created, 'arrival': ordinary_arrival}
-        self.meeting_place.emit_event(event)
-        self.history.append(event)
-        return {'garfield': garfield, 'event': event, 'profile': profile, 'ordinary_arrival': ordinary_arrival}
+
+        event = GarfieldArrivesAtBarEvent(
+            arrival=ordinary_arrival,
+            created=created,
+        )
+
+        self.meeting_place.emit_event(
+            event
+        )
+        self.history.append(
+            event.to_dict()
+        )
+
+        return GarfieldArrivalResult(
+            garfield=garfield,
+            event=event,
+            profile=profile,
+            ordinary_arrival=ordinary_arrival,
+        )
 
     def bouncer_enters_bar_with_garfield(self):
         bouncer = self.meeting_place.bouncer

@@ -59,9 +59,7 @@ class Day0GarfieldOrdinaryCatArrivalTests(
 
         return result[
             "garfield"
-        ][
-            "ordinary_arrival"
-        ]
+        ].ordinary_arrival
 
     def test_garfield_uses_ordinary_cat_arrival(
         self
