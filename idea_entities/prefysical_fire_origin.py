@@ -465,9 +465,7 @@ class PrefysicalFireOrigin:
         hidden = (
             self.serpent_d20
             .hidden_resolution_for(
-                public_roll[
-                    "roll_id"
-                ]
+                public_roll.roll_id
             )
         )
 
@@ -482,9 +480,7 @@ class PrefysicalFireOrigin:
                 ),
 
                 "public_roll": (
-                    deepcopy(
-                        public_roll
-                    )
+                    public_roll.to_dict()
                 ),
 
                 "friction_active": True,
@@ -503,9 +499,7 @@ class PrefysicalFireOrigin:
                     "fire_not_ignited"
                 ),
 
-                "public_roll": deepcopy(
-                    public_roll
-                ),
+                "public_roll": public_roll.to_dict(),
 
                 "energy_conversion": (
                     deepcopy(
@@ -535,9 +529,7 @@ class PrefysicalFireOrigin:
             ),
             details={
                 "public_roll": (
-                    deepcopy(
-                        public_roll
-                    )
+                    public_roll.to_dict()
                 ),
 
                 "ignited_by": (
@@ -563,9 +555,7 @@ class PrefysicalFireOrigin:
                 "prefysical_fire_ignited"
             ),
 
-            "public_roll": deepcopy(
-                public_roll
-            ),
+            "public_roll": public_roll.to_dict(),
 
             "energy_conversion": deepcopy(
                 energy_event
@@ -833,9 +823,7 @@ class PrefysicalFireOrigin:
             self.energy_conversion.friction_heat_j
         )
 
-        self.eternal_fire.origin_roll_id = public_roll[
-            "roll_id"
-        ]
+        self.eternal_fire.origin_roll_id = public_roll.roll_id
 
         self.friction_active = False
         self.state = (

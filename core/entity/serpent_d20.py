@@ -255,10 +255,6 @@ class SerpentD20:
             universe_tick=universe_tick,
         )
 
-        public_snapshot = (
-            public_event.to_dict()
-        )
-
         hidden_plan = self.roll_resolver.resolve(
             public_roll=public_event,
             rng=rng
@@ -292,9 +288,7 @@ class SerpentD20:
         )
 
         # Volající dostane pouze veřejnou událost.
-        return deepcopy(
-            public_snapshot
-        )
+        return public_event
 
     def record_public_roll(
         self,

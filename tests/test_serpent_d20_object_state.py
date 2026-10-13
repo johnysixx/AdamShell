@@ -99,7 +99,13 @@ class SerpentD20ObjectStateTests(
         with self.assertRaises(TypeError):
             _ = event["value"]
 
-        result["value"] = 99
+        self.assertIs(
+            result,
+            event,
+        )
+
+        snapshot = result.to_dict()
+        snapshot["value"] = 99
 
         self.assertEqual(
             event.value,
@@ -151,7 +157,7 @@ class SerpentD20ObjectStateTests(
 
         self.assertEqual(
             event.roll_id,
-            public["roll_id"],
+            public.roll_id,
         )
 
         self.assertEqual(
@@ -182,7 +188,7 @@ class SerpentD20ObjectStateTests(
 
         resolved = (
             die.hidden_resolution_for(
-                public["roll_id"]
+                public.roll_id
             )
         )
 
@@ -235,7 +241,7 @@ class SerpentD20ObjectStateTests(
         result = (
             executor.execute_hidden_plan(
                 die,
-                public["roll_id"],
+                public.roll_id,
             )
         )
 
@@ -301,7 +307,7 @@ class SerpentD20ObjectStateTests(
 
         with self.assertRaises(TypeError):
             die.record_resolved_consequences(
-                public["roll_id"],
+                public.roll_id,
                 [
                     {
                         "consequence": (
