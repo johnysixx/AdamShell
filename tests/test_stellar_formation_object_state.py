@@ -6,6 +6,9 @@ from universe.stellar_objects import PrimordialStar
 from universe.stellar_nucleosynthesis import (
     StellarNucleosynthesis,
 )
+from universe.stellar_nucleosynthesis_process_state import (
+    StellarNucleosynthesisProcessState,
+)
 from universe.stellar_state import StellarFormationState
 from universe.stellar_formation_result_state import (
     StarFormationResult,
@@ -204,7 +207,10 @@ class StellarFormationObjectStateTests(
 
         result = process.forge_elements_up_to_iron()
 
-        self.assertEqual(result["state"], "forged")
+        self.assertIs(
+            result.state,
+            StellarNucleosynthesisProcessState.FORGED,
+        )
         self.assertIn("iron", process.elements_up_to_iron)
 
     def test_rejects_legacy_cloud_dict(self):

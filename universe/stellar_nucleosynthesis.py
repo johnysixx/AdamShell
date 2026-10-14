@@ -8,6 +8,10 @@ from universe.stellar_nucleosynthesis_state import (
 from universe.stellar_nucleosynthesis_process_state import (
     StellarNucleosynthesisProcessState,
 )
+from universe.stellar_nucleosynthesis_result_state import (
+    StellarNucleosynthesisResult,
+    public_element_snapshot,
+)
 
 
 STELLAR_ELEMENT_SPECS = (
@@ -26,29 +30,6 @@ STELLAR_ELEMENT_SPECS = (
 )
 
 
-def _public_element_snapshot(element):
-    if isinstance(element, PrimordialCosmicComponent):
-        return element.to_dict()
-
-    if not isinstance(element, ChemicalElement):
-        raise TypeError(
-            "elements_up_to_iron must contain primordial "
-            "or ChemicalElement objects"
-        )
-
-    snapshot = {
-        "name": element.name,
-        "type": "element",
-        "atomic_number": element.atomic_number,
-        "state": element.state,
-    }
-
-    if element.origin is not None:
-        snapshot["origin"] = element.origin
-
-    return snapshot
-
-
 class StellarNucleosynthesis:
 
     def __init__(self, universe):
@@ -62,6 +43,7 @@ class StellarNucleosynthesis:
         self.elements_up_to_iron = {}
 
         self.stellar_nucleosynthesis_state = StellarNucleosynthesisState()
+        self.result = None
 
         self.public_state = self._build_public_state()
 
@@ -89,7 +71,7 @@ class StellarNucleosynthesis:
             "type": self.type,
             "state": self.state.value,
             "elements_up_to_iron": {
-                name: _public_element_snapshot(element)
+                name: public_element_snapshot(element)
                 for name, element in self.elements_up_to_iron.items()
             },
             "stellar_nucleosynthesis_state": (
@@ -112,7 +94,18 @@ class StellarNucleosynthesis:
 
             print("STELLAR NUCLEOSYNTHESIS FAILED: no stars available")
             self.write_to_world()
-            return self.public_state
+
+            self.result = StellarNucleosynthesisResult(
+                state=self.state,
+                elements_up_to_iron=(
+                    self.elements_up_to_iron
+                ),
+                stellar_nucleosynthesis_state=(
+                    self.stellar_nucleosynthesis_state
+                ),
+            )
+
+            return self.result
 
         for star in first_stars:
             if not isinstance(star, PrimordialStar):
@@ -131,7 +124,18 @@ class StellarNucleosynthesis:
                 "stellar fusion is not possible yet"
             )
             self.write_to_world()
-            return self.public_state
+
+            self.result = StellarNucleosynthesisResult(
+                state=self.state,
+                elements_up_to_iron=(
+                    self.elements_up_to_iron
+                ),
+                stellar_nucleosynthesis_state=(
+                    self.stellar_nucleosynthesis_state
+                ),
+            )
+
+            return self.result
 
         self.state = (
             StellarNucleosynthesisProcessState.FORGED
@@ -176,7 +180,17 @@ class StellarNucleosynthesis:
         print("STARS FORGE ELEMENTS UP TO IRON")
         print("IRON LIMIT REACHED")
 
-        return self.public_state
+        self.result = StellarNucleosynthesisResult(
+            state=self.state,
+            elements_up_to_iron=(
+                self.elements_up_to_iron
+            ),
+            stellar_nucleosynthesis_state=(
+                self.stellar_nucleosynthesis_state
+            ),
+        )
+
+        return self.result
 
     def add_stellar_element(
         self,

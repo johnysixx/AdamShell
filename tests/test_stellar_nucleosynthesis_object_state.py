@@ -6,6 +6,9 @@ from universe.stellar_nucleosynthesis import StellarNucleosynthesis
 from universe.stellar_nucleosynthesis_state import (
     StellarNucleosynthesisState,
 )
+from universe.stellar_nucleosynthesis_result_state import (
+    StellarNucleosynthesisResult,
+)
 from universe.stars import Stars
 from universe.universe import Universe
 
@@ -72,20 +75,59 @@ class StellarNucleosynthesisObjectStateTests(unittest.TestCase):
             process.stellar_nucleosynthesis_state,
         )
 
-    def test_public_result_remains_dict_boundary(self):
-        _, _, result = self._forged_process()
+    def test_runtime_result_is_object_and_snapshot_is_dict(
+        self
+    ):
+        _, process, result = self._forged_process()
 
-        self.assertIsInstance(result, dict)
         self.assertIsInstance(
-            result["stellar_nucleosynthesis_state"],
+            result,
+            StellarNucleosynthesisResult,
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    result,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(TypeError):
+            _ = result[
+                "stellar_nucleosynthesis_state"
+            ]
+
+        self.assertIs(
+            result.stellar_nucleosynthesis_state,
+            process.stellar_nucleosynthesis_state,
+        )
+        self.assertIs(
+            result.elements_up_to_iron["iron"],
+            process.elements_up_to_iron["iron"],
+        )
+
+        snapshot = result.to_dict()
+
+        self.assertIsInstance(
+            snapshot[
+                "stellar_nucleosynthesis_state"
+            ],
             dict,
         )
         self.assertIsInstance(
-            result["elements_up_to_iron"],
+            snapshot["elements_up_to_iron"],
             dict,
         )
         self.assertTrue(
-            result["stellar_nucleosynthesis_state"][
+            snapshot[
+                "stellar_nucleosynthesis_state"
+            ][
                 "elements_up_to_iron_forged"
             ]
         )
@@ -93,8 +135,14 @@ class StellarNucleosynthesisObjectStateTests(unittest.TestCase):
     def test_public_result_is_detached(self):
         _, process, result = self._forged_process()
 
-        result["stellar_nucleosynthesis_state"]["element_count"] = 999
-        result["elements_up_to_iron"]["iron"]["atomic_number"] = 999
+        snapshot = result.to_dict()
+
+        snapshot[
+            "stellar_nucleosynthesis_state"
+        ]["element_count"] = 999
+        snapshot[
+            "elements_up_to_iron"
+        ]["iron"]["atomic_number"] = 999
 
         self.assertEqual(
             process.stellar_nucleosynthesis_state.element_count,
@@ -124,8 +172,15 @@ class StellarNucleosynthesisObjectStateTests(unittest.TestCase):
         with self.assertRaises(TypeError):
             _ = iron["atomic_number"]
 
+        self.assertIs(
+            result.elements_up_to_iron["iron"],
+            iron,
+        )
+
+        snapshot = result.to_dict()
+
         self.assertIsInstance(
-            result["elements_up_to_iron"]["iron"],
+            snapshot["elements_up_to_iron"]["iron"],
             dict,
         )
 
@@ -138,8 +193,14 @@ class StellarNucleosynthesisObjectStateTests(unittest.TestCase):
         self.assertTrue(
             process.stellar_nucleosynthesis_state.failed
         )
+        self.assertIsInstance(
+            result,
+            StellarNucleosynthesisResult,
+        )
         self.assertTrue(
-            result["stellar_nucleosynthesis_state"]["failed"]
+            result
+            .stellar_nucleosynthesis_state
+            .failed
         )
 
     def test_to_dict_is_detached_boundary(self):

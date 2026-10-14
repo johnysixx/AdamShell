@@ -65,9 +65,9 @@ class StellarNucleosynthesisProcessStateObjectStateTests(
             process.state,
             StellarNucleosynthesisProcessState.FAILED,
         )
-        self.assertEqual(
-            result["state"],
-            "failed",
+        self.assertIs(
+            result.state,
+            StellarNucleosynthesisProcessState.FAILED,
         )
 
     def test_forging_sets_forged_enum(self):
@@ -77,9 +77,9 @@ class StellarNucleosynthesisProcessStateObjectStateTests(
             process.state,
             StellarNucleosynthesisProcessState.FORGED,
         )
-        self.assertEqual(
-            result["state"],
-            "forged",
+        self.assertIs(
+            result.state,
+            StellarNucleosynthesisProcessState.FORGED,
         )
 
     def test_string_state_is_rejected(self):
