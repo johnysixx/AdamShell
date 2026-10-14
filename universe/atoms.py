@@ -3,6 +3,9 @@ from universe.atom_state import AtomFormationState
 from universe.atoms_process_state import (
     AtomsProcessState,
 )
+from universe.physical_formation_result_state import (
+    AtomFormationResult,
+)
 from universe.chemical_objects import NeutralAtom
 from universe.periodic_table import PeriodicTable
 
@@ -19,6 +22,7 @@ class Atoms:
         self.atoms = {}
 
         self.atom_state = AtomFormationState()
+        self.result = None
 
         self.public_state = self._build_public_state()
 
@@ -88,7 +92,13 @@ class Atoms:
         print("CAESIUM ATOM FORMED")
         print("FUTURE ELEMENT 119 ATOM FORMED")
 
-        return self.public_state
+        self.result = AtomFormationResult(
+            state=self.state,
+            atoms=self.atoms,
+            atom_state=self.atom_state,
+        )
+
+        return self.result
 
     def ensure_periodic_table(self):
         if not self.universe.world.get("elements_by_atomic_number"):

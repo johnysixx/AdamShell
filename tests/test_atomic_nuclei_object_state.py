@@ -6,6 +6,9 @@ from universe.nuclear_state import (
     NuclearFormationState,
 )
 from universe.particles import Particles
+from universe.physical_formation_result_state import (
+    AtomicNucleiFormationResult,
+)
 from universe.universe import Universe
 
 
@@ -89,27 +92,54 @@ class AtomicNucleiObjectStateTests(
         self.assertIs(state, process.nuclear_state)
         self.assertIsInstance(universe.world, dict)
 
-    def test_public_result_remains_dict_boundary(
+    def test_runtime_result_is_object_and_snapshot_is_dict(
         self
     ):
-        _, _, result = self._formed_nuclei()
+        _, process, result = self._formed_nuclei()
 
-        self.assertIsInstance(result, dict)
         self.assertIsInstance(
-            result["nuclear_state"],
+            result,
+            AtomicNucleiFormationResult,
+        )
+        self._assert_object_only(
+            result,
+            "state",
+        )
+        self.assertIs(
+            result.nuclear_state,
+            process.nuclear_state,
+        )
+        self.assertIs(
+            result.nuclei[
+                "hydrogen_nucleus"
+            ],
+            process.nuclei[
+                "hydrogen_nucleus"
+            ],
+        )
+
+        snapshot = result.to_dict()
+
+        self.assertIsInstance(
+            snapshot["nuclear_state"],
             dict,
         )
-        self.assertIsInstance(result["nuclei"], dict)
+        self.assertIsInstance(
+            snapshot["nuclei"],
+            dict,
+        )
 
     def test_public_result_is_deeply_detached(
         self
     ):
         _, process, result = self._formed_nuclei()
 
-        result["nuclear_state"][
+        snapshot = result.to_dict()
+
+        snapshot["nuclear_state"][
             "light_nuclei_formed"
         ] = False
-        result["nuclei"][
+        snapshot["nuclei"][
             "hydrogen_nucleus"
         ]["state"] = "changed"
 

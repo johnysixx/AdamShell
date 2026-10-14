@@ -36,9 +36,9 @@ class AtomicNucleiProcessStateObjectStateTests(
             process.state,
             AtomicNucleiProcessState.FORMED,
         )
-        self.assertEqual(
-            result["state"],
-            "formed",
+        self.assertIs(
+            result.state,
+            AtomicNucleiProcessState.FORMED,
         )
 
     def test_string_state_is_rejected(self):

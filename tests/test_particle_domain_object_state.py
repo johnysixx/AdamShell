@@ -136,30 +136,51 @@ class ParticleDomainObjectStateTests(unittest.TestCase):
     def test_public_state_serializes_objects_at_boundary(self):
         _, process, result = self._formed_particles()
 
+        self.assertIs(
+            result.elementary_particles[
+                "up_quark"
+            ],
+            process.elementary_particles[
+                "up_quark"
+            ],
+        )
+
+        snapshot = result.to_dict()
+
         self.assertIsInstance(
-            result["elementary_particles"]["up_quark"],
+            snapshot[
+                "elementary_particles"
+            ]["up_quark"],
             dict,
         )
         self.assertIsInstance(
-            result["composite_particles"]["proton"],
+            snapshot[
+                "composite_particles"
+            ]["proton"],
             dict,
         )
         self.assertIsInstance(
-            result["fields"]["higgs_field"],
+            snapshot["fields"]["higgs_field"],
             dict,
         )
         self.assertIsInstance(
-            result["interactions"]["strong_interaction"],
+            snapshot[
+                "interactions"
+            ]["strong_interaction"],
             dict,
         )
 
-        result["elementary_particles"]["up_quark"][
-            "state"
-        ] = "changed"
-        result["composite_particles"]["proton"][
-            "composition"
-        ].append("changed")
-        result["interactions"]["strong_interaction"][
+        snapshot[
+            "elementary_particles"
+        ]["up_quark"]["state"] = "changed"
+        snapshot[
+            "composite_particles"
+        ]["proton"]["composition"].append(
+            "changed"
+        )
+        snapshot[
+            "interactions"
+        ]["strong_interaction"][
             "effect"
         ] = "changed"
 

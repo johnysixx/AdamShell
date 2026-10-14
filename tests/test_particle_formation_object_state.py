@@ -5,6 +5,13 @@ from universe.particle_state import (
     ParticleFormationState,
 )
 from universe.particles import Particles
+from universe.atomic_nuclei_process_state import (
+    AtomicNucleiProcessState,
+)
+from universe.physical_formation_result_state import (
+    AtomicNucleiFormationResult,
+    ParticleFormationResult,
+)
 from universe.universe import Universe
 
 
@@ -88,22 +95,49 @@ class ParticleFormationObjectStateTests(
         self.assertIs(state, process.particle_state)
         self.assertIsInstance(universe.world, dict)
 
-    def test_public_result_remains_dict_boundary(
+    def test_runtime_result_is_object_and_snapshot_is_dict(
         self
     ):
-        _, _, result = self._formed_particles()
+        _, process, result = self._formed_particles()
 
-        self.assertIsInstance(result, dict)
         self.assertIsInstance(
-            result["particle_state"],
+            result,
+            ParticleFormationResult,
+        )
+        self._assert_object_only(
+            result,
+            "state",
+        )
+
+        self.assertIs(
+            result.particle_state,
+            process.particle_state,
+        )
+        self.assertIs(
+            result.elementary_particles[
+                "up_quark"
+            ],
+            process.elementary_particles[
+                "up_quark"
+            ],
+        )
+
+        snapshot = result.to_dict()
+
+        self.assertIsInstance(
+            snapshot,
             dict,
         )
         self.assertIsInstance(
-            result["elementary_particles"],
+            snapshot["particle_state"],
             dict,
         )
         self.assertIsInstance(
-            result["interactions"],
+            snapshot["elementary_particles"],
+            dict,
+        )
+        self.assertIsInstance(
+            snapshot["interactions"],
             dict,
         )
 
@@ -112,13 +146,15 @@ class ParticleFormationObjectStateTests(
     ):
         _, process, result = self._formed_particles()
 
-        result["particle_state"][
+        snapshot = result.to_dict()
+
+        snapshot["particle_state"][
             "nucleons_formed"
         ] = False
-        result["elementary_particles"][
+        snapshot["elementary_particles"][
             "up_quark"
         ]["state"] = "changed"
-        result["interactions"][
+        snapshot["interactions"][
             "strong_interaction"
         ]["effect"] = "changed"
 
@@ -188,7 +224,14 @@ class ParticleFormationObjectStateTests(
 
         result = nuclei.form_light_nuclei()
 
-        self.assertEqual(result["state"], "formed")
+        self.assertIsInstance(
+            result,
+            AtomicNucleiFormationResult,
+        )
+        self.assertIs(
+            result.state,
+            AtomicNucleiProcessState.FORMED,
+        )
         self.assertIn(
             "hydrogen_nucleus",
             nuclei.nuclei,

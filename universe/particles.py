@@ -11,6 +11,9 @@ from universe.particle_state import (
 from universe.particles_process_state import (
     ParticlesProcessState,
 )
+from universe.physical_formation_result_state import (
+    ParticleFormationResult,
+)
 
 
 class Particles:
@@ -27,6 +30,7 @@ class Particles:
         self.interactions = {}
 
         self.particle_state = ParticleFormationState()
+        self.result = None
 
         self.public_state = self._build_public_state()
 
@@ -121,7 +125,20 @@ class Particles:
         print("PROTONS AND NEUTRONS FORMED")
         print("PARTICLE RELATIONSHIPS DEFINED")
 
-        return self.public_state
+        self.result = ParticleFormationResult(
+            state=self.state,
+            elementary_particles=(
+                self.elementary_particles
+            ),
+            composite_particles=(
+                self.composite_particles
+            ),
+            fields=self.fields,
+            interactions=self.interactions,
+            particle_state=self.particle_state,
+        )
+
+        return self.result
 
     def form_quarks(self):
         self.add_elementary_particle("up_quark", "quark", "+2/3", "light_quark")

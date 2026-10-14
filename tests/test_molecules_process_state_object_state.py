@@ -32,9 +32,9 @@ class MoleculesProcessStateObjectStateTests(
             process.state,
             MoleculesProcessState.FORMED,
         )
-        self.assertEqual(
-            result["state"],
-            "formed",
+        self.assertIs(
+            result.state,
+            MoleculesProcessState.FORMED,
         )
 
     def test_string_state_is_rejected(self):

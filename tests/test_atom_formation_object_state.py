@@ -3,6 +3,9 @@ import unittest
 from universe.atom_state import AtomFormationState
 from universe.chemical_objects import NeutralAtom
 from universe.atoms import Atoms
+from universe.physical_formation_result_state import (
+    AtomFormationResult,
+)
 from universe.universe import Universe
 
 
@@ -88,19 +91,42 @@ class AtomFormationObjectStateTests(
         self.assertIs(state, process.atom_state)
         self.assertIsInstance(universe.world, dict)
 
-    def test_public_result_remains_dict_boundary(
+    def test_runtime_result_is_object_and_snapshot_is_dict(
         self
     ):
-        _, _, result = self._formed_atoms()
+        _, process, result = self._formed_atoms()
 
-        self.assertIsInstance(result, dict)
         self.assertIsInstance(
-            result["atom_state"],
+            result,
+            AtomFormationResult,
+        )
+        self._assert_object_only(
+            result,
+            "state",
+        )
+        self.assertIs(
+            result.atom_state,
+            process.atom_state,
+        )
+        self.assertIs(
+            result.atoms["hydrogen_atom"],
+            process.atoms["hydrogen_atom"],
+        )
+
+        snapshot = result.to_dict()
+
+        self.assertIsInstance(
+            snapshot["atom_state"],
             dict,
         )
-        self.assertIsInstance(result["atoms"], dict)
+        self.assertIsInstance(
+            snapshot["atoms"],
+            dict,
+        )
         self.assertEqual(
-            result["atom_state"]["atom_count"],
+            snapshot["atom_state"][
+                "atom_count"
+            ],
             4,
         )
 
@@ -109,8 +135,10 @@ class AtomFormationObjectStateTests(
     ):
         _, process, result = self._formed_atoms()
 
-        result["atom_state"]["atom_count"] = 99
-        result["atoms"]["hydrogen_atom"][
+        snapshot = result.to_dict()
+
+        snapshot["atom_state"]["atom_count"] = 99
+        snapshot["atoms"]["hydrogen_atom"][
             "state"
         ] = "changed"
 

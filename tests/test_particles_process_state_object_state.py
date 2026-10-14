@@ -32,9 +32,9 @@ class ParticlesProcessStateObjectStateTests(
             process.state,
             ParticlesProcessState.FORMED,
         )
-        self.assertEqual(
-            result["state"],
-            "formed",
+        self.assertIs(
+            result.state,
+            ParticlesProcessState.FORMED,
         )
 
     def test_string_state_is_rejected(self):

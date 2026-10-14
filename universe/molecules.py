@@ -4,6 +4,9 @@ from universe.molecule_state import MoleculeFormationState
 from universe.molecules_process_state import (
     MoleculesProcessState,
 )
+from universe.physical_formation_result_state import (
+    MoleculeFormationResult,
+)
 from universe.periodic_table import PeriodicTable
 
 
@@ -20,6 +23,7 @@ class Molecules:
         self.molecules = {}
 
         self.molecule_state = MoleculeFormationState()
+        self.result = None
 
         self.public_state = self._build_public_state()
 
@@ -139,7 +143,13 @@ class Molecules:
         print("AMMONIA FORMED")
         print("SIMPLE ALCOHOLS FORMED")
 
-        return self.public_state
+        self.result = MoleculeFormationResult(
+            state=self.state,
+            molecules=self.molecules,
+            molecule_state=self.molecule_state,
+        )
+
+        return self.result
 
     def ensure_periodic_table(self):
         if not self.universe.world.get("elements_by_atomic_number"):

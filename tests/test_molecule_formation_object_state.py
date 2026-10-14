@@ -2,6 +2,9 @@ import unittest
 
 from universe.molecule_state import MoleculeFormationState
 from universe.molecules import Molecules
+from universe.physical_formation_result_state import (
+    MoleculeFormationResult,
+)
 from universe.universe import Universe
 
 
@@ -101,22 +104,40 @@ class MoleculeFormationObjectStateTests(
         )
         self.assertIsInstance(universe.world, dict)
 
-    def test_public_result_remains_dict_boundary(
+    def test_runtime_result_is_object_and_snapshot_is_dict(
         self
     ):
-        _, _, result = self._formed_molecules()
+        _, process, result = self._formed_molecules()
 
-        self.assertIsInstance(result, dict)
         self.assertIsInstance(
-            result["molecule_state"],
+            result,
+            MoleculeFormationResult,
+        )
+        self._assert_object_only(
+            result,
+            "state",
+        )
+        self.assertIs(
+            result.molecule_state,
+            process.molecule_state,
+        )
+        self.assertIs(
+            result.molecules["water"],
+            process.molecules["water"],
+        )
+
+        snapshot = result.to_dict()
+
+        self.assertIsInstance(
+            snapshot["molecule_state"],
             dict,
         )
         self.assertIsInstance(
-            result["molecules"],
+            snapshot["molecules"],
             dict,
         )
         self.assertEqual(
-            result["molecule_state"][
+            snapshot["molecule_state"][
                 "molecule_count"
             ],
             6,
@@ -129,10 +150,12 @@ class MoleculeFormationObjectStateTests(
             self._formed_molecules()
         )
 
-        result["molecule_state"][
+        snapshot = result.to_dict()
+
+        snapshot["molecule_state"][
             "molecule_count"
         ] = 99
-        result["molecules"]["water"][
+        snapshot["molecules"]["water"][
             "components"
         ]["hydrogen"] = 99
 

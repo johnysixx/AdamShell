@@ -6,6 +6,9 @@ from universe.nuclear_state import (
 from universe.atomic_nuclei_process_state import (
     AtomicNucleiProcessState,
 )
+from universe.physical_formation_result_state import (
+    AtomicNucleiFormationResult,
+)
 
 
 class AtomicNuclei:
@@ -19,6 +22,7 @@ class AtomicNuclei:
         self.nuclei = {}
 
         self.nuclear_state = NuclearFormationState()
+        self.result = None
 
         self.public_state = self._build_public_state()
 
@@ -116,7 +120,13 @@ class AtomicNuclei:
         print("HELIUM NUCLEUS FORMED")
         print("LIGHT NUCLEI COMPOSITION RECORDED")
 
-        return self.public_state
+        self.result = AtomicNucleiFormationResult(
+            state=self.state,
+            nuclei=self.nuclei,
+            nuclear_state=self.nuclear_state,
+        )
+
+        return self.result
 
     def add_nucleus(self, name, protons, neutrons, element_name):
         self.nuclei[name] = AtomicNucleus(

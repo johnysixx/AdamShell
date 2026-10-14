@@ -99,12 +99,25 @@ class MoleculeDomainObjectStateTests(unittest.TestCase):
     def test_public_boundary_serializes_molecule_objects(self):
         _, process, result = self._formed_molecules()
 
-        public_water = result["molecules"]["water"]
         live_water = process.molecules["water"]
 
+        self.assertIs(
+            result.molecules["water"],
+            live_water,
+        )
+
+        snapshot = result.to_dict()
+        public_water = snapshot["molecules"]["water"]
+
         self.assertIsInstance(public_water, dict)
-        self.assertIsInstance(public_water["components"], dict)
-        self.assertEqual(public_water["components"]["hydrogen"], 2)
+        self.assertIsInstance(
+            public_water["components"],
+            dict,
+        )
+        self.assertEqual(
+            public_water["components"]["hydrogen"],
+            2,
+        )
 
         public_water["components"]["hydrogen"] = 99
         public_water["future_use"].append("changed")
