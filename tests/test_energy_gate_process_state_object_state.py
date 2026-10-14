@@ -41,9 +41,9 @@ class EnergyGateProcessStateObjectStateTests(
             gate.state,
             EnergyGateProcessState.CLOSED,
         )
-        self.assertEqual(
-            result["state"],
-            "closed",
+        self.assertIs(
+            result.state,
+            EnergyGateProcessState.CLOSED,
         )
 
     def test_threshold_opens_gate_as_enum(self):
@@ -61,9 +61,9 @@ class EnergyGateProcessStateObjectStateTests(
             gate.state,
             EnergyGateProcessState.OPEN,
         )
-        self.assertEqual(
-            result["state"],
-            "open",
+        self.assertIs(
+            result.state,
+            EnergyGateProcessState.OPEN,
         )
 
     def test_gate_can_close_again_below_threshold(self):

@@ -1,6 +1,9 @@
 import unittest
 
 from universe.energy_gate import EnergyGate
+from universe.energy_gate_result_state import (
+    EnergyGateCollectionResult,
+)
 from universe.energy_gate_state import (
     EnergyGateCollectionEvent,
     EnergyGateState,
@@ -66,25 +69,100 @@ class EnergyGateObjectStateTests(unittest.TestCase):
             event.source,
             "idea",
         )
+        self.assertIsInstance(
+            result,
+            EnergyGateCollectionResult,
+        )
+        self.assertIs(
+            result.gate_state,
+            state,
+        )
+        self.assertIsInstance(
+            result.events,
+            tuple,
+        )
+        self.assertIs(
+            result.events[0],
+            event,
+        )
         self.assertEqual(
-            result["events"][0]["source"],
+            result.events[0].source,
             "idea",
         )
 
-    def test_public_result_is_deeply_detached_dict(self):
+    def test_runtime_result_is_object_and_snapshot_is_detached(
+        self
+    ):
         universe = Universe()
-        gate = EnergyGate(universe, threshold_j=10.0)
-        result = gate.collect_energy("idea", 4.0)
+        gate = EnergyGate(
+            universe,
+            threshold_j=10.0,
+        )
+        result = gate.collect_energy(
+            "idea",
+            4.0,
+        )
 
-        self.assertIsInstance(result, dict)
-        self.assertIsInstance(result["gate_state"], dict)
-        self.assertIsInstance(result["events"], list)
+        self.assertIsInstance(
+            result,
+            EnergyGateCollectionResult,
+        )
 
-        result["gate_state"]["idea_energy_j"] = 999.0
-        result["events"][0]["source"] = "changed"
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    result,
+                    mapping_method,
+                )
+            )
 
-        self.assertEqual(gate.gate_state.idea_energy_j, 4.0)
-        self.assertEqual(gate.events[0].source, "idea")
+        with self.assertRaises(TypeError):
+            _ = result["gate_state"]
+
+        self.assertIs(
+            result.gate_state,
+            gate.gate_state,
+        )
+        self.assertIsInstance(
+            result.events,
+            tuple,
+        )
+        self.assertIs(
+            result.events[0],
+            gate.events[0],
+        )
+
+        snapshot = result.to_dict()
+
+        self.assertIsInstance(
+            snapshot["gate_state"],
+            dict,
+        )
+        self.assertIsInstance(
+            snapshot["events"],
+            list,
+        )
+
+        snapshot["gate_state"][
+            "idea_energy_j"
+        ] = 999.0
+        snapshot["events"][0][
+            "source"
+        ] = "changed"
+
+        self.assertEqual(
+            gate.gate_state.idea_energy_j,
+            4.0,
+        )
+        self.assertEqual(
+            gate.events[0].source,
+            "idea",
+        )
 
     def test_collection_event_is_object_only(self):
         event = EnergyGateCollectionEvent(

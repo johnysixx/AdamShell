@@ -5,6 +5,9 @@ from universe.energy_gate_state import (
 from universe.energy_gate_process_state import (
     EnergyGateProcessState,
 )
+from universe.energy_gate_result_state import (
+    EnergyGateCollectionResult,
+)
 
 
 HBAR_J_S = 1.054_571_817e-34
@@ -32,6 +35,7 @@ class EnergyGate:
         self.gate_state = EnergyGateState(
             threshold_j=self.threshold_j,
         )
+        self.result = None
 
         self.public_state = self._build_public_state()
 
@@ -117,7 +121,15 @@ class EnergyGate:
             f"{self.threshold_j:.3f} J"
         )
 
-        return self.public_state
+        self.result = EnergyGateCollectionResult(
+            state=self.state,
+            gate_state=self.gate_state,
+            events=tuple(
+                self.events
+            ),
+        )
+
+        return self.result
 
     def update_state(self):
         return (
