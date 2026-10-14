@@ -2,6 +2,9 @@ import unittest
 
 from universe.cosmic_objects import StellarMaterialCloud
 from universe.planets import Planets
+from universe.planets_process_state import (
+    PlanetsProcessState,
+)
 from universe.stellar_system_objects import (
     ProtoplanetaryDisk,
     SecondGenerationStar,
@@ -261,7 +264,10 @@ class StellarSystemFormationObjectStateTests(
 
         result = process.form_planets()
 
-        self.assertEqual(result["state"], "formed")
+        self.assertIs(
+            result.state,
+            PlanetsProcessState.FORMED,
+        )
         self.assertEqual(
             universe.world["earth"].name,
             "earth",

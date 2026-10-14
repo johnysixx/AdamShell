@@ -89,9 +89,9 @@ class PlanetsProcessStateObjectStateTests(
             process.state,
             PlanetsProcessState.FAILED,
         )
-        self.assertEqual(
-            result["state"],
-            "failed",
+        self.assertIs(
+            result.state,
+            PlanetsProcessState.FAILED,
         )
 
     def test_inactive_disk_sets_failed_enum(self):
@@ -109,9 +109,9 @@ class PlanetsProcessStateObjectStateTests(
             process.state,
             PlanetsProcessState.FAILED,
         )
-        self.assertEqual(
-            result["state"],
-            "failed",
+        self.assertIs(
+            result.state,
+            PlanetsProcessState.FAILED,
         )
 
     def test_formation_sets_formed_enum(self):
@@ -127,9 +127,9 @@ class PlanetsProcessStateObjectStateTests(
             process.state,
             PlanetsProcessState.FORMED,
         )
-        self.assertEqual(
-            result["state"],
-            "formed",
+        self.assertIs(
+            result.state,
+            PlanetsProcessState.FORMED,
         )
 
     def test_string_state_is_rejected(self):

@@ -142,21 +142,45 @@ class PlanetDomainObjectStateTests(unittest.TestCase):
         self.assertFalse(earth.water_possible)
         self.assertFalse(earth.organic_molecules_possible)
 
-    def test_public_planet_snapshots_remain_dict_boundary(self):
+    def test_planet_result_keeps_objects_and_snapshot_boundary(
+        self
+    ):
         _, process, result = self._formed_process()
 
-        self.assertIsInstance(result["planets"], list)
+        self.assertIsInstance(
+            result.planets,
+            tuple,
+        )
+        self.assertIs(
+            result.planets[2],
+            process.planets[2],
+        )
+
+        snapshot = result.to_dict()
+
+        self.assertIsInstance(
+            snapshot["planets"],
+            list,
+        )
         self.assertTrue(
             all(
                 isinstance(planet, dict)
-                for planet in result["planets"]
+                for planet in snapshot["planets"]
             )
         )
-        self.assertEqual(result["planets"][2]["name"], "earth")
-        self.assertTrue(result["planets"][2]["water_possible"])
+        self.assertEqual(
+            snapshot["planets"][2]["name"],
+            "earth",
+        )
+        self.assertTrue(
+            snapshot["planets"][2]["water_possible"]
+        )
 
-        result["planets"][2]["name"] = "fake_earth"
-        self.assertEqual(process.planets[2].name, "earth")
+        snapshot["planets"][2]["name"] = "fake_earth"
+        self.assertEqual(
+            process.planets[2].name,
+            "earth",
+        )
 
     def test_to_dict_is_detached_boundary(self):
         earth = EarthPlanet(

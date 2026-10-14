@@ -4,6 +4,9 @@ from universe.cosmic_objects import StellarMaterialCloud
 from universe.planet_objects import EarthPlanet, Planet
 from universe.planetary_material_objects import PlanetaryMaterial
 from universe.planet_state import PlanetFormationState
+from universe.planet_formation_result_state import (
+    PlanetFormationResult,
+)
 from universe.planetary_materials import PlanetaryMaterials
 from universe.planets import Planets
 from universe.planets_process_state import (
@@ -188,23 +191,53 @@ class PlanetFormationObjectStateTests(
             )
         )
 
-    def test_public_result_remains_dict_boundary(
+    def test_runtime_result_is_object_and_snapshot_is_dict(
         self
     ):
-        _, _, result = self._formed_process()
+        _, process, result = self._formed_process()
 
-        self.assertIsInstance(result, dict)
         self.assertIsInstance(
-            result["planetary_state"],
+            result,
+            PlanetFormationResult,
+        )
+        self._assert_object_only(
+            result,
+            "state",
+        )
+
+        self.assertIs(
+            result.planetary_state,
+            process.planetary_state,
+        )
+        self.assertIsInstance(
+            result.planets,
+            tuple,
+        )
+        self.assertIs(
+            result.planets[2],
+            process.planets[2],
+        )
+        self.assertIs(
+            result.planetary_materials["water"],
+            process.planetary_materials["water"],
+        )
+
+        snapshot = result.to_dict()
+
+        self.assertIsInstance(
+            snapshot["planetary_state"],
             dict,
         )
-        self.assertIsInstance(result["planets"], list)
         self.assertIsInstance(
-            result["planetary_materials"],
+            snapshot["planets"],
+            list,
+        )
+        self.assertIsInstance(
+            snapshot["planetary_materials"],
             dict,
         )
         self.assertTrue(
-            result["planetary_state"][
+            snapshot["planetary_state"][
                 "earth_formed"
             ]
         )
@@ -214,11 +247,13 @@ class PlanetFormationObjectStateTests(
     ):
         _, process, result = self._formed_process()
 
-        result["planetary_state"][
+        snapshot = result.to_dict()
+
+        snapshot["planetary_state"][
             "earth_formed"
         ] = False
-        result["planets"][2]["name"] = "fake_earth"
-        result["planetary_materials"]["water"][
+        snapshot["planets"][2]["name"] = "fake_earth"
+        snapshot["planetary_materials"]["water"][
             "requires"
         ].append("fake_element")
 
@@ -282,9 +317,9 @@ class PlanetFormationObjectStateTests(
             process.planetary_state.planets_formed
         )
         self.assertFalse(
-            result["planetary_state"][
-                "planets_formed"
-            ]
+            result
+            .planetary_state
+            .planets_formed
         )
 
     def test_inactive_disk_preserves_state(self):
@@ -305,9 +340,9 @@ class PlanetFormationObjectStateTests(
             process.planetary_state.planets_formed
         )
         self.assertFalse(
-            result["planetary_state"][
-                "planets_formed"
-            ]
+            result
+            .planetary_state
+            .planets_formed
         )
 
 

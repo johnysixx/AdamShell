@@ -5,6 +5,9 @@ from universe.planet_state import PlanetFormationState
 from universe.planets_process_state import (
     PlanetsProcessState,
 )
+from universe.planet_formation_result_state import (
+    PlanetFormationResult,
+)
 from universe.stellar_system_objects import StellarSystem
 
 
@@ -48,6 +51,7 @@ class Planets:
         }
 
         self.planetary_state = PlanetFormationState()
+        self.result = None
 
         self.public_state = self._build_public_state()
 
@@ -105,7 +109,19 @@ class Planets:
 
             print("PLANET FORMATION FAILED: no solar system available")
             self.write_to_world()
-            return self.public_state
+
+            self.result = PlanetFormationResult(
+                state=self.state,
+                planets=tuple(
+                    self.planets
+                ),
+                planetary_materials=(
+                    self.planetary_materials
+                ),
+                planetary_state=self.planetary_state,
+            )
+
+            return self.result
 
         if not isinstance(solar_system, StellarSystem):
             raise TypeError(
@@ -119,7 +135,19 @@ class Planets:
 
             print("PLANET FORMATION FAILED: protoplanetary disk cannot form planets")
             self.write_to_world()
-            return self.public_state
+
+            self.result = PlanetFormationResult(
+                state=self.state,
+                planets=tuple(
+                    self.planets
+                ),
+                planetary_materials=(
+                    self.planetary_materials
+                ),
+                planetary_state=self.planetary_state,
+            )
+
+            return self.result
 
         available_elements = disk.available_elements
 
@@ -234,7 +262,18 @@ class Planets:
         print("EARTH FORMED")
         print("WATER, ICE, MINERALS AND ORGANIC MOLECULES BECOME POSSIBLE")
 
-        return self.public_state
+        self.result = PlanetFormationResult(
+            state=self.state,
+            planets=tuple(
+                self.planets
+            ),
+            planetary_materials=(
+                self.planetary_materials
+            ),
+            planetary_state=self.planetary_state,
+        )
+
+        return self.result
 
     def record_history(self):
         history = self.universe.world.setdefault("cosmic_history", [])
