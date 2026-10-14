@@ -1,4 +1,7 @@
-﻿from universe.energy_gate import PLANCK_ENERGY_THRESHOLD_J
+from universe.energy_gate import PLANCK_ENERGY_THRESHOLD_J
+from universe.pre_cosmic_energy_budget_result_state import (
+    PreCosmicEnergyBudgetResult,
+)
 
 
 IDEA_DIMENSIONS = 20
@@ -69,38 +72,80 @@ def describe_pre_cosmic_energy_budget():
         reservoir_before_serving - first_energy_servings_total
     )
 
-    return {
-        "idea_dimensions": IDEA_DIMENSIONS,
-        "threshold_j": PLANCK_ENERGY_THRESHOLD_J,
-        "bar_energy_capture_ratio": BAR_ENERGY_CAPTURE_RATIO,
-        "energy_serving_j": ENERGY_SERVING_J,
-        "reality_payment_ratio": REALITY_PAYMENT_RATIO,
-        "will_gain_per_energy_serving": WILL_GAIN_PER_ENERGY_SERVING,
-
-        "entropy_unit": ENTROPY_UNIT,
-        "quantum_entropy_tick_max_units": QUANTUM_ENTROPY_TICK_MAX_UNITS,
-        "quantum_entropy_tick_expected_units": QUANTUM_ENTROPY_TICK_EXPECTED_UNITS,
-        "expected_quantum_ticks_per_entropy_serving": EXPECTED_QUANTUM_TICKS_PER_ENTROPY_SERVING,
-        "entropy_unit_energy_value_j": ENTROPY_UNIT_ENERGY_VALUE_J,
-
-        "entropy_drink_units": ENTROPY_DRINK_UNITS,
-        "entropy_drink_total_energy_gain_j": ENTROPY_DRINK_TOTAL_ENERGY_GAIN_J,
-        "entropy_drink_bar_share_ratio": ENTROPY_DRINK_BAR_SHARE_RATIO,
-        "entropy_drink_entity_share_ratio": ENTROPY_DRINK_ENTITY_SHARE_RATIO,
-        "entropy_drink_bar_energy_gain_j": ENTROPY_DRINK_BAR_ENERGY_GAIN_J,
-        "entropy_drink_entity_energy_gain_j": ENTROPY_DRINK_ENTITY_ENERGY_GAIN_J,
-        "entropy_drink_payment_ratio": ENTROPY_DRINK_PAYMENT_RATIO,
-        "entropy_drink_entropy_increase_ratio": ENTROPY_DRINK_ENTROPY_INCREASE_RATIO,
-
-        "reservoir_before_serving_j": reservoir_before_serving,
-        "reservoir_before_serving_ratio": reservoir_before_serving / PLANCK_ENERGY_THRESHOLD_J,
-        "first_energy_servings_total_j": first_energy_servings_total,
-        "reservoir_after_first_energy_servings_j": reservoir_after_first_energy_servings,
-        "reservoir_after_first_energy_servings_ratio": reservoir_after_first_energy_servings / PLANCK_ENERGY_THRESHOLD_J,
-
-        "god_entropy_gain_ratio": GOD_ENTROPY_GAIN_RATIO,
-        "normal_entropy_gain_ratio": NORMAL_ENTROPY_GAIN_RATIO,
-    }
+    return PreCosmicEnergyBudgetResult(
+        idea_dimensions=IDEA_DIMENSIONS,
+        threshold_j=PLANCK_ENERGY_THRESHOLD_J,
+        bar_energy_capture_ratio=(
+            BAR_ENERGY_CAPTURE_RATIO
+        ),
+        energy_serving_j=ENERGY_SERVING_J,
+        reality_payment_ratio=(
+            REALITY_PAYMENT_RATIO
+        ),
+        will_gain_per_energy_serving=(
+            WILL_GAIN_PER_ENERGY_SERVING
+        ),
+        entropy_unit=ENTROPY_UNIT,
+        quantum_entropy_tick_max_units=(
+            QUANTUM_ENTROPY_TICK_MAX_UNITS
+        ),
+        quantum_entropy_tick_expected_units=(
+            QUANTUM_ENTROPY_TICK_EXPECTED_UNITS
+        ),
+        expected_quantum_ticks_per_entropy_serving=(
+            EXPECTED_QUANTUM_TICKS_PER_ENTROPY_SERVING
+        ),
+        entropy_unit_energy_value_j=(
+            ENTROPY_UNIT_ENERGY_VALUE_J
+        ),
+        entropy_drink_units=(
+            ENTROPY_DRINK_UNITS
+        ),
+        entropy_drink_total_energy_gain_j=(
+            ENTROPY_DRINK_TOTAL_ENERGY_GAIN_J
+        ),
+        entropy_drink_bar_share_ratio=(
+            ENTROPY_DRINK_BAR_SHARE_RATIO
+        ),
+        entropy_drink_entity_share_ratio=(
+            ENTROPY_DRINK_ENTITY_SHARE_RATIO
+        ),
+        entropy_drink_bar_energy_gain_j=(
+            ENTROPY_DRINK_BAR_ENERGY_GAIN_J
+        ),
+        entropy_drink_entity_energy_gain_j=(
+            ENTROPY_DRINK_ENTITY_ENERGY_GAIN_J
+        ),
+        entropy_drink_payment_ratio=(
+            ENTROPY_DRINK_PAYMENT_RATIO
+        ),
+        entropy_drink_entropy_increase_ratio=(
+            ENTROPY_DRINK_ENTROPY_INCREASE_RATIO
+        ),
+        reservoir_before_serving_j=(
+            reservoir_before_serving
+        ),
+        reservoir_before_serving_ratio=(
+            reservoir_before_serving
+            / PLANCK_ENERGY_THRESHOLD_J
+        ),
+        first_energy_servings_total_j=(
+            first_energy_servings_total
+        ),
+        reservoir_after_first_energy_servings_j=(
+            reservoir_after_first_energy_servings
+        ),
+        reservoir_after_first_energy_servings_ratio=(
+            reservoir_after_first_energy_servings
+            / PLANCK_ENERGY_THRESHOLD_J
+        ),
+        god_entropy_gain_ratio=(
+            GOD_ENTROPY_GAIN_RATIO
+        ),
+        normal_entropy_gain_ratio=(
+            NORMAL_ENTROPY_GAIN_RATIO
+        ),
+    )
 
 GOD_MAX_ENERGY_J = PLANCK_ENERGY_THRESHOLD_J
 GOD_INITIAL_ENERGY_J = GOD_MAX_ENERGY_J * 0.5
