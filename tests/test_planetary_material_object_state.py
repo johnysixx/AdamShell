@@ -11,6 +11,9 @@ from universe.planetary_material_objects import (
 from universe.planetary_material_state import (
     PlanetaryMaterialState,
 )
+from universe.planetary_material_result_state import (
+    PlanetaryMaterializationResult,
+)
 from universe.planetary_materials import PlanetaryMaterials
 from universe.planetary_materials_process_state import (
     PlanetaryMaterialsProcessState,
@@ -150,22 +153,48 @@ class PlanetaryMaterialObjectStateTests(
             )
         )
 
-    def test_public_result_remains_dict_boundary(
+    def test_runtime_result_is_object_and_snapshot_is_dict(
         self
     ):
-        _, _, result = self._materialized_process()
+        _, process, result = (
+            self._materialized_process()
+        )
 
-        self.assertIsInstance(result, dict)
         self.assertIsInstance(
-            result["material_state"],
+            result,
+            PlanetaryMaterializationResult,
+        )
+        self._assert_object_only(
+            result,
+            "state",
+        )
+
+        self.assertIs(
+            result.material_state,
+            process.material_state,
+        )
+        self.assertIs(
+            result.available_materials["water"],
+            process.available_materials["water"],
+        )
+
+        with self.assertRaises(TypeError):
+            result.available_materials[
+                "fake"
+            ] = process.available_materials["water"]
+
+        snapshot = result.to_dict()
+
+        self.assertIsInstance(
+            snapshot["material_state"],
             dict,
         )
         self.assertIsInstance(
-            result["available_materials"],
+            snapshot["available_materials"],
             dict,
         )
         self.assertTrue(
-            result["material_state"][
+            snapshot["material_state"][
                 "water_available"
             ]
         )
@@ -177,10 +206,12 @@ class PlanetaryMaterialObjectStateTests(
             self._materialized_process()
         )
 
-        result["material_state"][
+        snapshot = result.to_dict()
+
+        snapshot["material_state"][
             "water_available"
         ] = False
-        result["available_materials"]["water"][
+        snapshot["available_materials"]["water"][
             "requires"
         ].append("fake_element")
 
@@ -280,9 +311,9 @@ class PlanetaryMaterialObjectStateTests(
             process.material_state.water_available
         )
         self.assertFalse(
-            result["material_state"][
-                "water_available"
-            ]
+            result
+            .material_state
+            .water_available
         )
 
     def test_biochemical_process_uses_registry_boundary(

@@ -61,9 +61,9 @@ class PlanetaryMaterialsProcessStateObjectStateTests(
             process.state,
             PlanetaryMaterialsProcessState.FAILED,
         )
-        self.assertEqual(
-            result["state"],
-            "failed",
+        self.assertIs(
+            result.state,
+            PlanetaryMaterialsProcessState.FAILED,
         )
 
     def test_materialization_sets_materialized_enum(
@@ -91,9 +91,9 @@ class PlanetaryMaterialsProcessStateObjectStateTests(
             process.state,
             PlanetaryMaterialsProcessState.MATERIALIZED,
         )
-        self.assertEqual(
-            result["state"],
-            "materialized",
+        self.assertIs(
+            result.state,
+            PlanetaryMaterialsProcessState.MATERIALIZED,
         )
 
     def test_string_state_is_rejected(self):

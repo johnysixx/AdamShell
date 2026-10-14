@@ -9,6 +9,9 @@ from universe.planetary_material_state import (
 from universe.planetary_materials_process_state import (
     PlanetaryMaterialsProcessState,
 )
+from universe.planetary_material_result_state import (
+    PlanetaryMaterializationResult,
+)
 
 
 class PlanetaryMaterials:
@@ -22,6 +25,7 @@ class PlanetaryMaterials:
         self.available_materials = {}
 
         self.material_state = PlanetaryMaterialState()
+        self.result = None
 
         self.public_state = self._build_public_state()
 
@@ -79,7 +83,16 @@ class PlanetaryMaterials:
 
             print("PLANETARY MATERIALIZATION FAILED: Earth has not formed yet")
             self.write_to_world()
-            return self.public_state
+
+            self.result = PlanetaryMaterializationResult(
+                state=self.state,
+                available_materials=(
+                    self.available_materials
+                ),
+                material_state=self.material_state,
+            )
+
+            return self.result
 
         self.state = (
             PlanetaryMaterialsProcessState.MATERIALIZED
@@ -119,7 +132,15 @@ class PlanetaryMaterials:
         print("MINERALS AVAILABLE")
         print("ORGANIC MOLECULES AVAILABLE")
 
-        return self.public_state
+        self.result = PlanetaryMaterializationResult(
+            state=self.state,
+            available_materials=(
+                self.available_materials
+            ),
+            material_state=self.material_state,
+        )
+
+        return self.result
 
     def make_available(self, material_name, possible_materials):
         material = possible_materials.get(material_name)

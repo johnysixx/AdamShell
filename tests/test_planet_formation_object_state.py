@@ -8,6 +8,9 @@ from universe.planet_formation_result_state import (
     PlanetFormationResult,
 )
 from universe.planetary_materials import PlanetaryMaterials
+from universe.planetary_materials_process_state import (
+    PlanetaryMaterialsProcessState,
+)
 from universe.planets import Planets
 from universe.planets_process_state import (
     PlanetsProcessState,
@@ -365,7 +368,10 @@ class PlanetFormationObjectStateTests(
 
         result = process.materialize()
 
-        self.assertEqual(result["state"], "materialized")
+        self.assertIs(
+            result.state,
+            PlanetaryMaterialsProcessState.MATERIALIZED,
+        )
         self.assertIn(
             "water",
             universe.world[
