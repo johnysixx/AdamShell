@@ -5,6 +5,9 @@ from universe.periodic_table import PeriodicTable
 from universe.periodic_table_state import (
     PeriodicTableRegistryState,
 )
+from universe.periodic_table_result_state import (
+    PeriodicTableBuildResult,
+)
 from universe.universe import Universe
 
 
@@ -102,18 +105,36 @@ class PeriodicTableObjectStateTests(
         )
         self.assertIsInstance(universe.world, dict)
 
-    def test_public_result_remains_dict_boundary(
+    def test_runtime_result_is_object_and_snapshot_is_dict(
         self
     ):
-        _, _, result = self._built_table()
+        _, table, result = self._built_table()
 
-        self.assertIsInstance(result, dict)
         self.assertIsInstance(
-            result["registry_state"],
+            result,
+            PeriodicTableBuildResult,
+        )
+        self._assert_object_only(
+            result,
+            "state",
+        )
+        self.assertIs(
+            result.registry_state,
+            table.registry_state,
+        )
+
+        snapshot = result.to_dict()
+
+        self.assertIsInstance(
+            snapshot,
+            dict,
+        )
+        self.assertIsInstance(
+            snapshot["registry_state"],
             dict,
         )
         self.assertEqual(
-            result["registry_state"][
+            snapshot["registry_state"][
                 "known_element_count"
             ],
             118,
@@ -122,7 +143,9 @@ class PeriodicTableObjectStateTests(
     def test_public_result_is_detached(self):
         _, table, result = self._built_table()
 
-        result["registry_state"][
+        snapshot = result.to_dict()
+
+        snapshot["registry_state"][
             "known_element_count"
         ] = 999
 

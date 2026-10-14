@@ -32,9 +32,9 @@ class PeriodicTableProcessStateObjectStateTests(
             process.state,
             PeriodicTableProcessState.REGISTERED,
         )
-        self.assertEqual(
-            result["state"],
-            "registered",
+        self.assertIs(
+            result.state,
+            PeriodicTableProcessState.REGISTERED,
         )
 
     def test_string_state_is_rejected(self):

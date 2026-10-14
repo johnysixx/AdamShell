@@ -5,6 +5,9 @@ from universe.periodic_table_state import (
 from universe.periodic_table_process_state import (
     PeriodicTableProcessState,
 )
+from universe.periodic_table_result_state import (
+    PeriodicTableBuildResult,
+)
 
 
 DIGIT_ROOTS = {
@@ -155,6 +158,7 @@ class PeriodicTable:
         self.future_elements = {}
 
         self.registry_state = PeriodicTableRegistryState()
+        self.result = None
 
         self.public_state = self._build_public_state()
 
@@ -219,7 +223,12 @@ class PeriodicTable:
         print(f"KNOWN ELEMENTS REGISTERED: {len(self.elements)}")
         print("FUTURE ELEMENT GENERATION AVAILABLE")
 
-        return self.public_state
+        self.result = PeriodicTableBuildResult(
+            state=self.state,
+            registry_state=self.registry_state,
+        )
+
+        return self.result
 
     def create_known_element(self, atomic_number, symbol, name):
         return ChemicalElement(
