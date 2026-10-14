@@ -8,6 +8,9 @@ from universe.heavy_element_nucleosynthesis import (
 from universe.heavy_element_nucleosynthesis_state import (
     HeavyElementNucleosynthesisState,
 )
+from universe.heavy_element_nucleosynthesis_result_state import (
+    HeavyElementNucleosynthesisResult,
+)
 from universe.heavy_element_nucleosynthesis_process_state import (
     HeavyElementNucleosynthesisProcessState,
 )
@@ -92,27 +95,68 @@ class HeavyElementNucleosynthesisObjectStateTests(unittest.TestCase):
         self.assertTrue(cloud.contains_heavy_elements)
         self.assertTrue(cloud.can_form_metal_rich_systems)
 
-    def test_public_result_remains_dict_boundary(self):
-        _, _, result = self._forged_process()
+    def test_runtime_result_is_object_and_snapshot_is_dict(
+        self
+    ):
+        _, process, result = self._forged_process()
 
-        self.assertIsInstance(result, dict)
         self.assertIsInstance(
-            result["process_state"],
+            result,
+            HeavyElementNucleosynthesisResult,
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    result,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(TypeError):
+            _ = result["process_state"]
+
+        self.assertIs(
+            result.process_state,
+            process.process_state,
+        )
+        self.assertIs(
+            result.heavy_elements["gold"],
+            process.heavy_elements["gold"],
+        )
+
+        snapshot = result.to_dict()
+
+        self.assertIsInstance(
+            snapshot["process_state"],
             dict,
         )
         self.assertIsInstance(
-            result["heavy_elements"],
+            snapshot["heavy_elements"],
             dict,
         )
         self.assertTrue(
-            result["process_state"]["heavy_elements_forged"]
+            snapshot["process_state"][
+                "heavy_elements_forged"
+            ]
         )
 
     def test_public_result_is_detached(self):
         _, process, result = self._forged_process()
 
-        result["process_state"]["heavy_elements_forged"] = False
-        result["heavy_elements"]["gold"]["atomic_number"] = 999
+        snapshot = result.to_dict()
+
+        snapshot[
+            "process_state"
+        ]["heavy_elements_forged"] = False
+        snapshot[
+            "heavy_elements"
+        ]["gold"]["atomic_number"] = 999
 
         self.assertTrue(process.process_state.heavy_elements_forged)
         self.assertEqual(
@@ -151,8 +195,15 @@ class HeavyElementNucleosynthesisObjectStateTests(unittest.TestCase):
             .composition["gold"],
             gold,
         )
+        self.assertIs(
+            result.heavy_elements["gold"],
+            gold,
+        )
+
+        snapshot = result.to_dict()
+
         self.assertIsInstance(
-            result["heavy_elements"]["gold"],
+            snapshot["heavy_elements"]["gold"],
             dict,
         )
         self.assertFalse(hasattr(gold, "get"))
@@ -197,9 +248,12 @@ class HeavyElementNucleosynthesisObjectStateTests(unittest.TestCase):
         )
         self.assertFalse(process.process_state.iron_seed_available)
         self.assertFalse(process.process_state.heavy_elements_forged)
-        self.assertEqual(
-            result["process_state"]["iron_seed_available"],
-            False,
+        self.assertIsInstance(
+            result,
+            HeavyElementNucleosynthesisResult,
+        )
+        self.assertFalse(
+            result.process_state.iron_seed_available
         )
 
     def test_to_dict_is_detached_boundary(self):

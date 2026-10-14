@@ -6,6 +6,9 @@ from universe.primordial_objects import PrimordialCosmicComponent
 from universe.heavy_element_nucleosynthesis import (
     HeavyElementNucleosynthesis,
 )
+from universe.heavy_element_nucleosynthesis_process_state import (
+    HeavyElementNucleosynthesisProcessState,
+)
 from universe.stellar_objects import PrimordialStar, Supernova
 from universe.supernova_enrichment import (
     SupernovaEnrichment,
@@ -460,7 +463,10 @@ class SupernovaEnrichmentObjectStateTests(
         )
         result = process.forge_heavy_elements()
 
-        self.assertEqual(result["state"], "forged")
+        self.assertIs(
+            result.state,
+            HeavyElementNucleosynthesisProcessState.FORGED,
+        )
         self.assertTrue(
             process.process_state.heavy_elements_forged
         )

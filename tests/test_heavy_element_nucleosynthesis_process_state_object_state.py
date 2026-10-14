@@ -67,9 +67,9 @@ class HeavyElementNucleosynthesisProcessStateObjectStateTests(
             process.state,
             HeavyElementNucleosynthesisProcessState.FAILED,
         )
-        self.assertEqual(
-            result["state"],
-            "failed",
+        self.assertIs(
+            result.state,
+            HeavyElementNucleosynthesisProcessState.FAILED,
         )
 
     def test_missing_clouds_sets_failed_enum(self):
@@ -96,9 +96,9 @@ class HeavyElementNucleosynthesisProcessStateObjectStateTests(
             process.state,
             HeavyElementNucleosynthesisProcessState.FAILED,
         )
-        self.assertEqual(
-            result["state"],
-            "failed",
+        self.assertIs(
+            result.state,
+            HeavyElementNucleosynthesisProcessState.FAILED,
         )
 
     def test_forging_sets_forged_enum(self):
@@ -112,9 +112,9 @@ class HeavyElementNucleosynthesisProcessStateObjectStateTests(
             process.state,
             HeavyElementNucleosynthesisProcessState.FORGED,
         )
-        self.assertEqual(
-            result["state"],
-            "forged",
+        self.assertIs(
+            result.state,
+            HeavyElementNucleosynthesisProcessState.FORGED,
         )
 
     def test_string_state_is_rejected(self):

@@ -8,6 +8,9 @@ from universe.heavy_element_nucleosynthesis_state import (
 from universe.heavy_element_nucleosynthesis_process_state import (
     HeavyElementNucleosynthesisProcessState,
 )
+from universe.heavy_element_nucleosynthesis_result_state import (
+    HeavyElementNucleosynthesisResult,
+)
 
 
 HEAVY_ELEMENT_SPECS = (
@@ -49,6 +52,7 @@ class HeavyElementNucleosynthesis:
         self.heavy_elements = {}
 
         self.process_state = HeavyElementNucleosynthesisState()
+        self.result = None
 
         self.public_state = self._build_public_state()
 
@@ -105,7 +109,14 @@ class HeavyElementNucleosynthesis:
                 "iron seed is missing"
             )
             self.write_to_world()
-            return self.public_state
+
+            self.result = HeavyElementNucleosynthesisResult(
+                state=self.state,
+                heavy_elements=self.heavy_elements,
+                process_state=self.process_state,
+            )
+
+            return self.result
 
         for element in elements_up_to_iron.values():
             if not isinstance(
@@ -138,7 +149,14 @@ class HeavyElementNucleosynthesis:
                 "no enriched clouds available"
             )
             self.write_to_world()
-            return self.public_state
+
+            self.result = HeavyElementNucleosynthesisResult(
+                state=self.state,
+                heavy_elements=self.heavy_elements,
+                process_state=self.process_state,
+            )
+
+            return self.result
 
         self.state = (
             HeavyElementNucleosynthesisProcessState.FORGED
@@ -166,7 +184,13 @@ class HeavyElementNucleosynthesis:
         print("HEAVY ELEMENTS FORGED BEYOND IRON")
         print("ENRICHED CLOUDS UPDATED WITH HEAVY ELEMENTS")
 
-        return self.public_state
+        self.result = HeavyElementNucleosynthesisResult(
+            state=self.state,
+            heavy_elements=self.heavy_elements,
+            process_state=self.process_state,
+        )
+
+        return self.result
 
     def add_heavy_element(
         self,
