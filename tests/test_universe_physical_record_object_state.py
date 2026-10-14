@@ -159,8 +159,17 @@ class UniversePhysicalRecordObjectStateTests(
             standard.frequency_hz,
             9_192_631_770,
         )
+        self.assertIs(
+            result.time_standards[
+                "si_second"
+            ],
+            standard,
+        )
+
+        snapshot = result.to_dict()
+
         self.assertIsInstance(
-            result["time_standards"][
+            snapshot["time_standards"][
                 "si_second"
             ],
             dict,
@@ -195,8 +204,17 @@ class UniversePhysicalRecordObjectStateTests(
             pattern.state,
             "available",
         )
+        self.assertIs(
+            result.decay_patterns[
+                "carbon_14_decay"
+            ],
+            pattern,
+        )
+
+        snapshot = result.to_dict()
+
         self.assertIsInstance(
-            result["decay_patterns"][
+            snapshot["decay_patterns"][
                 "carbon_14_decay"
             ],
             dict,

@@ -185,8 +185,17 @@ class ChemicalDomainObjectStateTests(unittest.TestCase):
         atom_result = atom_process.form_reference_atoms()
         atom_snapshot = atom_result.to_dict()
 
+        self.assertIs(
+            isotope_result.isotopes["carbon_14"],
+            isotope_process.isotopes["carbon_14"],
+        )
+
+        isotope_snapshot = isotope_result.to_dict()
+
         self.assertIsInstance(
-            isotope_result["isotopes"]["carbon_14"],
+            isotope_snapshot[
+                "isotopes"
+            ]["carbon_14"],
             dict,
         )
         self.assertIs(
@@ -198,9 +207,9 @@ class ChemicalDomainObjectStateTests(unittest.TestCase):
             dict,
         )
 
-        isotope_result["isotopes"]["carbon_14"][
-            "state"
-        ] = "changed"
+        isotope_snapshot[
+            "isotopes"
+        ]["carbon_14"]["state"] = "changed"
         atom_snapshot["atoms"]["hydrogen_atom"][
             "state"
         ] = "changed"

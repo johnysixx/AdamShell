@@ -6,6 +6,9 @@ from universe.isotope_state import (
 from universe.isotopes_process_state import (
     IsotopesProcessState,
 )
+from universe.physical_time_result_state import (
+    IsotopeFormationResult,
+)
 from universe.periodic_table import PeriodicTable
 
 
@@ -21,6 +24,7 @@ class Isotopes:
         self.isotopes = {}
 
         self.isotope_state = IsotopeFormationState()
+        self.result = None
 
         self.public_state = self._build_public_state()
 
@@ -109,7 +113,13 @@ class Isotopes:
         print("CAESIUM-133 FORMED")
         print("RADIOACTIVE TIMEKEEPERS FORMED")
 
-        return self.public_state
+        self.result = IsotopeFormationResult(
+            state=self.state,
+            isotopes=self.isotopes,
+            isotope_state=self.isotope_state,
+        )
+
+        return self.result
 
     def ensure_periodic_table(self):
         if not self.universe.world.get("elements_by_atomic_number"):

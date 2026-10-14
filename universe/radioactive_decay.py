@@ -6,6 +6,9 @@ from universe.physical_record_state import (
 from universe.radioactive_decay_process_state import (
     RadioactiveDecayProcessState,
 )
+from universe.physical_time_result_state import (
+    RadioactiveDecayDefinitionResult,
+)
 from universe.isotopes import Isotopes
 
 
@@ -21,6 +24,7 @@ class RadioactiveDecay:
         self.decay_patterns = {}
 
         self.decay_state = RadioactiveDecayState()
+        self.result = None
 
         self.public_state = self._build_public_state()
 
@@ -123,7 +127,13 @@ class RadioactiveDecay:
         print("URANIUM-238 DECAY AVAILABLE")
         print("GEOLOGICAL TIMEKEEPERS AVAILABLE")
 
-        return self.public_state
+        self.result = RadioactiveDecayDefinitionResult(
+            state=self.state,
+            decay_patterns=self.decay_patterns,
+            decay_state=self.decay_state,
+        )
+
+        return self.result
 
     def ensure_isotopes(self):
         if not self.universe.world.get("known_isotopes"):

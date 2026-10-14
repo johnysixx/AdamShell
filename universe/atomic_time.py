@@ -6,6 +6,9 @@ from universe.physical_record_state import (
 from universe.atomic_time_process_state import (
     AtomicTimeProcessState,
 )
+from universe.physical_time_result_state import (
+    AtomicTimeDefinitionResult,
+)
 from universe.isotopes import Isotopes
 
 
@@ -22,6 +25,7 @@ class AtomicTime:
         self.time_standards = {}
 
         self.atomic_time_state = AtomicTimeState()
+        self.result = None
 
         self.public_state = self._build_public_state()
 
@@ -79,7 +83,16 @@ class AtomicTime:
             self.state = AtomicTimeProcessState.FAILED
             print("ATOMIC TIME FAILED: caesium-133 is missing")
             self.write_to_world()
-            return self.public_state
+
+            self.result = AtomicTimeDefinitionResult(
+                state=self.state,
+                time_standards=self.time_standards,
+                atomic_time_state=(
+                    self.atomic_time_state
+                ),
+            )
+
+            return self.result
 
         caesium_133 = isotopes["caesium_133"]
 
@@ -123,7 +136,13 @@ class AtomicTime:
         print("SI SECOND DEFINED")
         print("PRECISION TIME AVAILABLE")
 
-        return self.public_state
+        self.result = AtomicTimeDefinitionResult(
+            state=self.state,
+            time_standards=self.time_standards,
+            atomic_time_state=self.atomic_time_state,
+        )
+
+        return self.result
 
     def ensure_isotopes(self):
         if not self.universe.world.get("known_isotopes"):

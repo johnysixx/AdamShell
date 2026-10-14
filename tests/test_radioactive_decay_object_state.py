@@ -2,6 +2,9 @@ import unittest
 
 from universe.decay_state import RadioactiveDecayState
 from universe.radioactive_decay import RadioactiveDecay
+from universe.physical_time_result_state import (
+    RadioactiveDecayDefinitionResult,
+)
 from universe.universe import Universe
 
 
@@ -99,22 +102,44 @@ class RadioactiveDecayObjectStateTests(
         )
         self.assertIsInstance(universe.world, dict)
 
-    def test_public_result_remains_dict_boundary(
+    def test_runtime_result_is_object_and_snapshot_is_dict(
         self
     ):
-        _, _, result = self._defined_decay()
+        _, process, result = self._defined_decay()
 
-        self.assertIsInstance(result, dict)
         self.assertIsInstance(
-            result["decay_state"],
+            result,
+            RadioactiveDecayDefinitionResult,
+        )
+        self._assert_object_only(
+            result,
+            "state",
+        )
+        self.assertIs(
+            result.decay_state,
+            process.decay_state,
+        )
+        self.assertIs(
+            result.decay_patterns[
+                "carbon_14_decay"
+            ],
+            process.decay_patterns[
+                "carbon_14_decay"
+            ],
+        )
+
+        snapshot = result.to_dict()
+
+        self.assertIsInstance(
+            snapshot["decay_state"],
             dict,
         )
         self.assertIsInstance(
-            result["decay_patterns"],
+            snapshot["decay_patterns"],
             dict,
         )
         self.assertEqual(
-            result["decay_state"][
+            snapshot["decay_state"][
                 "decay_pattern_count"
             ],
             4,
@@ -125,10 +150,12 @@ class RadioactiveDecayObjectStateTests(
     ):
         _, process, result = self._defined_decay()
 
-        result["decay_state"][
+        snapshot = result.to_dict()
+
+        snapshot["decay_state"][
             "decay_pattern_count"
         ] = 99
-        result["decay_patterns"][
+        snapshot["decay_patterns"][
             "carbon_14_decay"
         ]["state"] = "changed"
 

@@ -5,6 +5,9 @@ from universe.isotope_state import (
     IsotopeFormationState,
 )
 from universe.isotopes import Isotopes
+from universe.physical_time_result_state import (
+    IsotopeFormationResult,
+)
 from universe.universe import Universe
 
 
@@ -104,22 +107,40 @@ class IsotopeFormationObjectStateTests(
         self.assertIs(state, process.isotope_state)
         self.assertIsInstance(universe.world, dict)
 
-    def test_public_result_remains_dict_boundary(
+    def test_runtime_result_is_object_and_snapshot_is_dict(
         self
     ):
-        _, _, result = self._formed_isotopes()
+        _, process, result = self._formed_isotopes()
 
-        self.assertIsInstance(result, dict)
         self.assertIsInstance(
-            result["isotope_state"],
+            result,
+            IsotopeFormationResult,
+        )
+        self._assert_object_only(
+            result,
+            "state",
+        )
+        self.assertIs(
+            result.isotope_state,
+            process.isotope_state,
+        )
+        self.assertIs(
+            result.isotopes["hydrogen_1"],
+            process.isotopes["hydrogen_1"],
+        )
+
+        snapshot = result.to_dict()
+
+        self.assertIsInstance(
+            snapshot["isotope_state"],
             dict,
         )
         self.assertIsInstance(
-            result["isotopes"],
+            snapshot["isotopes"],
             dict,
         )
         self.assertEqual(
-            result["isotope_state"][
+            snapshot["isotope_state"][
                 "isotope_count"
             ],
             8,
@@ -130,10 +151,12 @@ class IsotopeFormationObjectStateTests(
     ):
         _, process, result = self._formed_isotopes()
 
-        result["isotope_state"][
+        snapshot = result.to_dict()
+
+        snapshot["isotope_state"][
             "isotope_count"
         ] = 99
-        result["isotopes"]["hydrogen_1"][
+        snapshot["isotopes"]["hydrogen_1"][
             "state"
         ] = "changed"
 

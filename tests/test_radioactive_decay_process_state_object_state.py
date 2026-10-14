@@ -32,9 +32,9 @@ class RadioactiveDecayProcessStateObjectStateTests(
             process.state,
             RadioactiveDecayProcessState.DEFINED,
         )
-        self.assertEqual(
-            result["state"],
-            "defined",
+        self.assertIs(
+            result.state,
+            RadioactiveDecayProcessState.DEFINED,
         )
 
     def test_string_state_is_rejected(self):

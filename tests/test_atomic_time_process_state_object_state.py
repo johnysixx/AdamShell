@@ -32,9 +32,9 @@ class AtomicTimeProcessStateObjectStateTests(
             process.state,
             AtomicTimeProcessState.DEFINED,
         )
-        self.assertEqual(
-            result["state"],
-            "defined",
+        self.assertIs(
+            result.state,
+            AtomicTimeProcessState.DEFINED,
         )
 
     def test_missing_caesium_sets_failed_enum(self):
@@ -47,9 +47,9 @@ class AtomicTimeProcessStateObjectStateTests(
             process.state,
             AtomicTimeProcessState.FAILED,
         )
-        self.assertEqual(
-            result["state"],
-            "failed",
+        self.assertIs(
+            result.state,
+            AtomicTimeProcessState.FAILED,
         )
 
     def test_string_state_is_rejected(self):

@@ -3,6 +3,12 @@ import unittest
 from universe.atomic_time import AtomicTime
 from universe.chemical_objects import Isotope
 from universe.atomic_time_state import AtomicTimeState
+from universe.atomic_time_process_state import (
+    AtomicTimeProcessState,
+)
+from universe.physical_time_result_state import (
+    AtomicTimeDefinitionResult,
+)
 from universe.universe import Universe
 
 
@@ -89,22 +95,40 @@ class AtomicTimeObjectStateTests(
         )
         self.assertIsInstance(universe.world, dict)
 
-    def test_public_result_remains_dict_boundary(
+    def test_runtime_result_is_object_and_snapshot_is_dict(
         self
     ):
-        _, _, result = self._defined_atomic_time()
+        _, process, result = self._defined_atomic_time()
 
-        self.assertIsInstance(result, dict)
         self.assertIsInstance(
-            result["atomic_time_state"],
+            result,
+            AtomicTimeDefinitionResult,
+        )
+        self._assert_object_only(
+            result,
+            "state",
+        )
+        self.assertIs(
+            result.atomic_time_state,
+            process.atomic_time_state,
+        )
+        self.assertIs(
+            result.time_standards["si_second"],
+            process.time_standards["si_second"],
+        )
+
+        snapshot = result.to_dict()
+
+        self.assertIsInstance(
+            snapshot["atomic_time_state"],
             dict,
         )
         self.assertIsInstance(
-            result["time_standards"],
+            snapshot["time_standards"],
             dict,
         )
         self.assertTrue(
-            result["atomic_time_state"][
+            snapshot["atomic_time_state"][
                 "si_second_defined"
             ]
         )
@@ -116,10 +140,12 @@ class AtomicTimeObjectStateTests(
             self._defined_atomic_time()
         )
 
-        result["atomic_time_state"][
+        snapshot = result.to_dict()
+
+        snapshot["atomic_time_state"][
             "si_second_defined"
         ] = False
-        result["time_standards"]["si_second"][
+        snapshot["time_standards"]["si_second"][
             "isotope"
         ]["state"] = "changed"
 
@@ -139,7 +165,7 @@ class AtomicTimeObjectStateTests(
             "formed",
         )
         self.assertIsInstance(
-            result["time_standards"]["si_second"][
+            snapshot["time_standards"]["si_second"][
                 "isotope"
             ],
             dict,
@@ -192,11 +218,23 @@ class AtomicTimeObjectStateTests(
 
         result = process.define_si_second()
 
-        self.assertEqual(result["state"], "failed")
+        self.assertIsInstance(
+            result,
+            AtomicTimeDefinitionResult,
+        )
+        self.assertIs(
+            result.state,
+            AtomicTimeProcessState.FAILED,
+        )
         self.assertFalse(
-            result["atomic_time_state"][
-                "si_second_defined"
-            ]
+            result.atomic_time_state.si_second_defined
+        )
+
+        snapshot = result.to_dict()
+
+        self.assertEqual(
+            snapshot["state"],
+            "failed",
         )
         self.assertIs(
             universe.world["atomic_time_state"],

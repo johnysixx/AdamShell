@@ -32,9 +32,9 @@ class IsotopesProcessStateObjectStateTests(
             process.state,
             IsotopesProcessState.FORMED,
         )
-        self.assertEqual(
-            result["state"],
-            "formed",
+        self.assertIs(
+            result.state,
+            IsotopesProcessState.FORMED,
         )
 
     def test_string_state_is_rejected(self):
