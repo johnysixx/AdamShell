@@ -1,4 +1,5 @@
 import unittest
+from universe.aroma_composition import AromaComposition
 
 from universe.aroma_profile import AromaProfile, AromaSurfaceResidue
 from universe.aroma_residue import AromaResidue
@@ -30,7 +31,7 @@ class UniverseUtilityResultObjectStateTests(unittest.TestCase):
     def test_aroma_transfer_returns_object_result(self):
         source = AromaProfile(
             identity="cat:pazuzu",
-            base_components={"cat": 1.0},
+            base_components=AromaComposition.from_pairs(("cat", 1.0)),
         )
         target = Target()
 
@@ -47,7 +48,7 @@ class UniverseUtilityResultObjectStateTests(unittest.TestCase):
         )
         self.assertTrue(result.transferred)
         self.assertEqual(
-            result.components["cat"],
+            result.components.amount("cat"),
             0.25,
         )
         self.assertIsInstance(
@@ -74,7 +75,7 @@ class UniverseUtilityResultObjectStateTests(unittest.TestCase):
             "source_has_no_aroma",
         )
         self.assertEqual(
-            dict(result.components),
+            result.components.to_dict(),
             {},
         )
         self.assertIsNone(result.residue)
@@ -83,7 +84,7 @@ class UniverseUtilityResultObjectStateTests(unittest.TestCase):
     def test_aroma_result_snapshot_is_detached(self):
         source = AromaProfile(
             identity="cat:pazuzu",
-            base_components={"cat": 1.0},
+            base_components=AromaComposition.from_pairs(("cat", 1.0)),
         )
         result = AromaResidue.transfer(
             source_profile=source,
@@ -96,11 +97,11 @@ class UniverseUtilityResultObjectStateTests(unittest.TestCase):
         snapshot["residue"]["components"]["cat"] = 99.0
 
         self.assertNotEqual(
-            result.components["cat"],
+            result.components.amount("cat"),
             99.0,
         )
         self.assertNotEqual(
-            result.residue.components["cat"],
+            result.residue.components.amount("cat"),
             99.0,
         )
 

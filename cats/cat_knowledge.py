@@ -1,6 +1,10 @@
 from cats.cat import Cat
 from copy import deepcopy
 from core.entity.components import SpatialVector3, require_spatial_vector
+from universe.aroma_composition import (
+    AromaComposition,
+    require_aroma_composition,
+)
 
 from cats.cat_scent_direction_state import (
     CatScentTrailDirection,
@@ -277,8 +281,17 @@ class CatKnowledge:
         cat,
         identity,
         components,
-        source='direct_experience',
+        source="direct_experience",
     ):
+        components = (
+            require_aroma_composition(
+                components,
+                field_name=(
+                    "cat learned aroma components"
+                ),
+            )
+        )
+
         knowledge = (
             cls.ensure_cat_knowledge(
                 cat
@@ -288,7 +301,8 @@ class CatKnowledge:
         known = next(
             (
                 item
-                for item in knowledge.known_aromas
+                for item
+                in knowledge.known_aromas
                 if item.identity
                 == identity
             ),
@@ -323,6 +337,15 @@ class CatKnowledge:
         components,
         minimum_similarity=0.55,
     ):
+        components = (
+            require_aroma_composition(
+                components,
+                field_name=(
+                    "recognized aroma components"
+                ),
+            )
+        )
+
         knowledge = (
             cls.ensure_cat_knowledge(
                 cat
@@ -348,8 +371,12 @@ class CatKnowledge:
                 CatAromaMatch(
                     identity=known.identity,
                     similarity=similarity,
-                    confidence=known.confidence,
-                    encounters=known.encounters,
+                    confidence=(
+                        known.confidence
+                    ),
+                    encounters=(
+                        known.encounters
+                    ),
                 )
             )
 
@@ -385,12 +412,25 @@ class CatKnowledge:
         perceived_intensity=0.0,
         universe_tick=None,
     ):
-        knowledge = cls.ensure_cat_knowledge(
-            cat
+        knowledge = (
+            cls.ensure_cat_knowledge(
+                cat
+            )
         )
 
         position = cls._position(
             position
+        )
+
+        composition = (
+            AromaComposition.empty()
+            if components is None
+            else require_aroma_composition(
+                components,
+                field_name=(
+                    "remembered scent components"
+                ),
+            )
         )
 
         place_id = cls._place_id(
@@ -400,16 +440,20 @@ class CatKnowledge:
 
         identity = (
             recognized_identity
-            or 'unknown_aroma'
+            or "unknown_aroma"
         )
 
         memory = next(
             (
                 item
-                for item in knowledge.known_scent_places
-                if item.place_id == place_id
-                and item.identity == identity
-                and item.source_id == source_id
+                for item
+                in knowledge.known_scent_places
+                if item.place_id
+                == place_id
+                and item.identity
+                == identity
+                and item.source_id
+                == source_id
             ),
             None,
         )
@@ -431,48 +475,100 @@ class CatKnowledge:
                     else 0.3
                 ),
                 last_intensity=intensity,
-                strongest_intensity=intensity,
-                components=deepcopy(
-                    components or {}
+                strongest_intensity=(
+                    intensity
                 ),
-                first_seen_tick=universe_tick,
-                last_seen_tick=universe_tick,
+                components=composition,
+                first_seen_tick=(
+                    universe_tick
+                ),
+                last_seen_tick=(
+                    universe_tick
+                ),
             )
 
-            knowledge.known_scent_places.append(memory)
+            knowledge.known_scent_places.append(
+                memory
+            )
 
         else:
             memory.record_observation(
                 recognized_identity=(
                     recognized_identity
                 ),
-                components=components,
+                components=composition,
                 perceived_intensity=(
                     perceived_intensity
                 ),
-                universe_tick=universe_tick,
+                universe_tick=(
+                    universe_tick
+                ),
             )
 
-        return deepcopy(memory)
+        return deepcopy(
+            memory
+        )
 
     @classmethod
-    def remember_olfaction(cls, cat, olfaction, current_layer, universe_tick=None):
+    def remember_olfaction(
+        cls,
+        cat,
+        olfaction,
+        current_layer,
+        universe_tick=None,
+    ):
         remembered = []
-        knowledge = cls.ensure_cat_knowledge(cat)
+
+        knowledge = (
+            cls.ensure_cat_knowledge(
+                cat
+            )
+        )
+
         if universe_tick is not None:
-            knowledge.scent_clock_tick = universe_tick
+            knowledge.scent_clock_tick = (
+                universe_tick
+            )
+
         for item in olfaction.detected_aromas:
             recognition = item.recognition
+
             identity = (
                 recognition.identity
                 if recognition.recognized
                 else None
             )
+
             position = item.position
-            if not isinstance(position, SpatialVector3):
+
+            if not isinstance(
+                position,
+                SpatialVector3,
+            ):
                 continue
-            remembered.append(cls.remember_scent_place(cat=cat, layer=current_layer, position=position, source_id=item.entity_id, recognized_identity=identity, components=item.raw_components, perceived_intensity=item.perceived_intensity, universe_tick=universe_tick))
-        ambient = olfaction.ambient_aroma
+
+            remembered.append(
+                cls.remember_scent_place(
+                    cat=cat,
+                    layer=current_layer,
+                    position=position,
+                    source_id=item.entity_id,
+                    recognized_identity=identity,
+                    components=(
+                        item.raw_components
+                    ),
+                    perceived_intensity=(
+                        item.perceived_intensity
+                    ),
+                    universe_tick=(
+                        universe_tick
+                    ),
+                )
+            )
+
+        ambient = (
+            olfaction.ambient_aroma
+        )
 
         if ambient is not None:
             recognition = (
@@ -490,21 +586,24 @@ class CatKnowledge:
                     cat=cat,
                     layer=current_layer,
                     position=cat.position,
-                    source_id='ambient',
-                    recognized_identity=identity,
+                    source_id="ambient",
+                    recognized_identity=(
+                        identity
+                    ),
                     components=(
                         ambient.components
                     ),
-                    perceived_intensity=sum(
-                        float(value)
-                        for value
-                        in ambient.components.values()
+                    perceived_intensity=(
+                        ambient
+                        .components
+                        .total_intensity
                     ),
                     universe_tick=(
                         universe_tick
                     ),
                 )
             )
+
         return remembered
 
     @classmethod

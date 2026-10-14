@@ -1,4 +1,5 @@
 import unittest
+from universe.aroma_composition import AromaComposition
 
 from cats.cat_knowledge import CatKnowledge
 from cats.cat_knowledge_objects import (
@@ -34,10 +35,12 @@ class CatAromaKnowledgeObjectStateTests(
             CatKnowledge.learn_aroma(
                 cat=self.cat,
                 identity='raspberry_rum',
-                components={
-                    'berry': 1.0,
-                    'ethanol': 0.7,
-                },
+                components=(
+                    AromaComposition.from_pairs(
+                        ("berry", 1.0),
+                        ("ethanol", 0.7),
+                    )
+                ),
             )
         )
 
@@ -68,19 +71,23 @@ class CatAromaKnowledgeObjectStateTests(
         CatKnowledge.learn_aroma(
             cat=self.cat,
             identity='raspberry_rum',
-            components={
-                'berry': 1.0,
-            },
+            components=(
+                AromaComposition.from_pairs(
+                    ("berry", 1.0),
+                )
+            ),
             source='first_contact',
         )
 
         CatKnowledge.learn_aroma(
             cat=self.cat,
             identity='raspberry_rum',
-            components={
-                'berry': 0.8,
-                'ethanol': 0.6,
-            },
+            components=(
+                AromaComposition.from_pairs(
+                    ("berry", 0.8),
+                    ("ethanol", 0.6),
+                )
+            ),
             source='second_contact',
         )
 

@@ -1,4 +1,5 @@
 import unittest
+from universe.aroma_composition import AromaComposition
 from universe.universe import Universe
 from cats.cats import Cats
 from universe.aroma_profile import AromaProfile
@@ -21,16 +22,16 @@ class AromaDecayLifecycleTests(unittest.TestCase):
     def test_box_residue_fades_with_universe_aroma_tick(self):
         box = self.universe.create_quantum_box()
         AromaResidue.transfer(source_profile=self.cat.aroma, target=box, source_identity='pazuzu', fraction=0.3)
-        before = box.aroma.current()['individual_cat:pazuzu']
+        before = box.aroma.current().amount("individual_cat:pazuzu")
         self.universe._tick_aroma_residues()
-        after = box.aroma.current()['individual_cat:pazuzu']
+        after = box.aroma.current().amount("individual_cat:pazuzu")
         self.assertLess(after, before)
 
     def test_cat_surface_aroma_fades_too(self):
-        self.cat.aroma.add_surface(source='raspberry_rum', components={'raspberry': 1.0}, intensity=1.0, decay_rate=0.1)
-        before = self.cat.aroma.current()['raspberry']
+        self.cat.aroma.add_surface(source='raspberry_rum', components=AromaComposition.from_pairs(("raspberry", 1.0)), intensity=1.0, decay_rate=0.1)
+        before = self.cat.aroma.current().amount("raspberry")
         self.universe._tick_aroma_residues()
-        after = self.cat.aroma.current()['raspberry']
+        after = self.cat.aroma.current().amount("raspberry")
         self.assertLess(after, before)
 if __name__ == '__main__':
     unittest.main()

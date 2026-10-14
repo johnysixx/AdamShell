@@ -1,5 +1,9 @@
 from copy import deepcopy
 from dataclasses import dataclass, field
+from universe.aroma_composition import (
+    AromaComposition,
+    require_aroma_composition,
+)
 from core.entity.components import SpatialVector3, require_optional_spatial_vector, require_spatial_vector
 from cats.cat_social_objects import (
     CatRelationshipTrustEvent,
@@ -94,15 +98,29 @@ class CatScentPlaceMemory:
     last_intensity: float = 0.0
     strongest_intensity: float = 0.0
 
-    components: dict = field(
-        default_factory=dict
+    components: AromaComposition = field(
+        default_factory=AromaComposition.empty
     )
 
     first_seen_tick: int | None = None
     last_seen_tick: int | None = None
 
     def __post_init__(self):
-        self.position = require_spatial_vector(self.position, field_name="cat scent memory position")
+        self.position = require_spatial_vector(
+            self.position,
+            field_name=(
+                "cat scent memory position"
+            ),
+        )
+
+        self.components = (
+            require_aroma_composition(
+                self.components,
+                field_name=(
+                    "cat scent memory components"
+                ),
+            )
+        )
 
     def record_observation(
         self,
@@ -131,7 +149,9 @@ class CatScentPlaceMemory:
 
         self.confidence = min(
             1.0,
-            float(self.confidence)
+            float(
+                self.confidence
+            )
             + (
                 0.1
                 if recognized_identity
@@ -139,10 +159,18 @@ class CatScentPlaceMemory:
             ),
         )
 
-        if components:
-            self.components = deepcopy(
-                components
+        if components is not None:
+            components = (
+                require_aroma_composition(
+                    components,
+                    field_name=(
+                        "cat scent observation components"
+                    ),
+                )
             )
+
+            if not components.is_empty:
+                self.components = components
 
 
 
@@ -264,35 +292,37 @@ class CatVerifiedLegendRecord:
 class CatKnownAroma:
 
     identity: str
-    components: dict
+    components: AromaComposition
     source: str
 
     encounters: int = 1
     confidence: float = 0.55
 
-    @staticmethod
-    def normalize_components(
-        components
-    ):
-        return {
-            str(key): float(value)
-            for key, value
-            in dict(components).items()
-            if float(value) > 0.0
-        }
+    def __post_init__(self):
+        self.components = (
+            require_aroma_composition(
+                self.components,
+                field_name=(
+                    "known aroma components"
+                ),
+            )
+        )
 
     @classmethod
     def create(
         cls,
         identity,
         components,
-        source='direct_experience',
+        source="direct_experience",
     ):
         return cls(
             identity=identity,
             components=(
-                cls.normalize_components(
-                    components
+                require_aroma_composition(
+                    components,
+                    field_name=(
+                        "learned aroma components"
+                    ),
                 )
             ),
             source=source,
@@ -303,42 +333,29 @@ class CatKnownAroma:
         components,
         source,
     ):
-        normalized = (
-            self.normalize_components(
-                components
+        components = (
+            require_aroma_composition(
+                components,
+                field_name=(
+                    "repeated aroma encounter components"
+                ),
             )
         )
 
         self.encounters += 1
         self.source = source
 
-        all_keys = (
-            set(self.components)
-            | set(normalized)
-        )
-
-        self.components = {
-            key: (
-                float(
-                    self.components.get(
-                        key,
-                        0.0,
-                    )
-                )
-                + float(
-                    normalized.get(
-                        key,
-                        0.0,
-                    )
-                )
+        self.components = (
+            self.components.average_with(
+                components
             )
-            / 2.0
-            for key in all_keys
-        }
+        )
 
         self.confidence = min(
             1.0,
-            float(self.confidence)
+            float(
+                self.confidence
+            )
             + 0.1,
         )
 
@@ -346,72 +363,20 @@ class CatKnownAroma:
         self,
         components,
     ):
-        observed = (
-            self.normalize_components(
+        components = (
+            require_aroma_composition(
+                components,
+                field_name=(
+                    "observed aroma components"
+                ),
+            )
+        )
+
+        return (
+            self.components
+            .similarity_to(
                 components
             )
-        )
-
-        keys = (
-            set(observed)
-            | set(self.components)
-        )
-
-        if not keys:
-            return 0.0
-
-        dot = sum(
-            float(
-                observed.get(
-                    key,
-                    0.0,
-                )
-            )
-            * float(
-                self.components.get(
-                    key,
-                    0.0,
-                )
-            )
-            for key in keys
-        )
-
-        observed_length = sum(
-            float(
-                observed.get(
-                    key,
-                    0.0,
-                )
-            ) ** 2
-            for key in keys
-        ) ** 0.5
-
-        known_length = sum(
-            float(
-                self.components.get(
-                    key,
-                    0.0,
-                )
-            ) ** 2
-            for key in keys
-        ) ** 0.5
-
-        if (
-            observed_length == 0.0
-            or known_length == 0.0
-        ):
-            return 0.0
-
-        return max(
-            0.0,
-            min(
-                1.0,
-                dot
-                / (
-                    observed_length
-                    * known_length
-                ),
-            ),
         )
 
 

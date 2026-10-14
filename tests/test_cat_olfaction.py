@@ -1,5 +1,6 @@
 from core.entity.components import SpatialVector3
 import unittest
+from universe.aroma_composition import AromaComposition
 from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat_olfaction import CatOlfaction
@@ -22,7 +23,7 @@ class CatOlfactionTests(unittest.TestCase):
         result = CatOlfaction.sniff(self.observer, self.universe)
         detected = [item for item in result.detected_aromas if item.actual_identity == 'cat:pazuzu']
         self.assertEqual(len(detected), 1)
-        self.assertGreater(detected[0].components['cat'], 0.0)
+        self.assertGreater(detected[0].components.amount("cat"), 0.0)
 
     def test_unknown_cat_smell_is_not_identified(self):
         result = CatOlfaction.sniff(self.observer, self.universe)
@@ -38,7 +39,7 @@ class CatOlfactionTests(unittest.TestCase):
 
     def test_surface_smell_does_not_destroy_identity(self):
         self.cats.learn_cat_aroma(self.observer, self.other)
-        self.cats.add_surface_aroma(cat=self.other, source='raspberry_rum', components={'berry': 1.0, 'ethanol': 0.7}, intensity=0.3)
+        self.cats.add_surface_aroma(cat=self.other, source='raspberry_rum', components=AromaComposition.from_pairs(("berry", 1.0), ("ethanol", 0.7)), intensity=0.3)
         result = CatOlfaction.sniff(self.observer, self.universe)
         pazuzu = next((item for item in result.detected_aromas if item.actual_identity == 'cat:pazuzu'))
         self.assertTrue(pazuzu.recognition.recognized)
@@ -48,7 +49,7 @@ class CatOlfactionTests(unittest.TestCase):
         fake_cronenberg = type('FakeCronenberg', (), {})()
         fake_cronenberg.id = 'cronenberg_test'
         fake_cronenberg.position = SpatialVector3(x=3.0, y=0.0, z=0.0)
-        fake_cronenberg.aroma = AromaProfile(identity='cronenberg', base_components={'ozone': 1.0, 'ionized_air': 0.85, 'electrical': 0.75})
+        fake_cronenberg.aroma = AromaProfile(identity='cronenberg', base_components=AromaComposition.from_pairs(("ozone", 1.0), ("ionized_air", 0.85), ("electrical", 0.75)))
         self.universe.cronenbergs.append(fake_cronenberg)
         result = CatOlfaction.sniff(self.observer, self.universe)
         self.assertTrue(result.ozone_detected)
@@ -59,7 +60,7 @@ class CatOlfactionTests(unittest.TestCase):
         fake_cronenberg = type('FakeCronenberg', (), {})()
         fake_cronenberg.id = 'cronenberg_test'
         fake_cronenberg.position = SpatialVector3(x=3.0, y=0.0, z=0.0)
-        fake_cronenberg.aroma = AromaProfile(identity='cronenberg', base_components={'ozone': 1.0, 'ionized_air': 0.85, 'electrical': 0.75})
+        fake_cronenberg.aroma = AromaProfile(identity='cronenberg', base_components=AromaComposition.from_pairs(("ozone", 1.0), ("ionized_air", 0.85), ("electrical", 0.75)))
         self.universe.cronenbergs.append(fake_cronenberg)
         self.cats.learn_aroma(cat=self.observer, identity='cronenberg', components=fake_cronenberg.aroma.current(), source='direct_cronenberg_encounter')
         result = CatOlfaction.sniff(self.observer, self.universe)
@@ -81,7 +82,7 @@ class CatOlfactionTests(unittest.TestCase):
 
     def test_surface_aroma_preserves_individual_cat_identity(self):
         self.cats.learn_cat_aroma(observer=self.observer, observed_cat=self.other)
-        self.cats.add_surface_aroma(cat=self.other, source='raspberry_rum', components={'berry': 1.0, 'ethanol': 0.7}, intensity=0.3)
+        self.cats.add_surface_aroma(cat=self.other, source='raspberry_rum', components=AromaComposition.from_pairs(("berry", 1.0), ("ethanol", 0.7)), intensity=0.3)
         result = CatOlfaction.sniff(self.observer, self.universe)
         pazuzu = next((item for item in result.detected_aromas if item.actual_identity == 'cat:pazuzu'))
         self.assertTrue(pazuzu.recognition.recognized)

@@ -34,6 +34,7 @@ from core.entity.cronenberg_system.chemical_marker import (
     CronenbergChemicalMarker
 )
 from universe.aroma_profile import AromaProfile
+from universe.aroma_composition import AromaComposition
 
 
 class Cronenberg(Entity):
@@ -63,13 +64,15 @@ class Cronenberg(Entity):
 
         self.aroma = AromaProfile(
             identity="cronenberg",
-            base_components={
-                "ozone": 1.0,
-                "ionized_air": 0.85,
-                "electrical": 0.75,
-                "metallic": 0.20
-            },
-            base_intensity=1.0
+            base_components=(
+                AromaComposition.from_pairs(
+                    ("ozone", 1.0),
+                    ("ionized_air", 0.85),
+                    ("electrical", 0.75),
+                    ("metallic", 0.20),
+                )
+            ),
+            base_intensity=1.0,
         )
 
         self.aroma_chemical_marker = (

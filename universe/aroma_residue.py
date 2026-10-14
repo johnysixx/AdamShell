@@ -1,3 +1,6 @@
+from universe.aroma_composition import (
+    AromaComposition,
+)
 from universe.aroma_profile import AromaProfile
 from universe.aroma_residue_result_state import (
     AromaResidueTransferResult,
@@ -8,30 +11,55 @@ class AromaResidue:
 
     @staticmethod
     def ensure(target):
-        if isinstance(target, dict):
+        if isinstance(
+            target,
+            dict,
+        ):
             raise TypeError(
-                "Aroma residue targets must be object entities."
+                "Aroma residue targets must be "
+                "object entities."
             )
 
-        aroma = getattr(target, "aroma", None)
+        aroma = getattr(
+            target,
+            "aroma",
+            None,
+        )
 
         if aroma is None:
             identity = (
-                getattr(target, "id", None)
-                or getattr(target, "name", None)
+                getattr(
+                    target,
+                    "id",
+                    None,
+                )
+                or getattr(
+                    target,
+                    "name",
+                    None,
+                )
                 or target.__class__.__name__
             )
 
             target.aroma = AromaProfile(
-                identity=f"object:{identity}",
-                base_components={},
+                identity=(
+                    f"object:{identity}"
+                ),
+                base_components=(
+                    AromaComposition.empty()
+                ),
                 base_intensity=0.0,
             )
+
             return target.aroma
 
-        if not isinstance(aroma, AromaProfile):
+        if not isinstance(
+            aroma,
+            AromaProfile,
+        ):
             raise TypeError(
-                "Entity aroma must be an AromaProfile object."
+                "Entity aroma must be an "
+                "AromaProfile object."
             )
 
         return aroma
@@ -45,27 +73,44 @@ class AromaResidue:
         fraction=0.15,
         decay_rate=0.04,
     ):
-        if not isinstance(source_profile, AromaProfile):
+        if not isinstance(
+            source_profile,
+            AromaProfile,
+        ):
             raise TypeError(
-                "source_profile must be an AromaProfile object."
+                "source_profile must be an "
+                "AromaProfile object."
             )
 
-        target_profile = cls.ensure(target)
-        current = source_profile.current()
+        target_profile = cls.ensure(
+            target
+        )
 
-        fraction = max(0.0, min(1.0, float(fraction)))
+        current = (
+            source_profile.current()
+        )
 
-        transferred = {
-            component: float(amount) * fraction
-            for component, amount in current.items()
-            if float(amount) > 0.0
-        }
+        fraction = max(
+            0.0,
+            min(
+                1.0,
+                float(
+                    fraction
+                ),
+            ),
+        )
 
-        residue = target_profile.add_surface(
-            source=source_identity,
-            components=transferred,
-            intensity=1.0,
-            decay_rate=decay_rate,
+        transferred = current.scaled(
+            fraction
+        )
+
+        residue = (
+            target_profile.add_surface(
+                source=source_identity,
+                components=transferred,
+                intensity=1.0,
+                decay_rate=decay_rate,
+            )
         )
 
         return AromaResidueTransferResult(
@@ -84,33 +129,51 @@ class AromaResidue:
         fraction=0.08,
         decay_rate=0.03,
     ):
-        if isinstance(source, dict):
+        if isinstance(
+            source,
+            dict,
+        ):
             raise TypeError(
-                "Aroma residue sources must be object entities."
+                "Aroma residue sources must be "
+                "object entities."
             )
 
-        source_profile = getattr(source, "aroma", None)
+        source_profile = getattr(
+            source,
+            "aroma",
+            None,
+        )
 
         if source_profile is None:
             return AromaResidueTransferResult(
                 transferred=False,
                 source=source_identity,
-                components={},
+                components=(
+                    AromaComposition.empty()
+                ),
                 reason="source_has_no_aroma",
             )
 
-        if not isinstance(source_profile, AromaProfile):
+        if not isinstance(
+            source_profile,
+            AromaProfile,
+        ):
             raise TypeError(
-                "Source aroma must be an AromaProfile object."
+                "Source aroma must be an "
+                "AromaProfile object."
             )
 
-        current = source_profile.current()
+        current = (
+            source_profile.current()
+        )
 
-        if not current:
+        if current.is_empty:
             return AromaResidueTransferResult(
                 transferred=False,
                 source=source_identity,
-                components={},
+                components=(
+                    AromaComposition.empty()
+                ),
                 reason="source_aroma_is_empty",
             )
 
@@ -123,20 +186,38 @@ class AromaResidue:
         )
 
     @classmethod
-    def decay(cls, target, ticks=1):
-        if isinstance(target, dict):
+    def decay(
+        cls,
+        target,
+        ticks=1,
+    ):
+        if isinstance(
+            target,
+            dict,
+        ):
             raise TypeError(
-                "Aroma residue targets must be object entities."
+                "Aroma residue targets must be "
+                "object entities."
             )
 
-        profile = getattr(target, "aroma", None)
+        profile = getattr(
+            target,
+            "aroma",
+            None,
+        )
 
         if profile is None:
-            return {}
+            return AromaComposition.empty()
 
-        if not isinstance(profile, AromaProfile):
+        if not isinstance(
+            profile,
+            AromaProfile,
+        ):
             raise TypeError(
-                "Entity aroma must be an AromaProfile object."
+                "Entity aroma must be an "
+                "AromaProfile object."
             )
 
-        return profile.decay(ticks=ticks)
+        return profile.decay(
+            ticks=ticks
+        )

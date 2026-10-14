@@ -13,6 +13,7 @@ from .cat_intellect import CatIntellect
 from .cat_intention_executor import CatIntentionExecutor
 from .cat_perception import CatPerception
 from universe.aroma_profile import AromaProfile
+from universe.aroma_composition import AromaComposition
 from universe.aroma_foundations import AromaMixture
 from .cat_knowledge import CatKnowledge
 from .cat_need_system import CatNeedSystem
@@ -242,7 +243,20 @@ class Cats:
         if sex not in self.allowed_sexes:
             UniverseLogger.event(f'CAT CREATION DENIED: invalid sex {sex}')
             return None
-        cat = Cat(name=name, color=color, pattern=pattern, eye_color=eye_color, fur_length=fur_length, sex=sex, genotype=CatGenotype.create_founder(sex=sex), reproduction=CatReproduction.create_state(sex=sex, neutered=False), origin=origin, idea_energy=self.default_idea_energy, memory=CatMemory(name), access=self.access_rules, learning=CatLearning.create_complete_state(), personality=CatPersonality.create_state(), mind=CatMind.create_state(), intellect=CatIntellect.create_state(), aroma=AromaProfile(identity=f'cat:{name}', base_components={'cat': 1.0, 'fur': 0.8, f'individual_cat:{name}': 2.0}, base_intensity=1.0))
+        cat = Cat(name=name, color=color, pattern=pattern, eye_color=eye_color, fur_length=fur_length, sex=sex, genotype=CatGenotype.create_founder(sex=sex), reproduction=CatReproduction.create_state(sex=sex, neutered=False), origin=origin, idea_energy=self.default_idea_energy, memory=CatMemory(name), access=self.access_rules, learning=CatLearning.create_complete_state(), personality=CatPersonality.create_state(), mind=CatMind.create_state(), intellect=CatIntellect.create_state(), aroma=AromaProfile(
+            identity=f"cat:{name}",
+            base_components=(
+                AromaComposition.from_pairs(
+                    ("cat", 1.0),
+                    ("fur", 0.8),
+                    (
+                        f"individual_cat:{name}",
+                        2.0,
+                    ),
+                )
+            ),
+            base_intensity=1.0,
+        ))
         self.cats.append(cat)
         self.write_to_world()
         UniverseLogger.event(f'CAT CREATED: {name}')

@@ -1,4 +1,6 @@
-from copy import deepcopy
+from universe.aroma_composition import (
+    AromaComposition,
+)
 from universe.aroma_profile import AromaProfile
 from cats.cat_knowledge import CatKnowledge
 from cats.cat_olfaction_state import (
@@ -8,62 +10,157 @@ from cats.cat_olfaction_state import (
 )
 from core.entity.components import SpatialVector3
 
+
 class CatOlfaction:
+
     DEFAULT_RADIUS = 14.0
 
     @classmethod
-    def sniff(cls, cat, universe, radius=None):
-        radius = float(radius if radius is not None else cls.DEFAULT_RADIUS)
-        cat_position = cls._position(getattr(cat, 'position', None))
+    def sniff(
+        cls,
+        cat,
+        universe,
+        radius=None,
+    ):
+        radius = float(
+            radius
+            if radius is not None
+            else cls.DEFAULT_RADIUS
+        )
+
+        cat_position = cls._position(
+            getattr(
+                cat,
+                "position",
+                None,
+            )
+        )
+
         detected = []
         seen_ids = set()
-        for entity in getattr(universe, 'entities', []):
+
+        for entity in getattr(
+            universe,
+            "entities",
+            [],
+        ):
             if entity is cat:
                 continue
-            observation = cls._sniff_entity(cat=cat, entity=entity, cat_position=cat_position, radius=radius)
+
+            observation = cls._sniff_entity(
+                cat=cat,
+                entity=entity,
+                cat_position=cat_position,
+                radius=radius,
+            )
+
             if observation is None:
                 continue
+
             entity_id = observation.entity_id
+
             if entity_id in seen_ids:
                 continue
-            seen_ids.add(entity_id)
-            detected.append(observation)
-        for entity in getattr(universe, 'cronenbergs', []):
-            observation = cls._sniff_entity(cat=cat, entity=entity, cat_position=cat_position, radius=radius)
+
+            seen_ids.add(
+                entity_id
+            )
+            detected.append(
+                observation
+            )
+
+        for entity in getattr(
+            universe,
+            "cronenbergs",
+            [],
+        ):
+            observation = cls._sniff_entity(
+                cat=cat,
+                entity=entity,
+                cat_position=cat_position,
+                radius=radius,
+            )
+
             if observation is None:
                 continue
+
             entity_id = observation.entity_id
+
             if entity_id in seen_ids:
                 continue
-            seen_ids.add(entity_id)
-            detected.append(observation)
-        cat_layer = getattr(cat, 'current_layer', None)
-        for quantum_box in getattr(universe, 'quantum_boxes', []):
-            box_layer = getattr(quantum_box, 'current_layer', None)
-            if cat_layer is not None and box_layer is not None and (box_layer != cat_layer):
+
+            seen_ids.add(
+                entity_id
+            )
+            detected.append(
+                observation
+            )
+
+        cat_layer = getattr(
+            cat,
+            "current_layer",
+            None,
+        )
+
+        for quantum_box in getattr(
+            universe,
+            "quantum_boxes",
+            [],
+        ):
+            box_layer = getattr(
+                quantum_box,
+                "current_layer",
+                None,
+            )
+
+            if (
+                cat_layer is not None
+                and box_layer is not None
+                and box_layer != cat_layer
+            ):
                 continue
-            observation = cls._sniff_entity(cat=cat, entity=quantum_box, cat_position=cat_position, radius=radius)
+
+            observation = cls._sniff_entity(
+                cat=cat,
+                entity=quantum_box,
+                cat_position=cat_position,
+                radius=radius,
+            )
+
             if observation is None:
                 continue
+
             entity_id = observation.entity_id
+
             if entity_id in seen_ids:
                 continue
-            seen_ids.add(entity_id)
-            detected.append(observation)
-        ambient = cls._sniff_ambient(cat=cat, universe=universe)
+
+            seen_ids.add(
+                entity_id
+            )
+            detected.append(
+                observation
+            )
+
+        ambient = cls._sniff_ambient(
+            cat=cat,
+            universe=universe,
+        )
+
         detected.sort(
-            key=lambda item: item.perceived_intensity,
+            key=lambda item: (
+                item.perceived_intensity
+            ),
             reverse=True,
         )
+
         ozone_detected = any(
-            float(
-                item.components.get(
-                    'ozone',
-                    0.0,
-                )
+            item.components.amount(
+                "ozone"
             ) > 0.15
             for item in detected
         )
+
         return CatOlfactionState(
             cat=cat.name,
             radius=radius,
@@ -74,57 +171,129 @@ class CatOlfaction:
         )
 
     @classmethod
-    def _sniff_entity(cls, cat, entity, cat_position, radius):
-        profile = cls._get(entity, 'aroma')
-        if not isinstance(profile, AromaProfile):
+    def _sniff_entity(
+        cls,
+        cat,
+        entity,
+        cat_position,
+        radius,
+    ):
+        profile = cls._get(
+            entity,
+            "aroma",
+        )
+
+        if not isinstance(
+            profile,
+            AromaProfile,
+        ):
             return None
-        position = cls._position(cls._get(entity, 'position'))
+
+        position = cls._position(
+            cls._get(
+                entity,
+                "position",
+            )
+        )
+
         if position is None:
             return None
-        distance = cls._distance(cat_position, position)
+
+        distance = cls._distance(
+            cat_position,
+            position,
+        )
+
         if distance > radius:
             return None
+
         components = profile.current()
-        if not components:
+
+        if components.is_empty:
             return None
-        distance_factor = 1.0 / (1.0 + distance)
-        perceived = {name: float(value) * distance_factor for name, value in components.items()}
-        recognition = CatKnowledge.recognize_aroma(cat, components)
-        identity = profile.identity
+
+        distance_factor = (
+            1.0
+            / (
+                1.0
+                + distance
+            )
+        )
+
+        perceived = components.scaled(
+            distance_factor
+        )
+
+        recognition = (
+            CatKnowledge.recognize_aroma(
+                cat,
+                components,
+            )
+        )
+
         return CatDetectedAroma(
             entity_id=cls._entity_id(
                 entity
             ),
-            actual_identity=identity,
+            actual_identity=profile.identity,
             position=position,
             distance=distance,
             components=perceived,
             raw_components=components,
-            perceived_intensity=sum(
-                perceived.values()
+            perceived_intensity=(
+                perceived.total_intensity
             ),
             recognition=recognition,
         )
 
     @classmethod
-    def _sniff_ambient(cls, cat, universe):
-        if getattr(cat, 'current_layer', None) != 'meeting_place':
+    def _sniff_ambient(
+        cls,
+        cat,
+        universe,
+    ):
+        if (
+            getattr(
+                cat,
+                "current_layer",
+                None,
+            )
+            != "meeting_place"
+        ):
             return None
-        meeting_place = getattr(universe, 'meeting_place', None)
+
+        meeting_place = getattr(
+            universe,
+            "meeting_place",
+            None,
+        )
+
         if meeting_place is None:
             return None
+
         ambient = getattr(
             meeting_place,
-            'ambient_aroma',
+            "ambient_aroma",
             None,
         )
 
         if ambient is None:
             return None
 
-        profile = dict(
-            ambient.profile or {}
+        profile = getattr(
+            ambient,
+            "profile",
+            None,
         )
+
+        if not isinstance(
+            profile,
+            AromaComposition,
+        ):
+            raise TypeError(
+                "Ambient aroma profile must use "
+                "AromaComposition."
+            )
 
         recognition = (
             CatKnowledge.recognize_aroma(
@@ -134,31 +303,77 @@ class CatOlfaction:
         )
 
         return CatAmbientAroma(
-            source=ambient.dominant_source,
+            source=(
+                ambient.dominant_source
+            ),
             components=profile,
             recognition=recognition,
         )
 
     @staticmethod
-    def _get(entity, key):
-        return getattr(entity, key, None)
+    def _get(
+        entity,
+        key,
+    ):
+        return getattr(
+            entity,
+            key,
+            None,
+        )
 
     @classmethod
-    def _entity_id(cls, entity):
-        return cls._get(entity, 'name') or cls._get(entity, 'id') or f'entity_{id(entity)}'
+    def _entity_id(
+        cls,
+        entity,
+    ):
+        return (
+            cls._get(
+                entity,
+                "name",
+            )
+            or cls._get(
+                entity,
+                "id",
+            )
+            or f"entity_{id(entity)}"
+        )
 
     @staticmethod
     def _position(position):
         if position is None:
             return None
-        if not isinstance(position, SpatialVector3):
+
+        if not isinstance(
+            position,
+            SpatialVector3,
+        ):
             return None
+
         return position
 
     @staticmethod
-    def _distance(first, second):
-        if not isinstance(first, SpatialVector3):
-            raise TypeError("Cat olfaction origin must be a SpatialVector3 object.")
-        if not isinstance(second, SpatialVector3):
-            raise TypeError("Cat olfaction target must be a SpatialVector3 object.")
-        return first.distance_to(second)
+    def _distance(
+        first,
+        second,
+    ):
+        if not isinstance(
+            first,
+            SpatialVector3,
+        ):
+            raise TypeError(
+                "Cat olfaction origin must be "
+                "a SpatialVector3 object."
+            )
+
+        if not isinstance(
+            second,
+            SpatialVector3,
+        ):
+            raise TypeError(
+                "Cat olfaction target must be "
+                "a SpatialVector3 object."
+            )
+
+        return first.distance_to(
+            second
+        )

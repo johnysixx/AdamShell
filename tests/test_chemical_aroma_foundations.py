@@ -1,4 +1,5 @@
 import unittest
+from universe.aroma_composition import AromaComposition
 
 from universe.universe import Universe
 from multiverse import UniverseRegistry
@@ -42,9 +43,9 @@ class ChemicalAromaFoundationsTests(
         )
 
         self.assertGreater(
-            rum.aroma_profile[
+            rum.aroma_profile.amount(
                 "berry"
-            ],
+            ),
             0.0
         )
 
@@ -103,10 +104,12 @@ class ChemicalAromaFoundationsTests(
         cats.add_surface_aroma(
             cat=cat,
             source="raspberry_rum",
-            components={
-                "berry": 1.0,
-                "ethanol": 0.7
-            },
+            components=(
+                AromaComposition.from_pairs(
+                    ("berry", 1.0),
+                    ("ethanol", 0.7),
+                )
+            ),
             intensity=0.8
         )
 
@@ -115,12 +118,12 @@ class ChemicalAromaFoundationsTests(
         )
 
         self.assertGreater(
-            current["cat"],
+            current.amount("cat"),
             0.0
         )
 
         self.assertGreater(
-            current["berry"],
+            current.amount("berry"),
             0.0
         )
 
@@ -134,20 +137,20 @@ class ChemicalAromaFoundationsTests(
     ):
         profile = AromaProfile(
             identity="test",
-            base_components={"cat": 1.0},
+            base_components=AromaComposition.from_pairs(("cat", 1.0)),
         )
 
         profile.add_surface(
             source="fish",
-            components={"fish": 1.0},
+            components=AromaComposition.from_pairs(("fish", 1.0)),
             intensity=1.0,
         )
 
-        before = profile.current()["fish"]
+        before = profile.current().amount("fish")
 
         profile.decay(ticks=10)
 
-        after = profile.current()["fish"]
+        after = profile.current().amount("fish")
 
         self.assertLess(
             after,
@@ -174,7 +177,7 @@ class ChemicalAromaFoundationsTests(
         )
 
         self.assertGreater(
-            aroma["ozone"],
+            aroma.amount("ozone"),
             0.9
         )
 

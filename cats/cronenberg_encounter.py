@@ -423,7 +423,7 @@ class CatCronenbergEncounter:
 
         components = aroma.current()
 
-        if not components:
+        if components.is_empty:
             return None
 
         return CatKnowledge.learn_aroma(

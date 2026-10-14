@@ -1,5 +1,6 @@
 from core.entity.components import SpatialVector3
 import unittest
+from universe.aroma_composition import AromaComposition
 
 from cats.cat_scent_direction_state import (
     CatScentTrailDirection,
@@ -97,7 +98,7 @@ class CatKnownScentTargetObjectTests(
             recognized_identity=(
                 "cat:pazuzu"
             ),
-            components={},
+            components=AromaComposition.empty(),
             perceived_intensity=0.8,
             universe_tick=10,
         )

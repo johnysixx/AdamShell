@@ -1,5 +1,6 @@
 from core.entity.components import SpatialVector3
 import unittest
+from universe.aroma_composition import AromaComposition
 
 from multiverse import UniverseRegistry
 from universe.universe import Universe
@@ -49,10 +50,12 @@ class CatAmbientAromaObjectTests(
             .ambient_aroma
         )
 
-        ambient.profile = {
-            "berry": 1.0,
-            "ethanol": 0.5,
-        }
+        ambient.profile = (
+            AromaComposition.from_pairs(
+                ("berry", 1.0),
+                ("ethanol", 0.5),
+            )
+        )
 
         ambient.dominant_source = (
             "raspberry_rum"
@@ -100,12 +103,23 @@ class CatAmbientAromaObjectTests(
             "raspberry_rum",
         )
 
-        self.assertEqual(
+        self.assertIsInstance(
             ambient.components,
-            {
-                "berry": 1.0,
-                "ethanol": 0.5,
-            },
+            AromaComposition,
+        )
+
+        self.assertEqual(
+            ambient.components.amount(
+                "berry"
+            ),
+            1.0,
+        )
+
+        self.assertEqual(
+            ambient.components.amount(
+                "ethanol"
+            ),
+            0.5,
         )
 
         self.assertIsInstance(

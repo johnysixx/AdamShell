@@ -1,5 +1,6 @@
 from core.entity.components import SpatialVector3
 import unittest
+from universe.aroma_composition import AromaComposition
 
 from universe.universe import Universe
 from cats.cats import Cats
@@ -41,9 +42,11 @@ class CatScentDestinationPlanObjectTests(
             position=SpatialVector3(x=5.0, y=0.0, z=0.0),
             source_id="test_trace",
             recognized_identity="cat:pazuzu",
-            components={
-                "cat": 1.0,
-            },
+            components=(
+                AromaComposition.from_pairs(
+                    ("cat", 1.0),
+                )
+            ),
             perceived_intensity=0.8,
             universe_tick=10,
         )

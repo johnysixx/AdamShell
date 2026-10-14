@@ -25,7 +25,7 @@ class CatBoxAromaExchangeTests(unittest.TestCase):
         self.universe.cat_box_transfer.transfer_cat(cat=self.pazuzu, source_box_id=self.source.id, target_box_id=self.target.id)
         self.assertTrue(hasattr(self.source, 'aroma'))
         aroma = self.source.aroma.current()
-        self.assertGreater(aroma['individual_cat:pazuzu'], 0.0)
+        self.assertGreater(aroma.amount("individual_cat:pazuzu"), 0.0)
 
     def test_next_cat_picks_up_previous_cat_scent(self):
         self.universe.cat_box_transfer.transfer_cat(cat=self.pazuzu, source_box_id=self.source.id, target_box_id=self.target.id)
@@ -33,7 +33,7 @@ class CatBoxAromaExchangeTests(unittest.TestCase):
         self.universe.cat_box_transfer.pair_boxes(self.source, second_target)
         self.universe.cat_box_transfer.transfer_cat(cat=self.garfield, source_box_id=self.source.id, target_box_id=second_target.id)
         aroma = self.garfield.aroma.current()
-        self.assertGreater(aroma.get('individual_cat:pazuzu', 0.0), 0.0)
-        self.assertGreater(aroma.get('individual_cat:garfield', 0.0), 0.0)
+        self.assertGreater(aroma.amount("individual_cat:pazuzu"), 0.0)
+        self.assertGreater(aroma.amount("individual_cat:garfield"), 0.0)
 if __name__ == '__main__':
     unittest.main()

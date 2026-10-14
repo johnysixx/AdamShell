@@ -22,14 +22,14 @@ class AromaResidueTests(unittest.TestCase):
         result = AromaResidue.transfer(source_profile=self.pazuzu.aroma, target=box, source_identity='pazuzu', fraction=0.2)
         self.assertTrue(result.transferred)
         aroma = box.aroma.current()
-        self.assertGreater(aroma['cat'], 0.0)
+        self.assertGreater(aroma.amount("cat"), 0.0)
 
     def test_residue_fades(self):
         box = self.universe.create_quantum_box()
         AromaResidue.transfer(self.pazuzu.aroma, box, 'pazuzu', fraction=0.2)
-        before = box.aroma.current()['cat']
+        before = box.aroma.current().amount("cat")
         AromaResidue.decay(box, ticks=20)
-        after = box.aroma.current()['cat']
+        after = box.aroma.current().amount("cat")
         self.assertLess(after, before)
 
     def test_other_cat_can_smell_residue_on_box(self):

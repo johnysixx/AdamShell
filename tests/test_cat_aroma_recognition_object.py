@@ -1,4 +1,5 @@
 import unittest
+from universe.aroma_composition import AromaComposition
 
 from universe.universe import Universe
 from cats.cats import Cats
@@ -32,9 +33,9 @@ class CatAromaRecognitionObjectTests(
         recognition = (
             CatKnowledge.recognize_aroma(
                 self.cat,
-                {
-                    "ozone": 1.0,
-                },
+                AromaComposition.from_pairs(
+                    ("ozone", 1.0),
+                ),
             )
         )
 
@@ -76,18 +77,20 @@ class CatAromaRecognitionObjectTests(
         CatKnowledge.learn_aroma(
             cat=self.cat,
             identity="cronenberg",
-            components={
-                "ozone": 1.0,
-            },
+            components=(
+                AromaComposition.from_pairs(
+                    ("ozone", 1.0),
+                )
+            ),
             source="test",
         )
 
         recognition = (
             CatKnowledge.recognize_aroma(
                 self.cat,
-                {
-                    "ozone": 1.0,
-                },
+                AromaComposition.from_pairs(
+                    ("ozone", 1.0),
+                ),
             )
         )
 
@@ -129,20 +132,22 @@ class CatAromaRecognitionObjectTests(
         CatKnowledge.learn_aroma(
             cat=self.cat,
             identity="known_cat",
-            components={
-                "cat": 1.0,
-                "fur": 0.8,
-            },
+            components=(
+                AromaComposition.from_pairs(
+                    ("cat", 1.0),
+                    ("fur", 0.8),
+                )
+            ),
             source="test",
         )
 
         recognition = (
             CatKnowledge.recognize_aroma(
                 self.cat,
-                {
-                    "cat": 1.0,
-                    "fur": 0.8,
-                },
+                AromaComposition.from_pairs(
+                    ("cat", 1.0),
+                    ("fur", 0.8),
+                ),
             )
         )
 

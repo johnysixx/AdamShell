@@ -1,5 +1,6 @@
 from core.entity.components import SpatialVector3
 import unittest
+from universe.aroma_composition import AromaComposition
 
 from universe.universe import Universe
 from cats.cats import Cats
@@ -98,30 +99,49 @@ class CatDetectedAromaObjectTests(
             0.0,
         )
 
-    def test_chemical_component_maps_remain_dynamic_maps(
+    def test_chemical_components_are_object_state(
         self
     ):
         detected = self.detected()
 
         self.assertIsInstance(
             detected.components,
-            dict,
+            AromaComposition,
         )
 
         self.assertIsInstance(
             detected.raw_components,
-            dict,
+            AromaComposition,
         )
 
-        self.assertIn(
-            "cat",
+        for composition in (
             detected.components,
+            detected.raw_components,
+        ):
+            self.assertFalse(
+                hasattr(
+                    composition,
+                    "get",
+                )
+            )
+
+            with self.assertRaises(TypeError):
+                _ = composition["cat"]
+
+        self.assertGreater(
+            detected.components.amount(
+                "cat"
+            ),
+            0.0,
         )
 
-        self.assertIn(
-            "cat",
-            detected.raw_components,
+        self.assertGreater(
+            detected.raw_components.amount(
+                "cat"
+            ),
+            0.0,
         )
+
 
 
 if __name__ == "__main__":

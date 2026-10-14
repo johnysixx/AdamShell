@@ -1,4 +1,5 @@
 import unittest
+from universe.aroma_composition import AromaComposition
 
 from universe.aroma_profile import (
     AromaProfile,
@@ -12,10 +13,12 @@ class AromaProfileObjectStateTests(unittest.TestCase):
     def test_profile_is_live_object_state(self):
         profile = AromaProfile(
             identity="cat:pazuzu",
-            base_components={
-                "cat": 1.0,
-                "fur": 0.8,
-            },
+            base_components=(
+                AromaComposition.from_pairs(
+                    ("cat", 1.0),
+                    ("fur", 0.8),
+                )
+            ),
         )
 
         self.assertEqual(
@@ -23,7 +26,7 @@ class AromaProfileObjectStateTests(unittest.TestCase):
             "cat:pazuzu",
         )
         self.assertEqual(
-            profile.base_components["cat"],
+            profile.base_components.amount("cat"),
             1.0,
         )
         self.assertEqual(
@@ -34,12 +37,16 @@ class AromaProfileObjectStateTests(unittest.TestCase):
     def test_surface_residue_is_object_state(self):
         profile = AromaProfile(
             identity="cat:pazuzu",
-            base_components={"cat": 1.0},
+            base_components=AromaComposition.from_pairs(("cat", 1.0)),
         )
 
         residue = profile.add_surface(
             source="raspberry_rum",
-            components={"raspberry": 1.0},
+            components=(
+                AromaComposition.from_pairs(
+                    ("raspberry", 1.0),
+                )
+            ),
             intensity=0.8,
             decay_rate=0.1,
         )
@@ -61,7 +68,7 @@ class AromaProfileObjectStateTests(unittest.TestCase):
         with self.assertRaises(TypeError):
             AromaProfile(
                 identity="legacy",
-                base_components={},
+                base_components=AromaComposition.empty(),
                 surface_residues=[
                     {
                         "source": "fish",
@@ -89,7 +96,7 @@ class AromaProfileObjectStateTests(unittest.TestCase):
     def test_aroma_residue_rejects_dict_target(self):
         profile = AromaProfile(
             identity="cat:pazuzu",
-            base_components={"cat": 1.0},
+            base_components=AromaComposition.from_pairs(("cat", 1.0)),
         )
 
         with self.assertRaises(TypeError):
@@ -102,11 +109,15 @@ class AromaProfileObjectStateTests(unittest.TestCase):
     def test_to_dict_returns_detached_snapshot(self):
         profile = AromaProfile(
             identity="cat:pazuzu",
-            base_components={"cat": 1.0},
+            base_components=AromaComposition.from_pairs(("cat", 1.0)),
         )
         residue = profile.add_surface(
             source="fish",
-            components={"fish": 0.5},
+            components=(
+                AromaComposition.from_pairs(
+                    ("fish", 0.5),
+                )
+            ),
         )
 
         snapshot = profile.to_dict()
@@ -114,11 +125,11 @@ class AromaProfileObjectStateTests(unittest.TestCase):
         snapshot["surface_residues"][0]["components"]["fish"] = 99.0
 
         self.assertEqual(
-            profile.base_components["cat"],
+            profile.base_components.amount("cat"),
             1.0,
         )
         self.assertEqual(
-            residue.components["fish"],
+            residue.components.amount("fish"),
             0.5,
         )
 
