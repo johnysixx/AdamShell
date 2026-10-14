@@ -13,6 +13,9 @@ from universe.supernova_enrichment import (
 from universe.supernova_enrichment_state import (
     SupernovaEnrichmentState,
 )
+from universe.supernova_enrichment_result_state import (
+    SupernovaEnrichmentResult,
+)
 from universe.supernova_enrichment_process_state import (
     SupernovaEnrichmentProcessState,
 )
@@ -272,26 +275,57 @@ class SupernovaEnrichmentObjectStateTests(
             "first_star",
         )
 
-    def test_public_result_remains_dict_boundary(
+    def test_runtime_result_is_object_and_snapshot_is_dict(
         self
     ):
-        _, _, result = self._enriched_process()
+        _, process, result = self._enriched_process()
 
-        self.assertIsInstance(result, dict)
         self.assertIsInstance(
-            result["supernova_enrichment_state"],
+            result,
+            SupernovaEnrichmentResult,
+        )
+        self._assert_object_only(
+            result,
+            "state",
+        )
+
+        self.assertIs(
+            result.supernova_enrichment_state,
+            process.supernova_enrichment_state,
+        )
+        self.assertIsInstance(
+            result.supernovae,
+            tuple,
+        )
+        self.assertIsInstance(
+            result.enriched_clouds,
+            tuple,
+        )
+        self.assertIs(
+            result.supernovae[0],
+            process.supernovae[0],
+        )
+        self.assertIs(
+            result.enriched_clouds[0],
+            process.enriched_clouds[0],
+        )
+
+        snapshot = result.to_dict()
+
+        self.assertIsInstance(
+            snapshot["supernova_enrichment_state"],
             dict,
         )
         self.assertIsInstance(
-            result["supernovae"],
+            snapshot["supernovae"],
             list,
         )
         self.assertIsInstance(
-            result["enriched_clouds"],
+            snapshot["enriched_clouds"],
             list,
         )
         self.assertTrue(
-            result["supernova_enrichment_state"][
+            snapshot["supernova_enrichment_state"][
                 "supernova_exploded"
             ]
         )
@@ -303,13 +337,15 @@ class SupernovaEnrichmentObjectStateTests(
             self._enriched_process()
         )
 
-        result["supernova_enrichment_state"][
+        snapshot = result.to_dict()
+
+        snapshot["supernova_enrichment_state"][
             "supernova_exploded"
         ] = False
-        result["supernovae"][0][
+        snapshot["supernovae"][0][
             "released_elements"
         ].append("fake_element")
-        result["enriched_clouds"][0][
+        snapshot["enriched_clouds"][0][
             "composition"
         ]["iron"]["atomic_number"] = 999
 
@@ -352,9 +388,9 @@ class SupernovaEnrichmentObjectStateTests(
             .stars_available
         )
         self.assertFalse(
-            result["supernova_enrichment_state"][
-                "stars_available"
-            ]
+            result
+            .supernova_enrichment_state
+            .stars_available
         )
 
     def test_missing_iron_records_available_stars(
@@ -377,14 +413,14 @@ class SupernovaEnrichmentObjectStateTests(
         self.assertTrue(state.stars_available)
         self.assertFalse(state.iron_available)
         self.assertTrue(
-            result["supernova_enrichment_state"][
-                "stars_available"
-            ]
+            result
+            .supernova_enrichment_state
+            .stars_available
         )
         self.assertFalse(
-            result["supernova_enrichment_state"][
-                "iron_available"
-            ]
+            result
+            .supernova_enrichment_state
+            .iron_available
         )
 
     def test_rejects_legacy_element_dict(self):

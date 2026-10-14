@@ -9,6 +9,9 @@ from universe.supernova_enrichment_state import (
 from universe.supernova_enrichment_process_state import (
     SupernovaEnrichmentProcessState,
 )
+from universe.supernova_enrichment_result_state import (
+    SupernovaEnrichmentResult,
+)
 
 
 class SupernovaEnrichment:
@@ -25,6 +28,7 @@ class SupernovaEnrichment:
         self.supernova_enrichment_state = (
             SupernovaEnrichmentState()
         )
+        self.result = None
 
         self.public_state = self._build_public_state()
 
@@ -96,7 +100,21 @@ class SupernovaEnrichment:
                 "no stars available"
             )
             self.write_to_world()
-            return self.public_state
+
+            self.result = SupernovaEnrichmentResult(
+                state=self.state,
+                supernovae=tuple(
+                    self.supernovae
+                ),
+                enriched_clouds=tuple(
+                    self.enriched_clouds
+                ),
+                supernova_enrichment_state=(
+                    self.supernova_enrichment_state
+                ),
+            )
+
+            return self.result
 
         for star in first_stars:
             if not isinstance(star, PrimordialStar):
@@ -118,7 +136,21 @@ class SupernovaEnrichment:
                 "iron has not been forged yet"
             )
             self.write_to_world()
-            return self.public_state
+
+            self.result = SupernovaEnrichmentResult(
+                state=self.state,
+                supernovae=tuple(
+                    self.supernovae
+                ),
+                enriched_clouds=tuple(
+                    self.enriched_clouds
+                ),
+                supernova_enrichment_state=(
+                    self.supernova_enrichment_state
+                ),
+            )
+
+            return self.result
 
         for element in elements.values():
             if not isinstance(
@@ -188,7 +220,20 @@ class SupernovaEnrichment:
         print("ENRICHED CLOUDS FORMED")
         print("STELLAR SYSTEM FORMATION BECOMES POSSIBLE")
 
-        return self.public_state
+        self.result = SupernovaEnrichmentResult(
+            state=self.state,
+            supernovae=tuple(
+                self.supernovae
+            ),
+            enriched_clouds=tuple(
+                self.enriched_clouds
+            ),
+            supernova_enrichment_state=(
+                self.supernova_enrichment_state
+            ),
+        )
+
+        return self.result
 
     def record_history(self):
         history = self.universe.world.setdefault(

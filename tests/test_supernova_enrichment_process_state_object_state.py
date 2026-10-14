@@ -69,9 +69,9 @@ class SupernovaEnrichmentProcessStateObjectStateTests(
             process.state,
             SupernovaEnrichmentProcessState.FAILED,
         )
-        self.assertEqual(
-            result["state"],
-            "failed",
+        self.assertIs(
+            result.state,
+            SupernovaEnrichmentProcessState.FAILED,
         )
 
     def test_missing_iron_sets_failed_enum(self):
@@ -87,9 +87,9 @@ class SupernovaEnrichmentProcessStateObjectStateTests(
             process.state,
             SupernovaEnrichmentProcessState.FAILED,
         )
-        self.assertEqual(
-            result["state"],
-            "failed",
+        self.assertIs(
+            result.state,
+            SupernovaEnrichmentProcessState.FAILED,
         )
 
     def test_enrichment_sets_enriched_enum(self):
@@ -108,9 +108,9 @@ class SupernovaEnrichmentProcessStateObjectStateTests(
             process.state,
             SupernovaEnrichmentProcessState.ENRICHED,
         )
-        self.assertEqual(
-            result["state"],
-            "enriched",
+        self.assertIs(
+            result.state,
+            SupernovaEnrichmentProcessState.ENRICHED,
         )
 
     def test_string_state_is_rejected(self):
