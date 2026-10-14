@@ -11,6 +11,9 @@ from universe.stellar_system_state import (
 from universe.stellar_systems_process_state import (
     StellarSystemsProcessState,
 )
+from universe.stellar_system_formation_result_state import (
+    StellarSystemFormationResult,
+)
 
 
 class StellarSystems:
@@ -24,6 +27,7 @@ class StellarSystems:
         self.systems = []
 
         self.system_state = StellarSystemFormationState()
+        self.result = None
 
         self.public_state = self._build_public_state()
 
@@ -91,7 +95,16 @@ class StellarSystems:
 
             print("STELLAR SYSTEM FORMATION FAILED: no enriched clouds available")
             self.write_to_world()
-            return self.public_state
+
+            self.result = StellarSystemFormationResult(
+                state=self.state,
+                systems=tuple(
+                    self.systems
+                ),
+                system_state=self.system_state,
+            )
+
+            return self.result
 
         source_cloud = system_forming_clouds[0]
         composition = source_cloud.composition
@@ -181,7 +194,15 @@ class StellarSystems:
         print("PROTOPLANETARY DISKS CREATED")
         print("PLANET FORMATION BECOMES POSSIBLE")
 
-        return self.public_state
+        self.result = StellarSystemFormationResult(
+            state=self.state,
+            systems=tuple(
+                self.systems
+            ),
+            system_state=self.system_state,
+        )
+
+        return self.result
 
     def record_history(self):
         history = self.universe.world.setdefault("cosmic_history", [])

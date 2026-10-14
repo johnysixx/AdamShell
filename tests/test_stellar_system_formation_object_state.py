@@ -10,6 +10,9 @@ from universe.stellar_system_objects import (
 from universe.stellar_system_state import (
     StellarSystemFormationState,
 )
+from universe.stellar_system_formation_result_state import (
+    StellarSystemFormationResult,
+)
 from universe.stellar_systems import StellarSystems
 from universe.stellar_systems_process_state import (
     StellarSystemsProcessState,
@@ -135,19 +138,45 @@ class StellarSystemFormationObjectStateTests(
             ProtoplanetaryDisk,
         )
 
-    def test_public_result_remains_dict_boundary(
+    def test_runtime_result_is_object_and_snapshot_is_dict(
         self
     ):
-        _, _, result = self._formed_process()
+        _, process, result = self._formed_process()
 
-        self.assertIsInstance(result, dict)
         self.assertIsInstance(
-            result["system_state"],
+            result,
+            StellarSystemFormationResult,
+        )
+        self._assert_object_only(
+            result,
+            "state",
+        )
+
+        self.assertIs(
+            result.system_state,
+            process.system_state,
+        )
+        self.assertIsInstance(
+            result.systems,
+            tuple,
+        )
+        self.assertIs(
+            result.systems[0],
+            process.systems[0],
+        )
+
+        snapshot = result.to_dict()
+
+        self.assertIsInstance(
+            snapshot["system_state"],
             dict,
         )
-        self.assertIsInstance(result["systems"], list)
+        self.assertIsInstance(
+            snapshot["systems"],
+            list,
+        )
         self.assertTrue(
-            result["system_state"][
+            snapshot["system_state"][
                 "stellar_systems_formed"
             ]
         )
@@ -157,10 +186,12 @@ class StellarSystemFormationObjectStateTests(
     ):
         _, process, result = self._formed_process()
 
-        result["system_state"][
+        snapshot = result.to_dict()
+
+        snapshot["system_state"][
             "stellar_systems_formed"
         ] = False
-        result["systems"][0][
+        snapshot["systems"][0][
             "protoplanetary_disk"
         ]["available_elements"].append("fake")
 
@@ -217,9 +248,9 @@ class StellarSystemFormationObjectStateTests(
             process.system_state.stellar_systems_formed
         )
         self.assertFalse(
-            result["system_state"][
-                "stellar_systems_formed"
-            ]
+            result
+            .system_state
+            .stellar_systems_formed
         )
 
     def test_planet_process_uses_solar_system_boundary(
