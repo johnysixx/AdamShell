@@ -10,6 +10,13 @@ from universe.cosmic_clouds_process_state import (
 from universe.cosmic_objects import StellarMaterialCloud
 from universe.primordial_objects import PrimordialCosmicComponent
 from universe.stars import Stars
+from universe.stars_process_state import (
+    StarsProcessState,
+)
+from universe.stellar_formation_result_state import (
+    CosmicCloudFormationResult,
+    StarFormationResult,
+)
 from universe.universe import Universe
 
 
@@ -110,17 +117,42 @@ class CosmicCloudObjectStateTests(unittest.TestCase):
             list,
         )
 
-    def test_public_result_remains_dict_boundary(self):
-        _, _, result = self._formed_clouds()
+    def test_runtime_result_is_object_and_snapshot_is_dict(self):
+        _, process, result = self._formed_clouds()
 
-        self.assertIsInstance(result, dict)
         self.assertIsInstance(
-            result["cosmic_cloud_state"],
+            result,
+            CosmicCloudFormationResult,
+        )
+        self._assert_object_only(
+            result,
+            "state",
+        )
+        self.assertIs(
+            result.cosmic_cloud_state,
+            process.cosmic_cloud_state,
+        )
+        self.assertIs(
+            result.clouds[0],
+            process.clouds[0],
+        )
+        self.assertIsInstance(
+            result.clouds,
+            tuple,
+        )
+
+        snapshot = result.to_dict()
+
+        self.assertIsInstance(
+            snapshot["cosmic_cloud_state"],
             dict,
         )
-        self.assertIsInstance(result["clouds"], list)
+        self.assertIsInstance(
+            snapshot["clouds"],
+            list,
+        )
         self.assertTrue(
-            result["cosmic_cloud_state"][
+            snapshot["cosmic_cloud_state"][
                 "germinal_clouds_formed"
             ]
         )
@@ -128,10 +160,12 @@ class CosmicCloudObjectStateTests(unittest.TestCase):
     def test_public_result_is_deeply_detached(self):
         _, process, result = self._formed_clouds()
 
-        result["cosmic_cloud_state"][
+        snapshot = result.to_dict()
+
+        snapshot["cosmic_cloud_state"][
             "germinal_clouds_formed"
         ] = False
-        result["clouds"][0]["composition"][
+        snapshot["clouds"][0]["composition"][
             "hydrogen"
         ] = "missing"
 
@@ -204,9 +238,8 @@ class CosmicCloudObjectStateTests(unittest.TestCase):
             process.cosmic_cloud_state.helium_available
         )
         self.assertFalse(
-            result["cosmic_cloud_state"][
-                "germinal_clouds_formed"
-            ]
+            result.cosmic_cloud_state
+            .germinal_clouds_formed
         )
 
     def test_missing_helium_records_available_hydrogen(self):
@@ -231,9 +264,8 @@ class CosmicCloudObjectStateTests(unittest.TestCase):
             process.cosmic_cloud_state.helium_available
         )
         self.assertTrue(
-            result["cosmic_cloud_state"][
-                "hydrogen_available"
-            ]
+            result.cosmic_cloud_state
+            .hydrogen_available
         )
 
     def test_downstream_star_formation_works(self):
@@ -242,7 +274,14 @@ class CosmicCloudObjectStateTests(unittest.TestCase):
         process = Stars(universe)
         result = process.form_first_stars()
 
-        self.assertEqual(result["state"], "formed")
+        self.assertIsInstance(
+            result,
+            StarFormationResult,
+        )
+        self.assertIs(
+            result.state,
+            StarsProcessState.FORMED,
+        )
         self.assertTrue(
             process.stellar_state.first_stars_formed
         )

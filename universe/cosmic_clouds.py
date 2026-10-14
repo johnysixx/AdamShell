@@ -6,6 +6,9 @@ from universe.cosmic_clouds_process_state import (
     CosmicCloudsProcessState,
 )
 from universe.cosmic_objects import StellarMaterialCloud
+from universe.stellar_formation_result_state import (
+    CosmicCloudFormationResult,
+)
 from universe.primordial_objects import PrimordialCosmicComponent
 
 
@@ -22,6 +25,7 @@ class CosmicClouds:
         self.cosmic_cloud_state = (
             CosmicCloudFormationState()
         )
+        self.result = None
 
         self.public_state = self._build_public_state()
 
@@ -85,7 +89,18 @@ class CosmicClouds:
                 "missing hydrogen or helium"
             )
             self.write_to_world()
-            return self.public_state
+
+            self.result = CosmicCloudFormationResult(
+                state=self.state,
+                clouds=tuple(
+                    self.clouds
+                ),
+                cosmic_cloud_state=(
+                    self.cosmic_cloud_state
+                ),
+            )
+
+            return self.result
 
         hydrogen = primordial_elements["hydrogen"]
 
@@ -108,7 +123,18 @@ class CosmicClouds:
                 "missing hydrogen or helium"
             )
             self.write_to_world()
-            return self.public_state
+
+            self.result = CosmicCloudFormationResult(
+                state=self.state,
+                clouds=tuple(
+                    self.clouds
+                ),
+                cosmic_cloud_state=(
+                    self.cosmic_cloud_state
+                ),
+            )
+
+            return self.result
 
         helium = primordial_elements["helium"]
 
@@ -165,7 +191,17 @@ class CosmicClouds:
         print("HYDROGEN AND HELIUM BEGIN TO GATHER")
         print("STAR FORMATION POTENTIAL CREATED")
 
-        return self.public_state
+        self.result = CosmicCloudFormationResult(
+            state=self.state,
+            clouds=tuple(
+                self.clouds
+            ),
+            cosmic_cloud_state=(
+                self.cosmic_cloud_state
+            ),
+        )
+
+        return self.result
 
     def record_history(self):
         history = self.universe.world.setdefault(

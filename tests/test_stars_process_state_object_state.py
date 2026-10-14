@@ -33,9 +33,9 @@ class StarsProcessStateObjectStateTests(
             process.state,
             StarsProcessState.FAILED,
         )
-        self.assertEqual(
-            result["state"],
-            "failed",
+        self.assertIs(
+            result.state,
+            StarsProcessState.FAILED,
         )
 
     def test_formation_sets_formed_enum(self):
@@ -57,9 +57,9 @@ class StarsProcessStateObjectStateTests(
             process.state,
             StarsProcessState.FORMED,
         )
-        self.assertEqual(
-            result["state"],
-            "formed",
+        self.assertIs(
+            result.state,
+            StarsProcessState.FORMED,
         )
 
     def test_string_state_is_rejected(self):

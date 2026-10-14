@@ -7,6 +7,9 @@ from universe.stellar_nucleosynthesis import (
     StellarNucleosynthesis,
 )
 from universe.stellar_state import StellarFormationState
+from universe.stellar_formation_result_state import (
+    StarFormationResult,
+)
 from universe.universe import Universe
 
 
@@ -127,19 +130,44 @@ class StellarFormationObjectStateTests(
         )
         self.assertIsInstance(universe.world, dict)
 
-    def test_public_result_remains_dict_boundary(
+    def test_runtime_result_is_object_and_snapshot_is_dict(
         self
     ):
-        _, _, result = self._formed_stars()
+        _, process, result = self._formed_stars()
 
-        self.assertIsInstance(result, dict)
         self.assertIsInstance(
-            result["stellar_state"],
+            result,
+            StarFormationResult,
+        )
+        self._assert_object_only(
+            result,
+            "state",
+        )
+        self.assertIs(
+            result.stellar_state,
+            process.stellar_state,
+        )
+        self.assertIs(
+            result.stars[0],
+            process.stars[0],
+        )
+        self.assertIsInstance(
+            result.stars,
+            tuple,
+        )
+
+        snapshot = result.to_dict()
+
+        self.assertIsInstance(
+            snapshot["stellar_state"],
             dict,
         )
-        self.assertIsInstance(result["stars"], list)
+        self.assertIsInstance(
+            snapshot["stars"],
+            list,
+        )
         self.assertTrue(
-            result["stellar_state"][
+            snapshot["stellar_state"][
                 "first_stars_formed"
             ]
         )
@@ -149,10 +177,12 @@ class StellarFormationObjectStateTests(
     ):
         _, process, result = self._formed_stars()
 
-        result["stellar_state"][
+        snapshot = result.to_dict()
+
+        snapshot["stellar_state"][
             "first_stars_formed"
         ] = False
-        result["stars"][0]["composition"][
+        snapshot["stars"][0]["composition"][
             "hydrogen"
         ] = "missing"
 

@@ -2,6 +2,9 @@ from universe.physical_record_state import CosmicHistoryEvent
 from universe.cosmic_objects import StellarMaterialCloud
 from universe.stellar_objects import PrimordialStar
 from universe.stellar_state import StellarFormationState
+from universe.stellar_formation_result_state import (
+    StarFormationResult,
+)
 from universe.stars_process_state import (
     StarsProcessState,
 )
@@ -18,6 +21,7 @@ class Stars:
         self.stars = []
 
         self.stellar_state = StellarFormationState()
+        self.result = None
 
         self.public_state = self._build_public_state()
 
@@ -80,7 +84,16 @@ class Stars:
 
             print("STAR FORMATION FAILED: no germinal clouds ready")
             self.write_to_world()
-            return self.public_state
+
+            self.result = StarFormationResult(
+                state=self.state,
+                stars=tuple(
+                    self.stars
+                ),
+                stellar_state=self.stellar_state,
+            )
+
+            return self.result
 
         self.state = StarsProcessState.FORMED
 
@@ -128,7 +141,15 @@ class Stars:
         print("HYDROGEN IGNITES INSIDE PRIMORDIAL STARS")
         print("STELLAR FUSION BECOMES POSSIBLE")
 
-        return self.public_state
+        self.result = StarFormationResult(
+            state=self.state,
+            stars=tuple(
+                self.stars
+            ),
+            stellar_state=self.stellar_state,
+        )
+
+        return self.result
 
     def record_history(self):
         history = self.universe.world.setdefault("cosmic_history", [])
