@@ -237,7 +237,7 @@ class LawRegistry:
                 event
             )
 
-            return event.to_dict()
+            return event
 
         context = dict(context or {})
 
@@ -259,7 +259,7 @@ class LawRegistry:
             f"LAW TRIGGERED: {name}"
         )
 
-        return event.to_dict()
+        return event
 
     def record_trigger(
         self,

@@ -25,7 +25,28 @@ class LawRegistryObjectStateTests(
     unittest.TestCase
 ):
 
-    def test_missing_law_history_uses_object_state(
+    def _assert_object_only(
+        self,
+        value,
+        key,
+    ):
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    value,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(TypeError):
+            _ = value[key]
+
+    def test_missing_law_returns_history_object(
         self
     ):
         registry = LawRegistry()
@@ -39,22 +60,31 @@ class LawRegistryObjectStateTests(
             .trigger_history[-1]
         )
 
-        self.assertIsInstance(
+        self.assertIs(
+            result,
             event,
+        )
+        self.assertIsInstance(
+            result,
             LawNotFoundEvent,
         )
-
         self.assertEqual(
-            event.law,
+            result.law,
             "missing-law",
         )
-
         self.assertFalse(
-            event.executed
+            result.executed
         )
 
-        self.assertEqual(
+        self._assert_object_only(
             result,
+            "law",
+        )
+
+        snapshot = result.to_dict()
+
+        self.assertEqual(
+            snapshot,
             {
                 "name": "law_not_found",
                 "law": "missing-law",
@@ -62,23 +92,14 @@ class LawRegistryObjectStateTests(
             },
         )
 
-        for mapping_method in (
-            "get",
-            "keys",
-            "items",
-            "values",
-        ):
-            self.assertFalse(
-                hasattr(
-                    event,
-                    mapping_method,
-                )
-            )
+        snapshot["law"] = "changed"
 
-        with self.assertRaises(TypeError):
-            _ = event["law"]
+        self.assertEqual(
+            result.law,
+            "missing-law",
+        )
 
-    def test_triggered_history_freezes_payloads(
+    def test_triggered_result_is_history_object(
         self
     ):
         registry = LawRegistry()
@@ -106,26 +127,33 @@ class LawRegistryObjectStateTests(
             .trigger_history[-1]
         )
 
-        self.assertIsInstance(
+        self.assertIs(
+            result,
             event,
+        )
+        self.assertIsInstance(
+            result,
             LawTriggeredEvent,
         )
 
-        self.assertEqual(
-            event.context["value"],
-            7,
+        self._assert_object_only(
+            result,
+            "law",
         )
 
         self.assertEqual(
-            event.context["items"],
+            result.context["value"],
+            7,
+        )
+        self.assertEqual(
+            result.context["items"],
             (
                 1,
                 2,
             ),
         )
-
         self.assertEqual(
-            event.result[
+            result.result[
                 "nested"
             ][
                 "value"
@@ -136,14 +164,14 @@ class LawRegistryObjectStateTests(
         with self.assertRaises(
             TypeError
         ):
-            event.context[
+            result.context[
                 "value"
             ] = 99
 
         with self.assertRaises(
             TypeError
         ):
-            event.result[
+            result.result[
                 "nested"
             ][
                 "value"
@@ -151,27 +179,12 @@ class LawRegistryObjectStateTests(
 
         context["value"] = 99
 
-        result[
-            "context"
-        ][
-            "value"
-        ] = 100
-
-        result[
-            "result"
-        ][
-            "nested"
-        ][
-            "value"
-        ] = 101
-
         self.assertEqual(
-            event.context["value"],
+            result.context["value"],
             7,
         )
-
         self.assertEqual(
-            event.result[
+            result.result[
                 "nested"
             ][
                 "value"
@@ -179,7 +192,7 @@ class LawRegistryObjectStateTests(
             7,
         )
 
-    def test_trigger_boundary_shape_stays_dict_based(
+    def test_to_dict_is_detached_boundary(
         self
     ):
         registry = LawRegistry()
@@ -200,8 +213,10 @@ class LawRegistryObjectStateTests(
             },
         )
 
+        snapshot = result.to_dict()
+
         self.assertEqual(
-            result,
+            snapshot,
             {
                 "name": "law_triggered",
                 "law": "example",
@@ -220,6 +235,33 @@ class LawRegistryObjectStateTests(
                     },
                 },
             },
+        )
+
+        snapshot[
+            "context"
+        ][
+            "value"
+        ] = 100
+
+        snapshot[
+            "result"
+        ][
+            "nested"
+        ][
+            "value"
+        ] = 101
+
+        self.assertEqual(
+            result.context["value"],
+            3,
+        )
+        self.assertEqual(
+            result.result[
+                "nested"
+            ][
+                "value"
+            ],
+            3,
         )
 
     def test_history_rejects_mapping_event(
