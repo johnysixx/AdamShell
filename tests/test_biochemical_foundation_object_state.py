@@ -6,6 +6,9 @@ from universe.biochemical_foundations import (
 from universe.biochemical_foundations_process_state import (
     BiochemicalFoundationsProcessState,
 )
+from universe.biochemical_foundation_result_state import (
+    BiochemicalFoundationResult,
+)
 from universe.biochemical_objects import (
     BiochemicalCompound,
 )
@@ -107,14 +110,19 @@ class BiochemicalFoundationObjectStateTests(
             state.fermentation_substrate_possible
         )
 
-    def test_compound_registry_stays_dict_boundary(self):
+    def test_runtime_result_keeps_compound_objects(
+        self
+    ):
         universe, process, result = self._formed_process()
 
         self.assertIs(
             universe.world["biochemical_compounds"],
             process.compounds,
         )
-        self.assertIsInstance(process.compounds, dict)
+        self.assertIsInstance(
+            process.compounds,
+            dict,
+        )
         self.assertEqual(
             set(process.compounds),
             {
@@ -124,26 +132,73 @@ class BiochemicalFoundationObjectStateTests(
                 "fermentation_substrate",
             },
         )
-        self.assertIsInstance(result, dict)
+
         self.assertIsInstance(
-            result["biochemical_state"],
-            dict,
+            result,
+            BiochemicalFoundationResult,
         )
-        self.assertIsInstance(result["compounds"], dict)
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    result,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(TypeError):
+            _ = result["state"]
+
+        self.assertIs(
+            result.biochemical_state,
+            process.biochemical_state,
+        )
+        self.assertIs(
+            result.compounds["sugars"],
+            process.compounds["sugars"],
+        )
+
+        with self.assertRaises(TypeError):
+            result.compounds[
+                "fake"
+            ] = process.compounds["sugars"]
+
         self.assertTrue(
             all(
-                isinstance(compound, BiochemicalCompound)
-                for compound in process.compounds.values()
+                isinstance(
+                    compound,
+                    BiochemicalCompound,
+                )
+                for compound
+                in result.compounds.values()
             )
+        )
+
+        snapshot = result.to_dict()
+
+        self.assertIsInstance(
+            snapshot["biochemical_state"],
+            dict,
+        )
+        self.assertIsInstance(
+            snapshot["compounds"],
+            dict,
         )
 
     def test_public_result_is_deeply_detached(self):
         _, process, result = self._formed_process()
 
-        result["biochemical_state"][
+        snapshot = result.to_dict()
+
+        snapshot["biochemical_state"][
             "sugars_possible"
         ] = False
-        result["compounds"]["sugars"][
+        snapshot["compounds"]["sugars"][
             "requires"
         ].append("fake_material")
 
@@ -172,9 +227,9 @@ class BiochemicalFoundationObjectStateTests(
             process.biochemical_state.sugars_possible
         )
         self.assertFalse(
-            result["biochemical_state"][
-                "sugars_possible"
-            ]
+            result
+            .biochemical_state
+            .sugars_possible
         )
 
     def test_formation_error_creates_cronenberg(self):

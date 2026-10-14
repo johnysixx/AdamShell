@@ -86,15 +86,38 @@ class BiochemicalCompoundDomainObjectStateTests(unittest.TestCase):
     def test_public_snapshot_is_detached_dict_boundary(self):
         _, process, result = self._formed_process()
 
-        snapshot = result["compounds"]["sugars"]
-        self.assertIsInstance(snapshot, dict)
-        self.assertIsInstance(snapshot["requires"], list)
-        snapshot["requires"].append("fake_material")
-        snapshot["name"] = "fake_sugars"
+        self.assertIs(
+            result.compounds["sugars"],
+            process.compounds["sugars"],
+        )
+
+        snapshot = result.to_dict()
+        sugars_snapshot = snapshot[
+            "compounds"
+        ]["sugars"]
+
+        self.assertIsInstance(
+            sugars_snapshot,
+            dict,
+        )
+        self.assertIsInstance(
+            sugars_snapshot["requires"],
+            list,
+        )
+        sugars_snapshot[
+            "requires"
+        ].append("fake_material")
+        sugars_snapshot["name"] = "fake_sugars"
 
         sugars = process.compounds["sugars"]
-        self.assertEqual(sugars.name, "sugars")
-        self.assertNotIn("fake_material", sugars.requires)
+        self.assertEqual(
+            sugars.name,
+            "sugars",
+        )
+        self.assertNotIn(
+            "fake_material",
+            sugars.requires,
+        )
 
     def test_constructor_rejects_invalid_requirement_entries(self):
         with self.assertRaises(TypeError):

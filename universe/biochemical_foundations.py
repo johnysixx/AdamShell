@@ -8,6 +8,9 @@ from universe.biochemical_state import (
 from universe.biochemical_foundations_process_state import (
     BiochemicalFoundationsProcessState,
 )
+from universe.biochemical_foundation_result_state import (
+    BiochemicalFoundationResult,
+)
 from universe.planetary_material_objects import (
     AvailablePlanetaryMaterial,
 )
@@ -26,6 +29,7 @@ class BiochemicalFoundations:
         self.compounds = {}
 
         self.biochemical_state = BiochemicalFoundationState()
+        self.result = None
         self.public_state = self._build_public_state()
 
     @property
@@ -83,7 +87,14 @@ class BiochemicalFoundations:
 
             print("BIOCHEMICAL FOUNDATION FAILED: missing water or organic molecules")
             self.write_to_world()
-            return self.public_state
+
+            self.result = BiochemicalFoundationResult(
+                state=self.state,
+                compounds=self.compounds,
+                biochemical_state=self.biochemical_state,
+            )
+
+            return self.result
 
         for material_name in ("water", "organic_molecules"):
             material = materials[material_name]
@@ -141,7 +152,13 @@ class BiochemicalFoundations:
         print("LIPIDS BECOME POSSIBLE")
         print("FERMENTATION SUBSTRATE BECOMES POSSIBLE")
 
-        return self.public_state
+        self.result = BiochemicalFoundationResult(
+            state=self.state,
+            compounds=self.compounds,
+            biochemical_state=self.biochemical_state,
+        )
+
+        return self.result
 
     def add_compound(self, name, compound_type, requires, future_use):
         compound = BiochemicalCompound(

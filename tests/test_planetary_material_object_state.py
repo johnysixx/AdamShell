@@ -3,6 +3,9 @@ import unittest
 from universe.biochemical_foundations import (
     BiochemicalFoundations,
 )
+from universe.biochemical_foundations_process_state import (
+    BiochemicalFoundationsProcessState,
+)
 from universe.planet_state import PlanetFormationState
 from universe.planetary_material_objects import (
     AvailablePlanetaryMaterial,
@@ -324,7 +327,10 @@ class PlanetaryMaterialObjectStateTests(
 
         result = process.form_biochemical_foundations()
 
-        self.assertEqual(result["state"], "formed")
+        self.assertIs(
+            result.state,
+            BiochemicalFoundationsProcessState.FORMED,
+        )
         self.assertIn(
             "sugars",
             universe.world["biochemical_compounds"],

@@ -69,9 +69,9 @@ class BiochemicalFoundationsProcessStateObjectStateTests(
             process.state,
             BiochemicalFoundationsProcessState.FAILED,
         )
-        self.assertEqual(
-            result["state"],
-            "failed",
+        self.assertIs(
+            result.state,
+            BiochemicalFoundationsProcessState.FAILED,
         )
 
     def test_formation_sets_formed_enum(self):
@@ -92,9 +92,9 @@ class BiochemicalFoundationsProcessStateObjectStateTests(
             process.state,
             BiochemicalFoundationsProcessState.FORMED,
         )
-        self.assertEqual(
-            result["state"],
-            "formed",
+        self.assertIs(
+            result.state,
+            BiochemicalFoundationsProcessState.FORMED,
         )
 
     def test_string_state_is_rejected(self):
