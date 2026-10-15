@@ -138,12 +138,12 @@ class QuantumDirectorTests(unittest.TestCase):
             )
         )
 
-        star = result["stars"][0]
-        nebula = result["primordial_nebula"]
+        star = result.stars[0]
+        nebula = result.primordial_nebula
 
         director.observe_star_explosion(
             star=star,
-            remnant=result["remnants"][0]
+            remnant=result.remnants[0]
         )
 
         director.observe_nebula_birth(

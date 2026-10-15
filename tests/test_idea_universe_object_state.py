@@ -171,7 +171,7 @@ class IdeaUniverseObjectStateTests(unittest.TestCase):
             universe.world["idea_universe"][
                 "primordial_nebula"
             ],
-            result["primordial_nebula"],
+            result.primordial_nebula,
         )
 
     def test_to_dict_is_detached_boundary(self):

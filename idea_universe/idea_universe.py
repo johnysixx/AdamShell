@@ -2,6 +2,9 @@ from idea_universe.idea_universe_state import IdeaUniverseState
 from idea_universe.primordial_idea_star import PrimordialIdeaStar
 from idea_universe.primordial_nebula import PrimordialNebula
 from idea_universe.primordial_waters import PrimordialWaters
+from idea_universe.primordial_stellar_state import (
+    PrimordialStellarEpochResult,
+)
 
 
 class IdeaUniverse:
@@ -229,11 +232,13 @@ class IdeaUniverse:
         )
         self.write_to_world()
 
-        return {
-            "primordial_nebula": self.primordial_nebula,
-            "stars": stars,
-            "remnants": remnants,
-        }
+        return PrimordialStellarEpochResult(
+            primordial_nebula=(
+                self.primordial_nebula
+            ),
+            stars=stars,
+            remnants=remnants,
+        )
 
     def add_entity(self, entity):
         entity.origin_layer = "idea_universe"

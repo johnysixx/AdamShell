@@ -47,7 +47,7 @@ class PrimordialIdeaStarStateObjectStateTests(
             PrimordialIdeaStarState.EXPLODED,
         )
         self.assertEqual(
-            remnant["type"],
+            remnant.type,
             "primordial_nebula_remnant",
         )
 

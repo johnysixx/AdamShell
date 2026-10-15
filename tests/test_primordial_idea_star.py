@@ -91,12 +91,12 @@ class PrimordialIdeaStarTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            remnant["type"],
+            remnant.type,
             "primordial_nebula_remnant"
         )
 
         self.assertEqual(
-            remnant["source"],
+            remnant.source,
             "primordial_idea_star"
         )
 
@@ -233,16 +233,16 @@ class PrimordialIdeaStarTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            len(result["stars"]),
+            len(result.stars),
             3
         )
 
         self.assertEqual(
-            len(result["remnants"]),
+            len(result.remnants),
             3
         )
 
-        for star in result["stars"]:
+        for star in result.stars:
             self.assertIs(
                 star.state,
                 PrimordialIdeaStarState.EXPLODED,
@@ -260,20 +260,17 @@ class PrimordialIdeaStarTests(unittest.TestCase):
         star.ignite()
         remnant = star.explode()
 
-        self.assertIn(
-            "elemental_potentials",
-            remnant
-        )
+        self.assertTrue(hasattr(remnant, "elemental_potentials"))
 
         self.assertEqual(
-            remnant["elemental_potentials"][
+            remnant.elemental_potentials[
                 "hydrogen"
             ],
             1.0
         )
 
         self.assertEqual(
-            remnant["elemental_potentials"][
+            remnant.elemental_potentials[
                 "carbon"
             ],
             1.0

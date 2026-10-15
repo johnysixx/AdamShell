@@ -4,6 +4,9 @@ from universe.universe import Universe
 from multiverse import UniverseRegistry
 from idea_universe import IdeaUniverse
 from idea_universe.primordial_nebula import PrimordialNebula
+from idea_universe.primordial_stellar_state import (
+    PrimordialNebulaRemnant,
+)
 
 
 class PrimordialNebulaTests(unittest.TestCase):
@@ -84,8 +87,10 @@ class PrimordialNebulaTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            idea_universe.starry_sky,
-            result["stars"]
+            tuple(
+                idea_universe.starry_sky
+            ),
+            result.stars
         )
 
         self.assertEqual(
@@ -258,7 +263,7 @@ class PrimordialNebulaTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            result["primordial_nebula"],
+            result.primordial_nebula,
             idea_universe.primordial_nebula
         )
 
@@ -273,10 +278,7 @@ class PrimordialNebulaTests(unittest.TestCase):
 
         nebula = PrimordialNebula(
             source_remnants=[
-                {
-                    "type": "primordial_nebula_remnant",
-                    "source": "primordial_idea_star"
-                }
+                PrimordialNebulaRemnant(source='primordial_idea_star')
             ]
         )
 
@@ -300,30 +302,9 @@ class PrimordialNebulaTests(unittest.TestCase):
         )
 
         remnants = [
-            {
-                "type": "primordial_nebula_remnant",
-                "source": "primordial_idea_star",
-                "elemental_potentials": {
-                    "hydrogen": 1.0,
-                    "carbon": 1.0
-                }
-            },
-            {
-                "type": "primordial_nebula_remnant",
-                "source": "primordial_idea_star",
-                "elemental_potentials": {
-                    "hydrogen": 1.0,
-                    "carbon": 1.0
-                }
-            },
-            {
-                "type": "primordial_nebula_remnant",
-                "source": "primordial_idea_star",
-                "elemental_potentials": {
-                    "hydrogen": 1.0,
-                    "carbon": 1.0
-                }
-            }
+            PrimordialNebulaRemnant(source='primordial_idea_star', elemental_potentials={'hydrogen': 1.0, 'carbon': 1.0}),
+            PrimordialNebulaRemnant(source='primordial_idea_star', elemental_potentials={'hydrogen': 1.0, 'carbon': 1.0}),
+            PrimordialNebulaRemnant(source='primordial_idea_star', elemental_potentials={'hydrogen': 1.0, 'carbon': 1.0})
         ]
 
         nebula = PrimordialNebula(
@@ -355,14 +336,7 @@ class PrimordialNebulaTests(unittest.TestCase):
 
         nebula = PrimordialNebula(
             source_remnants=[
-                {
-                    "type": "primordial_nebula_remnant",
-                    "source": "primordial_idea_star",
-                    "elemental_potentials": {
-                        "hydrogen": 2.0,
-                        "carbon": 1.0
-                    }
-                }
+                PrimordialNebulaRemnant(source='primordial_idea_star', elemental_potentials={'hydrogen': 2.0, 'carbon': 1.0})
             ]
         )
 
@@ -393,25 +367,13 @@ class PrimordialNebulaTests(unittest.TestCase):
 
         hydrogen_only = PrimordialNebula(
             source_remnants=[
-                {
-                    "type": "primordial_nebula_remnant",
-                    "source": "primordial_idea_star",
-                    "elemental_potentials": {
-                        "hydrogen": 1.0
-                    }
-                }
+                PrimordialNebulaRemnant(source='primordial_idea_star', elemental_potentials={'hydrogen': 1.0})
             ]
         )
 
         carbon_only = PrimordialNebula(
             source_remnants=[
-                {
-                    "type": "primordial_nebula_remnant",
-                    "source": "primordial_idea_star",
-                    "elemental_potentials": {
-                        "carbon": 1.0
-                    }
-                }
+                PrimordialNebulaRemnant(source='primordial_idea_star', elemental_potentials={'carbon': 1.0})
             ]
         )
 
@@ -446,14 +408,7 @@ class PrimordialNebulaTests(unittest.TestCase):
 
         nebula = PrimordialNebula(
             source_remnants=[
-                {
-                    "type": "primordial_nebula_remnant",
-                    "source": "primordial_idea_star",
-                    "elemental_potentials": {
-                        "hydrogen": 2.0,
-                        "carbon": 1.0
-                    }
-                }
+                PrimordialNebulaRemnant(source='primordial_idea_star', elemental_potentials={'hydrogen': 2.0, 'carbon': 1.0})
             ]
         )
 

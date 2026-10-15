@@ -1,5 +1,8 @@
-﻿from idea_universe.primordial_nebula_state import (
+from idea_universe.primordial_nebula_state import (
     PrimordialNebulaState,
+)
+from idea_universe.primordial_stellar_state import (
+    PrimordialNebulaRemnant,
 )
 
 
@@ -12,7 +15,7 @@ class PrimordialNebula:
 
     def __init__(
         self,
-        source_remnants=None
+        source_remnants=None,
     ):
         self.name = "primordial_nebula"
         self.type = "primordial_nebula"
@@ -21,79 +24,191 @@ class PrimordialNebula:
             source_remnants or []
         )
 
+        for remnant in source_remnants:
+            if not isinstance(
+                remnant,
+                PrimordialNebulaRemnant,
+            ):
+                raise TypeError(
+                    "Primordial nebula source "
+                    "remnants must be "
+                    "PrimordialNebulaRemnant."
+                )
+
         elemental_potentials = {}
 
         for remnant in source_remnants:
-            potentials = remnant.get(
-                "elemental_potentials",
-                {}
+            potentials = (
+                remnant
+                .elemental_potentials
             )
 
-            for element, amount in potentials.items():
+            for (
+                element,
+                amount,
+            ) in potentials.items():
                 elemental_potentials[
                     element
                 ] = (
                     elemental_potentials.get(
                         element,
-                        0.0
+                        0.0,
                     )
                     + amount
                 )
 
-        self.primordial_nebula_state = PrimordialNebulaState(
-            source_remnants=source_remnants,
-            source_remnant_count=len(source_remnants),
-            elemental_potentials=elemental_potentials,
+        self.primordial_nebula_state = (
+            PrimordialNebulaState(
+                source_remnants=(
+                    source_remnants
+                ),
+                elemental_potentials=(
+                    elemental_potentials
+                ),
+            )
         )
-        self.state = self.primordial_nebula_state
+
+        self.state = (
+            self
+            .primordial_nebula_state
+        )
 
     @property
     def tick_count(self):
-        return self.primordial_nebula_state.tick_count
+        return (
+            self
+            .primordial_nebula_state
+            .tick_count
+        )
 
     @tick_count.setter
-    def tick_count(self, value):
-        self.primordial_nebula_state.tick_count = value
+    def tick_count(
+        self,
+        value,
+    ):
+        (
+            self
+            .primordial_nebula_state
+            .tick_count
+        ) = value
 
     @property
     def size(self):
-        return self.primordial_nebula_state.size
+        return (
+            self
+            .primordial_nebula_state
+            .size
+        )
 
     @size.setter
-    def size(self, value):
-        self.primordial_nebula_state.size = value
+    def size(
+        self,
+        value,
+    ):
+        (
+            self
+            .primordial_nebula_state
+            .size
+        ) = value
 
     @property
     def stars(self):
-        return self.primordial_nebula_state.stars
+        return (
+            self
+            .primordial_nebula_state
+            .stars
+        )
 
     @stars.setter
-    def stars(self, value):
-        self.primordial_nebula_state.stars = value
+    def stars(
+        self,
+        value,
+    ):
+        (
+            self
+            .primordial_nebula_state
+            .stars
+        ) = value
 
     @property
     def source_remnants(self):
-        return self.primordial_nebula_state.source_remnants
+        return (
+            self
+            .primordial_nebula_state
+            .source_remnants
+        )
 
     @source_remnants.setter
-    def source_remnants(self, value):
-        self.primordial_nebula_state.source_remnants = value
+    def source_remnants(
+        self,
+        value,
+    ):
+        remnants = list(
+            value
+        )
+
+        for remnant in remnants:
+            if not isinstance(
+                remnant,
+                PrimordialNebulaRemnant,
+            ):
+                raise TypeError(
+                    "Primordial nebula source "
+                    "remnants must be "
+                    "PrimordialNebulaRemnant."
+                )
+
+        (
+            self
+            .primordial_nebula_state
+            .source_remnants
+        ) = remnants
+
+        (
+            self
+            .primordial_nebula_state
+            .source_remnant_count
+        ) = len(
+            remnants
+        )
 
     @property
     def source_remnant_count(self):
-        return self.primordial_nebula_state.source_remnant_count
+        return (
+            self
+            .primordial_nebula_state
+            .source_remnant_count
+        )
 
     @source_remnant_count.setter
-    def source_remnant_count(self, value):
-        self.primordial_nebula_state.source_remnant_count = value
+    def source_remnant_count(
+        self,
+        value,
+    ):
+        (
+            self
+            .primordial_nebula_state
+            .source_remnant_count
+        ) = value
 
     @property
     def elemental_potentials(self):
-        return self.primordial_nebula_state.elemental_potentials
+        return (
+            self
+            .primordial_nebula_state
+            .elemental_potentials
+        )
 
     @elemental_potentials.setter
-    def elemental_potentials(self, value):
-        self.primordial_nebula_state.elemental_potentials = value
+    def elemental_potentials(
+        self,
+        value,
+    ):
+        (
+            self
+            .primordial_nebula_state
+            .elemental_potentials
+        ) = value
 
     @property
     def previous_liquid_hydrocarbon_level(self):
@@ -104,7 +219,10 @@ class PrimordialNebula:
         )
 
     @previous_liquid_hydrocarbon_level.setter
-    def previous_liquid_hydrocarbon_level(self, value):
+    def previous_liquid_hydrocarbon_level(
+        self,
+        value,
+    ):
         (
             self
             .primordial_nebula_state
@@ -120,7 +238,10 @@ class PrimordialNebula:
         )
 
     @current_liquid_hydrocarbon_level.setter
-    def current_liquid_hydrocarbon_level(self, value):
+    def current_liquid_hydrocarbon_level(
+        self,
+        value,
+    ):
         (
             self
             .primordial_nebula_state
@@ -136,7 +257,10 @@ class PrimordialNebula:
         )
 
     @mined_from_current_growth.setter
-    def mined_from_current_growth(self, value):
+    def mined_from_current_growth(
+        self,
+        value,
+    ):
         (
             self
             .primordial_nebula_state
@@ -146,28 +270,45 @@ class PrimordialNebula:
     @property
     def public_state(self):
         return {
-            "name": self.name,
-            "type": self.type,
-            **self.primordial_nebula_state.to_dict(),
+            "name":
+                self.name,
+            "type":
+                self.type,
+            **(
+                self
+                .primordial_nebula_state
+                .to_dict()
+            ),
         }
 
     def form_hydrocarbons(self):
-        hydrogen = self.elemental_potentials.get(
-            "hydrogen",
-            0.0
+        hydrogen = (
+            self
+            .elemental_potentials
+            .get(
+                "hydrogen",
+                0.0,
+            )
         )
 
-        carbon = self.elemental_potentials.get(
-            "carbon",
-            0.0
+        carbon = (
+            self
+            .elemental_potentials
+            .get(
+                "carbon",
+                0.0,
+            )
         )
 
-        if hydrogen <= 0.0 or carbon <= 0.0:
+        if (
+            hydrogen <= 0.0
+            or carbon <= 0.0
+        ):
             return 0.0
 
         amount = min(
             hydrogen,
-            carbon
+            carbon,
         )
 
         self.elemental_potentials[
@@ -176,22 +317,30 @@ class PrimordialNebula:
 
         return amount
 
-    def can_mine_liquid_hydrocarbons(self):
+    def can_mine_liquid_hydrocarbons(
+        self,
+    ):
         return (
             self.size
             >= LIQUID_HYDROCARBON_MINING_THRESHOLD
         )
 
-    def form_liquid_hydrocarbons(self):
+    def form_liquid_hydrocarbons(
+        self,
+    ):
         if (
             self.size
             < LIQUID_HYDROCARBON_FORMATION_THRESHOLD
         ):
             return 0.0
 
-        hydrocarbons = self.elemental_potentials.get(
-            "hydrocarbons",
-            0.0
+        hydrocarbons = (
+            self
+            .elemental_potentials
+            .get(
+                "hydrocarbons",
+                0.0,
+            )
         )
 
         if hydrocarbons <= 0.0:
@@ -205,35 +354,52 @@ class PrimordialNebula:
 
     def record_liquid_hydrocarbon_level(
         self,
-        level
+        level,
     ):
         self.previous_liquid_hydrocarbon_level = (
             self.current_liquid_hydrocarbon_level
         )
 
         self.current_liquid_hydrocarbon_level = (
-            float(level)
+            float(
+                level
+            )
         )
+
         self.mined_from_current_growth = 0.0
 
-        return self.current_liquid_hydrocarbon_level
+        return (
+            self
+            .current_liquid_hydrocarbon_level
+        )
 
-    def available_liquid_hydrocarbon_mining(self):
+    def available_liquid_hydrocarbon_mining(
+        self,
+    ):
         if not self.can_mine_liquid_hydrocarbons():
             return 0.0
 
-        if self.previous_liquid_hydrocarbon_level is None:
+        if (
+            self
+            .previous_liquid_hydrocarbon_level
+            is None
+        ):
             return 0.0
 
         growth = (
-            self.current_liquid_hydrocarbon_level
-            - self.previous_liquid_hydrocarbon_level
+            self
+            .current_liquid_hydrocarbon_level
+            - self
+            .previous_liquid_hydrocarbon_level
         )
 
         if growth <= 0.0:
             return 0.0
 
-        allowed = growth * 0.10
+        allowed = (
+            growth
+            * 0.10
+        )
 
         remaining = (
             allowed
@@ -242,14 +408,16 @@ class PrimordialNebula:
 
         return max(
             0.0,
-            remaining
+            remaining,
         )
 
     def mine_liquid_hydrocarbons(
         self,
-        amount
+        amount,
     ):
-        amount = float(amount)
+        amount = float(
+            amount
+        )
 
         if amount <= 0.0:
             raise ValueError(
@@ -257,20 +425,27 @@ class PrimordialNebula:
             )
 
         available = (
-            self.available_liquid_hydrocarbon_mining()
+            self
+            .available_liquid_hydrocarbon_mining()
         )
 
         if amount > available:
             raise RuntimeError(
-                "Liquid hydrocarbon mining limit exceeded."
+                "Liquid hydrocarbon mining limit "
+                "exceeded."
             )
 
-        self.current_liquid_hydrocarbon_level -= amount
+        self.current_liquid_hydrocarbon_level -= (
+            amount
+        )
 
-        self.mined_from_current_growth += amount
+        self.mined_from_current_growth += (
+            amount
+        )
 
         return amount
 
     def tick(self):
         self.tick_count += 1
+
         return self.tick_count
