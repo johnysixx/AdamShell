@@ -2,6 +2,14 @@ from universe.pre_cosmic_rules import REALITY_PAYMENT_RATIO, WILL_GAIN_PER_ENERG
 from core.entity.existence_energy import existence_pct_to_energy_j
 from meeting_place.bar_payment_state import BarPaymentState
 from meeting_place.bar_payment_kind import BarPaymentKind
+from meeting_place.bar_service_effect_state import (
+    BarEnergyDrinkUnavailableResult,
+    BarEntropyDrinkUnavailableResult,
+    BarGodEnergyDrinkEffect,
+    BarGodEntropyDrinkEffect,
+    BarIdeaEntityEnergyDrinkEffect,
+    BarIdeaEntityEntropyDrinkEffect,
+)
 IDEA_ENTITY_ENERGY_EXISTENCE_COST_PERCENT = REALITY_PAYMENT_RATIO * 100
 GOD_ENERGY_CREATIVE_WILL_GAIN = 0.3
 GOD_ENTROPY_EXISTENCE_GAIN_PERCENT = 1.0
@@ -76,7 +84,16 @@ class BarServiceRules:
             creative_will = self._get(entity, 'creative_will', 0.0)
             self._set(entity, 'creative_will', creative_will + GOD_ENERGY_CREATIVE_WILL_GAIN)
             self._update_creation_capacity(entity)
-            return {'name': 'god_energy_drink_effect', 'entity': self._get(entity, 'name'), 'existence_cost_pct': 0.0, 'creative_will_gain': GOD_ENERGY_CREATIVE_WILL_GAIN}
+            return BarGodEnergyDrinkEffect(
+                entity=self._get(
+                    entity,
+                    'name',
+                ),
+                existence_cost_pct=0.0,
+                creative_will_gain=(
+                    GOD_ENERGY_CREATIVE_WILL_GAIN
+                ),
+            )
         if entity_type == 'idea_entity':
             existence_pct = self._get(entity, 'existence_pct', 100.0)
             will = self._get(entity, 'will', 0.0)
@@ -84,8 +101,25 @@ class BarServiceRules:
             self._set(entity, 'existence_pct', new_existence)
             self._set(entity, 'will', will + WILL_GAIN_PER_ENERGY_SERVING)
             self._update_idea_capacity(entity)
-            return {'name': 'idea_entity_energy_drink_effect', 'entity': self._get(entity, 'name'), 'existence_cost_pct': IDEA_ENTITY_ENERGY_EXISTENCE_COST_PERCENT, 'will_gain': WILL_GAIN_PER_ENERGY_SERVING}
-        return {'name': 'energy_drink_not_available', 'entity': self._get(entity, 'name'), 'entity_type': entity_type}
+            return BarIdeaEntityEnergyDrinkEffect(
+                entity=self._get(
+                    entity,
+                    'name',
+                ),
+                existence_cost_pct=(
+                    IDEA_ENTITY_ENERGY_EXISTENCE_COST_PERCENT
+                ),
+                will_gain=(
+                    WILL_GAIN_PER_ENERGY_SERVING
+                ),
+            )
+        return BarEnergyDrinkUnavailableResult(
+            entity=self._get(
+                entity,
+                'name',
+            ),
+            entity_type=entity_type,
+        )
 
     def apply_entropy_drink(self, entity, entity_energy_gain_j=0.0):
         entity_type = self._get(entity, 'type')
@@ -97,13 +131,31 @@ class BarServiceRules:
             new_existence = min(100.0, existence_pct + GOD_ENTROPY_EXISTENCE_GAIN_PERCENT)
             self._set(entity, 'existence_pct', new_existence)
             self._update_creation_capacity(entity)
-            return {'name': 'god_entropy_drink_effect', 'entity': entity_name, 'existence_gain_pct': GOD_ENTROPY_EXISTENCE_GAIN_PERCENT, 'entity_energy_gain_j': entity_energy_gain_j, 'payment_pct': 0.0}
+            return BarGodEntropyDrinkEffect(
+                entity=entity_name,
+                existence_gain_pct=(
+                    GOD_ENTROPY_EXISTENCE_GAIN_PERCENT
+                ),
+                entity_energy_gain_j=(
+                    entity_energy_gain_j
+                ),
+                payment_pct=0.0,
+            )
         if entity_type == 'idea_entity':
             energy_j = self._get(entity, 'energy_j', 0.0)
             self._set(entity, 'energy_j', energy_j + entity_energy_gain_j)
             self._update_idea_capacity(entity)
-            return {'name': 'idea_entity_entropy_drink_effect', 'entity': entity_name, 'entity_energy_gain_j': entity_energy_gain_j, 'payment_pct': 0.0}
-        return {'name': 'entropy_drink_not_available', 'entity': entity_name, 'entity_type': entity_type}
+            return BarIdeaEntityEntropyDrinkEffect(
+                entity=entity_name,
+                entity_energy_gain_j=(
+                    entity_energy_gain_j
+                ),
+                payment_pct=0.0,
+            )
+        return BarEntropyDrinkUnavailableResult(
+            entity=entity_name,
+            entity_type=entity_type,
+        )
 
     def _update_creation_capacity(self, entity):
         existence_pct = self._get(entity, 'existence_pct', 100.0)
