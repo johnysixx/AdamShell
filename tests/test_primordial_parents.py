@@ -3,6 +3,10 @@ from universe.universe import Universe
 from multiverse import UniverseRegistry
 from idea_universe import IdeaUniverse
 from idea_entities import IdeaEntities
+from idea_universe.idea_genesis_runtime_state import (
+    IdeaGenesisWordEvent,
+)
+
 
 class PrimordialParentsTests(unittest.TestCase):
 
@@ -29,8 +33,8 @@ class PrimordialParentsTests(unittest.TestCase):
         from universe.bootstraps.idea_genesis_bootstrap import IdeaGenesisBootstrap
         bootstrap = IdeaGenesisBootstrap(universe=universe, idea_universe=idea_universe, gods=gods)
         result = bootstrap.run()
-        tiamat = result['tiamat']
-        apsu = result['apsu']
+        tiamat = result.tiamat
+        apsu = result.apsu
         self.assertEqual(tiamat.type, 'god')
         self.assertEqual(apsu.type, 'god')
         self.assertEqual(tiamat.role, 'primordial_mother')
@@ -57,8 +61,8 @@ class PrimordialParentsTests(unittest.TestCase):
         from universe.bootstraps.idea_genesis_bootstrap import IdeaGenesisBootstrap
         gods = Gods(universe)
         result = IdeaGenesisBootstrap(universe=universe, idea_universe=idea_universe, gods=gods).run()
-        tiamat = result['tiamat']
-        apsu = result['apsu']
+        tiamat = result.tiamat
+        apsu = result.apsu
         self.assertEqual(tiamat.primordial_aspect, 'salt_water')
         self.assertEqual(apsu.primordial_aspect, 'fresh_water')
 
@@ -120,7 +124,38 @@ class PrimordialParentsTests(unittest.TestCase):
         genesis.run()
         genesis.let_there_be_light()
         genesis.let_there_be_space()
-        self.assertIn({'kind': 'genesis', 'word': 'let_there_be_space'}, idea_universe.events)
+        event = idea_universe.events[-1]
+
+        self.assertIsInstance(
+            event,
+            IdeaGenesisWordEvent,
+        )
+
+        self.assertEqual(
+            event.kind,
+            "genesis",
+        )
+
+        self.assertEqual(
+            event.word,
+            "let_there_be_space",
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    event,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(TypeError):
+            _ = event["word"]
 
     def test_day0_bootstrap_creates_tiamat_apsu_and_serpent(self):
         universe = Universe()
@@ -143,7 +178,7 @@ class PrimordialParentsTests(unittest.TestCase):
         self.assertIn('tiamat', bar_names)
         self.assertIn('apsu', bar_names)
         self.assertIn('serpent', bar_names)
-        self.assertEqual(result['serpent'].type, 'idea_entity')
+        self.assertEqual(result.serpent.type, 'idea_entity')
 
     def test_day0_records_creation_phases_in_order(self):
         universe = Universe()
@@ -178,8 +213,8 @@ class PrimordialParentsTests(unittest.TestCase):
         self.assertIn('god', god_names)
         self.assertIn('tiamat', god_names)
         self.assertIn('apsu', god_names)
-        self.assertEqual(result['god'].role, 'creator_entity')
-        self.assertEqual(result['god'].native_world, 'gods_layer')
+        self.assertEqual(result.god.role, 'creator_entity')
+        self.assertEqual(result.god.native_world, 'gods_layer')
 
     def test_day3_creates_seas_dry_land_and_vegetation(self):
         universe = Universe()
@@ -250,7 +285,7 @@ class PrimordialParentsTests(unittest.TestCase):
         result = genesis.let_there_be_life_in_waters_and_sky()
         self.assertTrue(idea_universe.aquatic_life_archetype)
         self.assertTrue(idea_universe.flying_life_archetype)
-        self.assertEqual(result['day'], 5)
+        self.assertEqual(result.day, 5)
 
     def test_day5_requires_day4_completion(self):
         universe = Universe()
@@ -299,8 +334,8 @@ class PrimordialParentsTests(unittest.TestCase):
         genesis.let_there_be_life_in_waters_and_sky()
         result = genesis.let_there_be_land_life()
         self.assertTrue(idea_universe.land_life_archetype)
-        self.assertEqual(result['day'], 6)
-        self.assertEqual(result['created'], 'land_life_archetype')
+        self.assertEqual(result.day, 6)
+        self.assertEqual(result.created, 'land_life_archetype')
 
     def test_day6_land_life_requires_day5_completion(self):
         universe = Universe()
@@ -327,11 +362,11 @@ class PrimordialParentsTests(unittest.TestCase):
         gods = Gods(universe)
         genesis = IdeaGenesisBootstrap(universe=universe, idea_universe=idea_universe, gods=gods)
         result = genesis.run()
-        tiamat = result['tiamat']
-        apsu = result['apsu']
+        tiamat = result.tiamat
+        apsu = result.apsu
         children = genesis.bring_forth_first_divine_generation(tiamat=tiamat, apsu=apsu)
-        lahmu = children['lahmu']
-        lahamu = children['lahamu']
+        lahmu = children.lahmu
+        lahamu = children.lahamu
         self.assertEqual(lahmu.type, 'god')
         self.assertEqual(lahamu.type, 'god')
         self.assertEqual(lahmu.native_world, 'gods_layer')
@@ -348,10 +383,10 @@ class PrimordialParentsTests(unittest.TestCase):
         gods = Gods(universe)
         genesis = IdeaGenesisBootstrap(universe=universe, idea_universe=idea_universe, gods=gods)
         result = genesis.run()
-        first_generation = genesis.bring_forth_first_divine_generation(tiamat=result['tiamat'], apsu=result['apsu'])
-        second_generation = genesis.bring_forth_second_divine_generation(lahmu=first_generation['lahmu'], lahamu=first_generation['lahamu'])
-        anshar = second_generation['anshar']
-        kishar = second_generation['kishar']
+        first_generation = genesis.bring_forth_first_divine_generation(tiamat=result.tiamat, apsu=result.apsu)
+        second_generation = genesis.bring_forth_second_divine_generation(lahmu=first_generation.lahmu, lahamu=first_generation.lahamu)
+        anshar = second_generation.anshar
+        kishar = second_generation.kishar
         self.assertEqual(anshar.type, 'god')
         self.assertEqual(kishar.type, 'god')
         self.assertEqual(anshar.parents, ['lahmu', 'lahamu'])
@@ -368,9 +403,9 @@ class PrimordialParentsTests(unittest.TestCase):
         gods = Gods(universe)
         genesis = IdeaGenesisBootstrap(universe=universe, idea_universe=idea_universe, gods=gods)
         result = genesis.run()
-        first_generation = genesis.bring_forth_first_divine_generation(tiamat=result['tiamat'], apsu=result['apsu'])
-        second_generation = genesis.bring_forth_second_divine_generation(lahmu=first_generation['lahmu'], lahamu=first_generation['lahamu'])
-        anu = genesis.bring_forth_anu(anshar=second_generation['anshar'], kishar=second_generation['kishar'])
+        first_generation = genesis.bring_forth_first_divine_generation(tiamat=result.tiamat, apsu=result.apsu)
+        second_generation = genesis.bring_forth_second_divine_generation(lahmu=first_generation.lahmu, lahamu=first_generation.lahamu)
+        anu = genesis.bring_forth_anu(anshar=second_generation.anshar, kishar=second_generation.kishar)
         self.assertEqual(anu.name, 'anu')
         self.assertEqual(anu.type, 'god')
         self.assertEqual(anu.native_world, 'gods_layer')
@@ -385,9 +420,9 @@ class PrimordialParentsTests(unittest.TestCase):
         gods = Gods(universe)
         genesis = IdeaGenesisBootstrap(universe=universe, idea_universe=idea_universe, gods=gods)
         result = genesis.run()
-        first_generation = genesis.bring_forth_first_divine_generation(tiamat=result['tiamat'], apsu=result['apsu'])
-        second_generation = genesis.bring_forth_second_divine_generation(lahmu=first_generation['lahmu'], lahamu=first_generation['lahamu'])
-        anu = genesis.bring_forth_anu(anshar=second_generation['anshar'], kishar=second_generation['kishar'])
+        first_generation = genesis.bring_forth_first_divine_generation(tiamat=result.tiamat, apsu=result.apsu)
+        second_generation = genesis.bring_forth_second_divine_generation(lahmu=first_generation.lahmu, lahamu=first_generation.lahamu)
+        anu = genesis.bring_forth_anu(anshar=second_generation.anshar, kishar=second_generation.kishar)
         self.assertEqual(anu.name, 'anu')
         self.assertEqual(anu.type, 'god')
         self.assertEqual(anu.native_world, 'gods_layer')
@@ -402,9 +437,9 @@ class PrimordialParentsTests(unittest.TestCase):
         gods = Gods(universe)
         genesis = IdeaGenesisBootstrap(universe=universe, idea_universe=idea_universe, gods=gods)
         result = genesis.run()
-        first_generation = genesis.bring_forth_first_divine_generation(tiamat=result['tiamat'], apsu=result['apsu'])
-        second_generation = genesis.bring_forth_second_divine_generation(lahmu=first_generation['lahmu'], lahamu=first_generation['lahamu'])
-        anu = genesis.bring_forth_anu(anshar=second_generation['anshar'], kishar=second_generation['kishar'])
+        first_generation = genesis.bring_forth_first_divine_generation(tiamat=result.tiamat, apsu=result.apsu)
+        second_generation = genesis.bring_forth_second_divine_generation(lahmu=first_generation.lahmu, lahamu=first_generation.lahamu)
+        anu = genesis.bring_forth_anu(anshar=second_generation.anshar, kishar=second_generation.kishar)
         ea = genesis.bring_forth_ea(anu=anu)
         self.assertEqual(ea.name, 'ea')
         self.assertEqual(ea.type, 'god')
@@ -436,10 +471,10 @@ class PrimordialParentsTests(unittest.TestCase):
         gods = Gods(universe)
         genesis = IdeaGenesisBootstrap(universe=universe, idea_universe=idea_universe, gods=gods)
         result = genesis.run()
-        god = result['god']
-        first_generation = genesis.bring_forth_first_divine_generation(tiamat=result['tiamat'], apsu=result['apsu'])
-        second_generation = genesis.bring_forth_second_divine_generation(lahmu=first_generation['lahmu'], lahamu=first_generation['lahamu'])
-        anu = genesis.bring_forth_anu(anshar=second_generation['anshar'], kishar=second_generation['kishar'])
+        god = result.god
+        first_generation = genesis.bring_forth_first_divine_generation(tiamat=result.tiamat, apsu=result.apsu)
+        second_generation = genesis.bring_forth_second_divine_generation(lahmu=first_generation.lahmu, lahamu=first_generation.lahamu)
+        anu = genesis.bring_forth_anu(anshar=second_generation.anshar, kishar=second_generation.kishar)
         ea = genesis.bring_forth_ea(anu=anu)
         damkina = genesis.bring_forth_damkina()
         god_count_before = len(gods.gods)
@@ -465,19 +500,19 @@ class PrimordialParentsTests(unittest.TestCase):
         gods = Gods(universe)
         genesis = IdeaGenesisBootstrap(universe=universe, idea_universe=idea_universe, gods=gods)
         result = genesis.run()
-        god = result['god']
-        first_generation = genesis.bring_forth_first_divine_generation(tiamat=result['tiamat'], apsu=result['apsu'])
-        second_generation = genesis.bring_forth_second_divine_generation(lahmu=first_generation['lahmu'], lahamu=first_generation['lahamu'])
-        anu = genesis.bring_forth_anu(anshar=second_generation['anshar'], kishar=second_generation['kishar'])
+        god = result.god
+        first_generation = genesis.bring_forth_first_divine_generation(tiamat=result.tiamat, apsu=result.apsu)
+        second_generation = genesis.bring_forth_second_divine_generation(lahmu=first_generation.lahmu, lahamu=first_generation.lahamu)
+        anu = genesis.bring_forth_anu(anshar=second_generation.anshar, kishar=second_generation.kishar)
         ea = genesis.bring_forth_ea(anu=anu)
         damkina = genesis.bring_forth_damkina()
         marduk = genesis.manifest_marduk(god=god, ea=ea, damkina=damkina)
         self.assertFalse(getattr(marduk, 'divine_authority_granted', False))
         with self.assertRaises(RuntimeError):
-            genesis.confront_tiamat(marduk=marduk, tiamat=result['tiamat'])
+            genesis.confront_tiamat(marduk=marduk, tiamat=result.tiamat)
         authority = genesis.grant_marduk_divine_authority(marduk=marduk)
         self.assertTrue(marduk.divine_authority_granted)
-        self.assertEqual(authority['title'], 'king_of_the_gods')
+        self.assertEqual(authority.title, 'king_of_the_gods')
 
     def test_marduk_defeats_tiamat_without_creating_new_god(self):
         universe = Universe()
@@ -488,20 +523,20 @@ class PrimordialParentsTests(unittest.TestCase):
         gods = Gods(universe)
         genesis = IdeaGenesisBootstrap(universe=universe, idea_universe=idea_universe, gods=gods)
         result = genesis.run()
-        god = result['god']
-        tiamat = result['tiamat']
-        first_generation = genesis.bring_forth_first_divine_generation(tiamat=tiamat, apsu=result['apsu'])
-        second_generation = genesis.bring_forth_second_divine_generation(lahmu=first_generation['lahmu'], lahamu=first_generation['lahamu'])
-        anu = genesis.bring_forth_anu(anshar=second_generation['anshar'], kishar=second_generation['kishar'])
+        god = result.god
+        tiamat = result.tiamat
+        first_generation = genesis.bring_forth_first_divine_generation(tiamat=tiamat, apsu=result.apsu)
+        second_generation = genesis.bring_forth_second_divine_generation(lahmu=first_generation.lahmu, lahamu=first_generation.lahamu)
+        anu = genesis.bring_forth_anu(anshar=second_generation.anshar, kishar=second_generation.kishar)
         ea = genesis.bring_forth_ea(anu=anu)
         damkina = genesis.bring_forth_damkina()
         marduk = genesis.manifest_marduk(god=god, ea=ea, damkina=damkina)
         genesis.grant_marduk_divine_authority(marduk=marduk)
         god_count_before = len(gods.gods)
         outcome = genesis.defeat_tiamat(marduk=marduk, tiamat=tiamat)
-        self.assertEqual(outcome['event'], 'tiamat_defeated')
-        self.assertEqual(outcome['actor_mask'], 'marduk')
-        self.assertIs(outcome['actor'], god)
+        self.assertEqual(outcome.event, 'tiamat_defeated')
+        self.assertEqual(outcome.actor_mask, 'marduk')
+        self.assertIs(outcome.actor, god)
         self.assertEqual(tiamat.state, 'defeated')
         self.assertEqual(len(gods.gods), god_count_before)
 
@@ -514,11 +549,11 @@ class PrimordialParentsTests(unittest.TestCase):
         gods = Gods(universe)
         genesis = IdeaGenesisBootstrap(universe=universe, idea_universe=idea_universe, gods=gods)
         result = genesis.run()
-        god = result['god']
-        tiamat = result['tiamat']
-        first_generation = genesis.bring_forth_first_divine_generation(tiamat=tiamat, apsu=result['apsu'])
-        second_generation = genesis.bring_forth_second_divine_generation(lahmu=first_generation['lahmu'], lahamu=first_generation['lahamu'])
-        anu = genesis.bring_forth_anu(anshar=second_generation['anshar'], kishar=second_generation['kishar'])
+        god = result.god
+        tiamat = result.tiamat
+        first_generation = genesis.bring_forth_first_divine_generation(tiamat=tiamat, apsu=result.apsu)
+        second_generation = genesis.bring_forth_second_divine_generation(lahmu=first_generation.lahmu, lahamu=first_generation.lahamu)
+        anu = genesis.bring_forth_anu(anshar=second_generation.anshar, kishar=second_generation.kishar)
         ea = genesis.bring_forth_ea(anu=anu)
         damkina = genesis.bring_forth_damkina()
         marduk = genesis.manifest_marduk(god=god, ea=ea, damkina=damkina)
@@ -527,8 +562,8 @@ class PrimordialParentsTests(unittest.TestCase):
         result = genesis.order_cosmos_from_tiamat(marduk=marduk, tiamat=tiamat)
         self.assertTrue(idea_universe.heaven_ordered)
         self.assertTrue(idea_universe.celestial_stations_established)
-        self.assertEqual(result['event'], 'cosmos_ordered_from_tiamat')
-        self.assertEqual(result['actor_mask'], 'marduk')
+        self.assertEqual(result.event, 'cosmos_ordered_from_tiamat')
+        self.assertEqual(result.actor_mask, 'marduk')
 
     def test_cosmic_order_can_have_genesis_and_mesopotamian_witnesses(self):
         universe = Universe()
@@ -539,24 +574,52 @@ class PrimordialParentsTests(unittest.TestCase):
         gods = Gods(universe)
         genesis = IdeaGenesisBootstrap(universe=universe, idea_universe=idea_universe, gods=gods)
         result = genesis.run()
-        first_generation = genesis.bring_forth_first_divine_generation(tiamat=result['tiamat'], apsu=result['apsu'])
-        second_generation = genesis.bring_forth_second_divine_generation(lahmu=first_generation['lahmu'], lahamu=first_generation['lahamu'])
-        anu = genesis.bring_forth_anu(anshar=second_generation['anshar'], kishar=second_generation['kishar'])
+        first_generation = genesis.bring_forth_first_divine_generation(tiamat=result.tiamat, apsu=result.apsu)
+        second_generation = genesis.bring_forth_second_divine_generation(lahmu=first_generation.lahmu, lahamu=first_generation.lahamu)
+        anu = genesis.bring_forth_anu(anshar=second_generation.anshar, kishar=second_generation.kishar)
         ea = genesis.bring_forth_ea(anu=anu)
         damkina = genesis.bring_forth_damkina()
-        marduk = genesis.manifest_marduk(god=result['god'], ea=ea, damkina=damkina)
+        marduk = genesis.manifest_marduk(god=result.god, ea=ea, damkina=damkina)
         genesis.grant_marduk_divine_authority(marduk=marduk)
-        genesis.defeat_tiamat(marduk=marduk, tiamat=result['tiamat'])
-        mesopotamian = genesis.order_cosmos_from_tiamat(marduk=marduk, tiamat=result['tiamat'])
+        genesis.defeat_tiamat(marduk=marduk, tiamat=result.tiamat)
+        mesopotamian = genesis.order_cosmos_from_tiamat(marduk=marduk, tiamat=result.tiamat)
         genesis.let_there_be_light()
         genesis.let_there_be_space()
         genesis.let_there_be_land_and_vegetation()
         genesis_view = genesis.let_there_be_heavenly_lights()
         event = genesis.record_cosmic_order_witnesses(genesis_view=genesis_view, mesopotamian_view=mesopotamian)
-        self.assertEqual(event['event'], 'cosmic_order_established')
-        self.assertEqual(set(event['witnesses'].keys()), {'genesis', 'mesopotamian'})
-        self.assertEqual(event['witnesses']['genesis']['event'], 'heavenly_lights_created')
-        self.assertEqual(event['witnesses']['mesopotamian']['event'], 'cosmos_ordered_from_tiamat')
+        self.assertEqual(
+            event.event,
+            "cosmic_order_established",
+        )
+
+        self.assertEqual(
+            event.witnesses,
+            (
+                "genesis",
+                "mesopotamian",
+            ),
+        )
+
+        self.assertEqual(
+            event.genesis_event,
+            "heavenly_lights_created",
+        )
+
+        self.assertEqual(
+            event.mesopotamian_event,
+            "cosmos_ordered_from_tiamat",
+        )
+
+        self.assertIs(
+            event.genesis_record,
+            genesis_view,
+        )
+
+        self.assertIs(
+            event.mesopotamian_record,
+            mesopotamian,
+        )
 
     def test_marduk_establishes_divine_order_after_cosmic_order(self):
         universe = Universe()
@@ -567,20 +630,20 @@ class PrimordialParentsTests(unittest.TestCase):
         gods = Gods(universe)
         genesis = IdeaGenesisBootstrap(universe=universe, idea_universe=idea_universe, gods=gods)
         result = genesis.run()
-        first_generation = genesis.bring_forth_first_divine_generation(tiamat=result['tiamat'], apsu=result['apsu'])
-        second_generation = genesis.bring_forth_second_divine_generation(lahmu=first_generation['lahmu'], lahamu=first_generation['lahamu'])
-        anu = genesis.bring_forth_anu(anshar=second_generation['anshar'], kishar=second_generation['kishar'])
+        first_generation = genesis.bring_forth_first_divine_generation(tiamat=result.tiamat, apsu=result.apsu)
+        second_generation = genesis.bring_forth_second_divine_generation(lahmu=first_generation.lahmu, lahamu=first_generation.lahamu)
+        anu = genesis.bring_forth_anu(anshar=second_generation.anshar, kishar=second_generation.kishar)
         ea = genesis.bring_forth_ea(anu=anu)
         damkina = genesis.bring_forth_damkina()
-        marduk = genesis.manifest_marduk(god=result['god'], ea=ea, damkina=damkina)
+        marduk = genesis.manifest_marduk(god=result.god, ea=ea, damkina=damkina)
         genesis.grant_marduk_divine_authority(marduk=marduk)
-        genesis.defeat_tiamat(marduk=marduk, tiamat=result['tiamat'])
-        genesis.order_cosmos_from_tiamat(marduk=marduk, tiamat=result['tiamat'])
-        order = genesis.establish_divine_order(marduk=marduk, gods=[anu, ea, damkina, first_generation['lahmu'], first_generation['lahamu'], second_generation['anshar'], second_generation['kishar']])
+        genesis.defeat_tiamat(marduk=marduk, tiamat=result.tiamat)
+        genesis.order_cosmos_from_tiamat(marduk=marduk, tiamat=result.tiamat)
+        order = genesis.establish_divine_order(marduk=marduk, gods=[anu, ea, damkina, first_generation.lahmu, first_generation.lahamu, second_generation.anshar, second_generation.kishar])
         self.assertTrue(idea_universe.divine_order_established)
-        self.assertEqual(order['event'], 'divine_order_established')
-        self.assertEqual(order['actor_mask'], 'marduk')
-        self.assertGreaterEqual(len(order['assignments']), 1)
+        self.assertEqual(order.event, 'divine_order_established')
+        self.assertEqual(order.actor_mask, 'marduk')
+        self.assertGreaterEqual(len(order.assignments), 1)
 if __name__ == '__main__':
     unittest.main()
 if __name__ == '__main__':
