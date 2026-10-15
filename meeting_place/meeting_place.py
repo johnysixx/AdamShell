@@ -26,6 +26,9 @@ from meeting_place.bar_objects import (
 from meeting_place.cat_arrival_state import (
     CatBarArrivalResult,
 )
+from meeting_place.meeting_place_entry_state import (
+    MeetingPlaceEntryDeniedResult,
+)
 from meeting_place.cat_bar_lifecycle_state import (
     CatBartenderMeowExchangeEvent,
     CatDrankMilkAtBarEvent,
@@ -212,7 +215,10 @@ class MeetingPlace:
         entity_name = self._get_entity_name(entity)
         if entity_name in self.bar_banned_humans:
             UniverseLogger.event(f'MEETING PLACE ENTRY DENIED: {entity_name} IS BAR BANNED')
-            return {'name': 'meeting_place_entry_denied', 'entity': entity_name, 'reason': 'bar_entry_banned', 'entered': False}
+            return MeetingPlaceEntryDeniedResult(
+                entity=entity_name,
+                reason='bar_entry_banned',
+            )
         if not self.bouncer.can_enter(entity):
             UniverseLogger.event(f'MEETING PLACE ENTRY DENIED BY BOUNCER: {entity_name}')
             entity_type = getattr(entity, 'type', None)

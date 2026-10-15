@@ -57,7 +57,7 @@ class CatMEOWGuestResponsibilityTests(unittest.TestCase):
         self.human.current_layer = 'physical_world'
         result = self.meeting.add_entity(self.human)
         self.assertNotIn(self.human, self.meeting.entities)
-        self.assertEqual(result['reason'], 'bar_entry_banned')
+        self.assertEqual(result.reason, 'bar_entry_banned')
 
     def test_inviting_cat_gets_MEOW_cooldown(self):
         self._bring_first_guest()
