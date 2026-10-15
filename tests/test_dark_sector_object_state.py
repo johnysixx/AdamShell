@@ -5,6 +5,7 @@ from universe.dark_sector_state import (
     DarkMatterCondensationEvent,
     DarkSectorEnergyReceivedEvent,
     DarkSectorState,
+    StableBoxPairDarkEnergyReceivedEvent,
 )
 from universe.universe import Universe
 
@@ -84,6 +85,67 @@ class DarkSectorObjectStateTests(unittest.TestCase):
         self.assertEqual(
             event.energy_j,
             2.0,
+        )
+
+    def test_stable_pair_energy_uses_object_event(
+        self
+    ):
+        sector = DarkSector()
+
+        event = (
+            sector.receive_stable_pair_energy(
+                pair_id="stable_pair_0001",
+                energy_j=3.0,
+            )
+        )
+
+        self.assertIsInstance(
+            event,
+            StableBoxPairDarkEnergyReceivedEvent,
+        )
+
+        self.assertIs(
+            sector.events[-1],
+            event,
+        )
+
+        self.assertEqual(
+            sector.dark_energy_j,
+            3.0,
+        )
+
+        self.assertEqual(
+            event.pair_id,
+            "stable_pair_0001",
+        )
+
+        self.assertEqual(
+            event.energy_j,
+            3.0,
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    event,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(TypeError):
+            _ = event["energy_j"]
+
+        snapshot = event.to_dict()
+        snapshot["energy_j"] = 999.0
+
+        self.assertEqual(
+            event.energy_j,
+            3.0,
         )
 
     def test_public_state_is_detached_dict_boundary(self):

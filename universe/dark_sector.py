@@ -7,6 +7,7 @@ from universe.dark_sector_state import (
     DarkMatterCondensationEvent,
     DarkSectorEnergyReceivedEvent,
     DarkSectorState,
+    StableBoxPairDarkEnergyReceivedEvent,
 )
 
 
@@ -111,6 +112,41 @@ class DarkSector:
             f"{box_id} "
             f"ENERGY={energy_j:.3f} J "
             f"TOTAL={self.dark_energy_j:.3f} J"
+        )
+
+        return event
+
+    def receive_stable_pair_energy(
+        self,
+        pair_id,
+        energy_j,
+    ):
+        energy_j = float(
+            energy_j
+        )
+
+        if energy_j <= 0.0:
+            raise ValueError(
+                "Stable pair dark energy "
+                "must be positive."
+            )
+
+        self.dark_energy_j += (
+            energy_j
+        )
+
+        event = (
+            StableBoxPairDarkEnergyReceivedEvent(
+                pair_id=pair_id,
+                energy_j=energy_j,
+                dark_energy_total_j=(
+                    self.dark_energy_j
+                ),
+            )
+        )
+
+        self.events.append(
+            event
         )
 
         return event

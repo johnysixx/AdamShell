@@ -6,6 +6,9 @@ from cats.cats import Cats
 from universe.dark_sector import (
     QUANTUM_BOX_ENERGY_COST_J
 )
+from universe.dark_sector_state import (
+    StableBoxPairDarkEnergyReceivedEvent,
+)
 
 
 class StableCatExplorationBoxPairTests(
@@ -245,6 +248,61 @@ class StableCatExplorationBoxPairTests(
             dissolution.remote_layer_energy_j,
             0.0
         )
+
+    def test_dissolution_records_dark_energy_object_event(
+        self
+    ):
+        self.transfer(
+            self.creator,
+            self.source,
+            self.target
+        )
+
+        result = self.transfer(
+            self.creator,
+            self.target,
+            self.source
+        )
+
+        event = (
+            self.universe
+            .dark_sector
+            .events[-1]
+        )
+
+        dissolution = (
+            result.pair_dissolution
+        )
+
+        self.assertIsInstance(
+            event,
+            StableBoxPairDarkEnergyReceivedEvent,
+        )
+
+        self.assertEqual(
+            event.pair_id,
+            dissolution.pair_id,
+        )
+
+        self.assertAlmostEqual(
+            event.energy_j,
+            dissolution.quantum_dark_energy_j,
+        )
+
+        self.assertAlmostEqual(
+            event.dark_energy_total_j,
+            self.universe.dark_sector.dark_energy_j,
+        )
+
+        self.assertFalse(
+            hasattr(
+                event,
+                "get",
+            )
+        )
+
+        with self.assertRaises(TypeError):
+            _ = event["energy_j"]
 
     def test_dissolution_creates_cronenberg(
         self

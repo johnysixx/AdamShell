@@ -738,28 +738,13 @@ class CatQuantumBoxTransfer:
                 remote_layer_energy
             )
 
-        dark_sector = (
-            self.universe.dark_sector
-        )
-
-        dark_sector.dark_energy_j += (
-            dark_energy
-        )
-
-        dark_event = {
-            "name": (
-                "stable_box_pair_dark_"
-                "energy_received"
-            ),
-            "pair_id": pair.pair_id,
-            "energy_j": dark_energy,
-            "dark_energy_total_j": (
-                dark_sector.dark_energy_j
+        (
+            self.universe
+            .dark_sector
+            .receive_stable_pair_energy(
+                pair_id=pair.pair_id,
+                energy_j=dark_energy,
             )
-        }
-
-        dark_sector.events.append(
-            dark_event
         )
 
         removed_boxes = []

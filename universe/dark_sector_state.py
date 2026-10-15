@@ -49,6 +49,51 @@ class DarkSectorEnergyReceivedEvent:
 
 
 @dataclass(slots=True, frozen=True)
+class StableBoxPairDarkEnergyReceivedEvent:
+    pair_id: str
+    energy_j: float
+    dark_energy_total_j: float
+
+    name: str = field(
+        default=(
+            "stable_box_pair_dark_energy_received"
+        ),
+        init=False,
+    )
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "pair_id",
+            str(self.pair_id),
+        )
+
+        object.__setattr__(
+            self,
+            "energy_j",
+            float(self.energy_j),
+        )
+
+        object.__setattr__(
+            self,
+            "dark_energy_total_j",
+            float(
+                self.dark_energy_total_j
+            ),
+        )
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "pair_id": self.pair_id,
+            "energy_j": self.energy_j,
+            "dark_energy_total_j": (
+                self.dark_energy_total_j
+            ),
+        }
+
+
+@dataclass(slots=True, frozen=True)
 class DarkMatterCondensationEvent:
     consumed_energy_j: float
     produced_dark_matter_kg: float
