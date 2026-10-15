@@ -1,6 +1,10 @@
 import unittest
 
 from quantum.director import QuantumDirector
+from quantum.director_state import (
+    QuantumDirectorNebulaStudiedEvent,
+    QuantumDirectorStarCreatedEvent,
+)
 from universe.universe import Universe
 from multiverse import UniverseRegistry
 from idea_universe import IdeaUniverse
@@ -68,10 +72,9 @@ class QuantumDirectorTests(unittest.TestCase):
         )
 
         director.observe(
-            {
-                "event": "primordial_idea_star_created",
-                "subject": star
-            }
+            QuantumDirectorStarCreatedEvent(
+                subject=star,
+            )
         )
 
         self.assertEqual(
@@ -90,9 +93,7 @@ class QuantumDirectorTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            director.research_book[0][
-                "event"
-            ],
+            director.research_book[0].event,
             "primordial_idea_star_created"
         )
 
@@ -155,17 +156,17 @@ class QuantumDirectorTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            director.research_book[0]["event"],
+            director.research_book[0].event,
             "primordial_idea_star_exploded"
         )
 
         self.assertEqual(
-            director.research_book[1]["event"],
+            director.research_book[1].event,
             "primordial_nebula_created"
         )
 
         self.assertIs(
-            director.research_book[1]["subject"],
+            director.research_book[1].subject,
             nebula
         )
 
@@ -199,12 +200,12 @@ class QuantumDirectorTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            result["finding"],
+            result.finding,
             "liquid_hydrocarbons_identified"
         )
 
         self.assertEqual(
-            result["amount"],
+            result.amount,
             5.0
         )
 
@@ -254,7 +255,7 @@ class QuantumDirectorTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            result["invention"],
+            result.invention,
             "liquid_hydrocarbon_mining"
         )
 
@@ -264,7 +265,7 @@ class QuantumDirectorTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            result["mining_limit_rule"],
+            result.mining_limit_rule,
             "maximum_10_percent_of_growth"
         )
 
@@ -316,7 +317,7 @@ class QuantumDirectorTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            result["mined"],
+            result.mined,
             3.0
         )
 
@@ -326,14 +327,78 @@ class QuantumDirectorTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            result["material"],
+            result.material,
             "liquid_hydrocarbons"
         )
 
         self.assertEqual(
-            result["miner"],
+            result.miner,
             "director"
         )
+
+
+    def test_director_runtime_records_are_objects(
+        self
+    ):
+        from idea_universe.primordial_nebula import (
+            PrimordialNebula,
+        )
+
+        universe = Universe()
+
+        director, _, _ = make_director(
+            universe
+        )
+
+        nebula = PrimordialNebula(
+            source_remnants=[]
+        )
+
+        result = director.study_nebula(
+            nebula
+        )
+
+        self.assertIsInstance(
+            result,
+            QuantumDirectorNebulaStudiedEvent,
+        )
+
+        self.assertIs(
+            director.research_book[-1],
+            result,
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    result,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = result[
+                "finding"
+            ]
+
+        with self.assertRaises(
+            TypeError
+        ):
+            director.observe(
+                {
+                    "event":
+                        "legacy_mapping",
+                }
+            )
+
+
 
 
 if __name__ == "__main__":
