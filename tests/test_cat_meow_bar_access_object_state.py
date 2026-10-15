@@ -5,6 +5,8 @@ from multiverse import UniverseRegistry
 from meeting_place.meeting_place import MeetingPlace
 from meeting_place.cat_meow_event_state import (
     BouncerCatInvitedGuestAuthorizedEvent,
+    BouncerCatInvitedGuestDeniedResult,
+    BouncerMeowInvitationRegistryRegisteredEvent,
 )
 from cats.cats import Cats
 from cats.cat_human_bond_system import (
@@ -190,17 +192,51 @@ class CatMeowBarAccessObjectStateTests(
             state,
         )
 
+    def test_registration_result_is_object(
+        self
+    ):
+        result = (
+            self.meeting
+            .bouncer
+            .register_meow_invitation_system(
+                self.invitations
+            )
+        )
+
+        self.assertIsInstance(
+            result,
+            BouncerMeowInvitationRegistryRegisteredEvent,
+        )
+
+        self.assertTrue(
+            result.registered
+        )
+
+        self.assertFalse(
+            hasattr(
+                result,
+                "get",
+            )
+        )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = result["registered"]
+
     def test_bouncer_accepts_object_state(
         self
     ):
         state = CatMeowBarAccessState(
-            source='cat_MEOW_invitation',
+            source="cat_MEOW_invitation",
             inviting_cat=self.cat.name,
             invitation_id=self.offered.id,
             permanent=False,
         )
 
-        self.human.meow_bar_invitation = state
+        self.human.meow_bar_invitation = (
+            state
+        )
 
         result = (
             self.meeting
@@ -211,12 +247,17 @@ class CatMeowBarAccessObjectStateTests(
             )
         )
 
+        self.assertIsInstance(
+            result,
+            BouncerCatInvitedGuestAuthorizedEvent,
+        )
+
         self.assertTrue(
-            result['authorized']
+            result.authorized
         )
 
         self.assertEqual(
-            result['invitation_id'],
+            result.invitation_id,
             self.offered.id,
         )
 
@@ -226,13 +267,9 @@ class CatMeowBarAccessObjectStateTests(
             .cat_invited_guest_history[-1]
         )
 
-        self.assertIsInstance(
+        self.assertIs(
             stored,
-            BouncerCatInvitedGuestAuthorizedEvent,
-        )
-
-        self.assertTrue(
-            stored.authorized
+            result,
         )
 
         self.assertEqual(
@@ -245,25 +282,15 @@ class CatMeowBarAccessObjectStateTests(
             self.cat.name,
         )
 
-        self.assertEqual(
-            stored.invitation_id,
-            self.offered.id,
-        )
-
-        self.assertEqual(
-            stored.guest_type,
-            'cat_invited_guest',
-        )
-
         for mapping_method in (
-            'get',
-            'keys',
-            'items',
-            'values',
+            "get",
+            "keys",
+            "items",
+            "values",
         ):
             self.assertFalse(
                 hasattr(
-                    stored,
+                    result,
                     mapping_method,
                 )
             )
@@ -271,16 +298,18 @@ class CatMeowBarAccessObjectStateTests(
         with self.assertRaises(
             TypeError
         ):
-            _ = stored[
-                'authorized'
+            _ = result[
+                "authorized"
             ]
 
-        result[
-            'human'
-        ] = 'changed'
+        snapshot = result.to_dict()
+
+        snapshot[
+            "human"
+        ] = "changed"
 
         self.assertEqual(
-            stored.human,
+            result.human,
             self.human.name,
         )
 
@@ -296,14 +325,33 @@ class CatMeowBarAccessObjectStateTests(
             )
         )
 
+        self.assertIsInstance(
+            result,
+            BouncerCatInvitedGuestDeniedResult,
+        )
+
         self.assertFalse(
-            result['authorized']
+            result.authorized
         )
 
         self.assertEqual(
-            result['reason'],
-            'no_MEOW_invitation',
+            result.reason,
+            "no_MEOW_invitation",
         )
+
+        self.assertFalse(
+            hasattr(
+                result,
+                "get",
+            )
+        )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = result[
+                "reason"
+            ]
 
     def test_legacy_mapping_state_is_rejected(
         self

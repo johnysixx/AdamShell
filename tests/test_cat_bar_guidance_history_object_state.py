@@ -5,6 +5,9 @@ from multiverse import UniverseRegistry
 from meeting_place.meeting_place import (
     MeetingPlace,
 )
+from meeting_place.cat_invited_guest_state import (
+    CatInvitedHumanEnteredEvent,
+)
 from cats.cats import Cats
 from cats.cat_human_bond_system import (
     CatHumanBondSystem,
@@ -17,7 +20,6 @@ from cats.cat_meow_bar_access_state import (
 )
 from cats.cat_bar_guidance_system import (
     CatBarGuidanceAccessSnapshot,
-    CatBarGuidanceAdmissionSnapshot,
     CatBarGuidanceSystem,
     CatGuidedHumanToBarEvent,
 )
@@ -130,7 +132,7 @@ class CatBarGuidanceHistoryObjectStateTests(
 
         self.assertIsInstance(
             event.admission,
-            CatBarGuidanceAdmissionSnapshot,
+            CatInvitedHumanEnteredEvent,
         )
 
         self.assertEqual(

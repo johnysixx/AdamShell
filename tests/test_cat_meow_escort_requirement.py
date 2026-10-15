@@ -47,18 +47,18 @@ class CatMEOWEscortRequirementTests(unittest.TestCase):
 
     def test_valid_MEOW_without_cat_does_not_admit(self):
         result = self.meeting.add_cat_invited_human(self.human, None, self.invitations)
-        self.assertFalse(result['entered'])
-        self.assertEqual(result['reason'], 'inviting_cat_not_present')
+        self.assertFalse(result.entered)
+        self.assertEqual(result.reason, 'inviting_cat_not_present')
         self.assertNotIn(self.human, self.meeting.entities)
 
     def test_wrong_cat_cannot_escort(self):
         result = self.meeting.bouncer.can_enter_with_cat(self.human, self.wrong_cat)
-        self.assertFalse(result['authorized'])
-        self.assertEqual(result['reason'], 'MEOW_wrong_cat')
+        self.assertFalse(result.authorized)
+        self.assertEqual(result.reason, 'MEOW_wrong_cat')
 
     def test_real_inviting_cat_can_escort(self):
         result = self.meeting.bouncer.can_enter_with_cat(self.human, self.cat)
-        self.assertTrue(result['authorized'])
+        self.assertTrue(result.authorized)
 
     def test_guidance_brings_cat_and_human_together(self):
         guidance = CatBarGuidanceSystem(self.invitations, self.meeting)

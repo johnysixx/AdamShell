@@ -1,7 +1,10 @@
 from copy import deepcopy
 
 from meeting_place.cat_invited_guest_state import (
+    CatInvitedGuestArrivedEvent,
     CatInvitedGuestState,
+    CatInvitedHumanEnteredEvent,
+    CatInvitedHumanEntryDeniedResult,
 )
 from meeting_place.bartender_chronicle_state import (
     BartenderDrinkPromotedEntry,
@@ -244,92 +247,184 @@ class MeetingPlace:
             self.record_guest_visit(entity_name)
             self.bartender.guest_arrives(entity_name)
 
-    def add_cat_invited_human(self, human, cat, invitation_system):
-        human_name = self._get_entity_name(human)
-        cat_name = self._get_entity_name(cat)
+    def _deny_cat_invited_human_entry(
+        self,
+        human,
+        cat,
+        reason,
+    ):
+        return (
+            CatInvitedHumanEntryDeniedResult(
+                human=human,
+                cat=cat,
+                reason=reason,
+            )
+        )
+
+    def add_cat_invited_human(
+        self,
+        human,
+        cat,
+        invitation_system,
+    ):
+        human_name = self._get_entity_name(
+            human
+        )
+
+        cat_name = self._get_entity_name(
+            cat
+        )
+
         if human_name in self.bar_banned_humans:
-            return {'name': 'cat_invited_human_entry_denied', 'human': human_name, 'cat': cat_name, 'reason': 'bar_entry_banned', 'entered': False}
+            return self._deny_cat_invited_human_entry(
+                human=human_name,
+                cat=cat_name,
+                reason="bar_entry_banned",
+            )
+
         if cat is None:
-            return {'name': 'cat_invited_human_entry_denied', 'human': human_name, 'cat': None, 'reason': 'inviting_cat_not_present', 'entered': False}
-        suspended_until = int(getattr(cat.meow_invitations, 'suspended_until_tick', 0))
+            return self._deny_cat_invited_human_entry(
+                human=human_name,
+                cat=None,
+                reason="inviting_cat_not_present",
+            )
+
+        suspended_until = int(
+            getattr(
+                cat.meow_invitations,
+                "suspended_until_tick",
+                0,
+            )
+        )
+
         if self.tick_count < suspended_until:
-            return {'name': 'cat_invited_human_entry_denied', 'human': human_name, 'cat': cat_name, 'reason': 'cat_MEOW_cooldown', 'entered': False}
-        if getattr(cat.meow_invitations, 'garfield_training_required', False):
-            return {'name': 'cat_invited_human_entry_denied', 'human': human_name, 'cat': cat_name, 'reason': 'garfield_training_required', 'entered': False}
-        register = getattr(self.bouncer, 'register_meow_invitation_system', None)
-        if callable(register):
-            register(invitation_system)
-        authorization = self.bouncer.can_enter_with_cat(human, cat)
-        if not authorization.get('authorized', False):
-            UniverseLogger.event(f"MEETING PLACE CAT INVITED ENTRY DENIED: {human_name} REASON={authorization.get('reason')}")
-            return {'name': 'cat_invited_human_entry_denied', 'human': human_name, 'cat': cat_name, 'reason': authorization.get('reason'), 'entered': False}
+            return self._deny_cat_invited_human_entry(
+                human=human_name,
+                cat=cat_name,
+                reason="cat_MEOW_cooldown",
+            )
+
+        if getattr(
+            cat.meow_invitations,
+            "garfield_training_required",
+            False,
+        ):
+            return self._deny_cat_invited_human_entry(
+                human=human_name,
+                cat=cat_name,
+                reason="garfield_training_required",
+            )
+
+        register = getattr(
+            self.bouncer,
+            "register_meow_invitation_system",
+            None,
+        )
+
+        if callable(
+            register
+        ):
+            register(
+                invitation_system
+            )
+
+        authorization = (
+            self.bouncer
+            .can_enter_with_cat(
+                human,
+                cat,
+            )
+        )
+
+        if not authorization.authorized:
+            UniverseLogger.event(
+                "MEETING PLACE CAT INVITED "
+                f"ENTRY DENIED: {human_name} "
+                f"REASON={authorization.reason}"
+            )
+
+            return self._deny_cat_invited_human_entry(
+                human=human_name,
+                cat=cat_name,
+                reason=authorization.reason,
+            )
+
         self._require_cat_invited_guest_records()
 
         if cat not in self.entities:
-            self.add_entity(cat)
+            self.add_entity(
+                cat
+            )
+
         if cat not in self.entities:
-            return {'name': 'cat_invited_human_entry_denied', 'human': human_name, 'cat': cat_name, 'reason': 'inviting_cat_failed_to_enter', 'entered': False}
+            return self._deny_cat_invited_human_entry(
+                human=human_name,
+                cat=cat_name,
+                reason=(
+                    "inviting_cat_failed_to_enter"
+                ),
+            )
+
         if human not in self.entities:
             self.bartender.prepare_for_guest()
-            self.entities.append(human)
-        human.current_layer = 'meeting_place'
-        human.location = 'meeting_place'
-        self.universe.world['meeting_place']['entities'] = self.entities
-        if not hasattr(self, 'cat_invited_guests'):
+            self.entities.append(
+                human
+            )
+
+        human.current_layer = (
+            "meeting_place"
+        )
+
+        human.location = (
+            "meeting_place"
+        )
+
+        self.universe.world[
+            "meeting_place"
+        ][
+            "entities"
+        ] = self.entities
+
+        if not hasattr(
+            self,
+            "cat_invited_guests",
+        ):
             self.cat_invited_guests = {}
+
         record = CatInvitedGuestState(
             human=human_name,
             inviting_cat=cat_name,
             invitation_id=(
-                authorization[
-                    'invitation_id'
-                ]
+                authorization.invitation_id
             ),
             cat_present=True,
             entered_together=True,
             permanent_access=False,
         )
-        self.cat_invited_guests[human_name] = record
+
+        self.cat_invited_guests[
+            human_name
+        ] = record
+
         UniverseLogger.event(
-            f'MEETING PLACE: CAT INVITED GUEST '
-            f'{human_name} ARRIVED WITH {cat_name}'
+            "MEETING PLACE: CAT INVITED GUEST "
+            f"{human_name} ARRIVED WITH "
+            f"{cat_name}"
         )
 
-        self.emit_event({
-            'name':
-                'cat_invited_guest_arrived',
-            'human':
-                record.human,
-            'inviting_cat':
-                record.inviting_cat,
-            'invitation_id':
-                record.invitation_id,
-            'cat_present':
-                record.cat_present,
-            'entered_together':
-                record.entered_together,
-            'permanent_access':
-                record.permanent_access,
-        })
+        self.emit_event(
+            CatInvitedGuestArrivedEvent
+            .from_state(
+                record
+            )
+        )
 
-        return {
-            'name':
-                'cat_invited_human_entered',
-            'human':
-                record.human,
-            'inviting_cat':
-                record.inviting_cat,
-            'invitation_id':
-                record.invitation_id,
-            'cat_present':
-                record.cat_present,
-            'entered_together':
-                record.entered_together,
-            'permanent_access':
-                record.permanent_access,
-            'entered':
-                True,
-        }
+        return (
+            CatInvitedHumanEnteredEvent
+            .from_state(
+                record
+            )
+        )
 
     def _require_cat_invited_guest_records(
         self,

@@ -8,8 +8,10 @@ from .bouncer_state import BouncerState
 from .cat_meow_event_state import (
     BouncerCatAllowedEvent,
     BouncerCatInvitedGuestAuthorizedEvent,
+    BouncerCatInvitedGuestDeniedResult,
     BouncerCatMeowEvent,
     BouncerCatMeowRecognitionEvent,
+    BouncerMeowInvitationRegistryRegisteredEvent,
 )
 
 class Bouncer(SocialMixin):
@@ -99,56 +101,141 @@ class Bouncer(SocialMixin):
         UniverseLogger.event(f'BOUNCER EJECTS: {entity_name}')
         return True
 
-    def register_meow_invitation_system(self, invitation_system):
-        self.meow_invitation_system = invitation_system
-        return {'name': 'bouncer_registered_MEOW_registry', 'registered': True}
+    def register_meow_invitation_system(
+        self,
+        invitation_system,
+    ):
+        self.meow_invitation_system = (
+            invitation_system
+        )
 
-    def can_enter_with_cat(self, human, escorting_cat):
-        human_name = self._get_entity_name(human)
-        cat_name = self._get_entity_name(escorting_cat)
+        return (
+            BouncerMeowInvitationRegistryRegisteredEvent()
+        )
+
+    def _deny_cat_invited_guest(
+        self,
+        human,
+        inviting_cat,
+        reason,
+    ):
+        return (
+            BouncerCatInvitedGuestDeniedResult(
+                human=human,
+                inviting_cat=inviting_cat,
+                reason=reason,
+            )
+        )
+
+    def can_enter_with_cat(
+        self,
+        human,
+        escorting_cat,
+    ):
+        human_name = self._get_entity_name(
+            human
+        )
+
+        cat_name = self._get_entity_name(
+            escorting_cat
+        )
+
         claim = self._entity_value(
             human,
-            'meow_bar_invitation',
+            "meow_bar_invitation",
         )
 
         if claim is None:
-            return {
-                'authorized': False,
-                'reason': 'no_MEOW_invitation',
-            }
+            return self._deny_cat_invited_guest(
+                human=human_name,
+                inviting_cat=cat_name,
+                reason="no_MEOW_invitation",
+            )
 
         if not isinstance(
             claim,
             CatMeowBarAccessState,
         ):
             raise TypeError(
-                'MEOW bar invitation state must be '
-                'CatMeowBarAccessState.'
+                "MEOW bar invitation state must be "
+                "CatMeowBarAccessState."
             )
 
-        if claim.source != 'cat_MEOW_invitation':
-            return {
-                'authorized': False,
-                'reason': 'invalid_MEOW_source',
-            }
+        if claim.source != "cat_MEOW_invitation":
+            return self._deny_cat_invited_guest(
+                human=human_name,
+                inviting_cat=cat_name,
+                reason="invalid_MEOW_source",
+            )
+
         if self.meow_invitation_system is None:
-            return {'authorized': False, 'reason': 'MEOW_registry_unavailable'}
+            return self._deny_cat_invited_guest(
+                human=human_name,
+                inviting_cat=cat_name,
+                reason="MEOW_registry_unavailable",
+            )
+
         invitation_id = claim.invitation_id
-        invitation = self.meow_invitation_system.get(invitation_id)
+
+        invitation = (
+            self.meow_invitation_system
+            .get(
+                invitation_id
+            )
+        )
+
         if invitation is None:
-            return {'authorized': False, 'reason': 'unknown_MEOW_invitation'}
+            return self._deny_cat_invited_guest(
+                human=human_name,
+                inviting_cat=cat_name,
+                reason="unknown_MEOW_invitation",
+            )
+
         if invitation.human != human_name:
-            return {'authorized': False, 'reason': 'MEOW_wrong_human'}
+            return self._deny_cat_invited_guest(
+                human=human_name,
+                inviting_cat=cat_name,
+                reason="MEOW_wrong_human",
+            )
+
         if invitation.cat != cat_name:
-            return {'authorized': False, 'reason': 'MEOW_wrong_cat'}
+            return self._deny_cat_invited_guest(
+                human=human_name,
+                inviting_cat=cat_name,
+                reason="MEOW_wrong_cat",
+            )
+
         if claim.inviting_cat != cat_name:
-            return {'authorized': False, 'reason': 'MEOW_claim_cat_mismatch'}
+            return self._deny_cat_invited_guest(
+                human=human_name,
+                inviting_cat=cat_name,
+                reason="MEOW_claim_cat_mismatch",
+            )
+
         if not invitation.understood:
-            return {'authorized': False, 'reason': 'MEOW_not_understood'}
+            return self._deny_cat_invited_guest(
+                human=human_name,
+                inviting_cat=cat_name,
+                reason="MEOW_not_understood",
+            )
+
         if invitation.used:
-            return {'authorized': False, 'reason': 'MEOW_already_used'}
-        if invitation.escort_required and escorting_cat is None:
-            return {'authorized': False, 'reason': 'inviting_cat_not_present'}
+            return self._deny_cat_invited_guest(
+                human=human_name,
+                inviting_cat=cat_name,
+                reason="MEOW_already_used",
+            )
+
+        if (
+            invitation.escort_required
+            and escorting_cat is None
+        ):
+            return self._deny_cat_invited_guest(
+                human=human_name,
+                inviting_cat=cat_name,
+                reason="inviting_cat_not_present",
+            )
+
         event = (
             BouncerCatInvitedGuestAuthorizedEvent(
                 human=human_name,
@@ -162,11 +249,11 @@ class Bouncer(SocialMixin):
         )
 
         UniverseLogger.event(
-            f'BOUNCER ALLOWS CAT INVITED GUEST: '
-            f'{human_name} WITH CAT {cat_name}'
+            f"BOUNCER ALLOWS CAT INVITED GUEST: "
+            f"{human_name} WITH CAT {cat_name}"
         )
 
-        return event.to_dict()
+        return event
 
     def _entity_value(self, entity, key, default=None):
         return getattr(entity, key, default)

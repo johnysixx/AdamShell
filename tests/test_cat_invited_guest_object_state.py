@@ -6,6 +6,7 @@ from meeting_place.meeting_place import (
     MeetingPlace,
 )
 from meeting_place.cat_invited_guest_state import (
+    CatInvitedGuestArrivedEvent,
     CatInvitedGuestState,
 )
 from cats.cats import Cats
@@ -210,6 +211,43 @@ class CatInvitedGuestObjectStateTests(
         self.assertFalse(
             record.permanent_access
         )
+
+    def test_entry_event_is_object(
+        self
+    ):
+        self._guide()
+
+        event = next(
+            event
+            for event
+            in self.meeting.events
+            if isinstance(
+                event,
+                CatInvitedGuestArrivedEvent,
+            )
+        )
+
+        self.assertEqual(
+            event.human,
+            self.human.name,
+        )
+
+        self.assertEqual(
+            event.inviting_cat,
+            self.cat.name,
+        )
+
+        self.assertFalse(
+            hasattr(
+                event,
+                "get",
+            )
+        )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = event["human"]
 
     def test_incident_reads_object_record(
         self

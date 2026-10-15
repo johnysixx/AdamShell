@@ -16,7 +16,6 @@ CATS_ROOT = (
 
 
 BOUNDARY_MAPPING_ALLOWLIST = {
-    'cats/cat_bar_guidance_system.py::CatBarGuidanceAdmissionSnapshot.to_dict',
     'cats/cat_bar_guidance_system.py::CatGuidedHumanToBarEvent.to_dict',
     'cats/cat_birth_objects.py::CatLitter.to_dict',
     'cats/cat_birth_objects.py::_kitten_birth_result_snapshot',

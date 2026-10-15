@@ -2,6 +2,78 @@ from dataclasses import dataclass, field
 
 
 @dataclass(slots=True, frozen=True)
+class BouncerMeowInvitationRegistryRegisteredEvent:
+
+    name: str = field(
+        default=(
+            "bouncer_registered_MEOW_registry"
+        ),
+        init=False,
+    )
+
+    registered: bool = field(
+        default=True,
+        init=False,
+    )
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "registered": self.registered,
+        }
+
+
+@dataclass(slots=True, frozen=True)
+class BouncerCatInvitedGuestDeniedResult:
+    human: str | None
+    inviting_cat: str | None
+    reason: str
+
+    name: str = field(
+        default=(
+            "bouncer_cat_invited_guest_denied"
+        ),
+        init=False,
+    )
+
+    authorized: bool = field(
+        default=False,
+        init=False,
+    )
+
+    def __post_init__(self):
+        if self.human is not None:
+            object.__setattr__(
+                self,
+                "human",
+                str(self.human),
+            )
+
+        if self.inviting_cat is not None:
+            object.__setattr__(
+                self,
+                "inviting_cat",
+                str(self.inviting_cat),
+            )
+
+        object.__setattr__(
+            self,
+            "reason",
+            str(self.reason),
+        )
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "authorized": self.authorized,
+            "human": self.human,
+            "inviting_cat":
+                self.inviting_cat,
+            "reason": self.reason,
+        }
+
+
+@dataclass(slots=True, frozen=True)
 class BouncerCatInvitedGuestAuthorizedEvent:
     human: str
     inviting_cat: str
