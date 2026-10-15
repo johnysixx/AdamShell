@@ -172,3 +172,53 @@ class CatInvitedHumanEnteredEvent:
                 self.permanent_access,
             "entered": self.entered,
         }
+
+
+@dataclass(slots=True, frozen=True)
+class CatGuestIncidentNotAttributedResult:
+    human: str | None
+    category: str
+    inviting_cat: str | None = None
+    reason: str | None = None
+
+    name: str = field(
+        default="cat_guest_incident_not_attributed",
+        init=False,
+    )
+
+    cat_responsibility: bool = field(
+        default=False,
+        init=False,
+    )
+
+    def __post_init__(self):
+        if self.human is not None:
+            object.__setattr__(
+                self,
+                "human",
+                str(self.human),
+            )
+
+        object.__setattr__(
+            self,
+            "category",
+            str(self.category),
+        )
+
+        if self.inviting_cat is not None:
+            object.__setattr__(
+                self,
+                "inviting_cat",
+                str(
+                    self.inviting_cat
+                ),
+            )
+
+        if self.reason is not None:
+            object.__setattr__(
+                self,
+                "reason",
+                str(
+                    self.reason
+                ),
+            )

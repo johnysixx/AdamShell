@@ -5,6 +5,7 @@ from meeting_place.cat_invited_guest_state import (
     CatInvitedGuestState,
     CatInvitedHumanEnteredEvent,
     CatInvitedHumanEntryDeniedResult,
+    CatGuestIncidentNotAttributedResult,
 )
 from meeting_place.bartender_chronicle_state import (
     BartenderDrinkPromotedEntry,
@@ -471,7 +472,10 @@ class MeetingPlace:
             human_name
         )
         if guest_record is None:
-            return {'name': 'cat_guest_incident_not_attributed', 'human': human_name, 'category': category, 'cat_responsibility': False}
+            return CatGuestIncidentNotAttributedResult(
+                human=human_name,
+                category=category,
+            )
         inviting_cat_name = (
             guest_record.inviting_cat
         )
@@ -481,7 +485,14 @@ class MeetingPlace:
                 inviting_cat = entity
                 break
         if inviting_cat is None:
-            return {'name': 'cat_guest_incident_not_attributed', 'human': human_name, 'category': category, 'inviting_cat': inviting_cat_name, 'reason': 'inviting_cat_not_found', 'cat_responsibility': False}
+            return CatGuestIncidentNotAttributedResult(
+                human=human_name,
+                category=category,
+                inviting_cat=inviting_cat_name,
+                reason=(
+                    'inviting_cat_not_found'
+                ),
+            )
         from cats.cat_guest_responsibility_system import CatGuestResponsibilitySystem
         responsibility = CatGuestResponsibilitySystem(self)
         event = responsibility.handle_incident(human=human, cat=inviting_cat, invitation_id=guest_record.invitation_id, category=category, description=description, cooldown_ticks=cooldown_ticks)
