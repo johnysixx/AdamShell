@@ -107,7 +107,7 @@ class BarCatD20ObjectStateTests(
     ):
         bar = self._bar()
         result = bar.welcome_cat_d20()
-        state = result["cat"].cat_d20
+        state = result.cat.cat_d20
 
         self.assertIsInstance(
             state,
@@ -128,8 +128,7 @@ class BarCatD20ObjectStateTests(
     ):
         bar = self._bar()
         cat = (
-            bar.welcome_cat_d20()
-            ["cat"]
+            bar.welcome_cat_d20().cat
         )
         state = cat.cat_d20
 
@@ -202,8 +201,7 @@ class BarCatD20ObjectStateTests(
     ):
         bar = self._bar()
         cat = (
-            bar.welcome_cat_d20()
-            ["cat"]
+            bar.welcome_cat_d20().cat
         )
 
         event = (

@@ -63,7 +63,7 @@ class CatD20PazuzuCanonTests(unittest.TestCase):
 
         self.assertIs(
             universe.cats_layer.cats[0],
-            arrival["cat"]
+            arrival.cat
         )
 
         self.assertIs(

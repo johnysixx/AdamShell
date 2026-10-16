@@ -37,6 +37,9 @@ from meeting_place.bar_objects import (
     RecipeIngredientRequirement,
 )
 from meeting_place.bar_yard import BarYard
+from meeting_place.cat_d20_welcome_state import (
+    CatD20WelcomeResultState,
+)
 from genesis.day0_lilith_entry_state import (
     LilithBornEvent,
     LilithEnteredBarEvent,
@@ -162,7 +165,6 @@ from genesis.day0_cat_d20_arrival_state import (
     CatD20DiscussionArrivalResult,
     CatD20ScratchedEvent,
     CatD20SocialState,
-    CatD20WelcomeResultState,
     TwoJudgePanelAcceptedEvent,
 )
 from genesis.day0_bartender_bouncer_panel_state import (
@@ -4181,12 +4183,18 @@ class Day0FirstBarShift:
         self
     ):
         arrival = (
-            CatD20WelcomeResultState
-            .from_mapping(
-                self.meeting_place
-                .welcome_cat_d20()
-            )
+            self.meeting_place
+            .welcome_cat_d20()
         )
+
+        if not isinstance(
+            arrival,
+            CatD20WelcomeResultState,
+        ):
+            raise TypeError(
+                'CatD20 welcome must return '
+                'CatD20WelcomeResultState.'
+            )
 
         cat = arrival.cat
 

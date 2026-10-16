@@ -76,7 +76,7 @@ class MultiverseKernel:
         )
 
         self.cat_d20 = (
-            cat_d20_arrival["cat"]
+            cat_d20_arrival.cat
         )
 
         pazuzu_preparation = (

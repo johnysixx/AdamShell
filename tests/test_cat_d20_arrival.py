@@ -3,6 +3,10 @@ from multiverse import UniverseRegistry
 from universe.universe import Universe
 from universe.bootstraps.universe_bootstrap import UniverseBootstrap
 from universe.bootstraps.entity_bootstrap import EntityBootstrap
+from meeting_place.cat_d20_welcome_state import (
+    CatD20WelcomeEventState,
+    CatD20WelcomeResultState,
+)
 
 class CatD20ArrivalTests(unittest.TestCase):
 
@@ -13,9 +17,40 @@ class CatD20ArrivalTests(unittest.TestCase):
         EntityBootstrap(universe, idea_universe, root_transition).run()
         bar = layers.get('meeting')
         result = bar.welcome_cat_d20()
-        cat = result['cat']
-        box = result['box']
-        self.assertTrue(result['created'])
+
+        self.assertIsInstance(
+            result,
+            CatD20WelcomeResultState,
+        )
+
+        self.assertIsInstance(
+            result.event,
+            CatD20WelcomeEventState,
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    result,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = result[
+                "cat"
+            ]
+
+        cat = result.cat
+        box = result.box
+        self.assertTrue(result.created)
         self.assertEqual(cat.type, 'cat')
         self.assertIn('d20_cat', cat.special_traits)
         self.assertEqual(cat.state, 'resting_in_cat_d20_box')
@@ -36,9 +71,9 @@ class CatD20ArrivalTests(unittest.TestCase):
         bar = layers.get('meeting')
         first = bar.welcome_cat_d20()
         second = bar.welcome_cat_d20()
-        self.assertTrue(first['created'])
-        self.assertFalse(second['created'])
-        self.assertIs(first['cat'], second['cat'])
+        self.assertTrue(first.created)
+        self.assertFalse(second.created)
+        self.assertIs(first.cat, second.cat)
         cat_d20_count = sum((1 for cat in universe.cats_layer.cats if cat.name == 'cat_d20'))
         self.assertEqual(cat_d20_count, 1)
 if __name__ == '__main__':

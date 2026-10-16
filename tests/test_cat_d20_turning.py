@@ -51,7 +51,7 @@ class CatD20TurningTests(unittest.TestCase):
             self.bar.welcome_cat_d20()
         )
 
-        self.cat = self.arrival["cat"]
+        self.cat = self.arrival.cat
 
     def test_cat_d20_turn_is_secret(self):
         bar_events_before = len(

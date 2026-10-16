@@ -6,8 +6,6 @@ from genesis.day0_cat_d20_arrival_state import (
     CatD20DiscussionArrivalResult,
     CatD20ScratchedEvent,
     CatD20SocialState,
-    CatD20WelcomeEventState,
-    CatD20WelcomeResultState,
     TwoJudgePanelAcceptedEvent,
 )
 from genesis.day0_first_bar_shift import (
@@ -21,6 +19,10 @@ from meeting_place.bar_objects import (
 )
 from meeting_place.meeting_place import (
     MeetingPlace,
+)
+from meeting_place.cat_d20_welcome_state import (
+    CatD20WelcomeEventState,
+    CatD20WelcomeResultState,
 )
 from multiverse import UniverseRegistry
 from universe.universe import Universe
