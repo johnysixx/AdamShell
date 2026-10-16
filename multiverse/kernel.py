@@ -84,10 +84,7 @@ class MultiverseKernel:
             .cat_d20_prepare_pazuzu_profile()
         )
 
-        if not pazuzu_preparation.get(
-            "prepared",
-            False
-        ):
+        if not pazuzu_preparation.prepared:
             raise RuntimeError(
                 "CatD20 failed to prepare "
                 "the canonical Pazuzu profile."
@@ -104,7 +101,7 @@ class MultiverseKernel:
             self.idea_universe,
             self.root_transition,
             pazuzu_profile=(
-                pazuzu_preparation["profile"]
+                pazuzu_preparation.profile
             )
         ).run()
 

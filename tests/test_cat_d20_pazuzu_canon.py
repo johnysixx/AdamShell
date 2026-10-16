@@ -8,6 +8,10 @@ from universe.bootstraps.universe_bootstrap import (
 from universe.bootstraps.entity_bootstrap import (
     EntityBootstrap
 )
+from meeting_place.bar_objects import (
+    CatD20CanonicalProfilePreparedEvent,
+    CatD20Profile,
+)
 
 
 class CatD20PazuzuCanonTests(unittest.TestCase):
@@ -41,9 +45,7 @@ class CatD20PazuzuCanonTests(unittest.TestCase):
             universe,
             idea_universe,
             root_transition,
-            pazuzu_profile=prepared[
-                "profile"
-            ]
+            pazuzu_profile=prepared.profile
         )
 
         bootstrap._create_pazuzu()
@@ -96,18 +98,58 @@ class CatD20PazuzuCanonTests(unittest.TestCase):
             "female"
         )
 
+        self.assertIsInstance(
+            prepared,
+            CatD20CanonicalProfilePreparedEvent,
+        )
+
+        self.assertIsInstance(
+            prepared.profile,
+            CatD20Profile,
+        )
+
+        self.assertIsInstance(
+            bootstrap.pazuzu_profile,
+            CatD20Profile,
+        )
+
+        self.assertIsNot(
+            bootstrap.pazuzu_profile,
+            prepared.profile,
+        )
+
         self.assertTrue(
-            prepared["prepared"]
+            prepared.prepared
         )
 
         self.assertFalse(
-            prepared["random"]
+            prepared.random
         )
 
         self.assertEqual(
-            prepared["mode"],
+            prepared.mode,
             "canonical_turn"
         )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    prepared,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = prepared[
+                "profile"
+            ]
 
 
 if __name__ == "__main__":

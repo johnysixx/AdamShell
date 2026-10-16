@@ -38,6 +38,9 @@ from meeting_place.cat_d20_turn_state import (
     CatD20TurnResult,
     CatD20ValueInterpretation,
 )
+from meeting_place.cat_d20_profile_preparation_state import (
+    CatD20ProfilePreparationFailedResult,
+)
 from meeting_place.cat_bar_lifecycle_state import (
     CatBartenderMeowExchangeEvent,
     CatDrankMilkAtBarEvent,
@@ -1046,7 +1049,9 @@ class MeetingPlace:
             ),
         )
 
-    def cat_d20_prepare_pazuzu_profile(self):
+    def cat_d20_prepare_pazuzu_profile(
+        self
+    ):
         cats_layer = getattr(
             self.universe,
             'cats_layer',
@@ -1054,20 +1059,14 @@ class MeetingPlace:
         )
 
         if cats_layer is None:
-            return {
-                'name':
-                    'cat_d20_pazuzu_profile_failed',
-                'result':
-                    'cats_layer_missing',
-                'prepared':
-                    False,
-            }
+            return CatD20ProfilePreparationFailedResult(
+                reason='cats_layer_missing',
+            )
 
         cat_d20 = next(
             (
                 cat
-                for cat
-                in cats_layer.cats
+                for cat in cats_layer.cats
                 if (
                     'd20_cat'
                     in getattr(
@@ -1081,14 +1080,9 @@ class MeetingPlace:
         )
 
         if cat_d20 is None:
-            return {
-                'name':
-                    'cat_d20_pazuzu_profile_failed',
-                'result':
-                    'cat_d20_missing',
-                'prepared':
-                    False,
-            }
+            return CatD20ProfilePreparationFailedResult(
+                reason='cat_d20_missing',
+            )
 
         base_profile = CatD20Profile(
             color='black',
@@ -1128,9 +1122,11 @@ class MeetingPlace:
 
         if occurrence == 1:
             target_name = 'pazuzu'
+
             profile = deepcopy(
                 base_profile
             )
+
             all_dice_rotation_requested = False
 
         elif occurrence == 2:
@@ -1203,7 +1199,7 @@ class MeetingPlace:
             'FOR PAZUZU RECORDED'
         )
 
-        return event.to_dict()
+        return event
 
     def manifest_gib_from_cat_d20(
         self,
@@ -1211,7 +1207,7 @@ class MeetingPlace:
     ):
         if not isinstance(
             prepared_event,
-            dict,
+            CatD20CanonicalProfilePreparedEvent,
         ):
             return {
                 'name':
@@ -1223,9 +1219,7 @@ class MeetingPlace:
             }
 
         if (
-            prepared_event.get(
-                'target_name'
-            )
+            prepared_event.target_name
             != 'gib'
         ):
             return {
@@ -1238,9 +1232,7 @@ class MeetingPlace:
             }
 
         if (
-            prepared_event.get(
-                'profile_occurrence'
-            )
+            prepared_event.profile_occurrence
             != 2
         ):
             return {
@@ -1252,72 +1244,12 @@ class MeetingPlace:
                     False,
             }
 
-        profile_payload = (
-            prepared_event.get(
-                'profile'
-            )
+        profile = deepcopy(
+            prepared_event.profile
         )
 
-        base_profile_payload = (
-            prepared_event.get(
-                'base_profile'
-            )
-        )
-
-        required_fields = {
-            'color',
-            'fur_length',
-            'pattern',
-            'eye_color',
-            'sex',
-        }
-
-        if (
-            not isinstance(
-                profile_payload,
-                dict,
-            )
-            or not required_fields.issubset(
-                profile_payload
-            )
-        ):
-            return {
-                'name':
-                    'gib_manifestation_failed',
-                'result':
-                    'incomplete_gib_profile',
-                'created':
-                    False,
-            }
-
-        if (
-            not isinstance(
-                base_profile_payload,
-                dict,
-            )
-            or not required_fields.issubset(
-                base_profile_payload
-            )
-        ):
-            return {
-                'name':
-                    'gib_manifestation_failed',
-                'result':
-                    'incomplete_gib_base_profile',
-                'created':
-                    False,
-            }
-
-        profile = (
-            CatD20Profile.from_dict(
-                profile_payload
-            )
-        )
-
-        base_profile = (
-            CatD20Profile.from_dict(
-                base_profile_payload
-            )
+        base_profile = deepcopy(
+            prepared_event.base_profile
         )
 
         cats_layer = getattr(
@@ -1339,8 +1271,7 @@ class MeetingPlace:
                     cat,
                     'name',
                     None,
-                )
-                == 'gib'
+                ) == 'gib'
             ),
             None,
         )
@@ -1363,13 +1294,9 @@ class MeetingPlace:
                     'canonical_profile'
                 ),
                 color=profile.color,
-                fur_length=(
-                    profile.fur_length
-                ),
+                fur_length=profile.fur_length,
                 pattern=profile.pattern,
-                eye_color=(
-                    profile.eye_color
-                ),
+                eye_color=profile.eye_color,
                 sex=profile.sex,
             )
         )
@@ -1407,10 +1334,8 @@ class MeetingPlace:
                 profile=profile,
                 profile_occurrence=2,
                 all_dice_rotation_requested=(
-                    prepared_event.get(
-                        'all_dice_rotation_requested',
-                        False,
-                    )
+                    prepared_event
+                    .all_dice_rotation_requested
                 ),
                 tick=getattr(
                     self.universe,

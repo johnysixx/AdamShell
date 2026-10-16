@@ -230,9 +230,24 @@ class BarCatD20ObjectStateTests(
             profile,
             CatD20Profile
         )
+        self.assertIsInstance(
+            event,
+            CatD20CanonicalProfilePreparedEvent,
+        )
+
+        self.assertIsInstance(
+            event.profile,
+            CatD20Profile,
+        )
+
         self.assertEqual(
             profile.to_dict(),
-            event["profile"]
+            event.profile.to_dict()
+        )
+
+        self._assert_object_only(
+            event,
+            "profile"
         )
 
         secret = (
@@ -274,8 +289,17 @@ class BarCatD20ObjectStateTests(
             quantum,
         )
 
-        event["profile"]["color"] = (
-            "changed"
+        snapshot = event.to_dict()
+
+        snapshot[
+            "profile"
+        ][
+            "color"
+        ] = "changed"
+
+        self.assertEqual(
+            event.profile.color,
+            "black"
         )
 
         self.assertEqual(
@@ -301,8 +325,13 @@ class BarCatD20ObjectStateTests(
             bar.cat_d20_prepare_pazuzu_profile()
         )
 
+        self.assertIsInstance(
+            prepared,
+            CatD20CanonicalProfilePreparedEvent,
+        )
+
         self.assertEqual(
-            prepared["target_name"],
+            prepared.target_name,
             "gib"
         )
 

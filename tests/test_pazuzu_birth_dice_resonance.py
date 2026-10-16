@@ -73,9 +73,7 @@ class PazuzuBirthDiceResonanceTests(
             self.universe,
             self.idea_universe,
             self.root_transition,
-            pazuzu_profile=prepared[
-                "profile"
-            ]
+            pazuzu_profile=prepared.profile
         )
 
         bootstrap._create_pazuzu()

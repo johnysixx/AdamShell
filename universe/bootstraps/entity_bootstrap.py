@@ -2,6 +2,9 @@ from universe.logger import UniverseLogger
 from cats import Cats
 from gods import Gods
 from idea_entities import IdeaEntities
+from meeting_place.bar_objects import (
+    CatD20Profile,
+)
 
 
 class EntityBootstrap:
@@ -17,17 +20,39 @@ class EntityBootstrap:
         self.idea_universe = idea_universe
         self.root_transition = root_transition
 
-        self.pazuzu_profile = {
-            "color": "black",
-            "fur_length": "short",
-            "pattern": "solid",
-            "eye_color": "green",
-            "sex": "female"
-        }
+        if pazuzu_profile is None:
+            self.pazuzu_profile = (
+                CatD20Profile(
+                    color="black",
+                    fur_length="short",
+                    pattern="solid",
+                    eye_color="green",
+                    sex="female",
+                )
+            )
 
-        if pazuzu_profile is not None:
-            self.pazuzu_profile.update(
-                dict(pazuzu_profile)
+        elif isinstance(
+            pazuzu_profile,
+            CatD20Profile,
+        ):
+            self.pazuzu_profile = (
+                CatD20Profile(
+                    color=pazuzu_profile.color,
+                    fur_length=(
+                        pazuzu_profile.fur_length
+                    ),
+                    pattern=pazuzu_profile.pattern,
+                    eye_color=(
+                        pazuzu_profile.eye_color
+                    ),
+                    sex=pazuzu_profile.sex,
+                )
+            )
+
+        else:
+            raise TypeError(
+                "Pazuzu bootstrap profile "
+                "must use CatD20Profile."
             )
 
     def run(self):
@@ -131,21 +156,21 @@ class EntityBootstrap:
 
         self.pazuzu = self.cats.create_cat(
             name="pazuzu",
-            color=self.pazuzu_profile[
-                "color"
-            ],
-            fur_length=self.pazuzu_profile[
-                "fur_length"
-            ],
-            pattern=self.pazuzu_profile[
-                "pattern"
-            ],
-            eye_color=self.pazuzu_profile[
-                "eye_color"
-            ],
-            sex=self.pazuzu_profile[
-                "sex"
-            ]
+            color=(
+                self.pazuzu_profile.color
+            ),
+            fur_length=(
+                self.pazuzu_profile.fur_length
+            ),
+            pattern=(
+                self.pazuzu_profile.pattern
+            ),
+            eye_color=(
+                self.pazuzu_profile.eye_color
+            ),
+            sex=(
+                self.pazuzu_profile.sex
+            )
         )
 
         self.pazuzu.alias = "classical_probe_debug_entity"
