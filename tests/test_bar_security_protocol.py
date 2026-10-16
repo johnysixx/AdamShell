@@ -1,3 +1,6 @@
+from cats.duplicate_consumption_energy import (
+    DuplicateConsumptionEnergyResolutionSkippedResult,
+)
 from core.entity.social_entity import SocialEntity
 from meeting_place.back_room_black_box import BackRoomBlackBox
 import unittest
@@ -18,9 +21,44 @@ from meeting_place.bar_hex_geometry import BarHexGeometry
 from meeting_place.bar_objects import (
     BarSecurityConfiscation,
     BarSecurityEnergyAllocation,
+    CatD20TurnEvent,
+)
+from meeting_place.cat_d20_adapter import (
+    CatD20Adapter,
+)
+from meeting_place.cat_d20_turn_state import (
+    CatD20TurnFailedResult,
+    CatD20TurnResult,
+    CatD20ValueInterpretation,
 )
 from meeting_place.bar_security_protocol import BarSecurityProtocol
+from meeting_place.meeting_place import MeetingPlace
+from multiverse import UniverseRegistry
+from universe.universe import Universe
 from core.entity.cronenberg import Cronenberg
+
+
+def cat_d20_turn_result(value):
+    return CatD20TurnResult(
+        turn=CatD20TurnEvent(
+            cat="cat_d20",
+            box="cat_d20_box",
+            previous_value=None,
+            value=value,
+            turn_number=1,
+        ),
+        interpretation=(
+            CatD20ValueInterpretation(
+                value=value,
+            )
+        ),
+        duplicate_consumption_energy=(
+            DuplicateConsumptionEnergyResolutionSkippedResult(
+                cat_d20_value=value,
+            )
+        ),
+    )
+
 
 class BarSecurityProtocolTests(unittest.TestCase):
 
@@ -87,7 +125,7 @@ class BarSecurityProtocolTests(unittest.TestCase):
 
     def test_confiscation_is_followed_by_cat_d20_roll(self):
         cat_d20 = Mock()
-        cat_d20.roll.return_value = {'value': 17, 'turned': True}
+        cat_d20.roll.return_value = cat_d20_turn_result(17)
         self.protocol.cat_d20 = cat_d20
         guest = SocialEntity.from_mapping({'name': 'guest_1', 'type': 'guest', 'state': 'behind_bar', 'position': {'x': 4000, 'y': 0}, 'existence_pct': 100.0, 'energy_j': 42.0})
         service = self.geometry.find_cell(name='bar_service_floor')
@@ -95,6 +133,113 @@ class BarSecurityProtocolTests(unittest.TestCase):
         self.assertTrue(result)
         cat_d20.roll.assert_called_once_with()
         self.assertEqual(self.protocol.last_security_roll, 17)
+
+    def test_failed_cat_d20_turn_is_ignored_as_object_result(self):
+        cat_d20 = Mock()
+        cat_d20.roll.return_value = (
+            CatD20TurnFailedResult(
+                reason="cat_d20_box_missing",
+                cat="cat_d20",
+            )
+        )
+        self.protocol.cat_d20 = cat_d20
+
+        guest = SocialEntity.from_mapping(
+            {
+                'name': 'guest_1',
+                'type': 'guest',
+                'state': 'behind_bar',
+                'position': {
+                    'x': 4000,
+                    'y': 0,
+                },
+                'existence_pct': 100.0,
+                'energy_j': 42.0,
+            }
+        )
+
+        service = self.geometry.find_cell(
+            name='bar_service_floor'
+        )
+
+        result = (
+            self.protocol
+            .handle_guest_entry(
+                guest,
+                service,
+            )
+        )
+
+        self.assertTrue(result)
+
+        self.assertIsNone(
+            self.protocol.last_security_roll
+        )
+
+        self.assertIsNone(
+            self.protocol.last_security_outcome
+        )
+
+    def test_security_rejects_legacy_cat_d20_mapping_result(self):
+        cat_d20 = Mock()
+        cat_d20.roll.return_value = {
+            'value': 17,
+            'turned': True,
+        }
+        self.protocol.cat_d20 = cat_d20
+
+        guest = SocialEntity.from_mapping(
+            {
+                'name': 'guest_1',
+                'type': 'guest',
+                'state': 'behind_bar',
+                'position': {
+                    'x': 4000,
+                    'y': 0,
+                },
+                'existence_pct': 100.0,
+                'energy_j': 42.0,
+            }
+        )
+
+        service = self.geometry.find_cell(
+            name='bar_service_floor'
+        )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            (
+                self.protocol
+                .handle_guest_entry(
+                    guest,
+                    service,
+                )
+            )
+
+    def test_meeting_place_wires_cat_d20_adapter_into_security(self):
+        universe = Universe()
+        universe.universe_registry = (
+            UniverseRegistry()
+        )
+
+        meeting = MeetingPlace(
+            universe
+        )
+
+        meeting.welcome_cat_d20()
+
+        self.assertIsInstance(
+            meeting.cat_d20_adapter,
+            CatD20Adapter,
+        )
+
+        self.assertIs(
+            meeting
+            .bar_security_protocol
+            .cat_d20,
+            meeting.cat_d20_adapter,
+        )
 
     def test_security_roll_selects_cat_or_cronenberg(self):
         self.assertEqual(self.protocol.interpret_security_roll(1), 'cronenberg')
@@ -104,7 +249,7 @@ class BarSecurityProtocolTests(unittest.TestCase):
 
     def test_security_roll_is_interpreted_after_confiscation(self):
         cat_d20 = Mock()
-        cat_d20.roll.return_value = {'value': 17, 'turned': True}
+        cat_d20.roll.return_value = cat_d20_turn_result(17)
         self.protocol.cat_d20 = cat_d20
         guest = SocialEntity.from_mapping({'name': 'guest_1', 'type': 'guest', 'state': 'behind_bar', 'position': {'x': 4000, 'y': 0}, 'existence_pct': 100.0, 'energy_j': 42.0})
         service = self.geometry.find_cell(name='bar_service_floor')
@@ -115,7 +260,7 @@ class BarSecurityProtocolTests(unittest.TestCase):
 
     def test_successful_security_roll_creates_real_cat_via_cats_system(self):
         cat_d20 = Mock()
-        cat_d20.roll.return_value = {'value': 17, 'turned': True}
+        cat_d20.roll.return_value = cat_d20_turn_result(17)
         cats = Mock()
         created_cat = SocialEntity.from_mapping({'name': 'security_cat_guest_1', 'type': 'cat', 'state': 'created'})
         cats.create_cat.return_value = created_cat
@@ -131,7 +276,7 @@ class BarSecurityProtocolTests(unittest.TestCase):
 
     def test_failed_security_roll_creates_real_cronenberg(self):
         cat_d20 = Mock()
-        cat_d20.roll.return_value = {'value': 7, 'turned': True}
+        cat_d20.roll.return_value = cat_d20_turn_result(7)
         self.protocol.cat_d20 = cat_d20
         guest = SocialEntity.from_mapping({'name': 'guest_1', 'type': 'guest', 'state': 'behind_bar', 'position': {'x': 4000, 'y': 0}, 'existence_pct': 100.0, 'energy_j': 42.0})
         service = self.geometry.find_cell(name='bar_service_floor')
@@ -146,7 +291,7 @@ class BarSecurityProtocolTests(unittest.TestCase):
 
     def test_failed_security_roll_leaves_cronenberg_in_quantum_layer(self):
         cat_d20 = Mock()
-        cat_d20.roll.return_value = {'value': 7, 'turned': True}
+        cat_d20.roll.return_value = cat_d20_turn_result(7)
         self.protocol.cat_d20 = cat_d20
         guest = SocialEntity.from_mapping({'name': 'guest_1', 'type': 'guest', 'state': 'behind_bar', 'position': {'x': 4000, 'y': 0}, 'existence_pct': 100.0, 'energy_j': 42.0})
         service = self.geometry.find_cell(name='bar_service_floor')
@@ -189,7 +334,7 @@ class BarSecurityProtocolTests(unittest.TestCase):
 
     def test_security_cat_uses_quantum_box_with_forced_cat_result(self):
         cat_d20 = Mock()
-        cat_d20.roll.return_value = {'value': 17, 'turned': True}
+        cat_d20.roll.return_value = cat_d20_turn_result(17)
         universe = Mock()
         box = Mock()
         box.id = 'quantum_box_security'

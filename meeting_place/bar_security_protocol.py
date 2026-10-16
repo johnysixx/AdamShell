@@ -7,6 +7,10 @@ from meeting_place.bar_objects import (
 from meeting_place.bar_incident_state import (
     BarIncidentState,
 )
+from meeting_place.cat_d20_turn_state import (
+    CatD20TurnFailedResult,
+    CatD20TurnResult,
+)
 from meeting_place.bouncer_state import (
     BouncerState,
 )
@@ -164,25 +168,115 @@ class BarSecurityProtocol:
         bottle_shelf = getattr(self, 'bottle_shelf', None)
         if bottle_shelf is not None:
             bottle_shelf.add_dark_energy(bar_dark_energy_j)
-        cat_d20 = getattr(self, 'cat_d20', None)
+        cat_d20 = getattr(
+            self,
+            'cat_d20',
+            None,
+        )
+
         if cat_d20 is not None:
             roll = cat_d20.roll()
-            if isinstance(roll, dict) and roll.get('turned'):
-                self.last_security_roll = roll.get('value')
-                self.last_security_outcome = self.interpret_security_roll(self.last_security_roll)
-                if self.last_security_outcome == 'cat':
-                    universe = getattr(self, 'universe', None)
+
+            if not isinstance(
+                roll,
+                (
+                    CatD20TurnResult,
+                    CatD20TurnFailedResult,
+                ),
+            ):
+                raise TypeError(
+                    "Bar security Cat D20 roll "
+                    "must return a CatD20 turn "
+                    "result object."
+                )
+
+            if (
+                isinstance(
+                    roll,
+                    CatD20TurnResult,
+                )
+                and roll.turned
+            ):
+                self.last_security_roll = (
+                    roll.value
+                )
+
+                self.last_security_outcome = (
+                    self.interpret_security_roll(
+                        self.last_security_roll
+                    )
+                )
+
+                if (
+                    self.last_security_outcome
+                    == 'cat'
+                ):
+                    universe = getattr(
+                        self,
+                        'universe',
+                        None,
+                    )
+
                     if universe is not None:
-                        box = universe.create_quantum_box()
+                        box = (
+                            universe
+                            .create_quantum_box()
+                        )
+
                         self.last_security_box = box
-                        box.resolve_state(result='cat', cause='bar_security', observer='bartender', tick=None)
-                        universe.open_quantum_box(box.id, observer='bartender')
+
+                        box.resolve_state(
+                            result='cat',
+                            cause='bar_security',
+                            observer='bartender',
+                            tick=None,
+                        )
+
+                        universe.open_quantum_box(
+                            box.id,
+                            observer='bartender',
+                        )
+
                     else:
-                        cats = getattr(self, 'cats', None)
+                        cats = getattr(
+                            self,
+                            'cats',
+                            None,
+                        )
+
                         if cats is not None:
-                            self.last_security_creation = cats.create_cat(name=f'security_cat_{guest_name}', color='black', fur_length='short', origin='bar_security_confiscation')
-                elif self.last_security_outcome == 'cronenberg':
-                    self.last_security_creation = Cronenberg(error=RuntimeError('bar_security_roll_failed'), source_component='bar_security_protocol', source_operation='security_d20_failure')
+                            self.last_security_creation = (
+                                cats.create_cat(
+                                    name=(
+                                        f'security_cat_'
+                                        f'{guest_name}'
+                                    ),
+                                    color='black',
+                                    fur_length='short',
+                                    origin=(
+                                        'bar_security_'
+                                        'confiscation'
+                                    ),
+                                )
+                            )
+
+                elif (
+                    self.last_security_outcome
+                    == 'cronenberg'
+                ):
+                    self.last_security_creation = (
+                        Cronenberg(
+                            error=RuntimeError(
+                                'bar_security_roll_failed'
+                            ),
+                            source_component=(
+                                'bar_security_protocol'
+                            ),
+                            source_operation=(
+                                'security_d20_failure'
+                            ),
+                        )
+                    )
         incident_book = getattr(self, 'incident_book', None)
         last_incident_entry = getattr(self, 'last_incident_entry', None)
         if incident_book is not None and last_incident_entry is not None:

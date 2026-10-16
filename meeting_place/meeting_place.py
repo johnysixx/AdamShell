@@ -850,6 +850,10 @@ class MeetingPlace:
             )
         )
 
+        self.bar_security_protocol.cat_d20 = (
+            self.cat_d20_adapter
+        )
+
         self.universe.d20_registry.register(
             self.cat_d20_adapter
         )
