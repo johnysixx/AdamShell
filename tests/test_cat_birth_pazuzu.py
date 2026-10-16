@@ -25,6 +25,10 @@ from cats.cat_birth_result_state import (
 from cats.cat_trait_dice_mapping import (
     CatTraitDiceMappingResult,
 )
+from meeting_place.pazuzu_birth_dice_resonance_state import (
+    PazuzuBirthDiceResonanceAlreadyTriggeredResult,
+    PazuzuBirthDiceResonanceEvent,
+)
 
 
 class FixedPazuzuRng:
@@ -191,6 +195,11 @@ class CatBirthPazuzuTests(
             cat.special_traits
         )
 
+        self.assertIsInstance(
+            resonance,
+            PazuzuBirthDiceResonanceEvent,
+        )
+
         self.assertTrue(
             resonance.triggered
         )
@@ -201,17 +210,40 @@ class CatBirthPazuzuTests(
         )
 
         self.assertTrue(
-            resonance.cat_d20["turned"]
+            resonance.cat_d20.turn.turned
         )
 
         self.assertEqual(
-            resonance.dice_vial["name"],
+            resonance.dice_vial.name,
             "dice_vial_secret_rotation"
         )
 
         self.assertTrue(
-            resonance.dice_box["rotated"]
+            resonance.dice_box.rotated
         )
+
+        for value, key in (
+            (
+                resonance,
+                "triggered",
+            ),
+            (
+                resonance.cat_d20,
+                "turn",
+            ),
+            (
+                resonance.dice_vial,
+                "name",
+            ),
+            (
+                resonance.dice_box,
+                "rotated",
+            ),
+        ):
+            with self.assertRaises(
+                TypeError
+            ):
+                _ = value[key]
 
     def test_pazuzu_birth_resonance_remains_one_time(self):
         birth = self._pazuzu_birth()
@@ -231,15 +263,30 @@ class CatBirthPazuzuTests(
             )
         )
 
+        self.assertIsInstance(
+            first.special_birth_result,
+            PazuzuBirthDiceResonanceEvent,
+        )
+
         self.assertTrue(
             first.special_birth_result.triggered
         )
 
+        self.assertIsInstance(
+            second_resonance,
+            PazuzuBirthDiceResonanceAlreadyTriggeredResult,
+        )
+
         self.assertTrue(
-            second_resonance[
+            second_resonance.already_triggered
+        )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = second_resonance[
                 "already_triggered"
             ]
-        )
 
 
 if __name__ == "__main__":

@@ -1,4 +1,5 @@
 import unittest
+from dataclasses import FrozenInstanceError
 
 from multiverse import UniverseRegistry
 from universe.universe import Universe
@@ -21,7 +22,9 @@ from meeting_place.dice_vial import (
     DiceVialSecretRotationEvent,
 )
 from meeting_place.pazuzu_birth_dice_resonance_state import (
+    PazuzuBirthDiceResonanceAlreadyTriggeredResult,
     PazuzuBirthDiceResonanceEvent,
+    PazuzuBirthDiceResonanceFailedResult,
     PazuzuCatD20ResonanceTurn,
 )
 from quantum.quantum_die_resolver import (
@@ -92,8 +95,13 @@ class PazuzuBirthDiceResonanceTests(
             )
         )
 
+        self.assertIsInstance(
+            result,
+            PazuzuBirthDiceResonanceEvent,
+        )
+
         self.assertTrue(
-            result["triggered"]
+            result.triggered
         )
 
         self.assertEqual(
@@ -107,52 +115,50 @@ class PazuzuBirthDiceResonanceTests(
         )
 
         self.assertEqual(
-            result["quantum_d20"]["value"],
+            result.quantum_d20.value,
             7
         )
 
         self.assertTrue(
-            result["cat_d20"]["turned"]
+            result.cat_d20.turn.turned
         )
 
         self.assertEqual(
-            result["cat_d20"]["value"],
+            result.cat_d20.turn.value,
             7
         )
 
         self.assertEqual(
-            result["dice_vial"]["name"],
+            result.dice_vial.name,
             "dice_vial_secret_rotation"
         )
 
         self.assertEqual(
-            result["dice_vial"]["roll"],
+            result.dice_vial.roll,
             7
         )
 
         self.assertTrue(
-            result["dice_box"]["rotated"]
+            result.dice_box.rotated
         )
 
         self.assertEqual(
-            result["dice_box"]["die"],
+            result.dice_box.die,
             "d12"
         )
 
         self.assertEqual(
-            result["dice_box"]["value"],
+            result.dice_box.value,
             7
         )
 
         self.assertLessEqual(
-            result["dice_box"]["value"],
-            result["dice_box"]["sides"]
+            result.dice_box.value,
+            result.dice_box.sides
         )
 
         self.assertFalse(
-            result["dice_box"][
-                "removed_from_box"
-            ]
+            result.dice_box.removed_from_box
         )
 
         stored = (
@@ -185,6 +191,11 @@ class PazuzuBirthDiceResonanceTests(
             PazuzuBirthDiceResonanceEvent,
         )
 
+        self.assertIsNot(
+            result,
+            stored,
+        )
+
         self.assertIsInstance(
             stored.quantum_d20,
             QuantumDieRollEvent,
@@ -215,30 +226,22 @@ class PazuzuBirthDiceResonanceTests(
             DiceBoxRotationEvent,
         )
 
-        self.assertIsInstance(
-            self.meeting
-            .dice_vial
-            .secret_event,
-            DiceVialSecretRotationEvent,
-        )
-
-        self.assertEqual(
-            quantum.name,
-            "pazuzu_birth_dice_resonance"
-        )
-
         for value, key in (
             (
-                stored,
+                result,
                 "triggered",
             ),
             (
-                stored.cat_d20,
+                result.cat_d20,
                 "turn",
             ),
             (
-                stored.dice_vial,
+                result.dice_vial,
                 "roll",
+            ),
+            (
+                result.dice_box,
+                "value",
             ),
         ):
             for mapping_method in (
@@ -259,11 +262,18 @@ class PazuzuBirthDiceResonanceTests(
             ):
                 _ = value[key]
 
-        result[
+        snapshot = result.to_dict()
+
+        snapshot[
             "dice_vial"
         ][
             "roll"
         ] = 1
+
+        self.assertEqual(
+            result.dice_vial.roll,
+            7
+        )
 
         self.assertEqual(
             stored.dice_vial.roll,
@@ -299,13 +309,53 @@ class PazuzuBirthDiceResonanceTests(
             )
         )
 
-        self.assertTrue(
-            first["triggered"]
+        self.assertIsInstance(
+            first,
+            PazuzuBirthDiceResonanceEvent,
+        )
+
+        self.assertIsInstance(
+            second,
+            PazuzuBirthDiceResonanceAlreadyTriggeredResult,
         )
 
         self.assertTrue(
-            second["already_triggered"]
+            first.triggered
         )
+
+        self.assertTrue(
+            second.triggered
+        )
+
+        self.assertTrue(
+            second.already_triggered
+        )
+
+        self.assertIs(
+            second.event,
+            self.meeting
+            .pazuzu_birth_dice_resonance_event,
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    second,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = second[
+                "already_triggered"
+            ]
 
         self.assertEqual(
             self.universe.quantum_die.roll_count,
@@ -329,6 +379,57 @@ class PazuzuBirthDiceResonanceTests(
             box_turns_after_first
         )
 
+    def test_missing_cat_d20_failure_is_object(self):
+        self.universe.cats_layer = None
+
+        result = (
+            self.meeting
+            .trigger_pazuzu_birth_dice_resonance(
+                rng=FixedResonanceRng()
+            )
+        )
+
+        self.assertIsInstance(
+            result,
+            PazuzuBirthDiceResonanceFailedResult,
+        )
+
+        self.assertEqual(
+            result.reason,
+            "cat_d20_missing",
+        )
+
+        self.assertFalse(
+            result.triggered
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+            "setdefault",
+        ):
+            self.assertFalse(
+                hasattr(
+                    result,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = result[
+                "reason"
+            ]
+
+        with self.assertRaises(
+            FrozenInstanceError
+        ):
+            result.reason = "changed"
+
+
     def test_pazuzu_birth_resonance_is_wired_into_kernel(self):
         from multiverse.kernel import (
             MultiverseKernel
@@ -351,6 +452,11 @@ class PazuzuBirthDiceResonanceTests(
             .pazuzu_birth_dice_resonance
         )
 
+        self.assertIsInstance(
+            result,
+            PazuzuBirthDiceResonanceEvent,
+        )
+
         self.assertEqual(
             [
                 cat.name
@@ -364,7 +470,7 @@ class PazuzuBirthDiceResonanceTests(
         )
 
         self.assertTrue(
-            result["triggered"]
+            result.triggered
         )
 
         self.assertEqual(
@@ -375,45 +481,42 @@ class PazuzuBirthDiceResonanceTests(
         )
 
         self.assertTrue(
-            result["cat_d20"]["turned"]
+            result.cat_d20.turn.turned
         )
 
         self.assertEqual(
-            result["dice_vial"]["name"],
+            result.dice_vial.name,
             "dice_vial_secret_rotation"
         )
 
         self.assertTrue(
-            result["dice_box"]["rotated"]
+            result.dice_box.rotated
         )
 
-        dice_box_result = result[
-            "dice_box"
-        ]
+        dice_box_result = (
+            result.dice_box
+        )
 
         self.assertGreaterEqual(
-            dice_box_result["raw_value"],
+            dice_box_result.raw_value,
             1
         )
 
         self.assertLessEqual(
-            dice_box_result["raw_value"],
-            dice_box_result["sides"]
+            dice_box_result.raw_value,
+            dice_box_result.sides
         )
 
-        if dice_box_result.get(
-            "is_percentile",
-            False
-        ):
+        if dice_box_result.is_percentile:
             self.assertIn(
-                dice_box_result["value"],
+                dice_box_result.value,
                 range(0, 100, 10)
             )
 
         else:
             self.assertEqual(
-                dice_box_result["value"],
-                dice_box_result["raw_value"]
+                dice_box_result.value,
+                dice_box_result.raw_value
             )
 
 

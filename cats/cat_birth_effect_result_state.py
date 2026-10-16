@@ -85,35 +85,3 @@ class GarfieldBirthEffectCombinationEvent:
     @property
     def effect_count(self):
         return len(self.effects)
-
-
-@dataclass(slots=True, frozen=True)
-class PazuzuBirthDiceResonanceResult:
-    name: str
-    triggered: bool
-    quantum_d20: object = None
-    cat_d20: object = None
-    dice_vial: object = None
-    dice_box: object = None
-    visibility: str | None = None
-    tick: int | None = None
-    result: str | None = None
-
-    @classmethod
-    def from_boundary(cls, payload):
-        if not isinstance(payload, dict):
-            raise TypeError(
-                "Pazuzu birth resonance boundary must be dict."
-            )
-
-        return cls(
-            name=payload["name"],
-            triggered=bool(payload["triggered"]),
-            quantum_d20=payload.get("quantum_d20"),
-            cat_d20=payload.get("cat_d20"),
-            dice_vial=payload.get("dice_vial"),
-            dice_box=payload.get("dice_box"),
-            visibility=payload.get("visibility"),
-            tick=payload.get("tick"),
-            result=payload.get("result"),
-        )

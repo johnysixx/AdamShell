@@ -65,7 +65,9 @@ from .bar_incident_book import BarIncidentBook
 from .dice_vial import DiceVial
 from .dice_box import DiceBox
 from .pazuzu_birth_dice_resonance_state import (
+    PazuzuBirthDiceResonanceAlreadyTriggeredResult,
     PazuzuBirthDiceResonanceEvent,
+    PazuzuBirthDiceResonanceFailedResult,
     PazuzuCatD20ResonanceTurn,
 )
 from .cat_d20_adapter import CatD20Adapter
@@ -1374,16 +1376,11 @@ class MeetingPlace:
                     "PazuzuBirthDiceResonanceEvent."
                 )
 
-            boundary = (
-                existing_event
-                .to_dict()
+            return (
+                PazuzuBirthDiceResonanceAlreadyTriggeredResult(
+                    event=existing_event,
+                )
             )
-
-            boundary[
-                'already_triggered'
-            ] = True
-
-            return boundary
 
         cats_layer = getattr(
             self.universe,
@@ -1413,14 +1410,9 @@ class MeetingPlace:
         )
 
         if cat_d20 is None:
-            return {
-                'name':
-                    'pazuzu_birth_dice_resonance_failed',
-                'result':
-                    'cat_d20_missing',
-                'triggered':
-                    False,
-            }
+            return PazuzuBirthDiceResonanceFailedResult(
+                reason='cat_d20_missing',
+            )
 
         self.universe.quantum_die.roll(
             rng=rng
@@ -1549,7 +1541,7 @@ class MeetingPlace:
             'RESONANCE RECORDED'
         )
 
-        return event.to_dict()
+        return event
 
     def interpret_cat_d20_value(
         self,

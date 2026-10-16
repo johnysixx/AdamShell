@@ -202,3 +202,102 @@ class PazuzuBirthDiceResonanceEvent:
                 self.visibility,
             "tick": self.tick,
         }
+
+@dataclass(slots=True, frozen=True)
+class PazuzuBirthDiceResonanceAlreadyTriggeredResult:
+    event: PazuzuBirthDiceResonanceEvent
+
+    already_triggered: bool = field(
+        default=True,
+        init=False,
+    )
+
+    def __post_init__(self):
+        if not isinstance(
+            self.event,
+            PazuzuBirthDiceResonanceEvent,
+        ):
+            raise TypeError(
+                "Repeated Pazuzu resonance "
+                "requires "
+                "PazuzuBirthDiceResonanceEvent."
+            )
+
+    @property
+    def name(self):
+        return self.event.name
+
+    @property
+    def triggered(self):
+        return self.event.triggered
+
+    @property
+    def quantum_d20(self):
+        return self.event.quantum_d20
+
+    @property
+    def quantum_resolution(self):
+        return self.event.quantum_resolution
+
+    @property
+    def cat_d20(self):
+        return self.event.cat_d20
+
+    @property
+    def dice_vial(self):
+        return self.event.dice_vial
+
+    @property
+    def dice_box(self):
+        return self.event.dice_box
+
+    @property
+    def visibility(self):
+        return self.event.visibility
+
+    @property
+    def tick(self):
+        return self.event.tick
+
+    def to_dict(self):
+        snapshot = (
+            self.event.to_dict()
+        )
+
+        snapshot[
+            "already_triggered"
+        ] = self.already_triggered
+
+        return snapshot
+
+
+@dataclass(slots=True, frozen=True)
+class PazuzuBirthDiceResonanceFailedResult:
+    reason: str
+
+    name: str = field(
+        default=(
+            "pazuzu_birth_dice_"
+            "resonance_failed"
+        ),
+        init=False,
+    )
+
+    triggered: bool = field(
+        default=False,
+        init=False,
+    )
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "reason",
+            str(self.reason),
+        )
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "reason": self.reason,
+            "triggered": self.triggered,
+        }

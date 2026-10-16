@@ -6,7 +6,6 @@ from cats.cat_birth_effect_result_state import (
     GarfieldBirthEffectAction,
     GarfieldBirthEffectCombinationEvent,
     QueenElisabethBirthEffectsEvent,
-    PazuzuBirthDiceResonanceResult,
     WoodooBirthD20RotationEvent,
     WoodooRebirthQuantumReconfigurationEvent,
 )
@@ -37,12 +36,9 @@ class CatBirthEffectResolver:
     ):
         if identity == "pazuzu":
             result = (
-                PazuzuBirthDiceResonanceResult
-                .from_boundary(
-                    self.meeting_place
-                    .trigger_pazuzu_birth_dice_resonance(
-                        rng=rng
-                    )
+                self.meeting_place
+                .trigger_pazuzu_birth_dice_resonance(
+                    rng=rng
                 )
             )
 
