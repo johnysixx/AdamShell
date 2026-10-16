@@ -41,6 +41,11 @@ from meeting_place.cat_d20_turn_state import (
 from meeting_place.cat_d20_profile_preparation_state import (
     CatD20ProfilePreparationFailedResult,
 )
+from meeting_place.cat_d20_gib_manifestation_state import (
+    CatD20GibAlreadyExistsResult,
+    CatD20GibManifestationFailedResult,
+    CatD20GibManifestationResult,
+)
 from meeting_place.cat_bar_lifecycle_state import (
     CatBartenderMeowExchangeEvent,
     CatDrankMilkAtBarEvent,
@@ -1209,40 +1214,25 @@ class MeetingPlace:
             prepared_event,
             CatD20CanonicalProfilePreparedEvent,
         ):
-            return {
-                'name':
-                    'gib_manifestation_failed',
-                'result':
-                    'invalid_prepared_event',
-                'created':
-                    False,
-            }
+            return CatD20GibManifestationFailedResult(
+                reason='invalid_prepared_event',
+            )
 
         if (
             prepared_event.target_name
             != 'gib'
         ):
-            return {
-                'name':
-                    'gib_manifestation_failed',
-                'result':
-                    'prepared_target_is_not_gib',
-                'created':
-                    False,
-            }
+            return CatD20GibManifestationFailedResult(
+                reason='prepared_target_is_not_gib',
+            )
 
         if (
             prepared_event.profile_occurrence
             != 2
         ):
-            return {
-                'name':
-                    'gib_manifestation_failed',
-                'result':
-                    'invalid_profile_occurrence',
-                'created':
-                    False,
-            }
+            return CatD20GibManifestationFailedResult(
+                reason='invalid_profile_occurrence',
+            )
 
         profile = deepcopy(
             prepared_event.profile
@@ -1277,14 +1267,9 @@ class MeetingPlace:
         )
 
         if existing is not None:
-            return {
-                'name':
-                    'gib_already_exists',
-                'cat':
-                    existing,
-                'created':
-                    False,
-            }
+            return CatD20GibAlreadyExistsResult(
+                cat=existing,
+            )
 
         manifestation = (
             self.universe.manifest_cat(
@@ -1302,14 +1287,9 @@ class MeetingPlace:
         )
 
         if manifestation is None:
-            return {
-                'name':
-                    'gib_manifestation_failed',
-                'result':
-                    'manifest_cat_failed',
-                'created':
-                    False,
-            }
+            return CatD20GibManifestationFailedResult(
+                reason='manifest_cat_failed',
+            )
 
         gib = manifestation.cat
 
@@ -1368,19 +1348,11 @@ class MeetingPlace:
             'SECOND CANONICAL CAT D20 PROFILE'
         )
 
-        boundary = (
-            event.to_dict()
+        return CatD20GibManifestationResult(
+            event=event,
+            cat=gib,
+            entity=manifestation.entity,
         )
-
-        boundary[
-            'cat'
-        ] = gib
-
-        boundary[
-            'entity'
-        ] = manifestation.entity
-
-        return boundary
 
     def trigger_pazuzu_birth_dice_resonance(
         self,

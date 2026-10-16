@@ -20,6 +20,9 @@ from meeting_place.meeting_place import (
 from meeting_place.cat_d20_turn_state import (
     CatD20TurnResult,
 )
+from meeting_place.cat_d20_gib_manifestation_state import (
+    CatD20GibManifestationResult,
+)
 from multiverse import UniverseRegistry
 from universe.universe import Universe
 
@@ -341,10 +344,20 @@ class BarCatD20ObjectStateTests(
             )
         )
 
-        gib = result["cat"]
+        self.assertIsInstance(
+            result,
+            CatD20GibManifestationResult,
+        )
+
+        gib = result.cat
 
         self.assertTrue(
-            result["created"]
+            result.created
+        )
+
+        self._assert_object_only(
+            result,
+            "cat"
         )
 
         self.assertEqual(
@@ -425,9 +438,18 @@ class BarCatD20ObjectStateTests(
             quantum,
         )
 
-        result["profile"][
+        snapshot = result.to_dict()
+
+        snapshot[
+            "profile"
+        ][
             "fur_length"
         ] = "changed"
+
+        self.assertEqual(
+            result.profile.fur_length,
+            "long"
+        )
 
         self.assertEqual(
             secret.profile.fur_length,
