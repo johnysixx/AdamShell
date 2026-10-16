@@ -33,6 +33,11 @@ from meeting_place.cat_d20_welcome_state import (
     CatD20WelcomeEventState,
     CatD20WelcomeResultState,
 )
+from meeting_place.cat_d20_turn_state import (
+    CatD20TurnFailedResult,
+    CatD20TurnResult,
+    CatD20ValueInterpretation,
+)
 from meeting_place.cat_bar_lifecycle_state import (
     CatBartenderMeowExchangeEvent,
     CatDrankMilkAtBarEvent,
@@ -889,23 +894,82 @@ class MeetingPlace:
             created=True,
         )
 
-    def turn_cat_d20_in_box(self, rng=None):
-        cats_layer = getattr(self.universe, 'cats_layer', None)
+    def turn_cat_d20_in_box(
+        self,
+        rng=None,
+    ):
+        cats_layer = getattr(
+            self.universe,
+            'cats_layer',
+            None,
+        )
+
         if cats_layer is None:
-            return {'name': 'cat_d20_turn_failed', 'result': 'cats_layer_missing', 'turned': False}
-        cat = next((candidate for candidate in cats_layer.cats if 'd20_cat' in getattr(candidate, 'special_traits', [])), None)
+            return CatD20TurnFailedResult(
+                reason='cats_layer_missing',
+            )
+
+        cat = next(
+            (
+                candidate
+                for candidate
+                in cats_layer.cats
+                if (
+                    'd20_cat'
+                    in getattr(
+                        candidate,
+                        'special_traits',
+                        [],
+                    )
+                )
+            ),
+            None,
+        )
+
         if cat is None:
-            return {'name': 'cat_d20_turn_failed', 'result': 'cat_d20_missing', 'turned': False}
-        box = getattr(self, 'cat_d20_box', None)
+            return CatD20TurnFailedResult(
+                reason='cat_d20_missing',
+            )
+
+        box = getattr(
+            self,
+            'cat_d20_box',
+            None,
+        )
+
         if box is None:
-            return {'name': 'cat_d20_turn_failed', 'result': 'cat_d20_box_missing', 'cat': cat.name, 'turned': False}
+            return CatD20TurnFailedResult(
+                reason='cat_d20_box_missing',
+                cat=cat.name,
+            )
+
         if box.occupied_by != cat.name:
-            return {'name': 'cat_d20_turn_failed', 'result': 'cat_d20_not_in_box', 'cat': cat.name, 'turned': False}
+            return CatD20TurnFailedResult(
+                reason='cat_d20_not_in_box',
+                cat=cat.name,
+            )
+
         rng = rng or random
-        value = int(rng.randint(1, 20))
+
+        value = int(
+            rng.randint(
+                1,
+                20,
+            )
+        )
+
         cat_d20_state = cat.cat_d20
-        previous_value = cat_d20_state.current_value
-        turn_count = cat_d20_state.turn_count + 1
+
+        previous_value = (
+            cat_d20_state
+            .current_value
+        )
+
+        turn_count = (
+            cat_d20_state
+            .turn_count
+            + 1
+        )
 
         turn_event = CatD20TurnEvent(
             cat=cat.name,
@@ -940,7 +1004,7 @@ class MeetingPlace:
 
         if not hasattr(
             self,
-            'cat_d20_secret_history'
+            'cat_d20_secret_history',
         ):
             self.cat_d20_secret_history = []
 
@@ -960,19 +1024,11 @@ class MeetingPlace:
             'CAT D20 SECRET ROTATION RECORDED'
         )
 
-        boundary = (
-            turn_event.to_dict()
-        )
-
         interpretation = (
             self.interpret_cat_d20_value(
                 value
             )
         )
-
-        boundary[
-            'interpretation'
-        ] = interpretation
 
         energy_resolution = (
             self
@@ -982,11 +1038,13 @@ class MeetingPlace:
             )
         )
 
-        boundary[
-            'duplicate_consumption_energy'
-        ] = energy_resolution
-
-        return boundary
+        return CatD20TurnResult(
+            turn=turn_event,
+            interpretation=interpretation,
+            duplicate_consumption_energy=(
+                energy_resolution
+            ),
+        )
 
     def cat_d20_prepare_pazuzu_profile(self):
         cats_layer = getattr(
@@ -1493,29 +1551,31 @@ class MeetingPlace:
                 resolver.history[-1]
             )
 
-        cat_d20_boundary = (
+        cat_d20_turn_result = (
             self.turn_cat_d20_in_box(
                 rng=rng
             )
         )
 
-        cat_d20_event = (
-            cat_d20
-            .cat_d20
-            .turn_history[-1]
-        )
-
-        energy_result = (
-            cat_d20_boundary[
-                'duplicate_consumption_energy'
-            ]
-        )
+        if not isinstance(
+            cat_d20_turn_result,
+            CatD20TurnResult,
+        ):
+            raise RuntimeError(
+                "Pazuzu resonance requires "
+                "a successful CatD20 turn: "
+                f"{cat_d20_turn_result.reason}"
+            )
 
         cat_d20_result = (
             PazuzuCatD20ResonanceTurn(
-                turn=cat_d20_event,
+                turn=(
+                    cat_d20_turn_result
+                    .turn
+                ),
                 duplicate_consumption_energy=(
-                    energy_result
+                    cat_d20_turn_result
+                    .duplicate_consumption_energy
                 ),
             )
         )
@@ -1594,19 +1654,13 @@ class MeetingPlace:
 
         return event.to_dict()
 
-    def interpret_cat_d20_value(self, value):
-        value = int(value)
-        if value < 1 or value > 20:
-            raise ValueError('CatD20 value must be between 1 and 20.')
-        if value <= 14:
-            meaning = 'accept_navigation_offer'
-        elif value <= 18:
-            meaning = 'decline_navigation_offer'
-        elif value == 19:
-            meaning = 'cat_does_something_else'
-        else:
-            meaning = 'cat_d20_surge'
-        return {'name': 'cat_d20_value_interpreted', 'value': value, 'meaning': meaning}
+    def interpret_cat_d20_value(
+        self,
+        value,
+    ):
+        return CatD20ValueInterpretation(
+            value=value
+        )
 
     def place_cat_d20_box(self, cat):
         if not isinstance(cat, (Cat, dict)):

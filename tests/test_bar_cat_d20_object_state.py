@@ -17,6 +17,9 @@ from meeting_place.bar_objects import (
 from meeting_place.meeting_place import (
     MeetingPlace,
 )
+from meeting_place.cat_d20_turn_state import (
+    CatD20TurnResult,
+)
 from multiverse import UniverseRegistry
 from universe.universe import Universe
 
@@ -157,9 +160,19 @@ class BarCatD20ObjectStateTests(
             CatD20TurnEvent,
         )
 
+        self.assertIsInstance(
+            event,
+            CatD20TurnResult,
+        )
+
         self.assertEqual(
             stored.value,
-            event["value"]
+            event.value
+        )
+
+        self._assert_object_only(
+            event,
+            "value"
         )
 
         self._assert_object_only(

@@ -10,6 +10,9 @@ from core.entity.quantum_die import (
 from meeting_place.bar_objects import (
     CatD20TurnEvent,
 )
+from meeting_place.cat_d20_turn_state import (
+    CatD20ValueInterpretation,
+)
 from meeting_place.dice_box import (
     DiceBoxRotationEvent,
 )
@@ -53,33 +56,27 @@ class PazuzuCatD20ResonanceTurn:
             )
 
     @property
+    def interpretation(self):
+        return CatD20ValueInterpretation(
+            value=self.turn.value
+        )
+
+    @property
     def meaning(self):
-        value = self.turn.value
-
-        if value <= 14:
-            return "accept_navigation_offer"
-
-        if value <= 18:
-            return "decline_navigation_offer"
-
-        if value == 19:
-            return "cat_does_something_else"
-
-        return "cat_d20_surge"
+        return (
+            self.interpretation
+            .meaning
+        )
 
     def to_dict(self):
         result = (
             self.turn.to_dict()
         )
 
-        result["interpretation"] = {
-            "name":
-                "cat_d20_value_interpreted",
-            "value":
-                self.turn.value,
-            "meaning":
-                self.meaning,
-        }
+        result["interpretation"] = (
+            self.interpretation
+            .to_dict()
+        )
 
         # Preserve the existing public boundary contract:
         # this field has already returned the typed energy

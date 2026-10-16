@@ -11,6 +11,10 @@ from universe.bootstraps.entity_bootstrap import (
 from meeting_place.bar_objects import (
     CatD20TurnEvent,
 )
+from meeting_place.cat_d20_turn_state import (
+    CatD20TurnResult,
+    CatD20ValueInterpretation,
+)
 
 
 class FixedD20:
@@ -73,14 +77,49 @@ class CatD20TurningTests(unittest.TestCase):
             rng=FixedD20(17)
         )
 
+        self.assertIsInstance(
+            turn,
+            CatD20TurnResult,
+        )
+
         self.assertEqual(
-            turn["value"],
+            turn.value,
             17
         )
 
         self.assertFalse(
-            turn["was_thrown"]
+            turn.was_thrown
         )
+
+        self.assertIsInstance(
+            turn.interpretation,
+            CatD20ValueInterpretation,
+        )
+
+        self.assertEqual(
+            turn.interpretation.meaning,
+            "decline_navigation_offer",
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    turn,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = turn[
+                "value"
+            ]
 
         self.assertEqual(
             len(self.bar.events),
@@ -167,10 +206,22 @@ class CatD20TurningTests(unittest.TestCase):
                     )
                 )
 
+                self.assertIsInstance(
+                    result,
+                    CatD20ValueInterpretation,
+                )
+
                 self.assertEqual(
-                    result["meaning"],
+                    result.meaning,
                     meaning
                 )
+
+                with self.assertRaises(
+                    TypeError
+                ):
+                    _ = result[
+                        "meaning"
+                    ]
 
     def test_invalid_cat_d20_value_is_rejected(self):
         for value in (

@@ -1,6 +1,9 @@
 from cats.cat_birth_effect_resolver import (
     CatBirthEffectResolver
 )
+from meeting_place.cat_d20_turn_state import (
+    CatD20TurnResult,
+)
 
 from .cat_trait_dice_mapping import (
     CatTraitDiceMapping,
@@ -103,6 +106,16 @@ class CatBirthResolver:
             )
         )
 
+        if not isinstance(
+            cat_d20_result,
+            CatD20TurnResult,
+        ):
+            raise RuntimeError(
+                "Cat birth requires a "
+                "successful CatD20 turn: "
+                f"{cat_d20_result.reason}"
+            )
+
         dice_result = (
             self.meeting_place
             .dice_box
@@ -129,7 +142,7 @@ class CatBirthResolver:
 
         mapping = (
             self.trait_dice_mapping.resolve(
-                cat_d20_result["value"]
+                cat_d20_result.value
             )
         )
 
@@ -171,7 +184,7 @@ class CatBirthResolver:
                         die_name
                     ]["sides"],
                     cat_d20_value=(
-                        cat_d20_result["value"]
+                        cat_d20_result.value
                     )
                 )
             )
