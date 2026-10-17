@@ -1,6 +1,10 @@
 import unittest
 
-from meeting_place.dice_box import DiceBox
+from meeting_place.dice_box import (
+    DiceBox,
+    DiceBoxRandomRotationFailedResult,
+    DiceBoxRotationEvent,
+)
 
 
 class FixedPercentileRng:
@@ -104,43 +108,48 @@ class BarDiceSetTests(
             rng=FixedPercentileRng()
         )
 
+        self.assertIsInstance(
+            result,
+            DiceBoxRotationEvent,
+        )
+
         self.assertEqual(
-            result["die"],
+            result.die,
             "d10_percentile"
         )
 
         self.assertEqual(
-            result["sides"],
+            result.sides,
             10
         )
 
         self.assertEqual(
-            result["face_value"],
+            result.face_value,
             7
         )
 
         self.assertEqual(
-            result["percentile_tens"],
+            result.percentile_tens,
             70
         )
 
         # Zpětná kompatibilita.
         self.assertEqual(
-            result["raw_value"],
+            result.raw_value,
             7
         )
 
         self.assertEqual(
-            result["value"],
+            result.value,
             70
         )
 
         self.assertTrue(
-            result["is_percentile"]
+            result.is_percentile
         )
 
         self.assertFalse(
-            result["removed_from_box"]
+            result.removed_from_box
         )
 
         self.assertEqual(
@@ -157,25 +166,73 @@ class BarDiceSetTests(
             rng=FixedZeroPercentileRng()
         )
 
+        self.assertIsInstance(
+            result,
+            DiceBoxRotationEvent,
+        )
+
         self.assertEqual(
-            result["face_value"],
+            result.face_value,
             10
         )
 
         self.assertEqual(
-            result["percentile_tens"],
+            result.percentile_tens,
             0
         )
 
         self.assertEqual(
-            result["raw_value"],
+            result.raw_value,
             10
         )
 
         self.assertEqual(
-            result["value"],
+            result.value,
             0
         )
+
+    def test_random_rotation_failure_is_object(
+        self
+    ):
+        box = DiceBox()
+
+        box.contents.clear()
+
+        result = box.rotate_random_die()
+
+        self.assertIsInstance(
+            result,
+            DiceBoxRandomRotationFailedResult,
+        )
+
+        self.assertEqual(
+            result.result,
+            "dice_box_empty",
+        )
+
+        self.assertFalse(
+            result.rotated
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    result,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = result[
+                "result"
+            ]
 
     def test_percentile_pair_rolls_seventy_four(
         self

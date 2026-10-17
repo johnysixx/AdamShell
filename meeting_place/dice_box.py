@@ -64,6 +64,30 @@ class DiceBoxRotationEvent:
     slots=True,
     frozen=True
 )
+class DiceBoxRandomRotationFailedResult:
+
+    name: str = field(
+        default=(
+            "dice_box_random_rotation_failed"
+        ),
+        init=False,
+    )
+
+    result: str = field(
+        default="dice_box_empty",
+        init=False,
+    )
+
+    rotated: bool = field(
+        default=False,
+        init=False,
+    )
+
+
+@dataclass(
+    slots=True,
+    frozen=True
+)
 class DiceBoxAllRotationEvent:
 
     results: tuple[
@@ -526,13 +550,9 @@ class DiceBox:
         rng=None
     ):
         if not self.contents:
-            return {
-                "name": (
-                    "dice_box_random_rotation_failed"
-                ),
-                "result": "dice_box_empty",
-                "rotated": False,
-            }
+            return (
+                DiceBoxRandomRotationFailedResult()
+            )
 
         rng = rng or random
 
@@ -556,7 +576,7 @@ class DiceBox:
             "INSIDE THE BAR DICE BOX"
         )
 
-        return event.to_dict()
+        return event
 
     def rotate_percentile_pair(
         self,
