@@ -880,10 +880,28 @@ class DiceBoxRotationState:
         cls,
         event
     ):
+        if (
+            not hasattr(
+                event,
+                "die",
+            )
+            or not hasattr(
+                event,
+                "value",
+            )
+        ):
+            raise TypeError(
+                "Dice box rotation state "
+                "requires an object with "
+                "die and value attributes."
+            )
+
         return cls(
-            die=event["die"],
+            die=str(
+                event.die
+            ),
             value=int(
-                event["value"]
+                event.value
             ),
         )
 

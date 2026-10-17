@@ -119,6 +119,91 @@ class DiceBoxRotationHistoryObjectStateTests(
             "d10",
         )
 
+    def test_internal_roll_is_domain_object(
+        self
+    ):
+        box = DiceBox()
+
+        event = box._roll_die(
+            "d6",
+            FixedRoll(3),
+        )
+
+        self.assertIsInstance(
+            event,
+            DiceBoxRotationEvent,
+        )
+
+        self.assertEqual(
+            event.die,
+            "d6",
+        )
+
+        self.assertEqual(
+            event.value,
+            3,
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    event,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = event[
+                "die"
+            ]
+
+    def test_recorded_rotation_is_same_internal_object(
+        self
+    ):
+        box = DiceBox()
+
+        event = box._roll_die(
+            "d8",
+            FixedRoll(5),
+        )
+
+        recorded = (
+            box._record_rotation(
+                event
+            )
+        )
+
+        self.assertIs(
+            recorded,
+            event,
+        )
+
+        self.assertIs(
+            box.rotation_history[-1],
+            event,
+        )
+
+        self.assertEqual(
+            box.state
+            .last_secret_rotation
+            .die,
+            event.die,
+        )
+
+        self.assertEqual(
+            box.state
+            .last_secret_rotation
+            .value,
+            event.value,
+        )
+
     def test_rotation_history_rejects_mapping(
         self
     ):

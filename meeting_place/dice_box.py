@@ -26,59 +26,6 @@ class DiceBoxRotationEvent:
     visibility: str
     rotated: bool
 
-    @classmethod
-    def from_event(
-        cls,
-        event
-    ):
-        return cls(
-            name=str(
-                event["name"]
-            ),
-            die=str(
-                event["die"]
-            ),
-            sides=int(
-                event["sides"]
-            ),
-            face_value=int(
-                event["face_value"]
-            ),
-            percentile_tens=(
-                None
-                if event[
-                    "percentile_tens"
-                ] is None
-                else int(
-                    event[
-                        "percentile_tens"
-                    ]
-                )
-            ),
-            raw_value=int(
-                event["raw_value"]
-            ),
-            value=int(
-                event["value"]
-            ),
-            is_percentile=bool(
-                event["is_percentile"]
-            ),
-            location=str(
-                event["location"]
-            ),
-            removed_from_box=bool(
-                event[
-                    "removed_from_box"
-                ]
-            ),
-            visibility=str(
-                event["visibility"]
-            ),
-            rotated=bool(
-                event["rotated"]
-            ),
-        )
 
     def __deepcopy__(
         self,
@@ -365,29 +312,32 @@ class DiceBox:
     ):
         if die_name not in self.contents:
             return {
-                "name": "dice_box_named_rotation_failed",
+                "name": (
+                    "dice_box_named_rotation_failed"
+                ),
                 "die": die_name,
                 "result": "die_not_in_box",
-                "rotated": False
+                "rotated": False,
             }
 
         rng = rng or random
 
-        result = self._roll_die(
+        event = self._roll_die(
             die_name,
             rng
         )
 
         self._record_rotation(
-            result
+            event
         )
 
         UniverseLogger.event(
-            f"{die_name.upper()} SECRETLY ROTATES "
+            f"{die_name.upper()} "
+            "SECRETLY ROTATES "
             "INSIDE THE BAR DICE BOX"
         )
 
-        return result
+        return event.to_dict()
 
     def rotate_all_dice(
         self,
@@ -395,24 +345,19 @@ class DiceBox:
     ):
         rng = rng or random
 
-        results = []
         rotation_events = []
 
         for die_name in list(
             self.contents
         ):
-            result = self._roll_die(
+            event = self._roll_die(
                 die_name,
                 rng
             )
 
-            results.append(
-                result
-            )
-
             rotation_events.append(
                 self._record_rotation(
-                    result
+                    event
                 )
             )
 
@@ -427,7 +372,7 @@ class DiceBox:
         )
 
         self.state.record_all_rotation(
-            results
+            event.results
         )
 
         UniverseLogger.event(
@@ -469,13 +414,16 @@ class DiceBox:
         rng
     ):
         is_percentile = (
-            die_name == "d10_percentile"
+            die_name
+            == "d10_percentile"
         )
 
         sides = (
             10
             if is_percentile
-            else int(die_name[1:])
+            else int(
+                die_name[1:]
+            )
         )
 
         face_value = int(
@@ -499,31 +447,29 @@ class DiceBox:
         else:
             value = face_value
 
-        return {
-            "name": (
-                "dice_box_die_secretly_rotated"
+        return DiceBoxRotationEvent(
+            name=(
+                "dice_box_die_"
+                "secretly_rotated"
             ),
-            "die": die_name,
-            "sides": sides,
-
-            # Jednozna?n? nov? pole.
-            "face_value": face_value,
-            "percentile_tens": (
+            die=die_name,
+            sides=sides,
+            face_value=face_value,
+            percentile_tens=(
                 percentile_tens
             ),
-
-            # Kompatibilita se st?vaj?c?m k?dem.
-            "raw_value": face_value,
-            "value": value,
-
-            "is_percentile": is_percentile,
-            "location": self.location,
-            "removed_from_box": False,
-            "visibility": (
+            raw_value=face_value,
+            value=value,
+            is_percentile=(
+                is_percentile
+            ),
+            location=self.location,
+            removed_from_box=False,
+            visibility=(
                 "secret_bar_dice_event"
             ),
-            "rotated": True
-        }
+            rotated=True,
+        )
 
     def record_rotation(
         self,
@@ -555,20 +501,25 @@ class DiceBox:
         self,
         event
     ):
-        rotation = (
-            DiceBoxRotationEvent
-            .from_event(event)
-        )
+        if not isinstance(
+            event,
+            DiceBoxRotationEvent,
+        ):
+            raise TypeError(
+                "Dice box internal rotation "
+                "must be "
+                "DiceBoxRotationEvent."
+            )
 
         self.record_rotation(
-            rotation
+            event
         )
 
         self.state.record_rotation(
             event
         )
 
-        return rotation
+        return event
 
     def rotate_random_die(
         self,
@@ -580,13 +531,15 @@ class DiceBox:
                     "dice_box_random_rotation_failed"
                 ),
                 "result": "dice_box_empty",
-                "rotated": False
+                "rotated": False,
             }
 
         rng = rng or random
 
         die_name = rng.choice(
-            list(self.contents)
+            list(
+                self.contents
+            )
         )
 
         event = self._roll_die(
@@ -603,18 +556,17 @@ class DiceBox:
             "INSIDE THE BAR DICE BOX"
         )
 
-        return event
+        return event.to_dict()
 
     def rotate_percentile_pair(
         self,
         rng=None
     ):
         """
-        Provede skute?n? hod d100 pomoc?:
-        - d10_percentile jako des?tek,
-        - oby?ejn? d10 jako jednotek.
+        Roll d100 using d10_percentile
+        for tens and d10 for units.
 
-        00 znamen? 100.
+        00 represents 100.
         """
         rng = rng or random
 
@@ -630,12 +582,12 @@ class DiceBox:
 
         units = (
             0
-            if units_die["face_value"] == 10
-            else units_die["face_value"]
+            if units_die.face_value == 10
+            else units_die.face_value
         )
 
         percentile_value = (
-            tens["percentile_tens"]
+            tens.percentile_tens
             + units
         )
 
