@@ -1,5 +1,9 @@
 from dataclasses import dataclass, field
 
+from meeting_place.dice_box import (
+    DiceBoxAllRotationEvent,
+)
+
 
 @dataclass(slots=True, frozen=True)
 class CatBirthDiceRotationEvent:
@@ -7,10 +11,33 @@ class CatBirthDiceRotationEvent:
     cat: str
     identity: str
     d20_rotation: object
-    dice_box_rotation: object
+    dice_box_rotation: DiceBoxAllRotationEvent
     registered_d20_count: int
     bar_dice_count: int
-    triggered: bool = field(default=True, init=False)
+    triggered: bool = field(
+        default=True,
+        init=False,
+    )
+
+    def __post_init__(self):
+        if not isinstance(
+            self.dice_box_rotation,
+            DiceBoxAllRotationEvent,
+        ):
+            raise TypeError(
+                "Cat birth dice rotation requires "
+                "DiceBoxAllRotationEvent."
+            )
+
+        if (
+            self.bar_dice_count
+            != self.dice_box_rotation
+            .rotated_count
+        ):
+            raise ValueError(
+                "bar_dice_count must match "
+                "DiceBox rotated_count."
+            )
 
 
 @dataclass(slots=True, frozen=True)

@@ -187,10 +187,10 @@ class BarDiceBoxObjectStateTests(
                 "last_all_rotation"
             ],
             {
-                result["die"]:
-                    result["value"]
-                for result in
-                event["results"]
+                result.die:
+                    result.value
+                for result
+                in event.results
             }
         )
 

@@ -1,5 +1,9 @@
 import random
 
+from meeting_place.dice_box import (
+    DiceBoxAllRotationEvent,
+)
+
 from cats.cat_birth_effect_result_state import (
     CatBirthDiceRotationEvent,
     CatBirthNonDiceEffectEvent,
@@ -331,6 +335,16 @@ class CatBirthEffectResolver:
             )
         )
 
+        if not isinstance(
+            dice_box_rotation,
+            DiceBoxAllRotationEvent,
+        ):
+            raise TypeError(
+                "Global cat birth DiceBox "
+                "rotation must be "
+                "DiceBoxAllRotationEvent."
+            )
+
         result = CatBirthDiceRotationEvent(
             name=event_name,
             cat=cat_name,
@@ -343,9 +357,8 @@ class CatBirthEffectResolver:
                 d20_rotation.rotated_count
             ),
             bar_dice_count=(
-                dice_box_rotation[
-                    "rotated_count"
-                ]
+                dice_box_rotation
+                .rotated_count
             ),
         )
 

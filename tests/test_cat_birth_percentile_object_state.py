@@ -10,6 +10,41 @@ from cats.cat_birth_objects import (
     CatBirthPercentileResult,
 )
 from cats.cat_birth_resolver import CatBirthResolver
+from meeting_place.dice_box import (
+    DiceBoxRotationEvent,
+)
+
+
+def percentile_rotation(
+    face_value
+):
+    percentile_tens = (
+        0
+        if face_value == 10
+        else face_value * 10
+    )
+
+    return DiceBoxRotationEvent(
+        name=(
+            "dice_box_die_"
+            "secretly_rotated"
+        ),
+        die="d10_percentile",
+        sides=10,
+        face_value=face_value,
+        percentile_tens=(
+            percentile_tens
+        ),
+        raw_value=face_value,
+        value=percentile_tens,
+        is_percentile=True,
+        location="on_bar_counter",
+        removed_from_box=False,
+        visibility=(
+            "secret_bar_dice_event"
+        ),
+        rotated=True,
+    )
 
 
 class CatBirthPercentileObjectStateTests(unittest.TestCase):
@@ -98,10 +133,7 @@ class CatBirthPercentileObjectStateTests(unittest.TestCase):
         )
 
         result = self.resolver._resolve_birth_percentile(
-            {
-                "die": "d10_percentile",
-                "value": 0,
-            }
+            percentile_rotation(10)
         )
 
         self.assertEqual(result.value, 40)

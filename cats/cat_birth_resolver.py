@@ -4,6 +4,9 @@ from cats.cat_birth_effect_resolver import (
 from meeting_place.cat_d20_turn_state import (
     CatD20TurnResult,
 )
+from meeting_place.dice_box import (
+    DiceBoxAllRotationEvent,
+)
 
 from .cat_trait_dice_mapping import (
     CatTraitDiceMapping,
@@ -124,9 +127,19 @@ class CatBirthResolver:
             )
         )
 
+        if not isinstance(
+            dice_result,
+            DiceBoxAllRotationEvent,
+        ):
+            raise TypeError(
+                "Cat birth DiceBox rotation must "
+                "be DiceBoxAllRotationEvent."
+            )
+
         rolls = {
-            result["die"]: result
-            for result in dice_result["results"]
+            result.die: result
+            for result
+            in dice_result.results
         }
 
         percentile_result = (
@@ -177,12 +190,16 @@ class CatBirthResolver:
             profile[trait] = (
                 self._select_for_cat_birth(
                     options=trait_options[trait],
-                    die_value=rolls[
-                        die_name
-                    ]["raw_value"],
-                    die_sides=rolls[
-                        die_name
-                    ]["sides"],
+                    die_value=(
+                        rolls[
+                            die_name
+                        ].raw_value
+                    ),
+                    die_sides=(
+                        rolls[
+                            die_name
+                        ].sides
+                    ),
                     cat_d20_value=(
                         cat_d20_result.value
                     )
@@ -308,7 +325,7 @@ class CatBirthResolver:
         rng=None,
     ):
         history = [
-            CatBirthPercentileRoll.from_dice_payload(
+            CatBirthPercentileRoll.from_dice_rotation(
                 initial_roll,
                 attempt=1,
             )

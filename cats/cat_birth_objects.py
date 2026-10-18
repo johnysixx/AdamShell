@@ -7,6 +7,9 @@ from typing import Mapping
 from cats.cat_genetics_validation_status import (
     CatGeneticsValidationStatus,
 )
+from meeting_place.dice_box import (
+    DiceBoxRotationEvent,
+)
 from cats.genotype import CatGenotype
 from cats.kitten_viability_resolver import (
     KittenGeneticViabilityResult,
@@ -392,6 +395,39 @@ class CatBirthPercentileRoll:
             raise ValueError(
                 "birth percentile attempt must be a positive integer."
             )
+
+    @classmethod
+    def from_dice_rotation(
+        cls,
+        rotation,
+        *,
+        attempt,
+    ):
+        if not isinstance(
+            rotation,
+            DiceBoxRotationEvent,
+        ):
+            raise TypeError(
+                "Birth percentile rotation must "
+                "be DiceBoxRotationEvent."
+            )
+
+        if (
+            rotation.die
+            != "d10_percentile"
+        ):
+            raise ValueError(
+                "Birth percentile rotation must "
+                "use d10_percentile."
+            )
+
+        return cls(
+            die=rotation.die,
+            value=int(
+                rotation.value
+            ),
+            attempt=attempt,
+        )
 
     @classmethod
     def from_dice_payload(cls, payload, *, attempt):

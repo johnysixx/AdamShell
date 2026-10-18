@@ -73,9 +73,9 @@ class DiceBoxAllRotationHistoryObjectStateTests(
             )
         )
 
-        self.assertEqual(
-            event.to_dict(),
+        self.assertIs(
             result,
+            event,
         )
 
     def test_all_rotation_event_reuses_rotation_history_objects(
@@ -112,7 +112,7 @@ class DiceBoxAllRotationHistoryObjectStateTests(
                 history_event,
             )
 
-    def test_boundary_is_detached_and_event_has_no_mapping_api(
+    def test_returned_all_rotation_is_object_state(
         self
     ):
         box = DiceBox()
@@ -125,6 +125,24 @@ class DiceBoxAllRotationHistoryObjectStateTests(
             box.all_rotation_history[-1]
         )
 
+        self.assertIs(
+            result,
+            event,
+        )
+
+        self.assertTrue(
+            result.results
+        )
+
+        original_value = (
+            result.results[0].value
+        )
+
+        self.assertEqual(
+            original_value,
+            3,
+        )
+
         for mapping_method in (
             "get",
             "keys",
@@ -133,7 +151,7 @@ class DiceBoxAllRotationHistoryObjectStateTests(
         ):
             self.assertFalse(
                 hasattr(
-                    event,
+                    result,
                     mapping_method,
                 )
             )
@@ -141,24 +159,9 @@ class DiceBoxAllRotationHistoryObjectStateTests(
         with self.assertRaises(
             TypeError
         ):
-            _ = event[
+            _ = result[
                 "results"
             ]
-
-        original_value = (
-            event.results[0].value
-        )
-
-        result[
-            "results"
-        ][0][
-            "value"
-        ] = 999
-
-        self.assertEqual(
-            event.results[0].value,
-            original_value,
-        )
 
     def test_all_rotation_history_rejects_mapping(
         self

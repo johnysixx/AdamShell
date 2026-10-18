@@ -183,7 +183,7 @@ class CatBirthMiaTests(
 
         self.assertEqual(
             len(
-                rotation.dice_box_rotation["results"]
+                rotation.dice_box_rotation.results
             ),
             6
         )

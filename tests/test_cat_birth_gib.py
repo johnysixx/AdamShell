@@ -265,10 +265,11 @@ class CatBirthGibTests(
 
         self.assertEqual(
             {
-                result["die"]
-                for result in resonance.dice_box_rotation[
-                    "results"
-                ]
+                result.die
+                for result
+                in resonance
+                .dice_box_rotation
+                .results
             },
             {
                 "d4",
