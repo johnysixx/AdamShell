@@ -6,6 +6,7 @@ from meeting_place.cat_d20_turn_state import (
 )
 from meeting_place.dice_box import (
     DiceBoxAllRotationEvent,
+    DiceBoxRotationEvent,
 )
 
 from .cat_trait_dice_mapping import (
@@ -364,7 +365,7 @@ class CatBirthResolver:
             )
 
             history.append(
-                CatBirthPercentileRoll.from_dice_payload(
+                CatBirthPercentileRoll.from_dice_rotation(
                     reroll,
                     attempt=len(history) + 1,
                 )
@@ -766,15 +767,24 @@ class CatBirthResolver:
                 )
             )
 
+            if not isinstance(
+                reroll,
+                DiceBoxRotationEvent,
+            ):
+                raise TypeError(
+                    "Cat genetic reroll must "
+                    "be DiceBoxRotationEvent."
+                )
+
             new_value = (
                 self._select_for_cat_birth(
                     options=trait_options[trait],
-                    die_value=reroll[
-                        "raw_value"
-                    ],
-                    die_sides=reroll[
-                        "sides"
-                    ],
+                    die_value=(
+                        reroll.raw_value
+                    ),
+                    die_sides=(
+                        reroll.sides
+                    ),
                     cat_d20_value=(
                         mapping.cat_d20_value
                     )
@@ -800,7 +810,7 @@ class CatBirthResolver:
                     die=reroll_die,
                     previous_value=previous_value,
                     new_value=new_value,
-                    reroll=dict(reroll),
+                    reroll=reroll,
                 )
             )
 

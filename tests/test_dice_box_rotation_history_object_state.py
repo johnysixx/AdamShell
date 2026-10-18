@@ -55,9 +55,9 @@ class DiceBoxRotationHistoryObjectStateTests(
             4,
         )
 
-        self.assertEqual(
-            event.to_dict(),
+        self.assertIs(
             result,
+            event,
         )
 
     def test_rotation_event_has_no_mapping_api(
@@ -92,7 +92,7 @@ class DiceBoxRotationHistoryObjectStateTests(
         ):
             _ = event["die"]
 
-    def test_returned_boundary_is_detached_from_history(
+    def test_returned_rotation_is_history_object(
         self
     ):
         box = DiceBox()
@@ -106,18 +106,45 @@ class DiceBoxRotationHistoryObjectStateTests(
             box.rotation_history[-1]
         )
 
-        result["value"] = 99
-        result["die"] = "changed"
+        self.assertIs(
+            result,
+            event,
+        )
+
+        self.assertIsInstance(
+            result,
+            DiceBoxRotationEvent,
+        )
 
         self.assertEqual(
-            event.value,
+            result.value,
             7,
         )
 
         self.assertEqual(
-            event.die,
+            result.die,
             "d10",
         )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    result,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = result[
+                "value"
+            ]
 
     def test_internal_roll_is_domain_object(
         self

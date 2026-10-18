@@ -119,6 +119,13 @@ class CatBirthPercentileObjectStateTests(unittest.TestCase):
             )
         )
 
+        self.assertFalse(
+            hasattr(
+                CatBirthPercentileRoll,
+                "from_dice_payload",
+            )
+        )
+
     def test_zero_percentile_builds_object_history_and_rerolls(self):
         cronenberg = object()
 
@@ -126,10 +133,8 @@ class CatBirthPercentileObjectStateTests(unittest.TestCase):
             lambda *args, **kwargs: cronenberg
         )
         self.bar.dice_box.rotate_named_die = (
-            lambda die_name, rng=None: {
-                "die": die_name,
-                "value": 40,
-            }
+            lambda die_name, rng=None:
+                percentile_rotation(4)
         )
 
         result = self.resolver._resolve_birth_percentile(

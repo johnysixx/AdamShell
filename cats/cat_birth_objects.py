@@ -1,8 +1,5 @@
 from copy import deepcopy
-from dataclasses import dataclass, field
-from dataclasses import dataclass, replace
-from types import MappingProxyType
-from typing import Mapping
+from dataclasses import dataclass, field, replace
 
 from cats.cat_genetics_validation_status import (
     CatGeneticsValidationStatus,
@@ -299,19 +296,17 @@ class CatGeneticConflictResolution:
     die: str
     previous_value: str
     new_value: str
-    reroll: Mapping[str, object]
+    reroll: DiceBoxRotationEvent
 
     def __post_init__(self):
-        if not isinstance(self.reroll, dict):
+        if not isinstance(
+            self.reroll,
+            DiceBoxRotationEvent,
+        ):
             raise TypeError(
-                "reroll must be a dict boundary payload."
+                "Cat genetic conflict reroll must "
+                "be DiceBoxRotationEvent."
             )
-
-        object.__setattr__(
-            self,
-            "reroll",
-            MappingProxyType(dict(self.reroll)),
-        )
 
 
 @dataclass(frozen=True)
@@ -426,19 +421,6 @@ class CatBirthPercentileRoll:
             value=int(
                 rotation.value
             ),
-            attempt=attempt,
-        )
-
-    @classmethod
-    def from_dice_payload(cls, payload, *, attempt):
-        if not isinstance(payload, dict):
-            raise TypeError(
-                "dice percentile payload must be a dict boundary payload."
-            )
-
-        return cls(
-            die=payload["die"],
-            value=int(payload["value"]),
             attempt=attempt,
         )
 

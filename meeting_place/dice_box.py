@@ -395,7 +395,7 @@ class DiceBox:
             "INSIDE THE BAR DICE BOX"
         )
 
-        return event.to_dict()
+        return event
 
     def rotate_all_dice(
         self,

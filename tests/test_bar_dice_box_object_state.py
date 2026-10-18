@@ -153,11 +153,16 @@ class BarDiceBoxObjectStateTests(
         )
         self.assertEqual(
             state.last_secret_rotation.die,
-            event["die"]
+            event.die
         )
         self.assertEqual(
             state.last_secret_rotation.value,
-            event["value"]
+            event.value
+        )
+
+        self._assert_object_only(
+            event,
+            "die"
         )
 
     def test_all_rotation_uses_object_summaries(

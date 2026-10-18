@@ -24,6 +24,9 @@ from cats.cat_birth_result_state import (
 from cats.cat_trait_dice_mapping import (
     CatTraitDiceMappingResult,
 )
+from meeting_place.dice_box import (
+    DiceBoxRotationEvent,
+)
 
 
 class CatBirthGeneticsObjectStateTests(unittest.TestCase):
@@ -127,7 +130,7 @@ class CatBirthGeneticsObjectStateTests(unittest.TestCase):
             )
         )
 
-    def test_genetic_conflict_reroll_uses_object_mapping(self):
+    def test_genetic_conflict_reroll_uses_rotation_object(self):
         profile = self._profile(
             color="tortoiseshell",
             sex="male",
@@ -140,12 +143,26 @@ class CatBirthGeneticsObjectStateTests(unittest.TestCase):
         )
 
         self.bar.dice_box.rotate_named_die = (
-            lambda die_name, rng=None: {
-                "name": die_name,
-                "raw_value": 1,
-                "value": 1,
-                "sides": 12,
-            }
+            lambda die_name, rng=None:
+                DiceBoxRotationEvent(
+                    name=(
+                        "dice_box_die_"
+                        "secretly_rotated"
+                    ),
+                    die=die_name,
+                    sides=12,
+                    face_value=1,
+                    percentile_tens=None,
+                    raw_value=1,
+                    value=1,
+                    is_percentile=False,
+                    location="on_bar_counter",
+                    removed_from_box=False,
+                    visibility=(
+                        "secret_bar_dice_event"
+                    ),
+                    rotated=True,
+                )
         )
         self.universe.create_cronenberg_from_quantum_error = (
             lambda *args, **kwargs: object()
@@ -170,12 +187,53 @@ class CatBirthGeneticsObjectStateTests(unittest.TestCase):
             "color",
         )
 
+        reroll = (
+            result
+            .conflict_history[0]
+            .reroll
+        )
+
+        self.assertIsInstance(
+            reroll,
+            DiceBoxRotationEvent,
+        )
+
+        self.assertEqual(
+            reroll.die,
+            "d12",
+        )
+
+        self.assertEqual(
+            reroll.raw_value,
+            1,
+        )
+
         self.assertFalse(
             hasattr(
                 result.conflict_history[0],
                 "to_dict",
             )
         )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    reroll,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = reroll[
+                "raw_value"
+            ]
 
     def test_create_cat_rejects_legacy_genetics_dict(self):
         profile = self._profile()
