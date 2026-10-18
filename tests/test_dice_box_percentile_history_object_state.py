@@ -84,9 +84,9 @@ class DiceBoxPercentileHistoryObjectStateTests(
             47,
         )
 
-        self.assertEqual(
-            event.to_dict(),
+        self.assertIs(
             result,
+            event,
         )
 
     def test_percentile_event_reuses_rotation_history_objects(
@@ -117,7 +117,7 @@ class DiceBoxPercentileHistoryObjectStateTests(
             box.rotation_history[-1],
         )
 
-    def test_boundary_is_detached_and_event_has_no_mapping_api(
+    def test_returned_percentile_rotation_is_object_state(
         self
     ):
         box = DiceBox()
@@ -137,6 +137,29 @@ class DiceBoxPercentileHistoryObjectStateTests(
             box.percentile_history[-1]
         )
 
+        self.assertIs(
+            result,
+            event,
+        )
+
+        self.assertEqual(
+            result.tens.value,
+            50,
+        )
+
+        self.assertEqual(
+            result.percentile_units,
+            8,
+        )
+
+        self.assertEqual(
+            result.dice,
+            (
+                "d10_percentile",
+                "d10",
+            ),
+        )
+
         for mapping_method in (
             "get",
             "keys",
@@ -145,7 +168,7 @@ class DiceBoxPercentileHistoryObjectStateTests(
         ):
             self.assertFalse(
                 hasattr(
-                    event,
+                    result,
                     mapping_method,
                 )
             )
@@ -153,43 +176,9 @@ class DiceBoxPercentileHistoryObjectStateTests(
         with self.assertRaises(
             TypeError
         ):
-            _ = event[
+            _ = result[
                 "value"
             ]
-
-        result[
-            "tens"
-        ][
-            "value"
-        ] = 999
-
-        result[
-            "units"
-        ][
-            "percentile_units"
-        ] = 999
-
-        result[
-            "dice"
-        ][0] = "changed"
-
-        self.assertEqual(
-            event.tens.value,
-            50,
-        )
-
-        self.assertEqual(
-            event.percentile_units,
-            8,
-        )
-
-        self.assertEqual(
-            event.dice,
-            (
-                "d10_percentile",
-                "d10",
-            ),
-        )
 
     def test_percentile_history_rejects_mapping(
         self

@@ -2,6 +2,7 @@ import unittest
 
 from meeting_place.dice_box import (
     DiceBox,
+    DiceBoxPercentilePairRotationEvent,
     DiceBoxRandomRotationFailedResult,
     DiceBoxRotationEvent,
 )
@@ -245,24 +246,45 @@ class BarDiceSetTests(
             )
         )
 
-        self.assertEqual(
-            result["tens"][
-                "percentile_tens"
-            ],
-            70
+        self.assertIsInstance(
+            result,
+            DiceBoxPercentilePairRotationEvent,
         )
 
         self.assertEqual(
-            result["units"][
-                "percentile_units"
-            ],
-            4
+            result.tens.percentile_tens,
+            70,
         )
 
         self.assertEqual(
-            result["value"],
-            74
+            result.percentile_units,
+            4,
         )
+
+        self.assertEqual(
+            result.value,
+            74,
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    result,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = result[
+                "value"
+            ]
 
     def test_double_zero_represents_one_hundred(
         self
@@ -275,23 +297,24 @@ class BarDiceSetTests(
             )
         )
 
-        self.assertEqual(
-            result["tens"][
-                "percentile_tens"
-            ],
-            0
+        self.assertIsInstance(
+            result,
+            DiceBoxPercentilePairRotationEvent,
         )
 
         self.assertEqual(
-            result["units"][
-                "percentile_units"
-            ],
-            0
+            result.tens.percentile_tens,
+            0,
         )
 
         self.assertEqual(
-            result["value"],
-            100
+            result.percentile_units,
+            0,
+        )
+
+        self.assertEqual(
+            result.value,
+            100,
         )
 
     def test_zero_tens_and_five_units_is_five(
@@ -305,9 +328,14 @@ class BarDiceSetTests(
             )
         )
 
+        self.assertIsInstance(
+            result,
+            DiceBoxPercentilePairRotationEvent,
+        )
+
         self.assertEqual(
-            result["value"],
-            5
+            result.value,
+            5,
         )
 
 

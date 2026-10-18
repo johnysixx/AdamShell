@@ -215,7 +215,7 @@ class BarDiceBoxObjectStateTests(
             box.public_state[
                 "last_percentile_rotation"
             ],
-            event["value"]
+            event.value
         )
 
     def test_removing_die_mutates_object_state(
