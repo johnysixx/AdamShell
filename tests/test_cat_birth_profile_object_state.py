@@ -7,6 +7,7 @@ from universe.bootstraps.universe_bootstrap import (
 )
 from cats.cat_birth_objects import (
     CatBirthProfile,
+    CatBirthProfileDraft,
     CatCanonicalBirthResolution,
     cat_birth_profile_snapshot,
 )
@@ -28,6 +29,122 @@ class CatBirthProfileObjectStateTests(unittest.TestCase):
             self.universe,
             self.bar,
         )
+
+    def test_profile_draft_builds_birth_profile_object(
+        self
+    ):
+        draft = CatBirthProfileDraft()
+
+        draft = draft.with_trait(
+            "color",
+            "black",
+        )
+        draft = draft.with_trait(
+            "fur_length",
+            "short",
+        )
+        draft = draft.with_trait(
+            "pattern",
+            "solid",
+        )
+        draft = draft.with_trait(
+            "eye_color",
+            "green",
+        )
+        draft = draft.with_trait(
+            "sex",
+            "female",
+        )
+
+        self.assertTrue(
+            draft.complete
+        )
+
+        profile = draft.build()
+
+        self.assertIsInstance(
+            profile,
+            CatBirthProfile,
+        )
+
+        self.assertEqual(
+            profile.color,
+            "black",
+        )
+
+        self.assertEqual(
+            profile.fur_length,
+            "short",
+        )
+
+        self.assertEqual(
+            profile.pattern,
+            "solid",
+        )
+
+        self.assertEqual(
+            profile.eye_color,
+            "green",
+        )
+
+        self.assertEqual(
+            profile.sex,
+            "female",
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(
+                    draft,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = draft[
+                "color"
+            ]
+
+    def test_incomplete_profile_draft_cannot_build(
+        self
+    ):
+        draft = (
+            CatBirthProfileDraft()
+            .with_trait(
+                "color",
+                "black",
+            )
+        )
+
+        self.assertFalse(
+            draft.complete
+        )
+
+        with self.assertRaises(
+            ValueError
+        ):
+            draft.build()
+
+    def test_profile_draft_rejects_unknown_trait(
+        self
+    ):
+        with self.assertRaises(
+            ValueError
+        ):
+            (
+                CatBirthProfileDraft()
+                .with_trait(
+                    "weight",
+                    "heavy",
+                )
+            )
 
     def test_canonical_profiles_are_objects(self):
         self.assertIsInstance(

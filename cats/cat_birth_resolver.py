@@ -21,6 +21,7 @@ from .cat_birth_result_state import (
 )
 from .cat_birth_objects import (
     CatBirthProfile,
+    CatBirthProfileDraft,
     cat_birth_profile_snapshot,
     CatCanonicalBirthResolution,
     CatBirthGeneticsResult,
@@ -174,7 +175,9 @@ class CatBirthResolver:
             "sex": cats_layer.allowed_sexes
         }
 
-        profile = {}
+        profile_draft = (
+            CatBirthProfileDraft()
+        )
 
         if not isinstance(
             mapping,
@@ -188,7 +191,7 @@ class CatBirthResolver:
         for die_name, trait in (
             mapping.die_to_trait.items()
         ):
-            profile[trait] = (
+            selected_value = (
                 self._select_for_cat_birth(
                     options=trait_options[trait],
                     die_value=(
@@ -207,12 +210,15 @@ class CatBirthResolver:
                 )
             )
 
-        rolled_profile = CatBirthProfile(
-            color=profile["color"],
-            fur_length=profile["fur_length"],
-            pattern=profile["pattern"],
-            eye_color=profile["eye_color"],
-            sex=profile["sex"],
+            profile_draft = (
+                profile_draft.with_trait(
+                    trait,
+                    selected_value,
+                )
+            )
+
+        rolled_profile = (
+            profile_draft.build()
         )
 
         genetics_result = (

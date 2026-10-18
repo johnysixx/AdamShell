@@ -153,6 +153,94 @@ class CatBirthProfile:
 
 
 
+@dataclass(
+    slots=True,
+    frozen=True,
+)
+class CatBirthProfileDraft:
+
+    color: str | None = None
+    fur_length: str | None = None
+    pattern: str | None = None
+    eye_color: str | None = None
+    sex: str | None = None
+
+    def with_trait(
+        self,
+        trait,
+        value,
+    ):
+        value = str(
+            value
+        )
+
+        if trait == "color":
+            return replace(
+                self,
+                color=value,
+            )
+
+        if trait == "fur_length":
+            return replace(
+                self,
+                fur_length=value,
+            )
+
+        if trait == "pattern":
+            return replace(
+                self,
+                pattern=value,
+            )
+
+        if trait == "eye_color":
+            return replace(
+                self,
+                eye_color=value,
+            )
+
+        if trait == "sex":
+            return replace(
+                self,
+                sex=value,
+            )
+
+        raise ValueError(
+            f"Unknown cat birth trait: {trait!r}."
+        )
+
+    @property
+    def complete(
+        self
+    ):
+        return all(
+            value is not None
+            for value in (
+                self.color,
+                self.fur_length,
+                self.pattern,
+                self.eye_color,
+                self.sex,
+            )
+        )
+
+    def build(
+        self
+    ):
+        if not self.complete:
+            raise ValueError(
+                "Cat birth profile draft "
+                "is incomplete."
+            )
+
+        return CatBirthProfile(
+            color=self.color,
+            fur_length=self.fur_length,
+            pattern=self.pattern,
+            eye_color=self.eye_color,
+            sex=self.sex,
+        )
+
+
 def cat_birth_profile_snapshot(
     profile,
 ):
