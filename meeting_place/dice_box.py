@@ -64,6 +64,43 @@ class DiceBoxRotationEvent:
     slots=True,
     frozen=True
 )
+class DiceBoxNamedRotationFailedResult:
+
+    die: str
+
+    name: str = field(
+        default=(
+            "dice_box_named_rotation_failed"
+        ),
+        init=False,
+    )
+
+    result: str = field(
+        default="die_not_in_box",
+        init=False,
+    )
+
+    rotated: bool = field(
+        default=False,
+        init=False,
+    )
+
+    def __post_init__(
+        self
+    ):
+        object.__setattr__(
+            self,
+            "die",
+            str(
+                self.die
+            ),
+        )
+
+
+@dataclass(
+    slots=True,
+    frozen=True
+)
 class DiceBoxRandomRotationFailedResult:
 
     name: str = field(
@@ -335,14 +372,11 @@ class DiceBox:
         rng=None
     ):
         if die_name not in self.contents:
-            return {
-                "name": (
-                    "dice_box_named_rotation_failed"
-                ),
-                "die": die_name,
-                "result": "die_not_in_box",
-                "rotated": False,
-            }
+            return (
+                DiceBoxNamedRotationFailedResult(
+                    die=die_name,
+                )
+            )
 
         rng = rng or random
 

@@ -4,7 +4,10 @@ from meeting_place.bar_objects import (
     DiceBoxRotationState,
     DiceBoxState,
 )
-from meeting_place.dice_box import DiceBox
+from meeting_place.dice_box import (
+    DiceBox,
+    DiceBoxNamedRotationFailedResult,
+)
 
 
 class FixedRoll:
@@ -94,6 +97,39 @@ class BarDiceBoxObjectStateTests(
         self.assertEqual(
             box.state.missing,
             ["d20"]
+        )
+
+    def test_named_rotation_failure_is_object_state(
+        self
+    ):
+        box = DiceBox()
+
+        result = box.rotate_named_die(
+            "d20"
+        )
+
+        self.assertIsInstance(
+            result,
+            DiceBoxNamedRotationFailedResult,
+        )
+
+        self.assertEqual(
+            result.die,
+            "d20",
+        )
+
+        self.assertEqual(
+            result.result,
+            "die_not_in_box",
+        )
+
+        self.assertFalse(
+            result.rotated
+        )
+
+        self._assert_object_only(
+            result,
+            "result"
         )
 
     def test_named_rotation_updates_same_state(
