@@ -4,6 +4,9 @@ from cats.cat_memory_record import (
     CatMemoryRecord,
 )
 from cats.memory import CatMemory
+from cats.cat_exploration_memory_details import (
+    CatExplorationMemoryDetails,
+)
 from core.entity.components import (
     SpatialVector3,
 )
@@ -110,11 +113,13 @@ class CatMemoryRecordObjectStateTests(
                 "successful_exploration"
             ),
             location=position,
-            details={
-                "position": position,
-                "target_layer":
-                    "quantum_layer",
-            },
+            details=(
+                CatExplorationMemoryDetails(
+                    target_layer=
+                        "quantum_layer",
+                    position=position,
+                )
+            ),
         )
 
         stored = (
@@ -132,9 +137,12 @@ class CatMemoryRecordObjectStateTests(
         )
 
         self.assertIsInstance(
-            stored.details[
-                "position"
-            ],
+            stored.details,
+            CatExplorationMemoryDetails,
+        )
+
+        self.assertIsInstance(
+            stored.details.position,
             SpatialVector3,
         )
 

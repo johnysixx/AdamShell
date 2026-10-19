@@ -6,6 +6,9 @@ from cats.cats import Cats
 from cats.cat_exploration_planner import (
     CatExplorationPlanner
 )
+from cats.cat_exploration_memory_details import (
+    CatExplorationMemoryDetails,
+)
 
 
 from cats.cat_exploration_goal import CatExplorationGoal
@@ -90,9 +93,11 @@ class CatExplorationPlannerTests(
                 y=5.0,
                 z=6.0,
             ),
-            details={
-                "target_layer": "history"
-            }
+            details=(
+                CatExplorationMemoryDetails(
+                    target_layer="history",
+                )
+            )
         )
 
         result = (
@@ -125,9 +130,11 @@ class CatExplorationPlannerTests(
                 y=0.0,
                 z=0.0,
             ),
-            details={
-                "target_layer": "history"
-            }
+            details=(
+                CatExplorationMemoryDetails(
+                    target_layer="history",
+                )
+            )
         )
 
         result = (

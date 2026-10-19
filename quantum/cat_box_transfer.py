@@ -11,6 +11,9 @@ from core.entity.quantum_cat_route_state import (
 from cats.cat_exploration_planner import (
     CatExplorationPlanner
 )
+from cats.cat_exploration_memory_details import (
+    CatExplorationMemoryDetails,
+)
 from cats.cat_after_arrival_action import (
     CatAfterArrivalAction,
 )
@@ -1682,14 +1685,16 @@ class CatQuantumBoxTransfer:
                 location=(
                     cat.position
                 ),
-                details={
-                    "target_layer":
-                        cat.current_layer,
-                    "position":
-                        cat.position,
-                    "pair_id":
-                        exploration.pair_id,
-                },
+                details=(
+                    CatExplorationMemoryDetails(
+                        target_layer=
+                            cat.current_layer,
+                        position=
+                            cat.position,
+                        pair_id=
+                            exploration.pair_id,
+                    )
+                ),
             )
 
         known_place = (

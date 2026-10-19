@@ -17,6 +17,9 @@ from .cat_after_arrival_action import (
     CatAfterArrivalAction,
 )
 from .cat_exploration_goal import CatExplorationGoal
+from .cat_exploration_memory_details import (
+    CatExplorationMemoryDetails,
+)
 from .cat_quantum_box_memory_details import (
     CatQuantumBoxObservedMemoryDetails,
     CatQuantumBoxTransferFailedMemoryDetails,
@@ -400,19 +403,26 @@ class CatExplorationPlanner:
 
             details = event.details
 
-            if details.get(
-                "target_layer"
-            ) != "quantum_layer":
+            if not isinstance(
+                details,
+                CatExplorationMemoryDetails,
+            ):
+                raise TypeError(
+                    "Successful exploration memory "
+                    "details must use "
+                    "CatExplorationMemoryDetails."
+                )
+
+            if (
+                details.target_layer
+                != "quantum_layer"
+            ):
                 continue
 
-            position = details.get(
-                "position"
-            )
-
-            if position is not None:
+            if details.position is not None:
                 visited_positions.append(
                     cls._position(
-                        position
+                        details.position
                     )
                 )
 
@@ -692,6 +702,21 @@ class CatExplorationPlanner:
                         )
 
                 raw_position = location
+
+            elif isinstance(
+                details,
+                CatExplorationMemoryDetails,
+            ):
+                layers.append(
+                    details.target_layer
+                )
+
+                raw_position = (
+                    details.position
+                    if details.position
+                    is not None
+                    else location
+                )
 
             else:
                 for key in (
