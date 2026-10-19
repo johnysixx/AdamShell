@@ -79,6 +79,8 @@ class CatKnownQuantumBoxTravelTests(unittest.TestCase):
         self.assertTrue(memories)
         memory = memories[-1]
         self.assertEqual(memory.participants, [self.source.id, self.target.id])
+        self.assertIsInstance(memory.location, SpatialVector3)
+        self.assertEqual(memory.location, self.target.position)
         self.assertEqual(memory.details['source_layer'], 'quantum_layer')
         self.assertEqual(memory.details['target_layer'], 'meeting_place')
         self.assertTrue(memory.details['target_box_consumed'])

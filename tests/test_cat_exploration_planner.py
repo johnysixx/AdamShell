@@ -85,11 +85,11 @@ class CatExplorationPlannerTests(
     ):
         self.cat.memory.remember(
             event_type="successful_exploration",
-            location={
-                "x": 4.0,
-                "y": 5.0,
-                "z": 6.0
-            },
+            location=SpatialVector3(
+                x=4.0,
+                y=5.0,
+                z=6.0,
+            ),
             details={
                 "target_layer": "history"
             }
@@ -120,11 +120,11 @@ class CatExplorationPlannerTests(
     ):
         self.cat.memory.remember(
             event_type="dangerous_location",
-            location={
-                "x": 4.0,
-                "y": 0.0,
-                "z": 0.0
-            },
+            location=SpatialVector3(
+                x=4.0,
+                y=0.0,
+                z=0.0,
+            ),
             details={
                 "target_layer": "history"
             }
@@ -149,6 +149,36 @@ class CatExplorationPlannerTests(
             "dangerous_memory",
             history.reasons
         )
+
+    def test_mapping_memory_position_is_rejected(
+        self
+    ):
+        self.cat.memory.remember(
+            event_type=(
+                "successful_exploration"
+            ),
+            location="quantum_layer",
+            details={
+                "target_layer":
+                    "quantum_layer",
+                "position": {
+                    "x": 4.0,
+                    "y": 0.0,
+                    "z": 0.0,
+                },
+            },
+        )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            (
+                CatExplorationPlanner
+                .choose_continuation_destination(
+                    cat=self.cat,
+                    universe=self.universe,
+                )
+            )
 
     def test_quantum_cat_can_choose_meeting_place(
         self

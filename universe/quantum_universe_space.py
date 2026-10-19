@@ -159,13 +159,57 @@ class QuantumUniverseSpace:
     def _get_cat_memory(self, cat):
         return getattr(cat, 'memory', None)
 
-    def _remember_cat_route_event(self, cat, route, universe, event_type, details=None):
-        memory = self._get_cat_memory(cat)
+    def _remember_cat_route_event(
+        self,
+        cat,
+        route,
+        universe,
+        event_type,
+        details=None,
+    ):
+        memory = self._get_cat_memory(
+            cat
+        )
+
         if memory is None:
             return None
-        route_details = {'route_id': route.route_id, 'destination': route.destination, 'start_position': route.start_position.to_dict(), 'current_position': route.current_position.to_dict(), 'current_step_index': route.current_step_index, 'next_position': None if route.next_position is None else route.next_position.to_dict(), 'route_state': route.state.value, 'has_arrived': route.has_arrived}
-        route_details.update(details or {})
-        return memory.remember(event_type=event_type, universe_tick=getattr(universe, 'universe_tick', None), location=route.current_position.to_dict(), participants=[], details=route_details)
+
+        route_details = {
+            "route_id":
+                route.route_id,
+            "destination":
+                route.destination,
+            "start_position":
+                route.start_position,
+            "current_position":
+                route.current_position,
+            "current_step_index":
+                route.current_step_index,
+            "next_position":
+                route.next_position,
+            "route_state":
+                route.state.value,
+            "has_arrived":
+                route.has_arrived,
+        }
+
+        route_details.update(
+            details or {}
+        )
+
+        return memory.remember(
+            event_type=event_type,
+            universe_tick=getattr(
+                universe,
+                "universe_tick",
+                None,
+            ),
+            location=(
+                route.current_position
+            ),
+            participants=[],
+            details=route_details,
+        )
 
     def plan_direct_cat_route(
         self,
@@ -414,11 +458,9 @@ class QuantumUniverseSpace:
                 universe=universe,
                 event_type="route_started",
                 details={
-                    "route_steps": [
-                        step.to_dict()
-                        for step
-                        in route.route_steps
-                    ],
+                    "route_steps": list(
+                        route.route_steps
+                    ),
                 },
             )
 
@@ -645,11 +687,9 @@ class QuantumUniverseSpace:
                         "blocked_by":
                             cronenberg.name,
                         "blocked_position":
-                            cronenberg_position
-                            .to_dict(),
+                            cronenberg_position,
                         "detour_position":
-                            encounter.detour
-                            .to_dict(),
+                            encounter.detour,
                         "returns_to_original_route":
                             True,
                     },
@@ -669,7 +709,6 @@ class QuantumUniverseSpace:
 
         previous_position = (
             route.current_position
-            .to_dict()
         )
 
         position = (
@@ -698,7 +737,7 @@ class QuantumUniverseSpace:
                 "previous_position":
                     previous_position,
                 "position":
-                    position.to_dict(),
+                    position,
             },
         )
 
@@ -710,8 +749,7 @@ class QuantumUniverseSpace:
                 event_type="route_arrived",
                 details={
                     "arrival_position":
-                        route.current_position
-                        .to_dict(),
+                        route.current_position,
                 },
             )
 

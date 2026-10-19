@@ -404,8 +404,12 @@ class CatExplorationPlanner:
                 "position"
             )
 
-            if isinstance(position, dict):
-                visited_positions.append(cls._position_from_snapshot(position))
+            if position is not None:
+                visited_positions.append(
+                    cls._position(
+                        position
+                    )
+                )
 
         # Vzd?lenost dal?? etapy je vlastnost
         # ko?ky, ne pevn? teleport.
@@ -626,12 +630,26 @@ class CatExplorationPlanner:
                 "resolved_position",
                 details.get("position", location),
             )
-            if isinstance(raw_position, SpatialVector3):
+            if isinstance(
+                raw_position,
+                SpatialVector3,
+            ):
                 position = raw_position
-            elif isinstance(raw_position, dict):
-                position = cls._position_from_snapshot(raw_position)
+
+            elif isinstance(
+                raw_position,
+                dict,
+            ):
+                raise TypeError(
+                    "Cat exploration memory "
+                    "position must be "
+                    "SpatialVector3."
+                )
+
             else:
-                position = SpatialVector3.zero()
+                position = (
+                    SpatialVector3.zero()
+                )
 
             for layer in layers:
                 candidates.append(
@@ -903,9 +921,3 @@ class CatExplorationPlanner:
     @staticmethod
     def _position(value):
         return require_spatial_vector(value, field_name="cat exploration position")
-
-    @staticmethod
-    def _position_from_snapshot(value):
-        if not isinstance(value, dict):
-            raise TypeError("Cat exploration snapshot position must be a dictionary.")
-        return SpatialVector3(x=value["x"], y=value["y"], z=value["z"])

@@ -560,7 +560,7 @@ class CatQuantumBoxTransfer:
                     self.universe
                     .universe_tick
                 ),
-                location=target_position.to_dict(),
+                location=target_position,
                 participants=[
                     source_box.id,
                     target_box.id
@@ -1062,7 +1062,7 @@ class CatQuantumBoxTransfer:
                 universe_tick=(
                     self.universe.universe_tick
                 ),
-                location=target_position.to_dict(),
+                location=target_position,
                 participants=[
                     source_box.id,
                     target_box.id
@@ -1667,13 +1667,13 @@ class CatQuantumBoxTransfer:
                     .universe_tick
                 ),
                 location=(
-                    cat.position.to_dict()
+                    cat.position
                 ),
                 details={
                     "target_layer":
                         cat.current_layer,
                     "position":
-                        cat.position.to_dict(),
+                        cat.position,
                     "pair_id":
                         exploration.pair_id,
                 },

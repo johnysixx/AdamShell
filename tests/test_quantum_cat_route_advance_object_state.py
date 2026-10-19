@@ -164,6 +164,179 @@ class QuantumCatRouteAdvanceObjectStateTests(
             result
         )
 
+    def test_route_memory_keeps_spatial_objects(
+        self
+    ):
+        destination = (
+            SpatialVector3(
+                x=1.0,
+                y=0.0,
+                z=0.0,
+            )
+        )
+
+        (
+            self.universe
+            .quantum_space
+            .plan_direct_cat_route(
+                cat_id=self.cat.name,
+                start_position=
+                    self.cat.position,
+                destination_position=
+                    destination,
+                destination="test",
+                step_size=1.0,
+            )
+        )
+
+        self.advance()
+
+        memories = (
+            self.cat.memory.records()
+        )
+
+        started = next(
+            memory
+            for memory in memories
+            if memory.event_type
+            == "route_started"
+        )
+
+        step = next(
+            memory
+            for memory in memories
+            if memory.event_type
+            == "route_step"
+        )
+
+        arrived = next(
+            memory
+            for memory in memories
+            if memory.event_type
+            == "route_arrived"
+        )
+
+        self.assertIsInstance(
+            started.location,
+            SpatialVector3,
+        )
+
+        self.assertTrue(
+            all(
+                isinstance(
+                    position,
+                    SpatialVector3,
+                )
+                for position
+                in started.details[
+                    "route_steps"
+                ]
+            )
+        )
+
+        self.assertIsInstance(
+            step.location,
+            SpatialVector3,
+        )
+
+        self.assertIsInstance(
+            step.details[
+                "previous_position"
+            ],
+            SpatialVector3,
+        )
+
+        self.assertIsInstance(
+            step.details[
+                "position"
+            ],
+            SpatialVector3,
+        )
+
+        self.assertIsInstance(
+            arrived.details[
+                "arrival_position"
+            ],
+            SpatialVector3,
+        )
+
+        snapshot = (
+            self.cat.memory.public_state
+        )
+
+        started_snapshot = next(
+            memory
+            for memory
+            in snapshot["events"]
+            if memory["event_type"]
+            == "route_started"
+        )
+
+        step_snapshot = next(
+            memory
+            for memory
+            in snapshot["events"]
+            if memory["event_type"]
+            == "route_step"
+        )
+
+        arrived_snapshot = next(
+            memory
+            for memory
+            in snapshot["events"]
+            if memory["event_type"]
+            == "route_arrived"
+        )
+
+        self.assertTrue(
+            all(
+                isinstance(
+                    position,
+                    dict,
+                )
+                for position
+                in started_snapshot[
+                    "details"
+                ][
+                    "route_steps"
+                ]
+            )
+        )
+
+        self.assertIsInstance(
+            step_snapshot[
+                "location"
+            ],
+            dict,
+        )
+
+        self.assertIsInstance(
+            step_snapshot[
+                "details"
+            ][
+                "previous_position"
+            ],
+            dict,
+        )
+
+        self.assertIsInstance(
+            step_snapshot[
+                "details"
+            ][
+                "position"
+            ],
+            dict,
+        )
+
+        self.assertIsInstance(
+            arrived_snapshot[
+                "details"
+            ][
+                "arrival_position"
+            ],
+            dict,
+        )
+
     def test_already_arrived_result_is_object(
         self
     ):

@@ -381,9 +381,7 @@ class CatQuantumBoxIntentionHandler:
                     .tick_count
                 ),
                 location=(
-                    None
-                    if cat.position is None
-                    else cat.position.to_dict()
+                    cat.position
                 ),
                 participants=[
                     source_box_id,
@@ -1145,16 +1143,10 @@ class CatQuantumBoxIntentionHandler:
                         "box_id":
                             box_id,
                         "position": (
-                            None
-                            if getattr(
+                            getattr(
                                 box,
                                 "position",
                                 None,
-                            )
-                            is None
-                            else (
-                                box.position
-                                .to_dict()
                             )
                         ),
                         "observation":

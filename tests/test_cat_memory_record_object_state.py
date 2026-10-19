@@ -4,6 +4,9 @@ from cats.cat_memory_record import (
     CatMemoryRecord,
 )
 from cats.memory import CatMemory
+from core.entity.components import (
+    SpatialVector3,
+)
 
 
 class CatMemoryRecordObjectStateTests(
@@ -91,6 +94,87 @@ class CatMemoryRecordObjectStateTests(
         self.assertIsInstance(
             stored.details,
             dict,
+        )
+
+    def test_spatial_memory_is_object_runtime_state(
+        self
+    ):
+        position = SpatialVector3(
+            x=4.0,
+            y=5.0,
+            z=6.0,
+        )
+
+        returned = self.memory.remember(
+            event_type=(
+                "successful_exploration"
+            ),
+            location=position,
+            details={
+                "position": position,
+                "target_layer":
+                    "quantum_layer",
+            },
+        )
+
+        stored = (
+            self.memory.events[-1]
+        )
+
+        self.assertIsInstance(
+            returned.location,
+            SpatialVector3,
+        )
+
+        self.assertIsInstance(
+            stored.location,
+            SpatialVector3,
+        )
+
+        self.assertIsInstance(
+            stored.details[
+                "position"
+            ],
+            SpatialVector3,
+        )
+
+        self.assertEqual(
+            stored.location,
+            position,
+        )
+
+        snapshot = (
+            self.memory.public_state[
+                "events"
+            ][-1]
+        )
+
+        self.assertIsInstance(
+            snapshot["location"],
+            dict,
+        )
+
+        self.assertIsInstance(
+            snapshot[
+                "details"
+            ][
+                "position"
+            ],
+            dict,
+        )
+
+        self.assertEqual(
+            snapshot["location"],
+            position.to_dict(),
+        )
+
+        self.assertEqual(
+            snapshot[
+                "details"
+            ][
+                "position"
+            ],
+            position.to_dict(),
         )
 
     def test_recall_returns_object_records(

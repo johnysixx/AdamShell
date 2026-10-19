@@ -1,6 +1,61 @@
 from copy import deepcopy
 from dataclasses import dataclass, field
 
+from core.entity.components import (
+    SpatialVector3,
+)
+
+
+def _memory_snapshot_value(
+    value,
+):
+    if isinstance(
+        value,
+        SpatialVector3,
+    ):
+        return value.to_dict()
+
+    if isinstance(
+        value,
+        dict,
+    ):
+        return {
+            key:
+                _memory_snapshot_value(
+                    item
+                )
+            for key, item
+            in value.items()
+        }
+
+    if isinstance(
+        value,
+        list,
+    ):
+        return [
+            _memory_snapshot_value(
+                item
+            )
+            for item
+            in value
+        ]
+
+    if isinstance(
+        value,
+        tuple,
+    ):
+        return tuple(
+            _memory_snapshot_value(
+                item
+            )
+            for item
+            in value
+        )
+
+    return deepcopy(
+        value
+    )
+
 
 @dataclass(slots=True)
 class CatMemoryRecord:
@@ -27,7 +82,7 @@ class CatMemoryRecord:
             "universe_tick":
                 self.universe_tick,
             "location":
-                deepcopy(
+                _memory_snapshot_value(
                     self.location
                 ),
             "participants":
@@ -35,7 +90,7 @@ class CatMemoryRecord:
                     self.participants
                 ),
             "details":
-                deepcopy(
+                _memory_snapshot_value(
                     self.details
                 ),
         }
