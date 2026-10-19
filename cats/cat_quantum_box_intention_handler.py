@@ -21,6 +21,10 @@ from cats.cat_intention_state import (
 from cats.cat_box_exploration_state import (
     CatBoxExplorationState,
 )
+from cats.cat_quantum_box_memory_details import (
+    CatQuantumBoxObservedMemoryDetails,
+    CatQuantumBoxTransferFailedMemoryDetails,
+)
 from universe.quantum_cat_route_advance_state import (
     QUANTUM_CAT_ROUTE_ADVANCE_RESULT_TYPES,
 )
@@ -387,16 +391,18 @@ class CatQuantumBoxIntentionHandler:
                     source_box_id,
                     counterpart_box_id,
                 ],
-                details={
-                    "source_layer":
-                        target.source_layer,
-                    "target_layer":
-                        target.target_layer,
-                    "reason":
-                        failure_reason,
-                    "cronenberg_id":
-                        cronenberg.id,
-                },
+                details=(
+                    CatQuantumBoxTransferFailedMemoryDetails(
+                        reason=
+                            failure_reason,
+                        source_layer=
+                            target.source_layer,
+                        target_layer=
+                            target.target_layer,
+                        cronenberg_id=
+                            cronenberg.id,
+                    )
+                ),
             )
         )
 
@@ -1139,21 +1145,23 @@ class CatQuantumBoxIntentionHandler:
                     participants=[
                         box_id,
                     ],
-                    details={
-                        "box_id":
-                            box_id,
-                        "position": (
-                            getattr(
-                                box,
-                                "position",
-                                None,
-                            )
-                        ),
-                        "observation":
-                            deepcopy(
-                                observation
+                    details=(
+                        CatQuantumBoxObservedMemoryDetails(
+                            box_id=
+                                box_id,
+                            position=(
+                                getattr(
+                                    box,
+                                    "position",
+                                    None,
+                                )
                             ),
-                    },
+                            observation=
+                                deepcopy(
+                                    observation
+                                ),
+                        )
+                    ),
                 )
             )
 

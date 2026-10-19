@@ -4,6 +4,11 @@ from core.entity.components import SpatialVector3
 from cats.cat_quantum_observation_state import (
     CatQuantumCounterpartObservation,
 )
+from cats.cat_quantum_box_memory_details import (
+    CatQuantumBoxObservedMemoryDetails,
+    CatQuantumBoxTransferFailedMemoryDetails,
+    CatQuantumBoxTransferMemoryDetails,
+)
 from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat_mind import CatMind
@@ -27,7 +32,10 @@ class CatQuantumCounterpartSensingTests(unittest.TestCase):
         self.target.position = SpatialVector3(x=9.0, y=4.0, z=0.0)
         self.source.pair_with(self.target)
         self.cat.position = SpatialVector3(x=2.0, y=0.0, z=0.0)
-        self.cat.memory.remember(event_type='quantum_box_observed', universe_tick=0, location='quantum_layer', participants=[self.source.id], details={'box_id': self.source.id})
+        self.cat.memory.remember(event_type='quantum_box_observed', universe_tick=0, location='quantum_layer', participants=[self.source.id], details=CatQuantumBoxObservedMemoryDetails(
+            box_id=self.source.id,
+            position=self.source.position,
+        ))
 
     def observations(self):
         return CatPerception(self.cats).observe(self.cat)
@@ -76,7 +84,13 @@ class CatQuantumCounterpartSensingTests(unittest.TestCase):
     def test_previous_quantum_travel_increases_sensing_score(self):
         inexperienced_candidates = CatMind.consider(cat=self.cat, observations=self.observations())
         inexperienced = next((candidate for candidate in inexperienced_candidates if candidate.type == 'sense_quantum_counterpart'))
-        self.cat.memory.remember(event_type='quantum_box_layer_transfer', universe_tick=0, location=SpatialVector3(x=9.0, y=4.0, z=0.0), participants=['old_source_box', 'old_target_box'], details={'source_layer': 'old_quantum_layer', 'target_layer': 'old_meeting_place', 'target_box_consumed': True, 'energy_j': 1.0, 'trail_id': 'old_quantum_trail'})
+        self.cat.memory.remember(event_type='quantum_box_layer_transfer', universe_tick=0, location=SpatialVector3(x=9.0, y=4.0, z=0.0), participants=['old_source_box', 'old_target_box'], details=CatQuantumBoxTransferMemoryDetails(
+            source_layer='old_quantum_layer',
+            target_layer='old_meeting_place',
+            target_box_consumed=True,
+            energy_j=1.0,
+            trail_id='old_quantum_trail',
+        ))
         experienced_candidates = CatMind.consider(cat=self.cat, observations=self.observations())
         experienced = next((candidate for candidate in experienced_candidates if candidate.type == 'sense_quantum_counterpart'))
         self.assertGreater(experienced.score, inexperienced.score)
@@ -88,10 +102,22 @@ class CatQuantumCounterpartSensingTests(unittest.TestCase):
             candidates = CatMind.consider(cat=self.cat, observations=self.observations())
             return next((candidate.score for candidate in candidates if candidate.type == 'sense_quantum_counterpart'))
         base_score = sense_score()
-        self.cat.memory.remember(event_type='quantum_box_layer_transfer', universe_tick=1, location=SpatialVector3(x=1.0, y=1.0, z=0.0), participants=['source_1', 'target_1'], details={'source_layer': 'quantum_layer', 'target_layer': 'meeting_place', 'target_box_consumed': True})
+        self.cat.memory.remember(event_type='quantum_box_layer_transfer', universe_tick=1, location=SpatialVector3(x=1.0, y=1.0, z=0.0), participants=['source_1', 'target_1'], details=CatQuantumBoxTransferMemoryDetails(
+            source_layer='quantum_layer',
+            target_layer='meeting_place',
+            target_box_consumed=True,
+        ))
         one_transfer_score = sense_score()
-        self.cat.memory.remember(event_type='quantum_box_layer_transfer', universe_tick=2, location=SpatialVector3(x=2.0, y=2.0, z=0.0), participants=['source_2', 'target_2'], details={'source_layer': 'quantum_layer', 'target_layer': 'meeting_place', 'target_box_consumed': True})
-        self.cat.memory.remember(event_type='quantum_box_layer_transfer', universe_tick=3, location=SpatialVector3(x=3.0, y=3.0, z=0.0), participants=['source_3', 'target_3'], details={'source_layer': 'quantum_layer', 'target_layer': 'meeting_place', 'target_box_consumed': True})
+        self.cat.memory.remember(event_type='quantum_box_layer_transfer', universe_tick=2, location=SpatialVector3(x=2.0, y=2.0, z=0.0), participants=['source_2', 'target_2'], details=CatQuantumBoxTransferMemoryDetails(
+            source_layer='quantum_layer',
+            target_layer='meeting_place',
+            target_box_consumed=True,
+        ))
+        self.cat.memory.remember(event_type='quantum_box_layer_transfer', universe_tick=3, location=SpatialVector3(x=3.0, y=3.0, z=0.0), participants=['source_3', 'target_3'], details=CatQuantumBoxTransferMemoryDetails(
+            source_layer='quantum_layer',
+            target_layer='meeting_place',
+            target_box_consumed=True,
+        ))
         three_transfer_score = sense_score()
         self.assertGreater(one_transfer_score, base_score)
         self.assertGreater(three_transfer_score, one_transfer_score)
@@ -105,7 +131,12 @@ class CatQuantumCounterpartSensingTests(unittest.TestCase):
         self.assertTrue(result.executed)
         before_candidates = CatMind.consider(cat=self.cat, observations=self.observations())
         before = next((candidate for candidate in before_candidates if candidate.type == 'travel_through_known_quantum_box'))
-        self.cat.memory.remember(event_type='quantum_box_layer_transfer_failed', universe_tick=1, location=self.cat.position, participants=[self.source.id, self.target.id], details={'source_layer': 'quantum_layer', 'target_layer': 'meeting_place', 'reason': 'test_quantum_failure', 'cronenberg_id': 'test_cronenberg'})
+        self.cat.memory.remember(event_type='quantum_box_layer_transfer_failed', universe_tick=1, location=self.cat.position, participants=[self.source.id, self.target.id], details=CatQuantumBoxTransferFailedMemoryDetails(
+            reason='test_quantum_failure',
+            source_layer='quantum_layer',
+            target_layer='meeting_place',
+            cronenberg_id='test_cronenberg',
+        ))
         after_candidates = CatMind.consider(cat=self.cat, observations=self.observations())
         after = next((candidate for candidate in after_candidates if candidate.type == 'travel_through_known_quantum_box'))
         self.assertLess(after.score, before.score)

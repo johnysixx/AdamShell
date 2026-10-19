@@ -5,6 +5,9 @@ from cats.cat_mind import CatMind
 from cats.cat_quantum_intention_considerer import (
     CatQuantumIntentionConsiderer,
 )
+from cats.cat_quantum_box_memory_details import (
+    CatQuantumBoxTransferFailedMemoryDetails,
+)
 from cats.cat_scent_intention_considerer import (
     CatScentIntentionConsiderer,
 )
@@ -132,7 +135,9 @@ class CatMindTests(unittest.TestCase):
     def test_failed_quantum_travel_increases_bar_score(self):
         before = CatMind.consider(cat=self.cat, observations=CatPerceptionState(bar_known=True, bar_visible=False))
         before_bar = next((candidate for candidate in before if candidate.type == 'visit_bar'))
-        self.cat.memory.remember(event_type='quantum_box_layer_transfer_failed', universe_tick=1, location=SpatialVector3(x=0.0, y=0.0, z=0.0), participants=['source_box', 'target_box'], details={'reason': 'test_failure'})
+        self.cat.memory.remember(event_type='quantum_box_layer_transfer_failed', universe_tick=1, location=SpatialVector3(x=0.0, y=0.0, z=0.0), participants=['source_box', 'target_box'], details=CatQuantumBoxTransferFailedMemoryDetails(
+            reason='test_failure',
+        ))
         after = CatMind.consider(cat=self.cat, observations=CatPerceptionState(bar_known=True, bar_visible=False))
         after_bar = next((candidate for candidate in after if candidate.type == 'visit_bar'))
         self.assertGreater(after_bar.score, before_bar.score)

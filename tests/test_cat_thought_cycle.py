@@ -4,6 +4,9 @@ from core.entity.components import SpatialVector3
 from cats.cat_quantum_observation_state import (
     CatQuantumCounterpartObservation,
 )
+from cats.cat_quantum_box_memory_details import (
+    CatQuantumBoxObservedMemoryDetails,
+)
 from universe.universe import Universe
 from cats.cats import Cats
 
@@ -51,7 +54,10 @@ class CatThoughtCycleTests(unittest.TestCase):
         target.position = SpatialVector3(x=9.0, y=4.0, z=0.0)
         source.pair_with(target)
         self.cat.position = source.position
-        self.cat.memory.remember(event_type='quantum_box_observed', universe_tick=0, location='quantum_layer', participants=[source.id], details={'box_id': source.id})
+        self.cat.memory.remember(event_type='quantum_box_observed', universe_tick=0, location='quantum_layer', participants=[source.id], details=CatQuantumBoxObservedMemoryDetails(
+            box_id=source.id,
+            position=source.position,
+        ))
         first_cycle = self.cats.think_and_act(cat=self.cat)
         self.assertTrue(first_cycle.completed)
         self.assertEqual(first_cycle.decision.intention, 'sense_quantum_counterpart')

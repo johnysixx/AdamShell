@@ -6,6 +6,11 @@ from universe.cronenberg_manifestation_state import (
 )
 from cats.cats import Cats
 from cats.cat_mind import CatMind
+from cats.cat_quantum_box_memory_details import (
+    CatQuantumBoxObservedMemoryDetails,
+    CatQuantumBoxTransferFailedMemoryDetails,
+    CatQuantumBoxTransferMemoryDetails,
+)
 from cats.cat_perception import CatPerception
 from quantum.cat_box_transfer_result_state import (
     CatQuantumBoxTransferFailedResult,
@@ -27,7 +32,10 @@ class CatKnownQuantumBoxTravelTests(unittest.TestCase):
         self.target.position = SpatialVector3(x=9.0, y=4.0, z=0.0)
         self.source.pair_with(self.target)
         self.cat.position = self.source.position
-        self.cat.memory.remember(event_type='quantum_box_observed', universe_tick=0, location='quantum_layer', participants=[self.source.id], details={'box_id': self.source.id})
+        self.cat.memory.remember(event_type='quantum_box_observed', universe_tick=0, location='quantum_layer', participants=[self.source.id], details=CatQuantumBoxObservedMemoryDetails(
+            box_id=self.source.id,
+            position=self.source.position,
+        ))
 
     def observations(self):
         return CatPerception(self.cats).observe(self.cat)
@@ -81,9 +89,21 @@ class CatKnownQuantumBoxTravelTests(unittest.TestCase):
         self.assertEqual(memory.participants, [self.source.id, self.target.id])
         self.assertIsInstance(memory.location, SpatialVector3)
         self.assertEqual(memory.location, self.target.position)
-        self.assertEqual(memory.details['source_layer'], 'quantum_layer')
-        self.assertEqual(memory.details['target_layer'], 'meeting_place')
-        self.assertTrue(memory.details['target_box_consumed'])
+        self.assertIsInstance(
+            memory.details,
+            CatQuantumBoxTransferMemoryDetails,
+        )
+        self.assertEqual(
+            memory.details.source_layer,
+            'quantum_layer',
+        )
+        self.assertEqual(
+            memory.details.target_layer,
+            'meeting_place',
+        )
+        self.assertTrue(
+            memory.details.target_box_consumed
+        )
 
     def test_failed_quantum_transfer_creates_cronenberg_and_memory(self):
         self.sense_counterpart()
@@ -140,6 +160,13 @@ class CatKnownQuantumBoxTravelTests(unittest.TestCase):
         memories = self.cat.memory.recall(event_type='quantum_box_layer_transfer_failed')
         self.assertEqual(len(memories), 1)
         self.assertEqual(memories[0].participants, [self.source.id, self.target.id])
-        self.assertEqual(memories[0].details['reason'], 'simulated_quantum_transfer_error')
+        self.assertIsInstance(
+            memories[0].details,
+            CatQuantumBoxTransferFailedMemoryDetails,
+        )
+        self.assertEqual(
+            memories[0].details.reason,
+            'simulated_quantum_transfer_error',
+        )
 if __name__ == '__main__':
     unittest.main()

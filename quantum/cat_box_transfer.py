@@ -18,6 +18,9 @@ from cats.cat_knowledge import (
     CatKnowledge
 )
 from cats.cat import Cat
+from cats.cat_quantum_box_memory_details import (
+    CatQuantumBoxTransferMemoryDetails,
+)
 from cats.cat_access_rules import CatAccessRules
 from universe.aroma_residue import (
     AromaResidue
@@ -565,19 +568,22 @@ class CatQuantumBoxTransfer:
                     source_box.id,
                     target_box.id
                 ],
-                details={
-                    "pair_id": pair.pair_id,
-                    "source_layer": (
-                        transfer_state.source_layer
-                    ),
-                    "target_layer": (
-                        target_layer
-                    ),
-                    "target_box_consumed": (
-                        False
-                    ),
-                    "trail_id": trail.trail_id
-                }
+                details=(
+                    CatQuantumBoxTransferMemoryDetails(
+                        pair_id=
+                            pair.pair_id,
+                        source_layer=(
+                            transfer_state
+                            .source_layer
+                        ),
+                        target_layer=
+                            target_layer,
+                        target_box_consumed=
+                            False,
+                        trail_id=
+                            trail.trail_id,
+                    )
+                )
             )
 
         dissolution = None
@@ -1067,15 +1073,22 @@ class CatQuantumBoxTransfer:
                     source_box.id,
                     target_box.id
                 ],
-                details={
-                    "source_layer": (
-                        transfer_state.source_layer
-                    ),
-                    "target_layer": target_layer,
-                    "target_box_consumed": True,
-                    "energy_j": consumed_energy,
-                    "trail_id": trail.trail_id
-                }
+                details=(
+                    CatQuantumBoxTransferMemoryDetails(
+                        source_layer=(
+                            transfer_state
+                            .source_layer
+                        ),
+                        target_layer=
+                            target_layer,
+                        target_box_consumed=
+                            True,
+                        energy_j=
+                            consumed_energy,
+                        trail_id=
+                            trail.trail_id,
+                    )
+                )
             )
 
         event = (

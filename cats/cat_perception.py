@@ -6,6 +6,9 @@ from dataclasses import dataclass, field
 from cats.cat_quantum_observation_state import (
     CatQuantumCounterpartObservation,
 )
+from cats.cat_quantum_box_memory_details import (
+    CatQuantumBoxObservedMemoryDetails,
+)
 from core.entity.quantum_box_cat_observation import (
     QuantumBoxCatObservation,
 )
@@ -650,7 +653,26 @@ class CatPerception:
             if box_id in event.participants:
                 return True
             details = event.details
-            if details.get('box_id') == box_id:
+
+            if isinstance(
+                details,
+                CatQuantumBoxObservedMemoryDetails,
+            ):
+                if details.box_id == box_id:
+                    return True
+
+                continue
+
+            if (
+                isinstance(
+                    details,
+                    dict,
+                )
+                and details.get(
+                    'box_id'
+                )
+                == box_id
+            ):
                 return True
         return False
 

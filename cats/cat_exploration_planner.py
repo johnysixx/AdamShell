@@ -17,6 +17,11 @@ from .cat_after_arrival_action import (
     CatAfterArrivalAction,
 )
 from .cat_exploration_goal import CatExplorationGoal
+from .cat_quantum_box_memory_details import (
+    CatQuantumBoxObservedMemoryDetails,
+    CatQuantumBoxTransferFailedMemoryDetails,
+    CatQuantumBoxTransferMemoryDetails,
+)
 
 class CatExplorationPlanner:
 
@@ -631,39 +636,96 @@ class CatExplorationPlanner:
 
             layers = []
 
-            for key in (
-                "target_layer",
-                "resolved_layer",
-                "source_layer",
-                "layer"
-            ):
-                value = details.get(
-                    key
-                )
-
-                if value is not None:
-                    layers.append(
-                        str(
-                            value
-                        )
-                    )
-
             location = (
                 event.location
             )
 
             if isinstance(
-                location,
-                str
+                details,
+                CatQuantumBoxObservedMemoryDetails,
             ):
-                layers.append(
-                    location
+                if isinstance(
+                    location,
+                    str,
+                ):
+                    layers.append(
+                        location
+                    )
+
+                raw_position = (
+                    details.position
+                    if details.position
+                    is not None
+                    else location
                 )
 
-            raw_position = details.get(
-                "resolved_position",
-                details.get("position", location),
-            )
+            elif isinstance(
+                details,
+                CatQuantumBoxTransferMemoryDetails,
+            ):
+                for value in (
+                    details.target_layer,
+                    details.source_layer,
+                ):
+                    if value is not None:
+                        layers.append(
+                            str(
+                                value
+                            )
+                        )
+
+                raw_position = location
+
+            elif isinstance(
+                details,
+                CatQuantumBoxTransferFailedMemoryDetails,
+            ):
+                for value in (
+                    details.target_layer,
+                    details.source_layer,
+                ):
+                    if value is not None:
+                        layers.append(
+                            str(
+                                value
+                            )
+                        )
+
+                raw_position = location
+
+            else:
+                for key in (
+                    "target_layer",
+                    "resolved_layer",
+                    "source_layer",
+                    "layer"
+                ):
+                    value = details.get(
+                        key
+                    )
+
+                    if value is not None:
+                        layers.append(
+                            str(
+                                value
+                            )
+                        )
+
+                if isinstance(
+                    location,
+                    str
+                ):
+                    layers.append(
+                        location
+                    )
+
+                raw_position = details.get(
+                    "resolved_position",
+                    details.get(
+                        "position",
+                        location,
+                    ),
+                )
             if isinstance(
                 raw_position,
                 SpatialVector3,
