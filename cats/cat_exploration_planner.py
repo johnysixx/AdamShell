@@ -598,6 +598,35 @@ class CatExplorationPlanner:
             ):
                 continue
 
+            if (
+                event_type
+                == "cronenberg_encounter"
+            ):
+                location = (
+                    event.location
+                )
+
+                if isinstance(
+                    location,
+                    str,
+                ):
+                    candidates.append(
+                        CatExplorationCandidate(
+                            layer=location,
+                            position=(
+                                SpatialVector3.zero()
+                            ),
+                            source="memory",
+                            memory_type=
+                                event_type,
+                            known_visits=1,
+                            positive_memories=0,
+                            negative_memories=0,
+                        )
+                    )
+
+                continue
+
             details = event.details
 
             layers = []

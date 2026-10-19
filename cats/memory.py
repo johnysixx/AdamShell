@@ -3,6 +3,9 @@ from copy import deepcopy
 from cats.cat_memory_record import (
     CatMemoryRecord,
 )
+from cats.cat_cronenberg_encounter_memory_details import (
+    CatCronenbergEncounterMemoryDetails,
+)
 
 
 class CatMemory:
@@ -181,12 +184,28 @@ class CatMemory:
 
     @property
     def cronenbergs_eaten(self):
+        memories = (
+            self.cronenberg_encounters
+        )
+
+        for memory in memories:
+            if not isinstance(
+                memory.details,
+                CatCronenbergEncounterMemoryDetails,
+            ):
+                raise TypeError(
+                    "Cronenberg encounter memory "
+                    "details must use "
+                    "CatCronenbergEncounterMemoryDetails."
+                )
+
         return [
             memory
-            for memory in self.cronenberg_encounters
-            if memory.details.get(
-                "result"
-            ) == "cronenberg_hunted"
+            for memory in memories
+            if (
+                memory.details.result
+                == "cronenberg_hunted"
+            )
         ]
 
     @property

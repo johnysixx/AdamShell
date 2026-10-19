@@ -12,6 +12,9 @@ from cats.cat_personality import CatPersonality
 from cats.cat import Cat
 from cats.cat_knowledge import CatKnowledge
 from universe.aroma_profile import AromaProfile
+from cats.cat_cronenberg_encounter_memory_details import (
+    CatCronenbergEncounterMemoryDetails,
+)
 
 
 class CatCronenbergEncounter:
@@ -136,12 +139,9 @@ class CatCronenbergEncounter:
                     "location",
                     "quantum_layer",
                 ),
-                details={
-                    "detour":
-                        detour.to_dict(),
-                    "destination":
-                        route.destination,
-                },
+                detour=detour,
+                destination=
+                    route.destination,
             )
 
             self._apply_personality_experience(
@@ -226,12 +226,10 @@ class CatCronenbergEncounter:
                     "location",
                     "quantum_layer",
                 ),
-                details={
-                    "escape_chance":
-                        escape_chance,
-                    "destination":
-                        route.destination,
-                },
+                escape_chance=
+                    escape_chance,
+                destination=
+                    route.destination,
             )
 
             self._apply_personality_experience(
@@ -302,14 +300,12 @@ class CatCronenbergEncounter:
             result="cronenberg_hunted",
             size_ratio=size_ratio,
             location=encounter_layer,
-            details={
-                "escape_chance":
-                    escape_chance,
-                "cat_growth":
-                    cat_growth,
-                "strength_gain":
-                    strength_gain,
-            },
+            escape_chance=
+                escape_chance,
+            cat_growth=
+                cat_growth,
+            strength_gain=
+                strength_gain,
         )
 
         cronenberg.state = (
@@ -466,76 +462,110 @@ class CatCronenbergEncounter:
         result,
         size_ratio,
         location,
-        details=None
+        detour=None,
+        destination=None,
+        escape_chance=None,
+        cat_growth=None,
+        strength_gain=None,
     ):
         memory = cat.memory
 
         if memory is None:
             return None
 
-        encounter_details = {
-            "result": result,
-            "size_ratio": float(size_ratio),
-            "cronenberg_id": cronenberg.name,
-            "cronenberg_size": float(
-                getattr(cronenberg, "size", 0.0)
-            ),
-            "cronenberg_energy": float(
-                getattr(cronenberg, "energy", 0.0)
-            ),
-            "origin": self._origin_snapshot(
-                cronenberg
-            ),
-            "traits": (
-                cronenberg.traits.snapshot()
-                if hasattr(cronenberg, "traits")
-                else {}
-            ),
-            "trait_birth_influences": (
-                list(
-                    cronenberg.traits.birth_influences
-                )
-                if hasattr(cronenberg, "traits")
-                else []
-            ),
-            "quantum_links": list(
-                getattr(
-                    cronenberg,
-                    "quantum_links",
-                    []
-                )
-            )
-        }
+        origin = getattr(
+            cronenberg,
+            "origin",
+            None,
+        )
 
-        encounter_details.update(
-            details or {}
+        if not isinstance(
+            origin,
+            CronenbergOrigin,
+        ):
+            raise TypeError(
+                "Cronenberg encounter memory "
+                "requires CronenbergOrigin."
+            )
+
+        traits = getattr(
+            cronenberg,
+            "traits",
+            None,
+        )
+
+        trait_values = getattr(
+            traits,
+            "values",
+            None,
+        )
+
+        birth_influences = tuple(
+            getattr(
+                traits,
+                "birth_influences",
+                (),
+            )
+        )
+
+        encounter_details = (
+            CatCronenbergEncounterMemoryDetails(
+                result=result,
+                size_ratio=size_ratio,
+                cronenberg_id=
+                    cronenberg.name,
+                cronenberg_size=float(
+                    getattr(
+                        cronenberg,
+                        "size",
+                        0.0,
+                    )
+                ),
+                cronenberg_energy=float(
+                    getattr(
+                        cronenberg,
+                        "energy",
+                        0.0,
+                    )
+                ),
+                origin=origin,
+                traits=trait_values,
+                trait_birth_influences=(
+                    birth_influences
+                ),
+                quantum_links=tuple(
+                    getattr(
+                        cronenberg,
+                        "quantum_links",
+                        (),
+                    )
+                ),
+                detour=detour,
+                destination=destination,
+                escape_chance=
+                    escape_chance,
+                cat_growth=
+                    cat_growth,
+                strength_gain=
+                    strength_gain,
+            )
         )
 
         return memory.remember(
-            event_type="cronenberg_encounter",
+            event_type=(
+                "cronenberg_encounter"
+            ),
             universe_tick=getattr(
                 universe,
                 "universe_tick",
-                None
+                None,
             ),
             location=location,
             participants=[
                 cronenberg.name
             ],
-            details=encounter_details
+            details=encounter_details,
         )
-
-    def _origin_snapshot(self, cronenberg):
-        origin = getattr(
-            cronenberg,
-            "origin",
-            None
-        )
-
-        if isinstance(origin, CronenbergOrigin):
-            return origin.to_dict()
-
-        return dict(origin or {})
 
     def _escape_chance(
         self,
