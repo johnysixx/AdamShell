@@ -1,5 +1,10 @@
 from copy import deepcopy
-from dataclasses import dataclass, field
+from dataclasses import (
+    dataclass,
+    field,
+    fields,
+    is_dataclass,
+)
 
 from core.entity.components import (
     SpatialVector3,
@@ -14,6 +19,21 @@ def _memory_snapshot_value(
         SpatialVector3,
     ):
         return value.to_dict()
+
+    if is_dataclass(
+        value
+    ):
+        return {
+            item.name:
+                _memory_snapshot_value(
+                    getattr(
+                        value,
+                        item.name,
+                    )
+                )
+            for item
+            in fields(value)
+        }
 
     if isinstance(
         value,
@@ -67,7 +87,7 @@ class CatMemoryRecord:
     participants: list = field(
         default_factory=list
     )
-    details: dict = field(
+    details: object = field(
         default_factory=dict
     )
 

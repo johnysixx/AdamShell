@@ -589,11 +589,16 @@ class CatExplorationPlanner:
         memory = cat.memory
 
         for event in memory.records():
-            details = event.details
-
             event_type = (
                 event.event_type
             )
+
+            if event_type.startswith(
+                "route_"
+            ):
+                continue
+
+            details = event.details
 
             layers = []
 

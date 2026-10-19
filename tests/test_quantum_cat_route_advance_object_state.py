@@ -1,6 +1,9 @@
 import unittest
 
 from cats.cats import Cats
+from cats.cat_route_memory_details import (
+    CatRouteMemoryDetails,
+)
 from core.entity.components import (
     SpatialVector3,
 )
@@ -221,6 +224,20 @@ class QuantumCatRouteAdvanceObjectStateTests(
             SpatialVector3,
         )
 
+        for memory in (
+            started,
+            step,
+            arrived,
+        ):
+            self.assertIsInstance(
+                memory.details,
+                CatRouteMemoryDetails,
+            )
+
+            self.assert_object_only(
+                memory.details
+            )
+
         self.assertTrue(
             all(
                 isinstance(
@@ -228,9 +245,7 @@ class QuantumCatRouteAdvanceObjectStateTests(
                     SpatialVector3,
                 )
                 for position
-                in started.details[
-                    "route_steps"
-                ]
+                in started.details.route_steps
             )
         )
 
@@ -240,23 +255,17 @@ class QuantumCatRouteAdvanceObjectStateTests(
         )
 
         self.assertIsInstance(
-            step.details[
-                "previous_position"
-            ],
+            step.details.previous_position,
             SpatialVector3,
         )
 
         self.assertIsInstance(
-            step.details[
-                "position"
-            ],
+            step.details.position,
             SpatialVector3,
         )
 
         self.assertIsInstance(
-            arrived.details[
-                "arrival_position"
-            ],
+            arrived.details.arrival_position,
             SpatialVector3,
         )
 

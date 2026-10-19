@@ -6,6 +6,9 @@ from core.entity.quantum_cat_route import (
     QuantumCatRouteEncounter,
 )
 from core.entity.components import SpatialVector3
+from cats.cat_route_memory_details import (
+    CatRouteMemoryDetails,
+)
 from quantum.geometry_engine import QuantumGeometryEngine
 from navigation import NavigationEngine
 from universe.quantum_cat_navigation_result_state import (
@@ -165,7 +168,14 @@ class QuantumUniverseSpace:
         route,
         universe,
         event_type,
-        details=None,
+        route_steps=(),
+        blocked_by=None,
+        blocked_position=None,
+        detour_position=None,
+        returns_to_original_route=None,
+        previous_position=None,
+        position=None,
+        arrival_position=None,
     ):
         memory = self._get_cat_memory(
             cat
@@ -174,27 +184,44 @@ class QuantumUniverseSpace:
         if memory is None:
             return None
 
-        route_details = {
-            "route_id":
-                route.route_id,
-            "destination":
-                route.destination,
-            "start_position":
-                route.start_position,
-            "current_position":
-                route.current_position,
-            "current_step_index":
-                route.current_step_index,
-            "next_position":
-                route.next_position,
-            "route_state":
-                route.state.value,
-            "has_arrived":
-                route.has_arrived,
-        }
-
-        route_details.update(
-            details or {}
+        route_details = (
+            CatRouteMemoryDetails(
+                route_id=
+                    route.route_id,
+                destination=
+                    route.destination,
+                start_position=
+                    route.start_position,
+                current_position=
+                    route.current_position,
+                current_step_index=
+                    route.current_step_index,
+                next_position=
+                    route.next_position,
+                route_state=
+                    route.state.value,
+                has_arrived=
+                    route.has_arrived,
+                route_steps=
+                    tuple(
+                        route_steps
+                    ),
+                blocked_by=
+                    blocked_by,
+                blocked_position=
+                    blocked_position,
+                detour_position=
+                    detour_position,
+                returns_to_original_route=(
+                    returns_to_original_route
+                ),
+                previous_position=
+                    previous_position,
+                position=
+                    position,
+                arrival_position=
+                    arrival_position,
+            )
         )
 
         return memory.remember(
@@ -457,11 +484,9 @@ class QuantumUniverseSpace:
                 route=route,
                 universe=universe,
                 event_type="route_started",
-                details={
-                    "route_steps": list(
-                        route.route_steps
-                    ),
-                },
+                route_steps=(
+                    route.route_steps
+                ),
             )
 
             route.memory_started = True
@@ -683,16 +708,14 @@ class QuantumUniverseSpace:
                     route=route,
                     universe=universe,
                     event_type="route_detour",
-                    details={
-                        "blocked_by":
-                            cronenberg.name,
-                        "blocked_position":
-                            cronenberg_position,
-                        "detour_position":
-                            encounter.detour,
-                        "returns_to_original_route":
-                            True,
-                    },
+                    blocked_by=
+                        cronenberg.name,
+                    blocked_position=
+                        cronenberg_position,
+                    detour_position=
+                        encounter.detour,
+                    returns_to_original_route=
+                        True,
                 )
 
                 return (
@@ -733,12 +756,10 @@ class QuantumUniverseSpace:
             route=route,
             universe=universe,
             event_type="route_step",
-            details={
-                "previous_position":
-                    previous_position,
-                "position":
-                    position,
-            },
+            previous_position=
+                previous_position,
+            position=
+                position,
         )
 
         if route.has_arrived:
@@ -747,10 +768,9 @@ class QuantumUniverseSpace:
                 route=route,
                 universe=universe,
                 event_type="route_arrived",
-                details={
-                    "arrival_position":
-                        route.current_position,
-                },
+                arrival_position=(
+                    route.current_position
+                ),
             )
 
         return (
