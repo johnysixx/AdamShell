@@ -20,6 +20,9 @@ from cats.cat_after_arrival_action import (
 from cats.cat_knowledge import (
     CatKnowledge
 )
+from cats.cat_knowledge_objects import (
+    CatKnownPlaceDetails,
+)
 from cats.cat import Cat
 from cats.cat_quantum_box_memory_details import (
     CatQuantumBoxTransferMemoryDetails,
@@ -1718,12 +1721,14 @@ class CatQuantumBoxTransfer:
                     self.universe
                     .universe_tick
                 ),
-                details={
-                    "pair_id":
-                        exploration.pair_id,
-                    "exploration_stage":
-                        exploration.stage,
-                },
+                details=(
+                    CatKnownPlaceDetails(
+                        pair_id=
+                            exploration.pair_id,
+                        exploration_stage=
+                            exploration.stage,
+                    )
+                ),
             )
         )
 

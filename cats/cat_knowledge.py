@@ -16,6 +16,7 @@ from cats.cat_olfaction_state import (
 from cats.cat_knowledge_objects import (
     CatKnownAroma,
     CatKnownPlace,
+    CatKnownPlaceDetails,
     CatKnownPrinciples,
     CatKnowledgeState,
     CatScentPlaceMemory,
@@ -232,6 +233,18 @@ class CatKnowledge:
         knowledge = cls.ensure_cat_knowledge(cat)
         normalized_position = cls._position(position)
 
+        if (
+            details is not None
+            and not isinstance(
+                details,
+                CatKnownPlaceDetails,
+            )
+        ):
+            raise TypeError(
+                "Cat known place details must use "
+                "CatKnownPlaceDetails or None."
+            )
+
         place = cls._find_place(
             knowledge.known_places,
             layer=layer,
@@ -252,7 +265,9 @@ class CatKnowledge:
                 first_seen_tick=universe_tick,
                 last_seen_tick=universe_tick,
                 details=deepcopy(
-                    details or {}
+                    details
+                    if details is not None
+                    else CatKnownPlaceDetails()
                 ),
             )
 
