@@ -119,9 +119,9 @@ class FelineAbilityMethodRegistrationObjectStateTests(
         stored = (
             self.pazuzu
             .feline_wisdom
-            .abilities[
+            .ability_record(
                 "open_human_door"
-            ]
+            )
             .method_record(
                 "hang_on_handle"
             )
@@ -176,9 +176,9 @@ class FelineAbilityMethodRegistrationObjectStateTests(
         teach_stored = (
             self.garfield
             .feline_wisdom
-            .abilities[
+            .ability_record(
                 "teach_other_cats"
-            ]
+            )
             .method_record(
                 "garfield_teaching_method"
             )
@@ -187,9 +187,9 @@ class FelineAbilityMethodRegistrationObjectStateTests(
         meta_stored = (
             self.garfield
             .feline_wisdom
-            .abilities[
+            .ability_record(
                 "teach_teaching"
-            ]
+            )
             .method_record(
                 "garfield_meta_teaching_method"
             )
@@ -289,9 +289,9 @@ class FelineAbilityMethodRegistrationObjectStateTests(
         stored = (
             self.queen
             .feline_wisdom
-            .abilities[
+            .ability_record(
                 "open_human_door"
-            ]
+            )
             .method_record(
                 "pull_with_paw"
             )

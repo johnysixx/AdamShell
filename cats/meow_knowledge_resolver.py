@@ -492,10 +492,10 @@ class MeowKnowledgeResolver:
 
         transferred = []
 
-        for (
-            knowledge_name,
-            knowledge,
-        ) in teacher_wisdom.awareness_items():
+        for knowledge in (
+            teacher_wisdom
+            .awareness_records()
+        ):
 
             domain = (
                 knowledge.domain

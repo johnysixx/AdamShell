@@ -72,9 +72,9 @@ class FelineAbilityObjectStateTests(
         )
 
         self.assertIs(
-            wisdom.abilities[
+            wisdom.ability_record(
                 'open_human_door'
-            ],
+            ),
             ability,
         )
 
@@ -208,44 +208,48 @@ class FelineAbilityObjectStateTests(
                 },
             )
 
-        self.assertEqual(
-            wisdom.abilities,
-            {},
+        self.assertTrue(
+            wisdom.abilities.is_empty
         )
 
-    def test_legacy_mapping_record_is_rejected(
+    def test_ability_registry_is_not_mapping(
         self
     ):
         wisdom = FelineWisdomState()
 
-        wisdom.abilities[
-            'open_human_door'
-        ] = {
-            'learned': True,
-            'methods': {},
-            'can_close': False,
-        }
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+            "__getitem__",
+            "__setitem__",
+            "setdefault",
+        ):
+            self.assertFalse(
+                hasattr(
+                    wisdom.abilities,
+                    mapping_method,
+                )
+            )
 
         with self.assertRaises(
             TypeError
         ):
+            _ = wisdom.abilities[
+                'open_human_door'
+            ]
+
+        self.assertIsNone(
             wisdom.ability_record(
                 'open_human_door'
             )
+        )
 
-        with self.assertRaises(
-            TypeError
-        ):
-            wisdom.ensure_ability(
-                'open_human_door'
-            )
-
-        with self.assertRaises(
-            TypeError
-        ):
-            list(
-                wisdom.ability_items()
-            )
+        self.assertEqual(
+            wisdom.ability_records(),
+            (),
+        )
 
 
 if __name__ == '__main__':

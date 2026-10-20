@@ -490,14 +490,12 @@ class Universe:
             )
         )
 
-        feline_wisdom.abilities.pop(
-            'teach_other_cats',
-            None,
+        feline_wisdom.remove_ability(
+            'teach_other_cats'
         )
 
-        feline_wisdom.abilities.pop(
-            'teach_teaching',
-            None,
+        feline_wisdom.remove_ability(
+            'teach_teaching'
         )
         cat.state = 'juvenile_cat_from_quantum_box'
         return cat

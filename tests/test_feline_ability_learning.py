@@ -33,12 +33,16 @@ class FelineAbilityLearningTests(unittest.TestCase):
         )
         self.assertTrue(
             wisdom
-            .awareness[
+            .awareness_record(
                 'open_human_door'
-            ]
+            )
             .known_to_exist
         )
-        self.assertNotIn('open_human_door', wisdom.abilities)
+        self.assertIsNone(
+            wisdom.ability_record(
+                'open_human_door'
+            )
+        )
 
     def test_pazuzu_teaches_handle_method(self):
         result = self.resolver.teach_method(teacher=self.pazuzu, student=self.kitten, ability_name='open_human_door', method_name='hang_on_handle')
@@ -80,9 +84,9 @@ class FelineAbilityLearningTests(unittest.TestCase):
         methods = (
             self.kitten
             .feline_wisdom
-            .abilities[
+            .ability_record(
                 'open_human_door'
-            ]
+            )
             .method_names()
         )
         self.assertEqual(set(methods), {'hang_on_handle', 'pull_with_paw'})

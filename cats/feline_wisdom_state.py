@@ -81,6 +81,10 @@ from cats.feline_ability_method_state import (
 from cats.feline_awareness_state import (
     FelineAwarenessState,
 )
+from cats.feline_wisdom_registry import (
+    FelineAbilityRegistry,
+    FelineAwarenessRegistry,
+)
 
 
 def _ability_method_constraints_snapshot(
@@ -794,11 +798,15 @@ class FelineAbilityMethodLearnedEvent:
 @dataclass(slots=True)
 class FelineWisdomState:
     can_transmit_meow: bool = False
-    awareness: dict = field(
-        default_factory=dict
+    awareness: FelineAwarenessRegistry = field(
+        default_factory=(
+            FelineAwarenessRegistry
+        )
     )
-    abilities: dict = field(
-        default_factory=dict
+    abilities: FelineAbilityRegistry = field(
+        default_factory=(
+            FelineAbilityRegistry
+        )
     )
     transmission_history: list = field(
         default_factory=list
@@ -806,6 +814,27 @@ class FelineWisdomState:
     lesson_history: list = field(
         default_factory=list
     )
+
+    def __post_init__(
+        self,
+    ):
+        if not isinstance(
+            self.awareness,
+            FelineAwarenessRegistry,
+        ):
+            raise TypeError(
+                "Feline wisdom awareness must use "
+                "FelineAwarenessRegistry."
+            )
+
+        if not isinstance(
+            self.abilities,
+            FelineAbilityRegistry,
+        ):
+            raise TypeError(
+                "Feline wisdom abilities must use "
+                "FelineAbilityRegistry."
+            )
 
     def record_transmission(
         self,
@@ -874,56 +903,22 @@ class FelineWisdomState:
                 "be FelineAwarenessState."
             )
 
-        self.awareness[
-            awareness.name
-        ] = awareness
-
-        return awareness
+        return self.awareness.store(
+            awareness
+        )
 
     def awareness_record(
         self,
         knowledge_name,
     ):
-        awareness = self.awareness.get(
+        return self.awareness.record(
             knowledge_name
         )
 
-        if awareness is None:
-            return None
-
-        if not isinstance(
-            awareness,
-            FelineAwarenessState,
-        ):
-            raise TypeError(
-                "Feline awareness record must "
-                "be FelineAwarenessState."
-            )
-
-        return awareness
-
-    def awareness_items(
+    def awareness_records(
         self,
     ):
-        for (
-            knowledge_name,
-            awareness,
-        ) in self.awareness.items():
-
-            if not isinstance(
-                awareness,
-                FelineAwarenessState,
-            ):
-                raise TypeError(
-                    "Feline awareness record "
-                    "must be "
-                    "FelineAwarenessState."
-                )
-
-            yield (
-                knowledge_name,
-                awareness,
-            )
+        return self.awareness.records()
 
     def store_ability(
         self,
@@ -939,33 +934,26 @@ class FelineWisdomState:
                 "be FelineAbilityState."
             )
 
-        self.abilities[
-            ability_name
-        ] = ability
+        return self.abilities.store(
+            ability_name,
+            ability,
+        )
 
-        return ability
+    def remove_ability(
+        self,
+        ability_name,
+    ):
+        return self.abilities.remove(
+            ability_name
+        )
 
     def ability_record(
         self,
         ability_name,
     ):
-        ability = self.abilities.get(
+        return self.abilities.record(
             ability_name
         )
-
-        if ability is None:
-            return None
-
-        if not isinstance(
-            ability,
-            FelineAbilityState,
-        ):
-            raise TypeError(
-                "Feline ability record must "
-                "be FelineAbilityState."
-            )
-
-        return ability
 
     def ensure_ability(
         self,
@@ -985,25 +973,7 @@ class FelineWisdomState:
 
         return ability
 
-    def ability_items(
+    def ability_records(
         self,
     ):
-        for (
-            ability_name,
-            ability,
-        ) in self.abilities.items():
-
-            if not isinstance(
-                ability,
-                FelineAbilityState,
-            ):
-                raise TypeError(
-                    "Feline ability record "
-                    "must be "
-                    "FelineAbilityState."
-                )
-
-            yield (
-                ability_name,
-                ability,
-            )
+        return self.abilities.records()

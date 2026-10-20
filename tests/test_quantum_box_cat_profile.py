@@ -23,9 +23,19 @@ class QuantumBoxCatProfileTests(unittest.TestCase):
     def test_quantum_box_cat_cannot_teach_yet(self):
         result = self.universe.manifest_cat(name='box_kitten', source='quantum_box_opened')
         cat = result.cat
-        abilities = cat.feline_wisdom.abilities
-        self.assertNotIn('teach_other_cats', abilities)
-        self.assertNotIn('teach_teaching', abilities)
+        wisdom = cat.feline_wisdom
+
+        self.assertIsNone(
+            wisdom.ability_record(
+                'teach_other_cats'
+            )
+        )
+
+        self.assertIsNone(
+            wisdom.ability_record(
+                'teach_teaching'
+            )
+        )
 
     def test_ordinary_manifested_cat_is_not_changed(self):
         result = self.universe.manifest_cat(name='ordinary_cat', source='test')

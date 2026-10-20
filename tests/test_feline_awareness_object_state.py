@@ -80,9 +80,10 @@ class FelineAwarenessObjectStateTests(
         )
 
         self.assertIs(
-            cat.feline_wisdom.awareness[
+            cat.feline_wisdom
+            .awareness_record(
                 'open_human_door'
-            ],
+            ),
             stored,
         )
 
@@ -172,38 +173,48 @@ class FelineAwarenessObjectStateTests(
                 }
             )
 
-        self.assertEqual(
-            wisdom.awareness,
-            {},
+        self.assertTrue(
+            wisdom.awareness.is_empty
         )
 
-    def test_legacy_mapping_record_is_rejected(
+    def test_awareness_registry_is_not_mapping(
         self
     ):
         wisdom = FelineWisdomState()
 
-        wisdom.awareness[
-            'open_human_door'
-        ] = {
-            'name':
-                'open_human_door',
-            'domain':
-                'feline',
-        }
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+            "__getitem__",
+            "__setitem__",
+            "setdefault",
+        ):
+            self.assertFalse(
+                hasattr(
+                    wisdom.awareness,
+                    mapping_method,
+                )
+            )
 
         with self.assertRaises(
             TypeError
         ):
+            _ = wisdom.awareness[
+                'open_human_door'
+            ]
+
+        self.assertIsNone(
             wisdom.awareness_record(
                 'open_human_door'
             )
+        )
 
-        with self.assertRaises(
-            TypeError
-        ):
-            list(
-                wisdom.awareness_items()
-            )
+        self.assertEqual(
+            wisdom.awareness_records(),
+            (),
+        )
 
 
 if __name__ == '__main__':

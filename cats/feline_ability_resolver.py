@@ -159,7 +159,10 @@ class FelineAbilityResolver:
 
             return result
         transferred = []
-        for knowledge_name, knowledge in teacher_wisdom.awareness_items():
+        for knowledge in (
+            teacher_wisdom
+            .awareness_records()
+        ):
             domain = knowledge.domain
             if domain not in FelineWisdom.MEOW_ALLOWED_DOMAINS:
                 continue

@@ -72,9 +72,9 @@ class FelineTeacherResolverTests(unittest.TestCase):
         methods = (
             self.kitten
             .feline_wisdom
-            .abilities[
+            .ability_record(
                 'open_human_door'
-            ]
+            )
             .method_names()
         )
         self.assertIn('hang_on_handle', methods)
@@ -83,6 +83,10 @@ class FelineTeacherResolverTests(unittest.TestCase):
         self.give_door_awareness()
         self.teachers.find_teachers(student=self.kitten, ability_name='open_human_door')
         wisdom = self.kitten.feline_wisdom
-        self.assertNotIn('open_human_door', wisdom.abilities)
+        self.assertIsNone(
+            wisdom.ability_record(
+                'open_human_door'
+            )
+        )
 if __name__ == '__main__':
     unittest.main()

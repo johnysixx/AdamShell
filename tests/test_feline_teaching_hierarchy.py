@@ -28,7 +28,13 @@ class FelineTeachingHierarchyTests(unittest.TestCase):
     def test_garfield_can_teach_any_cat_to_teach(self):
         result = self.teach_pazuzu_to_teach()
         self.assertTrue(result.learned)
-        ability = self.pazuzu.feline_wisdom.abilities['teach_other_cats']
+        ability = (
+            self.pazuzu
+            .feline_wisdom
+            .ability_record(
+                'teach_other_cats'
+            )
+        )
         self.assertTrue(
             ability.learned
         )
@@ -45,9 +51,9 @@ class FelineTeachingHierarchyTests(unittest.TestCase):
         self.assertTrue(
             self.kitten
             .feline_wisdom
-            .abilities[
+            .ability_record(
                 'teach_other_cats'
-            ]
+            )
             .learned
         )
 
@@ -59,7 +65,13 @@ class FelineTeachingHierarchyTests(unittest.TestCase):
         self.assertTrue(result.cronenberg_created)
         self.assertEqual(self.universe.cronenberg_count, previous_count + 1)
         self.assertEqual(self.universe.cronenbergs[-1].id, result.cronenberg_id)
-        self.assertNotIn('teach_other_cats', self.foreign_cat.feline_wisdom.abilities)
+        self.assertIsNone(
+            self.foreign_cat
+            .feline_wisdom
+            .ability_record(
+                'teach_other_cats'
+            )
+        )
 
     def test_meta_teacher_can_create_foreign_teacher(self):
         self.teach_pazuzu_to_teach()

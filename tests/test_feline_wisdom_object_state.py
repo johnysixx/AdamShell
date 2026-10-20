@@ -69,15 +69,33 @@ class FelineWisdomObjectStateTests(
             state.can_transmit_meow
         )
 
-        self.assertEqual(
-            state.awareness,
-            {},
+        self.assertTrue(
+            state.awareness.is_empty
         )
 
-        self.assertEqual(
-            state.abilities,
-            {},
+        self.assertTrue(
+            state.abilities.is_empty
         )
+
+        for registry in (
+            state.awareness,
+            state.abilities,
+        ):
+            for mapping_method in (
+                "get",
+                "keys",
+                "items",
+                "values",
+                "__getitem__",
+                "__setitem__",
+                "setdefault",
+            ):
+                self.assertFalse(
+                    hasattr(
+                        registry,
+                        mapping_method,
+                    )
+                )
 
         self.assertEqual(
             state.transmission_history,
