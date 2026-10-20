@@ -44,7 +44,7 @@ class CatBondingSystem:
         )
 
         memory = (
-            cat.social_memory.records.get(
+            cat.social_memory.record(
                 other_cat.name
             )
         )

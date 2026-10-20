@@ -32,55 +32,130 @@ class CatSocialMemoryRegistryObjectStateTests(
             self.cats
         )
 
-    def test_new_cat_has_object_memory_registry(self):
-        self.assertIsInstance(
-            self.first.social_memory,
-            CatSocialMemories,
-        )
-        self.assertEqual(
-            self.first.social_memory.records,
-            {},
+    def test_new_cat_has_object_memory_registry(
+        self
+    ):
+        registry = (
+            self.first.social_memory
         )
 
         self.assertIsInstance(
-            self.first.social_memory,
+            registry,
+            CatSocialMemories,
+        )
+
+        self.assertIsInstance(
+            registry,
             DomainObject,
+        )
+
+        self.assertTrue(
+            registry.is_empty
+        )
+
+        self.assertEqual(
+            registry.count,
+            0,
+        )
+
+        self.assertEqual(
+            registry.records(),
+            (),
         )
 
         self.assertFalse(
             hasattr(
-                self.first.social_memory,
+                registry,
                 "to_dict",
             )
         )
 
-    def test_meeting_stores_memory_in_registry(self):
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+            "pop",
+            "setdefault",
+            "__getitem__",
+            "__setitem__",
+            "__contains__",
+        ):
+            self.assertFalse(
+                hasattr(
+                    registry,
+                    mapping_method,
+                )
+            )
+
+    def test_meeting_stores_memory_in_registry(
+        self
+    ):
         self.system.meet(
             self.first,
             self.second,
         )
 
-        records = (
-            self.first.social_memory.records
+        registry = (
+            self.first.social_memory
         )
 
-        self.assertIn(
-            self.second.name,
-            records,
+        memory = registry.record(
+            self.second.name
         )
+
+        self.assertEqual(
+            registry.count,
+            1,
+        )
+
         self.assertIsInstance(
-            records[self.second.name],
+            memory,
             CatSocialMemory,
         )
 
-    def test_cats_own_separate_memory_registries(self):
+        self.assertEqual(
+            memory.other_cat,
+            self.second.name,
+        )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            registry.store({
+                "other_cat": self.second.name,
+            })
+
+    def test_cats_own_separate_memory_registries(
+        self
+    ):
         self.assertIsNot(
             self.first.social_memory,
             self.second.social_memory,
         )
+
+        self.system.meet(
+            self.first,
+            self.second,
+        )
+
+        self.assertEqual(
+            self.first.social_memory.count,
+            1,
+        )
+
+        self.assertEqual(
+            self.second.social_memory.count,
+            1,
+        )
+
         self.assertIsNot(
-            self.first.social_memory.records,
-            self.second.social_memory.records,
+            self.first.social_memory.record(
+                self.second.name
+            ),
+            self.second.social_memory.record(
+                self.first.name
+            ),
         )
 
 

@@ -128,8 +128,8 @@ class CatAutonomousNeedsMovementSocialTests(
         self.cats.tick()
 
         self.assertTrue(
-            first.social_memory.records
-            or second.social_memory.records
+            not first.social_memory.is_empty
+            or not second.social_memory.is_empty
         )
 
 

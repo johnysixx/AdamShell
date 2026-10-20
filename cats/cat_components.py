@@ -102,7 +102,96 @@ class CatTerritories(DomainObject):
 
 
 class CatSocialMemories(DomainObject):
-    pass
+
+    def __init__(
+        self,
+    ):
+        self._records = []
+
+    @property
+    def is_empty(
+        self,
+    ):
+        return not self._records
+
+    @property
+    def count(
+        self,
+    ):
+        return len(
+            self._records
+        )
+
+    def store(
+        self,
+        memory,
+    ):
+        from cats.cat_social_objects import (
+            CatSocialMemory,
+        )
+
+        if not isinstance(
+            memory,
+            CatSocialMemory,
+        ):
+            raise TypeError(
+                "Cat social memory registry requires "
+                "CatSocialMemory."
+            )
+
+        for index, current in enumerate(
+            self.records()
+        ):
+            if (
+                current.other_cat
+                == memory.other_cat
+            ):
+                self._records[
+                    index
+                ] = memory
+
+                return memory
+
+        self._records.append(
+            memory
+        )
+
+        return memory
+
+    def record(
+        self,
+        other_cat,
+    ):
+        other_cat = str(
+            other_cat
+        )
+
+        for memory in self.records():
+            if memory.other_cat == other_cat:
+                return memory
+
+        return None
+
+    def records(
+        self,
+    ):
+        from cats.cat_social_objects import (
+            CatSocialMemory,
+        )
+
+        for memory in self._records:
+            if not isinstance(
+                memory,
+                CatSocialMemory,
+            ):
+                raise TypeError(
+                    "Cat social memory registry contains "
+                    "invalid runtime state."
+                )
+
+        return tuple(
+            self._records
+        )
 
 
 class CatBonds(DomainObject):

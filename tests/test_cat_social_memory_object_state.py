@@ -34,9 +34,9 @@ class CatSocialMemoryObjectStateTests(unittest.TestCase):
             self.second,
         )
 
-        memory = self.first.social_memory.records[
+        memory = self.first.social_memory.record(
             self.second.name
-        ]
+        )
 
         self.assertIsInstance(
             memory,
@@ -52,9 +52,9 @@ class CatSocialMemoryObjectStateTests(unittest.TestCase):
             self.first,
             self.second,
         )
-        memory = self.first.social_memory.records[
+        memory = self.first.social_memory.record(
             self.second.name
-        ]
+        )
 
         self.assertEqual(
             memory.last_attitude,
@@ -75,9 +75,9 @@ class CatSocialMemoryObjectStateTests(unittest.TestCase):
                 steps=[],
             )
 
-        memory = self.first.social_memory.records[
+        memory = self.first.social_memory.record(
             self.second.name
-        ]
+        )
 
         self.assertEqual(
             memory.recent_outcomes,

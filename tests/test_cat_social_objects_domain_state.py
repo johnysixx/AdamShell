@@ -34,6 +34,7 @@ class CatSocialObjectsDomainStateTests(
                 name="claim",
             ),
             CatSocialMemory(
+                other_cat="other_cat",
                 name="memory",
             ),
             CatBond(
@@ -78,6 +79,7 @@ class CatSocialObjectsDomainStateTests(
         self
     ):
         memory = CatSocialMemory(
+            other_cat="other_cat",
             state="known",
         )
 

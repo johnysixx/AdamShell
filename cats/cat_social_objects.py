@@ -26,7 +26,25 @@ class CatTerritoryClaim(DomainObject):
 
 
 class CatSocialMemory(DomainObject):
-    pass
+
+    def __init__(
+        self,
+        other_cat,
+        **values
+    ):
+        other_cat = str(
+            other_cat
+        )
+
+        if not other_cat:
+            raise ValueError(
+                "Cat social memory requires other_cat."
+            )
+
+        super().__init__(
+            other_cat=other_cat,
+            **values
+        )
 
 
 class CatBond(DomainObject):

@@ -1066,18 +1066,25 @@ class CatSocialSystem:
         cat,
         other_cat
     ):
-        return cat.social_memory.records.get(
-            other_cat.name,
-            CatSocialMemory(
-                meet_count=0,
-                friendly_count=0,
-                uncertain_count=0,
-                hostile_count=0,
-                last_attitude=None,
-                last_outcome=None,
-                last_steps=[],
-                recent_outcomes=[],
+        memory = (
+            cat.social_memory.record(
+                other_cat.name
             )
+        )
+
+        if memory is not None:
+            return memory
+
+        return CatSocialMemory(
+            other_cat=other_cat.name,
+            meet_count=0,
+            friendly_count=0,
+            uncertain_count=0,
+            hostile_count=0,
+            last_attitude=None,
+            last_outcome=None,
+            last_steps=[],
+            recent_outcomes=[],
         )
 
     def _remember_meeting(
@@ -1089,21 +1096,27 @@ class CatSocialSystem:
         steps,
     ):
         memory = (
-            cat.social_memory.records
-            .setdefault(
-                other_cat.name,
-                CatSocialMemory(
-                    meet_count=0,
-                    friendly_count=0,
-                    uncertain_count=0,
-                    hostile_count=0,
-                    last_attitude=None,
-                    last_outcome=None,
-                    last_steps=[],
-                    recent_outcomes=[],
-                ),
+            cat.social_memory.record(
+                other_cat.name
             )
         )
+
+        if memory is None:
+            memory = CatSocialMemory(
+                other_cat=other_cat.name,
+                meet_count=0,
+                friendly_count=0,
+                uncertain_count=0,
+                hostile_count=0,
+                last_attitude=None,
+                last_outcome=None,
+                last_steps=[],
+                recent_outcomes=[],
+            )
+
+            cat.social_memory.store(
+                memory
+            )
 
         memory.meet_count = int(
             memory.meet_count

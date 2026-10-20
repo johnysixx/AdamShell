@@ -50,7 +50,7 @@ class Cat(SocialMixin):
         self.intellect = intellect
         self.knowledge = CatKnowledgeState()
         self.relationships = {}
-        self.social_memory = CatSocialMemories(records={})
+        self.social_memory = CatSocialMemories()
         self.territories = CatTerritories(claims={})
         self.bonds = CatBonds(records={})
         self.family = CatFamily(
