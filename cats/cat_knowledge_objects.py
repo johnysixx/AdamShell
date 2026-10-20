@@ -11,6 +11,9 @@ from cats.cat_social_objects import (
 from cats.cat_heard_group_myth_registry import (
     CatHeardGroupMythRegistry,
 )
+from cats.cat_group_received_knowledge_registry import (
+    CatGroupReceivedKnowledgeRegistry,
+)
 
 
 @dataclass(slots=True, frozen=True)
@@ -570,8 +573,10 @@ class CatKnowledgeState:
         )
     )
 
-    group_received_knowledge: dict = field(
-        default_factory=dict
+    group_received_knowledge: CatGroupReceivedKnowledgeRegistry = field(
+        default_factory=(
+            CatGroupReceivedKnowledgeRegistry
+        )
     )
 
     def role_knowledge_score(self):
@@ -582,9 +587,7 @@ class CatKnowledgeState:
             + len(self.known_aromas)
             + len(self.known_scent_places)
             + self.heard_group_myths.count
-            + len(
-                self.group_received_knowledge
-            )
+            + self.group_received_knowledge.count
         )
 
         principle_count = int(

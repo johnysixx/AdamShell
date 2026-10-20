@@ -429,7 +429,7 @@ class CatGroupKnowledgeSystem:
         )
 
         personal = (
-            member_knowledge.get(
+            member_knowledge.record(
                 knowledge_id
             )
         )
@@ -489,9 +489,9 @@ class CatGroupKnowledgeSystem:
             transmission
         )
 
-        received[
-            record.knowledge_id
-        ] = copy
+        received.store(
+            copy
+        )
 
         return copy
 

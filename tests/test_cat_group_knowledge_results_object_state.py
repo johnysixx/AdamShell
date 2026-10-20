@@ -408,9 +408,10 @@ class CatGroupKnowledgeResultsObjectStateTests(
 
         received = (
             self.outsider.knowledge
-            .group_received_knowledge[
+            .group_received_knowledge
+            .record(
                 "safe_route"
-            ]
+            )
         )
 
         self.assertFalse(
@@ -694,9 +695,10 @@ class CatGroupKnowledgeResultsObjectStateTests(
 
         received = (
             self.outsider.knowledge
-            .group_received_knowledge[
+            .group_received_knowledge
+            .record(
                 "safe_route"
-            ]
+            )
         )
 
         self.assertEqual(

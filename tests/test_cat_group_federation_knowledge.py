@@ -158,9 +158,11 @@ class CatGroupFederationKnowledgeTests(
 
         received = (
             listener
-            .knowledge.group_received_knowledge[
+            .knowledge
+            .group_received_knowledge
+            .record(
                 "box_warning"
-            ]
+            )
         )
 
         self.assertFalse(

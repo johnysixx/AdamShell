@@ -91,6 +91,56 @@ class CatKnowledgeStateObjectTests(
             .heard_group_myths,
         )
 
+        self.assertIsNot(
+            self.first
+            .knowledge
+            .group_received_knowledge,
+            self.second
+            .knowledge
+            .group_received_knowledge,
+        )
+
+        self.assertTrue(
+            self.first
+            .knowledge
+            .group_received_knowledge
+            .is_empty
+        )
+
+        self.assertEqual(
+            self.first
+            .knowledge
+            .group_received_knowledge
+            .count,
+            0,
+        )
+
+        for registry in (
+            self.first
+            .knowledge
+            .group_received_knowledge,
+            self.second
+            .knowledge
+            .group_received_knowledge,
+        ):
+            for mapping_method in (
+                "get",
+                "keys",
+                "items",
+                "values",
+                "pop",
+                "setdefault",
+                "__getitem__",
+                "__setitem__",
+                "__contains__",
+            ):
+                self.assertFalse(
+                    hasattr(
+                        registry,
+                        mapping_method,
+                    )
+                )
+
         self.assertTrue(
             self.first
             .knowledge
