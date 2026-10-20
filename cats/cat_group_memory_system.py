@@ -1,5 +1,8 @@
 from copy import deepcopy
 
+from cats.cat_group_memory_registry import (
+    CatGroupMemoryRegistry,
+)
 from cats.cat_group_memory_state import (
     CatGroupBetrayalEvent,
     CatGroupCooperationEvent,
@@ -161,29 +164,34 @@ class CatGroupMemorySystem:
         group,
         other_group_id,
     ):
-        memory = (
-            group.group_memory.get(
-                other_group_id
+        registry = (
+            group.group_memory
+        )
+
+        if not isinstance(
+            registry,
+            CatGroupMemoryRegistry,
+        ):
+            raise TypeError(
+                "Cat group memory must use "
+                "CatGroupMemoryRegistry."
             )
+
+        memory = registry.record(
+            other_group_id
         )
 
         if memory is None:
             memory = (
-                CatGroupMemoryState()
+                CatGroupMemoryState(
+                    other_group_id=(
+                        other_group_id
+                    )
+                )
             )
 
-            group.group_memory[
-                other_group_id
-            ] = memory
-
-        elif not isinstance(
-            memory,
-            CatGroupMemoryState,
-        ):
-            raise TypeError(
-                "Cat group memory record "
-                "must be "
-                "CatGroupMemoryState."
+            registry.store(
+                memory
             )
 
         return memory

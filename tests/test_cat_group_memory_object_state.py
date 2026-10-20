@@ -1,5 +1,8 @@
 import unittest
 
+from cats.cat_group_memory_registry import (
+    CatGroupMemoryRegistry,
+)
 from cats.cat_group_memory_state import (
     CatGroupMemoryState,
 )
@@ -67,7 +70,9 @@ class CatGroupMemoryObjectStateTests(
     def test_state_has_no_mapping_api(
         self
     ):
-        state = CatGroupMemoryState()
+        state = CatGroupMemoryState(
+            other_group_id="other_group"
+        )
 
         self.assertEqual(
             state.encounters,
@@ -120,9 +125,9 @@ class CatGroupMemoryObjectStateTests(
             self.first_group
         ]
 
-        state = group.group_memory[
+        state = group.group_memory.record(
             self.second_group
-        ]
+        )
 
         self.assertIsInstance(
             state,
@@ -151,7 +156,10 @@ class CatGroupMemoryObjectStateTests(
         stored = (
             self.groups
             .groups[self.first_group]
-            .group_memory[self.second_group]
+            .group_memory
+            .record(
+                self.second_group
+            )
         )
 
         snapshot = (
@@ -178,25 +186,43 @@ class CatGroupMemoryObjectStateTests(
             1,
         )
 
-    def test_legacy_mapping_record_is_rejected(
+    def test_registry_rejects_mapping_record(
         self
     ):
         group = self.groups.groups[
             self.first_group
         ]
 
-        group.group_memory[
-            self.second_group
-        ] = {
-            'encounters': 0,
-        }
+        self.assertIsInstance(
+            group.group_memory,
+            CatGroupMemoryRegistry,
+        )
 
         with self.assertRaises(
             TypeError
         ):
-            self.memory.relation_memory(
-                self.first_group,
-                self.second_group,
+            group.group_memory.store({
+                "other_group_id":
+                    self.second_group,
+                "encounters": 0,
+            })
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+            "pop",
+            "setdefault",
+            "__getitem__",
+            "__setitem__",
+            "__contains__",
+        ):
+            self.assertFalse(
+                hasattr(
+                    group.group_memory,
+                    mapping_method,
+                )
             )
 
 

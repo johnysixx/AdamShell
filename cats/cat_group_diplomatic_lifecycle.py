@@ -31,7 +31,7 @@ class CatGroupDiplomaticLifecycle:
         )
 
         memory = (
-            group.group_memory.get(
+            group.group_memory.record(
                 other_group_id
             )
         )
@@ -113,7 +113,7 @@ class CatGroupDiplomaticLifecycle:
         )
 
         memory = (
-            group.group_memory.get(
+            group.group_memory.record(
                 other_group_id
             )
         )

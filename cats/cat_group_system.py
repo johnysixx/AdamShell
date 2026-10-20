@@ -13,6 +13,9 @@ from cats.cat_group_creation_state import (
 from cats.cat_group_lifecycle_state import (
     CatGroupLifecycleState,
 )
+from cats.cat_group_memory_registry import (
+    CatGroupMemoryRegistry,
+)
 from cats.cat_group_leave_state import (
     CatGroupLeaveDeniedResult,
     CatLeftGroupEvent,
@@ -90,7 +93,7 @@ class CatGroupSystem:
             parent_group=None,
             daughter_groups=[],
             dissolved=False,
-            group_memory={},
+            group_memory=CatGroupMemoryRegistry(),
             diplomacy={},
             alliances=[],
             knowledge={},

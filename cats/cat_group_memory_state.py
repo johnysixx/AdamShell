@@ -78,6 +78,7 @@ class CatGroupBetrayalEvent:
 
 @dataclass(slots=True)
 class CatGroupMemoryState:
+    other_group_id: str
     encounters: int = 0
     peaceful_encounters: int = 0
     conflicts: int = 0
@@ -90,3 +91,15 @@ class CatGroupMemoryState:
     recent_events: list = field(
         default_factory=list
     )
+
+    def __post_init__(
+        self,
+    ):
+        self.other_group_id = str(
+            self.other_group_id
+        )
+
+        if not self.other_group_id:
+            raise ValueError(
+                "Cat group memory requires other_group_id."
+            )

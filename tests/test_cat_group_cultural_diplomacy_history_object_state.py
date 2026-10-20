@@ -409,20 +409,23 @@ class CatGroupCulturalDiplomacyHistoryObjectStateTests(
             self.first_group
         ]
 
-        group.group_memory[
-            self.second_group
-        ] = CatGroupMemoryState(
-            encounters=2,
-            peaceful_encounters=1,
-            conflicts=2,
-            defeats=1,
-            cooperations=2,
+        group.group_memory.store(
+            CatGroupMemoryState(
+                other_group_id=(
+                    self.second_group
+                ),
+                encounters=2,
+                peaceful_encounters=1,
+                conflicts=2,
+                defeats=1,
+                cooperations=2,
+            )
         )
 
         live_memory = (
-            group.group_memory[
+            group.group_memory.record(
                 self.second_group
-            ]
+            )
         )
 
         result = CatGroupDiplomaticLifecycle(
@@ -514,11 +517,15 @@ class CatGroupCulturalDiplomacyHistoryObjectStateTests(
             self.first_group
         ]
 
-        memory = CatGroupMemoryState()
+        memory = CatGroupMemoryState(
+            other_group_id=(
+                self.second_group
+            )
+        )
 
-        group.group_memory[
-            self.second_group
-        ] = memory
+        group.group_memory.store(
+            memory
+        )
 
         skipped = (
             lifecycle.recover_from_betrayal(

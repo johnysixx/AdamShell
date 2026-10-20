@@ -50,14 +50,18 @@ def _mutual_relation_result(
             other_group_id=second_group_id,
             score=mutual_score,
             status="neutral",
-            memory=CatGroupMemoryState(),
+            memory=CatGroupMemoryState(
+                other_group_id=second_group_id
+            ),
         ),
         second=CatGroupDiplomacyState(
             group_id=second_group_id,
             other_group_id=first_group_id,
             score=mutual_score,
             status="neutral",
-            memory=CatGroupMemoryState(),
+            memory=CatGroupMemoryState(
+                other_group_id=first_group_id
+            ),
         ),
         mutual_score=mutual_score,
     )

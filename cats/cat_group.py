@@ -2,6 +2,9 @@ from core.entity.domain_object import DomainObject
 from cats.cat_group_lifecycle_state import (
     CatGroupLifecycleState,
 )
+from cats.cat_group_memory_registry import (
+    CatGroupMemoryRegistry,
+)
 
 
 class CatGroupCulture(DomainObject):
@@ -43,6 +46,19 @@ class CatGroup(DomainObject):
                 CatGroupCulture(
                     **culture
                 )
+            )
+
+        group_memory = values.get(
+            "group_memory"
+        )
+
+        if not isinstance(
+            group_memory,
+            CatGroupMemoryRegistry,
+        ):
+            raise TypeError(
+                "Cat group memory must use "
+                "CatGroupMemoryRegistry."
             )
 
         super().__init__(
