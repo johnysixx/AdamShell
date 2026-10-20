@@ -4,6 +4,9 @@ from multiverse import UniverseRegistry
 from meeting_place.meeting_place import MeetingPlace
 from cats.cats import Cats
 from cats.cat_human_bond_system import CatHumanBondSystem
+from cats.cat_meow_invitation_registry import (
+    CatMeowInvitationRegistry,
+)
 from cats.cat_meow_invitation_system import CatMeowInvitationSystem
 from cats.cat_bar_guidance_system import CatBarGuidanceSystem
 from cats.cat_meow_bar_access_state import (
@@ -45,6 +48,66 @@ class CatMEOWEscortRequirementTests(unittest.TestCase):
         )
         self.meeting.bouncer.register_meow_invitation_system(self.invitations)
 
+    def test_invitation_registry_is_object_only(self):
+        registry = (
+            self.invitations.invitations
+        )
+
+        self.assertIsInstance(
+            registry,
+            CatMeowInvitationRegistry,
+        )
+
+        self.assertEqual(
+            registry.count,
+            1,
+        )
+
+        stored = registry.record(
+            self.offered.id
+        )
+
+        self.assertIsNotNone(
+            stored
+        )
+
+        self.assertEqual(
+            stored.id,
+            self.offered.id,
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+            "pop",
+            "setdefault",
+            "__getitem__",
+            "__setitem__",
+            "__contains__",
+        ):
+            self.assertFalse(
+                hasattr(
+                    registry,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            registry.store({
+                "id": self.offered.id,
+            })
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = registry[
+                self.offered.id
+            ]
+
     def test_valid_MEOW_without_cat_does_not_admit(self):
         result = self.meeting.add_cat_invited_human(self.human, None, self.invitations)
         self.assertFalse(result.entered)
@@ -82,11 +145,15 @@ class CatMEOWEscortRequirementTests(unittest.TestCase):
 
     def test_invitation_becomes_used_only_after_entry(self):
         guidance = CatBarGuidanceSystem(self.invitations, self.meeting)
-        before = self.invitations.get(self.offered.id)
+        before = self.invitations.invitation(
+            self.offered.id
+        )
         self.assertFalse(before.used)
         result = guidance.guide(self.cat, self.human, self.offered.id)
         self.assertTrue(result.guided)
-        after = self.invitations.get(self.offered.id)
+        after = self.invitations.invitation(
+            self.offered.id
+        )
         self.assertTrue(after.used)
 if __name__ == '__main__':
     unittest.main()

@@ -170,7 +170,7 @@ class CatBarGuidanceSystem:
     ):
         invitation = (
             self.invitation_system
-            .get(
+            .invitation(
                 invitation_id
             )
         )

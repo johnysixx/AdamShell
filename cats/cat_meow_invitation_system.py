@@ -2,6 +2,9 @@ from copy import deepcopy
 from uuid import uuid4
 from cats.cat import Cat
 from cats.cat_human_bond_system import CatHumanBondSystem
+from cats.cat_meow_invitation_registry import (
+    CatMeowInvitationRegistry,
+)
 from cats.cat_social_objects import CatMeowInvitation
 from cats.cat_meow_invitation_result_state import (
     CatMeowInterpretationFailedResult,
@@ -14,7 +17,9 @@ class CatMeowInvitationSystem:
     def __init__(self, cats_layer=None):
         self.cats_layer = cats_layer
         self.bonds = CatHumanBondSystem(cats_layer)
-        self.invitations = {}
+        self.invitations = (
+            CatMeowInvitationRegistry()
+        )
 
     def offer(self, cat, human):
         if not isinstance(cat, Cat):
@@ -44,13 +49,17 @@ class CatMeowInvitationSystem:
             )
         invitation_id = 'MEOW_' + uuid4().hex[:8]
         invitation = CatMeowInvitation(**{'id': invitation_id, 'name': 'cat_MEOW_invitation', 'cat': cat.name, 'human': self._name(human), 'escort_required': True, 'sound': 'MEOW', 'meaning': 'follow_me', 'offered': True, 'understood': None, 'accepted': False, 'used': False})
-        self.invitations[invitation_id] = invitation
+        self.invitations.store(
+            invitation
+        )
         cat.meow_invitations.offered += 1
         cat.meow_invitations.history.append(deepcopy(invitation))
         return deepcopy(invitation)
 
     def interpret(self, invitation_id, human, understood):
-        invitation = self.invitations.get(invitation_id)
+        invitation = self.invitations.record(
+            invitation_id
+        )
         if invitation is None:
             return CatMeowInterpretationFailedResult(
                 reason='unknown_invitation',
@@ -68,14 +77,38 @@ class CatMeowInvitationSystem:
             meaning=('follow_me' if understood else None),
         )
 
-    def get(self, invitation_id):
-        invitation = self.invitations.get(invitation_id)
+    def invitation(
+        self,
+        invitation_id,
+    ):
+        invitation = (
+            self.invitations.record(
+                invitation_id
+            )
+        )
+
         if invitation is None:
             return None
-        return deepcopy(invitation)
 
-    def mark_used(self, invitation_id):
-        invitation = self.invitations[invitation_id]
+        return deepcopy(
+            invitation
+        )
+
+    def mark_used(
+        self,
+        invitation_id,
+    ):
+        invitation = (
+            self.invitations.record(
+                invitation_id
+            )
+        )
+
+        if invitation is None:
+            raise KeyError(
+                invitation_id
+            )
+
         invitation.used = True
 
     def _current_bar_tick(self):

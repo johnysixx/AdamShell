@@ -179,7 +179,7 @@ class Bouncer(SocialMixin):
 
         invitation = (
             self.meow_invitation_system
-            .get(
+            .invitation(
                 invitation_id
             )
         )
