@@ -566,12 +566,12 @@ class CatGroupMythResultsObjectStateTests(
         )
 
         self.assertEqual(
-            lineage.children[
+            lineage.children_for(
                 created.myth_id
-            ],
-            [
-                result.myth_id
-            ],
+            ),
+            (
+                result.myth_id,
+            ),
         )
 
         self.assert_not_mapping(

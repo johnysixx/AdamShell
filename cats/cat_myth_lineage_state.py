@@ -1,15 +1,36 @@
-from dataclasses import dataclass, field
+﻿from dataclasses import dataclass, field
+
+from cats.cat_lineage_children_registry import (
+    CatLineageChildrenRegistry,
+)
 
 
 @dataclass(slots=True)
 class CatMythLineageState:
+
     root_myth: str | None = None
+
     versions: list = field(
         default_factory=list
     )
-    children: dict = field(
-        default_factory=dict
+
+    children: CatLineageChildrenRegistry = field(
+        default_factory=(
+            CatLineageChildrenRegistry
+        )
     )
+
+    def __post_init__(
+        self,
+    ):
+        if not isinstance(
+            self.children,
+            CatLineageChildrenRegistry,
+        ):
+            raise TypeError(
+                "Cat myth lineage children must use "
+                "CatLineageChildrenRegistry."
+            )
 
     def register_version(
         self,
@@ -31,20 +52,17 @@ class CatMythLineageState:
             child_myth_id
         )
 
-        children = self.children.get(
-            parent_myth_id
+        self.children.register(
+            parent_myth_id,
+            child_myth_id,
         )
 
-        if children is None:
-            children = []
-
-            self.children[
-                parent_myth_id
-            ] = children
-
-        if child_myth_id not in children:
-            children.append(
-                child_myth_id
-            )
-
         return self
+
+    def children_for(
+        self,
+        parent_myth_id,
+    ):
+        return self.children.children_for(
+            parent_myth_id
+        )

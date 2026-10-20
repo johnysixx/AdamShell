@@ -428,12 +428,12 @@ class CatMythLineageRegistrationResultsObjectStateTests(
         )
 
         self.assertEqual(
-            lineage.children[
+            lineage.children_for(
                 "parent_myth"
-            ],
-            [
-                "child_myth"
-            ],
+            ),
+            (
+                "child_myth",
+            ),
         )
 
     def test_repeated_descendant_registration_reuses_lineage(
@@ -490,13 +490,13 @@ class CatMythLineageRegistrationResultsObjectStateTests(
         )
 
         self.assertEqual(
-            current.children[
+            current.children_for(
                 "parent_myth"
-            ],
-            [
+            ),
+            (
                 "child_myth",
                 "second_child",
-            ],
+            ),
         )
 
     def test_duplicate_descendant_registration_is_idempotent(
@@ -535,12 +535,12 @@ class CatMythLineageRegistrationResultsObjectStateTests(
         )
 
         self.assertEqual(
-            lineage.children[
+            lineage.children_for(
                 "parent_myth"
-            ],
-            [
-                "child_myth"
-            ],
+            ),
+            (
+                "child_myth",
+            ),
         )
 
     def test_results_are_immutable(

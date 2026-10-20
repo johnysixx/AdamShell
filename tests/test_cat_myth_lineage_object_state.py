@@ -120,6 +120,25 @@ class CatMythLineageObjectStateTests(
             )
         )
 
+        self.assertTrue(
+            state.children.is_empty
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+            "__getitem__",
+            "__setitem__",
+        ):
+            self.assertFalse(
+                hasattr(
+                    state.children,
+                    mapping_method,
+                )
+            )
+
     def test_created_myth_stores_object_lineage(
         self
     ):
@@ -199,12 +218,12 @@ class CatMythLineageObjectStateTests(
         )
 
         self.assertEqual(
-            state.children[
+            state.children_for(
                 root
-            ],
-            [
-                child
-            ],
+            ),
+            (
+                child,
+            ),
         )
 
     def test_legacy_mapping_record_is_rejected(

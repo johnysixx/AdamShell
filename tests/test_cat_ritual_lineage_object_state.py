@@ -165,12 +165,12 @@ class CatRitualLineageObjectStateTests(
         )
 
         self.assertEqual(
-            current.children[
+            current.children_for(
                 'night_watch'
-            ],
-            [
-                'silent_watch'
-            ],
+            ),
+            (
+                'silent_watch',
+            ),
         )
 
     def test_legacy_mapping_record_is_rejected(

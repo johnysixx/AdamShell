@@ -80,12 +80,12 @@ class CatGroupRitualSpecializationTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            lineage.children[
+            lineage.children_for(
                 'evening_patrol'
-            ],
-            [
-                'silent_evening_patrol'
-            ],
+            ),
+            (
+                'silent_evening_patrol',
+            ),
         )
 
     def test_guardian_can_specialize(self):
