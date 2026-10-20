@@ -57,6 +57,7 @@ BOUNDARY_MAPPING_ALLOWLIST = {
     'cats/feline_wisdom_state.py::FelineAbilityTeachingCronenbergResult.to_dict',
     'cats/feline_wisdom_state.py::FelineTeachingAbilitiesRegistrationResult.to_dict',
     'cats/feline_wisdom_state.py::MeowFelineAwarenessTransmissionEvent.to_dict',
+    'cats/feline_wisdom_state.py::_ability_method_constraints_snapshot',
     'cats/feline_wisdom_state.py::_personality_experience_snapshot',
     'cats/feline_wisdom_state.py::_personality_trait_event_snapshot',
     'cats/kitten_embryo_resolver.py::NonviableKittenEmbryoReplacedByCronenbergEvent.to_dict',

@@ -1,4 +1,7 @@
 from cats.feline_wisdom import FelineWisdom
+from cats.feline_ability_method_state import (
+    FelineAbilityMethodConstraints,
+)
 from cats.feline_wisdom_state import (
     FelineAbilityAwarenessTransmissionDeniedResult,
     FelineAbilityAwarenessTransmissionEvent,
@@ -57,12 +60,14 @@ class FelineAbilityResolver:
                     self.PAZUZU_METHOD
                 ),
                 teacher_name=None,
-                constraints={
-                    'requires_unlocked': True,
-                    'opens_toward_cat': True,
-                    'opens_away_from_cat': True,
-                    'can_close': False,
-                },
+                constraints=(
+                    FelineAbilityMethodConstraints(
+                        requires_unlocked=True,
+                        opens_toward_cat=True,
+                        opens_away_from_cat=True,
+                        can_close=False,
+                    )
+                ),
             )
         )
 
@@ -109,12 +114,14 @@ class FelineAbilityResolver:
                     self.QUEEN_ELISABETH_METHOD
                 ),
                 teacher_name=None,
-                constraints={
-                    'requires_unlocked': True,
-                    'opens_toward_cat': True,
-                    'opens_away_from_cat': False,
-                    'can_close': False,
-                },
+                constraints=(
+                    FelineAbilityMethodConstraints(
+                        requires_unlocked=True,
+                        opens_toward_cat=True,
+                        opens_away_from_cat=False,
+                        can_close=False,
+                    )
+                ),
             )
         )
 
@@ -394,10 +401,8 @@ class FelineAbilityResolver:
 
             if (
                 opens_toward_cat
-                and constraints.get(
-                    "opens_toward_cat",
-                    False,
-                )
+                and constraints.opens_toward_cat
+                is True
             ):
                 usable_methods.append(
                     method.name
@@ -405,10 +410,8 @@ class FelineAbilityResolver:
 
             if (
                 not opens_toward_cat
-                and constraints.get(
-                    "opens_away_from_cat",
-                    False,
-                )
+                and constraints.opens_away_from_cat
+                is True
             ):
                 usable_methods.append(
                     method.name
@@ -469,15 +472,17 @@ class FelineAbilityResolver:
                     self.GARFIELD_TEACHING_METHOD
                 ),
                 teacher_name=None,
-                constraints={
-                    'can_teach_meow': True,
-                    'can_teach_owned_abilities':
-                        True,
-                    'can_teach_to_own_kittens':
-                        True,
-                    'can_create_foreign_teachers':
-                        True,
-                },
+                constraints=(
+                    FelineAbilityMethodConstraints(
+                        can_teach_meow=True,
+                        can_teach_owned_abilities=
+                            True,
+                        can_teach_to_own_kittens=
+                            True,
+                        can_create_foreign_teachers=
+                            True,
+                    )
+                ),
             )
         )
 
@@ -491,12 +496,14 @@ class FelineAbilityResolver:
                     self.GARFIELD_META_TEACHING_METHOD
                 ),
                 teacher_name=None,
-                constraints={
-                    'can_teach_teach_other_cats':
-                        True,
-                    'can_teach_teach_teaching':
-                        True,
-                },
+                constraints=(
+                    FelineAbilityMethodConstraints(
+                        can_teach_teach_other_cats=
+                            True,
+                        can_teach_teach_teaching=
+                            True,
+                    )
+                ),
             )
         )
 

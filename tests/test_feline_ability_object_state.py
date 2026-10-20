@@ -3,6 +3,9 @@ import unittest
 from cats.feline_ability_state import (
     FelineAbilityState,
 )
+from cats.feline_ability_method_state import (
+    FelineAbilityMethodConstraints,
+)
 from cats.feline_wisdom import (
     FelineWisdom,
 )
@@ -79,10 +82,24 @@ class FelineAbilityObjectStateTests(
             ability.learned
         )
 
-        self.assertEqual(
-            ability.methods,
-            {},
+        self.assertTrue(
+            ability.methods.is_empty
         )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+            "__getitem__",
+            "__setitem__",
+        ):
+            self.assertFalse(
+                hasattr(
+                    ability.methods,
+                    mapping_method,
+                )
+            )
 
         self.assertFalse(
             ability.can_close
@@ -103,10 +120,11 @@ class FelineAbilityObjectStateTests(
                     'hang_on_handle'
                 ),
                 teacher_name='pazuzu',
-                constraints={
-                    'requires_unlocked':
-                        True,
-                },
+                constraints=(
+                    FelineAbilityMethodConstraints(
+                        requires_unlocked=True,
+                    )
+                ),
             )
         )
 
@@ -134,10 +152,11 @@ class FelineAbilityObjectStateTests(
                 teacher_name=(
                     'queen_elisabeth'
                 ),
-                constraints={
-                    'requires_unlocked':
-                        True,
-                },
+                constraints=(
+                    FelineAbilityMethodConstraints(
+                        requires_unlocked=True,
+                    )
+                ),
             )
         )
 
@@ -159,16 +178,16 @@ class FelineAbilityObjectStateTests(
         )
 
         self.assertIs(
-            current.methods[
+            current.method_record(
                 'hang_on_handle'
-            ],
+            ),
             first_method,
         )
 
         self.assertIs(
-            current.methods[
+            current.method_record(
                 'pull_with_paw'
-            ],
+            ),
             second_method,
         )
 

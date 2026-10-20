@@ -7,6 +7,9 @@ from universe.universe import Universe
 from cats.cats import Cats
 from cats.development_resolver import CatDevelopmentResolver
 from cats.feline_wisdom import FelineWisdom
+from cats.feline_ability_method_state import (
+    FelineAbilityMethodConstraints,
+)
 from cats.feline_wisdom_state import (
     FelineAbilityAwarenessTransmissionDeniedResult,
     FelineAbilityAwarenessTransmissionEvent,
@@ -48,7 +51,9 @@ class MeowFelineWisdomIntegrationTests(unittest.TestCase):
 
     def test_mother_transmits_awareness_only(self):
         FelineWisdom.add_awareness(cat=self.mother, knowledge_name='open_human_door', domain='feline', description='Some cats can open human doors.', known_teachers=['pazuzu', 'queen_elisabeth'])
-        FelineWisdom.learn_ability_method(cat=self.mother, ability_name='open_human_door', method_name='example_method', teacher_name='pazuzu', constraints={'requires_unlocked': True})
+        FelineWisdom.learn_ability_method(cat=self.mother, ability_name='open_human_door', method_name='example_method', teacher_name='pazuzu', constraints=FelineAbilityMethodConstraints(
+            requires_unlocked=True
+        ))
         result = self.resolver.transmit(mother=self.mother, kitten=self.kitten, current_day=90)
         wisdom = self.kitten.feline_wisdom
         self.assertTrue(result.transmitted)

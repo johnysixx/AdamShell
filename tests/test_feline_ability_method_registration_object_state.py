@@ -122,9 +122,9 @@ class FelineAbilityMethodRegistrationObjectStateTests(
             .abilities[
                 "open_human_door"
             ]
-            .methods[
+            .method_record(
                 "hang_on_handle"
-            ]
+            )
         )
 
         self.assertIs(
@@ -145,9 +145,8 @@ class FelineAbilityMethodRegistrationObjectStateTests(
 
         self.assertFalse(
             result.method
-            .constraints[
-                "can_close"
-            ]
+            .constraints
+            .can_close
         )
 
     def test_garfield_registration_returns_two_method_objects(
@@ -180,9 +179,9 @@ class FelineAbilityMethodRegistrationObjectStateTests(
             .abilities[
                 "teach_other_cats"
             ]
-            .methods[
+            .method_record(
                 "garfield_teaching_method"
-            ]
+            )
         )
 
         meta_stored = (
@@ -191,9 +190,9 @@ class FelineAbilityMethodRegistrationObjectStateTests(
             .abilities[
                 "teach_teaching"
             ]
-            .methods[
+            .method_record(
                 "garfield_meta_teaching_method"
-            ]
+            )
         )
 
         self.assertIs(
@@ -224,9 +223,8 @@ class FelineAbilityMethodRegistrationObjectStateTests(
 
         self.assertTrue(
             result.teach_other_cats
-            .constraints[
-                "can_teach_meow"
-            ]
+            .constraints
+            .can_teach_meow
         )
 
         audit = (
@@ -255,9 +253,8 @@ class FelineAbilityMethodRegistrationObjectStateTests(
 
         self.assertTrue(
             result.teach_teaching
-            .constraints[
-                "can_teach_teach_teaching"
-            ]
+            .constraints
+            .can_teach_teach_teaching
         )
 
     def test_queen_registration_returns_method_object(
@@ -295,9 +292,9 @@ class FelineAbilityMethodRegistrationObjectStateTests(
             .abilities[
                 "open_human_door"
             ]
-            .methods[
+            .method_record(
                 "pull_with_paw"
-            ]
+            )
         )
 
         self.assertIs(

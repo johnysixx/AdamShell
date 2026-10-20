@@ -3,6 +3,9 @@ import unittest
 from universe.universe import Universe
 from cats.cats import Cats
 from cats.feline_wisdom import FelineWisdom
+from cats.feline_ability_method_state import (
+    FelineAbilityMethodConstraints,
+)
 from cats.feline_ability_resolver import (
     FelineAbilityResolver,
 )
@@ -65,12 +68,14 @@ class FelineHumanDoorCapabilityObjectStateTests(
                 teacher_name=(
                     self.pazuzu.name
                 ),
-                constraints={
-                    "requires_unlocked": True,
-                    "opens_toward_cat": True,
-                    "opens_away_from_cat": True,
-                    "can_close": False,
-                },
+                constraints=(
+                    FelineAbilityMethodConstraints(
+                        requires_unlocked=True,
+                        opens_toward_cat=True,
+                        opens_away_from_cat=True,
+                        can_close=False,
+                    )
+                ),
             )
         )
 

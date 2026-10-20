@@ -75,7 +75,7 @@ class FelineTeacherResolverTests(unittest.TestCase):
             .abilities[
                 'open_human_door'
             ]
-            .methods
+            .method_names()
         )
         self.assertIn('hang_on_handle', methods)
 

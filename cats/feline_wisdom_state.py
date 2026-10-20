@@ -1,7 +1,5 @@
 from copy import deepcopy
 from dataclasses import dataclass, field
-from types import MappingProxyType
-
 from cats.cat_personality_state import (
     CatPersonalityExperienceAppliedResult,
     CatPersonalityTraitAdjustedEvent,
@@ -77,11 +75,52 @@ from cats.feline_ability_state import (
     FelineAbilityState,
 )
 from cats.feline_ability_method_state import (
+    FelineAbilityMethodConstraints,
     FelineAbilityMethodState,
 )
 from cats.feline_awareness_state import (
     FelineAwarenessState,
 )
+
+
+def _ability_method_constraints_snapshot(
+    constraints,
+):
+    if not isinstance(
+        constraints,
+        FelineAbilityMethodConstraints,
+    ):
+        raise TypeError(
+            "Feline ability constraint snapshot "
+            "requires "
+            "FelineAbilityMethodConstraints."
+        )
+
+    snapshot = {}
+
+    for field_name in (
+        "requires_unlocked",
+        "opens_toward_cat",
+        "opens_away_from_cat",
+        "can_close",
+        "can_teach_meow",
+        "can_teach_owned_abilities",
+        "can_teach_to_own_kittens",
+        "can_create_foreign_teachers",
+        "can_teach_teach_other_cats",
+        "can_teach_teach_teaching",
+    ):
+        value = getattr(
+            constraints,
+            field_name,
+        )
+
+        if value is not None:
+            snapshot[
+                field_name
+            ] = value
+
+    return snapshot
 
 
 @dataclass(slots=True, frozen=True)
@@ -453,8 +492,8 @@ class FelineTeachingAbilitiesRegistrationResult:
                     self.teach_other_cats.name,
                 "teacher":
                     self.teach_other_cats.teacher,
-                "constraints": deepcopy(
-                    dict(
+                "constraints": (
+                    _ability_method_constraints_snapshot(
                         self.teach_other_cats
                         .constraints
                     )
@@ -465,8 +504,8 @@ class FelineTeachingAbilitiesRegistrationResult:
                     self.teach_teaching.name,
                 "teacher":
                     self.teach_teaching.teacher,
-                "constraints": deepcopy(
-                    dict(
+                "constraints": (
+                    _ability_method_constraints_snapshot(
                         self.teach_teaching
                         .constraints
                     )
@@ -692,17 +731,15 @@ class FelineAbilityMethodLearnedEvent:
             str(self.method),
         )
 
-        object.__setattr__(
-            self,
-            "constraints",
-            MappingProxyType(
-                deepcopy(
-                    dict(
-                        self.constraints or {}
-                    )
-                )
-            ),
-        )
+        if not isinstance(
+            self.constraints,
+            FelineAbilityMethodConstraints,
+        ):
+            raise TypeError(
+                "Learned feline ability constraints "
+                "must use "
+                "FelineAbilityMethodConstraints."
+            )
 
         if not isinstance(
             self.teacher_personality,
@@ -735,8 +772,8 @@ class FelineAbilityMethodLearnedEvent:
             "student": self.student,
             "ability": self.ability,
             "method": self.method,
-            "constraints": deepcopy(
-                dict(
+            "constraints": (
+                _ability_method_constraints_snapshot(
                     self.constraints
                 )
             ),

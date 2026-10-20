@@ -1,4 +1,5 @@
 from cats.feline_ability_method_state import (
+    FelineAbilityMethodConstraints,
     FelineAbilityMethodState,
 )
 from cats.feline_awareness_state import (
@@ -117,13 +118,26 @@ class FelineWisdom:
             ability_name
         )
 
+        if constraints is None:
+            constraints = (
+                FelineAbilityMethodConstraints()
+            )
+
+        elif not isinstance(
+            constraints,
+            FelineAbilityMethodConstraints,
+        ):
+            raise TypeError(
+                "Feline ability method constraints "
+                "must use "
+                "FelineAbilityMethodConstraints."
+            )
+
         method = (
             FelineAbilityMethodState(
                 name=method_name,
                 teacher=teacher_name,
-                constraints=dict(
-                    constraints or {}
-                ),
+                constraints=constraints,
             )
         )
 

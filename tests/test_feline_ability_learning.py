@@ -83,7 +83,7 @@ class FelineAbilityLearningTests(unittest.TestCase):
             .abilities[
                 'open_human_door'
             ]
-            .methods
+            .method_names()
         )
         self.assertEqual(set(methods), {'hang_on_handle', 'pull_with_paw'})
 

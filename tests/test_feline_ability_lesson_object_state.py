@@ -138,12 +138,19 @@ class FelineAbilityLessonObjectStateTests(
         boundary[
             "constraints"
         ][
-            "changed"
-        ] = True
+            "can_teach_meow"
+        ] = False
 
-        self.assertNotIn(
-            "changed",
-            result.constraints,
+        self.assertTrue(
+            result.constraints
+            .can_teach_meow
+        )
+
+        self.assertFalse(
+            hasattr(
+                result.constraints,
+                "get",
+            )
         )
 
         audit = (
