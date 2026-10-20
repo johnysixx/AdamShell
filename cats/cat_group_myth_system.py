@@ -358,9 +358,9 @@ class CatGroupMythSystem:
                 False
             )
 
-            cat.knowledge.heard_group_myths[
-                myth_id
-            ] = personal
+            cat.knowledge.heard_group_myths.store(
+                personal
+            )
 
             listeners.append(
                 cat.name

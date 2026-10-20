@@ -725,9 +725,10 @@ class CatGroupMythResultsObjectStateTests(
         ):
             personal = (
                 cat.knowledge
-                .heard_group_myths[
+                .heard_group_myths
+                .record(
                     created.myth_id
-                ]
+                )
             )
 
             self.assertIsNot(

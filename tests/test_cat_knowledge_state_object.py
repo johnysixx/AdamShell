@@ -91,6 +91,45 @@ class CatKnowledgeStateObjectTests(
             .heard_group_myths,
         )
 
+        self.assertTrue(
+            self.first
+            .knowledge
+            .heard_group_myths
+            .is_empty
+        )
+
+        self.assertEqual(
+            self.first
+            .knowledge
+            .heard_group_myths
+            .count,
+            0,
+        )
+
+        for registry in (
+            self.first
+            .knowledge
+            .heard_group_myths,
+            self.second
+            .knowledge
+            .heard_group_myths,
+        ):
+            for mapping_method in (
+                "get",
+                "keys",
+                "items",
+                "values",
+                "__getitem__",
+                "__setitem__",
+                "__contains__",
+            ):
+                self.assertFalse(
+                    hasattr(
+                        registry,
+                        mapping_method,
+                    )
+                )
+
     def test_ensure_returns_same_object(
         self
     ):

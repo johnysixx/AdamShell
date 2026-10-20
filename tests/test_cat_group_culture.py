@@ -296,9 +296,13 @@ class CatGroupCultureTests(
             created.myth_id
         )
 
-        self.assertIn(
-            created.myth_id,
-            self.other.knowledge.heard_group_myths
+        self.assertIsNotNone(
+            self.other
+            .knowledge
+            .heard_group_myths
+            .record(
+                created.myth_id
+            )
         )
 
     def test_two_knowledge_sources_can_create_innovation(

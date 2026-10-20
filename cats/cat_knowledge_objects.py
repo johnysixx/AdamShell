@@ -8,6 +8,9 @@ from core.entity.components import SpatialVector3, require_optional_spatial_vect
 from cats.cat_social_objects import (
     CatRelationshipTrustEvent,
 )
+from cats.cat_heard_group_myth_registry import (
+    CatHeardGroupMythRegistry,
+)
 
 
 @dataclass(slots=True, frozen=True)
@@ -561,8 +564,10 @@ class CatKnowledgeState:
 
     scent_clock_tick: int | None = None
 
-    heard_group_myths: dict = field(
-        default_factory=dict
+    heard_group_myths: CatHeardGroupMythRegistry = field(
+        default_factory=(
+            CatHeardGroupMythRegistry
+        )
     )
 
     group_received_knowledge: dict = field(
@@ -576,7 +581,7 @@ class CatKnowledgeState:
             + len(self.verified_legends)
             + len(self.known_aromas)
             + len(self.known_scent_places)
-            + len(self.heard_group_myths)
+            + self.heard_group_myths.count
             + len(
                 self.group_received_knowledge
             )
