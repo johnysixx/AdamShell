@@ -119,9 +119,7 @@ class KittenUpbringingResolverTests(
         )
 
         self.assertFalse(
-            self.kitten.learning.skills[
-                "socialization"
-            ].learned
+            self.kitten.learning.skills.record("socialization").learned
         )
 
     def test_father_sometimes_brings_dead_cronenberg(self):
@@ -175,9 +173,7 @@ class KittenUpbringingResolverTests(
             event_names
         )
 
-        socialization = self.kitten.learning.skills[
-            "socialization"
-        ]
+        socialization = self.kitten.learning.skills.record("socialization")
 
         self.assertGreater(
             socialization.progress,
@@ -187,9 +183,7 @@ class KittenUpbringingResolverTests(
     def test_day_eighteen_teaches_litter_box(self):
         self.run_at_age(18)
 
-        skill = self.kitten.learning.skills[
-            "litter_box"
-        ]
+        skill = self.kitten.learning.skills.record("litter_box")
 
         self.assertTrue(
             skill.learned
@@ -203,9 +197,7 @@ class KittenUpbringingResolverTests(
     def test_day_nineteen_teaches_boxes(self):
         self.run_at_age(19)
 
-        skill = self.kitten.learning.skills[
-            "box_travel"
-        ]
+        skill = self.kitten.learning.skills.record("box_travel")
 
         self.assertTrue(
             skill.learned
@@ -214,9 +206,7 @@ class KittenUpbringingResolverTests(
     def test_day_twenty_teaches_cat_doors(self):
         self.run_at_age(20)
 
-        skill = self.kitten.learning.skills[
-            "cat_door_travel"
-        ]
+        skill = self.kitten.learning.skills.record("cat_door_travel")
 
         self.assertTrue(
             skill.learned
@@ -302,9 +292,7 @@ class KittenUpbringingResolverTests(
             "tracking_and_chasing"
         )
 
-        hunting = self.kitten.learning.skills[
-            "hunting"
-        ]
+        hunting = self.kitten.learning.skills.record("hunting")
 
         self.assertGreater(
             hunting.progress,
@@ -363,9 +351,7 @@ class KittenUpbringingResolverTests(
             1
         )
 
-        hunting = self.kitten.learning.skills[
-            "hunting"
-        ]
+        hunting = self.kitten.learning.skills.record("hunting")
 
         self.assertGreaterEqual(
             hunting.progress,
@@ -432,9 +418,7 @@ class KittenUpbringingResolverTests(
         for age in range(36, 40):
             self.run_at_age(age)
 
-        hunting = self.kitten.learning.skills[
-            "hunting"
-        ]
+        hunting = self.kitten.learning.skills.record("hunting")
 
         experience = (
             self.kitten.upbringing

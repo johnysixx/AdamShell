@@ -116,9 +116,7 @@ class CatVocalizationMeowResultsObjectStateTests(
             skill = (
                 self.kitten
                 .learning
-                .skills[
-                    skill_name
-                ]
+                .skills.record(skill_name)
             )
 
             skill.learned = True

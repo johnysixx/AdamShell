@@ -100,7 +100,7 @@ class CatAdultVocalizationObjectStateTests(
         state = (
             self.kitten
             .learning
-            .skills['adult_meowing']
+            .skills.record('adult_meowing')
             .vocalizations
         )
 
@@ -125,7 +125,7 @@ class CatAdultVocalizationObjectStateTests(
         state = (
             self.mother
             .learning
-            .skills['adult_meowing']
+            .skills.record('adult_meowing')
             .vocalizations
         )
 
@@ -144,7 +144,7 @@ class CatAdultVocalizationObjectStateTests(
         state = (
             self.kitten
             .learning
-            .skills['adult_meowing']
+            .skills.record('adult_meowing')
             .vocalizations
         )
 
@@ -361,7 +361,7 @@ class CatAdultVocalizationObjectStateTests(
         skill = (
             self.kitten
             .learning
-            .skills['adult_meowing']
+            .skills.record('adult_meowing')
         )
 
         skill.vocalizations = {

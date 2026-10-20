@@ -20,7 +20,7 @@ class AdultVocalizationResolverTests(unittest.TestCase):
         self.development.initialize_newborn(self.kitten, birth_day=0)
 
     def test_newborn_knows_no_adult_vocalizations(self):
-        vocalizations = self.kitten.learning.skills['adult_meowing'].vocalizations
+        vocalizations = self.kitten.learning.skills.record('adult_meowing').vocalizations
         self.assertEqual(
             set(vocalizations.names()),
             set(
@@ -38,7 +38,7 @@ class AdultVocalizationResolverTests(unittest.TestCase):
         self.assertTrue(
             self.kitten
             .learning
-            .skills['adult_meowing']
+            .skills.record('adult_meowing')
             .vocalizations
             .knows('food_request')
         )
@@ -46,7 +46,7 @@ class AdultVocalizationResolverTests(unittest.TestCase):
 
     def test_complete_repertoire_is_learned(self):
         result = self.vocalization.teach_all(teacher=self.mother, kitten=self.kitten, current_day=70)
-        skill = self.kitten.learning.skills['adult_meowing']
+        skill = self.kitten.learning.skills.record('adult_meowing')
         self.assertTrue(result.complete)
         self.assertTrue(skill.learned)
         self.assertTrue(
@@ -56,7 +56,7 @@ class AdultVocalizationResolverTests(unittest.TestCase):
 
     def test_meow_is_denied_without_adult_repertoire(self):
         for skill_name in ('socialization', 'litter_box', 'box_travel', 'cat_door_travel', 'hunting', 'human_communication'):
-            skill = self.kitten.learning.skills[skill_name]
+            skill = self.kitten.learning.skills.record(skill_name)
             skill.learned = True
             skill.progress = 1.0
             skill.teacher = 'mother'
@@ -71,7 +71,7 @@ class AdultVocalizationResolverTests(unittest.TestCase):
 
     def test_meow_remains_separate_from_vocalizations(self):
         self.vocalization.teach_all(teacher=self.mother, kitten=self.kitten, current_day=70)
-        self.assertTrue(self.kitten.learning.skills['adult_meowing'].learned)
+        self.assertTrue(self.kitten.learning.skills.record('adult_meowing').learned)
         self.assertFalse(self.kitten.learning.meow_knowledge.learned)
 if __name__ == '__main__':
     unittest.main()

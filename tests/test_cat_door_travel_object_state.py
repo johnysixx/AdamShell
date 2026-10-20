@@ -34,9 +34,7 @@ class CatDoorTravelObjectStateTests(
             "layer_a"
         )
 
-        self.cat.learning.skills[
-            "cat_door_travel"
-        ].learned = True
+        self.cat.learning.skills.record("cat_door_travel").learned = True
 
     def assert_not_mapping(
         self,

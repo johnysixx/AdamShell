@@ -525,9 +525,9 @@ class KittenUpbringingResolver:
         current_day,
     ):
         hunting = (
-            kitten.learning.skills[
+            kitten.learning.skills.record(
                 "hunting"
-            ]
+            )
         )
 
         previous_progress = float(
@@ -583,9 +583,9 @@ class KittenUpbringingResolver:
         experience.successful_kills += 1
 
         hunting = (
-            kitten.learning.skills[
+            kitten.learning.skills.record(
                 "hunting"
-            ]
+            )
         )
 
         previous_progress = float(
@@ -653,9 +653,9 @@ class KittenUpbringingResolver:
         )
 
         hunting = (
-            kitten.learning.skills[
+            kitten.learning.skills.record(
                 "hunting"
-            ]
+            )
         )
 
         previous_progress = float(
@@ -845,9 +845,9 @@ class KittenUpbringingResolver:
         learning = kitten.learning
 
         adult_meowing = (
-            learning.skills[
+            learning.skills.record(
                 "adult_meowing"
-            ]
+            )
         )
 
         if not adult_meowing.learned:
@@ -879,9 +879,9 @@ class KittenUpbringingResolver:
             )
 
         skill = (
-            learning.skills[
+            learning.skills.record(
                 "human_communication"
-            ]
+            )
         )
 
         skill.learned = True
@@ -968,9 +968,9 @@ class KittenUpbringingResolver:
         current_day,
     ):
         skill = (
-            kitten.learning.skills[
+            kitten.learning.skills.record(
                 "socialization"
-            ]
+            )
         )
 
         previous_progress = float(
@@ -1050,9 +1050,9 @@ class KittenUpbringingResolver:
         lesson_name,
     ):
         skill = (
-            kitten.learning.skills[
+            kitten.learning.skills.record(
                 skill_name
-            ]
+            )
         )
 
         teacher_name = (

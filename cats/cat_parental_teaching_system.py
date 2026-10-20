@@ -90,18 +90,20 @@ class CatParentalTeachingSystem:
 
         skills = kitten.learning.skills
 
-        skill_state = skills.get(
+        skill_state = skills.record(
             skill
         )
 
         if skill_state is None:
             skill_state = (
-                CatSkillState()
+                CatSkillState(
+                    name=skill
+                )
             )
 
-            skills[
-                skill
-            ] = skill_state
+            skills.store(
+                skill_state
+            )
 
         old_progress = float(
             skill_state.progress

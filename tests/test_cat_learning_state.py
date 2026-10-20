@@ -20,15 +20,15 @@ class CatLearningStateTests(unittest.TestCase):
             type(newborn.learning),
         )
         self.assertEqual(
-            set(manifested.learning.skills),
-            set(newborn.learning.skills),
+            set(manifested.learning.skills.names()),
+            set(newborn.learning.skills.names()),
         )
 
     def test_manifested_cat_already_knows_cat_skills(self):
         cat = self.cats.create_cat(name='dice_cat', color='black', fur_length='short', origin='dice_manifestation')
         self.assertTrue(cat.learning.complete)
         self.assertFalse(cat.learning.teaching_required)
-        self.assertTrue(all((skill.learned for skill in cat.learning.skills.values())))
+        self.assertTrue(all((skill.learned for skill in cat.learning.skills.records())))
 
     def test_newborn_requires_maternal_teaching(self):
         kitten = self.cats.create_cat(name='kitten', color='white', fur_length='short', origin='kitten_birth_resolver')

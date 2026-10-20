@@ -5,6 +5,7 @@ from cats.cat_learning_state import (
     CatFamilyKnowledgeState,
     CatLearningState,
     CatMeowKnowledgeState,
+    CatSkillRegistry,
     CatSkillState,
 )
 
@@ -24,6 +25,9 @@ class CatLearningObjectStateTests(
             "values",
             "update",
             "setdefault",
+            "__getitem__",
+            "__setitem__",
+            "__contains__",
         ):
             self.assertFalse(
                 hasattr(
@@ -51,7 +55,9 @@ class CatLearningObjectStateTests(
     ):
         for state in (
             CatMeowKnowledgeState(),
-            CatSkillState(),
+            CatSkillState(
+                name="test"
+            ),
             CatFamilyKnowledgeState(),
         ):
             with self.subTest(
@@ -86,7 +92,11 @@ class CatLearningObjectStateTests(
 
         self.assertIsInstance(
             learning.skills,
-            dict,
+            CatSkillRegistry,
+        )
+
+        self._assert_object_only(
+            learning.skills
         )
 
         self.assertTrue(
@@ -96,7 +106,7 @@ class CatLearningObjectStateTests(
                     CatSkillState,
                 )
                 for skill
-                in learning.skills.values()
+                in learning.skills.records()
             )
         )
 
@@ -149,7 +159,7 @@ class CatLearningObjectStateTests(
             all(
                 skill.learned
                 for skill
-                in learning.skills.values()
+                in learning.skills.records()
             )
         )
 
@@ -189,7 +199,7 @@ class CatLearningObjectStateTests(
             any(
                 skill.learned
                 for skill
-                in learning.skills.values()
+                in learning.skills.records()
             )
         )
 
@@ -202,13 +212,13 @@ class CatLearningObjectStateTests(
         )
 
         self.assertEqual(
-            set(learning.skills),
+            set(learning.skills.names()),
             set(CatLearning.SKILLS),
         )
 
         vocalizations = (
             learning
-            .skills["adult_meowing"]
+            .skills.record("adult_meowing")
             .vocalizations
         )
 
@@ -313,14 +323,14 @@ class CatLearningObjectStateTests(
 
         self.assertEqual(
             learning
-            .skills["hunting"]
+            .skills.record("hunting")
             .progress,
             0.0,
         )
 
         self.assertFalse(
             learning
-            .skills["adult_meowing"]
+            .skills.record("adult_meowing")
             .vocalizations.knows(
                 "food_request"
             )

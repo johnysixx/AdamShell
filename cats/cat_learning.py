@@ -4,6 +4,7 @@ from cats.cat_adult_vocalization_state import (
 from cats.cat_learning_state import (
     CatLearningState,
     CatMeowKnowledgeState,
+    CatSkillRegistry,
     CatSkillState,
 )
 
@@ -47,6 +48,46 @@ class CatLearning:
     )
 
     @classmethod
+    def _skill_registry(
+        cls,
+        learned,
+    ):
+        registry = (
+            CatSkillRegistry()
+        )
+
+        for skill_name in cls.SKILLS:
+            registry.store(
+                CatSkillState(
+                    name=skill_name,
+                    learned=bool(
+                        learned
+                    ),
+                    progress=(
+                        1.0
+                        if learned
+                        else 0.0
+                    ),
+                    teacher=None,
+                    learned_on_day=None,
+                    vocalizations=(
+                        CatAdultVocalizationState.create(
+                            learned=bool(
+                                learned
+                            )
+                        )
+                        if (
+                            skill_name
+                            == "adult_meowing"
+                        )
+                        else None
+                    ),
+                )
+            )
+
+        return registry
+
+    @classmethod
     def create_complete_state(
         cls
     ):
@@ -74,22 +115,9 @@ class CatLearning:
                 learned_on_day=None,
                 contains=list(cls.MEOW_CONTENTS),
             ),
-            skills={
-                skill: CatSkillState(
-                    learned=True,
-                    progress=1.0,
-                    teacher=None,
-                    learned_on_day=None,
-                    vocalizations=(
-                        CatAdultVocalizationState.create(
-                            learned=True
-                        )
-                        if skill == "adult_meowing"
-                        else None
-                    ),
-                )
-                for skill in cls.SKILLS
-            },
+            skills=cls._skill_registry(
+                learned=True
+            ),
             lessons=[],
             complete=True,
         )
@@ -122,22 +150,9 @@ class CatLearning:
                 learned_on_day=None,
                 contains=list(cls.MEOW_CONTENTS),
             ),
-            skills={
-                skill: CatSkillState(
-                    learned=False,
-                    progress=0.0,
-                    teacher=None,
-                    learned_on_day=None,
-                    vocalizations=(
-                        CatAdultVocalizationState.create(
-                            learned=False
-                        )
-                        if skill == "adult_meowing"
-                        else None
-                    ),
-                )
-                for skill in cls.SKILLS
-            },
+            skills=cls._skill_registry(
+                learned=False
+            ),
             lessons=[],
             complete=False,
         )

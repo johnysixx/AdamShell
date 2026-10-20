@@ -166,22 +166,36 @@ class MeowKnowledgeResolver:
                 kitten_learning,
                 CatLearningState,
             )
-            else {}
+            else None
         )
 
-        missing_experiences = tuple(
-            skill_name
-            for skill_name
-            in self.REQUIRED_EXPERIENCES
-            if (
-                skills.get(
-                    skill_name
-                )
-                is None
-                or not skills[
-                    skill_name
-                ].learned
+        missing_experiences = []
+
+        if skills is None:
+            missing_experiences.extend(
+                self.REQUIRED_EXPERIENCES
             )
+
+        else:
+            for skill_name in (
+                self.REQUIRED_EXPERIENCES
+            ):
+                skill_state = (
+                    skills.record(
+                        skill_name
+                    )
+                )
+
+                if (
+                    skill_state is None
+                    or not skill_state.learned
+                ):
+                    missing_experiences.append(
+                        skill_name
+                    )
+
+        missing_experiences = tuple(
+            missing_experiences
         )
 
         if missing_experiences:
@@ -331,7 +345,7 @@ class MeowKnowledgeResolver:
         learning.complete = all(
             skill.learned
             for skill
-            in learning.skills.values()
+            in learning.skills.records()
         )
 
         if learning.complete:
@@ -556,9 +570,10 @@ class MeowKnowledgeResolver:
         skill = (
             kitten
             .learning
-            .skills[
+            .skills
+            .record(
                 skill_name
-            ]
+            )
         )
 
         skill.learned = True

@@ -202,7 +202,7 @@ class CatDoor:
         )
 
         skill = (
-            learning.skills.get(
+            learning.skills.record(
                 "cat_door_travel"
             )
             if learning is not None

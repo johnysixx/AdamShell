@@ -316,9 +316,7 @@ class CatFamilyBehaviorTests(
             )
 
         self.assertTrue(
-            self.first.learning.skills[
-                "litter_box"
-            ].learned
+            self.first.learning.skills.record("litter_box").learned
         )
 
     def test_stranger_cannot_use_parental_teaching(

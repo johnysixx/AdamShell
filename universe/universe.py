@@ -475,7 +475,7 @@ class Universe:
         meow.learned_on_day = 0
         learning.adult_meowing_learned = True
         learning.human_communication_learned = True
-        for skill in learning.skills.values():
+        for skill in learning.skills.records():
             skill.learned = True
             skill.progress = 1.0
             skill.teacher = None

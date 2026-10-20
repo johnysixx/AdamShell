@@ -37,10 +37,10 @@ class KittenLateEducationTests(unittest.TestCase):
     def complete_early_education(self):
         learning = self.kitten.learning
         for skill_name in ('socialization', 'litter_box', 'box_travel', 'cat_door_travel', 'hunting'):
-            learning.skills[skill_name].learned = True
-            learning.skills[skill_name].progress = 1.0
-            learning.skills[skill_name].teacher = 'mother'
-            learning.skills[skill_name].learned_on_day = 50
+            learning.skills.record(skill_name).learned = True
+            learning.skills.record(skill_name).progress = 1.0
+            learning.skills.record(skill_name).teacher = 'mother'
+            learning.skills.record(skill_name).learned_on_day = 50
 
     def run_at_age(self, age_days):
         self.kitten.age_days = age_days
@@ -54,7 +54,7 @@ class KittenLateEducationTests(unittest.TestCase):
         self.run_at_age(35)
         for age in range(36, 39):
             self.run_at_age(age)
-        hunting = self.kitten.learning.skills['hunting']
+        hunting = self.kitten.learning.skills.record('hunting')
         self.assertTrue(hunting.learned)
 
     def test_vocalizations_are_taught_one_per_day(self):
@@ -65,7 +65,7 @@ class KittenLateEducationTests(unittest.TestCase):
 
     def test_repertoire_is_complete_on_day_sixty_seven(self):
         self.teach_all_vocalizations()
-        skill = self.kitten.learning.skills['adult_meowing']
+        skill = self.kitten.learning.skills.record('adult_meowing')
         self.assertTrue(skill.learned)
         self.assertTrue(
             skill.vocalizations.complete

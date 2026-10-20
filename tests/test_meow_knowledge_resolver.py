@@ -23,7 +23,7 @@ class MeowKnowledgeResolverTests(unittest.TestCase):
 
     def complete_required_experiences(self):
         for skill_name in self.meow.REQUIRED_EXPERIENCES:
-            skill = self.kitten.learning.skills[skill_name]
+            skill = self.kitten.learning.skills.record(skill_name)
             skill.learned = True
             skill.progress = 1.0
             skill.teacher = 'mother'
@@ -63,8 +63,8 @@ class MeowKnowledgeResolverTests(unittest.TestCase):
         self.complete_required_experiences()
         self.meow.transmit(mother=self.mother, kitten=self.kitten, current_day=75)
         learning = self.kitten.learning
-        adult_meowing = learning.skills['adult_meowing']
-        human_communication = learning.skills['human_communication']
+        adult_meowing = learning.skills.record('adult_meowing')
+        human_communication = learning.skills.record('human_communication')
         self.assertTrue(adult_meowing.learned)
         self.assertTrue(human_communication.learned)
         self.assertTrue(learning.adult_meowing_learned)

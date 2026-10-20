@@ -44,9 +44,7 @@ class CatDoorFactoryTests(
                 origin_layer
             )
 
-        cat.learning.skills[
-            "cat_door_travel"
-        ].learned = bool(
+        cat.learning.skills.record("cat_door_travel").learned = bool(
             trained
         )
 

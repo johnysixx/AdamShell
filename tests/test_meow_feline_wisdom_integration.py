@@ -41,7 +41,7 @@ class MeowFelineWisdomIntegrationTests(unittest.TestCase):
     def complete_required_experiences(self):
         learning = self.kitten.learning
         for skill_name in self.resolver.REQUIRED_EXPERIENCES:
-            skill = learning.skills[skill_name]
+            skill = learning.skills.record(skill_name)
             skill.learned = True
             skill.progress = 1.0
             skill.teacher = 'mother'

@@ -51,7 +51,7 @@ class AdultVocalizationResolver:
         )
 
         teacher_skill = (
-            teacher_learning.skills.get(
+            teacher_learning.skills.record(
                 "adult_meowing"
             )
             if isinstance(
@@ -62,7 +62,7 @@ class AdultVocalizationResolver:
         )
 
         kitten_skill = (
-            kitten_learning.skills.get(
+            kitten_learning.skills.record(
                 "adult_meowing"
             )
             if isinstance(
@@ -256,9 +256,10 @@ class AdultVocalizationResolver:
                 complete=(
                     kitten
                     .learning
-                    .skills[
+                    .skills
+                    .record(
                         "adult_meowing"
-                    ]
+                    )
                     .learned
                 ),
             )
