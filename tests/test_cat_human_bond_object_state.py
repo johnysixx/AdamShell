@@ -35,9 +35,9 @@ class CatHumanBondObjectStateTests(unittest.TestCase):
             significance=0.1,
         )
 
-        bond = self.cat.human_bonds.records[
+        bond = self.cat.human_bonds.record(
             self.human.name
-        ]
+        )
 
         self.assertIsInstance(
             bond,
@@ -60,9 +60,9 @@ class CatHumanBondObjectStateTests(unittest.TestCase):
             significance=0.2,
         )
 
-        bond = self.cat.human_bonds.records[
+        bond = self.cat.human_bonds.record(
             self.human.name
-        ]
+        )
 
         self.assertEqual(
             bond.positive_interactions,
@@ -90,9 +90,9 @@ class CatHumanBondObjectStateTests(unittest.TestCase):
             self.cat,
             self.human,
         )
-        bond = self.cat.human_bonds.records[
+        bond = self.cat.human_bonds.record(
             self.human.name
-        ]
+        )
 
         self.assertTrue(
             result.right_human

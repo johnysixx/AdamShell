@@ -73,7 +73,7 @@ class Cat(SocialMixin):
         self.group = CatGroupMembership(group_id=None, member=False, joined_order=None, shared_scent=0.0, accepted_members=[], group_events=0, influence=0.0, defense_events=0, support_events=0, recruitment_support=0, recruitment_vetoes=0)
         self.culture = CatCulture(adopted_traditions={}, rejected_traditions={}, preferences={}, myths={}, innovations={}, exposures=0)
         self.group_roles = CatGroupRoles(active={}, history=[], role_events=0)
-        self.human_bonds = CatHumanBonds(records={})
+        self.human_bonds = CatHumanBonds()
         self.meow_invitations = CatMeowInvitations(offered=0, understood=0, guided_to_bar=0, history=[], suspended_until_tick=0, suspension_reason=None, garfield_training_required=False, garfield_training=None)
         self.norms = CatNorms(violations=[], sanctions=[], warnings=0, trust_penalties=0.0)
         self.special_traits = []

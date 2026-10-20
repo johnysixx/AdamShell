@@ -41,13 +41,19 @@ class CatHumanBondSystem:
             )
 
         bond = (
-            cat.human_bonds.records.setdefault(
-                human_name,
-                self._new_bond(
-                    human_name
-                ),
+            cat.human_bonds.record(
+                human_name
             )
         )
+
+        if bond is None:
+            bond = self._new_bond(
+                human_name
+            )
+
+            cat.human_bonds.store(
+                bond
+            )
 
         significance = self._clamp(
             significance
@@ -128,7 +134,7 @@ class CatHumanBondSystem:
         )
 
         bond = (
-            cat.human_bonds.records.get(
+            cat.human_bonds.record(
                 human_name
             )
         )

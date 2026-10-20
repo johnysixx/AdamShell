@@ -110,7 +110,102 @@ class CatBonds(DomainObject):
 
 
 class CatHumanBonds(DomainObject):
-    pass
+
+    def __init__(
+        self,
+    ):
+        self._records = []
+
+    @property
+    def is_empty(
+        self,
+    ):
+        return not self._records
+
+    @property
+    def count(
+        self,
+    ):
+        return len(
+            self._records
+        )
+
+    def store(
+        self,
+        bond,
+    ):
+        if not isinstance(
+            bond,
+            CatHumanBond,
+        ):
+            raise TypeError(
+                "Cat human bond registry requires "
+                "CatHumanBond."
+            )
+
+        human = getattr(
+            bond,
+            "human",
+            None,
+        )
+
+        if (
+            not isinstance(
+                human,
+                str,
+            )
+            or not human
+        ):
+            raise ValueError(
+                "Cat human bond requires human."
+            )
+
+        for index, current in enumerate(
+            self.records()
+        ):
+            if current.human == human:
+                self._records[
+                    index
+                ] = bond
+
+                return bond
+
+        self._records.append(
+            bond
+        )
+
+        return bond
+
+    def record(
+        self,
+        human_name,
+    ):
+        human_name = str(
+            human_name
+        )
+
+        for bond in self.records():
+            if bond.human == human_name:
+                return bond
+
+        return None
+
+    def records(
+        self,
+    ):
+        for bond in self._records:
+            if not isinstance(
+                bond,
+                CatHumanBond,
+            ):
+                raise TypeError(
+                    "Cat human bond registry contains "
+                    "invalid runtime state."
+                )
+
+        return tuple(
+            self._records
+        )
 
 
 

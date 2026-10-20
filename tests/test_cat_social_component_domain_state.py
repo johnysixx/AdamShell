@@ -22,9 +22,7 @@ class CatSocialComponentDomainStateTests(
             CatHumanBond(
                 human="johny",
             ),
-            CatHumanBonds(
-                records={},
-            ),
+            CatHumanBonds(),
             CatMeowInvitations(
                 offered=0,
                 history=[],
@@ -71,9 +69,7 @@ class CatSocialComponentDomainStateTests(
     def test_different_social_state_types_are_not_equal(
         self
     ):
-        bonds = CatHumanBonds(
-            records={},
-        )
+        bonds = CatHumanBonds()
 
         invitations = CatMeowInvitations(
             records={},

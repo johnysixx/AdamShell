@@ -30,17 +30,53 @@ class CatHumanBondRegistryObjectStateTests(
             self.cats
         )
 
-    def test_new_cat_has_object_human_bond_registry(self):
-        self.assertIsInstance(
-            self.cat.human_bonds,
-            CatHumanBonds,
-        )
-        self.assertEqual(
-            self.cat.human_bonds.records,
-            {},
+    def test_new_cat_has_object_human_bond_registry(
+        self
+    ):
+        registry = (
+            self.cat.human_bonds
         )
 
-    def test_interaction_stores_bond_in_registry(self):
+        self.assertIsInstance(
+            registry,
+            CatHumanBonds,
+        )
+
+        self.assertTrue(
+            registry.is_empty
+        )
+
+        self.assertEqual(
+            registry.count,
+            0,
+        )
+
+        self.assertEqual(
+            registry.records(),
+            (),
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+            "pop",
+            "setdefault",
+            "__getitem__",
+            "__setitem__",
+            "__contains__",
+        ):
+            self.assertFalse(
+                hasattr(
+                    registry,
+                    mapping_method,
+                )
+            )
+
+    def test_interaction_stores_bond_in_registry(
+        self
+    ):
         self.system.remember_interaction(
             self.cat,
             self.human,
@@ -48,18 +84,39 @@ class CatHumanBondRegistryObjectStateTests(
             significance=0.1,
         )
 
-        records = self.cat.human_bonds.records
-
-        self.assertIn(
-            self.human.name,
-            records,
+        registry = (
+            self.cat.human_bonds
         )
+
+        bond = registry.record(
+            self.human.name
+        )
+
+        self.assertEqual(
+            registry.count,
+            1,
+        )
+
         self.assertIsInstance(
-            records[self.human.name],
+            bond,
             CatHumanBond,
         )
 
-    def test_cats_own_separate_human_bond_registries(self):
+        self.assertEqual(
+            bond.human,
+            self.human.name,
+        )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            registry.store({
+                "human": self.human.name,
+            })
+
+    def test_cats_own_separate_human_bond_registries(
+        self
+    ):
         other = self.cats.create_cat(
             name="other_cat",
             color="white",
@@ -70,9 +127,21 @@ class CatHumanBondRegistryObjectStateTests(
             self.cat.human_bonds,
             other.human_bonds,
         )
-        self.assertIsNot(
-            self.cat.human_bonds.records,
-            other.human_bonds.records,
+
+        self.system.remember_interaction(
+            self.cat,
+            self.human,
+            positive=True,
+            significance=0.1,
+        )
+
+        self.assertEqual(
+            self.cat.human_bonds.count,
+            1,
+        )
+
+        self.assertTrue(
+            other.human_bonds.is_empty
         )
 
 
