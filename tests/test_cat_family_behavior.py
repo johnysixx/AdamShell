@@ -114,12 +114,20 @@ class CatFamilyBehaviorTests(
             result.formed
         )
 
+        bond = self.first.bonds.record(
+            self.second.name
+        )
+
+        self.assertIsNotNone(
+            bond
+        )
+
         self.assertTrue(
-            self.first.bonds.records[self.second.name].active
+            bond.active
         )
 
         self.assertEqual(
-            self.first.bonds.records[self.second.name].source,
+            bond.source,
             "family"
         )
 

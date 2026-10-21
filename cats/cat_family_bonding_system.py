@@ -232,7 +232,7 @@ class CatFamilyBondingSystem:
         strength,
     ):
         existing = (
-            cat.bonds.records.get(
+            cat.bonds.record(
                 other_cat.name
             )
         )
@@ -270,9 +270,9 @@ class CatFamilyBondingSystem:
             relation
         )
 
-        cat.bonds.records[
-            other_cat.name
-        ] = existing
+        cat.bonds.store(
+            existing
+        )
 
         cat.family_bonding.events += 1
 

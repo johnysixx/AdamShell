@@ -195,7 +195,96 @@ class CatSocialMemories(DomainObject):
 
 
 class CatBonds(DomainObject):
-    pass
+
+    def __init__(
+        self,
+    ):
+        self._records = []
+
+    @property
+    def is_empty(
+        self,
+    ):
+        return not self._records
+
+    @property
+    def count(
+        self,
+    ):
+        return len(
+            self._records
+        )
+
+    def store(
+        self,
+        bond,
+    ):
+        from cats.cat_social_objects import (
+            CatBond,
+        )
+
+        if not isinstance(
+            bond,
+            CatBond,
+        ):
+            raise TypeError(
+                "Cat bond registry requires "
+                "CatBond."
+            )
+
+        for index, current in enumerate(
+            self.records()
+        ):
+            if (
+                current.other_cat
+                == bond.other_cat
+            ):
+                self._records[
+                    index
+                ] = bond
+
+                return bond
+
+        self._records.append(
+            bond
+        )
+
+        return bond
+
+    def record(
+        self,
+        other_cat,
+    ):
+        other_cat = str(
+            other_cat
+        )
+
+        for bond in self.records():
+            if bond.other_cat == other_cat:
+                return bond
+
+        return None
+
+    def records(
+        self,
+    ):
+        from cats.cat_social_objects import (
+            CatBond,
+        )
+
+        for bond in self._records:
+            if not isinstance(
+                bond,
+                CatBond,
+            ):
+                raise TypeError(
+                    "Cat bond registry contains "
+                    "invalid runtime state."
+                )
+
+        return tuple(
+            self._records
+        )
 
 
 class CatHumanBonds(DomainObject):

@@ -31,9 +31,9 @@ class CatBondObjectStateTests(unittest.TestCase):
             self.second,
             strength=0.8,
         )
-        return self.first.bonds.records[
+        return self.first.bonds.record(
             self.second.name
-        ]
+        )
 
     def test_stored_bond_is_object(self):
         bond = self._store_bond()

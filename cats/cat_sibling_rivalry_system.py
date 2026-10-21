@@ -83,7 +83,7 @@ class CatSiblingRivalrySystem:
             )
         )
 
-        bond = first.bonds.records.get(
+        bond = first.bonds.record(
             second.name
         )
 

@@ -141,8 +141,16 @@ class CatGroupSystemTests(unittest.TestCase):
     def test_group_membership_does_not_create_bond(self):
         group_id = self._create_group()
         self.group_system.add_member(group_id, self.second, self.cats.cats)
-        self.assertNotIn(self.second.name, self.first.bonds.records)
-        self.assertNotIn(self.first.name, self.second.bonds.records)
+        self.assertIsNone(
+            self.first.bonds.record(
+                self.second.name
+            )
+        )
+        self.assertIsNone(
+            self.second.bonds.record(
+                self.first.name
+            )
+        )
 
     def test_group_operations_preserve_existing_relationships(self):
         relation = CatRelationship.create()

@@ -660,9 +660,22 @@ class CatSocialInteractionTests(unittest.TestCase):
         bonding = CatBondingSystem(self.cats)
         result = bonding.form_bond(first, second)
         self.assertTrue(result.formed)
-        self.assertIn(second.name, first.bonds.records)
-        self.assertIn(first.name, second.bonds.records)
-        self.assertTrue(first.bonds.records[second.name].active)
+        first_bond = first.bonds.record(
+            second.name
+        )
+        second_bond = second.bonds.record(
+            first.name
+        )
+
+        self.assertIsNotNone(
+            first_bond
+        )
+        self.assertIsNotNone(
+            second_bond
+        )
+        self.assertTrue(
+            first_bond.active
+        )
 
     def test_weak_relationship_does_not_form_bond(self):
         first, second = self._social_pair()
@@ -675,10 +688,16 @@ class CatSocialInteractionTests(unittest.TestCase):
         first, second = self._prepare_bonded_pair()
         bonding = CatBondingSystem(self.cats)
         bonding.form_bond(first, second)
-        before = first.bonds.records[second.name].strength
+        bond = first.bonds.record(
+            second.name
+        )
+        before = bond.strength
         result = bonding.mutual_groom(first, second)
         self.assertEqual(result.name, 'cats_mutually_groomed')
-        self.assertGreater(first.bonds.records[second.name].strength, before)
+        self.assertGreater(
+            bond.strength,
+            before,
+        )
 
     def test_bonded_cats_can_sleep_together(self):
         first, second = self._prepare_bonded_pair()
@@ -706,7 +725,11 @@ class CatSocialInteractionTests(unittest.TestCase):
         result = social.meet(first, second)
         self.assertEqual(result.attitude, 'friendly')
         self.assertIsNotNone(result.bond)
-        self.assertTrue(first.bonds.records[second.name].active)
+        self.assertTrue(
+            first.bonds.record(
+                second.name
+            ).active
+        )
 
     def test_mother_and_kitten_get_family_social_bonus(self):
         mother, kitten = self._social_pair()

@@ -52,7 +52,7 @@ class Cat(SocialMixin):
         self.relationships = {}
         self.social_memory = CatSocialMemories()
         self.territories = CatTerritories(claims={})
-        self.bonds = CatBonds(records={})
+        self.bonds = CatBonds()
         self.family = CatFamily(
             parents=CatParentageState(),
             children=[],

@@ -152,9 +152,10 @@ class CatGroupDynamicsTests(unittest.TestCase):
             amount=0.2,
         )
 
-        self.assertNotIn(
-            self.second.name,
-            self.first.bonds.records,
+        self.assertIsNone(
+            self.first.bonds.record(
+                self.second.name
+            )
         )
 
     def test_group_can_vote_candidate_in(

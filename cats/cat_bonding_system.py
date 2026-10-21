@@ -423,7 +423,7 @@ class CatBondingSystem:
         cat,
         other_cat
     ):
-        bond = cat.bonds.records.get(
+        bond = cat.bonds.record(
             other_cat.name
         )
 
@@ -441,19 +441,19 @@ class CatBondingSystem:
         other_cat,
         strength
     ):
-        cat.bonds.records[
-            other_cat.name
-        ] = CatBond(
-            other_cat=other_cat.name,
-            active=True,
-            strength=self._clamp(
-                strength
-            ),
-            groom_count=0,
-            sleep_count=0,
-            follow_count=0,
-            source="social",
-            family_relation=None,
+        cat.bonds.store(
+            CatBond(
+                other_cat=other_cat.name,
+                active=True,
+                strength=self._clamp(
+                    strength
+                ),
+                groom_count=0,
+                sleep_count=0,
+                follow_count=0,
+                source="social",
+                family_relation=None,
+            )
         )
 
     def _strengthen(
@@ -462,7 +462,7 @@ class CatBondingSystem:
         other_cat,
         amount
     ):
-        bond = cat.bonds.records.get(
+        bond = cat.bonds.record(
             other_cat.name
         )
 

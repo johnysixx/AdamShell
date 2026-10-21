@@ -38,6 +38,7 @@ class CatSocialObjectsDomainStateTests(
                 name="memory",
             ),
             CatBond(
+                other_cat="other_cat",
                 name="bond",
             ),
         )
@@ -84,6 +85,7 @@ class CatSocialObjectsDomainStateTests(
         )
 
         bond = CatBond(
+            other_cat="other_cat",
             state="known",
         )
 
