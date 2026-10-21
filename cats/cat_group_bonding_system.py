@@ -62,9 +62,8 @@ class CatGroupBondingSystem:
                     continue
 
                 relation = (
-                    first.relationships.get(
-                        second.name,
-                        CatRelationship.create(),
+                    first.relationships.profile(
+                        second.name
                     )
                 )
 

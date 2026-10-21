@@ -68,9 +68,8 @@ class CatGroupRecruitmentSystem:
 
         for member in members:
             relation = (
-                member.relationships.get(
-                    candidate.name,
-                    CatRelationship.create(),
+                member.relationships.profile(
+                    candidate.name
                 )
             )
 

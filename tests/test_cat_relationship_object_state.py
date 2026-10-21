@@ -1,6 +1,7 @@
 from core.entity.components import SpatialVector3
 import unittest
 
+from cats.cat_components import CatRelationships
 from cats.cat_social_objects import CatRelationship
 from cats.cat_social_system import CatSocialSystem
 from cats.cats import Cats
@@ -30,19 +31,81 @@ class CatRelationshipObjectStateTests(
             self.cats
         )
 
+    def test_cat_owns_object_relationship_registry(
+        self
+    ):
+        registry = (
+            self.first.relationships
+        )
+
+        self.assertIsInstance(
+            registry,
+            CatRelationships,
+        )
+
+        self.assertTrue(
+            registry.is_empty
+        )
+
+        self.assertEqual(
+            registry.count,
+            0,
+        )
+
+        self.assertEqual(
+            registry.records(),
+            (),
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+            "pop",
+            "setdefault",
+            "clear",
+            "__getitem__",
+            "__setitem__",
+            "__contains__",
+        ):
+            self.assertFalse(
+                hasattr(
+                    registry,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            registry.store({
+                "other_cat": self.second.name,
+            })
+
+        with self.assertRaises(
+            ValueError
+        ):
+            registry.store(
+                CatRelationship.create()
+            )
+
     def test_social_meeting_creates_relationship_object(self):
         self.system.meet(
             self.first,
             self.second,
         )
 
-        relationship = self.first.relationships[
-            self.second.name
-        ]
+        relationship = self.first.relationships.record(self.second.name)
 
         self.assertIsInstance(
             relationship,
             CatRelationship,
+        )
+
+        self.assertEqual(
+            relationship.other_cat,
+            self.second.name,
         )
 
     def test_relationship_has_neutral_defaults(self):
@@ -75,9 +138,7 @@ class CatRelationshipObjectStateTests(
             self.second,
         )
 
-        relationship = self.first.relationships[
-            self.second.name
-        ]
+        relationship = self.first.relationships.record(self.second.name)
 
         self.assertIsInstance(
             relationship,
@@ -95,7 +156,7 @@ class CatRelationshipObjectStateTests(
         from cats.cat_knowledge import CatKnowledge
 
         self.system.meet(self.first, self.second)
-        relationship = self.first.relationships[self.second.name]
+        relationship = self.first.relationships.record(self.second.name)
 
         self.assertIsInstance(relationship, CatRelationship)
         relationship.trust = 0.9

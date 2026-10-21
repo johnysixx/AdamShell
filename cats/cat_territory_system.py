@@ -242,9 +242,8 @@ class CatTerritorySystem:
             )
 
         relation = (
-            cat.relationships.get(
-                other_cat.name,
-                CatRelationship.create(),
+            cat.relationships.profile(
+                other_cat.name
             )
         )
 

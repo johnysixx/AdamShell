@@ -300,8 +300,9 @@ class CatSocialSystem:
         )
 
         known_before = (
-            other_cat.name
-            in cat.relationships
+            cat.relationships.has(
+                other_cat.name
+            )
         )
 
         relation = self._relation(
@@ -1172,19 +1173,9 @@ class CatSocialSystem:
         cat,
         other_cat
     ):
-        relation = cat.relationships.setdefault(
-            other_cat.name,
-            CatRelationship.create()
+        return cat.relationships.ensure(
+            other_cat.name
         )
-
-
-
-
-
-
-
-
-        return relation
 
     def _record_both(
         self,

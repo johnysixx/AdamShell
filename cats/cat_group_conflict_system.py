@@ -373,10 +373,8 @@ class CatGroupConflictSystem:
                     continue
 
                 relation = (
-                    first.relationships
-                    .setdefault(
-                        second.name,
-                        CatRelationship.create(),
+                    first.relationships.ensure(
+                        second.name
                     )
                 )
 

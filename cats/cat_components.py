@@ -101,6 +101,193 @@ class CatTerritories(DomainObject):
     pass
 
 
+class CatRelationships(DomainObject):
+
+    def __init__(
+        self,
+    ):
+        self._records = []
+
+    @property
+    def is_empty(
+        self,
+    ):
+        return not self._records
+
+    @property
+    def count(
+        self,
+    ):
+        return len(
+            self._records
+        )
+
+    def store(
+        self,
+        relationship,
+    ):
+        from cats.cat_social_objects import (
+            CatRelationship,
+        )
+
+        if not isinstance(
+            relationship,
+            CatRelationship,
+        ):
+            raise TypeError(
+                "Cat relationship registry requires "
+                "CatRelationship."
+            )
+
+        other_cat = getattr(
+            relationship,
+            "other_cat",
+            None,
+        )
+
+        if (
+            not isinstance(
+                other_cat,
+                str,
+            )
+            or not other_cat
+        ):
+            raise ValueError(
+                "Stored cat relationship requires "
+                "other_cat."
+            )
+
+        for index, current in enumerate(
+            self.records()
+        ):
+            if (
+                current.other_cat
+                == other_cat
+            ):
+                self._records[
+                    index
+                ] = relationship
+
+                return relationship
+
+        self._records.append(
+            relationship
+        )
+
+        return relationship
+
+    def record(
+        self,
+        other_cat,
+    ):
+        other_cat = str(
+            other_cat
+        )
+
+        for relationship in self.records():
+            if (
+                relationship.other_cat
+                == other_cat
+            ):
+                return relationship
+
+        return None
+
+    def profile(
+        self,
+        other_cat,
+    ):
+        from cats.cat_social_objects import (
+            CatRelationship,
+        )
+
+        relationship = self.record(
+            other_cat
+        )
+
+        if relationship is not None:
+            return relationship
+
+        return CatRelationship.create(
+            other_cat=other_cat
+        )
+
+    def ensure(
+        self,
+        other_cat,
+    ):
+        from cats.cat_social_objects import (
+            CatRelationship,
+        )
+
+        relationship = self.record(
+            other_cat
+        )
+
+        if relationship is not None:
+            return relationship
+
+        relationship = (
+            CatRelationship.create(
+                other_cat=other_cat
+            )
+        )
+
+        return self.store(
+            relationship
+        )
+
+    def has(
+        self,
+        other_cat,
+    ):
+        return (
+            self.record(
+                other_cat
+            )
+            is not None
+        )
+
+    def records(
+        self,
+    ):
+        from cats.cat_social_objects import (
+            CatRelationship,
+        )
+
+        for relationship in self._records:
+            if not isinstance(
+                relationship,
+                CatRelationship,
+            ):
+                raise TypeError(
+                    "Cat relationship registry contains "
+                    "invalid runtime state."
+                )
+
+            other_cat = getattr(
+                relationship,
+                "other_cat",
+                None,
+            )
+
+            if (
+                not isinstance(
+                    other_cat,
+                    str,
+                )
+                or not other_cat
+            ):
+                raise ValueError(
+                    "Cat relationship registry contains "
+                    "relationship without other_cat."
+                )
+
+        return tuple(
+            self._records
+        )
+
+
 class CatSocialMemories(DomainObject):
 
     def __init__(

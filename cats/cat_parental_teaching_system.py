@@ -281,9 +281,8 @@ class CatParentalTeachingSystem:
         parent,
     ):
         relation = (
-            kitten.relationships.setdefault(
-                parent.name,
-                CatRelationship.create(),
+            kitten.relationships.ensure(
+                parent.name
             )
         )
 

@@ -134,9 +134,8 @@ class CatGroupHierarchySystem:
                 continue
 
             relation = (
-                other.relationships.get(
-                    cat.name,
-                    CatRelationship.create(),
+                other.relationships.profile(
+                    cat.name
                 )
             )
 

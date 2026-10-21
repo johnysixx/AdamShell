@@ -69,7 +69,9 @@ class CatGroupWorldBehaviorTests(unittest.TestCase):
         first = self._group(self.members[:3], 'first')
         second = self._group(self.members[3:], 'second')
         for cat in self.members:
-            cat.relationships.clear()
+            cat.relationships = type(
+                cat.relationships
+            )()
         conflict = CatGroupConflictSystem(self.groups)
         conflict.resolve(first, second, self.cats.cats, resource='milk')
         self.assertEqual(self.groups.groups[first].conflict_count, 1)
@@ -78,10 +80,19 @@ class CatGroupWorldBehaviorTests(unittest.TestCase):
         for members in (self.members[:3], self.members[3:]):
             for cat in members:
                 self.assertEqual(
-                    set(cat.relationships),
-                    {other.name for other in members if other is not cat},
+                    {
+                        relation.other_cat
+                        for relation
+                        in cat.relationships.records()
+                    },
+                    {
+                        other.name
+                        for other in members
+                        if other is not cat
+                    },
                 )
-                for relation in cat.relationships.values():
+
+                for relation in cat.relationships.records():
                     self.assertIsInstance(relation, CatRelationship)
                     self.assertAlmostEqual(relation.tension, 0.08)
                     self.assertEqual(relation.trust, 0.5)
@@ -103,14 +114,17 @@ class CatGroupWorldBehaviorTests(unittest.TestCase):
                 relation.affiliation = 0.4
                 relation.trust_history = history
                 relation.meet_count = 3
-                cat.relationships[other.name] = relation
+                relation.other_cat = other.name
+                cat.relationships.store(
+                    relation
+                )
                 records.append((cat, other, relation, history, expected))
 
         conflict = CatGroupConflictSystem(self.groups)
         for index in range(2):
             conflict.resolve(first, second, self.cats.cats, resource='milk')
             for cat, other, relation, history, expected in records:
-                self.assertIs(cat.relationships[other.name], relation)
+                self.assertIs(cat.relationships.record(other.name), relation)
                 self.assertAlmostEqual(relation.tension, expected[index])
                 self.assertEqual(relation.trust, 0.75)
                 self.assertEqual(relation.affiliation, 0.4)

@@ -26,13 +26,13 @@ class CatLegendReputationTests(unittest.TestCase):
     def test_verified_legend_increases_trust(self):
         place = CatKnowledge.remember_place(self.listener, 'quantum_layer', SpatialVector3(x=9.0, y=1.0, z=0.0))
         CatKnowledge.verify_heard_legend(self.listener, place)
-        trust = self.listener.relationships['pazuzu'].trust
+        trust = self.listener.relationships.record('pazuzu').trust
         self.assertAlmostEqual(trust, 0.6)
 
     def test_contradicted_legend_decreases_trust(self):
         result = CatKnowledge.contradict_heard_legend(cat=self.listener, legend_id=self.legend.legend_id)
         self.assertTrue(result.contradicted)
-        trust = self.listener.relationships['pazuzu'].trust
+        trust = self.listener.relationships.record('pazuzu').trust
         self.assertAlmostEqual(trust, 0.35)
 
     def test_contradiction_result_is_object_state(
@@ -68,7 +68,7 @@ class CatLegendReputationTests(unittest.TestCase):
 
     def test_trust_history_is_recorded(self):
         CatKnowledge.contradict_heard_legend(self.listener, self.legend.legend_id)
-        history = self.listener.relationships['pazuzu'].trust_history
+        history = self.listener.relationships.record('pazuzu').trust_history
         self.assertEqual(len(history), 1)
         self.assertEqual(
             history[0].reason,
@@ -78,10 +78,10 @@ class CatLegendReputationTests(unittest.TestCase):
     def test_trust_is_clamped_to_zero_and_one(self):
         for _ in range(20):
             CatKnowledge.adjust_storyteller_trust(self.listener, 'pazuzu', 0.1, 'test')
-        self.assertEqual(self.listener.relationships['pazuzu'].trust, 1.0)
+        self.assertEqual(self.listener.relationships.record('pazuzu').trust, 1.0)
         for _ in range(20):
             CatKnowledge.adjust_storyteller_trust(self.listener, 'pazuzu', -0.15, 'test')
-        self.assertEqual(self.listener.relationships['pazuzu'].trust, 0.0)
+        self.assertEqual(self.listener.relationships.record('pazuzu').trust, 0.0)
 
     def test_contradicted_legend_is_not_used_for_planning(self):
         CatKnowledge.contradict_heard_legend(self.listener, self.legend.legend_id)
@@ -112,7 +112,10 @@ class CatLegendReputationTests(unittest.TestCase):
             (self.storyteller.name, record, 0.7),
             ('legacy_storyteller', legacy, 0.5),
         ):
-            self.listener.relationships[name] = relation
+            relation.other_cat = name
+            self.listener.relationships.store(
+                relation
+            )
             history = relation.trust_history
             prior_event = history[0]
             first = CatKnowledge.adjust_storyteller_trust(
@@ -124,7 +127,7 @@ class CatLegendReputationTests(unittest.TestCase):
                 legend_id=self.legend.legend_id,
             )
 
-            self.assertIs(self.listener.relationships[name], relation)
+            self.assertIs(self.listener.relationships.record(name), relation)
             self.assertIs(relation.trust_history, history)
             self.assertAlmostEqual(relation.trust, expected)
             self.assertAlmostEqual(

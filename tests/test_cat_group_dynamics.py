@@ -195,10 +195,10 @@ class CatGroupDynamicsTests(unittest.TestCase):
         relationship.tension = 1.0
         relationship.shared_scent = 0.0
 
-        self.second.relationships[
-            self.candidate.name
-        ] = relationship
-
+        relationship.other_cat = self.candidate.name
+        self.second.relationships.store(
+            relationship
+        )
         recruitment = (
             CatGroupRecruitmentSystem(
                 self.groups

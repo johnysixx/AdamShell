@@ -1,5 +1,5 @@
 from cats.cat_development_stage import CatDevelopmentStage
-from cats.cat_components import CatFamily, MaternalCare, MaternalCareReceived, SiblingPlay, SiblingRivalry, ParentalTeaching, FamilyBonding, CatGroupMembership, CatCulture, CatGroupRoles, CatMeowInvitations, CatNorms, CatNeeds, CatEmergencyNursing, CatTerritories, CatSocialMemories, CatBonds, CatHumanBonds
+from cats.cat_components import CatFamily, MaternalCare, MaternalCareReceived, SiblingPlay, SiblingRivalry, ParentalTeaching, FamilyBonding, CatGroupMembership, CatCulture, CatGroupRoles, CatMeowInvitations, CatNorms, CatNeeds, CatEmergencyNursing, CatTerritories, CatSocialMemories, CatBonds, CatHumanBonds, CatRelationships
 from cats.cat_knowledge_objects import CatKnowledgeState
 from core.entity.social_entity import SocialMixin
 from core.entity.components import SpatialVector3
@@ -49,7 +49,7 @@ class Cat(SocialMixin):
         self.mind = mind
         self.intellect = intellect
         self.knowledge = CatKnowledgeState()
-        self.relationships = {}
+        self.relationships = CatRelationships()
         self.social_memory = CatSocialMemories()
         self.territories = CatTerritories(claims={})
         self.bonds = CatBonds()

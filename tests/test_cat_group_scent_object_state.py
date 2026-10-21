@@ -250,15 +250,11 @@ class CatGroupScentObjectStateTests(
         self.join_second()
 
         first_relation = (
-            self.first.relationships[
-                self.second.name
-            ]
+            self.first.relationships.record(self.second.name)
         )
 
         second_relation = (
-            self.second.relationships[
-                self.first.name
-            ]
+            self.second.relationships.record(self.first.name)
         )
 
         self.groups.mix_group_scent(
@@ -268,16 +264,12 @@ class CatGroupScentObjectStateTests(
         )
 
         self.assertIs(
-            self.first.relationships[
-                self.second.name
-            ],
+            self.first.relationships.record(self.second.name),
             first_relation,
         )
 
         self.assertIs(
-            self.second.relationships[
-                self.first.name
-            ],
+            self.second.relationships.record(self.first.name),
             second_relation,
         )
 

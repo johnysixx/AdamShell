@@ -23,7 +23,10 @@ class CatLegendSharingTests(unittest.TestCase):
         self.listener = self.cats.create_cat(name='garfield', color='orange', fur_length='short')
         relationship = CatRelationship.create()
         relationship.trust = 1.0
-        self.storyteller.relationships[self.listener.name] = relationship
+        relationship.other_cat = self.listener.name
+        self.storyteller.relationships.store(
+            relationship
+        )
         place = CatKnowledge.remember_place(self.storyteller, 'quantum_layer', SpatialVector3(x=7.0, y=2.0, z=0.0))
         self.legend = CatKnowledge.publish_legend(self.universe, self.storyteller, place)
 
@@ -138,7 +141,10 @@ class CatLegendSharingTests(unittest.TestCase):
         stranger = self.cats.create_cat(name='stranger', color='gray', fur_length='short')
         relationship = CatRelationship.create()
         relationship.trust = 0.0
-        self.storyteller.relationships[stranger.name] = relationship
+        relationship.other_cat = stranger.name
+        self.storyteller.relationships.store(
+            relationship
+        )
         self.storyteller.personality.traits.curiosity = 0.0
         self.storyteller.personality.traits.patience = 0.0
         result = CatKnowledge.share_legend(self.storyteller, stranger, self.universe)

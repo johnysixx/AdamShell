@@ -217,9 +217,8 @@ class CatSiblingPlaySystem:
         other_cat,
     ):
         relation = (
-            cat.relationships.setdefault(
-                other_cat.name,
-                CatRelationship.create(),
+            cat.relationships.ensure(
+                other_cat.name
             )
         )
 

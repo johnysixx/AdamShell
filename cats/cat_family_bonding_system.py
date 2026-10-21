@@ -60,9 +60,8 @@ class CatFamilyBondingSystem:
             )
 
         relationship = (
-            first.relationships.get(
-                second.name,
-                CatRelationship.create(),
+            first.relationships.profile(
+                second.name
             )
         )
 

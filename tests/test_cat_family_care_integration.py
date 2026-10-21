@@ -90,8 +90,8 @@ class CatFamilyCareIntegrationTests(unittest.TestCase):
     def test_sibling_play_strengthens_relationship(self):
         play = CatSiblingPlaySystem(self.cats)
         play.play(self.first, self.second, age_days=30)
-        relation = self.first.relationships[self.second.name]
-        reverse = self.second.relationships[self.first.name]
+        relation = self.first.relationships.record(self.second.name)
+        reverse = self.second.relationships.record(self.first.name)
         self.assertIsInstance(relation, CatRelationship)
         self.assertIsInstance(reverse, CatRelationship)
         self.assertIsNot(relation, reverse)
@@ -118,16 +118,21 @@ class CatFamilyCareIntegrationTests(unittest.TestCase):
         legacy = CatRelationship.create()
         legacy.trust = 0.7
         legacy.custom_note = 'known_before_play'
-        self.first.relationships[self.second.name] = relation
-        self.second.relationships[self.first.name] = legacy
-
+        relation.other_cat = self.second.name
+        self.first.relationships.store(
+            relation
+        )
+        legacy.other_cat = self.first.name
+        self.second.relationships.store(
+            legacy
+        )
         play = CatSiblingPlaySystem(self.cats)
         for _ in range(2):
             result = play.play(self.first, self.second, age_days=30)
             self.assertTrue(result.played)
 
-        self.assertIs(self.first.relationships[self.second.name], relation)
-        self.assertIs(self.second.relationships[self.first.name], legacy)
+        self.assertIs(self.first.relationships.record(self.second.name), relation)
+        self.assertIs(self.second.relationships.record(self.first.name), legacy)
         self.assertAlmostEqual(relation.trust, 0.84)
         self.assertAlmostEqual(relation.familiarity, 0.28)
         self.assertAlmostEqual(relation.shared_scent, 0.3)

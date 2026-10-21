@@ -25,19 +25,28 @@ class CatLegendTrustTests(unittest.TestCase):
     def test_trust_changes_credibility(self):
         relationship = CatRelationship.create()
         relationship.trust = 1.0
-        self.listener.relationships[self.storyteller.name] = relationship
+        relationship.other_cat = self.storyteller.name
+        self.listener.relationships.store(
+            relationship
+        )
         trusted = CatKnowledge.hear_legend(self.listener, self.storyteller, self.legend)
         other = self.cats.create_cat(name='skeptic', color='gray', fur_length='short')
         relationship = CatRelationship.create()
         relationship.trust = 0.0
-        other.relationships[self.storyteller.name] = relationship
+        relationship.other_cat = self.storyteller.name
+        other.relationships.store(
+            relationship
+        )
         skeptical = CatKnowledge.hear_legend(other, self.storyteller, self.legend)
         self.assertGreater(trusted.credibility, skeptical.credibility)
 
     def test_planner_can_use_credible_legend(self):
         relationship = CatRelationship.create()
         relationship.trust = 1.0
-        self.listener.relationships[self.storyteller.name] = relationship
+        relationship.other_cat = self.storyteller.name
+        self.listener.relationships.store(
+            relationship
+        )
         CatKnowledge.hear_legend(self.listener, self.storyteller, self.legend)
         self.listener.current_layer = 'meeting_place'
         result = CatExplorationPlanner.choose_destination(cat=self.listener, universe=self.universe)

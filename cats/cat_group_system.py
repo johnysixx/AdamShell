@@ -215,9 +215,10 @@ class CatGroupSystem:
         hostile = 0
 
         for member in members:
-            relation = member.relationships.get(
-                candidate.name,
-                CatRelationship.create(),
+            relation = (
+                member.relationships.profile(
+                    candidate.name
+                )
             )
 
             trust = self._number(
@@ -690,11 +691,9 @@ class CatGroupSystem:
         return [by_name[name] for name in group.members if name in by_name]
 
     def _ensure_relationship(self, cat, other_cat):
-        relation = cat.relationships.setdefault(
-            other_cat.name,
-            CatRelationship.create(),
+        return cat.relationships.ensure(
+            other_cat.name
         )
-        return relation
 
     def _group(self, group_id):
         group = self.groups.get(group_id)

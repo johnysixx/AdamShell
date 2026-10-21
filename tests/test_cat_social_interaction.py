@@ -89,10 +89,22 @@ class CatSocialInteractionTests(unittest.TestCase):
         self.assertFalse(result.spoken)
         self.assertEqual(result.reason, 'meow_not_learned')
 
-    def _relationship(self, **values):
-        relationship = CatRelationship.create()
+    def _relationship(
+        self,
+        other_cat,
+        **values
+    ):
+        relationship = CatRelationship.create(
+            other_cat=other_cat
+        )
+
         for name, value in values.items():
-            setattr(relationship, name, value)
+            setattr(
+                relationship,
+                name,
+                value,
+            )
+
         return relationship
 
     def _social_pair(self):
@@ -260,13 +272,21 @@ class CatSocialInteractionTests(unittest.TestCase):
         names = [step.name for step in result.steps]
         self.assertIn('cat_sniffed_cat', names)
         self.assertIn('cat_kept_social_distance', names)
-        self.assertIn(second.name, first.relationships)
-        self.assertIn(first.name, second.relationships)
+        self.assertTrue(
+            first.relationships.has(
+                second.name
+            )
+        )
+        self.assertTrue(
+            second.relationships.has(
+                first.name
+            )
+        )
 
     def test_friendly_cats_use_affiliative_greeting(self):
         first, second = self._social_pair()
-        first.relationships[second.name] = self._relationship(familiarity=0.8, trust=0.9, affiliation=0.8, tension=0.0)
-        second.relationships[first.name] = self._relationship(familiarity=0.8, trust=0.9, affiliation=0.8, tension=0.0)
+        first.relationships.store(self._relationship(other_cat=second.name, familiarity=0.8, trust=0.9, affiliation=0.8, tension=0.0))
+        second.relationships.store(self._relationship(other_cat=first.name, familiarity=0.8, trust=0.9, affiliation=0.8, tension=0.0))
         social = CatSocialSystem(self.cats)
         result = social.meet(first, second)
         self.assertEqual(result.attitude, 'friendly')
@@ -275,12 +295,12 @@ class CatSocialInteractionTests(unittest.TestCase):
         self.assertIn('cat_slow_blink', names)
         self.assertIn('cat_head_bunt', names)
         self.assertIn('cat_body_rub', names)
-        self.assertGreater(first.relationships[second.name].shared_scent, 0.0)
+        self.assertGreater(first.relationships.record(second.name).shared_scent, 0.0)
 
     def test_hostile_cats_hiss_before_physical_escalation(self):
         first, second = self._social_pair()
-        first.relationships[second.name] = self._relationship(familiarity=0.5, trust=0.1, affiliation=0.0, tension=0.8)
-        second.relationships[first.name] = self._relationship(familiarity=0.5, trust=0.1, affiliation=0.0, tension=0.8)
+        first.relationships.store(self._relationship(other_cat=second.name, familiarity=0.5, trust=0.1, affiliation=0.0, tension=0.8))
+        second.relationships.store(self._relationship(other_cat=first.name, familiarity=0.5, trust=0.1, affiliation=0.0, tension=0.8))
         social = CatSocialSystem(self.cats)
         result = social.meet(first, second)
         self.assertEqual(result.attitude, 'hostile')
@@ -288,12 +308,12 @@ class CatSocialInteractionTests(unittest.TestCase):
         self.assertIn('cat_hissed_at_cat', names)
         self.assertIn('cat_warning_swat', names)
         self.assertNotIn('cat_fight_started', names)
-        self.assertGreater(first.relationships[second.name].tension, 0.8)
+        self.assertGreater(first.relationships.record(second.name).tension, 0.8)
 
     def test_extreme_hostility_can_escalate_to_fight(self):
         first, second = self._social_pair()
-        first.relationships[second.name] = self._relationship(familiarity=1.0, trust=0.0, affiliation=0.0, tension=1.0)
-        second.relationships[first.name] = self._relationship(familiarity=1.0, trust=0.0, affiliation=0.0, tension=1.0)
+        first.relationships.store(self._relationship(other_cat=second.name, familiarity=1.0, trust=0.0, affiliation=0.0, tension=1.0))
+        second.relationships.store(self._relationship(other_cat=first.name, familiarity=1.0, trust=0.0, affiliation=0.0, tension=1.0))
         first.personality.traits.aggression = 1.0
         second.personality.traits.aggression = 1.0
         social = CatSocialSystem(self.cats)
@@ -356,7 +376,7 @@ class CatSocialInteractionTests(unittest.TestCase):
 
     def test_friendly_memory_biases_future_assessment(self):
         first, second = self._social_pair()
-        first.relationships[second.name] = self._relationship(familiarity=0.6, trust=0.65, affiliation=0.5, tension=0.0)
+        first.relationships.store(self._relationship(other_cat=second.name, familiarity=0.6, trust=0.65, affiliation=0.5, tension=0.0))
         first.social_memory.store(
             CatSocialMemory(
                 other_cat=second.name,
@@ -381,7 +401,7 @@ class CatSocialInteractionTests(unittest.TestCase):
 
     def test_repeated_hostile_memory_can_make_cat_hostile(self):
         first, second = self._social_pair()
-        first.relationships[second.name] = self._relationship(familiarity=0.5, trust=0.5, affiliation=0.0, tension=0.2)
+        first.relationships.store(self._relationship(other_cat=second.name, familiarity=0.5, trust=0.5, affiliation=0.0, tension=0.2))
         first.social_memory.store(
             CatSocialMemory(
                 other_cat=second.name,
@@ -443,7 +463,7 @@ class CatSocialInteractionTests(unittest.TestCase):
         first, second = self._social_pair()
         first.location = 'window'
         second.location = 'window'
-        first.relationships[second.name] = self._relationship(familiarity=0.9, trust=0.9, affiliation=0.8, shared_scent=0.7, tension=0.0)
+        first.relationships.store(self._relationship(other_cat=second.name, familiarity=0.9, trust=0.9, affiliation=0.8, shared_scent=0.7, tension=0.0))
         territory = CatTerritorySystem(self.cats)
         territory.claim(first, strength=1.0)
         context = territory.context(first, second)
@@ -476,8 +496,8 @@ class CatSocialInteractionTests(unittest.TestCase):
 
     def _prepare_bonded_pair(self):
         first, second = self._social_pair()
-        first.relationships[second.name] = self._relationship(familiarity=0.9, trust=0.9, affiliation=0.85, shared_scent=0.7, tension=0.0)
-        second.relationships[first.name] = self._relationship(familiarity=0.9, trust=0.9, affiliation=0.85, shared_scent=0.7, tension=0.0)
+        first.relationships.store(self._relationship(other_cat=second.name, familiarity=0.9, trust=0.9, affiliation=0.85, shared_scent=0.7, tension=0.0))
+        second.relationships.store(self._relationship(other_cat=first.name, familiarity=0.9, trust=0.9, affiliation=0.85, shared_scent=0.7, tension=0.0))
         first.social_memory.store(
             CatSocialMemory(
                 other_cat=second.name,
@@ -772,7 +792,7 @@ class CatSocialInteractionTests(unittest.TestCase):
         first, second = self._social_pair()
         first.family.littermates.append(second.name)
         first.family.siblings.append(second.name)
-        first.relationships[second.name] = self._relationship(familiarity=0.8, trust=0.1, affiliation=0.0, shared_scent=0.3, tension=0.9)
+        first.relationships.store(self._relationship(other_cat=second.name, familiarity=0.8, trust=0.1, affiliation=0.0, shared_scent=0.3, tension=0.9))
         first.social_memory.store(
             CatSocialMemory(
                 other_cat=second.name,

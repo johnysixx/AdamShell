@@ -387,10 +387,10 @@ class CatGroupSocialDynamicsObjectStateTests(
         relation.tension = 1.0
         relation.familiarity = 0.8
 
-        self.second.relationships[
-            self.candidate.name
-        ] = relation
-
+        relation.other_cat = self.candidate.name
+        self.second.relationships.store(
+            relation
+        )
         recruitment = (
             CatGroupRecruitmentSystem(
                 self.groups

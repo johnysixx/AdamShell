@@ -38,8 +38,8 @@ class CatGroupSystemTests(unittest.TestCase):
         result = self.group_system.add_member(group_id, self.second, self.cats.cats)
         self.assertTrue(result.joined)
         self.assertTrue(self.group_system.same_group(self.first, self.second))
-        first_relation = self.first.relationships[self.second.name]
-        second_relation = self.second.relationships[self.first.name]
+        first_relation = self.first.relationships.record(self.second.name)
+        second_relation = self.second.relationships.record(self.first.name)
         self.assertIsInstance(first_relation, CatRelationship)
         self.assertIsInstance(second_relation, CatRelationship)
         self.assertIsNot(first_relation, second_relation)
@@ -51,7 +51,10 @@ class CatGroupSystemTests(unittest.TestCase):
         relationship.trust = 0.1
         relationship.affiliation = 0.0
         relationship.tension = 0.9
-        self.first.relationships[self.second.name] = relationship
+        relationship.other_cat = self.second.name
+        self.first.relationships.store(
+            relationship
+        )
         result = self.group_system.add_member(group_id, self.second, self.cats.cats)
         self.assertFalse(result.joined)
         self.assertEqual(result.reason, 'group_social_rejection')
@@ -61,8 +64,8 @@ class CatGroupSystemTests(unittest.TestCase):
         self.group_system.add_member(group_id, self.second, self.cats.cats)
         result = self.group_system.mix_group_scent(group_id, self.cats.cats, amount=0.2)
         self.assertTrue(result.mixed)
-        self.assertAlmostEqual(self.first.relationships[self.second.name].shared_scent, 0.2)
-        self.assertAlmostEqual(self.second.relationships[self.first.name].shared_scent, 0.2)
+        self.assertAlmostEqual(self.first.relationships.record(self.second.name).shared_scent, 0.2)
+        self.assertAlmostEqual(self.second.relationships.record(self.first.name).shared_scent, 0.2)
 
     def test_group_can_claim_shared_territory(self):
         group_id = self._create_group()
@@ -162,9 +165,14 @@ class CatGroupSystemTests(unittest.TestCase):
         legacy = CatRelationship.create()
         legacy.trust = 0.7
         legacy.custom_note = 'known_before_group'
-        self.first.relationships[self.second.name] = relation
-        self.second.relationships[self.first.name] = legacy
-
+        relation.other_cat = self.second.name
+        self.first.relationships.store(
+            relation
+        )
+        legacy.other_cat = self.first.name
+        self.second.relationships.store(
+            legacy
+        )
         group_id = self._create_group()
         joined = self.group_system.add_member(
             group_id, self.second, self.cats.cats,
@@ -175,8 +183,8 @@ class CatGroupSystemTests(unittest.TestCase):
 
         self.assertTrue(joined.joined)
         self.assertTrue(mixed.mixed)
-        self.assertIs(self.first.relationships[self.second.name], relation)
-        self.assertIs(self.second.relationships[self.first.name], legacy)
+        self.assertIs(self.first.relationships.record(self.second.name), relation)
+        self.assertIs(self.second.relationships.record(self.first.name), legacy)
         self.assertAlmostEqual(relation.trust, 0.8)
         self.assertAlmostEqual(relation.shared_scent, 0.5)
         self.assertEqual(relation.meet_count, 4)

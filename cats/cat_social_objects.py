@@ -154,6 +154,7 @@ class CatRelationship(DomainObject):
 
     def __init__(
         self,
+        other_cat=None,
         familiarity=0.0,
         trust=0.5,
         affiliation=0.0,
@@ -163,7 +164,19 @@ class CatRelationship(DomainObject):
         last_interaction=None,
         trust_history=None,
     ):
+        if other_cat is not None:
+            other_cat = str(
+                other_cat
+            )
+
+            if not other_cat:
+                raise ValueError(
+                    "Cat relationship requires "
+                    "non-empty other_cat."
+                )
+
         super().__init__(
+            other_cat=other_cat,
             familiarity=familiarity,
             trust=trust,
             affiliation=affiliation,
@@ -179,8 +192,13 @@ class CatRelationship(DomainObject):
         )
 
     @classmethod
-    def create(cls):
-        return cls()
+    def create(
+        cls,
+        other_cat=None,
+    ):
+        return cls(
+            other_cat=other_cat
+        )
 
 
 def cat_relationship_snapshot(

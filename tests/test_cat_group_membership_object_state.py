@@ -123,10 +123,10 @@ class CatGroupMembershipObjectStateTests(
         relation.affiliation = 0.0
         relation.tension = 0.9
 
-        self.first.relationships[
-            self.second.name
-        ] = relation
-
+        relation.other_cat = self.second.name
+        self.first.relationships.store(
+            relation
+        )
         result = (
             self.groups
             .evaluate_candidate(
@@ -168,10 +168,10 @@ class CatGroupMembershipObjectStateTests(
         relation.trust = 0.0
         relation.tension = 1.0
 
-        self.first.relationships[
-            self.second.name
-        ] = relation
-
+        relation.other_cat = self.second.name
+        self.first.relationships.store(
+            relation
+        )
         result = self.groups.add_member(
             self.group_id,
             self.second,

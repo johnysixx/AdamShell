@@ -105,35 +105,47 @@ class CatGroupNormTests(unittest.TestCase):
         )
 
     def test_social_avoidance_creates_relationship_object(self):
-        self.second.relationships.pop(self.first.name, None)
+        self.second.relationships = type(
+            self.second.relationships
+        )()
         sanctions = CatGroupSanctionSystem(self.groups)
 
         result = sanctions.sanction(
             self.group_id, self.second, CatViolation(severity=0.3)
         )
 
-        relation = self.second.relationships[self.first.name]
+        relation = self.second.relationships.record(self.first.name)
         self.assertEqual(result.sanction, 'social_avoidance')
         self.assertIsInstance(relation, CatRelationship)
         self.assertEqual(relation.affiliation, 0.0)
         self.assertEqual(relation.trust, 0.5)
-        self.assertNotIn(self.second.name, self.second.relationships)
+        self.assertFalse(
+            self.second.relationships.has(
+                self.second.name
+            )
+        )
 
     def test_trust_loss_creates_relationship_object(self):
-        self.second.relationships.pop(self.first.name, None)
+        self.second.relationships = type(
+            self.second.relationships
+        )()
         sanctions = CatGroupSanctionSystem(self.groups)
 
         result = sanctions.sanction(
             self.group_id, self.second, CatViolation(severity=0.6)
         )
 
-        relation = self.second.relationships[self.first.name]
+        relation = self.second.relationships.record(self.first.name)
         self.assertEqual(result.sanction, 'trust_loss')
         self.assertIsInstance(relation, CatRelationship)
         self.assertAlmostEqual(relation.trust, 0.26)
         self.assertEqual(relation.affiliation, 0.0)
         self.assertAlmostEqual(self.second.norms.trust_penalties, 0.24)
-        self.assertNotIn(self.second.name, self.second.relationships)
+        self.assertFalse(
+            self.second.relationships.has(
+                self.second.name
+            )
+        )
 
     def test_sanctions_preserve_existing_relationship_records(self):
         sanctions = CatGroupSanctionSystem(self.groups)
@@ -146,8 +158,10 @@ class CatGroupNormTests(unittest.TestCase):
             relation.trust = 0.8
             relation.trust_history = history
             relation.meet_count = 3
-            cat.relationships[other.name] = relation
-
+            relation.other_cat = other.name
+            cat.relationships.store(
+                relation
+            )
             avoidance = sanctions.sanction(
                 self.group_id, cat, CatViolation(severity=0.3)
             )
@@ -161,7 +175,7 @@ class CatGroupNormTests(unittest.TestCase):
 
             self.assertEqual(loss.sanction, 'trust_loss')
             self.assertAlmostEqual(loss.severity, 0.58)
-            self.assertIs(cat.relationships[other.name], relation)
+            self.assertIs(cat.relationships.record(other.name), relation)
             self.assertAlmostEqual(relation.trust, 0.563)
             self.assertAlmostEqual(relation.affiliation, 0.35)
             self.assertAlmostEqual(cat.norms.trust_penalties, 0.237)

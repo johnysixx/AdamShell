@@ -756,9 +756,8 @@ class CatLegendKnowledgeSystem:
         relation = (
             listener
             .relationships
-            .setdefault(
-                storyteller_name,
-                CatRelationship.create(),
+            .ensure(
+                storyteller_name
             )
         )
 
@@ -906,7 +905,7 @@ class CatLegendKnowledgeSystem:
         relation = (
             listener
             .relationships
-            .get(
+            .record(
                 storyteller_name
             )
         )

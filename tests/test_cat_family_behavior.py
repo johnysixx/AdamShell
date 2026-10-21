@@ -149,8 +149,8 @@ class CatFamilyBehaviorTests(
             result.competed
         )
 
-        first_relation = self.first.relationships[self.second.name]
-        second_relation = self.second.relationships[self.first.name]
+        first_relation = self.first.relationships.record(self.second.name)
+        second_relation = self.second.relationships.record(self.first.name)
         self.assertIsInstance(first_relation, CatRelationship)
         self.assertIsInstance(second_relation, CatRelationship)
         self.assertIsNot(first_relation, second_relation)
@@ -185,9 +185,7 @@ class CatFamilyBehaviorTests(
         )
 
         before = (
-            self.first.relationships[
-                self.second.name
-            ].tension
+            self.first.relationships.record(self.second.name).tension
         )
 
         rivalry.compete(
@@ -198,9 +196,7 @@ class CatFamilyBehaviorTests(
         )
 
         increase = (
-            self.first.relationships[
-                self.second.name
-            ].tension
+            self.first.relationships.record(self.second.name).tension
             - before
         )
 
@@ -224,9 +220,7 @@ class CatFamilyBehaviorTests(
         )
 
         before = (
-            self.first.relationships[
-                self.second.name
-            ].tension
+            self.first.relationships.record(self.second.name).tension
         )
 
         result = rivalry.reconcile(
@@ -239,9 +233,7 @@ class CatFamilyBehaviorTests(
         )
 
         self.assertLess(
-            self.first.relationships[
-                self.second.name
-            ].tension,
+            self.first.relationships.record(self.second.name).tension,
             before
         )
 
@@ -273,7 +265,7 @@ class CatFamilyBehaviorTests(
             self.first.learning.teacher_mother,
             self.mother.name
         )
-        relation = self.first.relationships[self.mother.name]
+        relation = self.first.relationships.record(self.mother.name)
         self.assertIsInstance(relation, CatRelationship)
         self.assertAlmostEqual(relation.trust, 0.54)
         self.assertAlmostEqual(relation.familiarity, 0.03)
@@ -303,7 +295,7 @@ class CatFamilyBehaviorTests(
             self.first.learning.hunting_teacher_father,
             self.father.name
         )
-        relation = self.first.relationships[self.father.name]
+        relation = self.first.relationships.record(self.father.name)
         self.assertIsInstance(relation, CatRelationship)
         self.assertAlmostEqual(relation.trust, 0.54)
         self.assertEqual(relation.last_interaction, 'parental_teaching')
@@ -367,9 +359,14 @@ class CatFamilyBehaviorTests(
         legacy = CatRelationship.create()
         legacy.trust = 0.7
         legacy.custom_note = 'known_before_rivalry'
-        self.first.relationships[self.second.name] = relation
-        self.second.relationships[self.first.name] = legacy
-
+        relation.other_cat = self.second.name
+        self.first.relationships.store(
+            relation
+        )
+        legacy.other_cat = self.first.name
+        self.second.relationships.store(
+            legacy
+        )
         rivalry = CatSiblingRivalrySystem(self.cats)
         competed = rivalry.compete(
             self.first, self.second, resource='food', intensity=0.5,
@@ -380,8 +377,8 @@ class CatFamilyBehaviorTests(
 
         reconciled = rivalry.reconcile(self.first, self.second)
         self.assertTrue(reconciled.reconciled)
-        self.assertIs(self.first.relationships[self.second.name], relation)
-        self.assertIs(self.second.relationships[self.first.name], legacy)
+        self.assertIs(self.first.relationships.record(self.second.name), relation)
+        self.assertIs(self.second.relationships.record(self.first.name), legacy)
         self.assertAlmostEqual(relation.trust, 0.8)
         self.assertAlmostEqual(relation.tension, 0.31)
         self.assertAlmostEqual(relation.affiliation, 0.63)
@@ -405,9 +402,14 @@ class CatFamilyBehaviorTests(
         legacy = CatRelationship.create()
         legacy.trust = 0.7
         legacy.custom_note = 'known_before_lessons'
-        self.first.relationships[self.mother.name] = relation
-        self.first.relationships[self.father.name] = legacy
-
+        relation.other_cat = self.mother.name
+        self.first.relationships.store(
+            relation
+        )
+        legacy.other_cat = self.father.name
+        self.first.relationships.store(
+            legacy
+        )
         teaching = CatParentalTeachingSystem(self.cats)
         for _ in range(2):
             mother_result = teaching.teach(
@@ -419,8 +421,8 @@ class CatFamilyBehaviorTests(
             self.assertTrue(mother_result.taught)
             self.assertTrue(father_result.taught)
 
-        self.assertIs(self.first.relationships[self.mother.name], relation)
-        self.assertIs(self.first.relationships[self.father.name], legacy)
+        self.assertIs(self.first.relationships.record(self.mother.name), relation)
+        self.assertIs(self.first.relationships.record(self.father.name), legacy)
         self.assertAlmostEqual(relation.trust, 0.88)
         self.assertAlmostEqual(relation.familiarity, 0.26)
         self.assertAlmostEqual(relation.affiliation, 0.34)

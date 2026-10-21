@@ -270,9 +270,8 @@ class CatSiblingRivalrySystem:
         cat,
         other_cat,
     ):
-        return cat.relationships.setdefault(
-            other_cat.name,
-            CatRelationship.create(),
+        return cat.relationships.ensure(
+            other_cat.name
         )
 
     def _record(

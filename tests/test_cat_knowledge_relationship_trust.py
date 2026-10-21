@@ -90,10 +90,10 @@ class CatKnowledgeRelationshipTrustTests(
                 relationship,
                 second_relationship,
             ):
-                self.listener.relationships[
-                    self.storyteller_name
-                ] = record
-
+                record.other_cat = self.storyteller_name
+                self.listener.relationships.store(
+                    record
+                )
                 self.assertAlmostEqual(
                     CatKnowledge._trust_in_cat(
                         self.listener,
@@ -103,9 +103,7 @@ class CatKnowledgeRelationshipTrustTests(
                 )
 
                 self.assertIs(
-                    self.listener.relationships[
-                        self.storyteller_name
-                    ],
+                    self.listener.relationships.record(self.storyteller_name),
                     record,
                 )
 
@@ -149,50 +147,41 @@ class CatKnowledgeRelationshipTrustTests(
             0.5,
         )
 
-        self.assertNotIn(
-            self.storyteller_name,
-            self.listener.relationships,
-        )
-
-        second_relationship = (
-            CatRelationship()
-        )
-
-        incomplete = CatRelationship()
-
-        for record in (
-            second_relationship,
-            incomplete,
-            None,
-        ):
-            self.listener.relationships[
+        self.assertIsNone(
+            self.listener.relationships.record(
                 self.storyteller_name
-            ] = record
-
-            self.assertEqual(
-                CatKnowledge._trust_in_cat(
-                    self.listener,
-                    self.storyteller_name,
-                ),
-                0.5,
             )
+        )
 
-            self.assertIs(
-                self.listener.relationships[
-                    self.storyteller_name
-                ],
-                record,
-            )
+        relationship = CatRelationship(
+            other_cat=self.storyteller_name
+        )
 
-        self.assertEqual(
-            second_relationship.trust,
-            0.5,
+        self.listener.relationships.store(
+            relationship
         )
 
         self.assertEqual(
-            incomplete.trust,
+            CatKnowledge._trust_in_cat(
+                self.listener,
+                self.storyteller_name,
+            ),
             0.5,
         )
+
+        self.assertIs(
+            self.listener.relationships.record(
+                self.storyteller_name
+            ),
+            relationship,
+        )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            self.listener.relationships.store(
+                None
+            )
 
     def test_adjustment_records_object_event(
         self
@@ -215,10 +204,10 @@ class CatKnowledgeRelationshipTrustTests(
                 second_relationship,
             ),
         ):
-            self.listener.relationships[
-                name
-            ] = record
-
+            record.other_cat = name
+            self.listener.relationships.store(
+                record
+            )
             event = (
                 CatKnowledge
                 .adjust_storyteller_trust(
@@ -231,9 +220,7 @@ class CatKnowledgeRelationshipTrustTests(
             )
 
             self.assertIs(
-                self.listener.relationships[
-                    name
-                ],
+                self.listener.relationships.record(name),
                 record,
             )
 
@@ -345,10 +332,10 @@ class CatKnowledgeRelationshipTrustTests(
                 second_history,
             ),
         ):
-            self.listener.relationships[
-                name
-            ] = record
-
+            record.other_cat = name
+            self.listener.relationships.store(
+                record
+            )
             previous_entry = history[0]
 
             for index, (
@@ -428,9 +415,7 @@ class CatKnowledgeRelationshipTrustTests(
                 )
 
             self.assertIs(
-                self.listener.relationships[
-                    name
-                ],
+                self.listener.relationships.record(name),
                 record,
             )
 

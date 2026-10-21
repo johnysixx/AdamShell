@@ -44,9 +44,8 @@ class CatGroupSanctionSystem:
             for member_name in group.members:
                 if member_name == cat.name:
                     continue
-                relation = cat.relationships.setdefault(
-                    member_name,
-                    CatRelationship.create(),
+                relation = cat.relationships.ensure(
+                    member_name
                 )
                 relation.affiliation = max(0.0, float(relation.affiliation) - 0.05)
         elif sanction_type == 'trust_loss':
@@ -55,9 +54,8 @@ class CatGroupSanctionSystem:
             for member_name in group.members:
                 if member_name == cat.name:
                     continue
-                relation = cat.relationships.setdefault(
-                    member_name,
-                    CatRelationship.create(),
+                relation = cat.relationships.ensure(
+                    member_name
                 )
                 relation.trust = max(0.0, float(relation.trust) - penalty)
         elif sanction_type == 'role_suspension':
