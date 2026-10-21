@@ -185,18 +185,20 @@ class CatGroupTerritoryResultsObjectStateTests(
             by_owner[
                 self.first.name
             ],
-            self.first.territories.claims[
-                key
-            ],
+            self.first.territories.record(
+                "meeting_place",
+                "window",
+            ),
         )
 
         self.assertIsNot(
             by_owner[
                 self.second.name
             ],
-            self.second.territories.claims[
-                key
-            ],
+            self.second.territories.record(
+                "meeting_place",
+                "window",
+            ),
         )
 
     def test_group_history_stores_event_object(

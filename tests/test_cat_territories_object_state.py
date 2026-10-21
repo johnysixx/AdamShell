@@ -34,8 +34,22 @@ class CatTerritoriesObjectStateTests(unittest.TestCase):
             CatTerritories,
         )
         self.assertEqual(
-            self.cat.territories.claims,
-            {},
+            self.cat.territories.owner,
+            self.cat.name,
+        )
+
+        self.assertTrue(
+            self.cat.territories.is_empty
+        )
+
+        self.assertEqual(
+            self.cat.territories.count,
+            0,
+        )
+
+        self.assertEqual(
+            self.cat.territories.records(),
+            (),
         )
 
         self.assertIsInstance(
@@ -43,32 +57,75 @@ class CatTerritoriesObjectStateTests(unittest.TestCase):
             DomainObject,
         )
 
-        self.assertFalse(
-            hasattr(
-                self.cat.territories,
-                "to_dict",
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+            "pop",
+            "setdefault",
+            "clear",
+            "__getitem__",
+            "__setitem__",
+            "__contains__",
+            "to_dict",
+        ):
+            self.assertFalse(
+                hasattr(
+                    self.cat.territories,
+                    mapping_method,
+                )
             )
-        )
 
     def test_claim_is_stored_in_object_registry(self):
         claim = self.system.claim(
             self.cat,
             strength=0.7,
         )
-        key = "meeting_place::window"
-
-        self.assertIn(
-            key,
-            self.cat.territories.claims,
+        stored = (
+            self.cat.territories.record(
+                "meeting_place",
+                "window",
+            )
         )
+
         self.assertIsInstance(
-            self.cat.territories.claims[key],
+            stored,
             CatTerritoryClaim,
         )
+
         self.assertEqual(
             claim,
-            self.cat.territories.claims[key],
+            stored,
         )
+
+        self.assertEqual(
+            stored.owner,
+            self.cat.name,
+        )
+
+    def test_registry_rejects_invalid_claims(
+        self
+    ):
+        with self.assertRaises(
+            TypeError
+        ):
+            self.cat.territories.store(
+                {
+                    "owner": self.cat.name,
+                }
+            )
+
+        with self.assertRaises(
+            ValueError
+        ):
+            self.cat.territories.store(
+                CatTerritoryClaim(
+                    owner="other_cat",
+                    layer="meeting_place",
+                    location="window",
+                )
+            )
 
     def test_territory_events_are_object_state(
         self
@@ -144,9 +201,10 @@ class CatTerritoriesObjectStateTests(unittest.TestCase):
             self.cat
         )
 
-        claim = self.cat.territories.claims[
-            "meeting_place::window"
-        ]
+        claim = self.cat.territories.record(
+            "meeting_place",
+            "window",
+        )
 
         self.assertEqual(
             claim.scent_marks,

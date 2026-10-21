@@ -194,12 +194,12 @@ class CatGroupTerritoryObjectStateTests(
             'members': [],
         }
 
-        first_claim_count = len(
-            self.first.territories.claims
+        first_claim_count = (
+            self.first.territories.count
         )
 
-        second_claim_count = len(
-            self.second.territories.claims
+        second_claim_count = (
+            self.second.territories.count
         )
 
         with self.assertRaises(
@@ -214,18 +214,12 @@ class CatGroupTerritoryObjectStateTests(
             )
 
         self.assertEqual(
-            len(
-                self.first
-                .territories.claims
-            ),
+            self.first.territories.count,
             first_claim_count,
         )
 
         self.assertEqual(
-            len(
-                self.second
-                .territories.claims
-            ),
+            self.second.territories.count,
             second_claim_count,
         )
 

@@ -43,8 +43,9 @@ class CatTerritorySystem:
         )
 
         previous = (
-            cat.territories.claims.get(
-                key
+            cat.territories.record(
+                layer,
+                location,
             )
         )
 
@@ -62,9 +63,9 @@ class CatTerritorySystem:
                 )
             )
 
-            cat.territories.claims[
-                key
-            ] = claim
+            cat.territories.store(
+                claim
+            )
 
         else:
             claim = previous
@@ -147,22 +148,20 @@ class CatTerritorySystem:
             location,
         )
 
-        if (
-            key
-            not in cat.territories.claims
-        ):
+        claim = (
+            cat.territories.record(
+                layer,
+                location,
+            )
+        )
+
+        if claim is None:
             return self.claim(
                 cat=cat,
                 layer=layer,
                 location=location,
                 strength=0.5,
             )
-
-        claim = (
-            cat.territories.claims[
-                key
-            ]
-        )
 
         claim.scent_marks = (
             int(
@@ -304,14 +303,20 @@ class CatTerritorySystem:
         )
 
 
-    def claim_at(self, cat, layer, location):
-        self._require_cat(cat)
-        exact_key = self._territory_key(layer, location)
-        claim = cat.territories.claims.get(exact_key)
-        if claim is not None:
-            return claim
-        layer_key = self._territory_key(layer, None)
-        return cat.territories.claims.get(layer_key)
+    def claim_at(
+        self,
+        cat,
+        layer,
+        location,
+    ):
+        self._require_cat(
+            cat
+        )
+
+        return cat.territories.claim_at(
+            layer,
+            location,
+        )
 
     def _territory_key(self, layer, location):
         return f"{layer}::{(location if location is not None else '*')}"

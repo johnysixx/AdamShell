@@ -98,7 +98,161 @@ class CatHumanBond(DomainObject):
 
 
 class CatTerritories(DomainObject):
-    pass
+
+    def __init__(
+        self,
+        owner,
+    ):
+        owner = str(
+            owner
+        )
+
+        if not owner:
+            raise ValueError(
+                "Cat territory registry requires owner."
+            )
+
+        self.owner = owner
+        self._claims = []
+
+    @property
+    def is_empty(
+        self,
+    ):
+        return not self._claims
+
+    @property
+    def count(
+        self,
+    ):
+        return len(
+            self._claims
+        )
+
+    def store(
+        self,
+        claim,
+    ):
+        from cats.cat_social_objects import (
+            CatTerritoryClaim,
+        )
+
+        if not isinstance(
+            claim,
+            CatTerritoryClaim,
+        ):
+            raise TypeError(
+                "Cat territory registry requires "
+                "CatTerritoryClaim."
+            )
+
+        if claim.owner != self.owner:
+            raise ValueError(
+                "Cat territory claim owner does not "
+                "match registry owner."
+            )
+
+        for index, current in enumerate(
+            self.records()
+        ):
+            if (
+                current.layer
+                == claim.layer
+                and current.location
+                == claim.location
+            ):
+                self._claims[
+                    index
+                ] = claim
+
+                return claim
+
+        self._claims.append(
+            claim
+        )
+
+        return claim
+
+    def record(
+        self,
+        layer,
+        location=None,
+    ):
+        layer = str(
+            layer
+        )
+
+        for claim in self.records():
+            if (
+                claim.layer
+                == layer
+                and claim.location
+                == location
+            ):
+                return claim
+
+        return None
+
+    def claim_at(
+        self,
+        layer,
+        location,
+    ):
+        claim = self.record(
+            layer,
+            location,
+        )
+
+        if claim is not None:
+            return claim
+
+        if location is None:
+            return None
+
+        return self.record(
+            layer,
+            None,
+        )
+
+    def has(
+        self,
+        layer,
+        location=None,
+    ):
+        return (
+            self.record(
+                layer,
+                location,
+            )
+            is not None
+        )
+
+    def records(
+        self,
+    ):
+        from cats.cat_social_objects import (
+            CatTerritoryClaim,
+        )
+
+        for claim in self._claims:
+            if not isinstance(
+                claim,
+                CatTerritoryClaim,
+            ):
+                raise TypeError(
+                    "Cat territory registry contains "
+                    "invalid runtime state."
+                )
+
+            if claim.owner != self.owner:
+                raise ValueError(
+                    "Cat territory registry contains "
+                    "claim for another owner."
+                )
+
+        return tuple(
+            self._claims
+        )
 
 
 class CatRelationships(DomainObject):

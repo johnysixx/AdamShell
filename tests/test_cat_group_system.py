@@ -73,8 +73,20 @@ class CatGroupSystemTests(unittest.TestCase):
         result = self.group_system.claim_territory(group_id, self.cats.cats, layer='meeting_place', location='bar_window', strength=0.8)
         self.assertTrue(result.claimed)
         key = 'meeting_place::bar_window'
-        self.assertIn(key, self.first.territories.claims)
-        self.assertIn(key, self.second.territories.claims)
+
+        self.assertIsNotNone(
+            self.first.territories.record(
+                'meeting_place',
+                'bar_window',
+            )
+        )
+
+        self.assertIsNotNone(
+            self.second.territories.record(
+                'meeting_place',
+                'bar_window',
+            )
+        )
 
         territory = (
             self.group_system

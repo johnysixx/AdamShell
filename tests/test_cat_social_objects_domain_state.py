@@ -31,6 +31,9 @@ class CatSocialObjectsDomainStateTests(
                 name="training",
             ),
             CatTerritoryClaim(
+                owner="owner_cat",
+                layer="meeting_place",
+                location="window",
                 name="claim",
             ),
             CatSocialMemory(

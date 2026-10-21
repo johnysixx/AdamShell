@@ -22,7 +22,38 @@ class CatLegend(DomainObject):
 
 
 class CatTerritoryClaim(DomainObject):
-    pass
+
+    def __init__(
+        self,
+        owner,
+        layer,
+        location=None,
+        **values
+    ):
+        owner = str(
+            owner
+        )
+
+        layer = str(
+            layer
+        )
+
+        if not owner:
+            raise ValueError(
+                "Cat territory claim requires owner."
+            )
+
+        if not layer:
+            raise ValueError(
+                "Cat territory claim requires layer."
+            )
+
+        super().__init__(
+            owner=owner,
+            layer=layer,
+            location=location,
+            **values
+        )
 
 
 class CatSocialMemory(DomainObject):
