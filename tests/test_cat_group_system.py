@@ -91,7 +91,11 @@ class CatGroupSystemTests(unittest.TestCase):
         territory = (
             self.group_system
             .groups[group_id]
-            .territories[key]
+            .territories
+            .record(
+                'meeting_place',
+                'bar_window',
+            )
         )
 
         self.assertIsInstance(

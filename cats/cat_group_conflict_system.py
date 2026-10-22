@@ -82,9 +82,9 @@ class CatGroupConflictSystem:
             )
 
         shared_territories = set(
-            first.territories
+            first.territories.identifiers()
         ).intersection(
-            second.territories
+            second.territories.identifiers()
         )
 
         same_place = bool(

@@ -6,7 +6,8 @@ from cats.cat_group_system import (
     CatGroupSystem
 )
 from cats.cat_group_territory_state import (
-    CatGroupTerritoryState
+    CatGroupTerritories,
+    CatGroupTerritoryState,
 )
 
 
@@ -88,6 +89,75 @@ class CatGroupTerritoryObjectStateTests(
             )
         )
 
+    def test_registry_has_no_mapping_api(
+        self
+    ):
+        registry = (
+            self.groups
+            .groups[self.group_id]
+            .territories
+        )
+
+        self.assertIsInstance(
+            registry,
+            CatGroupTerritories,
+        )
+
+        self.assertTrue(
+            registry.is_empty
+        )
+
+        self.assertEqual(
+            registry.count,
+            0,
+        )
+
+        self.assertEqual(
+            registry.records(),
+            (),
+        )
+
+        self.assertEqual(
+            registry.identifiers(),
+            (),
+        )
+
+        for mapping_method in (
+            'get',
+            'keys',
+            'items',
+            'values',
+            'pop',
+            'setdefault',
+            'clear',
+            '__getitem__',
+            '__setitem__',
+            '__contains__',
+        ):
+            self.assertFalse(
+                hasattr(
+                    registry,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            registry.store(
+                {
+                    'layer':
+                        'meeting_place',
+                }
+            )
+
+        with self.assertRaises(
+            ValueError
+        ):
+            registry.store(
+                CatGroupTerritoryState()
+            )
+
     def test_registry_stores_object_record(
         self
     ):
@@ -102,9 +172,11 @@ class CatGroupTerritoryObjectStateTests(
         state = (
             self.groups
             .groups[self.group_id]
-            .territories[
-                'meeting_place::window'
-            ]
+            .territories
+            .record(
+                'meeting_place',
+                'window',
+            )
         )
 
         self.assertIsInstance(
@@ -115,6 +187,16 @@ class CatGroupTerritoryObjectStateTests(
         self.assertEqual(
             state.location,
             'window',
+        )
+
+        self.assertEqual(
+            self.groups
+            .groups[self.group_id]
+            .territories
+            .identifiers(),
+            (
+                'meeting_place::window',
+            ),
         )
 
         self.assertAlmostEqual(
@@ -144,9 +226,11 @@ class CatGroupTerritoryObjectStateTests(
         stored = (
             self.groups
             .groups[self.group_id]
-            .territories[
-                'meeting_place::window'
-            ]
+            .territories
+            .record(
+                'meeting_place',
+                'window',
+            )
         )
 
         self.groups.claim_territory(
@@ -160,9 +244,11 @@ class CatGroupTerritoryObjectStateTests(
         current = (
             self.groups
             .groups[self.group_id]
-            .territories[
-                'meeting_place::window'
-            ]
+            .territories
+            .record(
+                'meeting_place',
+                'window',
+            )
         )
 
         self.assertIs(
@@ -182,18 +268,6 @@ class CatGroupTerritoryObjectStateTests(
             self.group_id
         ]
 
-        group.territories[
-            'meeting_place::window'
-        ] = {
-            'layer':
-                'meeting_place',
-            'location':
-                'window',
-            'strength':
-                0.7,
-            'members': [],
-        }
-
         first_claim_count = (
             self.first.territories.count
         )
@@ -205,13 +279,21 @@ class CatGroupTerritoryObjectStateTests(
         with self.assertRaises(
             TypeError
         ):
-            self.groups.claim_territory(
-                self.group_id,
-                self.cats.cats,
-                layer='meeting_place',
-                location='window',
-                strength=0.8,
+            group.territories.store(
+                {
+                    'layer':
+                        'meeting_place',
+                    'location':
+                        'window',
+                    'strength':
+                        0.7,
+                    'members': [],
+                }
             )
+
+        self.assertTrue(
+            group.territories.is_empty
+        )
 
         self.assertEqual(
             self.first.territories.count,

@@ -5,6 +5,9 @@ from cats.cat_group_lifecycle_state import (
 from cats.cat_group_memory_registry import (
     CatGroupMemoryRegistry,
 )
+from cats.cat_group_territory_state import (
+    CatGroupTerritories,
+)
 
 
 class CatGroupCulture(DomainObject):
@@ -59,6 +62,19 @@ class CatGroup(DomainObject):
             raise TypeError(
                 "Cat group memory must use "
                 "CatGroupMemoryRegistry."
+            )
+
+        territories = values.get(
+            "territories"
+        )
+
+        if not isinstance(
+            territories,
+            CatGroupTerritories,
+        ):
+            raise TypeError(
+                "Cat group territories must use "
+                "CatGroupTerritories."
             )
 
         super().__init__(

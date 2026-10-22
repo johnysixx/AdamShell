@@ -33,6 +33,7 @@ from cats.cat_group_scent_state import (
 from cats.cat_social_objects import CatRelationship
 from cats.cat_territory_system import CatTerritorySystem
 from cats.cat_group_territory_state import (
+    CatGroupTerritories,
     CatGroupTerritoryClaimedEvent,
     CatGroupTerritoryClaimedResult,
     CatGroupTerritoryState,
@@ -83,7 +84,7 @@ class CatGroupSystem:
                 founder.name
             ],
             shared_scent_strength=0.0,
-            territories={},
+            territories=CatGroupTerritories(),
             threat_events=0,
             state=CatGroupLifecycleState.FORMING,
             age_ticks=0,
@@ -505,22 +506,10 @@ class CatGroupSystem:
             f"{layer}::{location}"
         )
 
-        territory = group.territories.get(
-            key
+        territory = group.territories.record(
+            layer,
+            location,
         )
-
-        if (
-            territory is not None
-            and not isinstance(
-                territory,
-                CatGroupTerritoryState,
-            )
-        ):
-            raise TypeError(
-                "Cat group territory record "
-                "must be "
-                "CatGroupTerritoryState."
-            )
 
         if territory is None:
             territory = (
@@ -557,9 +546,9 @@ class CatGroupSystem:
             ],
         )
 
-        group.territories[
-            key
-        ] = territory
+        group.territories.store(
+            territory
+        )
 
         event = (
             CatGroupTerritoryClaimedEvent(
