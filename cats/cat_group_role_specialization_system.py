@@ -18,7 +18,7 @@ class CatGroupRoleSpecializationSystem:
         )
 
         base_state = (
-            cat.group_roles.active.get(
+            cat.group_roles.record(
                 base_role
             )
         )
@@ -48,22 +48,10 @@ class CatGroupRoleSpecializationSystem:
             )
 
         existing = (
-            cat.group_roles.active.get(
+            cat.group_roles.record(
                 specialization
             )
         )
-
-        if (
-            existing is not None
-            and not isinstance(
-                existing,
-                CatGroupRoleState,
-            )
-        ):
-            raise TypeError(
-                'Cat group role record must be '
-                'CatGroupRoleState.'
-            )
 
         if existing is None:
             existing = CatGroupRoleState()
@@ -123,12 +111,13 @@ class CatGroupRoleSpecializationSystem:
 
         existing.assign_specialization(
             group_id=group_id,
+            role=specialization,
             base_role=base_role,
         )
 
-        cat.group_roles.active[
-            specialization
-        ] = existing
+        cat.group_roles.store(
+            existing
+        )
 
         event = CatGroupRoleSpecializedEvent(
             group_id=group_id,

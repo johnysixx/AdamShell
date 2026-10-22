@@ -24,12 +24,16 @@ class CatGroupInstitutionTests(unittest.TestCase):
         roles = CatGroupRoleSystem(self.groups)
         result = roles.assign(self.group_id, self.first, 'guardian')
         self.assertTrue(result.assigned)
-        self.assertIn('guardian', self.first.group_roles.active)
+        self.assertTrue(
+            self.first.group_roles.has(
+                'guardian'
+            )
+        )
 
         role = (
-            self.first.group_roles.active[
+            self.first.group_roles.record(
                 'guardian'
-            ]
+            )
         )
 
         self.assertIsInstance(
@@ -52,7 +56,11 @@ class CatGroupInstitutionTests(unittest.TestCase):
         roles = CatGroupRoleSystem(self.groups)
         roles.assign(self.group_id, self.first, 'guardian')
         roles.release(self.group_id, self.first, 'guardian')
-        self.assertNotIn('guardian', self.first.group_roles.active)
+        self.assertFalse(
+            self.first.group_roles.has(
+                'guardian'
+            )
+        )
 
     def test_group_can_define_and_perform_ritual(self):
         rituals = CatGroupRitualSystem(self.groups)

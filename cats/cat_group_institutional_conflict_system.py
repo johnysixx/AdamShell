@@ -293,9 +293,8 @@ class CatGroupInstitutionalConflictSystem:
                 )
             )
 
-        if (
+        if not mediator.group_roles.has(
             "mediator"
-            not in mediator.group_roles.active
         ):
             return (
                 CatInstitutionMediationDeniedResult(

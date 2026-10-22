@@ -97,7 +97,11 @@ class CatGroupRitualSpecializationTests(unittest.TestCase):
         specialization = CatGroupRoleSpecializationSystem(self.groups)
         result = specialization.specialize(self.group_id, cat, 'guardian', 'night_guardian')
         self.assertTrue(result.specialized)
-        self.assertIn('night_guardian', cat.group_roles.active)
+        self.assertTrue(
+            cat.group_roles.has(
+                'night_guardian'
+            )
+        )
 
     def test_specialization_requires_base_role(self):
         specialization = CatGroupRoleSpecializationSystem(self.groups)

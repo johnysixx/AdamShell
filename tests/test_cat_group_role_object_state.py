@@ -101,8 +101,14 @@ class CatGroupRoleObjectStateTests(
         self
     ):
         state = CatGroupRoleState(
+            role="guardian",
             group_id="group",
             score=0.7,
+        )
+
+        self.assertEqual(
+            state.role,
+            "guardian",
         )
 
         self.assertEqual(
@@ -124,15 +130,74 @@ class CatGroupRoleObjectStateTests(
             )
         )
 
+    def test_role_registry_has_no_mapping_api(
+        self
+    ):
+        registry = self.cat.group_roles
+
+        self.assertTrue(
+            registry.is_empty
+        )
+
+        self.assertEqual(
+            registry.count,
+            0,
+        )
+
+        self.assertEqual(
+            registry.records(),
+            (),
+        )
+
+        self.assertEqual(
+            registry.roles(),
+            (),
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+            "pop",
+            "setdefault",
+            "clear",
+            "__getitem__",
+            "__setitem__",
+            "__contains__",
+        ):
+            self.assertFalse(
+                hasattr(
+                    registry,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            registry.store(
+                {
+                    "role": "guardian",
+                }
+            )
+
+        with self.assertRaises(
+            ValueError
+        ):
+            registry.store(
+                CatGroupRoleState()
+            )
+
     def test_base_role_registry_stores_and_reuses_object(
         self
     ):
         self.prepare_guardian()
 
         stored = (
-            self.cat.group_roles.active[
+            self.cat.group_roles.record(
                 "guardian"
-            ]
+            )
         )
 
         self.assertIsInstance(
@@ -147,9 +212,9 @@ class CatGroupRoleObjectStateTests(
         )
 
         current = (
-            self.cat.group_roles.active[
+            self.cat.group_roles.record(
                 "guardian"
-            ]
+            )
         )
 
         self.assertIs(
@@ -178,9 +243,9 @@ class CatGroupRoleObjectStateTests(
         )
 
         state = (
-            self.cat.group_roles.active[
+            self.cat.group_roles.record(
                 "night_guardian"
-            ]
+            )
         )
 
         self.assertIsInstance(
@@ -190,6 +255,11 @@ class CatGroupRoleObjectStateTests(
 
         self.assertTrue(
             state.specialized
+        )
+
+        self.assertEqual(
+            state.role,
+            "night_guardian",
         )
 
         self.assertEqual(
@@ -446,16 +516,6 @@ class CatGroupRoleObjectStateTests(
     def test_legacy_mapping_record_is_rejected_before_holder_side_effect(
         self
     ):
-        self.cat.personality.traits.courage = 1.0
-        self.cat.group.influence = 1.0
-
-        self.cat.group_roles.active[
-            "guardian"
-        ] = {
-            "group_id": self.group_id,
-            "score": 1.0,
-        }
-
         group = self.groups.groups[
             self.group_id
         ]
@@ -468,11 +528,19 @@ class CatGroupRoleObjectStateTests(
         with self.assertRaises(
             TypeError
         ):
-            self.roles.assign(
-                self.group_id,
-                self.cat,
-                "guardian",
+            self.cat.group_roles.store(
+                {
+                    "role": "guardian",
+                    "group_id": self.group_id,
+                    "score": 1.0,
+                }
             )
+
+        self.assertFalse(
+            self.cat.group_roles.has(
+                "guardian"
+            )
+        )
 
         self.assertNotIn(
             "guardian",

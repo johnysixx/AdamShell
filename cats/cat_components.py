@@ -57,6 +57,182 @@ class CatCulture(DomainObject):
     pass
 
 class CatGroupRoles(DomainObject):
+
+    def __init__(
+        self,
+        history=None,
+        role_events=0,
+    ):
+        self._active = []
+        self.history = []
+        self.role_events = int(
+            role_events
+        )
+
+        for event in list(
+            history or []
+        ):
+            self.record_event(
+                event
+            )
+
+    @property
+    def is_empty(
+        self,
+    ):
+        return not self._active
+
+    @property
+    def count(
+        self,
+    ):
+        return len(
+            self._active
+        )
+
+    def store(
+        self,
+        state,
+    ):
+        from cats.cat_group_role_state import (
+            CatGroupRoleState,
+        )
+
+        if not isinstance(
+            state,
+            CatGroupRoleState,
+        ):
+            raise TypeError(
+                "Cat group role registry requires "
+                "CatGroupRoleState."
+            )
+
+        role = getattr(
+            state,
+            "role",
+            None,
+        )
+
+        if (
+            not isinstance(
+                role,
+                str,
+            )
+            or not role
+        ):
+            raise ValueError(
+                "Stored cat group role requires role."
+            )
+
+        for index, current in enumerate(
+            self.records()
+        ):
+            if current.role == role:
+                self._active[
+                    index
+                ] = state
+
+                return state
+
+        self._active.append(
+            state
+        )
+
+        return state
+
+    def record(
+        self,
+        role,
+    ):
+        role = str(
+            role
+        )
+
+        for state in self.records():
+            if state.role == role:
+                return state
+
+        return None
+
+    def has(
+        self,
+        role,
+    ):
+        return (
+            self.record(
+                role
+            )
+            is not None
+        )
+
+    def release(
+        self,
+        role,
+    ):
+        role = str(
+            role
+        )
+
+        for index, state in enumerate(
+            self.records()
+        ):
+            if state.role == role:
+                del self._active[
+                    index
+                ]
+
+                return state
+
+        return None
+
+    def roles(
+        self,
+    ):
+        return tuple(
+            state.role
+            for state
+            in self.records()
+        )
+
+    def records(
+        self,
+    ):
+        from cats.cat_group_role_state import (
+            CatGroupRoleState,
+        )
+
+        for state in self._active:
+            if not isinstance(
+                state,
+                CatGroupRoleState,
+            ):
+                raise TypeError(
+                    "Cat group role registry contains "
+                    "invalid runtime state."
+                )
+
+            role = getattr(
+                state,
+                "role",
+                None,
+            )
+
+            if (
+                not isinstance(
+                    role,
+                    str,
+                )
+                or not role
+            ):
+                raise ValueError(
+                    "Cat group role registry contains "
+                    "state without role."
+                )
+
+        return tuple(
+            self._active
+        )
+
     def record_event(
         self,
         event,

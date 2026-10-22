@@ -229,8 +229,8 @@ class CatGroupSuccessionSystem:
         cats,
         reason="cat_left_group",
     ):
-        roles = tuple(
-            cat.group_roles.active.keys()
+        roles = (
+            cat.group_roles.roles()
         )
 
         succession_events = tuple(

@@ -31,7 +31,11 @@ class CatGroupSuccessionConflictTests(unittest.TestCase):
         result = succession.succeed(self.group_id, self.first, 'guardian', self.cats.cats)
         self.assertTrue(result.succeeded)
         self.assertEqual(result.successor, self.second.name)
-        self.assertIn('guardian', self.second.group_roles.active)
+        self.assertTrue(
+            self.second.group_roles.has(
+                'guardian'
+            )
+        )
 
     def test_departure_can_trigger_succession(self):
         roles = CatGroupRoleSystem(self.groups)
@@ -40,7 +44,11 @@ class CatGroupSuccessionConflictTests(unittest.TestCase):
         result = succession.handle_departure(self.group_id, self.first, self.cats.cats)
         self.assertTrue(result.departed)
         self.assertFalse(self.first.group.member)
-        self.assertIn('guardian', self.second.group_roles.active)
+        self.assertTrue(
+            self.second.group_roles.has(
+                'guardian'
+            )
+        )
 
     def test_missing_successor_weakens_institution(self):
         roles = CatGroupRoleSystem(self.groups)

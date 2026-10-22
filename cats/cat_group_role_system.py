@@ -121,21 +121,11 @@ class CatGroupRoleSystem:
                     ),
                 )
             )
-        existing = cat.group_roles.active.get(
-            role
+        existing = (
+            cat.group_roles.record(
+                role
+            )
         )
-
-        if (
-            existing is not None
-            and not isinstance(
-                existing,
-                CatGroupRoleState,
-            )
-        ):
-            raise TypeError(
-                'Cat group role record must be '
-                'CatGroupRoleState.'
-            )
 
         if existing is None:
             existing = CatGroupRoleState()
@@ -156,12 +146,13 @@ class CatGroupRoleSystem:
 
         existing.assign_base(
             group_id=group_id,
+            role=role,
             score=check.score,
         )
 
-        cat.group_roles.active[
-            role
-        ] = existing
+        cat.group_roles.store(
+            existing
+        )
 
         cat.group_roles.role_events += 1
 
@@ -189,9 +180,8 @@ class CatGroupRoleSystem:
         holders = group.roles.get(role, [])
         if cat.name in holders:
             holders.remove(cat.name)
-        cat.group_roles.active.pop(
-            role,
-            None,
+        cat.group_roles.release(
+            role
         )
 
         event = CatGroupRoleReleasedEvent(

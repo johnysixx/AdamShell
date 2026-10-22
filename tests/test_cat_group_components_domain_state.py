@@ -30,7 +30,6 @@ class CatGroupComponentsDomainStateTests(
                 myths={},
             ),
             CatGroupRoles(
-                active={},
                 history=[],
                 role_events=0,
             ),
@@ -89,7 +88,6 @@ class CatGroupComponentsDomainStateTests(
         self
     ):
         roles = CatGroupRoles(
-            active={},
             history=[],
             role_events=0,
         )

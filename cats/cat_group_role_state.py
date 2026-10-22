@@ -3,6 +3,7 @@ from dataclasses import dataclass
 
 @dataclass(slots=True)
 class CatGroupRoleState:
+    role: str | None = None
     group_id: str | None = None
     score: float | None = None
     base_role: str | None = None
@@ -11,8 +12,19 @@ class CatGroupRoleState:
     def assign_base(
         self,
         group_id,
+        role,
         score,
     ):
+        role = str(
+            role
+        )
+
+        if not role:
+            raise ValueError(
+                "Cat group role state requires role."
+            )
+
+        self.role = role
         self.group_id = group_id
         self.score = float(score)
         self.base_role = None
@@ -23,8 +35,29 @@ class CatGroupRoleState:
     def assign_specialization(
         self,
         group_id,
+        role,
         base_role,
     ):
+        role = str(
+            role
+        )
+
+        base_role = str(
+            base_role
+        )
+
+        if not role:
+            raise ValueError(
+                "Cat group role state requires role."
+            )
+
+        if not base_role:
+            raise ValueError(
+                "Cat group specialization requires "
+                "base_role."
+            )
+
+        self.role = role
         self.group_id = group_id
         self.score = None
         self.base_role = base_role
