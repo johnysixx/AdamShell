@@ -53,8 +53,450 @@ class FamilyBonding(DomainObject):
 class CatGroupMembership(DomainObject):
     pass
 
+class CatCulturalTraditionEvaluations(
+    DomainObject
+):
+
+    def __init__(
+        self,
+    ):
+        self._records = []
+
+    @property
+    def is_empty(
+        self,
+    ):
+        return not self._records
+
+    @property
+    def count(
+        self,
+    ):
+        return len(
+            self._records
+        )
+
+    def store(
+        self,
+        record,
+    ):
+        from cats.cat_cultural_tradition_evaluation_state import (
+            CatCulturalTraditionEvaluationState,
+        )
+
+        if not isinstance(
+            record,
+            CatCulturalTraditionEvaluationState,
+        ):
+            raise TypeError(
+                "Cultural tradition registry requires "
+                "CatCulturalTraditionEvaluationState."
+            )
+
+        tradition = getattr(
+            record,
+            "tradition",
+            None,
+        )
+
+        if (
+            not isinstance(
+                tradition,
+                str,
+            )
+            or not tradition
+        ):
+            raise ValueError(
+                "Stored cultural tradition evaluation "
+                "requires tradition."
+            )
+
+        for index, current in enumerate(
+            self.records()
+        ):
+            if (
+                current.tradition
+                == tradition
+            ):
+                self._records[
+                    index
+                ] = record
+
+                return record
+
+        self._records.append(
+            record
+        )
+
+        return record
+
+    def record(
+        self,
+        tradition,
+    ):
+        tradition = str(
+            tradition
+        )
+
+        for record in self.records():
+            if (
+                record.tradition
+                == tradition
+            ):
+                return record
+
+        return None
+
+    def has(
+        self,
+        tradition,
+    ):
+        return (
+            self.record(
+                tradition
+            )
+            is not None
+        )
+
+    def release(
+        self,
+        tradition,
+    ):
+        tradition = str(
+            tradition
+        )
+
+        for index, record in enumerate(
+            self.records()
+        ):
+            if (
+                record.tradition
+                == tradition
+            ):
+                del self._records[
+                    index
+                ]
+
+                return record
+
+        return None
+
+    def records(
+        self,
+    ):
+        from cats.cat_cultural_tradition_evaluation_state import (
+            CatCulturalTraditionEvaluationState,
+        )
+
+        for record in self._records:
+            if not isinstance(
+                record,
+                CatCulturalTraditionEvaluationState,
+            ):
+                raise TypeError(
+                    "Cultural tradition registry contains "
+                    "invalid runtime state."
+                )
+
+        return tuple(
+            self._records
+        )
+
+
+class CatCulturalPreferences(
+    DomainObject
+):
+
+    def __init__(
+        self,
+    ):
+        self._records = []
+
+    @property
+    def is_empty(
+        self,
+    ):
+        return not self._records
+
+    @property
+    def count(
+        self,
+    ):
+        return len(
+            self._records
+        )
+
+    def store(
+        self,
+        record,
+    ):
+        from cats.cat_cultural_preference_state import (
+            CatCulturalPreferenceState,
+        )
+
+        if not isinstance(
+            record,
+            CatCulturalPreferenceState,
+        ):
+            raise TypeError(
+                "Cultural preference registry requires "
+                "CatCulturalPreferenceState."
+            )
+
+        name = getattr(
+            record,
+            "name",
+            None,
+        )
+
+        if (
+            not isinstance(
+                name,
+                str,
+            )
+            or not name
+        ):
+            raise ValueError(
+                "Stored cultural preference requires name."
+            )
+
+        for index, current in enumerate(
+            self.records()
+        ):
+            if current.name == name:
+                self._records[
+                    index
+                ] = record
+
+                return record
+
+        self._records.append(
+            record
+        )
+
+        return record
+
+    def record(
+        self,
+        name,
+    ):
+        name = str(
+            name
+        )
+
+        for record in self.records():
+            if record.name == name:
+                return record
+
+        return None
+
+    def has(
+        self,
+        name,
+    ):
+        return (
+            self.record(
+                name
+            )
+            is not None
+        )
+
+    def records(
+        self,
+    ):
+        from cats.cat_cultural_preference_state import (
+            CatCulturalPreferenceState,
+        )
+
+        for record in self._records:
+            if not isinstance(
+                record,
+                CatCulturalPreferenceState,
+            ):
+                raise TypeError(
+                    "Cultural preference registry contains "
+                    "invalid runtime state."
+                )
+
+        return tuple(
+            self._records
+        )
+
+
+class CatMemeticSelections(
+    DomainObject
+):
+
+    def __init__(
+        self,
+    ):
+        self._records = []
+
+    @property
+    def is_empty(
+        self,
+    ):
+        return not self._records
+
+    @property
+    def count(
+        self,
+    ):
+        return len(
+            self._records
+        )
+
+    def store(
+        self,
+        state,
+    ):
+        from cats.cat_memetic_selection_state import (
+            CatMemeticSelectionState,
+        )
+
+        if not isinstance(
+            state,
+            CatMemeticSelectionState,
+        ):
+            raise TypeError(
+                "Memetic selection registry requires "
+                "CatMemeticSelectionState."
+            )
+
+        meme_id = getattr(
+            state,
+            "meme_id",
+            None,
+        )
+
+        if (
+            not isinstance(
+                meme_id,
+                str,
+            )
+            or not meme_id
+        ):
+            raise ValueError(
+                "Stored memetic selection requires "
+                "meme_id."
+            )
+
+        for index, current in enumerate(
+            self.records()
+        ):
+            if (
+                current.meme_id
+                == meme_id
+            ):
+                self._records[
+                    index
+                ] = state
+
+                return state
+
+        self._records.append(
+            state
+        )
+
+        return state
+
+    def record(
+        self,
+        meme_id,
+    ):
+        meme_id = str(
+            meme_id
+        )
+
+        for state in self.records():
+            if (
+                state.meme_id
+                == meme_id
+            ):
+                return state
+
+        return None
+
+    def has(
+        self,
+        meme_id,
+    ):
+        return (
+            self.record(
+                meme_id
+            )
+            is not None
+        )
+
+    def records(
+        self,
+    ):
+        from cats.cat_memetic_selection_state import (
+            CatMemeticSelectionState,
+        )
+
+        for state in self._records:
+            if not isinstance(
+                state,
+                CatMemeticSelectionState,
+            ):
+                raise TypeError(
+                    "Memetic selection registry contains "
+                    "invalid runtime state."
+                )
+
+        return tuple(
+            self._records
+        )
+
+
 class CatCulture(DomainObject):
-    pass
+
+    def __init__(
+        self,
+        exposures=0,
+        **values
+    ):
+        for reserved_name in (
+            "adopted_traditions",
+            "rejected_traditions",
+            "preferences",
+            "myths",
+            "innovations",
+        ):
+            if reserved_name in values:
+                raise TypeError(
+                    "CatCulture registry state cannot "
+                    "be supplied as mapping data."
+                )
+
+        self.adopted_traditions = (
+            CatCulturalTraditionEvaluations()
+        )
+
+        self.rejected_traditions = (
+            CatCulturalTraditionEvaluations()
+        )
+
+        self.preferences = (
+            CatCulturalPreferences()
+        )
+
+        self.myths = (
+            CatMemeticSelections()
+        )
+
+        self.innovations = (
+            CatMemeticSelections()
+        )
+
+        self.exposures = int(
+            exposures
+        )
+
+        super().__init__(
+            **values
+        )
 
 class CatGroupRoles(DomainObject):
 

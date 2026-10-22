@@ -23,6 +23,51 @@ class CatCulturalSelectionTests(unittest.TestCase):
         self.groups.add_member(self.first_group, self.second, self.cats.cats)
         self.second_group = self.groups.create_group(self.third, name='second_group').group_id
 
+    def test_personal_culture_registries_are_object_only(
+        self
+    ):
+        registries = (
+            self.second.culture.adopted_traditions,
+            self.second.culture.rejected_traditions,
+            self.second.culture.preferences,
+            self.second.culture.myths,
+            self.second.culture.innovations,
+        )
+
+        for registry in registries:
+            self.assertTrue(
+                registry.is_empty
+            )
+
+            self.assertEqual(
+                registry.count,
+                0,
+            )
+
+            self.assertEqual(
+                registry.records(),
+                (),
+            )
+
+            for mapping_method in (
+                'get',
+                'keys',
+                'items',
+                'values',
+                'pop',
+                'setdefault',
+                'clear',
+                '__getitem__',
+                '__setitem__',
+                '__contains__',
+            ):
+                self.assertFalse(
+                    hasattr(
+                        registry,
+                        mapping_method,
+                    )
+                )
+
     def test_cat_can_adopt_group_tradition(self):
         culture = CatGroupCultureSystem(self.groups)
         culture.practice(self.first_group, 'night_patrol', 'exploration', weight=0.8)
@@ -30,7 +75,11 @@ class CatCulturalSelectionTests(unittest.TestCase):
         adoption = CatCulturalAdoptionSystem(self.groups)
         result = adoption.expose_to_tradition(self.second, self.first_group, 'night_patrol')
         self.assertTrue(result.adopted)
-        self.assertIn('night_patrol', self.second.culture.adopted_traditions)
+        self.assertTrue(
+            self.second.culture.adopted_traditions.has(
+                'night_patrol'
+            )
+        )
 
     def test_cat_can_reject_weak_tradition(self):
         culture = CatGroupCultureSystem(self.groups)

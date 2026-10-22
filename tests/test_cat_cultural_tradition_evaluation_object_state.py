@@ -67,6 +67,7 @@ class CatCulturalTraditionEvaluationObjectStateTests(
     ):
         state = (
             CatCulturalTraditionEvaluationState(
+                tradition='night_patrol',
                 group_id=self.group_id,
                 score=0.8,
                 category='exploration',
@@ -128,9 +129,10 @@ class CatCulturalTraditionEvaluationObjectStateTests(
         record = (
             self.second
             .culture
-            .adopted_traditions[
+            .adopted_traditions
+            .record(
                 'night_patrol'
-            ]
+            )
         )
 
         self.assertIsInstance(
@@ -180,9 +182,10 @@ class CatCulturalTraditionEvaluationObjectStateTests(
         record = (
             self.second
             .culture
-            .rejected_traditions[
+            .rejected_traditions
+            .record(
                 'dangerous_box_jump'
-            ]
+            )
         )
 
         self.assertIsInstance(
@@ -232,9 +235,10 @@ class CatCulturalTraditionEvaluationObjectStateTests(
         previous = (
             self.second
             .culture
-            .rejected_traditions[
+            .rejected_traditions
+            .record(
                 'box_route'
-            ]
+            )
         )
 
         self.assertIsInstance(
@@ -263,19 +267,22 @@ class CatCulturalTraditionEvaluationObjectStateTests(
             adopted.adopted
         )
 
-        self.assertNotIn(
-            'box_route',
+        self.assertFalse(
             self.second
             .culture
-            .rejected_traditions,
+            .rejected_traditions
+            .has(
+                'box_route'
+            )
         )
 
         current = (
             self.second
             .culture
-            .adopted_traditions[
+            .adopted_traditions
+            .record(
                 'box_route'
-            ]
+            )
         )
 
         self.assertIsInstance(
@@ -295,17 +302,6 @@ class CatCulturalTraditionEvaluationObjectStateTests(
 
         self.second.personality.traits.curiosity = 1.0
 
-        self.second.culture.adopted_traditions[
-            'legacy'
-        ] = {
-            'group_id':
-                self.group_id,
-            'score':
-                0.5,
-            'category':
-                'exploration',
-        }
-
         exposures_before = (
             self.second
             .culture
@@ -315,10 +311,17 @@ class CatCulturalTraditionEvaluationObjectStateTests(
         with self.assertRaises(
             TypeError
         ):
-            self.adoption.expose_to_tradition(
-                self.second,
-                self.group_id,
-                'night_patrol',
+            self.second.culture.adopted_traditions.store(
+                {
+                    'tradition':
+                        'legacy',
+                    'group_id':
+                        self.group_id,
+                    'score':
+                        0.5,
+                    'category':
+                        'exploration',
+                }
             )
 
         self.assertEqual(
@@ -328,11 +331,22 @@ class CatCulturalTraditionEvaluationObjectStateTests(
             exposures_before,
         )
 
-        self.assertNotIn(
-            'night_patrol',
+        self.assertFalse(
             self.second
             .culture
-            .adopted_traditions,
+            .adopted_traditions
+            .has(
+                'legacy'
+            )
+        )
+
+        self.assertFalse(
+            self.second
+            .culture
+            .adopted_traditions
+            .has(
+                'night_patrol'
+            )
         )
 
 

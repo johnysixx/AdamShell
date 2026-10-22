@@ -73,7 +73,9 @@ class Cat(SocialMixin):
         self.parental_teaching = ParentalTeaching(lessons_received=0, teachers={}, skills={}, last_lesson=None, last_teacher=None)
         self.family_bonding = FamilyBonding(events=0, family_bonds=[])
         self.group = CatGroupMembership(group_id=None, member=False, joined_order=None, shared_scent=0.0, accepted_members=[], group_events=0, influence=0.0, defense_events=0, support_events=0, recruitment_support=0, recruitment_vetoes=0)
-        self.culture = CatCulture(adopted_traditions={}, rejected_traditions={}, preferences={}, myths={}, innovations={}, exposures=0)
+        self.culture = CatCulture(
+            exposures=0
+        )
         self.group_roles = CatGroupRoles(
             history=[],
             role_events=0,

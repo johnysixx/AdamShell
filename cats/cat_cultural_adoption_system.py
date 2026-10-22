@@ -163,6 +163,7 @@ class CatCulturalAdoptionSystem:
 
         record = (
             CatCulturalTraditionEvaluationState(
+                tradition=tradition_name,
                 group_id=group_id,
                 score=evaluation.score,
                 category=evaluation.category,
@@ -172,21 +173,20 @@ class CatCulturalAdoptionSystem:
         cat.culture.exposures += 1
 
         if evaluation.adopt:
-            cat.culture.adopted_traditions[
-                tradition_name
-            ] = record
+            cat.culture.adopted_traditions.store(
+                record
+            )
 
-            cat.culture.rejected_traditions.pop(
-                tradition_name,
-                None,
+            cat.culture.rejected_traditions.release(
+                tradition_name
             )
 
             outcome = "adopted"
 
         else:
-            cat.culture.rejected_traditions[
-                tradition_name
-            ] = record
+            cat.culture.rejected_traditions.store(
+                record
+            )
 
             outcome = "rejected"
 
@@ -249,10 +249,16 @@ class CatCulturalAdoptionSystem:
                 "CatCulturalPreferenceState."
             )
 
-        cat.culture.preferences[
-            preference_name
-        ] = deepcopy(
+        adopted_preference = deepcopy(
             preference
+        )
+
+        adopted_preference.name = (
+            preference_name
+        )
+
+        cat.culture.preferences.store(
+            adopted_preference
         )
 
         return (
@@ -276,7 +282,7 @@ class CatCulturalAdoptionSystem:
         )
 
         for registry in registries:
-            for record in registry.values():
+            for record in registry.records():
                 if not isinstance(
                     record,
                     CatCulturalTraditionEvaluationState,

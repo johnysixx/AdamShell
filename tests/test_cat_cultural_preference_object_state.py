@@ -185,9 +185,10 @@ class CatCulturalPreferenceObjectStateTests(
         adopted = (
             self.second
             .culture
-            .preferences[
+            .preferences
+            .record(
                 'sleeping_place'
-            ]
+            )
         )
 
         self.assertIsInstance(
@@ -198,6 +199,11 @@ class CatCulturalPreferenceObjectStateTests(
         self.assertIsNot(
             adopted,
             source,
+        )
+
+        self.assertEqual(
+            adopted.name,
+            'sleeping_place',
         )
 
         self.assertEqual(

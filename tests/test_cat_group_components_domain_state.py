@@ -26,8 +26,7 @@ class CatGroupComponentsDomainStateTests(
                 member=False,
             ),
             CatCulture(
-                traditions={},
-                myths={},
+                exposures=0,
             ),
             CatGroupRoles(
                 history=[],

@@ -7,3 +7,4 @@ class CatCulturalPreferenceState:
     strength: float = 0.0
     expressions: int = 0
     inherited_from: str | None = None
+    name: str | None = None

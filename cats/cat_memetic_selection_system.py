@@ -68,9 +68,9 @@ class CatMemeticSelectionSystem:
                     score=score,
                 )
 
-                cat.culture.myths[
-                    myth_id
-                ] = state
+                cat.culture.myths.store(
+                    state
+                )
 
                 adopted.append(
                     cat.name
@@ -234,9 +234,9 @@ class CatMemeticSelectionSystem:
                     ),
                 )
 
-                cat.culture.innovations[
-                    innovation_id
-                ] = state
+                cat.culture.innovations.store(
+                    state
+                )
 
                 adopted.append(
                     cat.name
@@ -409,23 +409,17 @@ class CatMemeticSelectionSystem:
         registry,
         meme_id,
     ):
-        state = registry.get(
+        state = registry.record(
             meme_id
         )
 
         if state is None:
             state = (
-                CatMemeticSelectionState()
-            )
-
-        elif not isinstance(
-            state,
-            CatMemeticSelectionState,
-        ):
-            raise TypeError(
-                "Cat memetic selection record "
-                "must be "
-                "CatMemeticSelectionState."
+                CatMemeticSelectionState(
+                    meme_id=str(
+                        meme_id
+                    )
+                )
             )
 
         return state

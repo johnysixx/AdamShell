@@ -127,6 +127,7 @@ class CatMemeticSelectionObjectStateTests(
         self
     ):
         state = CatMemeticSelectionState(
+            meme_id='myth',
             group_id='group',
             score=0.75,
         )
@@ -161,9 +162,9 @@ class CatMemeticSelectionObjectStateTests(
             self.myth_id,
         )
 
-        state = self.cat.culture.myths[
+        state = self.cat.culture.myths.record(
             self.myth_id
-        ]
+        )
 
         self.assertIsInstance(
             state,
@@ -192,9 +193,10 @@ class CatMemeticSelectionObjectStateTests(
         state = (
             self.cat
             .culture
-            .innovations[
+            .innovations
+            .record(
                 self.innovation_id
-            ]
+            )
         )
 
         self.assertIsInstance(
@@ -221,9 +223,9 @@ class CatMemeticSelectionObjectStateTests(
             self.myth_id,
         )
 
-        stored = self.cat.culture.myths[
+        stored = self.cat.culture.myths.record(
             self.myth_id
-        ]
+        )
 
         self.selection.expose_myth(
             self.group_id,
@@ -231,9 +233,9 @@ class CatMemeticSelectionObjectStateTests(
             self.myth_id,
         )
 
-        current = self.cat.culture.myths[
+        current = self.cat.culture.myths.record(
             self.myth_id
-        ]
+        )
 
         self.assertIs(
             current,
@@ -243,13 +245,6 @@ class CatMemeticSelectionObjectStateTests(
     def test_legacy_mapping_record_is_rejected(
         self
     ):
-        self.cat.culture.myths[
-            self.myth_id
-        ] = {
-            'score': 1.0,
-            'group_id': self.group_id,
-        }
-
         exposure_count = (
             self.cat.culture.exposures
         )
@@ -257,15 +252,26 @@ class CatMemeticSelectionObjectStateTests(
         with self.assertRaises(
             TypeError
         ):
-            self.selection.expose_myth(
-                self.group_id,
-                self.cats.cats,
-                self.myth_id,
+            self.cat.culture.myths.store(
+                {
+                    'meme_id':
+                        self.myth_id,
+                    'score':
+                        1.0,
+                    'group_id':
+                        self.group_id,
+                }
             )
 
         self.assertEqual(
             self.cat.culture.exposures,
             exposure_count,
+        )
+
+        self.assertFalse(
+            self.cat.culture.myths.has(
+                self.myth_id
+            )
         )
 
 
