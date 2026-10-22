@@ -32,6 +32,9 @@ from cats.cat_group_scent_state import (
 )
 from cats.cat_social_objects import CatRelationship
 from cats.cat_territory_system import CatTerritorySystem
+from cats.cat_group_diplomacy_state import (
+    CatGroupDiplomacyRegistry,
+)
 from cats.cat_group_territory_state import (
     CatGroupTerritories,
     CatGroupTerritoryClaimedEvent,
@@ -95,7 +98,7 @@ class CatGroupSystem:
             daughter_groups=[],
             dissolved=False,
             group_memory=CatGroupMemoryRegistry(),
-            diplomacy={},
+            diplomacy=CatGroupDiplomacyRegistry(),
             alliances=[],
             knowledge={},
             culture=CatGroupCulture(

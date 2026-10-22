@@ -8,6 +8,9 @@ from cats.cat_group_memory_registry import (
 from cats.cat_group_territory_state import (
     CatGroupTerritories,
 )
+from cats.cat_group_diplomacy_state import (
+    CatGroupDiplomacyRegistry,
+)
 
 
 class CatGroupCulture(DomainObject):
@@ -75,6 +78,19 @@ class CatGroup(DomainObject):
             raise TypeError(
                 "Cat group territories must use "
                 "CatGroupTerritories."
+            )
+
+        diplomacy = values.get(
+            "diplomacy"
+        )
+
+        if not isinstance(
+            diplomacy,
+            CatGroupDiplomacyRegistry,
+        ):
+            raise TypeError(
+                "Cat group diplomacy must use "
+                "CatGroupDiplomacyRegistry."
             )
 
         super().__init__(

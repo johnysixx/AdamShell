@@ -96,10 +96,10 @@ class CatGroupDiplomacySystem:
             )
         )
 
-        group.diplomacy[
-            other_group_id
-        ] = deepcopy(
-            result
+        group.diplomacy.store(
+            deepcopy(
+                result
+            )
         )
 
         return result

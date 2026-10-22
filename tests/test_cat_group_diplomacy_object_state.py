@@ -4,6 +4,7 @@ from cats.cat_group_cultural_conflict_system import (
     CatGroupCulturalConflictSystem,
 )
 from cats.cat_group_diplomacy_state import (
+    CatGroupDiplomacyRegistry,
     CatGroupDiplomacyState,
     CatGroupMutualRelationResult,
 )
@@ -97,6 +98,64 @@ class CatGroupDiplomacyObjectStateTests(
                 "score"
             ]
 
+    def test_registry_has_no_mapping_api(
+        self
+    ):
+        registry = (
+            self.groups.groups[
+                self.first_group
+            ].diplomacy
+        )
+
+        self.assertIsInstance(
+            registry,
+            CatGroupDiplomacyRegistry,
+        )
+
+        self.assertTrue(
+            registry.is_empty
+        )
+
+        self.assertEqual(
+            registry.count,
+            0,
+        )
+
+        self.assertEqual(
+            registry.records(),
+            (),
+        )
+
+        for method_name in (
+            "get",
+            "keys",
+            "items",
+            "values",
+            "pop",
+            "setdefault",
+            "clear",
+            "__getitem__",
+            "__setitem__",
+            "__contains__",
+            "__iter__",
+        ):
+            self.assertFalse(
+                hasattr(
+                    registry,
+                    method_name,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            registry.store(
+                {
+                    "other_group_id":
+                        self.second_group,
+                }
+            )
+
     def test_evaluate_returns_diplomacy_state_object(
         self
     ):
@@ -144,9 +203,9 @@ class CatGroupDiplomacyObjectStateTests(
         stored = (
             self.groups.groups[
                 self.first_group
-            ].diplomacy[
+            ].diplomacy.record(
                 self.second_group
-            ]
+            )
         )
 
         self.assertIsInstance(
@@ -266,9 +325,9 @@ class CatGroupDiplomacyObjectStateTests(
         )
 
         before = (
-            first.diplomacy[
+            first.diplomacy.record(
                 self.second_group
-            ]
+            )
         )
 
         cultural_conflict = (
@@ -283,9 +342,9 @@ class CatGroupDiplomacyObjectStateTests(
         )
 
         after = (
-            first.diplomacy[
+            first.diplomacy.record(
                 self.second_group
-            ]
+            )
         )
 
         self.assertIsInstance(

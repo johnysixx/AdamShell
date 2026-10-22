@@ -8,9 +8,6 @@ from cats.cat_group_cultural_conflict_state import (
     CatGroupCulturalComparisonResult,
     CatGroupCulturalInteractionEvent,
 )
-from cats.cat_group_diplomacy_state import (
-    CatGroupDiplomacyState,
-)
 
 
 class CatGroupCulturalConflictSystem:
@@ -243,7 +240,7 @@ class CatGroupCulturalConflictSystem:
             ),
         ):
             diplomacy = (
-                group.diplomacy.get(
+                group.diplomacy.record(
                     other_id
                 )
             )
@@ -251,19 +248,7 @@ class CatGroupCulturalConflictSystem:
             if diplomacy is None:
                 continue
 
-            if not isinstance(
-                diplomacy,
-                CatGroupDiplomacyState,
-            ):
-                raise TypeError(
-                    "Cat group diplomacy record "
-                    "must be "
-                    "CatGroupDiplomacyState."
-                )
-
-            group.diplomacy[
-                other_id
-            ] = (
+            group.diplomacy.store(
                 diplomacy.with_score_delta(
                     diplomacy_delta
                 )
