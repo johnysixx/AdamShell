@@ -84,17 +84,6 @@ class NewbornCatDevelopmentInitializedEvent:
                 int(self.birth_day),
             )
 
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "cat": self.cat,
-            "age_days": self.age_days,
-            "stage": self.stage.value,
-            "fertile": self.fertile,
-            "birth_day": self.birth_day,
-        }
-
-
 @dataclass(slots=True, frozen=True)
 class CatAgeAdvancedEvent:
 

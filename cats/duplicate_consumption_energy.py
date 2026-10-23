@@ -70,23 +70,6 @@ class DuplicateConsumptionEnergyStoredEvent:
             str(self.energy_kind),
         )
 
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "energy_id": self.energy_id,
-            "cat": self.cat,
-            "source": self.source,
-            "day": self.day,
-            "amount": self.amount,
-            "energy_kind": self.energy_kind,
-            "resolved": self.resolved,
-            "resolution": self.resolution,
-            "energy_conserved": (
-                self.energy_conserved
-            ),
-        }
-
-
 @dataclass(slots=True, frozen=True)
 class DuplicateConsumptionEnergyResolutionSkippedResult:
     cat_d20_value: int

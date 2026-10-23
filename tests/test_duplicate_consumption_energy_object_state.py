@@ -195,6 +195,7 @@ class DuplicateConsumptionEnergyObjectStateTests(
             "keys",
             "items",
             "values",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
