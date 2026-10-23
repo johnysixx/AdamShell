@@ -18,6 +18,10 @@ from cats.cat_group_culture_registry import (
     CatGroupPreferenceRegistry,
     CatGroupTraditionRegistry,
 )
+from cats.cat_group_myth_registry import (
+    CatGroupMythLineageRegistry,
+    CatGroupMythRegistry,
+)
 
 
 class CatGroupCulture(DomainObject):
@@ -136,6 +140,32 @@ class CatGroup(DomainObject):
             raise TypeError(
                 "Cat group knowledge must use "
                 "CatGroupKnowledgeRegistry."
+            )
+
+        myths = values.get(
+            "myths"
+        )
+
+        if not isinstance(
+            myths,
+            CatGroupMythRegistry,
+        ):
+            raise TypeError(
+                "Cat group myths must use "
+                "CatGroupMythRegistry."
+            )
+
+        myth_lineages = values.get(
+            "myth_lineages"
+        )
+
+        if not isinstance(
+            myth_lineages,
+            CatGroupMythLineageRegistry,
+        ):
+            raise TypeError(
+                "Cat group myth lineages must use "
+                "CatGroupMythLineageRegistry."
             )
 
         super().__init__(

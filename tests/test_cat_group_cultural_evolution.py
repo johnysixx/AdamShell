@@ -240,9 +240,7 @@ class CatGroupCulturalEvolutionTests(
             created.myth_id
         )
 
-        child = self.groups.groups[second].myths[
-            result.myth_id
-        ]
+        child = self.groups.groups[second].myths.record(result.myth_id)
 
         self.assertEqual(
             child.parent_version,

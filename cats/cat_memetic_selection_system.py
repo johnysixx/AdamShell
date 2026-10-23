@@ -28,7 +28,7 @@ class CatMemeticSelectionSystem:
             group_id
         )
 
-        myth = group.myths.get(
+        myth = group.myths.record(
             myth_id
         )
 
@@ -318,10 +318,8 @@ class CatMemeticSelectionSystem:
         surviving = []
         fading = []
 
-        for (
-            myth_id,
-            myth,
-        ) in group.myths.items():
+        for myth in group.myths.records():
+            myth_id = myth.myth_id
             fitness = self._number(
                 getattr(
                     myth,

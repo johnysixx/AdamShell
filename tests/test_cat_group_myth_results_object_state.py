@@ -14,6 +14,10 @@ from cats.cat_group_myth_retelling_state import (
 from cats.cat_group_myth_system import (
     CatGroupMythSystem,
 )
+from cats.cat_group_myth_registry import (
+    CatGroupMythLineageRegistry,
+    CatGroupMythRegistry,
+)
 from cats.cat_group_myth_telling_state import (
     CatGroupMythToldResult,
     CatGroupMythTellingDeniedResult,
@@ -164,6 +168,81 @@ class CatGroupMythResultsObjectStateTests(
                 "name"
             ]
 
+    def test_group_myth_registries_have_no_mapping_api(
+        self
+    ):
+        group = (
+            self.groups.groups[
+                self.group_id
+            ]
+        )
+
+        self.assertIsInstance(
+            group.myths,
+            CatGroupMythRegistry,
+        )
+
+        self.assertIsInstance(
+            group.myth_lineages,
+            CatGroupMythLineageRegistry,
+        )
+
+        for registry in (
+            group.myths,
+            group.myth_lineages,
+        ):
+            self.assertTrue(
+                registry.is_empty
+            )
+
+            self.assertEqual(
+                registry.count,
+                0,
+            )
+
+            self.assertEqual(
+                registry.records(),
+                (),
+            )
+
+            for mapping_method in (
+                "get",
+                "keys",
+                "items",
+                "values",
+                "pop",
+                "setdefault",
+                "clear",
+                "__getitem__",
+                "__setitem__",
+                "__contains__",
+                "__iter__",
+            ):
+                self.assertFalse(
+                    hasattr(
+                        registry,
+                        mapping_method,
+                    )
+                )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            group.myths.store(
+                {
+                    "myth_id": "legacy",
+                }
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            group.myth_lineages.store(
+                {
+                    "root_myth": "legacy",
+                }
+            )
+
     def test_unknown_knowledge_returns_creation_denied_object(
         self
     ):
@@ -211,7 +290,7 @@ class CatGroupMythResultsObjectStateTests(
         )
 
         self.assertEqual(
-            len(group.myths),
+            group.myths.count,
             0,
         )
 
@@ -274,9 +353,7 @@ class CatGroupMythResultsObjectStateTests(
         )
 
         myth = (
-            group.myths[
-                result.myth_id
-            ]
+            group.myths.record(result.myth_id)
         )
 
         self.assertEqual(
@@ -323,9 +400,7 @@ class CatGroupMythResultsObjectStateTests(
         )
 
         lineage = (
-            group.myth_lineages[
-                result.myth_id
-            ]
+            group.myth_lineages.record(result.myth_id)
         )
 
         self.assertIsInstance(
@@ -346,9 +421,7 @@ class CatGroupMythResultsObjectStateTests(
         )
 
         myth = (
-            group.myths[
-                result.myth_id
-            ]
+            group.myths.record(result.myth_id)
         )
 
         self.assertEqual(
@@ -519,9 +592,7 @@ class CatGroupMythResultsObjectStateTests(
         )
 
         copied = (
-            target.myths[
-                result.myth_id
-            ]
+            target.myths.record(result.myth_id)
         )
 
         self.assertEqual(
@@ -550,9 +621,7 @@ class CatGroupMythResultsObjectStateTests(
         )
 
         lineage = (
-            target.myth_lineages[
-                result.root_myth_id
-            ]
+            target.myth_lineages.record(result.root_myth_id)
         )
 
         self.assertIsInstance(
@@ -611,9 +680,7 @@ class CatGroupMythResultsObjectStateTests(
         target_myth = (
             self.groups.groups[
                 self.target_group_id
-            ].myths[
-                result.myth_id
-            ]
+            ].myths.record(result.myth_id)
         )
 
         self.assertEqual(
@@ -682,9 +749,7 @@ class CatGroupMythResultsObjectStateTests(
         group_myth = (
             self.groups.groups[
                 self.group_id
-            ].myths[
-                created.myth_id
-            ]
+            ].myths.record(created.myth_id)
         )
 
         result = (
@@ -856,9 +921,7 @@ class CatGroupMythResultsObjectStateTests(
         )
 
         myth = (
-            group.myths[
-                created.myth_id
-            ]
+            group.myths.record(created.myth_id)
         )
 
         self.assertFalse(

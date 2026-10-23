@@ -27,7 +27,7 @@ class CatGroupMythLineageSystem:
         )
 
         myth = (
-            group.myths.get(
+            group.myths.record(
                 myth_id
             )
         )
@@ -120,7 +120,7 @@ class CatGroupMythLineageSystem:
         root_myth_id,
         create=False,
     ):
-        lineage = group.myth_lineages.get(
+        lineage = group.myth_lineages.record(
             root_myth_id
         )
 
@@ -134,9 +134,9 @@ class CatGroupMythLineageSystem:
                 )
             )
 
-            group.myth_lineages[
-                root_myth_id
-            ] = lineage
+            group.myth_lineages.store(
+                lineage
+            )
 
         elif not isinstance(
             lineage,

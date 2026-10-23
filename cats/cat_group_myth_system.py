@@ -89,9 +89,9 @@ class CatGroupMythSystem:
             ],
         )
 
-        group.myths[
-            myth_id
-        ] = myth
+        group.myths.store(
+            myth
+        )
 
         CatGroupMythLineageSystem(
             self.group_system
@@ -134,7 +134,7 @@ class CatGroupMythSystem:
         )
 
         myth = (
-            source.myths.get(
+            source.myths.record(
                 myth_id
             )
         )
@@ -242,9 +242,9 @@ class CatGroupMythSystem:
 
         copied.verified = False
 
-        target.myths[
-            new_myth_id
-        ] = copied
+        target.myths.store(
+            copied
+        )
 
         lineage_system = (
             CatGroupMythLineageSystem(
@@ -253,7 +253,7 @@ class CatGroupMythSystem:
         )
 
         lineage = (
-            target.myth_lineages.get(
+            target.myth_lineages.record(
                 root_myth_id
             )
         )
@@ -270,9 +270,9 @@ class CatGroupMythSystem:
                 root_myth_id
             )
 
-            target.myth_lineages[
-                root_myth_id
-            ] = lineage
+            target.myth_lineages.store(
+                lineage
+            )
 
         elif not isinstance(
             lineage,
@@ -326,7 +326,7 @@ class CatGroupMythSystem:
         )
 
         myth = (
-            group.myths.get(
+            group.myths.record(
                 myth_id
             )
         )
@@ -388,7 +388,7 @@ class CatGroupMythSystem:
         )
 
         myth = (
-            group.myths.get(
+            group.myths.record(
                 myth_id
             )
         )

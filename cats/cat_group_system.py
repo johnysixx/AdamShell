@@ -38,6 +38,10 @@ from cats.cat_group_diplomacy_state import (
 from cats.cat_group_knowledge_registry import (
     CatGroupKnowledgeRegistry,
 )
+from cats.cat_group_myth_registry import (
+    CatGroupMythLineageRegistry,
+    CatGroupMythRegistry,
+)
 from cats.cat_group_territory_state import (
     CatGroupTerritories,
     CatGroupTerritoryClaimedEvent,
@@ -108,8 +112,10 @@ class CatGroupSystem:
                 traits={},
                 history=[],
             ),
-            myths={},
-            myth_lineages={},
+            myths=CatGroupMythRegistry(),
+            myth_lineages=(
+                CatGroupMythLineageRegistry()
+            ),
             innovations={},
             innovation_tree={},
             roles={},

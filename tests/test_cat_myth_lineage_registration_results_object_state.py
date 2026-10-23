@@ -155,8 +155,8 @@ class CatMythLineageRegistrationResultsObjectStateTests(
             ]
         )
 
-        lineage_count = len(
-            group.myth_lineages
+        lineage_count = (
+            group.myth_lineages.count
         )
 
         result = (
@@ -186,9 +186,7 @@ class CatMythLineageRegistrationResultsObjectStateTests(
         )
 
         self.assertEqual(
-            len(
-                group.myth_lineages
-            ),
+            group.myth_lineages.count,
             lineage_count,
         )
 
@@ -252,9 +250,7 @@ class CatMythLineageRegistrationResultsObjectStateTests(
         )
 
         stored = (
-            group.myth_lineages[
-                created.myth_id
-            ]
+            group.myth_lineages.record(created.myth_id)
         )
 
         result = (
@@ -265,9 +261,7 @@ class CatMythLineageRegistrationResultsObjectStateTests(
         )
 
         current = (
-            group.myth_lineages[
-                result.myth_id
-            ]
+            group.myth_lineages.record(result.myth_id)
         )
 
         self.assertIs(
@@ -301,9 +295,7 @@ class CatMythLineageRegistrationResultsObjectStateTests(
         )
 
         myth = (
-            group.myths[
-                created.myth_id
-            ]
+            group.myths.record(created.myth_id)
         )
 
         myth.lineage_root = "changed"
@@ -404,9 +396,7 @@ class CatMythLineageRegistrationResultsObjectStateTests(
         )
 
         lineage = (
-            group.myth_lineages[
-                result.root_myth_id
-            ]
+            group.myth_lineages.record(result.root_myth_id)
         )
 
         self.assertIsInstance(
@@ -455,9 +445,7 @@ class CatMythLineageRegistrationResultsObjectStateTests(
         )
 
         stored = (
-            group.myth_lineages[
-                first.root_myth_id
-            ]
+            group.myth_lineages.record(first.root_myth_id)
         )
 
         second = (
@@ -470,9 +458,7 @@ class CatMythLineageRegistrationResultsObjectStateTests(
         )
 
         current = (
-            group.myth_lineages[
-                second.root_myth_id
-            ]
+            group.myth_lineages.record(second.root_myth_id)
         )
 
         self.assertIs(
@@ -521,9 +507,7 @@ class CatMythLineageRegistrationResultsObjectStateTests(
         lineage = (
             self.groups.groups[
                 self.second_group
-            ].myth_lineages[
-                result.root_myth_id
-            ]
+            ].myth_lineages.record(result.root_myth_id)
         )
 
         self.assertEqual(

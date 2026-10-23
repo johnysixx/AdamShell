@@ -155,9 +155,7 @@ class CatMythLineageObjectStateTests(
         state = (
             self.groups
             .groups[self.first_group]
-            .myth_lineages[
-                myth_id
-            ]
+            .myth_lineages.record(myth_id)
         )
 
         self.assertIsInstance(
@@ -233,23 +231,22 @@ class CatMythLineageObjectStateTests(
             self.first_group
         ]
 
-        group.myth_lineages[
-            'legacy'
-        ] = {
-            'root_myth': 'legacy',
-            'versions': [
-                'legacy'
-            ],
-            'children': {},
-        }
-
         with self.assertRaises(
             TypeError
         ):
-            self.lineages.lineage(
-                self.first_group,
-                'legacy',
+            group.myth_lineages.store(
+                {
+                    'root_myth': 'legacy',
+                    'versions': [
+                        'legacy'
+                    ],
+                    'children': {},
+                }
             )
+
+        self.assertTrue(
+            group.myth_lineages.is_empty
+        )
 
 
 if __name__ == '__main__':

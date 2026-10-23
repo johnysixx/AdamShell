@@ -200,9 +200,7 @@ class CatGroupCultureTests(
             result.created
         )
 
-        myth = self.groups.groups[self.group_id].myths[
-            result.myth_id
-        ]
+        myth = self.groups.groups[self.group_id].myths.record(result.myth_id)
 
         self.assertFalse(
             myth.verified
@@ -250,9 +248,7 @@ class CatGroupCultureTests(
         )
 
         received = (
-            self.groups.groups[second_group].myths[
-                result.myth_id
-            ]
+            self.groups.groups[second_group].myths.record(result.myth_id)
         )
 
         self.assertNotEqual(
