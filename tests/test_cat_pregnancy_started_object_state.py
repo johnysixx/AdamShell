@@ -220,9 +220,11 @@ class CatPregnancyStartedObjectStateTests(
             1,
         )
 
-        self.assertEqual(
-            result.to_dict(),
-            event.to_dict(),
+        self.assertFalse(
+            hasattr(
+                result,
+                "to_dict",
+            )
         )
 
     def test_nested_domain_state_has_no_mapping_api(
@@ -290,110 +292,6 @@ class CatPregnancyStartedObjectStateTests(
             ):
                 _ = obj["name"]
 
-    def test_boundary_containers_are_detached(
-        self
-    ):
-        result = (
-            self._start_pregnancy()
-        )
-
-        event = (
-            self.resolver
-            .history[-1]
-        )
-
-        boundary = (
-            result.to_dict()
-        )
-
-        boundary[
-            "father_names"
-        ].append(
-            "changed"
-        )
-
-        boundary[
-            "ovulation"
-        ][
-            "ovulation_induced"
-        ] = False
-
-        boundary[
-            "paternity_results"
-        ][0][
-            "selection"
-        ][
-            "weighted_candidate_names"
-        ].append(
-            "changed"
-        )
-
-        boundary[
-            "embryo_results"
-        ][0][
-            "viability"
-        ][
-            "special_traits"
-        ].append(
-            "changed"
-        )
-
-        boundary[
-            "embryo_results"
-        ][0][
-            "phenotype"
-        ][
-            "profile"
-        ][
-            "color"
-        ] = "changed"
-
-        boundary[
-            "embryo_results"
-        ][0][
-            "event"
-        ][
-            "profile"
-        ][
-            "color"
-        ] = "changed"
-
-        self.assertEqual(
-            event.father_names,
-            (
-                "father",
-            ),
-        )
-
-        self.assertTrue(
-            event.ovulation.ovulation_induced
-        )
-
-        self.assertNotIn(
-            "changed",
-            event
-            .paternity_results[0]
-            .selection
-            .weighted_candidate_names,
-        )
-
-        self.assertNotIn(
-            "changed",
-            event
-            .embryo_results[0]
-            .viability
-            .special_traits,
-        )
-
-        self.assertNotEqual(
-            event
-            .embryo_results[0]
-            .phenotype
-            .profile
-            .color,
-            "changed",
-        )
-
     def test_quantum_audit_uses_domain_event(
         self
     ):
@@ -426,6 +324,7 @@ class CatPregnancyStartedObjectStateTests(
             "keys",
             "items",
             "values",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(

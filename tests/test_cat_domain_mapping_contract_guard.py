@@ -51,14 +51,8 @@ BOUNDARY_MAPPING_ALLOWLIST = {
     'cats/feline_wisdom_state.py::_ability_method_constraints_snapshot',
     'cats/feline_wisdom_state.py::_personality_experience_snapshot',
     'cats/feline_wisdom_state.py::_personality_trait_event_snapshot',
-    'cats/kitten_embryo_resolver.py::NonviableKittenEmbryoReplacedByCronenbergEvent.to_dict',
     'cats/kitten_growth_state.py::KittenGrowthAlreadyProcessedEvent.to_dict',
     'cats/kitten_growth_state.py::KittenGrowthAppliedEvent.to_dict',
-    'cats/mating_pregnancy_event.py::CatPregnancyStartedEvent.to_dict',
-    'cats/mating_pregnancy_event.py::_induced_ovulation_snapshot',
-    'cats/mating_pregnancy_event.py::_kitten_embryo_event_snapshot',
-    'cats/mating_pregnancy_event.py::_kitten_embryo_result_snapshot',
-    'cats/mating_pregnancy_event.py::_pregnancy_paternity_snapshot',
     'cats/memory.py::CatMemory.public_state',
 }
 

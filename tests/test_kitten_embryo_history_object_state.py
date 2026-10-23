@@ -184,17 +184,12 @@ class KittenEmbryoHistoryObjectStateTests(
                 "lethal_mutations"
             ]
 
-        boundary = (
-            event.to_dict()
+        self.assertFalse(
+            hasattr(
+                event,
+                "to_dict",
+            )
         )
-
-        boundary[
-            "viability"
-        ][
-            "details"
-        ][
-            "lethal_mutations"
-        ][0] = "changed"
 
         self.assertEqual(
             event.viability

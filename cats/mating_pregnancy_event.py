@@ -1,15 +1,7 @@
 from dataclasses import dataclass, field
 
 from cats.kitten_embryo_resolver import (
-    KittenEmbryoCreatedEvent,
     KittenEmbryoResult,
-    NonviableKittenEmbryoReplacedByCronenbergEvent,
-)
-
-from cats.cat_birth_objects import (
-    cat_birth_profile_snapshot,
-    cat_phenotype_snapshot,
-    kitten_genetic_viability_snapshot,
 )
 
 from cats.mating_contact import (
@@ -23,119 +15,6 @@ from cats.ovulation_resolver import (
 from cats.paternity_resolver import (
     KittenFatherSelectedEvent,
 )
-
-
-def _induced_ovulation_snapshot(
-    event,
-):
-    if not isinstance(
-        event,
-        CatInducedOvulationResolvedEvent,
-    ):
-        raise TypeError(
-            "Pregnancy ovulation snapshot requires "
-            "CatInducedOvulationResolvedEvent."
-        )
-
-    return {
-        "name": event.name,
-        "female": event.female,
-        "day": event.day,
-        "stimulation": event.stimulation,
-        "threshold": event.threshold,
-        "ovulation_induced": (
-            event.ovulation_induced
-        ),
-        "reason": event.reason,
-    }
-
-
-def _kitten_embryo_event_snapshot(
-    event,
-):
-    if isinstance(
-        event,
-        KittenEmbryoCreatedEvent,
-    ):
-        return {
-            "name": event.name,
-            "embryo_id": event.embryo_id,
-            "mother": event.mother,
-            "father": event.father,
-            "genetic_status": (
-                event.genetic_status
-            ),
-            "rare": event.rare,
-            "profile": (
-                cat_birth_profile_snapshot(
-                    event.profile
-                )
-            ),
-            "kitten_created": (
-                event.kitten_created
-            ),
-            "cronenberg_created": (
-                event.cronenberg_created
-            ),
-        }
-
-    if isinstance(
-        event,
-        NonviableKittenEmbryoReplacedByCronenbergEvent,
-    ):
-        return event.to_dict()
-
-    raise TypeError(
-        "Pregnancy embryo event snapshot "
-        "requires a typed embryo event."
-    )
-
-
-def _kitten_embryo_result_snapshot(
-    result,
-):
-    if not isinstance(
-        result,
-        KittenEmbryoResult,
-    ):
-        raise TypeError(
-            "Pregnancy embryo snapshot requires "
-            "KittenEmbryoResult."
-        )
-
-    snapshot = {
-        "embryo": result.embryo,
-        "viability": (
-            kitten_genetic_viability_snapshot(
-                result.viability
-            )
-        ),
-    }
-
-    if result.phenotype is not None:
-        snapshot[
-            "phenotype"
-        ] = (
-            cat_phenotype_snapshot(
-                result.phenotype
-            )
-        )
-
-    snapshot.update(
-        {
-            "cronenberg": (
-                result.cronenberg
-            ),
-            "event": (
-                _kitten_embryo_event_snapshot(
-                    result.event
-                )
-            ),
-            "viable": result.viable,
-        }
-    )
-
-    return snapshot
 
 
 @dataclass(slots=True, frozen=True)
@@ -172,40 +51,6 @@ class CatPregnancyPaternityResult:
         memo
     ):
         return self
-
-
-def _pregnancy_paternity_snapshot(
-    result,
-):
-    if not isinstance(
-        result,
-        CatPregnancyPaternityResult,
-    ):
-        raise TypeError(
-            "Pregnancy paternity snapshot requires "
-            "CatPregnancyPaternityResult."
-        )
-
-    return {
-        "embryo_id": result.embryo_id,
-        "father": result.father,
-        "selection": {
-            "name": result.selection.name,
-            "father": result.selection.father,
-            "successful_contact_count": (
-                result.selection
-                .successful_contact_count
-            ),
-            "total_successful_contacts": (
-                result.selection
-                .total_successful_contacts
-            ),
-            "weighted_candidate_names": list(
-                result.selection
-                .weighted_candidate_names
-            ),
-        },
-    }
 
 
 @dataclass(slots=True, frozen=True)
@@ -441,65 +286,6 @@ class CatPregnancyStartedEvent(
             self.embryos_attempted
             - self.viable_embryo_count
         )
-
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "mother": self.mother,
-            "father_names": list(
-                self.father_names
-            ),
-            "multiple_sires": (
-                self.multiple_sires
-            ),
-            "ovulation": (
-                _induced_ovulation_snapshot(
-                    self.ovulation
-                )
-            ),
-            "ovulation_induced": (
-                self.ovulation_induced
-            ),
-            "mating_contact_count": (
-                self.mating_contact_count
-            ),
-            "paternity_results": [
-                _pregnancy_paternity_snapshot(
-                    result
-                )
-                for result
-                in self.paternity_results
-            ],
-            "gestation_days": (
-                self.gestation_days
-            ),
-            "pregnancy_day": (
-                self.pregnancy_day
-            ),
-            "started_on_day": (
-                self.started_on_day
-            ),
-            "expected_birth_day": (
-                self.expected_birth_day
-            ),
-            "embryos_attempted": (
-                self.embryos_attempted
-            ),
-            "viable_embryo_count": (
-                self.viable_embryo_count
-            ),
-            "nonviable_embryo_count": (
-                self.nonviable_embryo_count
-            ),
-            "embryo_results": [
-                _kitten_embryo_result_snapshot(
-                    result
-                )
-                for result
-                in self.embryo_results
-            ],
-            "started": self.started,
-        }
 
 @dataclass(slots=True, frozen=True)
 class CatPregnancyAdvanceDeniedResult:

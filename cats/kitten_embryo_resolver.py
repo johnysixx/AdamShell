@@ -10,8 +10,6 @@ from cats.cat_birth_objects import (
     CatBirthProfile,
     CatPhenotypeResult,
     KittenEmbryo,
-    cat_phenotype_snapshot,
-    kitten_genetic_viability_snapshot,
 )
 
 
@@ -60,30 +58,6 @@ class NonviableKittenEmbryoReplacedByCronenbergEvent:
                 "Nonviable embryo event "
                 "requires a viability object."
             )
-
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "embryo_id": self.embryo_id,
-            "mother": self.mother,
-            "father": self.father,
-            "genotype": self.genotype,
-            "viability": (
-                kitten_genetic_viability_snapshot(
-                    self.viability
-                )
-            ),
-            "kitten_created": (
-                self.kitten_created
-            ),
-            "cronenberg_created": (
-                self.cronenberg_created
-            ),
-            "cronenberg_id": (
-                self.cronenberg_id
-            ),
-        }
-
 
 @dataclass(slots=True, frozen=True)
 class KittenEmbryoCreatedEvent:
