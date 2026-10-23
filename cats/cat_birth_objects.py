@@ -171,27 +171,6 @@ class CatBirthProfileDraft:
         )
 
 
-def cat_birth_profile_snapshot(
-    profile,
-):
-    if not isinstance(
-        profile,
-        CatBirthProfile,
-    ):
-        raise TypeError(
-            "Birth profile snapshot requires "
-            "CatBirthProfile."
-        )
-
-    return {
-        "color": profile.color,
-        "fur_length": profile.fur_length,
-        "pattern": profile.pattern,
-        "eye_color": profile.eye_color,
-        "sex": profile.sex,
-    }
-
-
 @dataclass(slots=True, frozen=True)
 class CatPhenotypeResult:
 

@@ -11,7 +11,6 @@ from cats.cat_birth_effect_resolver import (
 from cats.cat_birth_objects import (
     CatBirthProfile,
     CatCanonicalBirthResolution,
-    cat_birth_profile_snapshot,
 )
 from cats.cat_birth_resolver import (
     CatBirthResolver
@@ -168,9 +167,7 @@ class WoodooBirthEffectsTests(
             rng=None
         ):
             captured_profiles.append(
-                cat_birth_profile_snapshot(
-                    profile
-                )
+                profile
             )
 
             return CatCanonicalBirthResolution(
@@ -200,7 +197,7 @@ class WoodooBirthEffectsTests(
             )
 
         self.assertEqual(
-            captured_profiles[0]["color"],
+            captured_profiles[0].color,
             "white"
         )
 
@@ -210,7 +207,7 @@ class WoodooBirthEffectsTests(
         )
 
         self.assertFalse(
-            captured_profiles[1]["color"]
+            captured_profiles[1].color
             == "white"
             and captured_profiles[0]
             != captured_profiles[1]

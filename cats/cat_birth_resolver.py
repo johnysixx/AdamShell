@@ -22,7 +22,6 @@ from .cat_birth_result_state import (
 from .cat_birth_objects import (
     CatBirthProfile,
     CatBirthProfileDraft,
-    cat_birth_profile_snapshot,
     CatCanonicalBirthResolution,
     CatBirthGeneticsResult,
     CatGeneticConflictResolution,

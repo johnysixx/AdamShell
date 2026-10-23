@@ -9,7 +9,6 @@ from cats.cat_birth_objects import (
     CatBirthProfile,
     CatBirthProfileDraft,
     CatCanonicalBirthResolution,
-    cat_birth_profile_snapshot,
 )
 from cats.cat_birth_resolver import CatBirthResolver
 
@@ -199,7 +198,7 @@ class CatBirthProfileObjectStateTests(unittest.TestCase):
         self.assertEqual(original.eye_color, "green")
         self.assertEqual(changed.eye_color, "gold")
 
-    def test_profile_snapshot_is_detached_and_canonical_is_object_only(
+    def test_profile_and_canonical_resolution_are_object_only(
         self
     ):
         profile = self.resolver.canonical_profile
@@ -220,16 +219,29 @@ class CatBirthProfileObjectStateTests(unittest.TestCase):
             )
         )
 
-        profile_snapshot = (
-            cat_birth_profile_snapshot(
-                profile
-            )
-        )
-        profile_snapshot["color"] = "white"
-
         self.assertEqual(
             profile.color,
             "black",
+        )
+
+        self.assertEqual(
+            profile.fur_length,
+            "short",
+        )
+
+        self.assertEqual(
+            profile.pattern,
+            "solid",
+        )
+
+        self.assertEqual(
+            profile.eye_color,
+            "green",
+        )
+
+        self.assertEqual(
+            profile.sex,
+            "female",
         )
 
         self.assertIs(

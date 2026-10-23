@@ -8,7 +8,6 @@ from universe.bootstraps.universe_bootstrap import (
 from cats.cat_birth_objects import (
     CatBirthProfile,
     CatCanonicalBirthResolution,
-    cat_birth_profile_snapshot,
 )
 from cats.cat_birth_resolver import (
     CatBirthResolver
@@ -112,16 +111,20 @@ class CatBirthWoodooIdentityTests(
         )
 
         self.assertEqual(
-            cat_birth_profile_snapshot(
-                third.profile
+            (
+                third.profile.color,
+                third.profile.fur_length,
+                third.profile.pattern,
+                third.profile.eye_color,
+                third.profile.sex,
             ),
-            {
-                "color": "black",
-                "fur_length": "short",
-                "pattern": "solid",
-                "eye_color": "gold",
-                "sex": "female"
-            }
+            (
+                "black",
+                "short",
+                "solid",
+                "gold",
+                "female",
+            ),
         )
 
         self.assertEqual(
@@ -164,16 +167,20 @@ class CatBirthWoodooIdentityTests(
         )
 
         self.assertEqual(
-            cat_birth_profile_snapshot(
-                result.profile
+            (
+                result.profile.color,
+                result.profile.fur_length,
+                result.profile.pattern,
+                result.profile.eye_color,
+                result.profile.sex,
             ),
-            {
-                "color": "black",
-                "fur_length": "short",
-                "pattern": "solid",
-                "eye_color": "gold",
-                "sex": "female"
-            }
+            (
+                "black",
+                "short",
+                "solid",
+                "gold",
+                "female",
+            ),
         )
 
     def test_later_canonical_profile_normally_creates_ordinary_black_cat(self):

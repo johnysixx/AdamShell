@@ -2,9 +2,9 @@ from cats.cat_development_stage import CatDevelopmentStage
 from dataclasses import dataclass, field
 
 from cats.cat_birth_objects import (
+    CatBirthProfile,
     CatLitter,
     KittenEmbryo,
-    cat_birth_profile_snapshot,
 )
 from cats.cat_estrous_phase import CatEstrousPhase
 
@@ -62,6 +62,31 @@ class CatReproductionState:
         self.fertile = not self.neutered
 
     def to_dict(self):
+
+        def profile_snapshot(
+            profile,
+        ):
+            if not isinstance(
+                profile,
+                CatBirthProfile,
+            ):
+                raise TypeError(
+                    "Reproduction birth profile "
+                    "boundary requires "
+                    "CatBirthProfile."
+                )
+
+            return {
+                "color": profile.color,
+                "fur_length": (
+                    profile.fur_length
+                ),
+                "pattern": profile.pattern,
+                "eye_color": (
+                    profile.eye_color
+                ),
+                "sex": profile.sex,
+            }
 
         def contact_snapshot(
             contact,
@@ -160,7 +185,7 @@ class CatReproductionState:
             return {
                 "name": phenotype.name,
                 "profile": (
-                    cat_birth_profile_snapshot(
+                    profile_snapshot(
                         phenotype.profile
                     )
                 ),
@@ -215,7 +240,7 @@ class CatReproductionState:
                     )
                 ),
                 "profile": (
-                    cat_birth_profile_snapshot(
+                    profile_snapshot(
                         embryo.profile
                     )
                 ),

@@ -16,7 +16,6 @@ CATS_ROOT = (
 
 
 BOUNDARY_MAPPING_ALLOWLIST = {
-    'cats/cat_birth_objects.py::cat_birth_profile_snapshot',
     'cats/cat_door.py::CatDoor.public_state',
     'cats/cat_learning_state.py::CatLearningState.to_dict',
     'cats/cat_memory_record.py::CatMemoryRecord.to_dict',
