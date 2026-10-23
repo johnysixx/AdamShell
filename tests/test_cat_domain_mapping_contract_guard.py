@@ -73,9 +73,7 @@ BOUNDARY_MAPPING_ALLOWLIST = {
 }
 
 
-REAL_MAPPING_ALLOWLIST = {
-    'cats/cat_birth_objects.py::CatBirthProfile.with_trait',
-}
+REAL_MAPPING_ALLOWLIST = set()
 
 
 LEGACY_DOMAIN_DEBT = set()

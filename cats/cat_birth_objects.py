@@ -132,15 +132,43 @@ class CatBirthProfile:
         "sex",
     })
 
-    def with_trait(self, trait, value):
-        if trait not in self.TRAITS:
-            raise ValueError(
-                f"Unknown cat birth trait: {trait!r}."
+    def with_trait(
+        self,
+        trait,
+        value,
+    ):
+        if trait == "color":
+            return replace(
+                self,
+                color=value,
             )
 
-        return replace(
-            self,
-            **{trait: value}
+        if trait == "fur_length":
+            return replace(
+                self,
+                fur_length=value,
+            )
+
+        if trait == "pattern":
+            return replace(
+                self,
+                pattern=value,
+            )
+
+        if trait == "eye_color":
+            return replace(
+                self,
+                eye_color=value,
+            )
+
+        if trait == "sex":
+            return replace(
+                self,
+                sex=value,
+            )
+
+        raise ValueError(
+            f"Unknown cat birth trait: {trait!r}."
         )
 
     def trait_value(self, trait):
