@@ -5,72 +5,6 @@ from cats.cat_personality_state import (
     CatPersonalityTraitAdjustedEvent,
 )
 
-def _personality_trait_event_snapshot(
-    event,
-):
-    if not isinstance(
-        event,
-        CatPersonalityTraitAdjustedEvent,
-    ):
-        raise TypeError(
-            "Personality snapshot event must be "
-            "CatPersonalityTraitAdjustedEvent."
-        )
-
-    return {
-        "name": event.name,
-        "cat": event.cat,
-        "trait": event.trait,
-        "source": event.source,
-        "day": event.day,
-        "previous": event.previous,
-        "requested_change": (
-            event.requested_change
-        ),
-        "applied_change": (
-            event.applied_change
-        ),
-        "value": event.value,
-        "metadata": deepcopy(
-            dict(
-                event.metadata
-            )
-        ),
-    }
-
-
-def _personality_experience_snapshot(
-    result,
-):
-    if not isinstance(
-        result,
-        CatPersonalityExperienceAppliedResult,
-    ):
-        raise TypeError(
-            "Personality snapshot result must be "
-            "CatPersonalityExperienceAppliedResult."
-        )
-
-    return {
-        "name": result.name,
-        "cat": result.cat,
-        "source": result.source,
-        "day": result.day,
-        "changes": deepcopy(
-            dict(
-                result.changes
-            )
-        ),
-        "events": [
-            _personality_trait_event_snapshot(
-                event
-            )
-            for event in result.events
-        ],
-        "applied": result.applied,
-    }
-
-
 from cats.feline_ability_state import (
     FelineAbilityState,
 )
@@ -85,46 +19,6 @@ from cats.feline_wisdom_registry import (
     FelineAbilityRegistry,
     FelineAwarenessRegistry,
 )
-
-
-def _ability_method_constraints_snapshot(
-    constraints,
-):
-    if not isinstance(
-        constraints,
-        FelineAbilityMethodConstraints,
-    ):
-        raise TypeError(
-            "Feline ability constraint snapshot "
-            "requires "
-            "FelineAbilityMethodConstraints."
-        )
-
-    snapshot = {}
-
-    for field_name in (
-        "requires_unlocked",
-        "opens_toward_cat",
-        "opens_away_from_cat",
-        "can_close",
-        "can_teach_meow",
-        "can_teach_owned_abilities",
-        "can_teach_to_own_kittens",
-        "can_create_foreign_teachers",
-        "can_teach_teach_other_cats",
-        "can_teach_teach_teaching",
-    ):
-        value = getattr(
-            constraints,
-            field_name,
-        )
-
-        if value is not None:
-            snapshot[
-                field_name
-            ] = value
-
-    return snapshot
 
 
 @dataclass(slots=True, frozen=True)
@@ -470,6 +364,46 @@ class FelineTeachingAbilitiesRegistrationResult:
                 )
 
     def to_dict(self):
+
+        def constraints_snapshot(
+            constraints,
+        ):
+            if not isinstance(
+                constraints,
+                FelineAbilityMethodConstraints,
+            ):
+                raise TypeError(
+                    "Feline ability constraint "
+                    "boundary requires "
+                    "FelineAbilityMethodConstraints."
+                )
+
+            snapshot = {}
+
+            for field_name in (
+                "requires_unlocked",
+                "opens_toward_cat",
+                "opens_away_from_cat",
+                "can_close",
+                "can_teach_meow",
+                "can_teach_owned_abilities",
+                "can_teach_to_own_kittens",
+                "can_create_foreign_teachers",
+                "can_teach_teach_other_cats",
+                "can_teach_teach_teaching",
+            ):
+                value = getattr(
+                    constraints,
+                    field_name,
+                )
+
+                if value is not None:
+                    snapshot[
+                        field_name
+                    ] = value
+
+            return snapshot
+
         return {
             "name": self.name,
             "cat": self.cat,
@@ -479,7 +413,7 @@ class FelineTeachingAbilitiesRegistrationResult:
                 "teacher":
                     self.teach_other_cats.teacher,
                 "constraints": (
-                    _ability_method_constraints_snapshot(
+                    constraints_snapshot(
                         self.teach_other_cats
                         .constraints
                     )
@@ -491,7 +425,7 @@ class FelineTeachingAbilitiesRegistrationResult:
                 "teacher":
                     self.teach_teaching.teacher,
                 "constraints": (
-                    _ability_method_constraints_snapshot(
+                    constraints_snapshot(
                         self.teach_teaching
                         .constraints
                     )
@@ -752,6 +686,113 @@ class FelineAbilityMethodLearnedEvent:
         return self
 
     def to_dict(self):
+
+        def constraints_snapshot(
+            constraints,
+        ):
+            if not isinstance(
+                constraints,
+                FelineAbilityMethodConstraints,
+            ):
+                raise TypeError(
+                    "Feline ability constraint "
+                    "boundary requires "
+                    "FelineAbilityMethodConstraints."
+                )
+
+            snapshot = {}
+
+            for field_name in (
+                "requires_unlocked",
+                "opens_toward_cat",
+                "opens_away_from_cat",
+                "can_close",
+                "can_teach_meow",
+                "can_teach_owned_abilities",
+                "can_teach_to_own_kittens",
+                "can_create_foreign_teachers",
+                "can_teach_teach_other_cats",
+                "can_teach_teach_teaching",
+            ):
+                value = getattr(
+                    constraints,
+                    field_name,
+                )
+
+                if value is not None:
+                    snapshot[
+                        field_name
+                    ] = value
+
+            return snapshot
+
+        def personality_trait_event_snapshot(
+            event,
+        ):
+            if not isinstance(
+                event,
+                CatPersonalityTraitAdjustedEvent,
+            ):
+                raise TypeError(
+                    "Personality boundary event "
+                    "must be "
+                    "CatPersonalityTraitAdjustedEvent."
+                )
+
+            return {
+                "name": event.name,
+                "cat": event.cat,
+                "trait": event.trait,
+                "source": event.source,
+                "day": event.day,
+                "previous": event.previous,
+                "requested_change": (
+                    event.requested_change
+                ),
+                "applied_change": (
+                    event.applied_change
+                ),
+                "value": event.value,
+                "metadata": deepcopy(
+                    dict(
+                        event.metadata
+                    )
+                ),
+            }
+
+        def personality_experience_snapshot(
+            result,
+        ):
+            if not isinstance(
+                result,
+                CatPersonalityExperienceAppliedResult,
+            ):
+                raise TypeError(
+                    "Personality boundary result "
+                    "must be "
+                    "CatPersonalityExperienceAppliedResult."
+                )
+
+            return {
+                "name": result.name,
+                "cat": result.cat,
+                "source": result.source,
+                "day": result.day,
+                "changes": deepcopy(
+                    dict(
+                        result.changes
+                    )
+                ),
+                "events": [
+                    personality_trait_event_snapshot(
+                        event
+                    )
+                    for event
+                    in result.events
+                ],
+                "applied": result.applied,
+            }
+
         return {
             "name": self.name,
             "teacher": self.teacher,
@@ -759,17 +800,17 @@ class FelineAbilityMethodLearnedEvent:
             "ability": self.ability,
             "method": self.method,
             "constraints": (
-                _ability_method_constraints_snapshot(
+                constraints_snapshot(
                     self.constraints
                 )
             ),
             "teacher_personality": (
-                _personality_experience_snapshot(
+                personality_experience_snapshot(
                     self.teacher_personality
                 )
             ),
             "student_personality": (
-                _personality_experience_snapshot(
+                personality_experience_snapshot(
                     self.student_personality
                 )
             ),
