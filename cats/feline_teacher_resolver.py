@@ -105,19 +105,6 @@ class FelineTeacherCandidate:
     knows_ability: bool
     methods: tuple[str, ...] = ()
 
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "cat_found":
-                self.cat_found,
-            "knows_ability":
-                self.knows_ability,
-            "methods": list(
-                self.methods
-            ),
-        }
-
-
 @dataclass(
     slots=True,
     frozen=True
@@ -127,16 +114,6 @@ class FelineTeacherMatch:
     cat: object
     name: str
     methods: tuple[str, ...]
-
-    def to_dict(self):
-        return {
-            "cat": self.cat,
-            "name": self.name,
-            "methods": list(
-                self.methods
-            ),
-        }
-
 
 class FelineTeacherHistoryEvent:
 
@@ -217,28 +194,6 @@ class FelineAbilityTeacherSearchEvent(
             self.teachers
         )
 
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "student": self.student,
-            "ability": self.ability,
-            "reason": self.reason,
-            "candidates": [
-                item.to_dict()
-                for item
-                in self.candidates
-            ],
-            "teachers": [
-                item.to_dict()
-                for item
-                in self.teachers
-            ],
-            "teacher_count":
-                self.teacher_count,
-            "found": self.found,
-        }
-
-
 @dataclass(
     slots=True,
     frozen=True
@@ -280,21 +235,6 @@ class FelineAbilityTeacherChosenEvent(
                 "must match teacher name."
             )
 
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "student": self.student,
-            "ability": self.ability,
-            "requested_method":
-                self.requested_method,
-            "teacher": self.teacher,
-            "available_methods": list(
-                self.available_methods
-            ),
-            "chosen": self.chosen,
-        }
-
-
 @dataclass(
     slots=True,
     frozen=True
@@ -319,18 +259,6 @@ class FelineAbilityTeacherNotFoundEvent(
         default=False,
         init=False,
     )
-
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "student": self.student,
-            "ability": self.ability,
-            "requested_method":
-                self.requested_method,
-            "reason": self.reason,
-            "chosen": self.chosen,
-        }
-
 
 @dataclass(
     slots=True,
@@ -386,29 +314,6 @@ class FelineAbilityLessonRequestedEvent(
                 self.lesson
             ),
         )
-
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "student": self.student,
-            "teacher": self.teacher,
-            "ability": self.ability,
-            "method": self.method,
-            "lesson": (
-                self.lesson.to_dict()
-                if hasattr(
-                    self.lesson,
-                    "to_dict",
-                )
-                else (
-                    _thaw_feline_teacher_payload(
-                        self.lesson
-                    )
-                )
-            ),
-            "learned": self.learned,
-        }
-
 
 class FelineTeacherResolver:
 

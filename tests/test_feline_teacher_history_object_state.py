@@ -161,6 +161,7 @@ class FelineTeacherHistoryObjectStateTests(
                 "keys",
                 "items",
                 "values",
+                "to_dict",
             ):
                 self.assertFalse(
                     hasattr(
@@ -173,23 +174,6 @@ class FelineTeacherHistoryObjectStateTests(
                 TypeError
             ):
                 _ = obj["name"]
-
-        boundary = (
-            result.to_dict()
-        )
-
-        boundary[
-            "candidates"
-        ][0][
-            "methods"
-        ].append(
-            "changed"
-        )
-
-        self.assertNotIn(
-            "changed",
-            event.candidates[0].methods,
-        )
 
     def test_choose_teacher_history_uses_chosen_event(
         self
@@ -237,6 +221,7 @@ class FelineTeacherHistoryObjectStateTests(
             "keys",
             "items",
             "values",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
@@ -251,26 +236,6 @@ class FelineTeacherHistoryObjectStateTests(
             _ = result[
                 "teacher"
             ]
-
-        boundary = (
-            result.to_dict()
-        )
-
-        self.assertNotIn(
-            "teacher_cat",
-            boundary,
-        )
-
-        boundary[
-            "available_methods"
-        ].append(
-            "changed"
-        )
-
-        self.assertNotIn(
-            "changed",
-            event.available_methods,
-        )
 
     def test_choose_teacher_not_found_returns_history_object(
         self
@@ -317,6 +282,7 @@ class FelineTeacherHistoryObjectStateTests(
             "keys",
             "items",
             "values",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
@@ -331,14 +297,6 @@ class FelineTeacherHistoryObjectStateTests(
             _ = result[
                 "reason"
             ]
-
-        boundary = (
-            result.to_dict()
-        )
-
-        boundary[
-            "reason"
-        ] = "changed"
 
         self.assertEqual(
             result.reason,
@@ -408,6 +366,7 @@ class FelineTeacherHistoryObjectStateTests(
             "keys",
             "items",
             "values",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
@@ -422,16 +381,6 @@ class FelineTeacherHistoryObjectStateTests(
             _ = result[
                 "lesson"
             ]
-
-        boundary = (
-            result.to_dict()
-        )
-
-        boundary[
-            "lesson"
-        ][
-            "learned"
-        ] = False
 
         self.assertTrue(
             event.lesson.learned
