@@ -45,22 +45,6 @@ class PhysicalBiologyGateBlockedEvent:
             str(self.cronenberg_id),
         )
 
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "operation": self.operation,
-            "cat": self.cat,
-            "physical_universe_started": (
-                self.physical_universe_started
-            ),
-            "allowed": self.allowed,
-            "cronenberg_created": (
-                self.cronenberg_created
-            ),
-            "cronenberg_id": self.cronenberg_id,
-        }
-
-
 @dataclass(slots=True, frozen=True)
 class PhysicalBiologyGateResult:
 

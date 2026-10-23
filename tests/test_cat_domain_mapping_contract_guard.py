@@ -69,7 +69,6 @@ BOUNDARY_MAPPING_ALLOWLIST = {
     'cats/mating_pregnancy_event.py::_kitten_embryo_result_snapshot',
     'cats/mating_pregnancy_event.py::_pregnancy_paternity_snapshot',
     'cats/memory.py::CatMemory.public_state',
-    'cats/physical_biology_gate.py::PhysicalBiologyGateBlockedEvent.to_dict',
 }
 
 

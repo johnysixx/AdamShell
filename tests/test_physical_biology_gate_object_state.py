@@ -102,6 +102,7 @@ class PhysicalBiologyGateObjectStateTests(
             "keys",
             "items",
             "values",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
