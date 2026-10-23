@@ -6,6 +6,10 @@ from cats.cat_group_ritual_definition_state import (
 from cats.cat_group_ritual_system import (
     CatGroupRitualSystem,
 )
+from cats.cat_group_ritual_registry import (
+    CatGroupRitualLineageRegistry,
+    CatGroupRitualRegistry,
+)
 from cats.cat_group_system import (
     CatGroupSystem,
 )
@@ -89,6 +93,81 @@ class CatGroupRitualDefinitionObjectStateTests(
                 "ritual"
             ]
 
+    def test_group_ritual_registries_have_no_mapping_api(
+        self
+    ):
+        group = (
+            self.groups.groups[
+                self.group_id
+            ]
+        )
+
+        self.assertIsInstance(
+            group.rituals,
+            CatGroupRitualRegistry,
+        )
+
+        self.assertIsInstance(
+            group.ritual_lineages,
+            CatGroupRitualLineageRegistry,
+        )
+
+        for registry in (
+            group.rituals,
+            group.ritual_lineages,
+        ):
+            self.assertTrue(
+                registry.is_empty
+            )
+
+            self.assertEqual(
+                registry.count,
+                0,
+            )
+
+            self.assertEqual(
+                registry.records(),
+                (),
+            )
+
+            for mapping_method in (
+                "get",
+                "keys",
+                "items",
+                "values",
+                "pop",
+                "setdefault",
+                "clear",
+                "__getitem__",
+                "__setitem__",
+                "__contains__",
+                "__iter__",
+            ):
+                self.assertFalse(
+                    hasattr(
+                        registry,
+                        mapping_method,
+                    )
+                )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            group.rituals.store(
+                {
+                    "name": "legacy",
+                }
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            group.ritual_lineages.store(
+                {
+                    "root_ritual": "legacy",
+                }
+            )
+
     def test_define_returns_object_result(
         self
     ):
@@ -148,9 +227,7 @@ class CatGroupRitualDefinitionObjectStateTests(
         ritual = (
             self.groups.groups[
                 self.group_id
-            ].rituals[
-                result.ritual
-            ]
+            ].rituals.record(result.ritual)
         )
 
         self.assertEqual(
@@ -198,15 +275,11 @@ class CatGroupRitualDefinitionObjectStateTests(
         )
 
         ritual = (
-            group.rituals[
-                result.ritual
-            ]
+            group.rituals.record(result.ritual)
         )
 
         lineage = (
-            group.ritual_lineages[
-                result.ritual
-            ]
+            group.ritual_lineages.record(result.ritual)
         )
 
         self.assertEqual(

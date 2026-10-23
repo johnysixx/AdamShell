@@ -43,9 +43,9 @@ class CatGroupRitualSystem:
             last_participants=[],
         )
 
-        group.rituals[
-            ritual_name
-        ] = ritual
+        group.rituals.store(
+            ritual
+        )
 
         CatGroupRitualEvolutionSystem(
             self.group_system
@@ -74,7 +74,7 @@ class CatGroupRitualSystem:
         )
 
         ritual = (
-            group.rituals.get(
+            group.rituals.record(
                 ritual_name
             )
         )

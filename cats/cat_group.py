@@ -26,6 +26,10 @@ from cats.cat_group_innovation_registry import (
     CatGroupInnovationRegistry,
     CatGroupInnovationTreeRegistry,
 )
+from cats.cat_group_ritual_registry import (
+    CatGroupRitualLineageRegistry,
+    CatGroupRitualRegistry,
+)
 
 
 class CatGroupCulture(DomainObject):
@@ -196,6 +200,32 @@ class CatGroup(DomainObject):
             raise TypeError(
                 "Cat group innovation tree must use "
                 "CatGroupInnovationTreeRegistry."
+            )
+
+        rituals = values.get(
+            "rituals"
+        )
+
+        if not isinstance(
+            rituals,
+            CatGroupRitualRegistry,
+        ):
+            raise TypeError(
+                "Cat group rituals must use "
+                "CatGroupRitualRegistry."
+            )
+
+        ritual_lineages = values.get(
+            "ritual_lineages"
+        )
+
+        if not isinstance(
+            ritual_lineages,
+            CatGroupRitualLineageRegistry,
+        ):
+            raise TypeError(
+                "Cat group ritual lineages must use "
+                "CatGroupRitualLineageRegistry."
             )
 
         super().__init__(

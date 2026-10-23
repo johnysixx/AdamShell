@@ -192,9 +192,7 @@ class CatRitualLineageRegistrationObjectStateTests(
         )
 
         stored = (
-            group.ritual_lineages[
-                "night_watch"
-            ]
+            group.ritual_lineages.record("night_watch")
         )
 
         result = (
@@ -205,9 +203,7 @@ class CatRitualLineageRegistrationObjectStateTests(
         )
 
         current = (
-            group.ritual_lineages[
-                result.ritual
-            ]
+            group.ritual_lineages.record(result.ritual)
         )
 
         self.assertIs(
@@ -248,9 +244,7 @@ class CatRitualLineageRegistrationObjectStateTests(
         )
 
         ritual = (
-            group.rituals[
-                "evening_patrol"
-            ]
+            group.rituals.record("evening_patrol")
         )
 
         ritual.lineage_root = "changed"

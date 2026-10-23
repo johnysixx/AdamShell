@@ -84,9 +84,7 @@ class CatRitualMutationObjectStateTests(
         return (
             self.groups.groups[
                 self.group_id
-            ].rituals[
-                name
-            ]
+            ].rituals.record(name)
         )
 
     def assert_not_mapping(
@@ -160,9 +158,10 @@ class CatRitualMutationObjectStateTests(
             )
         )
 
-        self.assertNotIn(
-            "child_ritual",
-            group.rituals,
+        self.assertFalse(
+            group.rituals.has(
+                "child_ritual"
+            )
         )
 
         self.assertEqual(
@@ -214,16 +213,12 @@ class CatRitualMutationObjectStateTests(
         )
 
         self.assertIs(
-            group.rituals[
-                "night_watch"
-            ],
+            group.rituals.record("night_watch"),
             parent,
         )
 
         self.assertIs(
-            group.rituals[
-                "existing_watch"
-            ],
+            group.rituals.record("existing_watch"),
             existing,
         )
 
@@ -326,9 +321,7 @@ class CatRitualMutationObjectStateTests(
         )
 
         child = (
-            group.rituals[
-                result.new_ritual
-            ]
+            group.rituals.record(result.new_ritual)
         )
 
         self.assertIsNot(
@@ -405,9 +398,7 @@ class CatRitualMutationObjectStateTests(
         )
 
         lineage = (
-            group.ritual_lineages[
-                "night_watch"
-            ]
+            group.ritual_lineages.record("night_watch")
         )
 
         result = (
@@ -419,9 +410,7 @@ class CatRitualMutationObjectStateTests(
         )
 
         current = (
-            group.ritual_lineages[
-                result.lineage_root
-            ]
+            group.ritual_lineages.record(result.lineage_root)
         )
 
         self.assertIs(

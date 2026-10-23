@@ -102,10 +102,14 @@ class CatGroupInstitutionSystem:
         )
 
         rituals_present = all(
-            ritual in group.rituals
-            and group.rituals[
-                ritual
-            ].performances > 0
+            (
+                ritual_record := (
+                    group.rituals.record(
+                        ritual
+                    )
+                )
+            ) is not None
+            and ritual_record.performances > 0
             for ritual
             in institution.rituals
         )

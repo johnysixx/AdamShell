@@ -31,7 +31,7 @@ class CatGroupRitualEvolutionSystem:
         )
 
         ritual = (
-            group.rituals.get(
+            group.rituals.record(
                 ritual_name
             )
         )
@@ -83,7 +83,7 @@ class CatGroupRitualEvolutionSystem:
         )
 
         parent = (
-            group.rituals.get(
+            group.rituals.record(
                 ritual_name
             )
         )
@@ -95,7 +95,9 @@ class CatGroupRitualEvolutionSystem:
                 )
             )
 
-        if new_name in group.rituals:
+        if group.rituals.has(
+            new_name
+        ):
             return (
                 CatRitualMutationDeniedResult(
                     reason="ritual_name_exists",
@@ -161,9 +163,9 @@ class CatGroupRitualEvolutionSystem:
             mutation_reason
         )
 
-        group.rituals[
-            new_name
-        ] = child
+        group.rituals.store(
+            child
+        )
 
         lineage = self._lineage(
             group,
@@ -222,7 +224,7 @@ class CatGroupRitualEvolutionSystem:
         root_ritual,
         create=False,
     ):
-        lineage = group.ritual_lineages.get(
+        lineage = group.ritual_lineages.record(
             root_ritual
         )
 
@@ -236,9 +238,9 @@ class CatGroupRitualEvolutionSystem:
                 )
             )
 
-            group.ritual_lineages[
-                root_ritual
-            ] = lineage
+            group.ritual_lineages.store(
+                lineage
+            )
 
         elif not isinstance(
             lineage,

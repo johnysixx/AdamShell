@@ -28,16 +28,14 @@ class CatGroupRitualSpecializationTests(unittest.TestCase):
     def test_defined_ritual_has_lineage_origin(self):
         rituals = CatGroupRitualSystem(self.groups)
         rituals.define(self.group_id, 'evening_patrol', 'territory')
-        ritual = self.groups.groups[self.group_id].rituals['evening_patrol']
+        ritual = self.groups.groups[self.group_id].rituals.record('evening_patrol')
         self.assertEqual(ritual.lineage_root, 'evening_patrol')
         self.assertEqual(ritual.generation, 0)
 
         lineage = (
             self.groups
             .groups[self.group_id]
-            .ritual_lineages[
-                'evening_patrol'
-            ]
+            .ritual_lineages.record('evening_patrol')
         )
 
         self.assertIsInstance(
@@ -60,7 +58,7 @@ class CatGroupRitualSpecializationTests(unittest.TestCase):
         self.assertTrue(
             result.mutated
         )
-        child = self.groups.groups[self.group_id].rituals['silent_evening_patrol']
+        child = self.groups.groups[self.group_id].rituals.record('silent_evening_patrol')
         self.assertEqual(child.parent_ritual, 'evening_patrol')
         self.assertEqual(child.generation, 1)
 

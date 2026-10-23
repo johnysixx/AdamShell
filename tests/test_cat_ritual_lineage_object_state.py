@@ -101,9 +101,7 @@ class CatRitualLineageObjectStateTests(
         state = (
             self.groups
             .groups[self.group_id]
-            .ritual_lineages[
-                'night_watch'
-            ]
+            .ritual_lineages.record('night_watch')
         )
 
         self.assertIsInstance(
@@ -135,9 +133,7 @@ class CatRitualLineageObjectStateTests(
         stored = (
             self.groups
             .groups[self.group_id]
-            .ritual_lineages[
-                'night_watch'
-            ]
+            .ritual_lineages.record('night_watch')
         )
 
         self.evolution.mutate(
@@ -149,9 +145,7 @@ class CatRitualLineageObjectStateTests(
         current = (
             self.groups
             .groups[self.group_id]
-            .ritual_lineages[
-                'night_watch'
-            ]
+            .ritual_lineages.record('night_watch')
         )
 
         self.assertIs(
@@ -182,26 +176,37 @@ class CatRitualLineageObjectStateTests(
             'territory',
         )
 
-        self.groups.groups[
+        group = self.groups.groups[
             self.group_id
-        ].ritual_lineages[
-            'night_watch'
-        ] = {
-            'root_ritual':
-                'night_watch',
-            'versions': [
+        ]
+
+        stored = (
+            group.ritual_lineages.record(
                 'night_watch'
-            ],
-            'children': {},
-        }
+            )
+        )
 
         with self.assertRaises(
             TypeError
         ):
-            self.evolution.lineage(
-                self.group_id,
-                'night_watch',
+            group.ritual_lineages.store(
+                {
+                    'root_ritual':
+                        'night_watch',
+                    'versions': [
+                        'night_watch'
+                    ],
+                    'children': {},
+                }
             )
+
+        self.assertIs(
+            group.ritual_lineages.record(
+                'night_watch'
+            ),
+            stored,
+        )
+
 
 
 if __name__ == '__main__':

@@ -184,9 +184,7 @@ class CatGroupRitualPerformanceObjectStateTests(
         )
 
         ritual = (
-            group.rituals[
-                "evening_patrol"
-            ]
+            group.rituals.record("evening_patrol")
         )
 
         result = (
@@ -311,9 +309,7 @@ class CatGroupRitualPerformanceObjectStateTests(
         ritual = (
             self.groups.groups[
                 self.group_id
-            ].rituals[
-                "evening_patrol"
-            ]
+            ].rituals.record("evening_patrol")
         )
 
         self.assertEqual(
@@ -467,9 +463,7 @@ class CatGroupRitualPerformanceObjectStateTests(
         ritual = (
             self.groups.groups[
                 self.group_id
-            ].rituals[
-                "evening_patrol"
-            ]
+            ].rituals.record("evening_patrol")
         )
 
         self.assertEqual(
