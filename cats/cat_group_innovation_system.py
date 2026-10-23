@@ -1,4 +1,4 @@
-﻿from cats.cat_social_objects import (
+from cats.cat_social_objects import (
     CatGroupKnowledgeRecord,
     CatGroupKnowledgeTransmission,
 )
@@ -60,7 +60,7 @@ class CatGroupInnovationSystem:
 
         for knowledge_id in unique_knowledge_ids:
             record = (
-                group.knowledge.get(
+                group.knowledge.record(
                     knowledge_id
                 )
             )
@@ -132,27 +132,27 @@ class CatGroupInnovationSystem:
                 parent_innovation_id,
         )
 
-        group.knowledge[
-            innovation_id
-        ] = CatGroupKnowledgeRecord(
-            knowledge_id=innovation_id,
-            category=category,
-            content=deepcopy(
-                procedure
-            ),
-            origin_cat=None,
-            origin_group=group_id,
-            source_type="innovation",
-            confidence=innovation.confidence,
-            verified=False,
-            verification_count=0,
-            contradiction_count=0,
-            transmission_path=[
-                CatGroupKnowledgeTransmission(
-                    type="innovation",
-                    group=group_id,
-                )
-            ],
+        group.knowledge.store(
+            CatGroupKnowledgeRecord(
+                knowledge_id=innovation_id,
+                category=category,
+                content=deepcopy(
+                    procedure
+                ),
+                origin_cat=None,
+                origin_group=group_id,
+                source_type="innovation",
+                confidence=innovation.confidence,
+                verified=False,
+                verification_count=0,
+                contradiction_count=0,
+                transmission_path=[
+                    CatGroupKnowledgeTransmission(
+                        type="innovation",
+                        group=group_id,
+                    )
+                ],
+            )
         )
 
         event = (
@@ -233,9 +233,9 @@ class CatGroupInnovationSystem:
             innovation.verified = True
 
         knowledge = (
-            group.knowledge[
+            group.knowledge.record(
                 innovation_id
-            ]
+            )
         )
 
         knowledge.confidence = (

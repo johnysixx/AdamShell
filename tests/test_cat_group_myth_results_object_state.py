@@ -806,9 +806,15 @@ class CatGroupMythResultsObjectStateTests(
             ]
         )
 
-        del group.knowledge[
-            "danger_scent"
-        ]
+        removed = (
+            group.knowledge.release(
+                "danger_scent"
+            )
+        )
+
+        self.assertIsNotNone(
+            removed
+        )
 
         result = (
             self.myths.verify_against_knowledge(

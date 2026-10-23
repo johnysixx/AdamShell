@@ -40,7 +40,7 @@ class CatGroupMythSystem:
         )
 
         knowledge = (
-            group.knowledge.get(
+            group.knowledge.record(
                 knowledge_id
             )
         )
@@ -401,7 +401,7 @@ class CatGroupMythSystem:
             )
 
         knowledge = (
-            group.knowledge.get(
+            group.knowledge.record(
                 myth.source_knowledge
             )
         )

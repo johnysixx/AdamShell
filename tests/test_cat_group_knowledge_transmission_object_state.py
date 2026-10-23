@@ -116,7 +116,9 @@ class CatGroupKnowledgeTransmissionObjectStateTests(
         record = (
             self.groups
             .groups[self.first_group]
-            .knowledge["safe_route"]
+            .knowledge.record(
+                "safe_route"
+            )
         )
 
         transmission = (
@@ -196,7 +198,9 @@ class CatGroupKnowledgeTransmissionObjectStateTests(
         record = (
             self.groups
             .groups[self.second_group]
-            .knowledge["safe_route"]
+            .knowledge.record(
+                "safe_route"
+            )
         )
 
         transmission = (
@@ -267,9 +271,9 @@ class CatGroupKnowledgeTransmissionObjectStateTests(
         record = (
             self.groups
             .groups[self.first_group]
-            .knowledge[
+            .knowledge.record(
                 result.innovation_id
-            ]
+            )
         )
 
         transmission = (

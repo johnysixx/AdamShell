@@ -105,9 +105,11 @@ class CatGroupFederationKnowledgeTests(
         )
 
         record = (
-            self.groups.groups[self.first_group].knowledge[
+            self.groups.groups[
+                self.first_group
+            ].knowledge.record(
                 "safe_back_room"
-            ]
+            )
         )
 
         self.assertEqual(
@@ -195,9 +197,11 @@ class CatGroupFederationKnowledgeTests(
         )
 
         received = (
-            self.groups.groups[self.second_group].knowledge[
+            self.groups.groups[
+                self.second_group
+            ].knowledge.record(
                 "safe_route"
-            ]
+            )
         )
 
         self.assertLess(
@@ -225,9 +229,11 @@ class CatGroupFederationKnowledgeTests(
         )
 
         before = (
-            self.groups.groups[self.first_group].knowledge[
+            self.groups.groups[
+                self.first_group
+            ].knowledge.record(
                 "safe_route"
-            ].confidence
+            ).confidence
         )
 
         self.knowledge.verify(
@@ -238,9 +244,11 @@ class CatGroupFederationKnowledgeTests(
         )
 
         after = (
-            self.groups.groups[self.first_group].knowledge[
+            self.groups.groups[
+                self.first_group
+            ].knowledge.record(
                 "safe_route"
-            ].confidence
+            ).confidence
         )
 
         self.assertGreater(
@@ -270,9 +278,11 @@ class CatGroupFederationKnowledgeTests(
         )
 
         record = (
-            self.groups.groups[self.first_group].knowledge[
+            self.groups.groups[
+                self.first_group
+            ].knowledge.record(
                 "box_warning"
-            ]
+            )
         )
 
         self.assertLess(
@@ -352,9 +362,12 @@ class CatGroupFederationKnowledgeTests(
             result.shared
         )
 
-        self.assertIn(
-            "cronenberg_scent",
-            self.groups.groups[self.second_group].knowledge
+        self.assertTrue(
+            self.groups.groups[
+                self.second_group
+            ].knowledge.has(
+                "cronenberg_scent"
+            )
         )
 
     def test_ordinary_conflict_memory_can_decay(

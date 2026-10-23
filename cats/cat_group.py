@@ -11,6 +11,9 @@ from cats.cat_group_territory_state import (
 from cats.cat_group_diplomacy_state import (
     CatGroupDiplomacyRegistry,
 )
+from cats.cat_group_knowledge_registry import (
+    CatGroupKnowledgeRegistry,
+)
 
 
 class CatGroupCulture(DomainObject):
@@ -91,6 +94,19 @@ class CatGroup(DomainObject):
             raise TypeError(
                 "Cat group diplomacy must use "
                 "CatGroupDiplomacyRegistry."
+            )
+
+        knowledge = values.get(
+            "knowledge"
+        )
+
+        if not isinstance(
+            knowledge,
+            CatGroupKnowledgeRegistry,
+        ):
+            raise TypeError(
+                "Cat group knowledge must use "
+                "CatGroupKnowledgeRegistry."
             )
 
         super().__init__(

@@ -63,7 +63,7 @@ class CatGroupKnowledgeSystem:
         )
 
         existing = (
-            group.knowledge.get(
+            group.knowledge.record(
                 knowledge_id
             )
         )
@@ -115,9 +115,9 @@ class CatGroupKnowledgeSystem:
                 )
             )
 
-        group.knowledge[
-            knowledge_id
-        ] = record
+        group.knowledge.store(
+            record
+        )
 
         self._offer_to_member(
             cat,
@@ -158,7 +158,7 @@ class CatGroupKnowledgeSystem:
         )
 
         record = (
-            group.knowledge.get(
+            group.knowledge.record(
                 knowledge_id
             )
         )
@@ -220,7 +220,7 @@ class CatGroupKnowledgeSystem:
         )
 
         record = (
-            source.knowledge.get(
+            source.knowledge.record(
                 knowledge_id
             )
         )
@@ -262,15 +262,15 @@ class CatGroupKnowledgeSystem:
         )
 
         existing = (
-            target.knowledge.get(
+            target.knowledge.record(
                 knowledge_id
             )
         )
 
         if existing is None:
-            target.knowledge[
-                knowledge_id
-            ] = copied
+            target.knowledge.store(
+                copied
+            )
 
         elif (
             copied.confidence
@@ -282,9 +282,9 @@ class CatGroupKnowledgeSystem:
                 )
             )
         ):
-            target.knowledge[
-                knowledge_id
-            ] = copied
+            target.knowledge.store(
+                copied
+            )
 
         event = (
             CatGroupKnowledgeTransmittedEvent(
@@ -324,7 +324,7 @@ class CatGroupKnowledgeSystem:
         )
 
         record = (
-            group.knowledge.get(
+            group.knowledge.record(
                 knowledge_id
             )
         )
@@ -379,7 +379,7 @@ class CatGroupKnowledgeSystem:
         )
 
         record = (
-            group.knowledge.get(
+            group.knowledge.record(
                 knowledge_id
             )
         )

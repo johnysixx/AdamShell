@@ -35,6 +35,9 @@ from cats.cat_territory_system import CatTerritorySystem
 from cats.cat_group_diplomacy_state import (
     CatGroupDiplomacyRegistry,
 )
+from cats.cat_group_knowledge_registry import (
+    CatGroupKnowledgeRegistry,
+)
 from cats.cat_group_territory_state import (
     CatGroupTerritories,
     CatGroupTerritoryClaimedEvent,
@@ -100,7 +103,7 @@ class CatGroupSystem:
             group_memory=CatGroupMemoryRegistry(),
             diplomacy=CatGroupDiplomacyRegistry(),
             alliances=[],
-            knowledge={},
+            knowledge=CatGroupKnowledgeRegistry(),
             culture=CatGroupCulture(
                 traits={},
                 traditions={},

@@ -607,18 +607,20 @@ class CatGroupFederationResultsObjectStateTests(
             ),
         )
 
-        self.assertIn(
-            "safe_route",
+        self.assertTrue(
             self.groups.groups[
                 self.second_group
-            ].knowledge,
+            ].knowledge.has(
+                "safe_route"
+            )
         )
 
-        self.assertIn(
-            "safe_route",
+        self.assertTrue(
             self.groups.groups[
                 self.third_group
-            ].knowledge,
+            ].knowledge.has(
+                "safe_route"
+            )
         )
 
         self.assertFalse(

@@ -15,6 +15,9 @@ from cats.cat_group_knowledge_sharing_state import (
 from cats.cat_group_knowledge_system import (
     CatGroupKnowledgeSystem,
 )
+from cats.cat_group_knowledge_registry import (
+    CatGroupKnowledgeRegistry,
+)
 from cats.cat_group_knowledge_transmission_state import (
     CatGroupKnowledgeTransmittedEvent,
     CatGroupKnowledgeTransmissionDeniedResult,
@@ -142,6 +145,106 @@ class CatGroupKnowledgeResultsObjectStateTests(
                 "name"
             ]
 
+    def test_registry_has_no_mapping_api(
+        self
+    ):
+        registry = (
+            self.groups.groups[
+                self.first_group
+            ].knowledge
+        )
+
+        self.assertIsInstance(
+            registry,
+            CatGroupKnowledgeRegistry,
+        )
+
+        self.assertTrue(
+            registry.is_empty
+        )
+
+        self.assertEqual(
+            registry.count,
+            0,
+        )
+
+        self.assertEqual(
+            registry.records(),
+            (),
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+            "pop",
+            "setdefault",
+            "clear",
+            "__getitem__",
+            "__setitem__",
+            "__contains__",
+            "__iter__",
+        ):
+            self.assertFalse(
+                hasattr(
+                    registry,
+                    mapping_method,
+                )
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            registry.store(
+                {
+                    "knowledge_id":
+                        "legacy",
+                }
+            )
+
+        with self.assertRaises(
+            ValueError
+        ):
+            registry.store(
+                CatGroupKnowledgeRecord()
+            )
+
+        record = (
+            CatGroupKnowledgeRecord(
+                knowledge_id="temporary",
+                transmission_path=[],
+            )
+        )
+
+        registry.store(
+            record
+        )
+
+        self.assertIs(
+            registry.record(
+                "temporary"
+            ),
+            record,
+        )
+
+        self.assertTrue(
+            registry.has(
+                "temporary"
+            )
+        )
+
+        self.assertIs(
+            registry.release(
+                "temporary"
+            ),
+            record,
+        )
+
+        self.assertTrue(
+            registry.is_empty
+        )
+
     def test_non_member_contribution_returns_denied_object(
         self
     ):
@@ -188,9 +291,10 @@ class CatGroupKnowledgeResultsObjectStateTests(
             )
         )
 
-        self.assertNotIn(
-            "secret",
-            group.knowledge,
+        self.assertFalse(
+            group.knowledge.has(
+                "secret"
+            )
         )
 
         self.assertEqual(
@@ -240,9 +344,9 @@ class CatGroupKnowledgeResultsObjectStateTests(
         )
 
         record = (
-            group.knowledge[
+            group.knowledge.record(
                 "safe_route"
-            ]
+            )
         )
 
         self.assertIsInstance(
@@ -512,9 +616,9 @@ class CatGroupKnowledgeResultsObjectStateTests(
         record = (
             self.groups.groups[
                 self.second_group
-            ].knowledge[
+            ].knowledge.record(
                 "safe_route"
-            ]
+            )
         )
 
         self.assertFalse(
@@ -786,9 +890,9 @@ class CatGroupKnowledgeResultsObjectStateTests(
         record = (
             self.groups.groups[
                 self.first_group
-            ].knowledge[
+            ].knowledge.record(
                 "safe_route"
-            ]
+            )
         )
 
         self.assertTrue(
@@ -839,9 +943,9 @@ class CatGroupKnowledgeResultsObjectStateTests(
         record = (
             self.groups.groups[
                 self.first_group
-            ].knowledge[
+            ].knowledge.record(
                 "safe_route"
-            ]
+            )
         )
 
         self.assertEqual(

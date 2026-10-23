@@ -336,9 +336,12 @@ class CatGroupCultureTests(
             result.created
         )
 
-        self.assertIn(
-            result.innovation_id,
-            self.groups.groups[self.group_id].knowledge
+        self.assertTrue(
+            self.groups.groups[
+                self.group_id
+            ].knowledge.has(
+                result.innovation_id
+            )
         )
 
     def test_successful_trials_can_verify_innovation(

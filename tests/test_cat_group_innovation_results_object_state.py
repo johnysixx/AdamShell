@@ -414,9 +414,9 @@ class CatGroupInnovationResultsObjectStateTests(
         )
 
         record = (
-            group.knowledge[
+            group.knowledge.record(
                 result.innovation_id
-            ]
+            )
         )
 
         self.assertIsInstance(
@@ -644,9 +644,9 @@ class CatGroupInnovationResultsObjectStateTests(
         )
 
         knowledge = (
-            group.knowledge[
+            group.knowledge.record(
                 created.innovation_id
-            ]
+            )
         )
 
         history_before = len(
@@ -747,9 +747,9 @@ class CatGroupInnovationResultsObjectStateTests(
         )
 
         knowledge = (
-            group.knowledge[
+            group.knowledge.record(
                 created.innovation_id
-            ]
+            )
         )
 
         result = (
@@ -837,9 +837,9 @@ class CatGroupInnovationResultsObjectStateTests(
         )
 
         knowledge = (
-            group.knowledge[
+            group.knowledge.record(
                 created.innovation_id
-            ]
+            )
         )
 
         self.assertFalse(
