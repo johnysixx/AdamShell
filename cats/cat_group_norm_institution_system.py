@@ -25,13 +25,13 @@ class CatGroupNormInstitutionSystem:
         )
 
         institution = (
-            group.institutions.get(
+            group.institutions.record(
                 institution_name
             )
         )
 
         norm = (
-            group.norms.get(
+            group.norms.record(
                 norm_id
             )
         )

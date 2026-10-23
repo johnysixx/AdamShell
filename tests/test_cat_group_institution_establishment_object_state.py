@@ -6,6 +6,12 @@ from cats.cat_group_institution_establishment_state import (
 from cats.cat_group_institution_system import (
     CatGroupInstitutionSystem,
 )
+from cats.cat_group_governance_registry import (
+    CatGroupInstitutionConflictRegistry,
+    CatGroupInstitutionRegistry,
+    CatGroupNormRegistry,
+    CatGroupTabooRegistry,
+)
 from cats.cat_group_system import (
     CatGroupSystem,
 )
@@ -54,6 +60,110 @@ class CatGroupInstitutionEstablishmentObjectStateTests(
                 self.groups
             )
         )
+
+    def test_group_governance_registries_have_no_mapping_api(
+        self
+    ):
+        group = (
+            self.groups.groups[
+                self.group_id
+            ]
+        )
+
+        expected = (
+            (
+                group.institutions,
+                CatGroupInstitutionRegistry,
+            ),
+            (
+                group.norms,
+                CatGroupNormRegistry,
+            ),
+            (
+                group.taboos,
+                CatGroupTabooRegistry,
+            ),
+            (
+                group.institution_conflicts,
+                CatGroupInstitutionConflictRegistry,
+            ),
+        )
+
+        for registry, registry_type in expected:
+            self.assertIsInstance(
+                registry,
+                registry_type,
+            )
+
+            self.assertTrue(
+                registry.is_empty
+            )
+
+            self.assertEqual(
+                registry.count,
+                0,
+            )
+
+            self.assertEqual(
+                registry.records(),
+                (),
+            )
+
+            for mapping_method in (
+                "get",
+                "keys",
+                "items",
+                "values",
+                "pop",
+                "setdefault",
+                "clear",
+                "__getitem__",
+                "__setitem__",
+                "__contains__",
+                "__iter__",
+            ):
+                self.assertFalse(
+                    hasattr(
+                        registry,
+                        mapping_method,
+                    )
+                )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            group.institutions.store(
+                {
+                    "name": "legacy",
+                }
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            group.norms.store(
+                {
+                    "id": "legacy",
+                }
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            group.taboos.store(
+                {
+                    "id": "legacy",
+                }
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            group.institution_conflicts.store(
+                {
+                    "id": "legacy",
+                }
+            )
 
     def test_establish_returns_event_object(
         self
@@ -141,9 +251,7 @@ class CatGroupInstitutionEstablishmentObjectStateTests(
         institution = (
             self.groups.groups[
                 self.group_id
-            ].institutions[
-                result.institution
-            ]
+            ].institutions.record(result.institution)
         )
 
         self.assertEqual(

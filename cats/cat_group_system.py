@@ -54,6 +54,12 @@ from cats.cat_group_role_registry import (
     CatGroupRoleRegistry,
     CatGroupRoleSpecializationRegistry,
 )
+from cats.cat_group_governance_registry import (
+    CatGroupInstitutionConflictRegistry,
+    CatGroupInstitutionRegistry,
+    CatGroupNormRegistry,
+    CatGroupTabooRegistry,
+)
 from cats.cat_group_territory_state import (
     CatGroupTerritories,
     CatGroupTerritoryClaimedEvent,
@@ -143,16 +149,24 @@ class CatGroupSystem:
             ritual_lineages=(
                 CatGroupRitualLineageRegistry()
             ),
-            institutions={},
+            institutions=(
+                CatGroupInstitutionRegistry()
+            ),
             role_specializations=(
                 CatGroupRoleSpecializationRegistry()
             ),
-            norms={},
-            taboos={},
+            norms=(
+                CatGroupNormRegistry()
+            ),
+            taboos=(
+                CatGroupTabooRegistry()
+            ),
             norm_violations=[],
             sanction_history=[],
             succession_history=[],
-            institution_conflicts={},
+            institution_conflicts=(
+                CatGroupInstitutionConflictRegistry()
+            ),
             cultural_parent_group=None,
             cultural_children=[],
             federations=[],

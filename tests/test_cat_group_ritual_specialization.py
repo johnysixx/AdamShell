@@ -116,7 +116,7 @@ class CatGroupRitualSpecializationTests(unittest.TestCase):
         split = CatGroupSplitSystem(self.groups)
         result = split.split(self.group_id, self.cats.cats, departing_members=[self.members[2].name, self.members[3].name], new_name='daughter')
         daughter = result.daughter_group
-        inherited = self.groups.groups[daughter].institutions['night_watch']
+        inherited = self.groups.groups[daughter].institutions.record('night_watch')
         self.assertEqual(inherited.inherited_from, self.group_id)
         self.assertLess(inherited.continuity, 1.0)
 if __name__ == '__main__':

@@ -122,9 +122,7 @@ class CatGroupInstitutionalConflictEscalationObjectStateTests(
             ]
         )
 
-        conflict_count_before = len(
-            group.institution_conflicts
-        )
+        conflict_count_before = group.institution_conflicts.count
 
         history_count_before = len(
             group.history
@@ -170,9 +168,7 @@ class CatGroupInstitutionalConflictEscalationObjectStateTests(
         )
 
         self.assertEqual(
-            len(
-                group.institution_conflicts
-            ),
+            group.institution_conflicts.count,
             conflict_count_before,
         )
 
@@ -259,15 +255,11 @@ class CatGroupInstitutionalConflictEscalationObjectStateTests(
         )
 
         first = (
-            group.institutions[
-                "night_watch"
-            ]
+            group.institutions.record("night_watch")
         )
 
         second = (
-            group.institutions[
-                "door_watch"
-            ]
+            group.institutions.record("door_watch")
         )
 
         result = (
@@ -281,9 +273,7 @@ class CatGroupInstitutionalConflictEscalationObjectStateTests(
         )
 
         stored = (
-            group.institution_conflicts[
-                result.conflict_id
-            ]
+            group.institution_conflicts.record(result.conflict_id)
         )
 
         self.assertIsInstance(
@@ -352,9 +342,7 @@ class CatGroupInstitutionalConflictEscalationObjectStateTests(
         )
 
         conflict = (
-            group.institution_conflicts[
-                result.conflict_id
-            ]
+            group.institution_conflicts.record(result.conflict_id)
         )
 
         conflict_event = (
@@ -418,9 +406,7 @@ class CatGroupInstitutionalConflictEscalationObjectStateTests(
         )
 
         conflict = (
-            group.institution_conflicts[
-                result.conflict_id
-            ]
+            group.institution_conflicts.record(result.conflict_id)
         )
 
         conflict_event = (
@@ -479,9 +465,7 @@ class CatGroupInstitutionalConflictEscalationObjectStateTests(
         )
 
         conflict = (
-            group.institution_conflicts[
-                result.conflict_id
-            ]
+            group.institution_conflicts.record(result.conflict_id)
         )
 
         self.assertEqual(
@@ -495,16 +479,12 @@ class CatGroupInstitutionalConflictEscalationObjectStateTests(
         )
 
         self.assertAlmostEqual(
-            group.institutions[
-                "night_watch"
-            ].continuity,
+            group.institutions.record("night_watch").continuity,
             0.8,
         )
 
         self.assertAlmostEqual(
-            group.institutions[
-                "door_watch"
-            ].continuity,
+            group.institutions.record("door_watch").continuity,
             0.8,
         )
 

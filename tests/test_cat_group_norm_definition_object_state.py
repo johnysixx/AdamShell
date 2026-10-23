@@ -100,11 +100,12 @@ class CatGroupNormDefinitionObjectStateTests(
             "protective",
         )
 
-        self.assertIn(
-            result.norm_id,
+        self.assertTrue(
             self.groups.groups[
                 self.group_id
-            ].norms,
+            ].norms.has(
+                result.norm_id
+            )
         )
 
         for mapping_method in (

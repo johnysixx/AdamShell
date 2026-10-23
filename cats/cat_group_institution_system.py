@@ -47,9 +47,9 @@ class CatGroupInstitutionSystem:
             }
         )
 
-        group.institutions[
-            institution_name
-        ] = institution
+        group.institutions.store(
+            institution
+        )
 
         event = (
             CatGroupInstitutionEstablishedEvent(
@@ -79,7 +79,7 @@ class CatGroupInstitutionSystem:
         )
 
         institution = (
-            group.institutions.get(
+            group.institutions.record(
                 institution_name
             )
         )
@@ -175,10 +175,10 @@ class CatGroupInstitutionSystem:
 
         inherited = []
 
-        for (
-            name,
-            institution,
-        ) in parent.institutions.items():
+        for institution in (
+            parent.institutions.records()
+        ):
+            name = institution.name
             copied = deepcopy(
                 institution
             )
@@ -200,9 +200,9 @@ class CatGroupInstitutionSystem:
                 parent_group_id
             )
 
-            child.institutions[
-                name
-            ] = copied
+            child.institutions.store(
+                copied
+            )
 
             inherited.append(
                 name

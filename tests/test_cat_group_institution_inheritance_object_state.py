@@ -182,9 +182,7 @@ class CatGroupInstitutionInheritanceObjectStateTests(
         )
 
         original = (
-            parent_group.institutions[
-                "night_watch"
-            ]
+            parent_group.institutions.record("night_watch")
         )
 
         original.continuity = 0.8
@@ -199,11 +197,11 @@ class CatGroupInstitutionInheritanceObjectStateTests(
         )
 
         inherited = (
-            child_group.institutions[
+            child_group.institutions.record(
                 result.institutions[
                     0
                 ]
-            ]
+            )
         )
 
         self.assertIsNot(
@@ -301,14 +299,16 @@ class CatGroupInstitutionInheritanceObjectStateTests(
             ]
         )
 
-        self.assertIn(
-            "night_watch",
-            child_group.institutions,
+        self.assertTrue(
+            child_group.institutions.has(
+                "night_watch"
+            )
         )
 
-        self.assertIn(
-            "kitten_guard",
-            child_group.institutions,
+        self.assertTrue(
+            child_group.institutions.has(
+                "kitten_guard"
+            )
         )
 
     def test_empty_parent_returns_empty_tuple(

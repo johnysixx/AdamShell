@@ -126,11 +126,12 @@ class CatGroupTabooDefinitionObjectStateTests(
             "do_not_open_black_box",
         )
 
-        self.assertIn(
-            result.taboo_id,
+        self.assertTrue(
             self.groups.groups[
                 self.group_id
-            ].taboos,
+            ].taboos.has(
+                result.taboo_id
+            )
         )
 
         self.assert_not_mapping(
@@ -155,9 +156,7 @@ class CatGroupTabooDefinitionObjectStateTests(
         taboo = (
             self.groups.groups[
                 self.group_id
-            ].taboos[
-                result.taboo_id
-            ]
+            ].taboos.record(result.taboo_id)
         )
 
         self.assertEqual(

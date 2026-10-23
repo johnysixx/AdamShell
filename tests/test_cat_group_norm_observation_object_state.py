@@ -170,9 +170,7 @@ class CatGroupNormObservationObjectStateTests(
             .groups[
                 self.group_id
             ]
-            .norms[
-                self.norm_id
-            ]
+            .norms.record(self.norm_id)
         )
 
         before = norm.observances

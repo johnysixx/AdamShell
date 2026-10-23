@@ -34,6 +34,12 @@ from cats.cat_group_role_registry import (
     CatGroupRoleRegistry,
     CatGroupRoleSpecializationRegistry,
 )
+from cats.cat_group_governance_registry import (
+    CatGroupInstitutionConflictRegistry,
+    CatGroupInstitutionRegistry,
+    CatGroupNormRegistry,
+    CatGroupTabooRegistry,
+)
 
 
 class CatGroupCulture(DomainObject):
@@ -231,6 +237,59 @@ class CatGroup(DomainObject):
                 "Cat group role specializations "
                 "must use "
                 "CatGroupRoleSpecializationRegistry."
+            )
+
+        institutions = values.get(
+            "institutions"
+        )
+
+        if not isinstance(
+            institutions,
+            CatGroupInstitutionRegistry,
+        ):
+            raise TypeError(
+                "Cat group institutions must use "
+                "CatGroupInstitutionRegistry."
+            )
+
+        norms = values.get(
+            "norms"
+        )
+
+        if not isinstance(
+            norms,
+            CatGroupNormRegistry,
+        ):
+            raise TypeError(
+                "Cat group norms must use "
+                "CatGroupNormRegistry."
+            )
+
+        taboos = values.get(
+            "taboos"
+        )
+
+        if not isinstance(
+            taboos,
+            CatGroupTabooRegistry,
+        ):
+            raise TypeError(
+                "Cat group taboos must use "
+                "CatGroupTabooRegistry."
+            )
+
+        institution_conflicts = values.get(
+            "institution_conflicts"
+        )
+
+        if not isinstance(
+            institution_conflicts,
+            CatGroupInstitutionConflictRegistry,
+        ):
+            raise TypeError(
+                "Cat group institution conflicts "
+                "must use "
+                "CatGroupInstitutionConflictRegistry."
             )
 
         rituals = values.get(

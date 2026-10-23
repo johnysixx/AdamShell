@@ -276,9 +276,7 @@ class CatGroupNormInstitutionLinkObjectStateTests(
         institution = (
             self.groups.groups[
                 self.group_id
-            ].institutions[
-                result.institution
-            ]
+            ].institutions.record(result.institution)
         )
 
         self.assertEqual(
@@ -330,9 +328,7 @@ class CatGroupNormInstitutionLinkObjectStateTests(
         institution = (
             self.groups.groups[
                 self.group_id
-            ].institutions[
-                "kitten_guard"
-            ]
+            ].institutions.record("kitten_guard")
         )
 
         self.assertTrue(

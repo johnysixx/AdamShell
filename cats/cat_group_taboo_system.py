@@ -50,9 +50,9 @@ class CatGroupTabooSystem:
             }
         )
 
-        group.taboos[
-            taboo_id
-        ] = taboo
+        group.taboos.store(
+            taboo
+        )
 
         return (
             CatGroupTabooDefinedResult(
@@ -75,7 +75,7 @@ class CatGroupTabooSystem:
             )
         )
 
-        taboo = group.taboos.get(
+        taboo = group.taboos.record(
             taboo_id
         )
 

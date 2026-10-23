@@ -175,15 +175,11 @@ class CatGroupInstitutionalConflictSplitObjectStateTests(
         )
 
         first = (
-            group.institutions[
-                "night_watch"
-            ]
+            group.institutions.record("night_watch")
         )
 
         second = (
-            group.institutions[
-                "door_watch"
-            ]
+            group.institutions.record("door_watch")
         )
 
         first_before = (
@@ -302,15 +298,11 @@ class CatGroupInstitutionalConflictSplitObjectStateTests(
         )
 
         first = (
-            group.institutions[
-                "night_watch"
-            ]
+            group.institutions.record("night_watch")
         )
 
         second = (
-            group.institutions[
-                "door_watch"
-            ]
+            group.institutions.record("door_watch")
         )
 
         self.assertAlmostEqual(
@@ -360,15 +352,11 @@ class CatGroupInstitutionalConflictSplitObjectStateTests(
         )
 
         first = (
-            group.institutions[
-                "night_watch"
-            ]
+            group.institutions.record("night_watch")
         )
 
         second = (
-            group.institutions[
-                "door_watch"
-            ]
+            group.institutions.record("door_watch")
         )
 
         first.continuity = 0.1

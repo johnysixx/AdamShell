@@ -234,9 +234,7 @@ class CatGroupInstitutionalConflictMediationObjectStateTests(
         )
 
         conflict = (
-            group.institution_conflicts[
-                created.conflict_id
-            ]
+            group.institution_conflicts.record(created.conflict_id)
         )
 
         intensity_before = (
@@ -379,9 +377,7 @@ class CatGroupInstitutionalConflictMediationObjectStateTests(
         )
 
         stored = (
-            group.institution_conflicts[
-                created.conflict_id
-            ]
+            group.institution_conflicts.record(created.conflict_id)
         )
 
         result = (
@@ -393,9 +389,7 @@ class CatGroupInstitutionalConflictMediationObjectStateTests(
         )
 
         current = (
-            group.institution_conflicts[
-                created.conflict_id
-            ]
+            group.institution_conflicts.record(created.conflict_id)
         )
 
         self.assertIs(
@@ -436,15 +430,11 @@ class CatGroupInstitutionalConflictMediationObjectStateTests(
         )
 
         first = (
-            group.institutions[
-                "night_watch"
-            ]
+            group.institutions.record("night_watch")
         )
 
         second = (
-            group.institutions[
-                "door_watch"
-            ]
+            group.institutions.record("door_watch")
         )
 
         self.assertAlmostEqual(
@@ -499,9 +489,7 @@ class CatGroupInstitutionalConflictMediationObjectStateTests(
         )
 
         conflict = (
-            group.institution_conflicts[
-                created.conflict_id
-            ]
+            group.institution_conflicts.record(created.conflict_id)
         )
 
         conflict_event = (
@@ -567,9 +555,7 @@ class CatGroupInstitutionalConflictMediationObjectStateTests(
         )
 
         conflict = (
-            group.institution_conflicts[
-                created.conflict_id
-            ]
+            group.institution_conflicts.record(created.conflict_id)
         )
 
         conflict_event = (

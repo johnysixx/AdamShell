@@ -643,9 +643,7 @@ class CatGroupCulturalDiplomacyHistoryObjectStateTests(
         ]
 
         conflict = (
-            group.institution_conflicts[
-                result.conflict_id
-            ]
+            group.institution_conflicts.record(result.conflict_id)
         )
 
         conflict_event = (
@@ -731,9 +729,7 @@ class CatGroupCulturalDiplomacyHistoryObjectStateTests(
         ]
 
         conflict = (
-            group.institution_conflicts[
-                created.conflict_id
-            ]
+            group.institution_conflicts.record(created.conflict_id)
         )
 
         conflict_event = (

@@ -59,9 +59,9 @@ class CatGroupSuccessionConflictTests(unittest.TestCase):
             cat.personality.traits.courage = 0.0
             cat.group.influence = 0.0
         succession = CatGroupSuccessionSystem(self.groups)
-        before = self.groups.groups[self.group_id].institutions['night_watch'].continuity
+        before = self.groups.groups[self.group_id].institutions.record('night_watch').continuity
         result = succession.succeed(self.group_id, self.first, 'guardian', self.cats.cats)
-        after = self.groups.groups[self.group_id].institutions['night_watch'].continuity
+        after = self.groups.groups[self.group_id].institutions.record('night_watch').continuity
         self.assertFalse(result.succeeded)
         self.assertLess(after, before)
 
@@ -90,8 +90,8 @@ class CatGroupSuccessionConflictTests(unittest.TestCase):
             result.escalated
         )
         group = self.groups.groups[self.group_id]
-        self.assertLess(group.institutions['night_watch'].continuity, 1.0)
-        self.assertLess(group.institutions['door_watch'].continuity, 1.0)
+        self.assertLess(group.institutions.record('night_watch').continuity, 1.0)
+        self.assertLess(group.institutions.record('door_watch').continuity, 1.0)
 
     def test_mediator_can_resolve_conflict(self):
         self._institutions()

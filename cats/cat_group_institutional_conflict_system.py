@@ -37,13 +37,13 @@ class CatGroupInstitutionalConflictSystem:
         )
 
         first = (
-            group.institutions.get(
+            group.institutions.record(
                 first_institution
             )
         )
 
         second = (
-            group.institutions.get(
+            group.institutions.record(
                 second_institution
             )
         )
@@ -177,13 +177,13 @@ class CatGroupInstitutionalConflictSystem:
         )
 
         first = (
-            group.institutions.get(
+            group.institutions.record(
                 first_institution
             )
         )
 
         second = (
-            group.institutions.get(
+            group.institutions.record(
                 second_institution
             )
         )
@@ -243,9 +243,9 @@ class CatGroupInstitutionalConflictSystem:
             }
         )
 
-        group.institution_conflicts[
-            conflict_id
-        ] = conflict
+        group.institution_conflicts.store(
+            conflict
+        )
 
         event = (
             CatGroupInstitutionalConflictEvent(
@@ -281,7 +281,7 @@ class CatGroupInstitutionalConflictSystem:
         )
 
         conflict = (
-            group.institution_conflicts.get(
+            group.institution_conflicts.record(
                 conflict_id
             )
         )
@@ -369,7 +369,7 @@ class CatGroupInstitutionalConflictSystem:
         )
 
         conflict = (
-            group.institution_conflicts.get(
+            group.institution_conflicts.record(
                 conflict_id
             )
         )
@@ -392,15 +392,15 @@ class CatGroupInstitutionalConflictSystem:
             )
 
         first = (
-            group.institutions[
+            group.institutions.record(
                 conflict.first_institution
-            ]
+            )
         )
 
         second = (
-            group.institutions[
+            group.institutions.record(
                 conflict.second_institution
-            ]
+            )
         )
 
         first.continuity = max(
@@ -432,7 +432,11 @@ class CatGroupInstitutionalConflictSystem:
 
     def _restore_institutions(self, group, conflict, amount):
         for name in (conflict.first_institution, conflict.second_institution):
-            institution = group.institutions[name]
+            institution = (
+                group.institutions.record(
+                    name
+                )
+            )
             institution.continuity = min(1.0, float(institution.continuity) + amount)
 
     def _clamp(self, value):

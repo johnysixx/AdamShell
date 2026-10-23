@@ -29,11 +29,12 @@ class CatGroupNormTests(unittest.TestCase):
         norms = CatGroupNormSystem(self.groups)
         result = norms.define(self.group_id, 'protect_kittens', 'protective', {'action': 'protect', 'target': 'kitten'}, importance=0.9)
         self.assertTrue(result.defined)
-        self.assertIn(
-            result.norm_id,
+        self.assertTrue(
             self.groups.groups[
                 self.group_id
-            ].norms,
+            ].norms.has(
+                result.norm_id
+            )
         )
 
     def test_cat_can_violate_norm(self):
@@ -99,9 +100,7 @@ class CatGroupNormTests(unittest.TestCase):
             created.norm_id,
             self.groups.groups[
                 self.group_id
-            ].institutions[
-                "kitten_guard"
-            ].norms,
+            ].institutions.record("kitten_guard").norms,
         )
 
     def test_social_avoidance_creates_relationship_object(self):

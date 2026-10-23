@@ -145,9 +145,7 @@ class CatGroupInstitutionMaintenanceObjectStateTests(
         institution = (
             self.groups.groups[
                 self.group_id
-            ].institutions[
-                "night_watch"
-            ]
+            ].institutions.record("night_watch")
         )
 
         self.assertIsInstance(
@@ -207,9 +205,7 @@ class CatGroupInstitutionMaintenanceObjectStateTests(
         institution = (
             self.groups.groups[
                 self.group_id
-            ].institutions[
-                "quiet_watch"
-            ]
+            ].institutions.record("quiet_watch")
         )
 
         before_generations = (
@@ -278,9 +274,7 @@ class CatGroupInstitutionMaintenanceObjectStateTests(
         institution = (
             self.groups.groups[
                 self.group_id
-            ].institutions[
-                "night_watch"
-            ]
+            ].institutions.record("night_watch")
         )
 
         self.assertIsInstance(

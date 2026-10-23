@@ -269,7 +269,7 @@ class CatGroupSuccessionSystem:
         amount,
     ):
         for institution in (
-            group.institutions.values()
+            group.institutions.records()
         ):
             if role not in getattr(
                 institution,
@@ -303,7 +303,7 @@ class CatGroupSuccessionSystem:
         amount,
     ):
         for institution in (
-            group.institutions.values()
+            group.institutions.records()
         ):
             if role not in getattr(
                 institution,

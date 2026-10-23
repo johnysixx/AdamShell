@@ -87,7 +87,13 @@ class CatGroupInstitutionTests(unittest.TestCase):
         self.assertTrue(
             result.established
         )
-        self.assertIn('night_watch', self.groups.groups[self.group_id].institutions)
+        self.assertTrue(
+            self.groups.groups[
+                self.group_id
+            ].institutions.has(
+                'night_watch'
+            )
+        )
 
     def test_institution_strengthens_when_role_and_ritual_exist(self):
         self.first.personality.traits.courage = 1.0
@@ -99,9 +105,9 @@ class CatGroupInstitutionTests(unittest.TestCase):
         rituals.perform(self.group_id, 'evening_patrol', [self.first])
         institutions = CatGroupInstitutionSystem(self.groups)
         institutions.establish(self.group_id, 'night_watch', 'protect_group', roles=['guardian'], rituals=['evening_patrol'])
-        before = self.groups.groups[self.group_id].institutions['night_watch'].generations
+        before = self.groups.groups[self.group_id].institutions.record('night_watch').generations
         result = institutions.maintain(self.group_id, 'night_watch')
-        after = self.groups.groups[self.group_id].institutions['night_watch'].generations
+        after = self.groups.groups[self.group_id].institutions.record('night_watch').generations
         self.assertEqual(
             result.status,
             'maintained',

@@ -53,9 +53,9 @@ class CatGroupNormSystem:
             }
         )
 
-        group.norms[
-            norm_id
-        ] = norm
+        group.norms.store(
+            norm
+        )
 
         event = (
             CatGroupNormDefinedEvent(
@@ -84,7 +84,7 @@ class CatGroupNormSystem:
             )
         )
 
-        norm = group.norms.get(
+        norm = group.norms.record(
             norm_id
         )
 
@@ -118,7 +118,7 @@ class CatGroupNormSystem:
             )
         )
 
-        norm = group.norms.get(
+        norm = group.norms.record(
             norm_id
         )
 
