@@ -151,12 +151,30 @@ class CatDevelopmentHistoryObjectStateTests(
             CatDevelopmentStage.SOCIALIZING_KITTEN,
         )
 
-        with self.assertRaises(TypeError):
-            _ = event.transitions[0][
-                "day"
-            ]
+        for obj in (
+            event,
+            event.transitions[0],
+        ):
+            for mapping_method in (
+                "get",
+                "keys",
+                "items",
+                "values",
+                "to_dict",
+            ):
+                self.assertFalse(
+                    hasattr(
+                        obj,
+                        mapping_method,
+                    )
+                )
 
-    def test_boundary_snapshot_is_detached_from_history(
+            with self.assertRaises(
+                TypeError
+            ):
+                _ = obj["day"]
+
+    def test_quantum_history_keeps_age_event_object(
         self
     ):
         self.resolver.initialize_newborn(
@@ -176,31 +194,26 @@ class CatDevelopmentHistoryObjectStateTests(
             .history[-1]
         )
 
-        boundary = (
-            result.to_dict()
-        )
-
-        boundary[
-            "transitions"
-        ][0][
-            "stage"
-        ] = "changed"
-
-        self.assertIs(
-            event
-            .transitions[0]
-            .stage,
-            CatDevelopmentStage.SOCIALIZING_KITTEN,
-        )
-
         quantum_event = (
             self.universe
             .quantum_events[-1]
         )
 
         self.assertIs(
+            result,
+            event,
+        )
+
+        self.assertIs(
             quantum_event,
             event,
+        )
+
+        self.assertFalse(
+            hasattr(
+                event,
+                "to_dict",
+            )
         )
 
         self.assertIs(

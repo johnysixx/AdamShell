@@ -35,13 +35,6 @@ class CatDevelopmentStageTransition:
                 "must be a CatDevelopmentStage object."
             )
 
-    def to_dict(self):
-        return {
-            "day": self.day,
-            "stage": self.stage.value,
-        }
-
-
 @dataclass(slots=True, frozen=True)
 class NewbornCatDevelopmentInitializedEvent:
 
@@ -185,36 +178,6 @@ class CatAgeAdvancedEvent:
             self.previous_stage
             != self.stage
         )
-
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "cat": self.cat,
-            "days_advanced": (
-                self.days_advanced
-            ),
-            "previous_age_days": (
-                self.previous_age_days
-            ),
-            "age_days": self.age_days,
-            "previous_stage": (
-                self.previous_stage.value
-            ),
-            "stage": self.stage.value,
-            "stage_changed": (
-                self.stage_changed
-            ),
-            "transitions": [
-                transition.to_dict()
-                for transition
-                in self.transitions
-            ],
-            "reproductive_maturity": (
-                self.reproductive_maturity
-            ),
-            "fertile": self.fertile,
-        }
-
 
 class CatDevelopmentResolver:
 

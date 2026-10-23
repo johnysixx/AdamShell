@@ -110,41 +110,6 @@ class CatGuidedHumanToBarEvent:
                 "CatInvitedHumanEnteredEvent."
             )
 
-    def to_dict(
-        self,
-        access_state=None,
-    ):
-        access = (
-            self.access.to_state()
-            if access_state is None
-            else access_state
-        )
-
-        if not isinstance(
-            access,
-            CatMeowBarAccessState,
-        ):
-            raise TypeError(
-                "Bar guidance boundary access "
-                "requires "
-                "CatMeowBarAccessState."
-            )
-
-        return {
-            "name": self.name,
-            "cat": self.cat,
-            "human": self.human,
-            "invitation_id":
-                self.invitation_id,
-            "access": access,
-            "admission_result":
-                self.admission.to_dict(),
-            "guided": self.guided,
-            "permanent_access":
-                self.permanent_access,
-        }
-
-
 class CatBarGuidanceSystem:
 
     def __init__(

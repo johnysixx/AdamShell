@@ -16,7 +16,6 @@ CATS_ROOT = (
 
 
 BOUNDARY_MAPPING_ALLOWLIST = {
-    'cats/cat_bar_guidance_system.py::CatGuidedHumanToBarEvent.to_dict',
     'cats/cat_birth_objects.py::CatLitter.to_dict',
     'cats/cat_birth_objects.py::_kitten_birth_result_snapshot',
     'cats/cat_birth_objects.py::cat_birth_profile_snapshot',
@@ -38,8 +37,6 @@ BOUNDARY_MAPPING_ALLOWLIST = {
     'cats/cats.py::Cats.public_state',
     'cats/cronenberg_encounter.py::CatCronenbergEncounter._origin_snapshot',
     'cats/cronenberg_encounter.py::CatCronenbergEncounter.public_state',
-    'cats/development_resolver.py::CatAgeAdvancedEvent.to_dict',
-    'cats/development_resolver.py::CatDevelopmentStageTransition.to_dict',
     'cats/duplicate_consumption_energy.py::DuplicateConsumptionEnergyResolutionSkippedResult.to_dict',
     'cats/duplicate_consumption_energy.py::DuplicateConsumptionEnergyResolvedEvent.to_dict',
     'cats/feline_wisdom_state.py::FelineAbilityAwarenessTransmissionDeniedResult.to_dict',

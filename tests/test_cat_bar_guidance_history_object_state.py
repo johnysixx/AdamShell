@@ -150,6 +150,7 @@ class CatBarGuidanceHistoryObjectStateTests(
             "keys",
             "items",
             "values",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
@@ -173,48 +174,7 @@ class CatBarGuidanceHistoryObjectStateTests(
             self.human.meow_bar_invitation,
         )
 
-    def test_boundary_mutation_does_not_change_history(
-        self
-    ):
-        result = self.guidance.guide(
-            self.cat,
-            self.human,
-            self.offered.id,
-        )
-
-        event = (
-            self.guidance
-            .history[-1]
-        )
-
-        boundary = result.to_dict(
-            access_state=(
-                self.human.meow_bar_invitation
-            )
-        )
-
-        boundary[
-            "admission_result"
-        ][
-            "human"
-        ] = "changed"
-
-        boundary[
-            "admission_result"
-        ][
-            "entered"
-        ] = False
-
-        self.assertEqual(
-            event.admission.human,
-            self.human.name,
-        )
-
-        self.assertTrue(
-            event.admission.entered
-        )
-
-    def test_mixed_invitation_history_keeps_boundary_snapshot(
+    def test_mixed_invitation_history_keeps_domain_event(
         self
     ):
         result = self.guidance.guide(
@@ -239,20 +199,16 @@ class CatBarGuidanceHistoryObjectStateTests(
             result,
         )
 
-        boundary = result.to_dict(
-            access_state=(
-                self.human.meow_bar_invitation
-            )
-        )
-        boundary[
-            "admission_result"
-        ][
-            "human"
-        ] = "changed"
-
         self.assertEqual(
             audit.admission.human,
             self.human.name,
+        )
+
+        self.assertFalse(
+            hasattr(
+                audit,
+                "to_dict",
+            )
         )
 
     def test_history_rejects_mapping_event(
