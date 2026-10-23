@@ -140,17 +140,3 @@ class CatDoorRegistry:
             == source_layer
         ]
 
-    @property
-    def public_state(self):
-        return {
-            "type": "cat_door_registry",
-            "door_count": len(
-                self.doors
-            ),
-            "doors": [
-                door.public_state
-                for door in self.doors
-            ]
-        }
-
-

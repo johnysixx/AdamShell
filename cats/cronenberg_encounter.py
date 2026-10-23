@@ -615,19 +615,3 @@ class CatCronenbergEncounter:
             return None
 
         return position
-
-    @property
-    def public_state(self):
-        return {
-            "default_cat_size": (
-                self.default_cat_size
-            ),
-            "encounter_count": len(
-                self.history
-            ),
-            "history": [
-                encounter.to_dict()
-                for encounter
-                in self.history
-            ],
-        }

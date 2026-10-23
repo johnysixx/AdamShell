@@ -18,7 +18,6 @@ CATS_ROOT = (
 BOUNDARY_MAPPING_ALLOWLIST = {
     'cats/cat_birth_objects.py::cat_birth_profile_snapshot',
     'cats/cat_door.py::CatDoor.public_state',
-    'cats/cat_door_registry.py::CatDoorRegistry.public_state',
     'cats/cat_learning_state.py::CatLearningState.to_dict',
     'cats/cat_memory_record.py::CatMemoryRecord.to_dict',
     'cats/cat_perception.py::CatEnvironmentObservedEvent.to_dict',
@@ -26,7 +25,6 @@ BOUNDARY_MAPPING_ALLOWLIST = {
     'cats/cat_social_objects.py::cat_group_knowledge_transmission_snapshot',
     'cats/cat_social_objects.py::cat_relationship_trust_event_snapshot',
     'cats/cats.py::Cats.public_state',
-    'cats/cronenberg_encounter.py::CatCronenbergEncounter.public_state',
     'cats/feline_wisdom_state.py::FelineAbilityAwarenessTransmissionDeniedResult.to_dict',
     'cats/feline_wisdom_state.py::FelineAbilityAwarenessTransmissionEvent.to_dict',
     'cats/feline_wisdom_state.py::FelineAbilityLessonDeniedResult.to_dict',
