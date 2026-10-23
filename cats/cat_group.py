@@ -22,6 +22,10 @@ from cats.cat_group_myth_registry import (
     CatGroupMythLineageRegistry,
     CatGroupMythRegistry,
 )
+from cats.cat_group_innovation_registry import (
+    CatGroupInnovationRegistry,
+    CatGroupInnovationTreeRegistry,
+)
 
 
 class CatGroupCulture(DomainObject):
@@ -166,6 +170,32 @@ class CatGroup(DomainObject):
             raise TypeError(
                 "Cat group myth lineages must use "
                 "CatGroupMythLineageRegistry."
+            )
+
+        innovations = values.get(
+            "innovations"
+        )
+
+        if not isinstance(
+            innovations,
+            CatGroupInnovationRegistry,
+        ):
+            raise TypeError(
+                "Cat group innovations must use "
+                "CatGroupInnovationRegistry."
+            )
+
+        innovation_tree = values.get(
+            "innovation_tree"
+        )
+
+        if not isinstance(
+            innovation_tree,
+            CatGroupInnovationTreeRegistry,
+        ):
+            raise TypeError(
+                "Cat group innovation tree must use "
+                "CatGroupInnovationTreeRegistry."
             )
 
         super().__init__(

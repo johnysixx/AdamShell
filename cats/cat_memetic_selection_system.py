@@ -156,7 +156,7 @@ class CatMemeticSelectionSystem:
         )
 
         innovation = (
-            group.innovations.get(
+            group.innovations.record(
                 innovation_id
             )
         )
@@ -365,10 +365,8 @@ class CatMemeticSelectionSystem:
         surviving = []
         fading = []
 
-        for (
-            innovation_id,
-            innovation,
-        ) in group.innovations.items():
+        for innovation in group.innovations.records():
+            innovation_id = innovation.innovation_id
             fitness = self._number(
                 getattr(
                     innovation,

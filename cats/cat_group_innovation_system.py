@@ -119,9 +119,9 @@ class CatGroupInnovationSystem:
             failed_trials=0,
         )
 
-        group.innovations[
-            innovation_id
-        ] = innovation
+        group.innovations.store(
+            innovation
+        )
 
         CatGroupInnovationTreeSystem(
             self.group_system
@@ -188,7 +188,7 @@ class CatGroupInnovationSystem:
         )
 
         innovation = (
-            group.innovations.get(
+            group.innovations.record(
                 innovation_id
             )
         )

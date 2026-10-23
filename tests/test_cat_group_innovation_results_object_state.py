@@ -7,6 +7,10 @@ from cats.cat_group_innovation_creation_state import (
 from cats.cat_group_innovation_system import (
     CatGroupInnovationSystem,
 )
+from cats.cat_group_innovation_registry import (
+    CatGroupInnovationRegistry,
+    CatGroupInnovationTreeRegistry,
+)
 from cats.cat_group_innovation_trial_state import (
     CatGroupInnovationTrialDeniedResult,
     CatGroupInnovationTrialResult,
@@ -154,6 +158,81 @@ class CatGroupInnovationResultsObjectStateTests(
                 "name"
             ]
 
+    def test_group_innovation_registries_have_no_mapping_api(
+        self
+    ):
+        group = (
+            self.groups.groups[
+                self.group_id
+            ]
+        )
+
+        self.assertIsInstance(
+            group.innovations,
+            CatGroupInnovationRegistry,
+        )
+
+        self.assertIsInstance(
+            group.innovation_tree,
+            CatGroupInnovationTreeRegistry,
+        )
+
+        for registry in (
+            group.innovations,
+            group.innovation_tree,
+        ):
+            self.assertTrue(
+                registry.is_empty
+            )
+
+            self.assertEqual(
+                registry.count,
+                0,
+            )
+
+            self.assertEqual(
+                registry.records(),
+                (),
+            )
+
+            for mapping_method in (
+                "get",
+                "keys",
+                "items",
+                "values",
+                "pop",
+                "setdefault",
+                "clear",
+                "__getitem__",
+                "__setitem__",
+                "__contains__",
+                "__iter__",
+            ):
+                self.assertFalse(
+                    hasattr(
+                        registry,
+                        mapping_method,
+                    )
+                )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            group.innovations.store(
+                {
+                    "innovation_id": "legacy",
+                }
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            group.innovation_tree.store(
+                {
+                    "innovation_id": "legacy",
+                }
+            )
+
     def test_duplicate_sources_return_denied_object(
         self
     ):
@@ -217,7 +296,7 @@ class CatGroupInnovationResultsObjectStateTests(
         )
 
         self.assertEqual(
-            len(group.innovations),
+            group.innovations.count,
             0,
         )
 
@@ -282,7 +361,7 @@ class CatGroupInnovationResultsObjectStateTests(
         )
 
         self.assertEqual(
-            len(group.innovations),
+            group.innovations.count,
             0,
         )
 
@@ -385,9 +464,7 @@ class CatGroupInnovationResultsObjectStateTests(
         )
 
         innovation = (
-            group.innovations[
-                result.innovation_id
-            ]
+            group.innovations.record(result.innovation_id)
         )
 
         self.assertEqual(
@@ -533,15 +610,11 @@ class CatGroupInnovationResultsObjectStateTests(
         )
 
         parent_state = (
-            group.innovation_tree[
-                parent.innovation_id
-            ]
+            group.innovation_tree.record(parent.innovation_id)
         )
 
         child_state = (
-            group.innovation_tree[
-                child.innovation_id
-            ]
+            group.innovation_tree.record(child.innovation_id)
         )
 
         self.assertEqual(
@@ -560,9 +633,7 @@ class CatGroupInnovationResultsObjectStateTests(
         )
 
         self.assertEqual(
-            group.innovations[
-                child.innovation_id
-            ].generation,
+            group.innovations.record(child.innovation_id).generation,
             1,
         )
 
@@ -638,9 +709,7 @@ class CatGroupInnovationResultsObjectStateTests(
         )
 
         innovation = (
-            group.innovations[
-                created.innovation_id
-            ]
+            group.innovations.record(created.innovation_id)
         )
 
         knowledge = (
@@ -741,9 +810,7 @@ class CatGroupInnovationResultsObjectStateTests(
         )
 
         innovation = (
-            group.innovations[
-                created.innovation_id
-            ]
+            group.innovations.record(created.innovation_id)
         )
 
         knowledge = (
@@ -831,9 +898,7 @@ class CatGroupInnovationResultsObjectStateTests(
         )
 
         innovation = (
-            group.innovations[
-                created.innovation_id
-            ]
+            group.innovations.record(created.innovation_id)
         )
 
         knowledge = (

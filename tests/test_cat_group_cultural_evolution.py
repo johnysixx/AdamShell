@@ -312,9 +312,7 @@ class CatGroupCulturalEvolutionTests(
         tree_state = (
             self.groups
             .groups[self.parent]
-            .innovation_tree[
-                second.innovation_id
-            ]
+            .innovation_tree.record(second.innovation_id)
         )
 
         self.assertIsInstance(
@@ -327,9 +325,7 @@ class CatGroupCulturalEvolutionTests(
             1,
         )
 
-        record = self.groups.groups[self.parent].innovations[
-            second.innovation_id
-        ]
+        record = self.groups.groups[self.parent].innovations.record(second.innovation_id)
 
         self.assertEqual(
             record.generation,

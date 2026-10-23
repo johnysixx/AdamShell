@@ -150,9 +150,7 @@ class CatInnovationTreeRegistrationResultsObjectStateTests(
             ]
         )
 
-        tree_count = len(
-            group.innovation_tree
-        )
+        tree_count = group.innovation_tree.count
 
         result = (
             self.tree.register(
@@ -181,9 +179,7 @@ class CatInnovationTreeRegistrationResultsObjectStateTests(
         )
 
         self.assertEqual(
-            len(
-                group.innovation_tree
-            ),
+            group.innovation_tree.count,
             tree_count,
         )
 
@@ -268,9 +264,7 @@ class CatInnovationTreeRegistrationResultsObjectStateTests(
         )
 
         stored = (
-            group.innovation_tree[
-                created.innovation_id
-            ]
+            group.innovation_tree.record(created.innovation_id)
         )
 
         result = (
@@ -281,9 +275,7 @@ class CatInnovationTreeRegistrationResultsObjectStateTests(
         )
 
         current = (
-            group.innovation_tree[
-                result.innovation_id
-            ]
+            group.innovation_tree.record(result.innovation_id)
         )
 
         self.assertIs(
@@ -351,15 +343,11 @@ class CatInnovationTreeRegistrationResultsObjectStateTests(
         )
 
         root_state = (
-            group.innovation_tree[
-                root.innovation_id
-            ]
+            group.innovation_tree.record(root.innovation_id)
         )
 
         child_state = (
-            group.innovation_tree[
-                child.innovation_id
-            ]
+            group.innovation_tree.record(child.innovation_id)
         )
 
         self.assertEqual(
@@ -388,9 +376,7 @@ class CatInnovationTreeRegistrationResultsObjectStateTests(
         )
 
         innovation = (
-            group.innovations[
-                child.innovation_id
-            ]
+            group.innovations.record(child.innovation_id)
         )
 
         self.assertEqual(
@@ -447,9 +433,7 @@ class CatInnovationTreeRegistrationResultsObjectStateTests(
         root_state = (
             self.groups.groups[
                 self.group_id
-            ].innovation_tree[
-                root.innovation_id
-            ]
+            ].innovation_tree.record(root.innovation_id)
         )
 
         self.assertTrue(
@@ -492,9 +476,7 @@ class CatInnovationTreeRegistrationResultsObjectStateTests(
         )
 
         state = (
-            group.innovation_tree[
-                child.innovation_id
-            ]
+            group.innovation_tree.record(child.innovation_id)
         )
 
         self.assertTrue(
@@ -521,9 +503,10 @@ class CatInnovationTreeRegistrationResultsObjectStateTests(
             1,
         )
 
-        self.assertNotIn(
-            "missing_parent",
-            group.innovation_tree,
+        self.assertFalse(
+            group.innovation_tree.has(
+                "missing_parent"
+            )
         )
 
     def test_descendants_and_tree_remain_collection_queries(
@@ -572,31 +555,44 @@ class CatInnovationTreeRegistrationResultsObjectStateTests(
         )
 
         self.assertIsInstance(
-            tree[
-                root.innovation_id
-            ],
+            tree,
+            tuple,
+        )
+
+        root_copy = next(
+            state
+            for state in tree
+            if state.innovation_id
+            == root.innovation_id
+        )
+
+        child_copy = next(
+            state
+            for state in tree
+            if state.innovation_id
+            == child.innovation_id
+        )
+
+        self.assertIsInstance(
+            root_copy,
             CatInnovationTreeState,
         )
 
         self.assertIsInstance(
-            tree[
-                child.innovation_id
-            ],
+            child_copy,
             CatInnovationTreeState,
         )
 
         stored = (
             self.groups.groups[
                 self.group_id
-            ].innovation_tree[
+            ].innovation_tree.record(
                 root.innovation_id
-            ]
+            )
         )
 
         self.assertIsNot(
-            tree[
-                root.innovation_id
-            ],
+            root_copy,
             stored,
         )
 

@@ -376,9 +376,7 @@ class CatGroupCultureTests(
             )
 
         record = (
-            self.groups.groups[self.group_id].innovations[
-                innovation_id
-            ]
+            self.groups.groups[self.group_id].innovations.record(innovation_id)
         )
 
         self.assertTrue(

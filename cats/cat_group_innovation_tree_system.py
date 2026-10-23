@@ -27,7 +27,7 @@ class CatGroupInnovationTreeSystem:
         )
 
         innovation = (
-            group.innovations.get(
+            group.innovations.record(
                 innovation_id
             )
         )
@@ -152,17 +152,19 @@ class CatGroupInnovationTreeSystem:
             group_id
         )
 
-        for innovation_id in (
-            group.innovation_tree
-        ):
+        records = (
+            group.innovation_tree.records()
+        )
+
+        for state in records:
             self._state(
                 group,
-                innovation_id,
+                state.innovation_id,
                 create=False,
             )
 
         return deepcopy(
-            group.innovation_tree
+            records
         )
 
     def _state(
@@ -171,7 +173,7 @@ class CatGroupInnovationTreeSystem:
         innovation_id,
         create=False,
     ):
-        state = group.innovation_tree.get(
+        state = group.innovation_tree.record(
             innovation_id
         )
 
@@ -183,9 +185,9 @@ class CatGroupInnovationTreeSystem:
                 innovation_id=innovation_id
             )
 
-            group.innovation_tree[
-                innovation_id
-            ] = state
+            group.innovation_tree.store(
+                state
+            )
 
         elif not isinstance(
             state,

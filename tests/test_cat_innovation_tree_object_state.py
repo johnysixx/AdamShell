@@ -141,7 +141,7 @@ class CatInnovationTreeObjectStateTests(
         state = (
             self.groups
             .groups[self.group_id]
-            .innovation_tree[root]
+            .innovation_tree.record(root)
         )
 
         self.assertIsInstance(
@@ -188,11 +188,11 @@ class CatInnovationTreeObjectStateTests(
         ]
 
         root_state = (
-            group.innovation_tree[root]
+            group.innovation_tree.record(root)
         )
 
         child_state = (
-            group.innovation_tree[child]
+            group.innovation_tree.record(child)
         )
 
         self.assertEqual(
@@ -237,36 +237,32 @@ class CatInnovationTreeObjectStateTests(
             self.group_id
         ]
 
-        group.innovation_tree[
-            root
-        ] = {
-            'innovation_id': root,
-            'parent': None,
-            'children': [],
-            'generation': 0,
-        }
-
-        innovation_count = len(
-            group.innovation_tree
+        innovation_count = (
+            group.innovation_tree.count
         )
 
         with self.assertRaises(
             TypeError
         ):
-            self._create(
-                'child',
-                [
-                    'route',
-                    'shelter',
-                ],
-                parent=root,
+            group.innovation_tree.store(
+                {
+                    'innovation_id': root,
+                    'parent': None,
+                    'children': [],
+                    'generation': 0,
+                }
             )
 
         self.assertEqual(
-            len(
-                group.innovation_tree
-            ),
+            group.innovation_tree.count,
             innovation_count,
+        )
+
+        self.assertIsInstance(
+            group.innovation_tree.record(
+                root
+            ),
+            CatInnovationTreeState,
         )
 
 
