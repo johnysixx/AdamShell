@@ -83,34 +83,6 @@ class KittenGrowthAppliedEvent:
             ),
         )
 
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "kitten": self.kitten,
-            "source": self.source,
-            "day": self.day,
-            "previous_size": (
-                self.previous_size
-            ),
-            "size_gain": self.size_gain,
-            "size": self.size,
-            "previous_strength": (
-                self.previous_strength
-            ),
-            "strength_gain": (
-                self.strength_gain
-            ),
-            "strength": self.strength,
-            "cronenberg_mass": (
-                self.cronenberg_mass
-            ),
-            "metadata": deepcopy(
-                dict(self.metadata)
-            ),
-            "grew": self.grew,
-        }
-
-
 @dataclass(slots=True, frozen=True)
 class KittenGrowthAlreadyProcessedEvent:
 
@@ -171,25 +143,6 @@ class KittenGrowthAlreadyProcessedEvent:
                 "Stored duplicate energy must be "
                 "DuplicateConsumptionEnergyState."
             )
-
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "kitten": self.kitten,
-            "source": self.source,
-            "day": self.day,
-            "amount_not_absorbed": (
-                self.amount_not_absorbed
-            ),
-            "stored_energy": (
-                self.stored_energy
-            ),
-            "energy_conserved": (
-                self.energy_conserved
-            ),
-            "grew": self.grew,
-        }
-
 
 @dataclass(slots=True)
 class KittenGrowthState:

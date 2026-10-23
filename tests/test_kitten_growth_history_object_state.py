@@ -10,6 +10,9 @@ from cats.kitten_growth_state import (
     KittenGrowthAlreadyProcessedEvent,
     KittenGrowthAppliedEvent,
 )
+from meeting_place.cat_bar_lifecycle_state import (
+    CatDrankMilkAtBarEvent,
+)
 
 
 class KittenGrowthHistoryObjectStateTests(
@@ -90,6 +93,7 @@ class KittenGrowthHistoryObjectStateTests(
             "keys",
             "items",
             "values",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
@@ -101,7 +105,7 @@ class KittenGrowthHistoryObjectStateTests(
         with self.assertRaises(TypeError):
             _ = state_event["source"]
 
-    def test_growth_metadata_is_read_only_and_snapshot_detached(
+    def test_growth_metadata_is_read_only_and_bar_snapshot_is_detached(
         self
     ):
         result = (
@@ -131,11 +135,29 @@ class KittenGrowthHistoryObjectStateTests(
                 "portion_mass"
             ] = 9.0
 
+        self.assertFalse(
+            hasattr(
+                result,
+                "to_dict",
+            )
+        )
+
+        bar_event = (
+            CatDrankMilkAtBarEvent(
+                cat=self.kitten.name,
+                bowl="test_bowl",
+                growth=result,
+                distribution=None,
+            )
+        )
+
         boundary = (
-            result.to_dict()
+            bar_event.to_dict()
         )
 
         boundary[
+            "growth"
+        ][
             "metadata"
         ][
             "portion_mass"
@@ -174,6 +196,13 @@ class KittenGrowthHistoryObjectStateTests(
         self.assertIs(
             result,
             event,
+        )
+
+        self.assertFalse(
+            hasattr(
+                event,
+                "to_dict",
+            )
         )
 
         self.assertIs(

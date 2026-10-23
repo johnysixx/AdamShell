@@ -1,3 +1,4 @@
+from copy import deepcopy
 from dataclasses import dataclass, field
 
 from cats.cat_distribution_result_state import (
@@ -193,6 +194,72 @@ class CatDrankMilkAtBarEvent:
         )
 
     def to_dict(self):
+
+        def growth_snapshot(
+            growth,
+        ):
+            if isinstance(
+                growth,
+                KittenGrowthAppliedEvent,
+            ):
+                return {
+                    "name": growth.name,
+                    "kitten": growth.kitten,
+                    "source": growth.source,
+                    "day": growth.day,
+                    "previous_size": (
+                        growth.previous_size
+                    ),
+                    "size_gain": (
+                        growth.size_gain
+                    ),
+                    "size": growth.size,
+                    "previous_strength": (
+                        growth.previous_strength
+                    ),
+                    "strength_gain": (
+                        growth.strength_gain
+                    ),
+                    "strength": (
+                        growth.strength
+                    ),
+                    "cronenberg_mass": (
+                        growth.cronenberg_mass
+                    ),
+                    "metadata": deepcopy(
+                        dict(
+                            growth.metadata
+                        )
+                    ),
+                    "grew": growth.grew,
+                }
+
+            if isinstance(
+                growth,
+                KittenGrowthAlreadyProcessedEvent,
+            ):
+                return {
+                    "name": growth.name,
+                    "kitten": growth.kitten,
+                    "source": growth.source,
+                    "day": growth.day,
+                    "amount_not_absorbed": (
+                        growth.amount_not_absorbed
+                    ),
+                    "stored_energy": (
+                        growth.stored_energy
+                    ),
+                    "energy_conserved": (
+                        growth.energy_conserved
+                    ),
+                    "grew": growth.grew,
+                }
+
+            raise TypeError(
+                "Cat milk growth boundary "
+                "requires a kitten growth event."
+            )
+
         result = {
             "name": self.name,
             "cat": self.cat,
@@ -201,7 +268,9 @@ class CatDrankMilkAtBarEvent:
             "growth": (
                 None
                 if self.growth is None
-                else self.growth.to_dict()
+                else growth_snapshot(
+                    self.growth
+                )
             ),
             "served": self.served,
             "tick": self.tick,

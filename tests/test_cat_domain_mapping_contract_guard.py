@@ -27,8 +27,6 @@ BOUNDARY_MAPPING_ALLOWLIST = {
     'cats/feline_wisdom_state.py::FelineAbilityMethodLearnedEvent.to_dict',
     'cats/feline_wisdom_state.py::FelineAbilityTeachingCronenbergResult.to_dict',
     'cats/feline_wisdom_state.py::FelineTeachingAbilitiesRegistrationResult.to_dict',
-    'cats/kitten_growth_state.py::KittenGrowthAlreadyProcessedEvent.to_dict',
-    'cats/kitten_growth_state.py::KittenGrowthAppliedEvent.to_dict',
     'cats/memory.py::CatMemory.public_state',
 }
 
