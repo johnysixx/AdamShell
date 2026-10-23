@@ -98,17 +98,6 @@ class DuplicateConsumptionEnergyResolutionSkippedResult:
             str(self.reason),
         )
 
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "reason": self.reason,
-            "cat_d20_value": (
-                self.cat_d20_value
-            ),
-            "resolved": self.resolved,
-        }
-
-
 @dataclass(slots=True, frozen=True)
 class DuplicateConsumptionEnergyResolvedEvent:
     energy_id: str
@@ -171,36 +160,6 @@ class DuplicateConsumptionEnergyResolvedEvent:
                 "event resolution must use "
                 "DuplicateConsumptionEnergyResolution."
             )
-
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "energy_id": self.energy_id,
-            "cat": self.cat,
-            "source": self.source,
-            "amount": self.amount,
-            "cat_d20_value": (
-                self.cat_d20_value
-            ),
-            "resolution": self.resolution.value,
-            "resolved_entity_id": (
-                self.resolved_entity_id
-            ),
-            "original_cronenberg_id": (
-                self.original_cronenberg_id
-            ),
-            "counterpart_id": (
-                self.counterpart_id
-            ),
-            "fallback_reason": (
-                self.fallback_reason
-            ),
-            "energy_conserved": (
-                self.energy_conserved
-            ),
-            "resolved": self.resolved,
-        }
-
 
 @dataclass(slots=True, frozen=True)
 class DuplicateConsumptionEnergyResolutionOutcome:

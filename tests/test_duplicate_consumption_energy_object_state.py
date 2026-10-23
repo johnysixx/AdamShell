@@ -264,13 +264,12 @@ class DuplicateConsumptionEnergyObjectStateTests(
             .CRONENBERG_MANIFESTED,
         )
 
-        boundary = (
-            result.to_dict()
+        self.assertFalse(
+            hasattr(
+                result,
+                "to_dict",
+            )
         )
-
-        boundary[
-            "resolution"
-        ] = "changed"
 
         self.assertIs(
             event.resolution,
@@ -340,6 +339,7 @@ class DuplicateConsumptionEnergyObjectStateTests(
                 "keys",
                 "items",
                 "values",
+                "to_dict",
             ):
                 self.assertFalse(
                     hasattr(
@@ -354,14 +354,6 @@ class DuplicateConsumptionEnergyObjectStateTests(
                 _ = result[
                     "name"
                 ]
-
-        boundary = (
-            skipped.to_dict()
-        )
-
-        boundary[
-            "reason"
-        ] = "changed"
 
         self.assertEqual(
             skipped.reason,

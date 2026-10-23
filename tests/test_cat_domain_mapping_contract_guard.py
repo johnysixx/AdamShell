@@ -37,8 +37,6 @@ BOUNDARY_MAPPING_ALLOWLIST = {
     'cats/cats.py::Cats.public_state',
     'cats/cronenberg_encounter.py::CatCronenbergEncounter._origin_snapshot',
     'cats/cronenberg_encounter.py::CatCronenbergEncounter.public_state',
-    'cats/duplicate_consumption_energy.py::DuplicateConsumptionEnergyResolutionSkippedResult.to_dict',
-    'cats/duplicate_consumption_energy.py::DuplicateConsumptionEnergyResolvedEvent.to_dict',
     'cats/feline_wisdom_state.py::FelineAbilityAwarenessTransmissionDeniedResult.to_dict',
     'cats/feline_wisdom_state.py::FelineAbilityAwarenessTransmissionEvent.to_dict',
     'cats/feline_wisdom_state.py::FelineAbilityLessonDeniedResult.to_dict',
