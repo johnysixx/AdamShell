@@ -39,6 +39,7 @@ class CatMemoryRecordObjectStateTests(
             "values",
             "items",
             "update",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
