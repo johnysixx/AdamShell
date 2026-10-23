@@ -26,7 +26,6 @@ BOUNDARY_MAPPING_ALLOWLIST = {
     'cats/cat_social_objects.py::cat_group_knowledge_transmission_snapshot',
     'cats/cat_social_objects.py::cat_relationship_trust_event_snapshot',
     'cats/cats.py::Cats.public_state',
-    'cats/cronenberg_encounter.py::CatCronenbergEncounter._origin_snapshot',
     'cats/cronenberg_encounter.py::CatCronenbergEncounter.public_state',
     'cats/feline_wisdom_state.py::FelineAbilityAwarenessTransmissionDeniedResult.to_dict',
     'cats/feline_wisdom_state.py::FelineAbilityAwarenessTransmissionEvent.to_dict',
@@ -282,6 +281,32 @@ class CatDomainMappingContractGuardTests(
                 "New unclassified cat-domain "
                 "mapping contracts detected: "
                 f"{sorted(unexpected)}"
+            ),
+        )
+
+    def test_boundary_mapping_allowlist_is_current(
+        self,
+    ):
+        current = (
+            _current_mapping_contracts()
+        )
+
+        stale = (
+            BOUNDARY_MAPPING_ALLOWLIST
+            - current
+        )
+
+        self.assertEqual(
+            stale,
+            set(),
+            (
+                "Boundary mapping contract was "
+                "removed from production code but "
+                "not from "
+                "BOUNDARY_MAPPING_ALLOWLIST. "
+                "Remove these entries from the "
+                "guard: "
+                f"{sorted(stale)}"
             ),
         )
 
