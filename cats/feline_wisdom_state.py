@@ -1,4 +1,3 @@
-from copy import deepcopy
 from dataclasses import dataclass, field
 from cats.cat_personality_state import (
     CatPersonalityExperienceAppliedResult,
@@ -126,17 +125,6 @@ class FelineAbilityAwarenessTransmissionDeniedResult:
             str(self.reason),
         )
 
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "teacher": self.teacher,
-            "student": self.student,
-            "reason": self.reason,
-            "learned": self.learned,
-            "transmitted": self.transmitted,
-        }
-
-
 @dataclass(slots=True, frozen=True)
 class FelineAbilityAwarenessTransmissionEvent:
     teacher: str
@@ -199,24 +187,6 @@ class FelineAbilityAwarenessTransmissionEvent:
         return len(
             self.transferred
         )
-
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "teacher": self.teacher,
-            "student": self.student,
-            "transferred": list(
-                self.transferred
-            ),
-            "transferred_count": (
-                self.transferred_count
-            ),
-            "methods_transferred": (
-                self.methods_transferred
-            ),
-            "transmitted": self.transmitted,
-        }
-
 
 @dataclass(slots=True, frozen=True)
 class FelineHumanDoorCapabilityResult:
@@ -363,79 +333,6 @@ class FelineTeachingAbilitiesRegistrationResult:
                     "FelineAbilityMethodState objects."
                 )
 
-    def to_dict(self):
-
-        def constraints_snapshot(
-            constraints,
-        ):
-            if not isinstance(
-                constraints,
-                FelineAbilityMethodConstraints,
-            ):
-                raise TypeError(
-                    "Feline ability constraint "
-                    "boundary requires "
-                    "FelineAbilityMethodConstraints."
-                )
-
-            snapshot = {}
-
-            for field_name in (
-                "requires_unlocked",
-                "opens_toward_cat",
-                "opens_away_from_cat",
-                "can_close",
-                "can_teach_meow",
-                "can_teach_owned_abilities",
-                "can_teach_to_own_kittens",
-                "can_create_foreign_teachers",
-                "can_teach_teach_other_cats",
-                "can_teach_teach_teaching",
-            ):
-                value = getattr(
-                    constraints,
-                    field_name,
-                )
-
-                if value is not None:
-                    snapshot[
-                        field_name
-                    ] = value
-
-            return snapshot
-
-        return {
-            "name": self.name,
-            "cat": self.cat,
-            "teach_other_cats": {
-                "name":
-                    self.teach_other_cats.name,
-                "teacher":
-                    self.teach_other_cats.teacher,
-                "constraints": (
-                    constraints_snapshot(
-                        self.teach_other_cats
-                        .constraints
-                    )
-                ),
-            },
-            "teach_teaching": {
-                "name":
-                    self.teach_teaching.name,
-                "teacher":
-                    self.teach_teaching.teacher,
-                "constraints": (
-                    constraints_snapshot(
-                        self.teach_teaching
-                        .constraints
-                    )
-                ),
-            },
-            "registered":
-                self.registered,
-        }
-
-
 @dataclass(slots=True, frozen=True)
 class FelineTeachingPermissionResult:
     teacher: str
@@ -528,17 +425,6 @@ class FelineAbilityLessonDeniedResult:
             str(self.reason),
         )
 
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "teacher": self.teacher,
-            "student": self.student,
-            "reason": self.reason,
-            "learned": self.learned,
-            "transmitted": self.transmitted,
-        }
-
-
 @dataclass(slots=True, frozen=True)
 class FelineAbilityTeachingCronenbergResult:
     teacher: str
@@ -591,23 +477,6 @@ class FelineAbilityTeachingCronenbergResult:
             "reason",
             str(self.reason),
         )
-
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "teacher": self.teacher,
-            "student": self.student,
-            "attempted_ability":
-                self.attempted_ability,
-            "reason": self.reason,
-            "cronenberg_id":
-                self.cronenberg_id,
-            "cronenberg_created":
-                self.cronenberg_created,
-            "learned": self.learned,
-            "transmitted": self.transmitted,
-        }
-
 
 @dataclass(slots=True, frozen=True)
 class FelineAbilityMethodLearnedEvent:
@@ -684,139 +553,6 @@ class FelineAbilityMethodLearnedEvent:
         memo
     ):
         return self
-
-    def to_dict(self):
-
-        def constraints_snapshot(
-            constraints,
-        ):
-            if not isinstance(
-                constraints,
-                FelineAbilityMethodConstraints,
-            ):
-                raise TypeError(
-                    "Feline ability constraint "
-                    "boundary requires "
-                    "FelineAbilityMethodConstraints."
-                )
-
-            snapshot = {}
-
-            for field_name in (
-                "requires_unlocked",
-                "opens_toward_cat",
-                "opens_away_from_cat",
-                "can_close",
-                "can_teach_meow",
-                "can_teach_owned_abilities",
-                "can_teach_to_own_kittens",
-                "can_create_foreign_teachers",
-                "can_teach_teach_other_cats",
-                "can_teach_teach_teaching",
-            ):
-                value = getattr(
-                    constraints,
-                    field_name,
-                )
-
-                if value is not None:
-                    snapshot[
-                        field_name
-                    ] = value
-
-            return snapshot
-
-        def personality_trait_event_snapshot(
-            event,
-        ):
-            if not isinstance(
-                event,
-                CatPersonalityTraitAdjustedEvent,
-            ):
-                raise TypeError(
-                    "Personality boundary event "
-                    "must be "
-                    "CatPersonalityTraitAdjustedEvent."
-                )
-
-            return {
-                "name": event.name,
-                "cat": event.cat,
-                "trait": event.trait,
-                "source": event.source,
-                "day": event.day,
-                "previous": event.previous,
-                "requested_change": (
-                    event.requested_change
-                ),
-                "applied_change": (
-                    event.applied_change
-                ),
-                "value": event.value,
-                "metadata": deepcopy(
-                    dict(
-                        event.metadata
-                    )
-                ),
-            }
-
-        def personality_experience_snapshot(
-            result,
-        ):
-            if not isinstance(
-                result,
-                CatPersonalityExperienceAppliedResult,
-            ):
-                raise TypeError(
-                    "Personality boundary result "
-                    "must be "
-                    "CatPersonalityExperienceAppliedResult."
-                )
-
-            return {
-                "name": result.name,
-                "cat": result.cat,
-                "source": result.source,
-                "day": result.day,
-                "changes": deepcopy(
-                    dict(
-                        result.changes
-                    )
-                ),
-                "events": [
-                    personality_trait_event_snapshot(
-                        event
-                    )
-                    for event
-                    in result.events
-                ],
-                "applied": result.applied,
-            }
-
-        return {
-            "name": self.name,
-            "teacher": self.teacher,
-            "student": self.student,
-            "ability": self.ability,
-            "method": self.method,
-            "constraints": (
-                constraints_snapshot(
-                    self.constraints
-                )
-            ),
-            "teacher_personality": (
-                personality_experience_snapshot(
-                    self.teacher_personality
-                )
-            ),
-            "student_personality": (
-                personality_experience_snapshot(
-                    self.student_personality
-                )
-            ),
-            "learned": self.learned,
-        }
-
 
 @dataclass(slots=True)
 class FelineWisdomState:

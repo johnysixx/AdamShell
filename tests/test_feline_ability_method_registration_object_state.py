@@ -67,6 +67,7 @@ class FelineAbilityMethodRegistrationObjectStateTests(
             "keys",
             "items",
             "values",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
@@ -210,7 +211,8 @@ class FelineAbilityMethodRegistrationObjectStateTests(
         )
 
         boundary = (
-            result.to_dict()
+            self.resolver
+            .history[-1]
         )
 
         boundary[

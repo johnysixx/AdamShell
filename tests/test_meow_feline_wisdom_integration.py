@@ -190,6 +190,7 @@ class MeowFelineWisdomIntegrationTests(unittest.TestCase):
             'keys',
             'items',
             'values',
+            'to_dict',
         ):
             self.assertFalse(
                 hasattr(
@@ -206,7 +207,7 @@ class MeowFelineWisdomIntegrationTests(unittest.TestCase):
             ]
 
         boundary = (
-            result.to_dict()
+            self.abilities.history[-1]
         )
 
         boundary[
@@ -270,6 +271,7 @@ class MeowFelineWisdomIntegrationTests(unittest.TestCase):
             'keys',
             'items',
             'values',
+            'to_dict',
         ):
             self.assertFalse(
                 hasattr(
@@ -285,19 +287,6 @@ class MeowFelineWisdomIntegrationTests(unittest.TestCase):
                 'reason'
             ]
 
-        boundary = (
-            result.to_dict()
-        )
-
-        boundary[
-            'reason'
-        ] = 'changed'
-
-        self.assertEqual(
-            result.reason,
-            'teacher_cannot_transmit_meow',
-        )
-
         audit = (
             self.abilities.history[-1]
         )
@@ -311,6 +300,15 @@ class MeowFelineWisdomIntegrationTests(unittest.TestCase):
             audit[
                 'reason'
             ],
+            'teacher_cannot_transmit_meow',
+        )
+
+        audit[
+            'reason'
+        ] = 'changed'
+
+        self.assertEqual(
+            result.reason,
             'teacher_cannot_transmit_meow',
         )
 

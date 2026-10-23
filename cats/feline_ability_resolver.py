@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from cats.feline_wisdom import FelineWisdom
 from cats.feline_ability_method_state import (
     FelineAbilityMethodConstraints,
@@ -154,7 +156,7 @@ class FelineAbilityResolver:
             )
 
             self._record(
-                result.to_dict()
+                result
             )
 
             return result
@@ -186,10 +188,8 @@ class FelineAbilityResolver:
             event
         )
 
-        snapshot = event.to_dict()
-
         self._record(
-            snapshot
+            event
         )
 
         return event
@@ -344,7 +344,7 @@ class FelineAbilityResolver:
         )
 
         self._record(
-            event.to_dict()
+            event
         )
 
         return event
@@ -555,7 +555,7 @@ class FelineAbilityResolver:
         )
 
         self._record(
-            result.to_dict()
+            result
         )
 
         return result
@@ -787,7 +787,7 @@ class FelineAbilityResolver:
         )
 
         self._record(
-            result.to_dict()
+            result
         )
 
         return result
@@ -807,13 +807,276 @@ class FelineAbilityResolver:
         )
 
         self._record(
-            result.to_dict()
+            result
         )
 
         return result
 
     def _record(self, event):
-        self.history.append(event)
-        quantum_events = getattr(self.universe, 'quantum_events', None)
+
+        def constraints_snapshot(
+            constraints,
+        ):
+            if not isinstance(
+                constraints,
+                FelineAbilityMethodConstraints,
+            ):
+                raise TypeError(
+                    "Feline ability boundary "
+                    "requires "
+                    "FelineAbilityMethodConstraints."
+                )
+
+            snapshot = {}
+
+            for field_name in (
+                "requires_unlocked",
+                "opens_toward_cat",
+                "opens_away_from_cat",
+                "can_close",
+                "can_teach_meow",
+                "can_teach_owned_abilities",
+                "can_teach_to_own_kittens",
+                "can_create_foreign_teachers",
+                "can_teach_teach_other_cats",
+                "can_teach_teach_teaching",
+            ):
+                value = getattr(
+                    constraints,
+                    field_name,
+                )
+
+                if value is not None:
+                    snapshot[
+                        field_name
+                    ] = value
+
+            return snapshot
+
+        def personality_trait_snapshot(
+            personality_event,
+        ):
+            return {
+                "name":
+                    personality_event.name,
+                "cat":
+                    personality_event.cat,
+                "trait":
+                    personality_event.trait,
+                "source":
+                    personality_event.source,
+                "day":
+                    personality_event.day,
+                "previous":
+                    personality_event.previous,
+                "requested_change": (
+                    personality_event
+                    .requested_change
+                ),
+                "applied_change": (
+                    personality_event
+                    .applied_change
+                ),
+                "value":
+                    personality_event.value,
+                "metadata": deepcopy(
+                    dict(
+                        personality_event
+                        .metadata
+                    )
+                ),
+            }
+
+        def personality_snapshot(
+            personality,
+        ):
+            return {
+                "name":
+                    personality.name,
+                "cat":
+                    personality.cat,
+                "source":
+                    personality.source,
+                "day":
+                    personality.day,
+                "changes": deepcopy(
+                    dict(
+                        personality.changes
+                    )
+                ),
+                "events": [
+                    personality_trait_snapshot(
+                        personality_event
+                    )
+                    for personality_event
+                    in personality.events
+                ],
+                "applied":
+                    personality.applied,
+            }
+
+        if isinstance(
+            event,
+            FelineAbilityAwarenessTransmissionDeniedResult,
+        ):
+            snapshot = {
+                "name": event.name,
+                "teacher": event.teacher,
+                "student": event.student,
+                "reason": event.reason,
+                "learned": event.learned,
+                "transmitted":
+                    event.transmitted,
+            }
+
+        elif isinstance(
+            event,
+            FelineAbilityAwarenessTransmissionEvent,
+        ):
+            snapshot = {
+                "name": event.name,
+                "teacher": event.teacher,
+                "student": event.student,
+                "transferred": list(
+                    event.transferred
+                ),
+                "transferred_count": (
+                    event.transferred_count
+                ),
+                "methods_transferred": (
+                    event.methods_transferred
+                ),
+                "transmitted":
+                    event.transmitted,
+            }
+
+        elif isinstance(
+            event,
+            FelineAbilityLessonDeniedResult,
+        ):
+            snapshot = {
+                "name": event.name,
+                "teacher": event.teacher,
+                "student": event.student,
+                "reason": event.reason,
+                "learned": event.learned,
+                "transmitted":
+                    event.transmitted,
+            }
+
+        elif isinstance(
+            event,
+            FelineAbilityTeachingCronenbergResult,
+        ):
+            snapshot = {
+                "name": event.name,
+                "teacher": event.teacher,
+                "student": event.student,
+                "attempted_ability": (
+                    event.attempted_ability
+                ),
+                "reason": event.reason,
+                "cronenberg_id": (
+                    event.cronenberg_id
+                ),
+                "cronenberg_created": (
+                    event.cronenberg_created
+                ),
+                "learned": event.learned,
+                "transmitted":
+                    event.transmitted,
+            }
+
+        elif isinstance(
+            event,
+            FelineTeachingAbilitiesRegistrationResult,
+        ):
+            snapshot = {
+                "name": event.name,
+                "cat": event.cat,
+                "teach_other_cats": {
+                    "name":
+                        event
+                        .teach_other_cats
+                        .name,
+                    "teacher":
+                        event
+                        .teach_other_cats
+                        .teacher,
+                    "constraints": (
+                        constraints_snapshot(
+                            event
+                            .teach_other_cats
+                            .constraints
+                        )
+                    ),
+                },
+                "teach_teaching": {
+                    "name":
+                        event
+                        .teach_teaching
+                        .name,
+                    "teacher":
+                        event
+                        .teach_teaching
+                        .teacher,
+                    "constraints": (
+                        constraints_snapshot(
+                            event
+                            .teach_teaching
+                            .constraints
+                        )
+                    ),
+                },
+                "registered":
+                    event.registered,
+            }
+
+        elif isinstance(
+            event,
+            FelineAbilityMethodLearnedEvent,
+        ):
+            snapshot = {
+                "name": event.name,
+                "teacher": event.teacher,
+                "student": event.student,
+                "ability": event.ability,
+                "method": event.method,
+                "constraints": (
+                    constraints_snapshot(
+                        event.constraints
+                    )
+                ),
+                "teacher_personality": (
+                    personality_snapshot(
+                        event.teacher_personality
+                    )
+                ),
+                "student_personality": (
+                    personality_snapshot(
+                        event.student_personality
+                    )
+                ),
+                "learned": event.learned,
+            }
+
+        else:
+            raise TypeError(
+                "Unsupported feline ability "
+                "history event."
+            )
+
+        self.history.append(
+            snapshot
+        )
+
+        quantum_events = getattr(
+            self.universe,
+            'quantum_events',
+            None,
+        )
+
         if quantum_events is not None:
-            quantum_events.append(event)
+            quantum_events.append(
+                snapshot
+            )

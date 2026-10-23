@@ -16,17 +16,12 @@ CATS_ROOT = (
 
 
 BOUNDARY_MAPPING_ALLOWLIST = {
+    'cats/feline_ability_resolver.py::FelineAbilityResolver._record',
     'cats/cat_door.py::CatDoor.public_state',
     'cats/cat_learning_state.py::CatLearningState.to_dict',
     'cats/cat_perception.py::CatEnvironmentObservedEvent.to_dict',
     'cats/cat_reproduction_state.py::CatReproductionState.to_dict',
     'cats/cats.py::Cats.public_state',
-    'cats/feline_wisdom_state.py::FelineAbilityAwarenessTransmissionDeniedResult.to_dict',
-    'cats/feline_wisdom_state.py::FelineAbilityAwarenessTransmissionEvent.to_dict',
-    'cats/feline_wisdom_state.py::FelineAbilityLessonDeniedResult.to_dict',
-    'cats/feline_wisdom_state.py::FelineAbilityMethodLearnedEvent.to_dict',
-    'cats/feline_wisdom_state.py::FelineAbilityTeachingCronenbergResult.to_dict',
-    'cats/feline_wisdom_state.py::FelineTeachingAbilitiesRegistrationResult.to_dict',
     'cats/memory.py::CatMemory.public_state',
 }
 
