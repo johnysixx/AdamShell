@@ -16,104 +16,6 @@ from cats.kitten_viability_resolver import (
 )
 
 
-def kitten_genetic_viability_snapshot(
-    viability,
-):
-    if not isinstance(
-        viability,
-        KittenGeneticViabilityResult,
-    ):
-        raise TypeError(
-            "Viability snapshot requires "
-            "KittenGeneticViabilityResult."
-        )
-
-    if viability.details is None:
-        details = None
-
-    elif isinstance(
-        viability.details,
-        KittenInvalidGenotypeDetails,
-    ):
-        details = (
-            viability.details.error
-        )
-
-    elif isinstance(
-        viability.details,
-        KittenLethalMutationDetails,
-    ):
-        details = {
-            "lethal_mutations": list(
-                viability
-                .details
-                .lethal_mutations
-            )
-        }
-
-    elif isinstance(
-        viability.details,
-        KittenXXYGenotypeDetails,
-    ):
-        details = {
-            "sex_chromosomes": tuple(
-                viability
-                .details
-                .sex_chromosomes
-            )
-        }
-
-    else:
-        raise TypeError(
-            "Unsupported kitten viability details."
-        )
-
-    return {
-        "name": viability.name,
-        "status": viability.status,
-        "viable": viability.viable,
-        "rare": viability.rare,
-        "reason": viability.reason,
-        "details": details,
-        "special_traits": list(
-            viability.special_traits
-        ),
-        "genotype": viability.genotype,
-    }
-
-
-def cat_phenotype_snapshot(
-    phenotype,
-):
-    if not isinstance(
-        phenotype,
-        CatPhenotypeResult,
-    ):
-        raise TypeError(
-            "Phenotype snapshot requires "
-            "CatPhenotypeResult."
-        )
-
-    return {
-        "name": phenotype.name,
-        "profile": (
-            cat_birth_profile_snapshot(
-                phenotype.profile
-            )
-        ),
-        "base_color": (
-            phenotype.base_color
-        ),
-        "diluted": phenotype.diluted,
-        "white_spotted": (
-            phenotype.white_spotted
-        ),
-        "colorpoint": (
-            phenotype.colorpoint
-        ),
-        "genotype": phenotype.genotype,
-        "resolved": phenotype.resolved,
-    }
 
 
 @dataclass(frozen=True)
@@ -944,43 +846,6 @@ class CatKittenBirthResult:
         return self
 
 
-def _kitten_birth_result_snapshot(
-    result,
-):
-    if not isinstance(
-        result,
-        CatKittenBirthResult,
-    ):
-        raise TypeError(
-            "Litter birth result snapshot requires "
-            "CatKittenBirthResult."
-        )
-
-    if not result.born:
-        return {
-            "embryo_id": (
-                result.embryo_id
-            ),
-            "kitten": None,
-            "born": False,
-            "reason": (
-                result.reason
-            ),
-        }
-
-    return {
-        "embryo_id": (
-            result.embryo_id
-        ),
-        "kitten": result.kitten,
-        "father": result.father,
-        "genetic_status": (
-            result.genetic_status
-        ),
-        "rare": result.rare,
-        "born": True,
-    }
-
 
 @dataclass(slots=True, frozen=True)
 class CatLitter:
@@ -1173,45 +1038,6 @@ class CatLitter:
         memo
     ):
         return self
-
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "litter_number": (
-                self.litter_number
-            ),
-            "mother": self.mother,
-            "father_names": list(
-                self.father_names
-            ),
-            "multiple_sires": (
-                self.multiple_sires
-            ),
-            "embryos_present": (
-                self.embryos_present
-            ),
-            "kittens_born": (
-                self.kittens_born
-            ),
-            "kitten_names": list(
-                self.kitten_names
-            ),
-            "birth_results": [
-                _kitten_birth_result_snapshot(
-                    result
-                )
-                for result
-                in self.birth_results
-            ],
-            "pregnancy_day": (
-                self.pregnancy_day
-            ),
-            "gestation_days": (
-                self.gestation_days
-            ),
-            "birth_day": self.birth_day,
-            "born": self.born,
-        }
 
 
 

@@ -16,19 +16,13 @@ CATS_ROOT = (
 
 
 BOUNDARY_MAPPING_ALLOWLIST = {
-    'cats/cat_birth_objects.py::CatLitter.to_dict',
-    'cats/cat_birth_objects.py::_kitten_birth_result_snapshot',
     'cats/cat_birth_objects.py::cat_birth_profile_snapshot',
-    'cats/cat_birth_objects.py::cat_phenotype_snapshot',
-    'cats/cat_birth_objects.py::kitten_genetic_viability_snapshot',
     'cats/cat_door.py::CatDoor.public_state',
     'cats/cat_door_registry.py::CatDoorRegistry.public_state',
     'cats/cat_learning_state.py::CatLearningState.to_dict',
     'cats/cat_memory_record.py::CatMemoryRecord.to_dict',
     'cats/cat_perception.py::CatEnvironmentObservedEvent.to_dict',
     'cats/cat_reproduction_state.py::CatReproductionState.to_dict',
-    'cats/cat_reproduction_state.py::_kitten_embryo_snapshot',
-    'cats/cat_reproduction_state.py::_mating_contact_snapshot',
     'cats/cat_social_objects.py::cat_group_knowledge_transmission_snapshot',
     'cats/cat_social_objects.py::cat_relationship_trust_event_snapshot',
     'cats/cats.py::Cats.public_state',

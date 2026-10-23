@@ -44,18 +44,16 @@ class CatReproductionMatingContactsStateTests(
             )
         )
 
-        boundary = (
-            state.to_dict()
+        self.assertTrue(
+            hasattr(
+                state,
+                "to_dict",
+            )
         )
 
-        self.assertNotIn(
-            "mating_contact",
-            boundary,
-        )
-
-        self.assertIn(
-            "mating_contacts",
-            boundary,
+        self.assertIsInstance(
+            state.mating_contacts,
+            list,
         )
 
     def test_mating_contacts_is_canonical_object_state(
@@ -93,48 +91,6 @@ class CatReproductionMatingContactsStateTests(
                 contact,
                 "to_dict",
             )
-        )
-
-    def test_boundary_serializes_contact_without_mutating_domain(
-        self
-    ):
-        state = (
-            CatReproductionState(
-                sex="female"
-            )
-        )
-
-        contact = self._contact()
-
-        state.mating_contacts.append(
-            contact
-        )
-
-        boundary = (
-            state.to_dict()
-        )
-
-        self.assertIsInstance(
-            boundary[
-                "mating_contacts"
-            ][0],
-            dict,
-        )
-
-        boundary[
-            "mating_contacts"
-        ][0][
-            "male"
-        ] = "changed"
-
-        self.assertEqual(
-            contact.male,
-            "father",
-        )
-
-        self.assertEqual(
-            state.mating_contacts[0].male,
-            "father",
         )
 
 

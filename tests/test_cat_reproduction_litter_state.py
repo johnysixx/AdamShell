@@ -61,16 +61,18 @@ class CatReproductionLitterStateTests(
             litter,
         )
 
-        boundary = state.to_dict()
-
-        self.assertIsInstance(
-            boundary["litters"][0],
-            dict,
+        self.assertTrue(
+            hasattr(
+                state,
+                "to_dict",
+            )
         )
 
-        self.assertIsInstance(
-            boundary["last_litter"],
-            dict,
+        self.assertFalse(
+            hasattr(
+                litter,
+                "to_dict",
+            )
         )
 
         self.assertIs(

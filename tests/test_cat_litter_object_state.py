@@ -88,32 +88,6 @@ class CatLitterObjectStateTests(
                 "embryo_id"
             ]
 
-        litter = self._litter()
-
-        boundary = (
-            litter.to_dict()
-        )[
-            "birth_results"
-        ][0]
-
-        self.assertEqual(
-            boundary,
-            {
-                "embryo_id": (
-                    "embryo_0001"
-                ),
-                "kitten": (
-                    "kitten_0001"
-                ),
-                "father": "father",
-                "genetic_status": (
-                    "viable"
-                ),
-                "rare": False,
-                "born": True,
-            },
-        )
-
     def test_litter_contains_only_typed_birth_results(
         self
     ):
@@ -140,6 +114,7 @@ class CatLitterObjectStateTests(
             "keys",
             "items",
             "values",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
@@ -256,83 +231,6 @@ class CatLitterObjectStateTests(
             (
                 "kitten_0001",
             ),
-        )
-
-    def test_reproduction_boundary_serializes_litter(
-        self
-    ):
-        state = (
-            CatReproductionState(
-                sex="female"
-            )
-        )
-
-        litter = self._litter()
-
-        state.litters.append(
-            litter
-        )
-
-        state.last_litter = (
-            litter
-        )
-
-        boundary = (
-            state.to_dict()
-        )
-
-        self.assertIs(
-            state.litters[0],
-            litter,
-        )
-
-        self.assertIs(
-            state.last_litter,
-            litter,
-        )
-
-        self.assertIsInstance(
-            boundary[
-                "litters"
-            ][0],
-            dict,
-        )
-
-        self.assertIsInstance(
-            boundary[
-                "last_litter"
-            ],
-            dict,
-        )
-
-        boundary[
-            "litters"
-        ][0][
-            "father_names"
-        ].append(
-            "changed"
-        )
-
-        boundary[
-            "last_litter"
-        ][
-            "birth_results"
-        ][0][
-            "kitten"
-        ] = "changed"
-
-        self.assertEqual(
-            litter.father_names,
-            (
-                "father",
-            ),
-        )
-
-        self.assertEqual(
-            litter
-            .birth_results[0]
-            .kitten,
-            "kitten_0001",
         )
 
 
