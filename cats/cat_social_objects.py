@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from copy import deepcopy
 from core.entity.domain_object import DomainObject
 
 
@@ -132,27 +131,6 @@ class CatRelationshipTrustEvent:
                     float(value),
                 )
 
-def cat_relationship_trust_event_snapshot(
-    event,
-):
-    if not isinstance(
-        event,
-        CatRelationshipTrustEvent,
-    ):
-        raise TypeError(
-            "Relationship trust event snapshot "
-            "requires CatRelationshipTrustEvent."
-        )
-
-    return {
-        "previous": event.previous,
-        "current": event.current,
-        "delta": event.delta,
-        "reason": event.reason,
-        "legend_id": event.legend_id,
-    }
-
-
 class CatRelationship(DomainObject):
 
     @property
@@ -232,40 +210,6 @@ class CatRelationship(DomainObject):
         )
 
 
-def cat_relationship_snapshot(
-    relationship,
-):
-    if not isinstance(
-        relationship,
-        CatRelationship,
-    ):
-        raise TypeError(
-            "Relationship snapshot requires "
-            "CatRelationship."
-        )
-
-    snapshot = deepcopy(
-        vars(
-            relationship
-        )
-    )
-
-    snapshot.pop(
-        "_trust_history",
-        None,
-    )
-
-    snapshot["trust_history"] = [
-        cat_relationship_trust_event_snapshot(
-            event
-        )
-        for event
-        in relationship.trust_history
-    ]
-
-    return snapshot
-
-
 @dataclass(slots=True, frozen=True)
 class CatGroupKnowledgeTransmission:
     type: str
@@ -273,39 +217,6 @@ class CatGroupKnowledgeTransmission:
     group: str | None = None
     source_group: str | None = None
     target_group: str | None = None
-
-def cat_group_knowledge_transmission_snapshot(
-    transmission,
-):
-    if not isinstance(
-        transmission,
-        CatGroupKnowledgeTransmission,
-    ):
-        raise TypeError(
-            "Knowledge transmission snapshot requires "
-            "CatGroupKnowledgeTransmission."
-        )
-
-    snapshot = {
-        "type": transmission.type,
-    }
-
-    for field_name in (
-        "source",
-        "group",
-        "source_group",
-        "target_group",
-    ):
-        value = getattr(
-            transmission,
-            field_name,
-        )
-
-        if value is not None:
-            snapshot[field_name] = value
-
-    return snapshot
-
 
 class CatGroupKnowledgeRecord(DomainObject):
 
@@ -335,31 +246,3 @@ class CatGroupKnowledgeRecord(DomainObject):
         super().__init__(
             **values
         )
-
-def cat_group_knowledge_record_snapshot(
-    record,
-):
-    if not isinstance(
-        record,
-        CatGroupKnowledgeRecord,
-    ):
-        raise TypeError(
-            "Knowledge record snapshot requires "
-            "CatGroupKnowledgeRecord."
-        )
-
-    snapshot = deepcopy(
-        vars(
-            record
-        )
-    )
-
-    snapshot["transmission_path"] = [
-        cat_group_knowledge_transmission_snapshot(
-            transmission
-        )
-        for transmission
-        in record.transmission_path
-    ]
-
-    return snapshot

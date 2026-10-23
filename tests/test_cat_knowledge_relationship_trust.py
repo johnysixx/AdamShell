@@ -4,7 +4,6 @@ from cats.cat_knowledge import CatKnowledge
 from cats.cat_social_objects import (
     CatRelationship,
     CatRelationshipTrustEvent,
-    cat_relationship_snapshot,
 )
 from core.entity.domain_object import (
     DomainObject,
@@ -476,61 +475,6 @@ class CatKnowledgeRelationshipTrustTests(
             relationship.trust_history,
             [],
         )
-
-    def test_relationship_serialization_is_detached(
-        self
-    ):
-        event = (
-            CatRelationshipTrustEvent(
-                previous=0.5,
-                current=0.6,
-                delta=0.1,
-                reason="confirmed",
-                legend_id="legend_1",
-            )
-        )
-
-        relationship = CatRelationship(
-            trust=0.6,
-            trust_history=[
-                event
-            ],
-        )
-
-        self.assertIsInstance(
-            relationship,
-            DomainObject,
-        )
-
-        self.assertFalse(
-            hasattr(
-                relationship,
-                "to_dict",
-            )
-        )
-
-        snapshot = (
-            cat_relationship_snapshot(
-                relationship
-            )
-        )
-
-        snapshot[
-            "trust_history"
-        ][0]["reason"] = "changed"
-
-        self.assertEqual(
-            event.reason,
-            "confirmed",
-        )
-
-        self.assertEqual(
-            relationship
-            .trust_history[0]
-            .reason,
-            "confirmed",
-        )
-
 
 if __name__ == "__main__":
     unittest.main()

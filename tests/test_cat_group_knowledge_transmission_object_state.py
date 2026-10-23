@@ -12,7 +12,6 @@ from cats.cat_group_innovation_system import (
 from cats.cat_social_objects import (
     CatGroupKnowledgeRecord,
     CatGroupKnowledgeTransmission,
-    cat_group_knowledge_record_snapshot,
 )
 from core.entity.domain_object import (
     DomainObject,
@@ -161,15 +160,10 @@ class CatGroupKnowledgeTransmissionObjectStateTests(
             )
         )
 
-        snapshot = (
-            cat_group_knowledge_record_snapshot(
-                record
-            )
+        self.assertIs(
+            record.transmission_path[0],
+            transmission,
         )
-
-        snapshot[
-            "transmission_path"
-        ][0]["source"] = "changed"
 
         self.assertEqual(
             transmission.source,
