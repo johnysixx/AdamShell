@@ -92,10 +92,8 @@ class CatGroupInstitutionSystem:
             )
 
         roles_present = all(
-            bool(
-                group.roles.get(
-                    role
-                )
+            group.roles.has_holders(
+                role
             )
             for role
             in institution.roles

@@ -134,15 +134,10 @@ class CatGroupRoleSystem:
             group_id
         )
 
-        holders = group.roles.setdefault(
+        group.roles.assign(
             role,
-            []
+            cat.name,
         )
-
-        if cat.name not in holders:
-            holders.append(
-                cat.name
-            )
 
         existing.assign_base(
             group_id=group_id,
@@ -177,9 +172,10 @@ class CatGroupRoleSystem:
 
     def release(self, group_id, cat, role, reason='role_released'):
         group = self.group_system._group(group_id)
-        holders = group.roles.get(role, [])
-        if cat.name in holders:
-            holders.remove(cat.name)
+        group.roles.release_holder(
+            role,
+            cat.name,
+        )
         cat.group_roles.release(
             role
         )
@@ -199,7 +195,11 @@ class CatGroupRoleSystem:
 
     def holders(self, group_id, role):
         group = self.group_system._group(group_id)
-        return list(group.roles.get(role, []))
+        return list(
+            group.roles.holders(
+                role
+            )
+        )
 
     def _number(self, value):
         try:

@@ -114,9 +114,8 @@ class CatGroupSuccessionSystem:
             group_id
         )
 
-        holders = group.roles.get(
-            role,
-            [],
+        holders = group.roles.holders(
+            role
         )
 
         was_holder = (

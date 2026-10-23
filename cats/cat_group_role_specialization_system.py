@@ -90,24 +90,11 @@ class CatGroupRoleSpecializationSystem:
                         actual=value,
                     )
                 )
-        group.role_specializations.setdefault(
+        group.role_specializations.assign(
             base_role,
-            {}
+            specialization,
+            cat.name,
         )
-
-        holders = (
-            group.role_specializations[
-                base_role
-            ].setdefault(
-                specialization,
-                []
-            )
-        )
-
-        if cat.name not in holders:
-            holders.append(
-                cat.name
-            )
 
         existing.assign_specialization(
             group_id=group_id,
@@ -138,11 +125,20 @@ class CatGroupRoleSpecializationSystem:
 
         return event
 
-    def specializations(self, group_id, base_role=None):
-        group = self.group_system._group(group_id)
-        if base_role is None:
-            return deepcopy(group.role_specializations)
-        return deepcopy(group.role_specializations.get(base_role, {}))
+    def specializations(
+        self,
+        group_id,
+        base_role=None,
+    ):
+        group = self.group_system._group(
+            group_id
+        )
+
+        return deepcopy(
+            group.role_specializations.records(
+                base_role
+            )
+        )
 
     def _number(self, value):
         try:

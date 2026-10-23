@@ -8,6 +8,12 @@ from cats.cat_group_system import (
 from cats.cat_group_role_system import (
     CatGroupRoleSystem,
 )
+from cats.cat_group_role_registry import (
+    CatGroupRoleHolderRecord,
+    CatGroupRoleRegistry,
+    CatGroupRoleSpecializationRecord,
+    CatGroupRoleSpecializationRegistry,
+)
 from cats.cat_group_role_specialization_system import (
     CatGroupRoleSpecializationSystem,
 )
@@ -188,6 +194,149 @@ class CatGroupRoleObjectStateTests(
             registry.store(
                 CatGroupRoleState()
             )
+
+    def test_group_role_registries_have_no_mapping_api(
+        self
+    ):
+        group = self.groups.groups[
+            self.group_id
+        ]
+
+        self.assertIsInstance(
+            group.roles,
+            CatGroupRoleRegistry,
+        )
+
+        self.assertIsInstance(
+            group.role_specializations,
+            CatGroupRoleSpecializationRegistry,
+        )
+
+        for registry in (
+            group.roles,
+            group.role_specializations,
+        ):
+            self.assertTrue(
+                registry.is_empty
+            )
+
+            self.assertEqual(
+                registry.count,
+                0,
+            )
+
+            self.assertEqual(
+                registry.records(),
+                (),
+            )
+
+            for mapping_method in (
+                "get",
+                "keys",
+                "items",
+                "values",
+                "pop",
+                "setdefault",
+                "clear",
+                "__getitem__",
+                "__setitem__",
+                "__contains__",
+                "__iter__",
+            ):
+                self.assertFalse(
+                    hasattr(
+                        registry,
+                        mapping_method,
+                    )
+                )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            group.roles.store(
+                {
+                    "role": "guardian",
+                }
+            )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            group.role_specializations.store(
+                {
+                    "base_role": "guardian",
+                    "specialization":
+                        "night_guardian",
+                }
+            )
+
+    def test_group_role_holder_record_is_object_state(
+        self
+    ):
+        record = CatGroupRoleHolderRecord(
+            role="guardian"
+        )
+
+        record.add_holder(
+            self.cat.name
+        )
+
+        self.assertEqual(
+            record.holder_names(),
+            (
+                self.cat.name,
+            ),
+        )
+
+        self.assertFalse(
+            hasattr(
+                record,
+                "get",
+            )
+        )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = record[
+                "role"
+            ]
+
+    def test_group_role_specialization_record_is_object_state(
+        self
+    ):
+        record = (
+            CatGroupRoleSpecializationRecord(
+                base_role="guardian",
+                specialization=
+                    "night_guardian",
+            )
+        )
+
+        record.add_holder(
+            self.cat.name
+        )
+
+        self.assertEqual(
+            record.holder_names(),
+            (
+                self.cat.name,
+            ),
+        )
+
+        self.assertFalse(
+            hasattr(
+                record,
+                "get",
+            )
+        )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            _ = record[
+                "specialization"
+            ]
 
     def test_base_role_registry_stores_and_reuses_object(
         self
@@ -397,6 +546,73 @@ class CatGroupRoleObjectStateTests(
             "reason",
         )
 
+    def test_specializations_query_returns_object_records(
+        self
+    ):
+        self.prepare_guardian()
+
+        self.specializations.specialize(
+            self.group_id,
+            self.cat,
+            "guardian",
+            "night_guardian",
+        )
+
+        result = (
+            self.specializations.specializations(
+                self.group_id,
+                "guardian",
+            )
+        )
+
+        self.assertIsInstance(
+            result,
+            tuple,
+        )
+
+        self.assertEqual(
+            len(result),
+            1,
+        )
+
+        record = result[0]
+
+        self.assertIsInstance(
+            record,
+            CatGroupRoleSpecializationRecord,
+        )
+
+        self.assertEqual(
+            record.base_role,
+            "guardian",
+        )
+
+        self.assertEqual(
+            record.specialization,
+            "night_guardian",
+        )
+
+        self.assertEqual(
+            record.holder_names(),
+            (
+                self.cat.name,
+            ),
+        )
+
+        stored = (
+            self.groups.groups[
+                self.group_id
+            ].role_specializations.record(
+                "guardian",
+                "night_guardian",
+            )
+        )
+
+        self.assertIsNot(
+            record,
+            stored,
+        )
+
     def test_specialization_history_is_object_everywhere(
         self
     ):
@@ -520,9 +736,10 @@ class CatGroupRoleObjectStateTests(
             self.group_id
         ]
 
-        self.assertNotIn(
-            "guardian",
-            group.roles,
+        self.assertFalse(
+            group.roles.has(
+                "guardian"
+            )
         )
 
         with self.assertRaises(
@@ -542,9 +759,10 @@ class CatGroupRoleObjectStateTests(
             )
         )
 
-        self.assertNotIn(
-            "guardian",
-            group.roles,
+        self.assertFalse(
+            group.roles.has(
+                "guardian"
+            )
         )
 
 

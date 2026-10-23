@@ -60,9 +60,10 @@ class CatGroupSanctionSystem:
                 relation.trust = max(0.0, float(relation.trust) - penalty)
         elif sanction_type == 'role_suspension':
             for role in cat.group_roles.roles():
-                holders = group.roles.get(role, [])
-                if cat.name in holders:
-                    holders.remove(cat.name)
+                group.roles.release_holder(
+                    role,
+                    cat.name,
+                )
                 cat.group_roles.release(
                     role
                 )
