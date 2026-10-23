@@ -118,6 +118,7 @@ class MeowFelineWisdomIntegrationTests(unittest.TestCase):
             'keys',
             'items',
             'values',
+            'to_dict',
         ):
             self.assertFalse(
                 hasattr(

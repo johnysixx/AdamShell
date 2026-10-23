@@ -192,24 +192,6 @@ class MeowFelineAwarenessTransmissionEvent:
             self.transferred
         )
 
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "teacher": self.teacher,
-            "kitten": self.kitten,
-            "day": self.day,
-            "transferred": list(
-                self.transferred
-            ),
-            "transferred_count": (
-                self.transferred_count
-            ),
-            "ability_methods_transferred": (
-                self.ability_methods_transferred
-            ),
-        }
-
-
 @dataclass(slots=True, frozen=True)
 class FelineAbilityAwarenessTransmissionDeniedResult:
     teacher: str
