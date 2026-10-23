@@ -117,9 +117,9 @@ class CatGroupCultureTests(
         )
 
         tradition = (
-            profile.traditions[
+            profile.traditions.record(
                 "evening_box_patrol"
-            ]
+            )
         )
 
         self.assertIsInstance(
@@ -158,9 +158,9 @@ class CatGroupCultureTests(
         )
 
         preference = (
-            profile.preferences[
+            profile.preferences.record(
                 "sleeping_place"
-            ]
+            )
         )
 
         self.assertIsInstance(

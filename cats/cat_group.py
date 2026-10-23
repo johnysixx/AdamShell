@@ -14,10 +14,39 @@ from cats.cat_group_diplomacy_state import (
 from cats.cat_group_knowledge_registry import (
     CatGroupKnowledgeRegistry,
 )
+from cats.cat_group_culture_registry import (
+    CatGroupPreferenceRegistry,
+    CatGroupTraditionRegistry,
+)
 
 
 class CatGroupCulture(DomainObject):
-    pass
+
+    def __init__(
+        self,
+        **values
+    ):
+        for reserved_name in (
+            "traditions",
+            "preferences",
+        ):
+            if reserved_name in values:
+                raise TypeError(
+                    "Cat group culture registry state "
+                    "cannot be supplied as mapping data."
+                )
+
+        self.traditions = (
+            CatGroupTraditionRegistry()
+        )
+
+        self.preferences = (
+            CatGroupPreferenceRegistry()
+        )
+
+        super().__init__(
+            **values
+        )
 
 
 class CatGroup(DomainObject):

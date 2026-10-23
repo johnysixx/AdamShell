@@ -45,24 +45,37 @@ class CatGroupCulturalConflictSystem:
             second_culture.preferences
         )
 
+        first_names = {
+            preference.name
+            for preference in (
+                first_preferences.records()
+            )
+        }
+
+        second_names = {
+            preference.name
+            for preference in (
+                second_preferences.records()
+            )
+        }
+
         shared_preferences = (
-            set(first_preferences)
-            .intersection(
-                second_preferences
+            first_names.intersection(
+                second_names
             )
         )
 
         for name in shared_preferences:
             first_preference = (
-                first_preferences[
+                first_preferences.record(
                     name
-                ]
+                )
             )
 
             second_preference = (
-                second_preferences[
+                second_preferences.record(
                     name
-                ]
+                )
             )
 
             if not isinstance(

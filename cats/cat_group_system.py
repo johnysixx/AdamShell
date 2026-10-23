@@ -106,8 +106,6 @@ class CatGroupSystem:
             knowledge=CatGroupKnowledgeRegistry(),
             culture=CatGroupCulture(
                 traits={},
-                traditions={},
-                preferences={},
                 history=[],
             ),
             myths={},

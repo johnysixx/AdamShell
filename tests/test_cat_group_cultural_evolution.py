@@ -135,9 +135,12 @@ class CatGroupCulturalEvolutionTests(
 
         daughter = result.daughter_group
 
-        self.assertIn(
-            "night_patrol",
-            self.groups.groups[daughter].culture.traditions
+        self.assertTrue(
+            self.groups.groups[
+                daughter
+            ].culture.traditions.has(
+                "night_patrol"
+            )
         )
 
         self.assertEqual(

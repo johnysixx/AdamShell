@@ -350,9 +350,9 @@ class CatGroupRitualPerformanceObjectStateTests(
         tradition = (
             self.groups.groups[
                 self.group_id
-            ].culture.traditions[
+            ].culture.traditions.record(
                 "evening_patrol"
-            ]
+            )
         )
 
         self.assertIsInstance(
@@ -400,9 +400,9 @@ class CatGroupRitualPerformanceObjectStateTests(
         )
 
         stored = (
-            group.culture.traditions[
+            group.culture.traditions.record(
                 "evening_patrol"
-            ]
+            )
         )
 
         result = (
@@ -416,9 +416,9 @@ class CatGroupRitualPerformanceObjectStateTests(
         )
 
         current = (
-            group.culture.traditions[
+            group.culture.traditions.record(
                 "evening_patrol"
-            ]
+            )
         )
 
         self.assertIs(

@@ -42,7 +42,7 @@ class CatCulturalAdoptionSystem:
         )
 
         tradition = (
-            group.culture.traditions.get(
+            group.culture.traditions.record(
                 tradition_name
             )
         )
@@ -227,7 +227,7 @@ class CatCulturalAdoptionSystem:
         )
 
         preference = (
-            group.culture.preferences.get(
+            group.culture.preferences.record(
                 preference_name
             )
         )

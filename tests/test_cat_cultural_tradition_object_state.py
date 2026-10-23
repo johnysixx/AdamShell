@@ -107,9 +107,9 @@ class CatCulturalTraditionObjectStateTests(
             self.groups
             .groups[self.group_id]
             .culture
-            .traditions[
+            .traditions.record(
                 'night_patrol'
-            ]
+            )
         )
 
         self.assertIsInstance(
@@ -128,9 +128,9 @@ class CatCulturalTraditionObjectStateTests(
             self.groups
             .groups[self.group_id]
             .culture
-            .traditions[
+            .traditions.record(
                 'night_patrol'
-            ]
+            )
         )
 
         self.assertIs(
@@ -173,9 +173,9 @@ class CatCulturalTraditionObjectStateTests(
             self.groups
             .groups[self.group_id]
             .culture
-            .traditions[
+            .traditions.record(
                 'box_vigil'
-            ]
+            )
         )
 
         self.assertIsInstance(
@@ -200,22 +200,16 @@ class CatCulturalTraditionObjectStateTests(
             self.group_id
         ]
 
-        group.culture.traditions[
-            'night_patrol'
-        ] = {
-            'name': 'night_patrol',
-            'category': 'exploration',
-            'occurrences': 1,
-            'strength': 0.2,
-        }
-
         with self.assertRaises(
             TypeError
         ):
-            self.culture.practice(
-                self.group_id,
-                'night_patrol',
-                'exploration',
+            group.culture.traditions.store(
+                {
+                    'name': 'night_patrol',
+                    'category': 'exploration',
+                    'occurrences': 1,
+                    'strength': 0.2,
+                }
             )
 
 

@@ -105,9 +105,9 @@ class CatCulturalPreferenceObjectStateTests(
             self.groups
             .groups[self.group_id]
             .culture
-            .preferences[
+            .preferences.record(
                 'sleeping_place'
-            ]
+            )
         )
 
         self.assertIsInstance(
@@ -126,9 +126,9 @@ class CatCulturalPreferenceObjectStateTests(
             self.groups
             .groups[self.group_id]
             .culture
-            .preferences[
+            .preferences.record(
                 'sleeping_place'
-            ]
+            )
         )
 
         self.assertIs(
@@ -165,9 +165,9 @@ class CatCulturalPreferenceObjectStateTests(
             self.groups
             .groups[self.group_id]
             .culture
-            .preferences[
+            .preferences.record(
                 'sleeping_place'
-            ]
+            )
         )
 
         adoption = (
@@ -218,21 +218,15 @@ class CatCulturalPreferenceObjectStateTests(
             self.group_id
         ]
 
-        group.culture.preferences[
-            'sleeping_place'
-        ] = {
-            'value': 'bar_cloth',
-            'strength': 0.4,
-            'expressions': 1,
-        }
-
         with self.assertRaises(
             TypeError
         ):
-            self.culture.express_preference(
-                self.group_id,
-                'sleeping_place',
-                'window',
+            group.culture.preferences.store(
+                {
+                    'value': 'bar_cloth',
+                    'strength': 0.4,
+                    'expressions': 1,
+                }
             )
 
 

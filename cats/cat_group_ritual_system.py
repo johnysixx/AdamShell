@@ -116,7 +116,7 @@ class CatGroupRitualSystem:
         culture = group.culture
 
         tradition = (
-            culture.traditions.get(
+            culture.traditions.record(
                 ritual_name
             )
         )
@@ -129,9 +129,9 @@ class CatGroupRitualSystem:
                 )
             )
 
-            culture.traditions[
-                ritual_name
-            ] = tradition
+            culture.traditions.store(
+                tradition
+            )
 
         elif not isinstance(
             tradition,

@@ -77,10 +77,12 @@ class CatGroupCulturalInheritanceSystem:
                 * retention
             )
 
-        for (
-            name,
-            tradition,
-        ) in parent_culture.traditions.items():
+        for tradition in (
+            parent_culture
+            .traditions
+            .records()
+        ):
+            name = tradition.name
             if not isinstance(
                 tradition,
                 CatCulturalTraditionState,
@@ -111,14 +113,16 @@ class CatGroupCulturalInheritanceSystem:
                 parent_group_id
             )
 
-            child_culture.traditions[
-                name
-            ] = inherited_tradition
+            child_culture.traditions.store(
+                inherited_tradition
+            )
 
-        for (
-            name,
-            preference,
-        ) in parent_culture.preferences.items():
+        for preference in (
+            parent_culture
+            .preferences
+            .records()
+        ):
+            name = preference.name
             if not isinstance(
                 preference,
                 CatCulturalPreferenceState,
@@ -146,9 +150,9 @@ class CatGroupCulturalInheritanceSystem:
                 parent_group_id
             )
 
-            child_culture.preferences[
-                name
-            ] = inherited
+            child_culture.preferences.store(
+                inherited
+            )
 
         event = (
             CatGroupCultureInheritedEvent(
@@ -163,10 +167,20 @@ class CatGroupCulturalInheritanceSystem:
                     child_culture.traits
                 ),
                 inherited_traditions=tuple(
-                    child_culture.traditions
+                    record.name
+                    for record in (
+                        child_culture
+                        .traditions
+                        .records()
+                    )
                 ),
                 inherited_preferences=tuple(
-                    child_culture.preferences
+                    record.name
+                    for record in (
+                        child_culture
+                        .preferences
+                        .records()
+                    )
                 ),
             )
         )

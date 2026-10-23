@@ -35,7 +35,7 @@ class CatGroupCultureSystem:
         culture = group.culture
         traditions = culture.traditions
 
-        tradition = traditions.get(
+        tradition = traditions.record(
             practice
         )
 
@@ -47,9 +47,9 @@ class CatGroupCultureSystem:
                 )
             )
 
-            traditions[
-                practice
-            ] = tradition
+            traditions.store(
+                tradition
+            )
 
         elif not isinstance(
             tradition,
@@ -130,20 +130,21 @@ class CatGroupCultureSystem:
             group.culture.preferences
         )
 
-        record = preferences.get(
+        record = preferences.record(
             preference
         )
 
         if record is None:
             record = (
                 CatCulturalPreferenceState(
-                    value=value
+                    name=preference,
+                    value=value,
                 )
             )
 
-            preferences[
-                preference
-            ] = record
+            preferences.store(
+                record
+            )
 
         elif not isinstance(
             record,
