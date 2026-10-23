@@ -235,7 +235,7 @@ class CatLearningObjectStateTests(
             0,
         )
 
-    def test_to_dict_is_detached_recursive_boundary(
+    def test_learning_boundary_keeps_nested_state_object_only(
         self
     ):
         learning = (
@@ -252,13 +252,31 @@ class CatLearningObjectStateTests(
             ],
         })
 
-        snapshot = (
-            learning.to_dict()
+        nested_objects = (
+            learning.meow_knowledge,
+            learning.family_knowledge,
+            learning.skills.record(
+                "hunting"
+            ),
         )
 
-        self.assertIsInstance(
-            snapshot,
-            dict,
+        for obj in nested_objects:
+            for mapping_method in (
+                "get",
+                "keys",
+                "items",
+                "values",
+                "to_dict",
+            ):
+                self.assertFalse(
+                    hasattr(
+                        obj,
+                        mapping_method,
+                    )
+                )
+
+        snapshot = (
+            learning.to_dict()
         )
 
         self.assertIsInstance(
@@ -293,16 +311,6 @@ class CatLearningObjectStateTests(
         ] = 1.0
 
         snapshot[
-            "skills"
-        ][
-            "adult_meowing"
-        ][
-            "vocalizations"
-        ][
-            "food_request"
-        ] = True
-
-        snapshot[
             "family_knowledge"
         ][
             "parental_lessons"
@@ -323,17 +331,11 @@ class CatLearningObjectStateTests(
 
         self.assertEqual(
             learning
-            .skills.record("hunting")
+            .skills.record(
+                "hunting"
+            )
             .progress,
             0.0,
-        )
-
-        self.assertFalse(
-            learning
-            .skills.record("adult_meowing")
-            .vocalizations.knows(
-                "food_request"
-            )
         )
 
         self.assertEqual(
