@@ -156,15 +156,13 @@ class CatMatingContactObjectStateTests(
             )
         )
 
-    def test_boundaries_are_detached(
+    def test_recorded_event_is_detached_from_reproduction_state(
         self
     ):
-        result = (
-            self.resolver.mate(
-                self.female,
-                self.male,
-                current_day=10,
-            )
+        self.resolver.mate(
+            self.female,
+            self.male,
+            current_day=10,
         )
 
         event = (
@@ -176,18 +174,6 @@ class CatMatingContactObjectStateTests(
             "changed"
         )
 
-        snapshot = (
-            self.female
-            .reproduction
-            .to_dict()
-        )
-
-        snapshot[
-            "mating_contacts"
-        ][0][
-            "successful"
-        ] = False
-
         self.assertNotIn(
             "changed",
             event.potential_fathers,
@@ -195,6 +181,13 @@ class CatMatingContactObjectStateTests(
 
         self.assertTrue(
             event.contact.successful
+        )
+
+        self.assertFalse(
+            hasattr(
+                self.female.reproduction,
+                "to_dict",
+            )
         )
 
     def test_denied_mating_uses_object_state(

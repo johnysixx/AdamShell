@@ -53,26 +53,32 @@ class CatEstrousPhaseObjectStateTests(
             "diestrus",
         )
 
-    def test_to_dict_serializes_phase_at_boundary(
+    def test_phase_remains_domain_state_without_mapping_boundary(
         self
     ):
         state = CatReproductionState(
             "female"
         )
+
         state.estrous_phase = (
             CatEstrousPhase.ESTRUS
-        )
-
-        boundary = state.to_dict()
-
-        self.assertEqual(
-            boundary["estrous_phase"],
-            "estrus",
         )
 
         self.assertIs(
             state.estrous_phase,
             CatEstrousPhase.ESTRUS,
+        )
+
+        self.assertEqual(
+            state.estrous_phase.value,
+            "estrus",
+        )
+
+        self.assertFalse(
+            hasattr(
+                state,
+                "to_dict",
+            )
         )
 
 

@@ -148,7 +148,7 @@ class KittenEmbryoObjectStateTests(
             "standard",
         )
 
-    def test_reproduction_boundary_is_detached(
+    def test_reproduction_state_preserves_embryo_object_graph(
         self
     ):
         embryo = self._embryo()
@@ -161,77 +161,38 @@ class KittenEmbryoObjectStateTests(
             embryo
         )
 
-        boundary = (
-            state.to_dict()
-        )[
-            "embryos"
-        ][0]
-
-        self.assertIsInstance(
-            boundary,
-            dict,
+        stored = (
+            state.embryos[0]
         )
 
-        self.assertIsInstance(
-            boundary[
-                "profile"
-            ],
-            dict,
+        self.assertIs(
+            stored,
+            embryo,
         )
 
-        self.assertIsInstance(
-            boundary[
-                "phenotype"
-            ],
-            dict,
+        self.assertIs(
+            stored.profile,
+            embryo.profile,
         )
 
-        self.assertIsInstance(
-            boundary[
-                "viability"
-            ],
-            dict,
+        self.assertIs(
+            stored.phenotype,
+            embryo.phenotype,
         )
 
-        boundary[
-            "profile"
-        ][
-            "color"
-        ] = "white"
-
-        boundary[
-            "phenotype"
-        ][
-            "profile"
-        ][
-            "color"
-        ] = "white"
-
-        boundary[
-            "special_traits"
-        ].append(
-            "changed"
+        self.assertIs(
+            stored.viability,
+            embryo.viability,
         )
 
-        self.assertEqual(
-            embryo.profile.color,
-            "black",
+        self.assertFalse(
+            hasattr(
+                state,
+                "to_dict",
+            )
         )
 
-        self.assertEqual(
-            embryo
-            .phenotype
-            .profile
-            .color,
-            "black",
-        )
-
-        self.assertEqual(
-            embryo.special_traits,
-            (),
-        )
-
-    def test_reproduction_boundary_serializes_embryo(
+    def test_reproduction_state_keeps_embryo_values(
         self
     ):
         embryo = self._embryo()
@@ -246,42 +207,36 @@ class KittenEmbryoObjectStateTests(
             embryo
         )
 
-        boundary = (
-            state.to_dict()
-        )
-
         self.assertIs(
             state.embryos[0],
             embryo,
         )
 
-        self.assertIsInstance(
-            boundary[
-                "embryos"
-            ][0],
-            dict,
+        self.assertEqual(
+            state.embryos[0].id,
+            "embryo_0001",
         )
 
         self.assertEqual(
-            boundary[
-                "embryos"
-            ][0][
-                "id"
-            ],
-            embryo.id,
-        )
-
-        boundary[
-            "embryos"
-        ][0][
-            "profile"
-        ][
-            "color"
-        ] = "changed"
-
-        self.assertEqual(
-            embryo.profile.color,
+            state.embryos[0].profile.color,
             "black",
+        )
+
+        self.assertEqual(
+            state.embryos[0].viability.status,
+            "standard",
+        )
+
+        self.assertEqual(
+            state.embryos[0].special_traits,
+            (),
+        )
+
+        self.assertFalse(
+            hasattr(
+                state,
+                "to_dict",
+            )
         )
 
 

@@ -44,7 +44,7 @@ class CatReproductionMatingContactsStateTests(
             )
         )
 
-        self.assertTrue(
+        self.assertFalse(
             hasattr(
                 state,
                 "to_dict",

@@ -18,6 +18,12 @@ class CatReproductionObjectStateTests(unittest.TestCase):
         self.assertFalse(hasattr(state, "get"))
         self.assertFalse(hasattr(state, "keys"))
         self.assertFalse(hasattr(state, "update"))
+        self.assertFalse(
+            hasattr(
+                state,
+                "to_dict",
+            )
+        )
 
         with self.assertRaises(TypeError):
             _ = state["pregnant"]

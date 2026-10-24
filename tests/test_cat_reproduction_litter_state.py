@@ -61,7 +61,7 @@ class CatReproductionLitterStateTests(
             litter,
         )
 
-        self.assertTrue(
+        self.assertFalse(
             hasattr(
                 state,
                 "to_dict",
