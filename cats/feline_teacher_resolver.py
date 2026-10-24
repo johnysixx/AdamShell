@@ -49,51 +49,6 @@ def _freeze_feline_teacher_payload(value):
     return value
 
 
-def _thaw_feline_teacher_payload(value):
-    if isinstance(
-        value,
-        MappingProxyType
-    ):
-        return {
-            key: (
-                _thaw_feline_teacher_payload(
-                    item
-                )
-            )
-            for key, item
-            in value.items()
-        }
-
-    if isinstance(
-        value,
-        _FrozenFelineTeacherList
-    ):
-        return [
-            _thaw_feline_teacher_payload(
-                item
-            )
-            for item in value
-        ]
-
-    if isinstance(value, tuple):
-        return tuple(
-            _thaw_feline_teacher_payload(
-                item
-            )
-            for item in value
-        )
-
-    if isinstance(value, frozenset):
-        return {
-            _thaw_feline_teacher_payload(
-                item
-            )
-            for item in value
-        }
-
-    return value
-
-
 @dataclass(
     slots=True,
     frozen=True
