@@ -289,29 +289,45 @@ class CatDoorFactoryTests(
             name="positioned_door",
             source_layer="layer_a",
             target_layer="layer_b",
-            source_position=SpatialVector3(x=5.0, y=1.0, z=0.0),
-            target_position=SpatialVector3(x=2.0, y=3.0, z=0.0)
+            source_position=(
+                SpatialVector3(
+                    x=5.0,
+                    y=1.0,
+                    z=0.0,
+                )
+            ),
+            target_position=(
+                SpatialVector3(
+                    x=2.0,
+                    y=3.0,
+                    z=0.0,
+                )
+            ),
         )
 
         self.assertEqual(
             door.source_position,
-            SpatialVector3(x=5.0, y=1.0, z=0.0)
+            SpatialVector3(
+                x=5.0,
+                y=1.0,
+                z=0.0,
+            ),
         )
 
         self.assertEqual(
             door.target_position,
-            SpatialVector3(x=2.0, y=3.0, z=0.0)
+            SpatialVector3(
+                x=2.0,
+                y=3.0,
+                z=0.0,
+            ),
         )
 
-        self.assertEqual(
-            door.public_state[
-                "source_position"
-            ],
-            {
-                "x": 5.0,
-                "y": 1.0,
-                "z": 0.0
-            }
+        self.assertFalse(
+            hasattr(
+                door,
+                "public_state",
+            )
         )
 
     def test_cat_door_can_have_semantic_locations(
@@ -321,34 +337,43 @@ class CatDoorFactoryTests(
             name="front_cat_door",
             source_layer="layer_a",
             target_layer="layer_a",
-            source_location="outside_front_door",
-            target_location="inside_front_door",
-            source_position=SpatialVector3(x=1.0, y=0.0, z=0.0),
-            target_position=SpatialVector3(x=1.2, y=0.0, z=0.0)
+            source_location=(
+                "outside_front_door"
+            ),
+            target_location=(
+                "inside_front_door"
+            ),
+            source_position=(
+                SpatialVector3(
+                    x=1.0,
+                    y=0.0,
+                    z=0.0,
+                )
+            ),
+            target_position=(
+                SpatialVector3(
+                    x=1.2,
+                    y=0.0,
+                    z=0.0,
+                )
+            ),
         )
 
         self.assertEqual(
             door.source_location,
-            "outside_front_door"
+            "outside_front_door",
         )
 
         self.assertEqual(
             door.target_location,
-            "inside_front_door"
+            "inside_front_door",
         )
 
-        self.assertEqual(
-            door.public_state[
-                "source_location"
-            ],
-            "outside_front_door"
-        )
-
-        self.assertEqual(
-            door.public_state[
-                "target_location"
-            ],
-            "inside_front_door"
+        self.assertFalse(
+            hasattr(
+                door,
+                "public_state",
+            )
         )
 
     def test_cat_door_rejects_cat_in_wrong_location(
@@ -506,11 +531,3 @@ class CatDoorFactoryTests(
 
 if __name__ == "__main__":
     unittest.main()
-
-
-
-
-
-
-
-

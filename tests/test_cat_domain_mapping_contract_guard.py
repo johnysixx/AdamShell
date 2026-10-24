@@ -16,7 +16,6 @@ CATS_ROOT = (
 
 
 BOUNDARY_MAPPING_ALLOWLIST = {
-    'cats/cat_door.py::CatDoor.public_state',
     'cats/cats.py::Cats.public_state',
 }
 

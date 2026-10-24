@@ -116,6 +116,50 @@ class BackRoom:
 
     @property
     def public_state(self):
+        cat_door = (
+            self.world_door.cat_door
+        )
+
+        cat_door_state = None
+
+        if cat_door is not None:
+            cat_door_state = {
+                "name":
+                    cat_door.name,
+                "type":
+                    cat_door.type,
+                "destination_mode":
+                    cat_door.destination_mode,
+                "source_layer":
+                    cat_door.source_layer,
+                "target_layer":
+                    cat_door.target_layer,
+                "source_location":
+                    cat_door.source_location,
+                "target_location":
+                    cat_door.target_location,
+                "source_position": (
+                    cat_door
+                    .source_position
+                    .to_dict()
+                    if cat_door.source_position
+                    is not None
+                    else None
+                ),
+                "target_position": (
+                    cat_door
+                    .target_position
+                    .to_dict()
+                    if cat_door.target_position
+                    is not None
+                    else None
+                ),
+                "active":
+                    cat_door.active,
+                "cats_only":
+                    cat_door.cats_only,
+            }
+
         return {
             "name": self.name,
             "type": self.type,
@@ -130,14 +174,11 @@ class BackRoom:
                 "current_world_id": (
                     self.world_door.current_world_id
                 ),
-                "cat_door": (
-                    self.world_door.cat_door.public_state
-                    if self.world_door.cat_door is not None
-                    else None
-                )
+                "cat_door":
+                    cat_door_state,
             },
-            "world_window": self.world_window.to_dict(),
-            "world_keypad": self.world_keypad.to_dict()
+            "world_window":
+                self.world_window.to_dict(),
+            "world_keypad":
+                self.world_keypad.to_dict(),
         }
-
-

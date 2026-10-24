@@ -292,39 +292,3 @@ class CatDoor:
                 ),
             )
         )
-
-    @property
-    def public_state(self):
-        return {
-            "name": self.name,
-            "type": self.type,
-            "destination_mode": (
-                self.destination_mode
-            ),
-            "source_layer": (
-                self.source_layer
-            ),
-            "target_layer": (
-                self.target_layer
-            ),
-            "source_location": (
-                self.source_location
-            ),
-            "target_location": (
-                self.target_location
-            ),
-            "source_position": (
-                self.source_position.to_dict()
-                if self.source_position is not None
-                else None
-            ),
-            "target_position": (
-                self.target_position.to_dict()
-                if self.target_position is not None
-                else None
-            ),
-            "active": self.active,
-            "cats_only": self.cats_only
-        }
-
-
