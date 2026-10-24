@@ -115,12 +115,22 @@ class BarSecurityProtocolTests(unittest.TestCase):
             BarSecurityConfiscation
         )
         self.assertEqual(
-            self.protocol.last_confiscation.to_dict(),
-            {
-                'guest': 'guest_1',
-                'existence_pct': 73.5,
-                'energy_j': 42.0,
-            }
+            self.protocol.last_confiscation.guest,
+            'guest_1'
+        )
+        self.assertEqual(
+            self.protocol.last_confiscation.existence_pct,
+            73.5
+        )
+        self.assertEqual(
+            self.protocol.last_confiscation.energy_j,
+            42.0
+        )
+        self.assertFalse(
+            hasattr(
+                self.protocol.last_confiscation,
+                'to_dict'
+            )
         )
 
     def test_confiscation_is_followed_by_cat_d20_roll(self):
@@ -310,12 +320,22 @@ class BarSecurityProtocolTests(unittest.TestCase):
             BarSecurityEnergyAllocation
         )
         self.assertEqual(
-            allocation.to_dict(),
-            {
-                'entity_energy_j': 25.0,
-                'multiverse_energy_j': 50.0,
-                'bar_energy_j': 25.0,
-            }
+            allocation.entity_energy_j,
+            25.0
+        )
+        self.assertEqual(
+            allocation.multiverse_energy_j,
+            50.0
+        )
+        self.assertEqual(
+            allocation.bar_energy_j,
+            25.0
+        )
+        self.assertFalse(
+            hasattr(
+                allocation,
+                'to_dict'
+            )
         )
 
     def test_confiscated_energy_is_allocated_after_ejection(self):
@@ -324,12 +344,16 @@ class BarSecurityProtocolTests(unittest.TestCase):
         result = self.protocol.handle_guest_entry(guest, service)
         self.assertTrue(result)
         self.assertEqual(
-            self.protocol.last_energy_allocation.to_dict(),
-            {
-                'entity_energy_j': 20.0,
-                'multiverse_energy_j': 40.0,
-                'bar_energy_j': 20.0,
-            }
+            self.protocol.last_energy_allocation.entity_energy_j,
+            20.0
+        )
+        self.assertEqual(
+            self.protocol.last_energy_allocation.multiverse_energy_j,
+            40.0
+        )
+        self.assertEqual(
+            self.protocol.last_energy_allocation.bar_energy_j,
+            20.0
         )
 
     def test_security_cat_uses_quantum_box_with_forced_cat_result(self):
@@ -357,12 +381,16 @@ class BarSecurityProtocolTests(unittest.TestCase):
         self.assertTrue(result)
         self.assertEqual(self.protocol.last_creation_energy_j, 25.0)
         self.assertEqual(
-            self.protocol.last_energy_allocation.to_dict(),
-            {
-                'entity_energy_j': 25.0,
-                'multiverse_energy_j': 50.0,
-                'bar_energy_j': 25.0,
-            }
+            self.protocol.last_energy_allocation.entity_energy_j,
+            25.0
+        )
+        self.assertEqual(
+            self.protocol.last_energy_allocation.multiverse_energy_j,
+            50.0
+        )
+        self.assertEqual(
+            self.protocol.last_energy_allocation.bar_energy_j,
+            25.0
         )
 
     def test_multiverse_share_returns_to_universe_energy_pool(self):

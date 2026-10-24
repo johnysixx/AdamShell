@@ -58,6 +58,7 @@ class BarSecurityObjectStateTests(
             "keys",
             "items",
             "values",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
@@ -156,7 +157,7 @@ class BarSecurityObjectStateTests(
             "guest"
         )
 
-    def test_serialization_remains_detached_boundary_dict(
+    def test_security_state_has_no_serializer_api(
         self
     ):
         confiscation = BarSecurityConfiscation(
@@ -164,6 +165,7 @@ class BarSecurityObjectStateTests(
             existence_pct=70.0,
             energy_j=40.0,
         )
+
         allocation = (
             BarSecurityEnergyAllocation
             .from_confiscated_energy(
@@ -171,27 +173,14 @@ class BarSecurityObjectStateTests(
             )
         )
 
-        confiscation_snapshot = (
-            confiscation.to_dict()
-        )
-        allocation_snapshot = (
-            allocation.to_dict()
+        self._assert_object_only(
+            confiscation,
+            "energy_j",
         )
 
-        confiscation_snapshot[
-            "energy_j"
-        ] = 0.0
-        allocation_snapshot[
-            "bar_energy_j"
-        ] = 0.0
-
-        self.assertEqual(
-            confiscation.energy_j,
-            40.0
-        )
-        self.assertEqual(
-            allocation.bar_energy_j,
-            10.0
+        self._assert_object_only(
+            allocation,
+            "bar_energy_j",
         )
 
 

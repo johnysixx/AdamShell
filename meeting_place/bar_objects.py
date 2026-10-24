@@ -1885,26 +1885,6 @@ class BarSecurityConfiscation:
             removed_existence_pct
         )
 
-    def to_dict(self):
-        result = {
-            "guest": self.guest,
-            "existence_pct": self.existence_pct,
-            "energy_j": self.energy_j,
-        }
-
-        if self.existence_world is not None:
-            result[
-                "existence_world"
-            ] = self.existence_world
-
-        if self.removed_existence_pct is not None:
-            result[
-                "removed_existence_pct"
-            ] = self.removed_existence_pct
-
-        return result
-
-
 @dataclass(slots=True)
 class BarSecurityEnergyAllocation:
     entity_energy_j: float
@@ -1928,14 +1908,6 @@ class BarSecurityEnergyAllocation:
             bar_energy_j=
                 energy_j * 0.25,
         )
-
-    def to_dict(self):
-        return {
-            "entity_energy_j": self.entity_energy_j,
-            "multiverse_energy_j": self.multiverse_energy_j,
-            "bar_energy_j": self.bar_energy_j,
-        }
-
 
 @dataclass(slots=True)
 class BarTabItem:
