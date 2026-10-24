@@ -67,17 +67,6 @@ class CatEnvironmentObservedEvent:
             ),
         )
 
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "cat": self.cat,
-            "observations": deepcopy(
-                self.observations
-            ),
-            "observed": self.observed,
-        }
-
-
 class CatPerception:
     DEFAULT_VISION_RADIUS = 8.0
     NEARBY_CAT_RADIUS = 4.0
@@ -343,7 +332,9 @@ class CatPerception:
             'observation_history',
             [],
         ).append(
-            event.to_dict()
+            deepcopy(
+                event
+            )
         )
 
         self._record(
@@ -738,5 +729,5 @@ class CatPerception:
 
         if emit_event is not None:
             emit_event(
-                event.to_dict()
+                event
             )

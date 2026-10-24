@@ -76,6 +76,7 @@ class CatPerceptionHistoryObjectStateTests(
             "keys",
             "items",
             "values",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
@@ -118,7 +119,7 @@ class CatPerceptionHistoryObjectStateTests(
             event.observations.nearby_cats,
         )
 
-    def test_audit_histories_keep_detached_snapshot(
+    def test_audit_histories_keep_detached_object_state(
         self
     ):
         self.cats.observe_cat(
@@ -142,9 +143,14 @@ class CatPerceptionHistoryObjectStateTests(
             .quantum_events[-1]
         )
 
+        emitted_event = (
+            self.cats
+            .events[-1]
+        )
+
         self.assertIsInstance(
             mind_audit,
-            dict,
+            CatEnvironmentObservedEvent,
         )
 
         self.assertIsInstance(
@@ -152,21 +158,34 @@ class CatPerceptionHistoryObjectStateTests(
             CatEnvironmentObservedEvent,
         )
 
+        self.assertIsInstance(
+            emitted_event,
+            CatEnvironmentObservedEvent,
+        )
+
+        self.assertIsNot(
+            mind_audit,
+            event,
+        )
+
         self.assertIsNot(
             quantum_audit,
             event,
         )
 
+        self.assertIs(
+            emitted_event,
+            event,
+        )
+
         self.assertIsInstance(
-            mind_audit[
-                "observations"
-            ],
+            mind_audit.observations,
             CatPerceptionState,
         )
 
-        mind_audit[
-            "observations"
-        ].cat = "changed"
+        mind_audit.observations.cat = (
+            "changed"
+        )
 
         quantum_audit.observations.cat = (
             "changed_again"
@@ -176,6 +195,18 @@ class CatPerceptionHistoryObjectStateTests(
             event.observations.cat,
             self.cat.name,
         )
+
+        for audit in (
+            mind_audit,
+            quantum_audit,
+            emitted_event,
+        ):
+            self.assertFalse(
+                hasattr(
+                    audit,
+                    "to_dict",
+                )
+            )
 
     def test_history_rejects_mapping_event(
         self
