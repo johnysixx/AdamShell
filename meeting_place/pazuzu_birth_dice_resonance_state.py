@@ -267,18 +267,6 @@ class PazuzuBirthDiceResonanceAlreadyTriggeredResult:
     def tick(self):
         return self.event.tick
 
-    def to_dict(self):
-        snapshot = (
-            self.event.to_dict()
-        )
-
-        snapshot[
-            "already_triggered"
-        ] = self.already_triggered
-
-        return snapshot
-
-
 @dataclass(slots=True, frozen=True)
 class PazuzuBirthDiceResonanceFailedResult:
     reason: str
@@ -302,10 +290,3 @@ class PazuzuBirthDiceResonanceFailedResult:
             "reason",
             str(self.reason),
         )
-
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "reason": self.reason,
-            "triggered": self.triggered,
-        }

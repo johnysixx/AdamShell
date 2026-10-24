@@ -342,6 +342,7 @@ class PazuzuBirthDiceResonanceTests(
             "keys",
             "items",
             "values",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
@@ -409,6 +410,7 @@ class PazuzuBirthDiceResonanceTests(
             "items",
             "values",
             "setdefault",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
