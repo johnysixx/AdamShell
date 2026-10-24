@@ -32,6 +32,7 @@ class LemonTreeStateObjectStateTests(
             "setdefault",
             "__getitem__",
             "__setitem__",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
@@ -107,10 +108,7 @@ class LemonTreeStateObjectStateTests(
         )
 
         self.assertEqual(
-            result
-            .to_dict()[
-                "state"
-            ],
+            result.state.value,
             "flowering",
         )
 
@@ -148,10 +146,7 @@ class LemonTreeStateObjectStateTests(
         )
 
         self.assertEqual(
-            result
-            .to_dict()[
-                "state"
-            ],
+            result.state.value,
             "fruiting",
         )
 
@@ -228,21 +223,15 @@ class LemonTreeStateObjectStateTests(
         )
 
         self.assertEqual(
-            result.to_dict(),
-            {
-                "name":
-                    "lemon_picked",
-                "picker":
-                    "tester",
-                "fruit":
-                    "lemon",
-                "source":
-                    "lemon_tree",
-                "picked":
-                    True,
-                "lemons_remaining":
-                    6,
-            },
+            result.name,
+            "lemon_picked",
+        )
+
+        self.assertFalse(
+            hasattr(
+                result,
+                "to_dict",
+            )
         )
 
     def test_lemon_not_found_result_is_object_state(

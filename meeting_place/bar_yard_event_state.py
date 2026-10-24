@@ -31,16 +31,6 @@ class LemonNotFoundResult:
             str(self.picker),
         )
 
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "picker": self.picker,
-            "picked": self.picked,
-            "lemons_remaining":
-                self.lemons_remaining,
-        }
-
-
 @dataclass(slots=True, frozen=True)
 class LemonPickedResult:
     picker: str
@@ -81,18 +71,6 @@ class LemonPickedResult:
             ),
         )
 
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "picker": self.picker,
-            "fruit": self.fruit,
-            "source": self.source,
-            "picked": self.picked,
-            "lemons_remaining":
-                self.lemons_remaining,
-        }
-
-
 @dataclass(slots=True, frozen=True)
 class LemonTreeBeginsFloweringEvent:
     month: int
@@ -118,14 +96,6 @@ class LemonTreeBeginsFloweringEvent:
             int(self.flowers),
         )
 
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "month": self.month,
-            "flowers": self.flowers,
-        }
-
-
 @dataclass(slots=True, frozen=True)
 class LemonTreeNewCropEvent:
     lemons: int
@@ -141,13 +111,6 @@ class LemonTreeNewCropEvent:
             "lemons",
             int(self.lemons),
         )
-
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "lemons": self.lemons,
-        }
-
 
 LEMON_TREE_LIFECYCLE_EVENT_TYPES = (
     LemonTreeBeginsFloweringEvent,
@@ -211,25 +174,3 @@ class LemonTreeMonthPassedResult:
             "changed",
             bool(self.changed),
         )
-
-    def to_dict(self):
-        if self.month is None:
-            return {
-                "name": self.name,
-                "state":
-                    self.state.value,
-                "changed":
-                    self.changed,
-            }
-
-        return {
-            "name": self.name,
-            "month": self.month,
-            "state":
-                self.state.value,
-            "events": [
-                event.to_dict()
-                for event
-                in self.events
-            ],
-        }
