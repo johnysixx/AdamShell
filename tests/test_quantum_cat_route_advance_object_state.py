@@ -269,81 +269,11 @@ class QuantumCatRouteAdvanceObjectStateTests(
             SpatialVector3,
         )
 
-        snapshot = (
-            self.cat.memory.public_state
-        )
-
-        started_snapshot = next(
-            memory
-            for memory
-            in snapshot["events"]
-            if memory["event_type"]
-            == "route_started"
-        )
-
-        step_snapshot = next(
-            memory
-            for memory
-            in snapshot["events"]
-            if memory["event_type"]
-            == "route_step"
-        )
-
-        arrived_snapshot = next(
-            memory
-            for memory
-            in snapshot["events"]
-            if memory["event_type"]
-            == "route_arrived"
-        )
-
-        self.assertTrue(
-            all(
-                isinstance(
-                    position,
-                    dict,
-                )
-                for position
-                in started_snapshot[
-                    "details"
-                ][
-                    "route_steps"
-                ]
+        self.assertFalse(
+            hasattr(
+                self.cat.memory,
+                "public_state",
             )
-        )
-
-        self.assertIsInstance(
-            step_snapshot[
-                "location"
-            ],
-            dict,
-        )
-
-        self.assertIsInstance(
-            step_snapshot[
-                "details"
-            ][
-                "previous_position"
-            ],
-            dict,
-        )
-
-        self.assertIsInstance(
-            step_snapshot[
-                "details"
-            ][
-                "position"
-            ],
-            dict,
-        )
-
-        self.assertIsInstance(
-            arrived_snapshot[
-                "details"
-            ][
-                "arrival_position"
-            ],
-            dict,
         )
 
     def test_already_arrived_result_is_object(

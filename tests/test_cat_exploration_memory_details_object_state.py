@@ -64,7 +64,7 @@ class CatExplorationMemoryDetailsObjectStateTests(
                 },
             )
 
-    def test_public_state_is_snapshot_boundary(
+    def test_memory_keeps_exploration_details_object(
         self
     ):
         memory = CatMemory(
@@ -96,38 +96,40 @@ class CatExplorationMemoryDetailsObjectStateTests(
             ),
         )
 
+        stored = (
+            memory.records()[0]
+        )
+
         self.assertIsInstance(
             returned.details,
             CatExplorationMemoryDetails,
         )
 
-        snapshot = (
-            memory.public_state[
-                "events"
-            ][0]
+        self.assertIsInstance(
+            stored.details,
+            CatExplorationMemoryDetails,
         )
 
         self.assertIsInstance(
-            snapshot["details"],
-            dict,
+            stored.location,
+            SpatialVector3,
         )
 
         self.assertIsInstance(
-            snapshot[
-                "details"
-            ][
-                "position"
-            ],
-            dict,
+            stored.details.position,
+            SpatialVector3,
         )
 
         self.assertEqual(
-            snapshot[
-                "details"
-            ][
-                "target_layer"
-            ],
+            stored.details.target_layer,
             "quantum_layer",
+        )
+
+        self.assertFalse(
+            hasattr(
+                memory,
+                "public_state",
+            )
         )
 
 

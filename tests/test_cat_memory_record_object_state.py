@@ -128,6 +128,16 @@ class CatMemoryRecordObjectStateTests(
         )
 
         self.assertIsInstance(
+            returned,
+            CatMemoryRecord,
+        )
+
+        self.assertIsInstance(
+            stored,
+            CatMemoryRecord,
+        )
+
+        self.assertIsInstance(
             returned.location,
             SpatialVector3,
         )
@@ -152,38 +162,16 @@ class CatMemoryRecordObjectStateTests(
             position,
         )
 
-        snapshot = (
-            self.memory.public_state[
-                "events"
-            ][-1]
-        )
-
-        self.assertIsInstance(
-            snapshot["location"],
-            dict,
-        )
-
-        self.assertIsInstance(
-            snapshot[
-                "details"
-            ][
-                "position"
-            ],
-            dict,
-        )
-
         self.assertEqual(
-            snapshot["location"],
-            position.to_dict(),
+            stored.details.position,
+            position,
         )
 
-        self.assertEqual(
-            snapshot[
-                "details"
-            ][
-                "position"
-            ],
-            position.to_dict(),
+        self.assertFalse(
+            hasattr(
+                self.memory,
+                "public_state",
+            )
         )
 
     def test_recall_returns_object_records(
@@ -219,7 +207,7 @@ class CatMemoryRecordObjectStateTests(
             "box_explored",
         )
 
-    def test_public_state_serializes_records(
+    def test_memory_records_remain_object_state(
         self
     ):
         self.memory.remember(
@@ -231,27 +219,35 @@ class CatMemoryRecordObjectStateTests(
             },
         )
 
-        snapshot = (
-            self.memory.public_state
-        )
-
         event = (
-            snapshot["events"][0]
+            self.memory.records()[0]
         )
 
         self.assertIsInstance(
             event,
-            dict,
+            CatMemoryRecord,
         )
 
         self.assertEqual(
-            event["event_type"],
+            event.event_type,
             "box_explored",
         )
 
         self.assertIsInstance(
-            event["details"],
+            event.details,
             dict,
+        )
+
+        self.assertEqual(
+            event.details["box_id"],
+            "box_1",
+        )
+
+        self.assertFalse(
+            hasattr(
+                self.memory,
+                "public_state",
+            )
         )
 
     def test_legacy_mapping_record_is_rejected(

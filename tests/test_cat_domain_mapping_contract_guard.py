@@ -19,7 +19,6 @@ BOUNDARY_MAPPING_ALLOWLIST = {
     'cats/feline_ability_resolver.py::FelineAbilityResolver._record',
     'cats/cat_door.py::CatDoor.public_state',
     'cats/cats.py::Cats.public_state',
-    'cats/memory.py::CatMemory.public_state',
 }
 
 

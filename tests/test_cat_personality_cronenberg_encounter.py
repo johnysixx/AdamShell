@@ -155,35 +155,21 @@ class CatPersonalityCronenbergEncounterTests(unittest.TestCase):
             CatCronenbergEncounterMemoryDetails,
         )
 
-        snapshot = (
-            self.cat
-            .memory
-            .public_state[
-                "events"
-            ][-1]
+        self.assertFalse(
+            hasattr(
+                self.cat.memory,
+                "public_state",
+            )
         )
 
         self.assertIsInstance(
-            snapshot["details"],
-            dict,
+            eaten[0].details.origin,
+            CronenbergOrigin,
         )
 
         self.assertIsInstance(
-            snapshot[
-                "details"
-            ][
-                "origin"
-            ],
-            dict,
-        )
-
-        self.assertIsInstance(
-            snapshot[
-                "details"
-            ][
-                "traits"
-            ],
-            dict,
+            eaten[0].details.traits,
+            CronenbergTraitValues,
         )
 
     def test_large_cronenberg_builds_patience(self):

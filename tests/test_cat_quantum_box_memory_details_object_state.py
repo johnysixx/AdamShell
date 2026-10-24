@@ -102,7 +102,7 @@ class CatQuantumBoxMemoryDetailsObjectStateTests(
             "test_failure",
         )
 
-    def test_public_state_serializes_details_boundary(
+    def test_memory_keeps_quantum_box_details_object(
         self
     ):
         memory = CatMemory(
@@ -131,29 +131,40 @@ class CatQuantumBoxMemoryDetailsObjectStateTests(
             details=details,
         )
 
+        stored = (
+            memory.records()[0]
+        )
+
         self.assertIsInstance(
             returned.details,
             CatQuantumBoxTransferMemoryDetails,
         )
 
-        snapshot = (
-            memory.public_state[
-                "events"
-            ][0]
+        self.assertIsInstance(
+            stored.details,
+            CatQuantumBoxTransferMemoryDetails,
         )
 
         self.assertIsInstance(
-            snapshot["details"],
-            dict,
+            stored.location,
+            SpatialVector3,
         )
 
         self.assertEqual(
-            snapshot[
-                "details"
-            ][
-                "source_layer"
-            ],
+            stored.details.source_layer,
             "quantum_layer",
+        )
+
+        self.assertEqual(
+            stored.details.target_layer,
+            "meeting_place",
+        )
+
+        self.assertFalse(
+            hasattr(
+                memory,
+                "public_state",
+            )
         )
 
 
