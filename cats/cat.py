@@ -20,9 +20,6 @@ class Cat(SocialMixin):
     A living cat entity.
 
     Cat owns its state and behavior.
-    Mapping compatibility is temporary so the existing
-    feline subsystem can migrate from dictionaries
-    without a flag-day rewrite.
     """
 
     def __init__(self, name, color, pattern, eye_color, fur_length, sex, genotype, reproduction, origin, idea_energy, memory, access, learning, personality, mind, intellect, aroma):

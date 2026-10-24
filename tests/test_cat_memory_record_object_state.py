@@ -174,6 +174,23 @@ class CatMemoryRecordObjectStateTests(
             )
         )
 
+    def test_memory_has_no_entity_mapping_compatibility_api(
+        self
+    ):
+        self.assertFalse(
+            hasattr(
+                self.memory,
+                "remember_entity",
+            )
+        )
+
+        self.assertFalse(
+            hasattr(
+                self.memory,
+                "public_state",
+            )
+        )
+
     def test_recall_returns_object_records(
         self
     ):

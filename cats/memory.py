@@ -118,63 +118,6 @@ class CatMemory:
             self._require_events()
         )
 
-    def remember_entity(
-        self,
-        event_type,
-        entity,
-        universe_tick=None,
-        location=None,
-        extra_details=None
-    ):
-        entity_name = getattr(
-            entity,
-            "name",
-            str(entity)
-        )
-
-        public_state = getattr(
-            entity,
-            "public_state",
-            None
-        )
-
-        if callable(public_state):
-            entity_state = public_state()
-        elif public_state is not None:
-            entity_state = public_state
-        else:
-            entity_state = {
-                "name": entity_name,
-                "state": getattr(
-                    entity,
-                    "state",
-                    None
-                ),
-                "location": getattr(
-                    entity,
-                    "location",
-                    None
-                )
-            }
-
-        details = {
-            "entity": deepcopy(
-                entity_state
-            )
-        }
-
-        details.update(
-            deepcopy(extra_details or {})
-        )
-
-        return self.remember(
-            event_type=event_type,
-            universe_tick=universe_tick,
-            location=location,
-            participants=[entity_name],
-            details=details
-        )
-
     @property
     def cronenberg_encounters(self):
         return self.recall(
