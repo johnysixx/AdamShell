@@ -117,8 +117,14 @@ class BarReceiptState:
             == "staff_purchase"
         ):
             result["items"] = [
-                item.to_dict()
-                for item in self.items
+                {
+                    "drink":
+                        item.drink,
+                    "drink_category":
+                        item.drink_category,
+                }
+                for item
+                in self.items
             ]
 
         if self.message is not None:

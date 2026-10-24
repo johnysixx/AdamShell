@@ -65,6 +65,12 @@ class BarObjectStateSecondCutTests(unittest.TestCase):
         self.assertIsInstance(tab.items[0], BarTabItem)
         self.assertEqual(tab.items[0].drink, "beer")
         self._assert_object_only(tab.items[0])
+        self.assertFalse(
+            hasattr(
+                tab.items[0],
+                "to_dict",
+            )
+        )
         self.assertFalse(hasattr(tab, "get"))
         self.assertFalse(hasattr(tab, "keys"))
         with self.assertRaises(TypeError):

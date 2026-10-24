@@ -83,6 +83,13 @@ class BarReceiptObjectStateTests(
             BarTabItem,
         )
 
+        self.assertFalse(
+            hasattr(
+                receipt.items[0],
+                "to_dict",
+            )
+        )
+
         self.assertIs(
             self.register.receipts[0],
             receipt,

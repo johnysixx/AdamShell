@@ -1942,13 +1942,6 @@ class BarTabItem:
     drink: str
     drink_category: str | None = None
 
-    def to_dict(self):
-        return {
-            "drink": self.drink,
-            "drink_category": self.drink_category,
-        }
-
-
 @dataclass(slots=True)
 class BarTab:
     guest: str
@@ -1972,7 +1965,16 @@ class BarTab:
             "guest_type": self.guest_type,
             "status": self.status,
             "paid": self.paid,
-            "items": [item.to_dict() for item in self.items],
+            "items": [
+                {
+                    "drink":
+                        item.drink,
+                    "drink_category":
+                        item.drink_category,
+                }
+                for item
+                in self.items
+            ],
         }
         if self.latest_receipt_number is not None:
             result["latest_receipt_number"] = self.latest_receipt_number
