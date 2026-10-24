@@ -1651,7 +1651,13 @@ class MeetingPlace:
                 self.quantum_entropy_tick()
             if secret_event['box_created']:
                 self.universe.create_quantum_box()
-        effect = self.service_rules.apply_entropy_drink(entity, event.get('entity_energy_gain_j', 0.0))
+        effect = (
+            self.service_rules
+            .apply_entropy_drink(
+                entity,
+                event.entity_energy_gain_j,
+            )
+        )
         self.emit_event(f'{entity_name} drinks entropy at the bar')
         self.emit_event(f'{entity_name} entropy drink effect applied')
         return {'reservoir_event': event, 'service_effect': effect}

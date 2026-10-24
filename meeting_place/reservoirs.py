@@ -16,6 +16,80 @@ from universe.pre_cosmic_rules import (
 )
 
 
+def _reservoir_event_public_state(
+    event,
+):
+    if isinstance(
+        event,
+        BarEnergyAddedEvent,
+    ):
+        return {
+            "name": event.name,
+            "source": event.source,
+            "amount_j": event.amount_j,
+            "total_energy_j":
+                event.total_energy_j,
+        }
+
+    if isinstance(
+        event,
+        BarEnergySpentEvent,
+    ):
+        return {
+            "name": event.name,
+            "purpose": event.purpose,
+            "amount_j": event.amount_j,
+            "total_energy_j":
+                event.total_energy_j,
+        }
+
+    if isinstance(
+        event,
+        QuantumEntropyTickEvent,
+    ):
+        return {
+            "name": event.name,
+            "amount_units":
+                event.amount_units,
+            "total_entropy_units":
+                event.total_entropy_units,
+        }
+
+    if isinstance(
+        event,
+        BarEntropyAddedEvent,
+    ):
+        return {
+            "name": event.name,
+            "source": event.source,
+            "amount_units":
+                event.amount_units,
+            "total_entropy_units":
+                event.total_entropy_units,
+        }
+
+    if isinstance(
+        event,
+        EntropyServedEvent,
+    ):
+        return {
+            "name": event.name,
+            "drinker": event.drinker,
+            "entropy_units_spent":
+                event.entropy_units_spent,
+            "bar_energy_gain_j":
+                event.bar_energy_gain_j,
+            "entity_energy_gain_j":
+                event.entity_energy_gain_j,
+            "total_entropy_units":
+                event.total_entropy_units,
+        }
+
+    raise TypeError(
+        "Unsupported reservoir public event."
+    )
+
+
 class BarEnergyReservoir:
 
     def __init__(self):
@@ -31,7 +105,7 @@ class BarEnergyReservoir:
             "type": self.type,
             "energy_j": self.energy_j,
             "events": [
-                event.to_dict()
+                _reservoir_event_public_state(event)
                 for event
                 in self.events
             ]
@@ -56,7 +130,7 @@ class BarEnergyReservoir:
         UniverseLogger.event(f"BAR ENERGY ADDED: {amount_j:.3f} J from {source}")
         UniverseLogger.event(f"BAR ENERGY TOTAL: {self.energy_j:.3f} J")
 
-        return event.to_dict()
+        return event
 
     def spend_energy(self, purpose, amount_j):
         if amount_j <= 0:
@@ -80,7 +154,7 @@ class BarEnergyReservoir:
         UniverseLogger.event(f"BAR ENERGY SPENT: {amount_j:.3f} J for {purpose}")
         UniverseLogger.event(f"BAR ENERGY TOTAL: {self.energy_j:.3f} J")
 
-        return event.to_dict()
+        return event
 
 
 class BarEntropyReservoir:
@@ -98,7 +172,7 @@ class BarEntropyReservoir:
             "type": self.type,
             "entropy_units": self.entropy_units,
             "events": [
-                event.to_dict()
+                _reservoir_event_public_state(event)
                 for event
                 in self.events
             ]
@@ -124,7 +198,7 @@ class BarEntropyReservoir:
         UniverseLogger.event(f"BAR ENTROPY TICK: +{amount_units:.6f} units")
         UniverseLogger.event(f"BAR ENTROPY TOTAL: {self.entropy_units:.6f} units")
 
-        return event.to_dict()
+        return event
 
     def add_entropy(self, source, amount_units):
         if amount_units <= 0:
@@ -147,7 +221,7 @@ class BarEntropyReservoir:
         UniverseLogger.event(f"BAR ENTROPY ADDED: {amount_units:.6f} units from {source}")
         UniverseLogger.event(f"BAR ENTROPY TOTAL: {self.entropy_units:.6f} units")
 
-        return event.to_dict()
+        return event
 
     def serve_entropy(self, energy_reservoir, drinker_name="entity"):
         if self.entropy_units < ENTROPY_DRINK_UNITS:
@@ -188,5 +262,4 @@ class BarEntropyReservoir:
         UniverseLogger.event(f"ENTITY ENERGY GAIN: {entity_energy_gain_j:.3f} J")
         UniverseLogger.event(f"BAR ENTROPY TOTAL: {self.entropy_units:.6f} units")
 
-        return event.to_dict()
-
+        return event

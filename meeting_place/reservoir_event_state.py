@@ -49,16 +49,6 @@ class BarEnergyAddedEvent:
             total_energy_j,
         )
 
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "source": self.source,
-            "amount_j": self.amount_j,
-            "total_energy_j":
-                self.total_energy_j,
-        }
-
-
 @dataclass(slots=True, frozen=True)
 class BarEnergySpentEvent:
     purpose: str
@@ -107,16 +97,6 @@ class BarEnergySpentEvent:
             total_energy_j,
         )
 
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "purpose": self.purpose,
-            "amount_j": self.amount_j,
-            "total_energy_j":
-                self.total_energy_j,
-        }
-
-
 @dataclass(slots=True, frozen=True)
 class QuantumEntropyTickEvent:
     amount_units: float
@@ -158,16 +138,6 @@ class QuantumEntropyTickEvent:
             "total_entropy_units",
             total_entropy_units,
         )
-
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "amount_units":
-                self.amount_units,
-            "total_entropy_units":
-                self.total_entropy_units,
-        }
-
 
 @dataclass(slots=True, frozen=True)
 class BarEntropyAddedEvent:
@@ -216,17 +186,6 @@ class BarEntropyAddedEvent:
             "total_entropy_units",
             total_entropy_units,
         )
-
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "source": self.source,
-            "amount_units":
-                self.amount_units,
-            "total_entropy_units":
-                self.total_entropy_units,
-        }
-
 
 @dataclass(slots=True, frozen=True)
 class EntropyServedEvent:
@@ -302,17 +261,3 @@ class EntropyServedEvent:
             "total_entropy_units",
             total_entropy_units,
         )
-
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "drinker": self.drinker,
-            "entropy_units_spent":
-                self.entropy_units_spent,
-            "bar_energy_gain_j":
-                self.bar_energy_gain_j,
-            "entity_energy_gain_j":
-                self.entity_energy_gain_j,
-            "total_entropy_units":
-                self.total_entropy_units,
-        }

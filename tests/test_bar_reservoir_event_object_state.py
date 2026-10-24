@@ -81,12 +81,12 @@ class BarReservoirEventObjectStateTests(
 
         self.assertIsInstance(
             added,
-            dict,
+            BarEnergyAddedEvent,
         )
 
         self.assertIsInstance(
             spent,
-            dict,
+            BarEnergySpentEvent,
         )
 
         self.assertEqual(
@@ -94,56 +94,53 @@ class BarReservoirEventObjectStateTests(
             2,
         )
 
-        added_event = (
-            reservoir.events[0]
+        self.assertIs(
+            added,
+            reservoir.events[0],
         )
 
-        spent_event = (
-            reservoir.events[1]
-        )
-
-        self.assertIsInstance(
-            added_event,
-            BarEnergyAddedEvent,
-        )
-
-        self.assertIsInstance(
-            spent_event,
-            BarEnergySpentEvent,
+        self.assertIs(
+            spent,
+            reservoir.events[1],
         )
 
         self.assertEqual(
-            added_event.amount_j,
+            added.amount_j,
             4.0,
         )
 
         self.assertEqual(
-            spent_event.amount_j,
+            spent.amount_j,
             1.5,
         )
 
         self.assertEqual(
-            spent_event.total_energy_j,
+            spent.total_energy_j,
             2.5,
         )
 
         self._assert_object_only(
-            added_event,
+            added,
             "amount_j",
         )
 
         self._assert_object_only(
-            spent_event,
+            spent,
             "purpose",
         )
 
-        added[
-            "amount_j"
-        ] = 999.0
+        self.assertFalse(
+            hasattr(
+                added,
+                "to_dict",
+            )
+        )
 
-        self.assertEqual(
-            added_event.amount_j,
-            4.0,
+        self.assertFalse(
+            hasattr(
+                spent,
+                "to_dict",
+            )
         )
 
         public_state = (
@@ -155,6 +152,15 @@ class BarReservoirEventObjectStateTests(
             dict,
         )
 
+        self.assertEqual(
+            public_state[
+                "events"
+            ][0][
+                "amount_j"
+            ],
+            4.0,
+        )
+
         public_state[
             "events"
         ][0][
@@ -162,7 +168,7 @@ class BarReservoirEventObjectStateTests(
         ] = 123.0
 
         self.assertEqual(
-            added_event.amount_j,
+            added.amount_j,
             4.0,
         )
 
@@ -191,17 +197,17 @@ class BarReservoirEventObjectStateTests(
 
         self.assertIsInstance(
             tick,
-            dict,
+            QuantumEntropyTickEvent,
         )
 
         self.assertIsInstance(
             added,
-            dict,
+            BarEntropyAddedEvent,
         )
 
         self.assertIsInstance(
             served,
-            dict,
+            EntropyServedEvent,
         )
 
         self.assertEqual(
@@ -209,50 +215,38 @@ class BarReservoirEventObjectStateTests(
             3,
         )
 
-        tick_event = (
-            entropy.events[0]
+        self.assertIs(
+            tick,
+            entropy.events[0],
         )
 
-        added_event = (
-            entropy.events[1]
+        self.assertIs(
+            added,
+            entropy.events[1],
         )
 
-        served_event = (
-            entropy.events[2]
-        )
-
-        self.assertIsInstance(
-            tick_event,
-            QuantumEntropyTickEvent,
-        )
-
-        self.assertIsInstance(
-            added_event,
-            BarEntropyAddedEvent,
-        )
-
-        self.assertIsInstance(
-            served_event,
-            EntropyServedEvent,
+        self.assertIs(
+            served,
+            entropy.events[2],
         )
 
         self.assertEqual(
-            tick_event.amount_units,
+            tick.amount_units,
             0.125,
         )
 
         self.assertEqual(
-            added_event.source,
+            added.source,
             "test_source",
         )
 
         self.assertEqual(
-            served_event.drinker,
+            served.drinker,
             "test_drinker",
         )
 
         self.assertGreater(
-            served_event.entity_energy_gain_j,
+            served.entity_energy_gain_j,
             0.0,
         )
 
@@ -262,28 +256,31 @@ class BarReservoirEventObjectStateTests(
         )
 
         self._assert_object_only(
-            tick_event,
+            tick,
             "amount_units",
         )
 
         self._assert_object_only(
-            added_event,
+            added,
             "source",
         )
 
         self._assert_object_only(
-            served_event,
+            served,
             "drinker",
         )
 
-        served[
-            "drinker"
-        ] = "changed"
-
-        self.assertEqual(
-            served_event.drinker,
-            "test_drinker",
-        )
+        for event in (
+            tick,
+            added,
+            served,
+        ):
+            self.assertFalse(
+                hasattr(
+                    event,
+                    "to_dict",
+                )
+            )
 
         public_state = (
             entropy.public_state
@@ -300,6 +297,17 @@ class BarReservoirEventObjectStateTests(
                 "bar_entropy_added",
                 "entropy_served",
             ],
+        )
+
+        public_state[
+            "events"
+        ][-1][
+            "drinker"
+        ] = "changed"
+
+        self.assertEqual(
+            served.drinker,
+            "test_drinker",
         )
 
 
