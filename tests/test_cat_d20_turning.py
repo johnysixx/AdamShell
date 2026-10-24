@@ -106,6 +106,7 @@ class CatD20TurningTests(unittest.TestCase):
             "keys",
             "items",
             "values",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
@@ -214,6 +215,13 @@ class CatD20TurningTests(unittest.TestCase):
                 self.assertEqual(
                     result.meaning,
                     meaning
+                )
+
+                self.assertFalse(
+                    hasattr(
+                        result,
+                        "to_dict",
+                    )
                 )
 
                 with self.assertRaises(

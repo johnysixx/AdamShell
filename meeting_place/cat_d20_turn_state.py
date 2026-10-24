@@ -65,14 +65,6 @@ class CatD20ValueInterpretation:
             meaning,
         )
 
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "value": self.value,
-            "meaning": self.meaning,
-        }
-
-
 @dataclass(slots=True, frozen=True)
 class CatD20TurnFailedResult:
     reason: str
@@ -105,19 +97,6 @@ class CatD20TurnFailedResult:
                     self.cat
                 ),
             )
-
-    def to_dict(self):
-        result = {
-            "name": self.name,
-            "reason": self.reason,
-            "turned": self.turned,
-        }
-
-        if self.cat is not None:
-            result["cat"] = self.cat
-
-        return result
-
 
 @dataclass(slots=True, frozen=True)
 class CatD20TurnResult:
@@ -212,22 +191,3 @@ class CatD20TurnResult:
     @property
     def turned(self):
         return self.turn.turned
-
-    def to_dict(self):
-        result = (
-            self.turn.to_dict()
-        )
-
-        result["interpretation"] = (
-            self.interpretation
-            .to_dict()
-        )
-
-        result[
-            "duplicate_consumption_energy"
-        ] = (
-            self.duplicate_consumption_energy
-            .to_dict()
-        )
-
-        return result

@@ -73,10 +73,18 @@ class PazuzuCatD20ResonanceTurn:
             self.turn.to_dict()
         )
 
-        result["interpretation"] = (
+        interpretation = (
             self.interpretation
-            .to_dict()
         )
+
+        result["interpretation"] = {
+            "name":
+                interpretation.name,
+            "value":
+                interpretation.value,
+            "meaning":
+                interpretation.meaning,
+        }
 
         # Preserve the existing public boundary contract:
         # this field has already returned the typed energy

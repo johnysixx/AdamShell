@@ -65,6 +65,7 @@ class CatD20TurnResultObjectStateTests(
             "setdefault",
             "__getitem__",
             "__setitem__",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
