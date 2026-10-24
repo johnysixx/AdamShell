@@ -210,25 +210,6 @@ class FelineAbilityMethodRegistrationObjectStateTests(
             result
         )
 
-        boundary = (
-            self.resolver
-            .history[-1]
-        )
-
-        boundary[
-            "teach_other_cats"
-        ][
-            "constraints"
-        ][
-            "can_teach_meow"
-        ] = False
-
-        self.assertTrue(
-            result.teach_other_cats
-            .constraints
-            .can_teach_meow
-        )
-
         audit = (
             self.resolver
             .history[-1]
@@ -236,27 +217,54 @@ class FelineAbilityMethodRegistrationObjectStateTests(
 
         self.assertIsInstance(
             audit,
-            dict,
+            FelineTeachingAbilitiesRegistrationResult,
+        )
+
+        self.assertIsNot(
+            audit,
+            result,
+        )
+
+        self.assertIsNot(
+            audit.teach_other_cats,
+            result.teach_other_cats,
+        )
+
+        self.assertIsNot(
+            audit.teach_teaching,
+            result.teach_teaching,
+        )
+
+        self.assertIsNot(
+            audit.teach_other_cats.constraints,
+            result.teach_other_cats.constraints,
         )
 
         self.assertTrue(
-            audit[
-                "registered"
-            ]
+            audit.registered
         )
 
-        audit[
-            "teach_teaching"
-        ][
-            "constraints"
-        ][
-            "can_teach_teach_teaching"
-        ] = False
+        self.assertTrue(
+            audit
+            .teach_other_cats
+            .constraints
+            .can_teach_meow
+        )
 
         self.assertTrue(
-            result.teach_teaching
+            audit
+            .teach_teaching
             .constraints
             .can_teach_teach_teaching
+        )
+
+        self.assert_not_mapping(
+            audit
+        )
+
+        self.assertIs(
+            self.universe.quantum_events[-1],
+            audit,
         )
 
     def test_queen_registration_returns_method_object(

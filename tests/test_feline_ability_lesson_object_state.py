@@ -132,29 +132,6 @@ class FelineAbilityLessonObjectStateTests(
             result
         )
 
-        boundary = (
-            self.resolver
-            .history[-1]
-        )
-
-        boundary[
-            "constraints"
-        ][
-            "can_teach_meow"
-        ] = False
-
-        self.assertTrue(
-            result.constraints
-            .can_teach_meow
-        )
-
-        self.assertFalse(
-            hasattr(
-                result.constraints,
-                "get",
-            )
-        )
-
         audit = (
             self.resolver
             .history[-1]
@@ -162,13 +139,34 @@ class FelineAbilityLessonObjectStateTests(
 
         self.assertIsInstance(
             audit,
-            dict,
+            FelineAbilityMethodLearnedEvent,
+        )
+
+        self.assertIsNot(
+            audit,
+            result,
+        )
+
+        self.assertIsNot(
+            audit.constraints,
+            result.constraints,
         )
 
         self.assertTrue(
-            audit[
-                "learned"
-            ]
+            audit.constraints.can_teach_meow
+        )
+
+        self.assertTrue(
+            audit.learned
+        )
+
+        self.assert_not_mapping(
+            audit
+        )
+
+        self.assertIs(
+            self.universe.quantum_events[-1],
+            audit,
         )
 
     def test_denied_lesson_returns_result_object(
@@ -206,18 +204,33 @@ class FelineAbilityLessonObjectStateTests(
             result
         )
 
-        boundary = (
+        audit = (
             self.resolver
             .history[-1]
         )
 
-        boundary[
-            "reason"
-        ] = "changed"
+        self.assertIsInstance(
+            audit,
+            FelineAbilityLessonDeniedResult,
+        )
+
+        self.assertIsNot(
+            audit,
+            result,
+        )
 
         self.assertEqual(
-            result.reason,
+            audit.reason,
             "teacher_has_not_learned_to_teach",
+        )
+
+        self.assert_not_mapping(
+            audit
+        )
+
+        self.assertIs(
+            self.universe.quantum_events[-1],
+            audit,
         )
 
     def test_forbidden_teacher_creation_returns_cronenberg_object(

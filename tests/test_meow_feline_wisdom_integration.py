@@ -141,9 +141,9 @@ class MeowFelineWisdomIntegrationTests(unittest.TestCase):
         FelineWisdom.add_awareness(
             cat=self.mother,
             knowledge_name=(
-                'open_human_door'
+                "open_human_door"
             ),
-            domain='feline',
+            domain="feline",
         )
 
         result = (
@@ -159,6 +159,7 @@ class MeowFelineWisdomIntegrationTests(unittest.TestCase):
             .feline_wisdom
             .transmission_history[-1]
         )
+
         student_event = (
             self.kitten
             .feline_wisdom
@@ -186,11 +187,11 @@ class MeowFelineWisdomIntegrationTests(unittest.TestCase):
         )
 
         for mapping_method in (
-            'get',
-            'keys',
-            'items',
-            'values',
-            'to_dict',
+            "get",
+            "keys",
+            "items",
+            "values",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
@@ -203,23 +204,8 @@ class MeowFelineWisdomIntegrationTests(unittest.TestCase):
             TypeError
         ):
             _ = result[
-                'student'
+                "student"
             ]
-
-        boundary = (
-            self.abilities.history[-1]
-        )
-
-        boundary[
-            'transferred'
-        ].append(
-            'changed'
-        )
-
-        self.assertEqual(
-            teacher_event.transferred_count,
-            1,
-        )
 
         audit = (
             self.abilities.history[-1]
@@ -227,14 +213,36 @@ class MeowFelineWisdomIntegrationTests(unittest.TestCase):
 
         self.assertIsInstance(
             audit,
-            dict,
+            FelineAbilityAwarenessTransmissionEvent,
+        )
+
+        self.assertIsNot(
+            audit,
+            result,
         )
 
         self.assertEqual(
-            audit[
-                'transferred_count'
-            ],
+            audit.transferred_count,
             1,
+        )
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+            "to_dict",
+        ):
+            self.assertFalse(
+                hasattr(
+                    audit,
+                    mapping_method,
+                )
+            )
+
+        self.assertIs(
+            self.universe.quantum_events[-1],
+            audit,
         )
 
     def test_ability_awareness_denial_uses_result_object(
@@ -263,15 +271,15 @@ class MeowFelineWisdomIntegrationTests(unittest.TestCase):
 
         self.assertEqual(
             result.reason,
-            'teacher_cannot_transmit_meow',
+            "teacher_cannot_transmit_meow",
         )
 
         for mapping_method in (
-            'get',
-            'keys',
-            'items',
-            'values',
-            'to_dict',
+            "get",
+            "keys",
+            "items",
+            "values",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
@@ -284,7 +292,7 @@ class MeowFelineWisdomIntegrationTests(unittest.TestCase):
             TypeError
         ):
             _ = result[
-                'reason'
+                "reason"
             ]
 
         audit = (
@@ -293,23 +301,36 @@ class MeowFelineWisdomIntegrationTests(unittest.TestCase):
 
         self.assertIsInstance(
             audit,
-            dict,
+            FelineAbilityAwarenessTransmissionDeniedResult,
+        )
+
+        self.assertIsNot(
+            audit,
+            result,
         )
 
         self.assertEqual(
-            audit[
-                'reason'
-            ],
-            'teacher_cannot_transmit_meow',
+            audit.reason,
+            "teacher_cannot_transmit_meow",
         )
 
-        audit[
-            'reason'
-        ] = 'changed'
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+            "to_dict",
+        ):
+            self.assertFalse(
+                hasattr(
+                    audit,
+                    mapping_method,
+                )
+            )
 
-        self.assertEqual(
-            result.reason,
-            'teacher_cannot_transmit_meow',
+        self.assertIs(
+            self.universe.quantum_events[-1],
+            audit,
         )
 
     def test_unrelated_natural_cat_cannot_teach_meow(self):
