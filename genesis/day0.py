@@ -16,6 +16,28 @@ from idea_entities.eternal_fire_potential_state import (
 )
 
 
+def _snapshot_day0_history_value(value):
+    to_dict = getattr(value, "to_dict", None)
+
+    if callable(to_dict):
+        return deepcopy(to_dict())
+
+    return deepcopy(value)
+
+
+def _snapshot_genesis_day0_state(state):
+    return {
+        "name": state.name,
+        "status": state.status,
+        "physical_time_exists": state.physical_time_exists,
+        "physical_space_exists": state.physical_space_exists,
+        "history": [
+            _snapshot_day0_history_value(item)
+            for item in state.history
+        ],
+    }
+
+
 class GenesisDay0:
     """
     First canonical sequence inside Idea Universe.
@@ -225,9 +247,8 @@ class GenesisDay0:
     def public_state(
         self
     ):
-        state_snapshot = (
+        state_snapshot = _snapshot_genesis_day0_state(
             self.genesis_day0_state
-            .to_dict()
         )
 
         return {

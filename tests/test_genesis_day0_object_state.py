@@ -269,14 +269,33 @@ class GenesisDay0ObjectStateTests(unittest.TestCase):
 
         self.assertEqual(len(day0.history), 1)
 
-    def test_to_dict_is_deeply_detached(self):
-        state = GenesisDay0State()
-        state.history.append({"name": "event"})
+    def test_public_boundary_is_detached_from_object_history(self):
+        _, _, day0 = self._day0()
+        event = day0.verify_principles()
+        state = day0.genesis_day0_state
 
-        snapshot = state.to_dict()
-        snapshot["history"][0]["name"] = "changed"
+        self.assertFalse(hasattr(state, "to_dict"))
+        self.assertIs(state.history[0], event)
 
-        self.assertEqual(state.history[0]["name"], "event")
+        snapshot = day0.public_state
+
+        snapshot["history"][0][
+            "participants"
+        ].append("changed")
+
+        snapshot["genesis_day0_state"]["history"][0][
+            "participants"
+        ].append("changed_again")
+
+        self.assertIs(state.history[0], event)
+        self.assertEqual(
+            event.participants,
+            (
+                "serpent",
+                "lilith",
+                "pazuzu_masculine_principle",
+            ),
+        )
 
 
 if __name__ == "__main__":
