@@ -694,7 +694,7 @@ class MeetingPlace:
                 event
             )
 
-            return event.to_dict()
+            return event
 
         self.bartender.serve_without_order(
             cat_name,
@@ -771,7 +771,7 @@ class MeetingPlace:
             event
         )
 
-        return event.to_dict()
+        return event
 
     def welcome_cat_d20(
         self,

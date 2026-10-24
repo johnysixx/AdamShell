@@ -305,7 +305,7 @@ class QuantumBoxCatBarMeowTests(unittest.TestCase):
         self
     ):
         self.bar.fridge.items.pop(
-            'milk'
+            "milk"
         )
 
         result = (
@@ -315,26 +315,27 @@ class QuantumBoxCatBarMeowTests(unittest.TestCase):
             )
         )
 
+        self.assertIsInstance(
+            result,
+            CatMilkServiceFailedEvent,
+        )
+
         self.assertFalse(
-            result[
-                'served'
-            ]
+            result.served
         )
 
         self.assertEqual(
-            result[
-                'reason'
-            ],
-            'milk_missing',
+            result.reason,
+            "milk_missing",
         )
 
         event = (
             self.bar.events[-1]
         )
 
-        self.assertIsInstance(
+        self.assertIs(
+            result,
             event,
-            CatMilkServiceFailedEvent,
         )
 
         self.assertEqual(
@@ -342,22 +343,25 @@ class QuantumBoxCatBarMeowTests(unittest.TestCase):
             self.cat.name,
         )
 
-        self.assertFalse(
-            event.served
-        )
-
-        self.assertFalse(
-            hasattr(
-                event,
-                'get',
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+            "to_dict",
+        ):
+            self.assertFalse(
+                hasattr(
+                    event,
+                    mapping_method,
+                )
             )
-        )
 
         with self.assertRaises(
             TypeError
         ):
             _ = event[
-                'reason'
+                "reason"
             ]
 
 

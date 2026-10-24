@@ -105,7 +105,7 @@ class KittenGrowthHistoryObjectStateTests(
         with self.assertRaises(TypeError):
             _ = state_event["source"]
 
-    def test_growth_metadata_is_read_only_and_bar_snapshot_is_detached(
+    def test_growth_metadata_is_read_only_and_bar_event_stays_object_state(
         self
     ):
         result = (
@@ -130,7 +130,9 @@ class KittenGrowthHistoryObjectStateTests(
             0.5,
         )
 
-        with self.assertRaises(TypeError):
+        with self.assertRaises(
+            TypeError
+        ):
             event.metadata[
                 "portion_mass"
             ] = 9.0
@@ -151,17 +153,31 @@ class KittenGrowthHistoryObjectStateTests(
             )
         )
 
-        boundary = (
-            bar_event.to_dict()
+        self.assertIs(
+            bar_event.growth,
+            result,
         )
 
-        boundary[
-            "growth"
-        ][
-            "metadata"
-        ][
-            "portion_mass"
-        ] = 9.0
+        self.assertEqual(
+            bar_event.growth.metadata[
+                "portion_mass"
+            ],
+            0.5,
+        )
+
+        self.assertFalse(
+            hasattr(
+                bar_event,
+                "to_dict",
+            )
+        )
+
+        with self.assertRaises(
+            TypeError
+        ):
+            bar_event.growth.metadata[
+                "portion_mass"
+            ] = 9.0
 
         self.assertEqual(
             event.metadata[

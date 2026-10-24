@@ -71,18 +71,6 @@ class CatBartenderMeowExchangeEvent:
             int(self.tick),
         )
 
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "cat": self.cat,
-            "cat_meow":
-                self.cat_meow.to_dict(),
-            "bartender_meow":
-                self.bartender_meow.to_dict(),
-            "tick": self.tick,
-        }
-
-
 @dataclass(slots=True, frozen=True)
 class CatMilkServiceFailedEvent:
     cat: str
@@ -110,15 +98,6 @@ class CatMilkServiceFailedEvent:
             "reason",
             str(self.reason),
         )
-
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "cat": self.cat,
-            "reason": self.reason,
-            "served": self.served,
-        }
-
 
 @dataclass(slots=True, frozen=True)
 class CatDrankMilkAtBarEvent:
@@ -192,95 +171,3 @@ class CatDrankMilkAtBarEvent:
             "tick",
             int(self.tick),
         )
-
-    def to_dict(self):
-
-        def growth_snapshot(
-            growth,
-        ):
-            if isinstance(
-                growth,
-                KittenGrowthAppliedEvent,
-            ):
-                return {
-                    "name": growth.name,
-                    "kitten": growth.kitten,
-                    "source": growth.source,
-                    "day": growth.day,
-                    "previous_size": (
-                        growth.previous_size
-                    ),
-                    "size_gain": (
-                        growth.size_gain
-                    ),
-                    "size": growth.size,
-                    "previous_strength": (
-                        growth.previous_strength
-                    ),
-                    "strength_gain": (
-                        growth.strength_gain
-                    ),
-                    "strength": (
-                        growth.strength
-                    ),
-                    "cronenberg_mass": (
-                        growth.cronenberg_mass
-                    ),
-                    "metadata": deepcopy(
-                        dict(
-                            growth.metadata
-                        )
-                    ),
-                    "grew": growth.grew,
-                }
-
-            if isinstance(
-                growth,
-                KittenGrowthAlreadyProcessedEvent,
-            ):
-                return {
-                    "name": growth.name,
-                    "kitten": growth.kitten,
-                    "source": growth.source,
-                    "day": growth.day,
-                    "amount_not_absorbed": (
-                        growth.amount_not_absorbed
-                    ),
-                    "stored_energy": (
-                        growth.stored_energy
-                    ),
-                    "energy_conserved": (
-                        growth.energy_conserved
-                    ),
-                    "grew": growth.grew,
-                }
-
-            raise TypeError(
-                "Cat milk growth boundary "
-                "requires a kitten growth event."
-            )
-
-        result = {
-            "name": self.name,
-            "cat": self.cat,
-            "milk": self.milk,
-            "bowl": self.bowl,
-            "growth": (
-                None
-                if self.growth is None
-                else growth_snapshot(
-                    self.growth
-                )
-            ),
-            "served": self.served,
-            "tick": self.tick,
-        }
-
-        if self.distribution is not None:
-            # Preserve the existing public boundary:
-            # distribution already returned as a typed object.
-            result["distribution"] = (
-                self.distribution
-            )
-
-        return result
