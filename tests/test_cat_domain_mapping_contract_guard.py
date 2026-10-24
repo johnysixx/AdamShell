@@ -18,7 +18,6 @@ CATS_ROOT = (
 BOUNDARY_MAPPING_ALLOWLIST = {
     'cats/feline_ability_resolver.py::FelineAbilityResolver._record',
     'cats/cat_door.py::CatDoor.public_state',
-    'cats/cat_learning_state.py::CatLearningState.to_dict',
     'cats/cat_perception.py::CatEnvironmentObservedEvent.to_dict',
     'cats/cat_reproduction_state.py::CatReproductionState.to_dict',
     'cats/cats.py::Cats.public_state',

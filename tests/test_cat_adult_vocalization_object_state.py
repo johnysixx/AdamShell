@@ -315,7 +315,7 @@ class CatAdultVocalizationObjectStateTests(
                     'name'
                 ]
 
-    def test_learning_snapshot_serializes_lesson_object(
+    def test_learning_stores_lesson_object(
         self
     ):
         self.resolver.teach(
@@ -331,28 +331,23 @@ class CatAdultVocalizationObjectStateTests(
             .lessons[-1]
         )
 
-        snapshot = (
-            self.kitten
-            .learning
-            .to_dict()
-        )
-
-        lesson_snapshot = (
-            snapshot['lessons'][-1]
-        )
-
-        self.assertEqual(
-            lesson_snapshot['vocalization'],
-            'food_request',
-        )
-
-        lesson_snapshot[
-            'vocalization'
-        ] = 'changed'
-
         self.assertEqual(
             event.vocalization,
             'food_request',
+        )
+
+        self.assertFalse(
+            hasattr(
+                self.kitten.learning,
+                'to_dict',
+            )
+        )
+
+        self.assertFalse(
+            hasattr(
+                event,
+                'to_dict',
+            )
         )
 
     def test_legacy_mapping_state_is_rejected(

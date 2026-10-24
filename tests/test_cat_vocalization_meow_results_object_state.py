@@ -363,7 +363,7 @@ class CatVocalizationMeowResultsObjectStateTests(
             audit
         )
 
-    def test_learning_snapshot_serializes_pure_vocalization_lesson(
+    def test_learning_stores_pure_vocalization_lesson(
         self
     ):
         event = (
@@ -379,33 +379,29 @@ class CatVocalizationMeowResultsObjectStateTests(
             event
         )
 
-        snapshot = (
+        lesson = (
             self.kitten
             .learning
-            .to_dict()
+            .lessons[-1]
         )
 
-        lesson = (
-            snapshot[
-                "lessons"
-            ][
-                -1
-            ]
-        )
-
-        self.assertIsInstance(
-            lesson,
-            dict,
+        self.assert_object_only(
+            lesson
         )
 
         self.assertEqual(
-            lesson[
-                "vocalization"
-            ],
+            lesson.vocalization,
             "food_request",
         )
 
-    def test_learning_snapshot_serializes_pure_meow_lesson(
+        self.assertFalse(
+            hasattr(
+                self.kitten.learning,
+                "to_dict",
+            )
+        )
+
+    def test_learning_stores_pure_meow_lesson(
         self
     ):
         self.complete_required_experiences()
@@ -419,9 +415,7 @@ class CatVocalizationMeowResultsObjectStateTests(
         event = (
             self.kitten
             .learning
-            .lessons[
-                -1
-            ]
+            .lessons[-1]
         )
 
         self.assertIsInstance(
@@ -433,37 +427,16 @@ class CatVocalizationMeowResultsObjectStateTests(
             event
         )
 
-        snapshot = (
-            self.kitten
-            .learning
-            .to_dict()
-        )
-
-        lesson = (
-            snapshot[
-                "lessons"
-            ][
-                -1
-            ]
-        )
-
-        self.assertIsInstance(
-            lesson,
-            dict,
-        )
-
         self.assertEqual(
-            lesson[
-                "name"
-            ],
+            event.name,
             "mother_spoke_meow",
         )
 
-        self.assertIsInstance(
-            lesson[
-                "knowledge"
-            ],
-            list,
+        self.assertFalse(
+            hasattr(
+                self.kitten.learning,
+                "to_dict",
+            )
         )
 
 

@@ -232,7 +232,7 @@ class MeowKnowledgeResolverTests(unittest.TestCase):
                     'name'
                 ]
 
-    def test_learning_snapshot_serializes_meow_lesson_object(
+    def test_learning_stores_meow_lesson_object(
         self
     ):
         self.complete_required_experiences()
@@ -249,28 +249,23 @@ class MeowKnowledgeResolverTests(unittest.TestCase):
             .lessons[-1]
         )
 
-        snapshot = (
-            self.kitten
-            .learning
-            .to_dict()
-        )
-
-        lesson_snapshot = (
-            snapshot['lessons'][-1]
-        )
-
-        self.assertEqual(
-            lesson_snapshot['name'],
-            'mother_spoke_meow',
-        )
-
-        lesson_snapshot[
-            'name'
-        ] = 'changed'
-
         self.assertEqual(
             lesson.name,
             'mother_spoke_meow',
+        )
+
+        self.assertFalse(
+            hasattr(
+                lesson,
+                'to_dict',
+            )
+        )
+
+        self.assertFalse(
+            hasattr(
+                self.kitten.learning,
+                'to_dict',
+            )
         )
 
     def test_meow_cannot_be_transmitted_twice(self):

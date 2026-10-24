@@ -28,6 +28,7 @@ class CatLearningObjectStateTests(
             "__getitem__",
             "__setitem__",
             "__contains__",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
@@ -235,7 +236,7 @@ class CatLearningObjectStateTests(
             0,
         )
 
-    def test_learning_boundary_keeps_nested_state_object_only(
+    def test_learning_state_keeps_nested_state_object_only(
         self
     ):
         learning = (
@@ -245,12 +246,9 @@ class CatLearningObjectStateTests(
             )
         )
 
-        learning.lessons.append({
-            "name": "lesson",
-            "details": [
-                "original"
-            ],
-        })
+        self._assert_object_only(
+            learning
+        )
 
         nested_objects = (
             learning.meow_knowledge,
@@ -261,72 +259,18 @@ class CatLearningObjectStateTests(
         )
 
         for obj in nested_objects:
-            for mapping_method in (
-                "get",
-                "keys",
-                "items",
-                "values",
-                "to_dict",
+            with self.subTest(
+                obj=type(obj).__name__
             ):
-                self.assertFalse(
-                    hasattr(
-                        obj,
-                        mapping_method,
-                    )
+                self._assert_object_only(
+                    obj
                 )
 
-        snapshot = (
-            learning.to_dict()
-        )
-
-        self.assertIsInstance(
-            snapshot["meow_knowledge"],
-            dict,
-        )
-
-        self.assertIsInstance(
-            snapshot["skills"]["hunting"],
-            dict,
-        )
-
-        self.assertIsInstance(
-            snapshot["family_knowledge"],
-            dict,
-        )
-
-        snapshot[
-            "meow_knowledge"
-        ][
-            "contains"
-        ].append(
-            "changed"
-        )
-
-        snapshot[
-            "skills"
-        ][
-            "hunting"
-        ][
-            "progress"
-        ] = 1.0
-
-        snapshot[
-            "family_knowledge"
-        ][
-            "parental_lessons"
-        ] = 99
-
-        snapshot[
-            "lessons"
-        ][0][
-            "details"
-        ].append(
-            "changed"
-        )
-
-        self.assertNotIn(
-            "changed",
-            learning.meow_knowledge.contains,
+        self.assertEqual(
+            tuple(
+                learning.meow_knowledge.contains
+            ),
+            CatLearning.MEOW_CONTENTS,
         )
 
         self.assertEqual(
@@ -343,13 +287,6 @@ class CatLearningObjectStateTests(
             .family_knowledge
             .parental_lessons,
             0,
-        )
-
-        self.assertEqual(
-            learning.lessons[0]["details"],
-            [
-                "original"
-            ],
         )
 
 
