@@ -45,6 +45,7 @@ class CatD20GibManifestationObjectStateTests(
             "setdefault",
             "__getitem__",
             "__setitem__",
+            "to_dict",
         ):
             self.assertFalse(
                 hasattr(
@@ -268,13 +269,12 @@ class CatD20GibManifestationObjectStateTests(
             "cat",
         )
 
-        snapshot = result.to_dict()
-
-        snapshot[
-            "profile"
-        ][
-            "fur_length"
-        ] = "changed"
+        self.assertFalse(
+            hasattr(
+                result,
+                "to_dict",
+            )
+        )
 
         self.assertEqual(
             result.profile.fur_length,

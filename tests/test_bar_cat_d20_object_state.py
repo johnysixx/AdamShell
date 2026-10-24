@@ -438,13 +438,12 @@ class BarCatD20ObjectStateTests(
             quantum,
         )
 
-        snapshot = result.to_dict()
-
-        snapshot[
-            "profile"
-        ][
-            "fur_length"
-        ] = "changed"
+        self.assertFalse(
+            hasattr(
+                result,
+                "to_dict",
+            )
+        )
 
         self.assertEqual(
             result.profile.fur_length,

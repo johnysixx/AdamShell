@@ -26,14 +26,6 @@ class CatD20GibManifestationFailedResult:
             str(self.reason),
         )
 
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "reason": self.reason,
-            "created": self.created,
-        }
-
-
 @dataclass(slots=True, frozen=True)
 class CatD20GibAlreadyExistsResult:
     cat: object
@@ -47,18 +39,6 @@ class CatD20GibAlreadyExistsResult:
         default=False,
         init=False,
     )
-
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "cat": getattr(
-                self.cat,
-                "name",
-                None,
-            ),
-            "created": self.created,
-        }
-
 
 @dataclass(slots=True, frozen=True)
 class CatD20GibManifestationResult:
@@ -111,6 +91,3 @@ class CatD20GibManifestationResult:
     @property
     def tick(self):
         return self.event.tick
-
-    def to_dict(self):
-        return self.event.to_dict()
