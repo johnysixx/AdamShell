@@ -152,7 +152,7 @@ class Molecules:
         return self.result
 
     def ensure_periodic_table(self):
-        if not self.universe.world.get("elements_by_atomic_number"):
+        if not self.periodic_table.elements:
             self.periodic_table.build_known_table()
 
         self.molecule_state.periodic_table_available = True
@@ -205,10 +205,13 @@ class Molecules:
                 "components must be an element-name-to-count map"
             )
 
-        chemical_elements = self.universe.world.get(
-            "chemical_elements",
-            {},
-        )
+        if not self.periodic_table.elements:
+            self.ensure_periodic_table()
+
+        chemical_elements = {
+            element.name: element
+            for element in self.periodic_table.elements.values()
+        }
         resolved_components = {}
 
         for element_name, count in components.items():

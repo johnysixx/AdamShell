@@ -101,7 +101,7 @@ class Atoms:
         return self.result
 
     def ensure_periodic_table(self):
-        if not self.universe.world.get("elements_by_atomic_number"):
+        if not self.periodic_table.elements:
             self.periodic_table.build_known_table()
 
         self.atom_state.periodic_table_available = True
