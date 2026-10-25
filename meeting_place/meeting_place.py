@@ -21,6 +21,9 @@ from meeting_place.bar_energy_entropy_service_state import (
     BarEnergyDrinkServiceResult,
     BarEntropyDrinkServiceResult,
 )
+from meeting_place.bar_basic_drink_service_state import (
+    BarBasicDrinkServiceResult,
+)
 from meeting_place.bar_basic_drinks_on_tab_state import (
     BarBasicDrinksOnTabResult,
 )
@@ -1785,7 +1788,11 @@ class MeetingPlace:
         entity_name = self._get_entity_name(entity)
         receipt = self.bar_counter.cash_register.print_receipt(entity=entity, drink=drink, payment=payment)
         self.emit_event(f'{entity_name} drinks {drink_name}')
-        return {'drink': drink, 'payment': payment, 'receipt': receipt}
+        return BarBasicDrinkServiceResult(
+            drink=drink,
+            payment=payment,
+            receipt=receipt,
+        )
 
     def mix_basic_drink(self, drink_name):
         recipe = self.how_to_mix_drinks.recipes.get(drink_name)

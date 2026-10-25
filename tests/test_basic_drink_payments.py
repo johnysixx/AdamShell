@@ -59,12 +59,12 @@ class BasicDrinkPaymentTests(unittest.TestCase):
         before = meeting_place.energy_reservoir.energy_j
         result = meeting_place.serve_basic_drink(entity=entity, drink_name='rum')
         after = meeting_place.energy_reservoir.energy_j
-        self.assertEqual(result['drink'].name, 'rum')
-        self.assertIsInstance(result['payment'], BarPaymentState)
-        self.assertGreater(result['payment'].bar_energy_j, 0.0)
-        self.assertEqual(after - before, result['payment'].bar_energy_j)
-        self.assertEqual(result['receipt'].payment, result['payment'])
-        self.assertIsNot(result['receipt'].payment, result['payment'])
+        self.assertEqual(result.drink.name, 'rum')
+        self.assertIsInstance(result.payment, BarPaymentState)
+        self.assertGreater(result.payment.bar_energy_j, 0.0)
+        self.assertEqual(after - before, result.payment.bar_energy_j)
+        self.assertEqual(result.receipt.payment, result.payment)
+        self.assertIsNot(result.receipt.payment, result.payment)
 
     def test_god_receives_free_drink_note_from_cash_register(self):
         from universe.universe import Universe
@@ -76,7 +76,7 @@ class BasicDrinkPaymentTests(unittest.TestCase):
         meeting_place.refresh_basic_drinks()
         god = SocialEntity.from_mapping({'name': 'god', 'type': 'god', 'existence_pct': 100.0, 'energy_j': 10.0})
         result = meeting_place.serve_basic_drink(entity=god, drink_name='rum')
-        receipt = result['receipt']
+        receipt = result.receipt
         self.assertEqual(receipt.receipt_kind, 'god_free_drink_note')
         self.assertEqual(receipt.message, 'BOHOV? ZDE PIJ? ZDARMA.')
         self.assertEqual(receipt.guest, 'god')
