@@ -941,12 +941,22 @@ class Universe:
     def _tick_aroma_residues(self):
         for box in getattr(self, 'quantum_boxes', []):
             AromaResidue.decay(box, ticks=1)
-        cats_world = self.world.get('cats', {})
-        if isinstance(cats_world, dict):
-            cats = cats_world.get('cats', [])
-        else:
-            cats = []
-        for cat in cats:
+        cats_layer = getattr(
+            self,
+            "cats_layer",
+            None,
+        )
+
+        if cats_layer is None:
+            return
+
+        if not isinstance(cats_layer, Cats):
+            raise TypeError(
+                "Universe cats layer must use "
+                "the Cats domain object."
+            )
+
+        for cat in cats_layer.cats:
             AromaResidue.decay(cat, ticks=1)
 
     def _run_tick_operation(
