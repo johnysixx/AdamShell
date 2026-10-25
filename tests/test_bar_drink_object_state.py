@@ -8,6 +8,9 @@ from meeting_place.bar_objects import (
     BarTabItem,
 )
 from meeting_place.bar_receipt_state import BarReceiptState
+from meeting_place.bar_basic_drinks_on_tab_state import (
+    BarBasicDrinksOnTabResult,
+)
 from meeting_place.meeting_place import MeetingPlace
 from multiverse import UniverseRegistry
 from universe.universe import Universe
@@ -32,15 +35,26 @@ class BarDrinkObjectStateTests(unittest.TestCase):
             drink_names=["wine", "beer"],
         )
 
+        self.assertIsInstance(
+            result,
+            BarBasicDrinksOnTabResult,
+        )
+        self.assertFalse(hasattr(result, "__getitem__"))
+        self.assertIsNone(result.payment)
+        self.assertEqual(result.tab_status, "open")
+
+        with self.assertRaises(TypeError):
+            _ = result["drinks"]
+
         self.assertTrue(
             all(
                 isinstance(drink, BarDrink)
-                for drink in result["drinks"]
+                for drink in result.drinks
             )
         )
 
         self.assertEqual(
-            [drink.name for drink in result["drinks"]],
+            [drink.name for drink in result.drinks],
             ["wine", "beer"],
         )
 
@@ -78,7 +92,7 @@ class BarDrinkObjectStateTests(unittest.TestCase):
             drink_names=["wine"],
         )
 
-        receipt = result["receipt"]
+        receipt = result.receipt
 
         self.assertIsInstance(
             receipt,

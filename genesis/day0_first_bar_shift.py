@@ -448,7 +448,7 @@ class Day0FirstBarShift:
                 'Serpent does not exist yet.'
             )
 
-        boundary = (
+        service = (
             self.meeting_place
             .serve_basic_drinks_on_tab(
                 entity=self.serpent,
@@ -465,17 +465,17 @@ class Day0FirstBarShift:
                 drinks=tuple(
                     drink.name
                     for drink
-                    in boundary['drinks']
+                    in service.drinks
                 ),
             )
         )
 
-        result = (
-            SerpentFirstDrinksServiceResult
-            .from_mapping(
-                boundary,
-                event,
-            )
+        result = SerpentFirstDrinksServiceResult(
+            drinks=service.drinks,
+            receipt=service.receipt,
+            payment=service.payment,
+            tab_status=service.tab_status,
+            event=event,
         )
 
         self.serpent.bar_state = (

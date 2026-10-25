@@ -17,6 +17,9 @@ from meeting_place.drink_recipe_status import (
 from meeting_place.bar_incident_state import (
     BarIncidentState,
 )
+from meeting_place.bar_basic_drinks_on_tab_state import (
+    BarBasicDrinksOnTabResult,
+)
 from meeting_place.bar_objects import (
     BarDrink,
     BarIngredientStock,
@@ -1738,7 +1741,12 @@ class MeetingPlace:
         entity_name = self._get_entity_name(entity)
         event = {'name': 'bar_order_served_on_open_tab', 'guest': entity_name, 'drinks': [drink.name for drink in drinks], 'receipt_number': receipt.receipt_number, 'paid': False}
         self.emit_event(event)
-        return {'drinks': drinks, 'receipt': receipt, 'payment': None, 'tab_status': 'open'}
+        return BarBasicDrinksOnTabResult(
+            drinks=tuple(drinks),
+            receipt=receipt,
+            payment=None,
+            tab_status="open",
+        )
 
     def serve_basic_drink(self, entity, drink_name):
         self.refresh_basic_drinks()

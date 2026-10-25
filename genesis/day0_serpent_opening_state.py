@@ -159,22 +159,6 @@ class SerpentFirstDrinksServiceResult:
             ),
         )
 
-    @classmethod
-    def from_mapping(
-        cls,
-        values,
-        event,
-    ):
-        return cls(
-            drinks=tuple(
-                values["drinks"]
-            ),
-            receipt=values["receipt"],
-            payment=values["payment"],
-            tab_status=values["tab_status"],
-            event=event,
-        )
-
 
 @dataclass(slots=True, frozen=True)
 class SerpentProposesBetEvent:

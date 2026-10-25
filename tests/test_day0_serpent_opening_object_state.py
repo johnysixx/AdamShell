@@ -188,6 +188,13 @@ class Day0SerpentOpeningObjectStateTests(
             SerpentOrdersFirstDrinksEvent,
         )
 
+        self.assertFalse(
+            hasattr(
+                SerpentFirstDrinksServiceResult,
+                "from_mapping",
+            )
+        )
+
         self._assert_object_only(
             result,
             "drinks",
