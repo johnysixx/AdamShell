@@ -11,11 +11,20 @@ from universe.stellar_system_objects import (
     StellarSystem,
 )
 from universe.universe import Universe
+from universe.stellar_systems import StellarSystems
 
 
 class PlanetsProcessStateObjectStateTests(
     unittest.TestCase
 ):
+
+    def _wire_canonical_system(self, universe):
+        if "solar_system" in universe.world:
+            systems_layer = StellarSystems(universe)
+            systems_layer.systems.append(
+                universe.world["solar_system"]
+            )
+
 
     def _solar_system(
         self,
@@ -101,6 +110,8 @@ class PlanetsProcessStateObjectStateTests(
                 can_form_planets=False,
             )
         )
+        self._wire_canonical_system(universe)
+
         process = Planets(universe)
 
         result = process.form_planets()
@@ -119,6 +130,8 @@ class PlanetsProcessStateObjectStateTests(
         universe.world["solar_system"] = (
             self._solar_system()
         )
+        self._wire_canonical_system(universe)
+
         process = Planets(universe)
 
         result = process.form_planets()

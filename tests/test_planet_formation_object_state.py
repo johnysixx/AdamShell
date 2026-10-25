@@ -21,11 +21,20 @@ from universe.stellar_system_objects import (
     StellarSystem,
 )
 from universe.universe import Universe
+from universe.stellar_systems import StellarSystems
 
 
 class PlanetFormationObjectStateTests(
     unittest.TestCase
 ):
+
+    def _wire_canonical_system(self, universe):
+        if "solar_system" in universe.world:
+            systems_layer = StellarSystems(universe)
+            systems_layer.systems.append(
+                universe.world["solar_system"]
+            )
+
 
     def _assert_object_only(
         self,
@@ -106,6 +115,8 @@ class PlanetFormationObjectStateTests(
                 "iron",
             )
         )
+
+        self._wire_canonical_system(universe)
 
         process = Planets(universe)
         result = process.form_planets()
@@ -279,6 +290,8 @@ class PlanetFormationObjectStateTests(
         universe.world["solar_system"] = self._solar_system(
             ("hydrogen",)
         )
+        self._wire_canonical_system(universe)
+
         process = Planets(universe)
 
         process.form_planets()
@@ -308,6 +321,8 @@ class PlanetFormationObjectStateTests(
         self
     ):
         universe = Universe()
+        self._wire_canonical_system(universe)
+
         process = Planets(universe)
 
         result = process.form_planets()
@@ -331,6 +346,8 @@ class PlanetFormationObjectStateTests(
             (),
             can_form_planets=False,
         )
+        self._wire_canonical_system(universe)
+
         process = Planets(universe)
 
         result = process.form_planets()
@@ -355,6 +372,8 @@ class PlanetFormationObjectStateTests(
             "name": "legacy_solar_system",
             "protoplanetary_disk": {},
         }
+        self._wire_canonical_system(universe)
+
         process = Planets(universe)
 
         with self.assertRaises(TypeError):
@@ -390,6 +409,8 @@ class PlanetFormationObjectStateTests(
         universe.world["solar_system"] = self._solar_system(
             ("iron",)
         )
+        self._wire_canonical_system(universe)
+
         process = Planets(universe)
 
         def broken_history():

@@ -9,9 +9,18 @@ from universe.stellar_system_objects import (
     StellarSystem,
 )
 from universe.universe import Universe
+from universe.stellar_systems import StellarSystems
 
 
 class PlanetDomainObjectStateTests(unittest.TestCase):
+
+    def _wire_canonical_system(self, universe):
+        if "solar_system" in universe.world:
+            systems_layer = StellarSystems(universe)
+            systems_layer.systems.append(
+                universe.world["solar_system"]
+            )
+
 
     def _assert_object_only(self, value, key):
         for mapping_method in (
@@ -81,6 +90,8 @@ class PlanetDomainObjectStateTests(unittest.TestCase):
                 "iron",
             )
         )
+        self._wire_canonical_system(universe)
+
         process = Planets(universe)
         result = process.form_planets()
         return universe, process, result
@@ -132,6 +143,8 @@ class PlanetDomainObjectStateTests(unittest.TestCase):
         universe.world["solar_system"] = self._solar_system(
             ("hydrogen",)
         )
+        self._wire_canonical_system(universe)
+
         process = Planets(universe)
 
         process.form_planets()

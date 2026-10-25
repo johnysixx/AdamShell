@@ -55,6 +55,8 @@ class Planets:
 
         self.public_state = self._build_public_state()
 
+        self.universe.planets_layer = self
+
     @property
     def state(self):
         return self._state
@@ -102,7 +104,20 @@ class Planets:
         )
 
     def _form_planets_unprotected(self):
-        solar_system = self.universe.world.get("solar_system")
+        systems_layer = getattr(
+            self.universe,
+            "stellar_systems_layer",
+            None,
+        )
+
+        solar_system = (
+            systems_layer.systems[0]
+            if (
+                systems_layer is not None
+                and systems_layer.systems
+            )
+            else None
+        )
 
         if solar_system is None:
             self.state = PlanetsProcessState.FAILED
