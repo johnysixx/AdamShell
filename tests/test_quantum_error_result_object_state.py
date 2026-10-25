@@ -73,6 +73,58 @@ class QuantumErrorResultObjectStateTests(
         with self.assertRaises(TypeError):
             _ = result["error_type"]
 
+    def test_error_snapshot_detaches_cronenberg(
+        self,
+    ):
+        cronenberg = FakeCronenberg()
+
+        boundary = QuantumErrorBoundary(
+            cronenberg_factory=(
+                lambda **kwargs: cronenberg
+            )
+        )
+
+        def broken_operation():
+            raise RuntimeError("snapshot error")
+
+        result = boundary.execute(
+            operation=broken_operation,
+            source_component="test",
+            source_operation="snapshot",
+        )
+
+        self.assertIs(
+            result.cronenberg,
+            cronenberg,
+        )
+
+        self.assertEqual(
+            result.cronenberg_id,
+            "cronenberg_test",
+        )
+
+        snapshot = result.to_dict()
+
+        self.assertEqual(
+            snapshot["error_type"],
+            "RuntimeError",
+        )
+        self.assertEqual(
+            snapshot["cronenberg"],
+            {"id": "cronenberg_test"},
+        )
+
+        snapshot["cronenberg"]["id"] = "changed"
+
+        self.assertEqual(
+            cronenberg.id,
+            "cronenberg_test",
+        )
+        self.assertIs(
+            result.cronenberg,
+            cronenberg,
+        )
+
     def test_successful_operation_is_not_wrapped(
         self,
     ):

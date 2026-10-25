@@ -6,6 +6,9 @@ from quantum.cronenberg_pair_encounter import (
     CronenbergQuantumPairEncounteredEvent,
 )
 from universe.universe import Universe
+from quantum.error_boundary import (
+    QuantumErrorResult,
+)
 from universe.quantum_tick_result_state import (
     UniverseQuantumTickResult,
 )
@@ -303,6 +306,133 @@ class CronenbergPairEncounterResolverHistoryObjectStateTests(
             effect.tick_result.tick,
             1,
         )
+
+    def test_quantum_tick_error_preserves_entity_identity(
+        self,
+    ):
+        cronenberg = FakeCronenberg(
+            "cronenberg_error"
+        )
+
+        error = QuantumErrorResult(
+            error_type="RuntimeError",
+            error_message="quantum failure",
+            cronenberg=cronenberg,
+        )
+
+        class ErrorUniverse:
+            def __init__(self):
+                self.quantum_state = type(
+                    "QuantumState",
+                    (),
+                    {"tick_count": 4},
+                )()
+
+            def tick_quantum(self):
+                return error
+
+        resolver = CronenbergPairEncounterResolver(
+            ErrorUniverse()
+        )
+
+        effect = resolver._quantum_tick()
+
+        self.assertEqual(effect.before_tick, 4)
+        self.assertEqual(effect.after_tick, 4)
+
+        self.assertIs(
+            effect.tick_result,
+            error,
+        )
+        self.assertIs(
+            effect.tick_result.cronenberg,
+            cronenberg,
+        )
+
+        snapshot = effect.to_dict()
+
+        self.assertEqual(
+            snapshot["tick_result"]["cronenberg"],
+            {"id": "cronenberg_error"},
+        )
+
+        snapshot["tick_result"][
+            "cronenberg"
+        ]["id"] = "changed"
+
+        self.assertEqual(
+            cronenberg.id,
+            "cronenberg_error",
+        )
+        self.assertIs(
+            effect.tick_result,
+            error,
+        )
+
+    def test_disabled_quantum_tick_keeps_none(
+        self,
+    ):
+        class DisabledUniverse:
+            def __init__(self):
+                self.quantum_state = type(
+                    "QuantumState",
+                    (),
+                    {"tick_count": 0},
+                )()
+
+            def tick_quantum(self):
+                return None
+
+        resolver = CronenbergPairEncounterResolver(
+            DisabledUniverse()
+        )
+
+        effect = resolver._quantum_tick()
+
+        self.assertEqual(effect.before_tick, 0)
+        self.assertEqual(effect.after_tick, 0)
+        self.assertIsNone(effect.tick_result)
+
+        self.assertIsNone(
+            effect.to_dict()["tick_result"]
+        )
+
+    def test_quantum_tick_result_validates_contract(
+        self,
+    ):
+        for invalid in (
+            {"tick": 1},
+            object(),
+        ):
+            with self.assertRaises(TypeError):
+                CronenbergQuantumTickEffectResult(
+                    before_tick=0,
+                    after_tick=1,
+                    tick_result=invalid,
+                )
+
+        with self.assertRaises(ValueError):
+            CronenbergQuantumTickEffectResult(
+                before_tick=2,
+                after_tick=1,
+                tick_result=None,
+            )
+
+        result = UniverseQuantumTickResult(
+            tick=1,
+            collapse_count=1,
+            fluctuation=0.01,
+            uncertainty=0.005,
+            entropy_delta=0.0005,
+            entropy_total=0.0005,
+        )
+
+        with self.assertRaises(ValueError):
+            CronenbergQuantumTickEffectResult(
+                before_tick=0,
+                after_tick=2,
+                tick_result=result,
+            )
 
     def test_history_rejects_mapping_and_is_deepcopy_safe(
         self

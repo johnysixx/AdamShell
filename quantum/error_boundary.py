@@ -26,12 +26,35 @@ class QuantumErrorResult:
             str(self.error_message),
         )
 
+    @property
+    def cronenberg_id(self):
+        if self.cronenberg is None:
+            return None
+
+        identifier = getattr(
+            self.cronenberg,
+            "id",
+            None,
+        )
+
+        return (
+            None
+            if identifier is None
+            else str(identifier)
+        )
+
     def to_dict(self):
         return {
             "type": self.type,
             "error_type": self.error_type,
             "error_message": self.error_message,
-            "cronenberg": self.cronenberg,
+            "cronenberg": (
+                None
+                if self.cronenberg_id is None
+                else {
+                    "id": self.cronenberg_id,
+                }
+            ),
         }
 
 

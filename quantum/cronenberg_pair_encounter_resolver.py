@@ -4,6 +4,12 @@ from dataclasses import dataclass, field
 from types import MappingProxyType
 
 from universe.logger import UniverseLogger
+from universe.quantum_tick_result_state import (
+    UniverseQuantumTickResult,
+)
+from quantum.error_boundary import (
+    QuantumErrorResult,
+)
 
 
 class _FrozenCronenbergPairList(tuple):
@@ -164,7 +170,56 @@ class CronenbergPairSurvivalResult:
 class CronenbergQuantumTickEffectResult:
     before_tick: int
     after_tick: int
-    tick_result: object
+    tick_result: (
+        UniverseQuantumTickResult
+        | QuantumErrorResult
+        | None
+    )
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "before_tick",
+            int(self.before_tick),
+        )
+        object.__setattr__(
+            self,
+            "after_tick",
+            int(self.after_tick),
+        )
+
+        if self.after_tick < self.before_tick:
+            raise ValueError(
+                "Quantum tick count cannot decrease."
+            )
+
+        if (
+            self.tick_result is not None
+            and not isinstance(
+                self.tick_result,
+                (
+                    UniverseQuantumTickResult,
+                    QuantumErrorResult,
+                ),
+            )
+        ):
+            raise TypeError(
+                "Cronenberg quantum tick requires "
+                "a quantum tick result object."
+            )
+
+        if (
+            isinstance(
+                self.tick_result,
+                UniverseQuantumTickResult,
+            )
+            and self.tick_result.tick
+            != self.after_tick
+        ):
+            raise ValueError(
+                "Quantum tick result must match "
+                "the final tick count."
+            )
 
     def to_dict(self):
         return {
@@ -689,7 +744,7 @@ class CronenbergPairEncounterResolver:
         return CronenbergQuantumTickEffectResult(
             before_tick=before,
             after_tick=after,
-            tick_result=deepcopy(result),
+            tick_result=result,
         )
 
     def _spin_exchange(
