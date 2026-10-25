@@ -10,6 +10,7 @@ from universe.planetary_material_objects import (
     PlanetaryMaterial,
 )
 from universe.universe import Universe
+from universe.planetary_materials import PlanetaryMaterials
 
 
 class BiochemicalFoundationsProcessStateObjectStateTests(
@@ -79,6 +80,11 @@ class BiochemicalFoundationsProcessStateObjectStateTests(
         universe.world[
             "available_planetary_materials"
         ] = self._materials()
+
+        materials_layer = PlanetaryMaterials(universe)
+        materials_layer.available_materials = (
+            universe.world["available_planetary_materials"]
+        )
 
         process = BiochemicalFoundations(
             universe

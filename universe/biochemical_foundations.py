@@ -32,6 +32,8 @@ class BiochemicalFoundations:
         self.result = None
         self.public_state = self._build_public_state()
 
+        self.universe.biochemical_foundations_layer = self
+
     @property
     def state(self):
         return self._state
@@ -78,7 +80,17 @@ class BiochemicalFoundations:
         )
 
     def _form_biochemical_foundations_unprotected(self):
-        materials = self.universe.world.get("available_planetary_materials", {})
+        materials_layer = getattr(
+            self.universe,
+            "planetary_materials_layer",
+            None,
+        )
+
+        materials = (
+            materials_layer.available_materials
+            if materials_layer is not None
+            else {}
+        )
 
         if "water" not in materials or "organic_molecules" not in materials:
             self.state = (

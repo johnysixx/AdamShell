@@ -19,6 +19,7 @@ from universe.planetary_material_objects import (
     PlanetaryMaterial,
 )
 from universe.universe import Universe
+from universe.planetary_materials import PlanetaryMaterials
 
 
 class BiochemicalFoundationObjectStateTests(
@@ -53,6 +54,11 @@ class BiochemicalFoundationObjectStateTests(
         universe.world[
             "available_planetary_materials"
         ] = self._materials()
+        materials_layer = PlanetaryMaterials(universe)
+        materials_layer.available_materials = (
+            universe.world["available_planetary_materials"]
+        )
+
         process = BiochemicalFoundations(universe)
         result = process.form_biochemical_foundations()
         return universe, process, result
@@ -215,6 +221,11 @@ class BiochemicalFoundationObjectStateTests(
         universe.world[
             "available_planetary_materials"
         ] = {"water": self._materials()["water"]}
+        materials_layer = PlanetaryMaterials(universe)
+        materials_layer.available_materials = (
+            universe.world["available_planetary_materials"]
+        )
+
         process = BiochemicalFoundations(universe)
 
         result = process.form_biochemical_foundations()
@@ -237,6 +248,11 @@ class BiochemicalFoundationObjectStateTests(
         universe.world[
             "available_planetary_materials"
         ] = self._materials()
+        materials_layer = PlanetaryMaterials(universe)
+        materials_layer.available_materials = (
+            universe.world["available_planetary_materials"]
+        )
+
         process = BiochemicalFoundations(universe)
 
         def broken_history():

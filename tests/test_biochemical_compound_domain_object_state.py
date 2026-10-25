@@ -4,6 +4,7 @@ from universe.biochemical_foundations import BiochemicalFoundations
 from universe.biochemical_objects import BiochemicalCompound
 from universe.planetary_material_objects import PlanetaryMaterial
 from universe.universe import Universe
+from universe.planetary_materials import PlanetaryMaterials
 
 
 class BiochemicalCompoundDomainObjectStateTests(unittest.TestCase):
@@ -24,6 +25,11 @@ class BiochemicalCompoundDomainObjectStateTests(unittest.TestCase):
                 origin="test"
             ),
         }
+        materials_layer = PlanetaryMaterials(universe)
+        materials_layer.available_materials = (
+            universe.world["available_planetary_materials"]
+        )
+
         process = BiochemicalFoundations(universe)
         result = process.form_biochemical_foundations()
         return universe, process, result
