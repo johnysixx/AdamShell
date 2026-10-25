@@ -97,13 +97,6 @@ class EntityBootstrap:
             )
 
         if self.god is None:
-            self.god = (
-                self.universe.world.get(
-                    "god"
-                )
-            )
-
-        if self.god is None:
             raise RuntimeError(
                 "Canonical God must exist before "
                 "EntityBootstrap."
