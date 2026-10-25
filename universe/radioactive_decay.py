@@ -136,7 +136,7 @@ class RadioactiveDecay:
         return self.result
 
     def ensure_isotopes(self):
-        if not self.universe.world.get("known_isotopes"):
+        if not self.isotopes_layer.isotopes:
             self.isotopes_layer.form_reference_isotopes()
 
         self.decay_state.isotopes_available = True
@@ -149,7 +149,7 @@ class RadioactiveDecay:
         time_scale,
         use
     ):
-        known_isotopes = self.universe.world.get("known_isotopes", {})
+        known_isotopes = self.isotopes_layer.isotopes
 
         if isotope_name not in known_isotopes:
             raise ValueError(f"Missing isotope: {isotope_name}")
