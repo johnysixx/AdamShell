@@ -17,6 +17,10 @@ from meeting_place.drink_recipe_status import (
 from meeting_place.bar_incident_state import (
     BarIncidentState,
 )
+from meeting_place.bar_energy_entropy_service_state import (
+    BarEnergyDrinkServiceResult,
+    BarEntropyDrinkServiceResult,
+)
 from meeting_place.bar_basic_drinks_on_tab_state import (
     BarBasicDrinksOnTabResult,
 )
@@ -1626,7 +1630,10 @@ class MeetingPlace:
         self.sync_reservoirs_to_world()
         self.emit_event(f'{entity_name} drinks energy at the bar')
         self.emit_event(f'{entity_name} energy drink effect applied')
-        return {'reservoir_event': reservoir_event, 'service_effect': service_effect}
+        return BarEnergyDrinkServiceResult(
+            reservoir_event=reservoir_event,
+            service_effect=service_effect,
+        )
 
     def quantum_entropy_tick(self, rng=None):
         event = self.entropy_reservoir.quantum_tick(rng)
@@ -1663,7 +1670,10 @@ class MeetingPlace:
         )
         self.emit_event(f'{entity_name} drinks entropy at the bar')
         self.emit_event(f'{entity_name} entropy drink effect applied')
-        return {'reservoir_event': event, 'service_effect': effect}
+        return BarEntropyDrinkServiceResult(
+            reservoir_event=event,
+            service_effect=effect,
+        )
 
     def refresh_bar_ingredients(self):
         if 'sugar' not in self.back_room.bar_ingredients:
