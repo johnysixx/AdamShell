@@ -3,22 +3,269 @@ from types import SimpleNamespace
 
 from core.interaction.conflict import ConflictEngine
 from core.interaction.rule_engine import RuleEngine
+from core.interaction.rules.light import LightRule
+from core.interaction.rules.space import SpaceRule
+from core.interaction.rules.deep import DeepRule
 from core.interaction.result_state import (
     InteractionConflictRecord,
     InteractionConflictResolutionResult,
     InteractionEffectValue,
+    InteractionRuleEffect,
 )
 from universe.universe import Universe
 
 
 class InteractionConflictObjectStateTests(unittest.TestCase):
 
+    def test_builtin_rules_return_object_effects(self):
+        cases = (
+            (
+                LightRule(),
+                "LetThereBeLight",
+                {
+                    "state": {"light": True},
+                    "manifest": "Light",
+                    "birth_allowed": True,
+                },
+            ),
+            (
+                SpaceRule(),
+                "LetThereBeSpace",
+                {
+                    "space": True,
+                    "chaos": False,
+                    "order": True,
+                },
+            ),
+            (
+                DeepRule(),
+                "LetThereBeDeep",
+                {
+                    "deep": True,
+                },
+            ),
+        )
+
+        for rule, word_name, expected in cases:
+            with self.subTest(rule=rule.name):
+                result = rule.apply(
+                    None,
+                    SimpleNamespace(name=word_name),
+                )
+
+                self.assertIsInstance(
+                    result,
+                    InteractionRuleEffect,
+                )
+
+                self.assertEqual(
+                    result.rule_name,
+                    rule.name,
+                )
+
+                self.assertTrue(all(
+                    isinstance(
+                        item,
+                        InteractionEffectValue,
+                    )
+                    for item in result.effects
+                ))
+
+                values = {
+                    item.key: item.value
+                    for item in result.effects
+                }
+
+                self.assertEqual(
+                    values,
+                    expected,
+                )
+
+                snapshot = result.to_dict()
+
+                self.assertEqual(
+                    snapshot["rule_name"],
+                    rule.name,
+                )
+
+                self.assertEqual(
+                    {
+                        item["key"]: item["value"]
+                        for item in snapshot["effects"]
+                    },
+                    expected,
+                )
+
+    def test_nonmatching_rules_return_none(self):
+        word = SimpleNamespace(
+            name="UnknownWord",
+        )
+
+        for rule in (
+            LightRule(),
+            SpaceRule(),
+            DeepRule(),
+        ):
+            with self.subTest(rule=rule.name):
+                self.assertIsNone(
+                    rule.apply(None, word)
+                )
+
+    def test_rule_effect_rejects_mapping_components(self):
+        with self.assertRaises(TypeError):
+            InteractionRuleEffect(
+                rule_name="invalid",
+                effects=(
+                    {
+                        "key": "light",
+                        "value": True,
+                    },
+                ),
+            )
+
+        with self.assertRaises(TypeError):
+            InteractionRuleEffect(
+                rule_name="invalid",
+                effects=(object(),),
+            )
+
+    def test_conflict_engine_rejects_legacy_effects(self):
+        for legacy in (
+            {"light": True},
+            {},
+            [],
+        ):
+            with self.subTest(
+                legacy_type=type(legacy).__name__
+            ):
+                with self.assertRaises(TypeError):
+                    ConflictEngine().resolve(
+                        [legacy]
+                    )
+
+    def test_rule_effect_export_is_detached(self):
+        source = {"light": True}
+
+        result = InteractionRuleEffect(
+            rule_name="light",
+            effects=(
+                InteractionEffectValue(
+                    key="state",
+                    value=source,
+                ),
+            ),
+        )
+
+        source["light"] = False
+
+        self.assertTrue(
+            result.effects[0].value["light"]
+        )
+
+        snapshot = result.to_dict()
+
+        snapshot["effects"][0][
+            "value"
+        ]["light"] = False
+
+        self.assertTrue(
+            result.effects[0].value["light"]
+        )
+
+        self.assertTrue(
+            result.to_dict()["effects"][0][
+                "value"
+            ]["light"]
+        )
+
+        with self.assertRaises(TypeError):
+            _ = result["effects"]
+
+    def test_rule_engine_accepts_builtin_object_effects(self):
+        engine = RuleEngine()
+
+        registered = []
+        created = []
+
+        universe = SimpleNamespace(
+            register_conflicts=lambda conflicts:
+                registered.extend(conflicts),
+        )
+
+        engine._creation = SimpleNamespace(
+            apply=lambda universe, payload:
+                created.append(payload),
+        )
+
+        result = engine.apply(
+            universe,
+            SimpleNamespace(
+                name="LetThereBeLight",
+            ),
+        )
+
+        self.assertIsInstance(
+            result,
+            InteractionConflictResolutionResult,
+        )
+
+        self.assertEqual(
+            result.conflicts,
+            (),
+        )
+
+        self.assertEqual(
+            registered,
+            [],
+        )
+
+        self.assertEqual(
+            created[0],
+            {
+                "state": {"light": True},
+                "manifest": "Light",
+                "birth_allowed": True,
+            },
+        )
+
+        created[0]["state"]["light"] = False
+
+        self.assertTrue(
+            result.to_dict()["effects"][
+                "state"
+            ]["light"]
+        )
+
     def test_resolver_returns_typed_results(self):
         source = {"light": True}
 
         resolution = ConflictEngine().resolve([
-            {"light": True, "state": source},
-            {"light": False, "order": True},
+            InteractionRuleEffect(
+                rule_name="first",
+                effects=(
+                    InteractionEffectValue(
+                        "light",
+                        True,
+                    ),
+                    InteractionEffectValue(
+                        "state",
+                        source,
+                    ),
+                ),
+            ),
+            InteractionRuleEffect(
+                rule_name="second",
+                effects=(
+                    InteractionEffectValue(
+                        "light",
+                        False,
+                    ),
+                    InteractionEffectValue(
+                        "order",
+                        True,
+                    ),
+                ),
+            ),
         ])
 
         self.assertIsInstance(
@@ -83,18 +330,40 @@ class InteractionConflictObjectStateTests(unittest.TestCase):
             SimpleNamespace(
                 priority=10,
                 active=True,
-                apply=lambda universe, word: {
-                    "light": True,
-                    "state": {"light": True},
-                },
+                apply=lambda universe, word: (
+                    InteractionRuleEffect(
+                        rule_name="first",
+                        effects=(
+                            InteractionEffectValue(
+                                "light",
+                                True,
+                            ),
+                            InteractionEffectValue(
+                                "state",
+                                {"light": True},
+                            ),
+                        ),
+                    )
+                ),
             ),
             SimpleNamespace(
                 priority=5,
                 active=True,
-                apply=lambda universe, word: {
-                    "light": False,
-                    "birth_allowed": True,
-                },
+                apply=lambda universe, word: (
+                    InteractionRuleEffect(
+                        rule_name="second",
+                        effects=(
+                            InteractionEffectValue(
+                                "light",
+                                False,
+                            ),
+                            InteractionEffectValue(
+                                "birth_allowed",
+                                True,
+                            ),
+                        ),
+                    )
+                ),
             ),
         ]
 
@@ -190,7 +459,13 @@ class InteractionConflictObjectStateTests(unittest.TestCase):
         )
 
     def test_empty_conflict_resolution(self):
-        result = ConflictEngine().resolve([None, {}])
+        result = ConflictEngine().resolve([
+            None,
+            InteractionRuleEffect(
+                rule_name="empty",
+                effects=(),
+            ),
+        ])
 
         self.assertEqual(result.effects, ())
         self.assertEqual(result.conflicts, ())

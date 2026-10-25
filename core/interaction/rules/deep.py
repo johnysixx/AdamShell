@@ -1,4 +1,8 @@
 from core.interaction.rule import Rule
+from core.interaction.result_state import (
+    InteractionEffectValue,
+    InteractionRuleEffect,
+)
 
 
 class DeepRule(Rule):
@@ -8,5 +12,13 @@ class DeepRule(Rule):
 
     def apply(self, universe, word):
         if word.name == "LetThereBeDeep":
-            return {"deep": True}
+            return InteractionRuleEffect(
+                rule_name=self.name,
+                effects=(
+                    InteractionEffectValue(
+                        "deep",
+                        True,
+                    ),
+                ),
+            )
         return None

@@ -4,6 +4,7 @@ from core.interaction.result_state import (
     InteractionConflictRecord,
     InteractionConflictResolutionResult,
     InteractionEffectValue,
+    InteractionRuleEffect,
 )
 
 
@@ -14,10 +15,21 @@ class ConflictEngine:
         conflicts = []
 
         for effect in effects:
-            if not effect:
+            if effect is None:
                 continue
 
-            for key, value in effect.items():
+            if not isinstance(
+                effect,
+                InteractionRuleEffect,
+            ):
+                raise TypeError(
+                    "ConflictEngine requires "
+                    "InteractionRuleEffect objects."
+                )
+
+            for item in effect.effects:
+                key = item.key
+                value = item.value
                 if key in resolved and resolved[key] != value:
                     conflicts.append(
                         InteractionConflictRecord(

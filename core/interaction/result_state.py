@@ -21,6 +21,45 @@ class InteractionEffectValue:
 
 
 @dataclass(slots=True, frozen=True)
+class InteractionRuleEffect:
+    rule_name: str
+    effects: tuple[InteractionEffectValue, ...]
+
+    def __post_init__(self):
+        object.__setattr__(
+            self,
+            "rule_name",
+            str(self.rule_name),
+        )
+
+        effects = tuple(self.effects)
+
+        if not all(
+            isinstance(item, InteractionEffectValue)
+            for item in effects
+        ):
+            raise TypeError(
+                "Rule effects require "
+                "InteractionEffectValue objects."
+            )
+
+        object.__setattr__(
+            self,
+            "effects",
+            effects,
+        )
+
+    def to_dict(self):
+        return {
+            "rule_name": self.rule_name,
+            "effects": [
+                item.to_dict()
+                for item in self.effects
+            ],
+        }
+
+
+@dataclass(slots=True, frozen=True)
 class InteractionConflictRecord:
     key: str
     old: object

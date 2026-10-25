@@ -1,4 +1,8 @@
 from core.interaction.rule import Rule
+from core.interaction.result_state import (
+    InteractionEffectValue,
+    InteractionRuleEffect,
+)
 
 
 class LightRule(Rule):
@@ -8,11 +12,21 @@ class LightRule(Rule):
 
     def apply(self, universe, word):
         if word.name == "LetThereBeLight":
-            return {
-                "state": {
-                    "light": True
-                },
-                "manifest": "Light",
-                "birth_allowed": True
-            }
+            return InteractionRuleEffect(
+                rule_name=self.name,
+                effects=(
+                    InteractionEffectValue(
+                        key="state",
+                        value={"light": True},
+                    ),
+                    InteractionEffectValue(
+                        key="manifest",
+                        value="Light",
+                    ),
+                    InteractionEffectValue(
+                        key="birth_allowed",
+                        value=True,
+                    ),
+                ),
+            )
         return None

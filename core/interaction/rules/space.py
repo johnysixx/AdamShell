@@ -1,4 +1,8 @@
 from core.interaction.rule import Rule
+from core.interaction.result_state import (
+    InteractionEffectValue,
+    InteractionRuleEffect,
+)
 
 
 class SpaceRule(Rule):
@@ -8,5 +12,21 @@ class SpaceRule(Rule):
 
     def apply(self, universe, word):
         if word.name == "LetThereBeSpace":
-            return {"space": True, "chaos": False, "order": True}
+            return InteractionRuleEffect(
+                rule_name=self.name,
+                effects=(
+                    InteractionEffectValue(
+                        "space",
+                        True,
+                    ),
+                    InteractionEffectValue(
+                        "chaos",
+                        False,
+                    ),
+                    InteractionEffectValue(
+                        "order",
+                        True,
+                    ),
+                ),
+            )
         return None
