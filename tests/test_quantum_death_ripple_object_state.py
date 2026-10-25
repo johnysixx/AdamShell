@@ -1,5 +1,6 @@
 import unittest
 
+from quantum.event_bus import QuantumEvent
 from quantum.death_ripple import (
     QuantumDeathRipple,
     QuantumDeathRippleEvent,
@@ -74,15 +75,13 @@ class QuantumDeathRippleObjectStateTests(
         result = (
             self.ripple
             .on_cronenberg_hunted(
-                {
-                    "name": (
-                        "cronenberg_hunted"
-                    ),
-                    "payload": {
+                QuantumEvent(
+                    name="cronenberg_hunted",
+                    payload={
                         "predator": "cat",
                         "prey": "cronenberg",
                     },
-                },
+                ),
                 rng=FixedRng(),
             )
         )
@@ -149,12 +148,10 @@ class QuantumDeathRippleObjectStateTests(
         self
     ):
         self.ripple.on_cronenberg_hunted(
-            {
-                "name": (
-                    "cronenberg_hunted"
-                ),
-                "payload": {},
-            },
+            QuantumEvent(
+                name="cronenberg_hunted",
+                payload={},
+            ),
             rng=FixedRng(),
         )
 
@@ -178,6 +175,21 @@ class QuantumDeathRippleObjectStateTests(
             event.rotated_count,
             0,
         )
+
+    def test_handler_rejects_mapping_event(self):
+        with self.assertRaisesRegex(
+            TypeError,
+            "QuantumEvent",
+        ):
+            self.ripple.on_cronenberg_hunted(
+                {
+                    "name": "cronenberg_hunted",
+                    "payload": {},
+                },
+                rng=FixedRng(),
+            )
+
+        self.assertEqual(self.ripple.history, [])
 
     def test_history_rejects_mapping_event(
         self

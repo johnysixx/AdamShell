@@ -94,59 +94,81 @@ class QuantumEventBusObjectStateTests(
             1,
         )
 
-    def test_handler_receives_boundary_snapshot(
+    def test_handler_receives_isolated_object_snapshot(
         self
     ):
         bus = QuantumEventBus()
 
         def handler(event):
-            event[
-                "payload"
-            ][
-                "value"
-            ] = 99
+            self.assertIsInstance(event, QuantumEvent)
 
-            return event[
-                "payload"
-            ][
-                "value"
-            ]
+            event.payload["nested"]["count"] = 99
 
-        bus.subscribe(
-            "test_event",
-            handler,
-        )
+            return event.payload["nested"]["count"]
+
+        bus.subscribe("test_event", handler)
 
         result = bus.publish(
             "test_event",
-            value=7,
+            nested={"count": 1},
         )
 
-        event = (
-            bus.event_history[-1]
-        )
+        event = bus.event_history[-1]
 
+        self.assertEqual(result.results, (99,))
+        self.assertIs(result.event, event)
         self.assertEqual(
-            result.results,
-            (99,),
+            event.payload["nested"]["count"],
+            1,
         )
+
+    def test_subscribers_receive_independent_events(
+        self
+    ):
+        bus = QuantumEventBus()
+        received = []
+        original = {"count": 1}
+
+        def first(event):
+            received.append(event)
+            event.payload["nested"]["count"] = 99
+            return event.payload["nested"]["count"]
+
+        def second(event):
+            received.append(event)
+            return event.payload["nested"]["count"]
+
+        bus.subscribe("test_event", first)
+        bus.subscribe("test_event", second)
+
+        result = bus.publish(
+            "test_event",
+            nested=original,
+        )
+
+        self.assertEqual(result.subscriber_count, 2)
+        self.assertEqual(result.results, (99, 1))
+        self.assertEqual(original["count"], 1)
+
+        self.assertIsInstance(received[0], QuantumEvent)
+        self.assertIsInstance(received[1], QuantumEvent)
+
+        self.assertIsNot(received[0], received[1])
+        self.assertIsNot(received[0], result.event)
+        self.assertIsNot(received[1], result.event)
 
         self.assertIs(
             result.event,
-            event,
+            bus.event_history[-1],
         )
 
         self.assertEqual(
-            result.event.payload[
-                "value"
-            ],
-            7,
+            result.event.payload["nested"]["count"],
+            1,
         )
 
-        self.assertEqual(
-            event.payload["value"],
-            7,
-        )
+        with self.assertRaises(TypeError):
+            _ = received[0]["payload"]
 
     def test_history_rejects_mapping_event(
         self

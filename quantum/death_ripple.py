@@ -2,6 +2,7 @@ import random
 from dataclasses import dataclass
 
 from quantum.d20_registry import D20RotationEvent
+from quantum.event_bus import QuantumEvent
 
 
 @dataclass(slots=True, frozen=True)
@@ -61,6 +62,11 @@ class QuantumDeathRipple:
         event,
         rng=None
     ):
+        if not isinstance(event, QuantumEvent):
+            raise TypeError(
+                "Quantum death ripple requires QuantumEvent."
+            )
+
         rng = rng or random
 
         roll = rng.random()
@@ -84,12 +90,7 @@ class QuantumDeathRipple:
             )
 
         elif roll < 0.99:
-            payload = event.get(
-                "payload",
-                {}
-            )
-
-            layer = payload.get(
+            layer = event.payload.get(
                 "layer",
                 "meeting_place"
             )
@@ -122,15 +123,9 @@ class QuantumDeathRipple:
             )
 
         record = QuantumDeathRippleEvent(
-            event_name=event.get("name"),
-            predator=event.get(
-                "payload",
-                {}
-            ).get("predator"),
-            prey=event.get(
-                "payload",
-                {}
-            ).get("prey"),
+            event_name=event.name,
+            predator=event.payload.get("predator"),
+            prey=event.payload.get("prey"),
             result_scope=result_scope,
             rotated_count=rotated_count,
         )

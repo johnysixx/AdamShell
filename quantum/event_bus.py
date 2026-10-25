@@ -175,10 +175,6 @@ class QuantumEventBus:
             event
         )
 
-        event_snapshot = (
-            event.to_dict()
-        )
-
         results = []
 
         for handler in list(
@@ -187,12 +183,15 @@ class QuantumEventBus:
                 []
             )
         ):
+            # Each subscriber gets its own domain object.
+            # The recorded event remains untouched.
+            subscriber_event = QuantumEvent(
+                name=event.name,
+                payload=event.payload,
+            )
+
             results.append(
-                handler(
-                    deepcopy(
-                        event_snapshot
-                    )
-                )
+                handler(subscriber_event)
             )
 
         return QuantumEventPublicationResult(
