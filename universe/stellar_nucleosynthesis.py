@@ -83,8 +83,23 @@ class StellarNucleosynthesis:
         self.public_state = self._build_public_state()
 
     def forge_elements_up_to_iron(self):
-        stellar_state = self.universe.world.get("stellar_state", {})
-        first_stars = self.universe.world.get("first_stars", [])
+        stars_layer = getattr(
+            self.universe,
+            "stars_layer",
+            None,
+        )
+
+        first_stars = (
+            stars_layer.stars
+            if stars_layer is not None
+            else ()
+        )
+
+        stellar_state = (
+            stars_layer.stellar_state
+            if stars_layer is not None
+            else None
+        )
 
         if not first_stars:
             self.state = (

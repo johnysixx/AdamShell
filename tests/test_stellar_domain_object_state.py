@@ -4,7 +4,6 @@ from universe.cosmic_objects import StellarMaterialCloud
 from universe.stars import Stars
 from universe.stellar_nucleosynthesis import StellarNucleosynthesis
 from universe.stellar_objects import PrimordialStar
-from universe.stellar_state import StellarFormationState
 from universe.supernova_enrichment import SupernovaEnrichment
 from universe.universe import Universe
 
@@ -116,12 +115,13 @@ class StellarDomainObjectStateTests(unittest.TestCase):
 
     def test_stellar_nucleosynthesis_rejects_legacy_star_dict(self):
         universe = Universe()
-        universe.world["first_stars"] = [
+        stars_layer = Stars(universe)
+
+        stars_layer.stars.append(
             {"name": "legacy_star"}
-        ]
-        state = StellarFormationState()
-        state.stellar_fusion_possible = True
-        universe.world["stellar_state"] = state
+        )
+
+        stars_layer.stellar_state.stellar_fusion_possible = True
 
         process = StellarNucleosynthesis(universe)
 

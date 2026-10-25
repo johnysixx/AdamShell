@@ -6,6 +6,7 @@ from universe.cosmic_objects import StellarMaterialCloud
 from universe.primordial_objects import PrimordialCosmicComponent
 from universe.stellar_nucleosynthesis import StellarNucleosynthesis
 from universe.stellar_objects import PrimordialStar
+from universe.stars import Stars
 from universe.universe import Universe
 
 
@@ -73,7 +74,9 @@ class PrimordialComponentDomainObjectStateTests(
             can_form_stars=True,
         )
 
-        universe.world["first_stars"] = [
+        stars_layer = Stars(universe)
+
+        stars_layer.stars.extend([
             PrimordialStar(
                 name="first_star",
                 type="primordial_star",
@@ -84,18 +87,10 @@ class PrimordialComponentDomainObjectStateTests(
                 can_fuse_elements=True,
                 can_create_heavy_elements=True,
             )
-        ]
+        ])
 
-        from universe.stellar_state import (
-            StellarFormationState,
-        )
-
-        stellar_state = StellarFormationState()
-        stellar_state.stellar_fusion_possible = True
-
-        universe.world[
-            "stellar_state"
-        ] = stellar_state
+        stars_layer.stellar_state.stellar_fusion_possible = True
+        stars_layer.write_to_world()
 
         hydrogen = universe.world[
             "primordial_elements"
@@ -132,7 +127,9 @@ class PrimordialComponentDomainObjectStateTests(
             can_form_stars=True,
         )
 
-        universe.world["first_stars"] = [
+        stars_layer = Stars(universe)
+
+        stars_layer.stars.extend([
             PrimordialStar(
                 name="first_star",
                 type="primordial_star",
@@ -143,18 +140,10 @@ class PrimordialComponentDomainObjectStateTests(
                 can_fuse_elements=True,
                 can_create_heavy_elements=True,
             )
-        ]
+        ])
 
-        from universe.stellar_state import (
-            StellarFormationState,
-        )
-
-        stellar_state = StellarFormationState()
-        stellar_state.stellar_fusion_possible = True
-
-        universe.world[
-            "stellar_state"
-        ] = stellar_state
+        stars_layer.stellar_state.stellar_fusion_possible = True
+        stars_layer.write_to_world()
 
         universe.world[
             "primordial_elements"

@@ -26,6 +26,8 @@ class Stars:
 
         self.public_state = self._build_public_state()
 
+        self.universe.stars_layer = self
+
     @property
     def state(self):
         return self._state
