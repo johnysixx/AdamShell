@@ -293,7 +293,7 @@ class Bartender(SocialMixin):
             f'{drink_name} FROM {teacher}'
         )
 
-        return entry.to_dict()
+        return entry
 
     def end_shift(
         self,
@@ -397,7 +397,7 @@ class Bartender(SocialMixin):
             f'{drink} FROM {teacher}'
         )
 
-        return entry.to_dict()
+        return entry
 
     def create_cocktail(
         self,
@@ -463,7 +463,7 @@ class Bartender(SocialMixin):
             f'{drink} FROM {source}'
         )
 
-        return entry.to_dict()
+        return entry
 
     def note_interesting_guest(
         self,
@@ -486,7 +486,7 @@ class Bartender(SocialMixin):
             f'{guest} BECAUSE {reason}'
         )
 
-        return entry.to_dict()
+        return entry
 
     def offer_cocktail_tasting(self, guest, drink):
         if guest not in self.regular_guests:

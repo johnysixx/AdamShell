@@ -9,6 +9,7 @@ from meeting_place.bartender_chronicle_state import (
     BartenderCreatedCocktailEntry,
     BartenderInterestingGuestEntry,
     BartenderLearnedCocktailEntry,
+    BartenderLearnedGuestDrinkEntry,
     BartenderNewDrinkEntry,
     BartenderObservedEjectionEntry,
     BartenderObservedEventEntry,
@@ -422,6 +423,104 @@ class BartenderShiftChronicleTests(
                 'raspberry_rum',
                 'lemonade',
             ],
+        )
+
+    def test_chronicle_methods_return_recorded_objects(
+        self
+    ):
+        bartender = Bartender(
+            BarCounter().hidden_story_book
+        )
+
+        effects = {"energy_j": 1.0}
+
+        learned = bartender.learn_guest_drink(
+            drink_name="lilith",
+            teacher="lilith",
+            ingredients=("vodka", "lemon", "sugar"),
+            effects=effects,
+            price_basis="vodka",
+        )
+
+        cocktail = bartender.learn_cocktail(
+            drink="event_horizon",
+            teacher="newton",
+            ingredients=("rum", "dark_energy"),
+        )
+
+        new_drink = bartender.note_new_drink(
+            drink="absinthe",
+            source="new_bottle",
+        )
+
+        guest = bartender.note_interesting_guest(
+            guest="newton",
+            reason="talked about gravity",
+        )
+
+        results = (
+            learned,
+            cocktail,
+            new_drink,
+            guest,
+        )
+
+        expected_types = (
+            BartenderLearnedGuestDrinkEntry,
+            BartenderLearnedCocktailEntry,
+            BartenderNewDrinkEntry,
+            BartenderInterestingGuestEntry,
+        )
+
+        self.assertEqual(
+            tuple(bartender.chronicle_memory),
+            results,
+        )
+
+        for index, (result, expected_type) in enumerate(
+            zip(results, expected_types)
+        ):
+            self.assertIsInstance(result, expected_type)
+            self.assertIs(
+                result,
+                bartender.chronicle_memory[index],
+            )
+
+            self.assertNotIsInstance(result, dict)
+
+            for mapping_method in (
+                "get",
+                "keys",
+                "items",
+                "__getitem__",
+            ):
+                self.assertFalse(
+                    hasattr(result, mapping_method)
+                )
+
+            with self.assertRaises(TypeError):
+                _ = result["kind"]
+
+        # External input cannot mutate recorded state.
+        effects["energy_j"] = 99.0
+
+        self.assertEqual(
+            learned.effects["energy_j"],
+            1.0,
+        )
+
+        # Serialization is explicit and detached.
+        snapshot = learned.to_dict()
+        snapshot["effects"]["energy_j"] = 123.0
+        snapshot["ingredients"].append("changed")
+
+        self.assertEqual(
+            learned.effects["energy_j"],
+            1.0,
+        )
+        self.assertEqual(
+            learned.ingredients,
+            ("vodka", "lemon", "sugar"),
         )
 
     def test_chronicle_state_has_no_mapping_api(
