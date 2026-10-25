@@ -1,4 +1,3 @@
-from copy import deepcopy
 from dataclasses import dataclass, field
 
 from idea_entities.eternal_fire_objects import (
@@ -112,7 +111,10 @@ class EternalFirePotential:
             "physical_location": self.physical_location,
             "requires_maintenance": self.requires_maintenance,
             "maintainer": self.maintainer,
-            "interactions": deepcopy(self.interactions),
+            "interactions": [
+                interaction.to_dict()
+                for interaction in self.interactions
+            ],
         }
 
         if self.actualized:

@@ -5,6 +5,7 @@ from universe.logger import UniverseLogger
 from core.entity.serpent_d20 import SerpentD20
 from idea_entities.idea_actor_state import IdeaPrePhysicalAttributes
 from idea_entities.idea_entities_state import IdeaEntitiesState
+from idea_entities.idea_event_state import IdeaEntityEvent
 from idea_entities.prefysical_fire_origin import PrefysicalFireOrigin
 
 class IdeaEntities:
@@ -109,22 +110,37 @@ class IdeaEntities:
         return idea_entity
 
     def emit_event(self, event):
+        if not isinstance(event, IdeaEntityEvent):
+            raise TypeError(
+                "Idea Entities events require "
+                "IdeaEntityEvent objects."
+            )
+
         self.events.append(event)
         self.event_history.append(event)
         self.write_to_world()
         UniverseLogger.event(f'IDEA ENTITIES EVENT: {event}')
 
     def record_idea_event(self, name, participants, observer=None, state='unresolved', meaning=None):
-        event = {'name': name, 'layer': 'idea_entities', 'participants': participants, 'observer': observer, 'state': state, 'meaning': meaning, 'known_by': []}
-        if observer is not None:
-            event['known_by'].append(observer)
+        event = IdeaEntityEvent(
+            name=name,
+            participants=tuple(participants),
+            observer=observer,
+            state=state,
+            meaning=meaning,
+        )
         self.emit_event(event)
         return event
 
     def record_fire_interaction(self, name, participants, observer=None, state='unresolved', meaning=None):
-        interaction = {'name': name, 'layer': 'idea_entities', 'place': 'eternal_fire', 'participants': participants, 'observer': observer, 'state': state, 'meaning': meaning, 'known_by': []}
-        if observer is not None:
-            interaction['known_by'].append(observer)
+        interaction = IdeaEntityEvent(
+            name=name,
+            participants=tuple(participants),
+            observer=observer,
+            state=state,
+            meaning=meaning,
+            place="eternal_fire",
+        )
         self.eternal_fire.interactions.append(interaction)
         self._refresh_eternal_fire_boundary()
         self.emit_event(interaction)

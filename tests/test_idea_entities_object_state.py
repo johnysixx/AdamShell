@@ -1,7 +1,9 @@
 import unittest
+from copy import deepcopy
 
 from idea_entities import IdeaEntities
 from idea_entities.idea_entities_state import IdeaEntitiesState
+from idea_entities.idea_event_state import IdeaEntityEvent
 from idea_entities.eternal_fire_potential_state import (
     EternalFirePotentialState,
 )
@@ -130,7 +132,10 @@ class IdeaEntitiesObjectStateTests(unittest.TestCase):
     def test_events_and_tick_mutate_same_state_object(self):
         universe, layer = self._layer()
         state = layer.idea_entities_state
-        event = {"name": "idea_seen"}
+        event = IdeaEntityEvent(
+            name="idea_seen",
+            participants=(),
+        )
 
         layer.emit_event(event)
 
@@ -149,6 +154,85 @@ class IdeaEntitiesObjectStateTests(unittest.TestCase):
             ]["tick_count"],
             1,
         )
+
+    def test_record_idea_event_keeps_object_identity(self):
+        universe, layer = self._layer()
+
+        participants = ["serpent", "lilith"]
+
+        event = layer.record_idea_event(
+            name="idea_shared",
+            participants=participants,
+            observer="pazuzu",
+            meaning="shared knowledge",
+        )
+
+        participants.append("changed")
+
+        self.assertIsInstance(
+            event,
+            IdeaEntityEvent,
+        )
+        self.assertEqual(
+            event.participants,
+            ("serpent", "lilith"),
+        )
+        self.assertEqual(
+            event.known_by,
+            ("pazuzu",),
+        )
+        self.assertIsNone(event.place)
+
+        self.assertIs(layer.events[-1], event)
+        self.assertIs(layer.event_history[-1], event)
+        self.assertIs(
+            universe.world["idea_entities"]["events"][-1],
+            event,
+        )
+        self.assertIs(deepcopy(event), event)
+
+        snapshot = layer.idea_entities_state.to_dict()
+
+        self.assertEqual(
+            snapshot["events"][0],
+            event.to_dict(),
+        )
+
+        snapshot["events"][0]["known_by"].append(
+            "intruder"
+        )
+        snapshot["event_history"][0][
+            "participants"
+        ][0] = "changed"
+
+        self.assertEqual(
+            event.known_by,
+            ("pazuzu",),
+        )
+        self.assertEqual(
+            event.participants,
+            ("serpent", "lilith"),
+        )
+
+        layer.tick()
+
+        self.assertEqual(layer.events, [])
+        self.assertIs(
+            layer.event_history[-1],
+            event,
+        )
+
+    def test_emit_event_rejects_mapping(self):
+        _, layer = self._layer()
+
+        with self.assertRaises(TypeError):
+            layer.emit_event({
+                "name": "invalid",
+                "layer": "idea_entities",
+            })
+
+        self.assertEqual(layer.events, [])
+        self.assertEqual(layer.event_history, [])
 
     def test_public_state_snapshot_is_detached(self):
         _, layer = self._layer()
@@ -169,8 +253,18 @@ class IdeaEntitiesObjectStateTests(unittest.TestCase):
 
     def test_to_dict_is_deeply_detached(self):
         state = IdeaEntitiesState()
-        state.events.append({"name": "event"})
-        state.event_history.append({"name": "history"})
+        state.events.append(
+            IdeaEntityEvent(
+                name="event",
+                participants=(),
+            )
+        )
+        state.event_history.append(
+            IdeaEntityEvent(
+                name="history",
+                participants=(),
+            )
+        )
 
         snapshot = state.to_dict()
         snapshot["events"][0]["name"] = "changed"
@@ -178,9 +272,9 @@ class IdeaEntitiesObjectStateTests(unittest.TestCase):
         snapshot["permissions"]["can_influence"] = False
         snapshot["eternal_fire"]["state"] = "changed"
 
-        self.assertEqual(state.events[0]["name"], "event")
+        self.assertEqual(state.events[0].name, "event")
         self.assertEqual(
-            state.event_history[0]["name"],
+            state.event_history[0].name,
             "history",
         )
         self.assertTrue(state.permissions["can_influence"])

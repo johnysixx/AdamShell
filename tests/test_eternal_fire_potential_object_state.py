@@ -7,6 +7,7 @@ from core.eternal_flame.eternal_flame_objects import (
     EternalFlameSourceIdea,
 )
 from idea_entities import IdeaEntities
+from idea_entities.idea_event_state import IdeaEntityEvent
 from idea_entities.eternal_fire_objects import (
     EternalFireFuel,
     EternalFireFuelConsumption,
@@ -259,7 +260,48 @@ class EternalFirePotentialObjectStateTests(unittest.TestCase):
         self.assertIs(fire.interactions[0], interaction)
         self.assertEqual(
             boundary["interactions"],
-            [interaction],
+            [interaction.to_dict()],
+        )
+
+    def test_fire_interaction_preserves_event_identity(
+        self
+    ):
+        universe, layer, _ = self._system()
+
+        event = layer.record_fire_interaction(
+            name="fire_observed",
+            participants=["serpent", "lilith"],
+            observer=None,
+        )
+
+        self.assertIsInstance(
+            event,
+            IdeaEntityEvent,
+        )
+        self.assertEqual(event.place, "eternal_fire")
+        self.assertEqual(event.known_by, ())
+
+        self.assertIs(
+            layer.eternal_fire.interactions[-1],
+            event,
+        )
+        self.assertIs(layer.events[-1], event)
+        self.assertIs(layer.event_history[-1], event)
+
+        snapshot = universe.world[
+            "idea_entities"
+        ]["eternal_fire"]["interactions"][-1]
+
+        self.assertEqual(
+            snapshot,
+            event.to_dict(),
+        )
+
+        snapshot["participants"][0] = "changed"
+
+        self.assertEqual(
+            event.participants,
+            ("serpent", "lilith"),
         )
 
     def test_to_dict_is_deeply_detached(self):
@@ -271,7 +313,12 @@ class EternalFirePotentialObjectStateTests(unittest.TestCase):
         fire.set_meaning(
             EternalFireMeaning()
         )
-        fire.interactions.append({"name": "watched"})
+        fire.interactions.append(
+            IdeaEntityEvent(
+                name="watched",
+                participants=(),
+            )
+        )
 
         snapshot = fire.to_dict()
         snapshot["fuel"]["wood_sticks"] = 999.0
@@ -281,7 +328,7 @@ class EternalFirePotentialObjectStateTests(unittest.TestCase):
         self.assertEqual(fire.fuel.wood_sticks, 2.0)
         self.assertTrue(fire.meaning.requires_fuel)
         self.assertEqual(
-            fire.interactions[0]["name"],
+            fire.interactions[0].name,
             "watched",
         )
 
