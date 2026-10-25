@@ -121,6 +121,7 @@ class Universe:
         self.quantum_state = UniverseQuantumState()
         self.physics = {'light': False, 'space': False, 'time': False, 'gravity': False}
         self.world = {}
+        self.spacetime = None
         self.big_bang = None
         self.big_bang_started = False
         self.physical_universe_started = False
@@ -292,10 +293,9 @@ class Universe:
         if self.quantum_state.enabled:
             self.entropy += self.quantum_state.entropy_delta
         self.pressure = self.entropy / (len(self.entities) + 1)
-        if 'spacetime' in self.world:
+        if self.spacetime is not None:
             self.pressure += (
-                self.world['spacetime']
-                .curvature
+                self.spacetime.curvature
             )
         self.energy_pool += len(self.entities) * 0.02
         self.last_energy_gain = 0.05
@@ -362,16 +362,16 @@ class Universe:
         return self.energy_pool
 
     def bind_spacetime(self):
-        self.world['spacetime'] = (
-            UniverseSpacetimeState()
-        )
+        self.spacetime = UniverseSpacetimeState()
+        self.world['spacetime'] = self.spacetime
         UniverseLogger.event('time and space are bound into spacetime')
 
     def tick_spacetime(self):
-        if 'spacetime' not in self.world:
+        spacetime = self.spacetime
+
+        if spacetime is None:
             UniverseLogger.event('No spacetime bound yet')
             return
-        spacetime = self.world['spacetime']
         gravity = self.physics['gravity']
         curvature_delta = 0.0
         if gravity and gravity.enabled:
@@ -596,11 +596,9 @@ class Universe:
 
     def record_universe_state(self):
         curvature = 0.0
-        if 'spacetime' in self.world:
-            curvature = (
-                self.world['spacetime']
-                .curvature
-            )
+
+        if self.spacetime is not None:
+            curvature = self.spacetime.curvature
         snapshot = UniverseHistorySnapshot(
             tick=self.universe_tick,
             energy=self.energy_pool,
