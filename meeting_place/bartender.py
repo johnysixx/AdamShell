@@ -124,7 +124,7 @@ class Bartender(SocialMixin):
                 )
             )
 
-            return result.to_dict()
+            return result
 
         self.shift_active = True
 
@@ -151,7 +151,7 @@ class Bartender(SocialMixin):
             'BARTENDER FIRST SHIFT STARTED'
         )
 
-        return event.to_dict()
+        return event
 
     def refuse_bet(
         self,
@@ -172,7 +172,7 @@ class Bartender(SocialMixin):
             f'{guest_name}'
         )
 
-        return event.to_dict()
+        return event
 
     def learn_requested_drink(
         self,
@@ -360,7 +360,7 @@ class Bartender(SocialMixin):
             )
 
             shift_entries.append(
-                chronicle.to_dict()
+                chronicle
             )
 
         self.event_memory = []

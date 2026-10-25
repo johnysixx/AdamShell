@@ -11,6 +11,7 @@ from meeting_place.bartender_chronicle_state import (
     BartenderShiftChronicle,
 )
 from meeting_place.bartender_event_state import (
+    BartenderShiftAlreadyActiveResult,
     BartenderLearnedRequestedDrinkEvent,
     BartenderLeftForLemonEvent,
     BartenderRefusedBetEvent,
@@ -96,14 +97,14 @@ class BartenderEventObjectStateTests(
             )
         )
 
-        for boundary in (
+        self.assertIs(
             started,
+            self.bartender.event_memory[0],
+        )
+        self.assertIs(
             refused,
-        ):
-            self.assertIsInstance(
-                boundary,
-                dict,
-            )
+            self.bartender.event_memory[1],
+        )
 
         expected_types = (
             BartenderShiftStartedEvent,
@@ -114,6 +115,8 @@ class BartenderEventObjectStateTests(
         )
 
         for index, returned_event in (
+            (0, started),
+            (1, refused),
             (2, learned),
             (3, left),
             (4, returned),
@@ -183,7 +186,7 @@ class BartenderEventObjectStateTests(
             "lemon",
         )
 
-    def test_second_shift_start_is_boundary_only(
+    def test_second_shift_start_returns_object(
         self
     ):
         self.bartender.begin_shift(
@@ -203,11 +206,19 @@ class BartenderEventObjectStateTests(
             )
         )
 
-        self.assertEqual(
+        self.assertIsInstance(
             result,
+            BartenderShiftAlreadyActiveResult,
+        )
+
+        self.assertEqual(result.bar_day, 3)
+        self.assertEqual(result.shift_start_tick, 72)
+        self.assert_not_mapping(result, "bar_day")
+
+        self.assertEqual(
+            result.to_dict(),
             {
-                "name":
-                    "bartender_shift_already_active",
+                "name": "bartender_shift_already_active",
                 "bar_day": 3,
                 "shift_start_tick": 72,
             },
@@ -225,6 +236,17 @@ class BartenderEventObjectStateTests(
             self.bartender
             .event_memory[0],
             first_event,
+        )
+
+    def test_empty_shift_returns_no_chronicle(self):
+        result = self.bartender.end_shift()
+
+        self.assertEqual(result, [])
+        self.assertEqual(
+            len(
+                self.counter.hidden_story_book.read_entries()
+            ),
+            0,
         )
 
     def test_shift_boundary_serializes_nested_bartender_event(
@@ -268,13 +290,13 @@ class BartenderEventObjectStateTests(
             BartenderShiftStartedEvent,
         )
 
-        self.assertIsInstance(
-            boundary,
-            dict,
-        )
+        self.assertIs(boundary, chronicle)
+        self.assert_not_mapping(boundary, "events")
+
+        exported = boundary.to_dict()
 
         self.assertEqual(
-            boundary["events"][0],
+            exported["events"][0],
             {
                 "kind": "ordinary",
                 "observed_event": {
@@ -291,6 +313,22 @@ class BartenderEventObjectStateTests(
             .events[0]
             .observed_event,
             BartenderShiftStartedEvent,
+        )
+
+        exported["events"][0]["observed_event"][
+            "bar_day"
+        ] = 999
+
+        self.assertEqual(
+            chronicle.events[0].observed_event.bar_day,
+            1,
+        )
+
+        self.assertEqual(
+            chronicle.to_dict()["events"][0][
+                "observed_event"
+            ]["bar_day"],
+            1,
         )
 
 
