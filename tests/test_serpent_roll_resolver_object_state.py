@@ -153,6 +153,58 @@ class SerpentRollResolverObjectStateTests(
             event.selected_effects,
         )
 
+    def test_resolver_rejects_mapping_public_roll(self):
+        with self.assertRaisesRegex(
+            TypeError,
+            "SerpentD20PublicRollEvent",
+        ):
+            self.resolver.resolve(
+                public_roll={
+                    "name": "serpent_d20_rolled",
+                    "roll_id": "fake",
+                    "value": 7,
+                },
+                rng=FixedResolverRng(),
+            )
+
+        self.assertEqual(self.resolver.history, [])
+
+    def test_resolver_rejects_spoofed_object(self):
+        class FakePublicRoll:
+            name = "serpent_d20_rolled"
+            roll_id = "fake"
+            value = 7
+
+        with self.assertRaisesRegex(
+            TypeError,
+            "SerpentD20PublicRollEvent",
+        ):
+            self.resolver.resolve(
+                public_roll=FakePublicRoll(),
+                rng=FixedResolverRng(),
+            )
+
+        self.assertEqual(self.resolver.history, [])
+
+    def test_resolver_rejects_out_of_range_roll(self):
+        for value in (0, 21):
+            with self.subTest(value=value):
+                public_roll = SerpentD20PublicRollEvent(
+                    roll_id=f"invalid_{value}",
+                    roller="serpent",
+                    die="serpent_d20",
+                    value=value,
+                    roll_number=1,
+                )
+
+                with self.assertRaises(ValueError):
+                    self.resolver.resolve(
+                        public_roll=public_roll,
+                        rng=FixedResolverRng(),
+                    )
+
+        self.assertEqual(self.resolver.history, [])
+
     def test_string_intensity_is_rejected(
         self
     ):

@@ -103,22 +103,22 @@ class SerpentRollResolver:
         public_roll,
         rng=None
     ):
-        rng = rng or random
+        # Local import avoids the existing module
+        # dependency from SerpentD20 to this resolver.
+        from core.entity.serpent_d20 import (
+            SerpentD20PublicRollEvent,
+        )
 
-        if isinstance(public_roll, dict):
+        if not isinstance(
+            public_roll,
+            SerpentD20PublicRollEvent,
+        ):
             raise TypeError(
                 "Serpent roll resolver requires "
-                "an object event."
+                "SerpentD20PublicRollEvent."
             )
 
-        if getattr(
-            public_roll,
-            "name",
-            None,
-        ) != "serpent_d20_rolled":
-            raise ValueError(
-                "Invalid Serpent d20 event."
-            )
+        rng = rng or random
 
         value = int(
             public_roll.value
