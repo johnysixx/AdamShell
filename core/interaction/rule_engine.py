@@ -37,19 +37,20 @@ class RuleEngine:
                 if effect is not None:
                     effects.append(effect)
 
-        result, conflicts = self._conflict.resolve(effects)
-        universe.register_conflicts(conflicts)
+        resolution = self._conflict.resolve(effects)
+        universe.register_conflicts(resolution.conflicts)
 
-        if conflicts:
-            print("\n⚔ Conflict Explanation:")
-            for c in conflicts:
-                print(f"- {c['key']} changed from {c['old']} → {c['new']}")
+        if resolution.conflicts:
+            print("\nConflict Explanation:")
+            for conflict in resolution.conflicts:
+                print(
+                    f"- {conflict.key} changed from "
+                    f"{conflict.old} -> {conflict.new}"
+                )
 
-        state = result.get("state", {})
+        creation_payload = resolution.to_dict()["effects"]
+        creation_payload.setdefault("state", {})
 
-        clean_result = dict(result)
-        clean_result["state"] = state
+        self._creation.apply(universe, creation_payload)
 
-        self._creation.apply(universe, clean_result)
-
-        return clean_result, conflicts
+        return resolution

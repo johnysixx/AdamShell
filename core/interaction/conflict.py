@@ -1,24 +1,42 @@
+from copy import deepcopy
+
+from core.interaction.result_state import (
+    InteractionConflictRecord,
+    InteractionConflictResolutionResult,
+    InteractionEffectValue,
+)
+
+
 class ConflictEngine:
 
     def resolve(self, effects):
-
-        result = {}
+        resolved = {}
         conflicts = []
 
         for effect in effects:
             if not effect:
                 continue
 
-            for k, v in effect.items():
+            for key, value in effect.items():
+                if key in resolved and resolved[key] != value:
+                    conflicts.append(
+                        InteractionConflictRecord(
+                            key=key,
+                            old=resolved[key],
+                            new=value,
+                            strength=1,
+                        )
+                    )
 
-                if k in result and result[k] != v:
-                    conflicts.append({
-                        "key": k,
-                        "old": result[k],
-                        "new": v,
-                        "strength": 1  # základní energie konfliktu
-                    })
+                resolved[key] = deepcopy(value)
 
-                result[k] = v
-
-        return result, conflicts
+        return InteractionConflictResolutionResult(
+            effects=tuple(
+                InteractionEffectValue(
+                    key=key,
+                    value=value,
+                )
+                for key, value in resolved.items()
+            ),
+            conflicts=tuple(conflicts),
+        )

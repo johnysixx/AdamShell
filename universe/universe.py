@@ -5,6 +5,9 @@ from cats.cat_lifecycle import CatLifeCycleHandler
 import uuid
 from typing import Self
 from core.entity.factory import EntityFactory
+from core.interaction.result_state import (
+    InteractionConflictRecord,
+)
 from cats import Cats
 from core.entity.profile_resolver import EntityProfileResolver
 from core.entity.quantum_die import QuantumDie
@@ -209,6 +212,18 @@ class Universe:
     def register_conflicts(self, conflicts):
         if not conflicts:
             return
+
+        conflicts = tuple(conflicts)
+
+        if not all(
+            isinstance(conflict, InteractionConflictRecord)
+            for conflict in conflicts
+        ):
+            raise TypeError(
+                "Universe conflict history requires "
+                "InteractionConflictRecord objects."
+            )
+
         self.conflict_history.extend(conflicts)
         self.conflict_pressure += len(conflicts)
         self.check_threshold()
@@ -239,7 +254,7 @@ class Universe:
         if not conflicts:
             return
         for c in conflicts:
-            key = c['key']
+            key = c.key
             if key == 'light' and self.conflict_pressure > 1:
                 self.create_entity('LightEcho', streght=1)
             if key == 'space' and self.conflict_pressure > 1:
