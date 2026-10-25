@@ -50,6 +50,9 @@ from universe.spacetime import UniverseSpacetimeState
 from universe.universe_lifecycle_state import (
     UniverseLifecycleState,
 )
+from universe.universe_history_state import (
+    UniverseHistorySnapshot,
+)
 from universe.universe_tick_result_state import (
     UniverseTickPhaseCompletedResult,
     UniverseTickPhaseErrorResult,
@@ -601,7 +604,36 @@ class Universe:
                 self.world['spacetime']
                 .curvature
             )
-        snapshot = {'tick': self.universe_tick, 'energy': self.energy_pool, 'gain': self.last_energy_gain, 'cost': self.last_pressure_cost, 'delta': self.last_energy_delta, 'classical_entropy_delta': self.last_classical_entropy_delta, 'classical_entropy_total': self.classical_entropy_total, 'entropy': self.entropy, 'pressure': self.pressure, 'curvature': curvature, 'physics_model': self.physics_model, 'quantum_enabled': self.quantum_state.enabled, 'quantum_fluctuation': self.quantum_state.fluctuation, 'quantum_uncertainty': self.quantum_state.uncertainty, 'quantum_entropy_delta': self.quantum_state.entropy_delta, 'quantum_entropy_total': self.quantum_state.entropy_total}
+        snapshot = UniverseHistorySnapshot(
+            tick=self.universe_tick,
+            energy=self.energy_pool,
+            gain=self.last_energy_gain,
+            cost=self.last_pressure_cost,
+            delta=self.last_energy_delta,
+            classical_entropy_delta=(
+                self.last_classical_entropy_delta
+            ),
+            classical_entropy_total=(
+                self.classical_entropy_total
+            ),
+            entropy=self.entropy,
+            pressure=self.pressure,
+            curvature=curvature,
+            physics_model=self.physics_model,
+            quantum_enabled=self.quantum_state.enabled,
+            quantum_fluctuation=(
+                self.quantum_state.fluctuation
+            ),
+            quantum_uncertainty=(
+                self.quantum_state.uncertainty
+            ),
+            quantum_entropy_delta=(
+                self.quantum_state.entropy_delta
+            ),
+            quantum_entropy_total=(
+                self.quantum_state.entropy_total
+            ),
+        )
         self.universe_history.append(snapshot)
 
     def resolve_quantum_pair_consumption(self, first, second):
@@ -1220,21 +1252,21 @@ class Universe:
                 f"HISTORY="
                 f"{len(self.universe_history)} "
                 f"MODEL="
-                f"{last_snapshot.get('physics_model', 'unknown')} "
+                f"{last_snapshot.physics_model} "
                 f"QUANTUM="
-                f"{last_snapshot.get('quantum_enabled', False)} "
+                f"{last_snapshot.quantum_enabled} "
                 f"QFLUCT="
-                f"{last_snapshot.get('quantum_fluctuation', 0.0):.2f} "
+                f"{last_snapshot.quantum_fluctuation:.2f} "
                 f"QUNCERT="
-                f"{last_snapshot.get('quantum_uncertainty', 0.0):.3f} "
+                f"{last_snapshot.quantum_uncertainty:.3f} "
                 f"QENTROPY="
-                f"{last_snapshot.get('quantum_entropy_delta', 0.0):.4f} "
+                f"{last_snapshot.quantum_entropy_delta:.4f} "
                 f"QTOTAL="
-                f"{last_snapshot.get('quantum_entropy_total', 0.0):.4f} "
+                f"{last_snapshot.quantum_entropy_total:.4f} "
                 f"CENTROPY="
-                f"{last_snapshot.get('classical_entropy_delta', 0.0):.4f} "
+                f"{last_snapshot.classical_entropy_delta:.4f} "
                 f"CTOTAL="
-                f"{last_snapshot.get('classical_entropy_total', 0.0):.4f} "
+                f"{last_snapshot.classical_entropy_total:.4f} "
                 f"ENERGY="
                 f"{self.energy_pool:.4f} "
                 f"GAIN="
@@ -1248,7 +1280,7 @@ class Universe:
                 f"PRESSURE="
                 f"{self.pressure:.4f} "
                 f"CURVATURE="
-                f"{last_snapshot.get('curvature', 0.0):.2f}"
+                f"{last_snapshot.curvature:.2f}"
             )
 
         report = (

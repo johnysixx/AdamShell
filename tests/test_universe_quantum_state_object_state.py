@@ -229,7 +229,7 @@ class UniverseQuantumStateObjectStateTests(
         self.assertTrue(state.enabled)
         self.assertEqual(state.tick_count, 1)
 
-    def test_universe_history_remains_boundary_dict(
+    def test_universe_history_keeps_object_state(
         self
     ):
         universe = Universe()
@@ -239,13 +239,18 @@ class UniverseQuantumStateObjectStateTests(
         universe.record_universe_state()
         snapshot = universe.universe_history[-1]
 
-        self.assertIsInstance(snapshot, dict)
         self.assertEqual(
-            snapshot["quantum_fluctuation"],
+            snapshot.quantum_fluctuation,
             universe.quantum_state.fluctuation,
         )
-        snapshot["quantum_fluctuation"] = 99.0
 
+        exported = snapshot.to_dict()
+        exported["quantum_fluctuation"] = 99.0
+
+        self.assertAlmostEqual(
+            snapshot.quantum_fluctuation,
+            0.01,
+        )
         self.assertAlmostEqual(
             universe.quantum_state.fluctuation,
             0.01,

@@ -169,7 +169,7 @@ class UniverseSpacetimeObjectStateTests(
             3,
         )
 
-    def test_history_remains_boundary_dict(
+    def test_history_uses_object_state(
         self
     ):
         universe = Universe()
@@ -180,13 +180,18 @@ class UniverseSpacetimeObjectStateTests(
         universe.record_universe_state()
         snapshot = universe.universe_history[-1]
 
-        self.assertIsInstance(snapshot, dict)
         self.assertAlmostEqual(
-            snapshot["curvature"],
+            snapshot.curvature,
             0.01,
         )
-        snapshot["curvature"] = 99.0
 
+        exported = snapshot.to_dict()
+        exported["curvature"] = 99.0
+
+        self.assertAlmostEqual(
+            snapshot.curvature,
+            0.01,
+        )
         self.assertAlmostEqual(
             universe.world[
                 "spacetime"
