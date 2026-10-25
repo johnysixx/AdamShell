@@ -58,7 +58,8 @@ class PlanetaryMaterialDomainObjectStateTests(unittest.TestCase):
 
     def test_materialization_preserves_definition_identity(self):
         universe = Universe()
-        definitions = Planets(universe).planetary_materials
+        planets_layer = Planets(universe)
+        definitions = planets_layer.planetary_materials
         universe.world["planetary_materials"] = definitions
         universe.world["planetary_state"] = PlanetFormationState(
             earth_formed=True,
@@ -66,6 +67,10 @@ class PlanetaryMaterialDomainObjectStateTests(unittest.TestCase):
             ice_possible=True,
             minerals_possible=True,
             organic_molecules_possible=True,
+        )
+
+        planets_layer.planetary_state = (
+            universe.world["planetary_state"]
         )
 
         process = PlanetaryMaterials(universe)
@@ -86,6 +91,14 @@ class PlanetaryMaterialDomainObjectStateTests(unittest.TestCase):
                 "requires": ["hydrogen", "oxygen"],
             }
         }
+        planets_layer = Planets(universe)
+        planets_layer.planetary_state = (
+            universe.world["planetary_state"]
+        )
+        planets_layer.planetary_materials = (
+            universe.world["planetary_materials"]
+        )
+
         process = PlanetaryMaterials(universe)
 
         with self.assertRaises(TypeError):

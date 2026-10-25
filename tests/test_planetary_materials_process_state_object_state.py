@@ -9,11 +9,25 @@ from universe.planetary_materials_process_state import (
     PlanetaryMaterialsProcessState,
 )
 from universe.universe import Universe
+from universe.planets import Planets
 
 
 class PlanetaryMaterialsProcessStateObjectStateTests(
     unittest.TestCase
 ):
+
+    def _wire_canonical_inputs(self, universe):
+        planets_layer = Planets(universe)
+
+        if "planetary_state" in universe.world:
+            planets_layer.planetary_state = (
+                universe.world["planetary_state"]
+            )
+
+        if "planetary_materials" in universe.world:
+            planets_layer.planetary_materials = (
+                universe.world["planetary_materials"]
+            )
 
     def _possible_materials(self):
         return {
@@ -83,6 +97,8 @@ class PlanetaryMaterialsProcessStateObjectStateTests(
         universe.world["planetary_materials"] = (
             self._possible_materials()
         )
+        self._wire_canonical_inputs(universe)
+
         process = PlanetaryMaterials(universe)
 
         result = process.materialize()

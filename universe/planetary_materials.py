@@ -29,6 +29,8 @@ class PlanetaryMaterials:
 
         self.public_state = self._build_public_state()
 
+        self.universe.planetary_materials_layer = self
+
     @property
     def state(self):
         return self._state
@@ -72,11 +74,23 @@ class PlanetaryMaterials:
         )
 
     def _materialize_unprotected(self):
-        planetary_state = self.universe.world.get(
-            "planetary_state",
-            PlanetFormationState(),
+        planets_layer = getattr(
+            self.universe,
+            "planets_layer",
+            None,
         )
-        possible_materials = self.universe.world.get("planetary_materials", {})
+
+        planetary_state = (
+            planets_layer.planetary_state
+            if planets_layer is not None
+            else PlanetFormationState()
+        )
+
+        possible_materials = (
+            planets_layer.planetary_materials
+            if planets_layer is not None
+            else {}
+        )
 
         if not planetary_state.earth_formed:
             self.state = PlanetaryMaterialsProcessState.FAILED

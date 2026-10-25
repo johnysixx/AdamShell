@@ -22,11 +22,25 @@ from universe.planetary_materials_process_state import (
     PlanetaryMaterialsProcessState,
 )
 from universe.universe import Universe
+from universe.planets import Planets
 
 
 class PlanetaryMaterialObjectStateTests(
     unittest.TestCase
 ):
+
+    def _wire_canonical_inputs(self, universe):
+        planets_layer = Planets(universe)
+
+        if "planetary_state" in universe.world:
+            planets_layer.planetary_state = (
+                universe.world["planetary_state"]
+            )
+
+        if "planetary_materials" in universe.world:
+            planets_layer.planetary_materials = (
+                universe.world["planetary_materials"]
+            )
 
     def _assert_object_only(
         self,
@@ -86,6 +100,8 @@ class PlanetaryMaterialObjectStateTests(
         universe.world["planetary_materials"] = (
             self._possible_materials()
         )
+
+        self._wire_canonical_inputs(universe)
 
         process = PlanetaryMaterials(universe)
         result = process.materialize()
@@ -240,6 +256,8 @@ class PlanetaryMaterialObjectStateTests(
         universe.world["planetary_materials"] = (
             self._possible_materials()
         )
+        self._wire_canonical_inputs(universe)
+
         process = PlanetaryMaterials(universe)
 
         process.materialize()
@@ -279,6 +297,8 @@ class PlanetaryMaterialObjectStateTests(
                 requires=("hydrogen", "oxygen"),
             )
         }
+        self._wire_canonical_inputs(universe)
+
         process = PlanetaryMaterials(universe)
 
         process.materialize()
@@ -302,6 +322,8 @@ class PlanetaryMaterialObjectStateTests(
         self
     ):
         universe = Universe()
+        self._wire_canonical_inputs(universe)
+
         process = PlanetaryMaterials(universe)
 
         result = process.materialize()
@@ -349,6 +371,8 @@ class PlanetaryMaterialObjectStateTests(
         universe.world["planetary_materials"] = (
             self._possible_materials()
         )
+        self._wire_canonical_inputs(universe)
+
         process = PlanetaryMaterials(universe)
 
         def broken_history():
