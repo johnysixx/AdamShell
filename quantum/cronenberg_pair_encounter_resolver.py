@@ -170,7 +170,9 @@ class CronenbergQuantumTickEffectResult:
         return {
             "before_tick": self.before_tick,
             "after_tick": self.after_tick,
-            "tick_result": deepcopy(self.tick_result),
+            "tick_result": _thaw_cronenberg_pair_payload(
+                self.tick_result
+            ),
         }
 
 

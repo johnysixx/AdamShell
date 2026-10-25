@@ -40,6 +40,9 @@ from universe.physics_state import (
     UniverseTimeState,
 )
 from universe.quantum_state import UniverseQuantumState
+from universe.quantum_tick_result_state import (
+    UniverseQuantumTickResult,
+)
 from universe.spacetime import UniverseSpacetimeState
 from universe.universe_lifecycle_state import (
     UniverseLifecycleState,
@@ -559,6 +562,17 @@ class Universe:
             self.statistics.record_quantum_box_disappeared()
             UniverseLogger.event(f'QUANTUM BOX DISAPPEARED: {box.id}')
         UniverseLogger.event(f"QUANTUM TICK FLUCTUATION={self.quantum_state.fluctuation:.2f} UNCERTAINTY={self.quantum_state.uncertainty:.3f} QENTROPY={self.quantum_state.entropy_delta:.4f} ")
+
+        return UniverseQuantumTickResult(
+            tick=self.quantum_state.tick_count,
+            collapse_count=(
+                self.quantum_state.collapse_count
+            ),
+            fluctuation=self.quantum_state.fluctuation,
+            uncertainty=self.quantum_state.uncertainty,
+            entropy_delta=self.quantum_state.entropy_delta,
+            entropy_total=self.quantum_state.entropy_total,
+        )
 
     def tick_quantum(self):
         if not self.quantum_state.enabled:

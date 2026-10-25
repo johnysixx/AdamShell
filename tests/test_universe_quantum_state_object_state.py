@@ -1,7 +1,11 @@
 import unittest
+from copy import deepcopy
 
 from universe.quantum_state import (
     UniverseQuantumState
+)
+from universe.quantum_tick_result_state import (
+    UniverseQuantumTickResult,
 )
 from universe.universe import Universe
 
@@ -114,6 +118,99 @@ class UniverseQuantumStateObjectStateTests(
         self.assertAlmostEqual(
             state.entropy_total,
             0.0015,
+        )
+
+    def test_quantum_tick_returns_object_result(
+        self
+    ):
+        universe = Universe()
+
+        universe.enable_quantum_layer()
+        state = universe.quantum_state
+
+        result = universe.tick_quantum()
+
+        self.assertIsInstance(
+            result,
+            UniverseQuantumTickResult,
+        )
+
+        self.assertIs(
+            universe.quantum_state,
+            state,
+        )
+
+        self.assertEqual(result.tick, 1)
+        self.assertEqual(
+            result.collapse_count,
+            state.collapse_count,
+        )
+
+        self.assertAlmostEqual(
+            result.fluctuation,
+            0.01,
+        )
+        self.assertAlmostEqual(
+            result.uncertainty,
+            0.005,
+        )
+
+        self._assert_object_only(result)
+
+        self.assertIs(
+            deepcopy(result),
+            result,
+        )
+
+        snapshot = result.to_dict()
+        snapshot["tick"] = 99
+
+        self.assertEqual(result.tick, 1)
+
+        second = universe.tick_quantum()
+
+        self.assertIsInstance(
+            second,
+            UniverseQuantumTickResult,
+        )
+        self.assertEqual(second.tick, 2)
+        self.assertEqual(result.tick, 1)
+
+    def test_unprotected_tick_returns_object_result(
+        self
+    ):
+        universe = Universe()
+        universe.enable_quantum_layer()
+
+        result = (
+            universe.tick_quantum_unprotected()
+        )
+
+        self.assertIsInstance(
+            result,
+            UniverseQuantumTickResult,
+        )
+        self.assertEqual(result.tick, 1)
+        self.assertEqual(
+            result.collapse_count,
+            1,
+        )
+
+    def test_disabled_quantum_tick_remains_noop(
+        self
+    ):
+        universe = Universe()
+
+        self.assertIsNone(
+            universe.tick_quantum()
+        )
+        self.assertIsNone(
+            universe.tick_quantum_unprotected()
+        )
+
+        self.assertEqual(
+            universe.quantum_state.tick_count,
+            0,
         )
 
     def test_to_dict_returns_detached_snapshot(

@@ -6,6 +6,9 @@ from core.entity.serpent_d20 import (
     SerpentD20PublicRollEvent,
     SerpentResolvedConsequence,
 )
+from universe.quantum_tick_result_state import (
+    UniverseQuantumTickResult,
+)
 from quantum.serpent_consequence_executor import (
     SerpentConsequenceExecutor,
 )
@@ -48,10 +51,18 @@ class FixedSerpentRng:
 
 class FakeSerpentUniverse:
 
+    def __init__(self):
+        self.result = UniverseQuantumTickResult(
+            tick=1,
+            collapse_count=1,
+            fluctuation=0.01,
+            uncertainty=0.005,
+            entropy_delta=0.0005,
+            entropy_total=0.0005,
+        )
+
     def tick_quantum(self):
-        return {
-            "tick": 1,
-        }
+        return self.result
 
 
 class SerpentD20ObjectStateTests(
@@ -291,9 +302,17 @@ class SerpentD20ObjectStateTests(
             "tick"
         ] = 99
 
+        self.assertIsInstance(
+            consequence.result,
+            UniverseQuantumTickResult,
+        )
         self.assertEqual(
-            consequence.result["tick"],
+            consequence.result.tick,
             1,
+        )
+        self.assertIs(
+            consequence.result,
+            executor.universe.result,
         )
 
     def test_resolved_consequences_reject_mapping_state(

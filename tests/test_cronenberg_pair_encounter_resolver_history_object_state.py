@@ -5,7 +5,12 @@ from quantum.cronenberg_pair_encounter import (
     CronenbergPairSpin,
     CronenbergQuantumPairEncounteredEvent,
 )
+from universe.universe import Universe
+from universe.quantum_tick_result_state import (
+    UniverseQuantumTickResult,
+)
 from quantum.cronenberg_pair_encounter_resolver import (
+    CronenbergQuantumTickEffectResult,
     CronenbergPairEncounterResolvedEvent,
     CronenbergPairEncounterResolver,
     CronenbergPairResolvedEffect,
@@ -241,6 +246,62 @@ class CronenbergPairEncounterResolverHistoryObjectStateTests(
             event
             .resolved_effects[0]
             .result.first_alive
+        )
+
+    def test_quantum_tick_effect_preserves_object(
+        self
+    ):
+        universe = Universe()
+        universe.enable_quantum_layer()
+
+        resolver = CronenbergPairEncounterResolver(
+            universe
+        )
+
+        original_tick = universe.tick_quantum
+        produced = []
+
+        def capture_tick():
+            result = original_tick()
+            produced.append(result)
+            return result
+
+        universe.tick_quantum = capture_tick
+
+        effect = resolver._quantum_tick()
+
+        self.assertIsInstance(
+            effect,
+            CronenbergQuantumTickEffectResult,
+        )
+        self.assertEqual(effect.before_tick, 0)
+        self.assertEqual(effect.after_tick, 1)
+
+        self.assertIsInstance(
+            effect.tick_result,
+            UniverseQuantumTickResult,
+        )
+        self.assertIs(
+            effect.tick_result,
+            produced[0],
+        )
+
+        snapshot = effect.to_dict()
+
+        self.assertIsInstance(
+            snapshot["tick_result"],
+            dict,
+        )
+        self.assertEqual(
+            snapshot["tick_result"]["tick"],
+            1,
+        )
+
+        snapshot["tick_result"]["tick"] = 99
+
+        self.assertEqual(
+            effect.tick_result.tick,
+            1,
         )
 
     def test_history_rejects_mapping_and_is_deepcopy_safe(
