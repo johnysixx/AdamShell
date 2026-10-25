@@ -1,4 +1,5 @@
 import unittest
+from copy import deepcopy
 
 from core.entity.serpent_d20 import (
     SerpentD20HiddenResolutionEvent,
@@ -234,6 +235,114 @@ class SerpentConsequenceExecutorObjectStateTests(
             7,
         )
 
+    def test_builtin_handler_result_preserves_identity(
+        self,
+    ):
+        executor = SerpentConsequenceExecutor(
+            FakeUniverse()
+        )
+
+        position = SpatialVector3(
+            x=1,
+            y=2,
+            z=3,
+        )
+
+        produced = SerpentQuantumBoxResult(
+            box_id="box_identity",
+            position=position,
+            state="superposition",
+        )
+
+        executor.handlers = {
+            "quantum_box": lambda: produced,
+        }
+
+        serpent = FakeSerpentD20(
+            ["quantum_box"]
+        )
+
+        executed = executor.execute_hidden_plan(
+            serpent,
+            "identity-roll",
+        )
+
+        stored = executed.resolved_consequences[0]
+
+        self.assertIs(
+            executed,
+            executor.execution_history[-1],
+        )
+
+        self.assertIs(
+            stored,
+            serpent.recorded[0],
+        )
+
+        self.assertIs(
+            stored.result,
+            produced,
+        )
+
+        self.assertIs(
+            stored.result.position,
+            position,
+        )
+
+        snapshot = executed.to_dict()
+
+        self.assertEqual(
+            snapshot["resolved_consequences"][0]
+            ["result"]["box_id"],
+            "box_identity",
+        )
+
+        snapshot["resolved_consequences"][0][
+            "result"
+        ]["position"]["x"] = 999
+
+        self.assertEqual(
+            produced.position.x,
+            1.0,
+        )
+
+        self.assertIs(
+            stored.result,
+            produced,
+        )
+
+    def test_mutable_handler_result_is_still_copied(
+        self,
+    ):
+        source = {
+            "nested": [7],
+        }
+
+        consequence = SerpentResolvedConsequence(
+            consequence="custom",
+            result=source,
+        )
+
+        self.assertIsNot(
+            consequence.result,
+            source,
+        )
+
+        source["nested"][0] = 99
+
+        self.assertEqual(
+            consequence.result["nested"],
+            [7],
+        )
+
+        snapshot = consequence.to_dict()
+        snapshot["result"]["nested"][0] = 42
+
+        self.assertEqual(
+            consequence.result["nested"],
+            [7],
+        )
+
     def test_execution_snapshot_is_detached(
         self,
     ):
@@ -331,7 +440,17 @@ class SerpentConsequenceExecutorObjectStateTests(
             ),
         )
 
+        self.assertIs(
+            deepcopy(geometry),
+            geometry,
+        )
+
         for result in results:
+            self.assertIs(
+                deepcopy(result),
+                result,
+            )
+
             for mapping_method in (
                 "get",
                 "keys",

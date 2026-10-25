@@ -68,6 +68,9 @@ class SerpentQuantumBoxResult:
             str(self.state),
         )
 
+    def __deepcopy__(self, memo):
+        return self
+
     def to_dict(self):
         return {
             "box_id": self.box_id,
@@ -103,6 +106,9 @@ class SerpentQuantumErrorResult:
                 str(self.cronenberg_id),
             )
 
+    def __deepcopy__(self, memo):
+        return self
+
     def to_dict(self):
         return {
             "error_type": self.error_type,
@@ -134,6 +140,9 @@ class SerpentCatManifestationResult:
             "origin",
             str(self.origin),
         )
+
+    def __deepcopy__(self, memo):
+        return self
 
     def to_dict(self):
         return {
@@ -170,6 +179,9 @@ class SerpentQuantumGeometryState:
             "reconfiguration_count",
             int(self.reconfiguration_count),
         )
+
+    def __deepcopy__(self, memo):
+        return self
 
     def to_dict(self):
         return {
@@ -211,6 +223,9 @@ class SerpentQuantumGeometryShiftResult:
             "cause",
             str(self.cause),
         )
+
+    def __deepcopy__(self, memo):
+        return self
 
     def to_dict(self):
         return {
@@ -275,6 +290,9 @@ class SerpentCronenbergCounterpartResult:
                     field_name,
                     float(value),
                 )
+
+    def __deepcopy__(self, memo):
+        return self
 
     def to_dict(self):
         return {
