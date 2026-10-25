@@ -1,5 +1,9 @@
 import unittest
 
+from meeting_place.dice_vial import (
+    DiceVial,
+    DiceVialSecretRotationEvent,
+)
 from quantum.d20_registry import (
     D20Registry,
     D20RotationEvent,
@@ -223,6 +227,52 @@ class D20RegistryObjectStateTests(
         self.assertEqual(
             result.rotated_count,
             2,
+        )
+
+    def test_vial_rotation_keeps_object_result(self):
+        registry = D20Registry()
+        vial = DiceVial()
+        registry.register(vial)
+
+        class FixedRng:
+            def randint(self, minimum, maximum):
+                return 7
+
+            def choice(self, values):
+                return list(values)[0]
+
+        result = registry.rotate_random(
+            rng=FixedRng()
+        )
+
+        self.assertIsInstance(
+            result,
+            D20RotationEvent,
+        )
+        self.assertIsInstance(
+            result.results[0],
+            DiceVialSecretRotationEvent,
+        )
+        self.assertIs(
+            result.results[0],
+            vial.secret_event,
+        )
+
+        snapshot = result.to_dict()
+        self.assertIsInstance(
+            snapshot["results"][0],
+            dict,
+        )
+        self.assertEqual(
+            snapshot["results"][0]["roll"],
+            7,
+        )
+
+        snapshot["results"][0]["roll"] = 99
+
+        self.assertEqual(
+            result.results[0].roll,
+            7,
         )
 
     def test_history_rejects_mapping_event(

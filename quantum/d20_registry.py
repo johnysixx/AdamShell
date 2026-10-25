@@ -56,6 +56,11 @@ def _thaw_rotation_payload(value):
             for item in value
         ]
 
+    serializer = getattr(value, "to_dict", None)
+
+    if callable(serializer):
+        return serializer()
+
     return deepcopy(value)
 
 

@@ -47,6 +47,9 @@ class DiceVialSecretRotationEvent:
             ),
         )
 
+    def __deepcopy__(self, memo):
+        return self
+
     def to_dict(self):
         return {
             "name": self.name,
@@ -125,10 +128,7 @@ class DiceVial:
             )
         )
 
-        return (
-            self._secret_event
-            .to_dict()
-        )
+        return self._secret_event
 
     @property
     def secret_event(self):
@@ -139,17 +139,17 @@ class DiceVial:
             rng=rng
         )
 
-        if event["roll"] <= 10:
+        if event.roll <= 10:
             return {
                 "layer": "multiverse",
                 "universe_id": 0,
-                "secret_event": event
+                "secret_event": event.to_dict()
             }
 
         return {
             "layer": "quantum_layer",
             "universe_id": 0.5,
-            "secret_event": event
+            "secret_event": event.to_dict()
         }
 
     def clear_secret(self):

@@ -1471,13 +1471,8 @@ class MeetingPlace:
             )
         )
 
-        self.dice_vial.roll(
+        dice_vial_event = self.dice_vial.roll(
             rng=rng
-        )
-
-        dice_vial_event = (
-            self.dice_vial
-            .secret_event
         )
 
         self.dice_box.rotate_random_die(
@@ -1648,9 +1643,9 @@ class MeetingPlace:
         self.sync_entropy_terminal_to_world()
         if self.total_entropy_served_ever % 10 == 0:
             secret_event = self.dice_vial.roll()
-            if secret_event['quantum_tick_requested']:
+            if secret_event.quantum_tick_requested:
                 self.quantum_entropy_tick()
-            if secret_event['box_created']:
+            if secret_event.box_created:
                 self.universe.create_quantum_box()
         effect = (
             self.service_rules
