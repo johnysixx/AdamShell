@@ -21,6 +21,7 @@ from universe.stellar_systems_process_state import (
     StellarSystemsProcessState,
 )
 from universe.universe import Universe
+from universe.supernova_enrichment import SupernovaEnrichment
 
 
 class StellarSystemFormationObjectStateTests(
@@ -61,6 +62,11 @@ class StellarSystemFormationObjectStateTests(
                 can_form_stellar_systems=True,
             )
         ]
+
+        supernova_layer = SupernovaEnrichment(universe)
+        supernova_layer.enriched_clouds = (
+            universe.world["enriched_clouds"]
+        )
 
         process = StellarSystems(universe)
         result = process.form_stellar_systems()
@@ -221,6 +227,11 @@ class StellarSystemFormationObjectStateTests(
                 can_form_stellar_systems=True,
             )
         ]
+        supernova_layer = SupernovaEnrichment(universe)
+        supernova_layer.enriched_clouds = (
+            universe.world["enriched_clouds"]
+        )
+
         process = StellarSystems(universe)
 
         process.form_stellar_systems()
@@ -286,6 +297,11 @@ class StellarSystemFormationObjectStateTests(
                 can_form_stellar_systems=True,
             )
         ]
+        supernova_layer = SupernovaEnrichment(universe)
+        supernova_layer.enriched_clouds = (
+            universe.world["enriched_clouds"]
+        )
+
         process = StellarSystems(universe)
 
         def broken_history():

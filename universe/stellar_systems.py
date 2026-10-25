@@ -31,6 +31,8 @@ class StellarSystems:
 
         self.public_state = self._build_public_state()
 
+        self.universe.stellar_systems_layer = self
+
     @property
     def state(self):
         return self._state
@@ -76,7 +78,17 @@ class StellarSystems:
         )
 
     def _form_stellar_systems_unprotected(self):
-        enriched_clouds = self.universe.world.get("enriched_clouds", [])
+        supernova_layer = getattr(
+            self.universe,
+            "supernova_enrichment_layer",
+            None,
+        )
+
+        enriched_clouds = (
+            supernova_layer.enriched_clouds
+            if supernova_layer is not None
+            else ()
+        )
 
         for cloud in enriched_clouds:
             if not isinstance(cloud, StellarMaterialCloud):
