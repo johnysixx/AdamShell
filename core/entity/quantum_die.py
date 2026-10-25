@@ -72,23 +72,21 @@ class QuantumDie:
             event
         )
 
-        roll_snapshot = event.to_dict()
-
-        resolution = None
+        resolution_event = None
 
         if self.resolver is not None:
-            resolution = self.resolver.resolve(
+            resolution_event = self.resolver.resolve(
                 roll_event=event,
                 source="quantum_die_roll"
             )
 
-        result = dict(
-            roll_snapshot
+        # Local import prevents a circular module import:
+        # the resolver already imports QuantumDieRollEvent.
+        from core.entity.quantum_die_roll_result_state import (
+            QuantumDieRollResult,
         )
 
-        if resolution is not None:
-            result["resolution"] = (
-                resolution.to_dict()
-            )
-
-        return result
+        return QuantumDieRollResult(
+            roll_event=event,
+            resolution_event=resolution_event,
+        )

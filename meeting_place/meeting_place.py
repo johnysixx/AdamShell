@@ -1428,31 +1428,19 @@ class MeetingPlace:
                 reason='cat_d20_missing',
             )
 
-        self.universe.quantum_die.roll(
-            rng=rng
+        quantum_roll = (
+            self.universe.quantum_die.roll(
+                rng=rng
+            )
         )
 
         quantum_d20_event = (
-            self.universe
-            .quantum_die
-            .history[-1]
+            quantum_roll.roll_event
         )
 
-        quantum_resolution_event = None
-
-        resolver = getattr(
-            self.universe,
-            'quantum_die_resolver',
-            None,
+        quantum_resolution_event = (
+            quantum_roll.resolution_event
         )
-
-        if (
-            resolver is not None
-            and resolver.history
-        ):
-            quantum_resolution_event = (
-                resolver.history[-1]
-            )
 
         cat_d20_turn_result = (
             self.turn_cat_d20_in_box(

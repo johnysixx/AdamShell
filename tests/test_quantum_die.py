@@ -1,6 +1,12 @@
 import unittest
 
-from core.entity.quantum_die import QuantumDieRollEvent
+from core.entity.quantum_die import (
+    QuantumDie,
+    QuantumDieRollEvent,
+)
+from core.entity.quantum_die_roll_result_state import (
+    QuantumDieRollResult,
+)
 from quantum.quantum_die_resolver import (
     QuantumDieResolution,
     QuantumDieResolutionEvent,
@@ -92,10 +98,25 @@ class QuantumDieTests(unittest.TestCase):
             7,
         )
 
-        self.assertEqual(
-            result["value"],
-            7,
+        self.assertIsInstance(
+            result,
+            QuantumDieRollResult,
         )
+        self.assertIs(result.roll_event, event)
+        self.assertIs(
+            result.resolution_event,
+            universe.quantum_die_resolver.history[0],
+        )
+        self.assertEqual(result.roll_event.value, 7)
+
+        with self.assertRaises(TypeError):
+            _ = result["value"]
+
+        exported = result.to_dict()
+        self.assertEqual(exported["value"], 7)
+
+        exported["value"] = 99
+        self.assertEqual(result.roll_event.value, 7)
 
     def test_resolver_history_uses_object_state(
         self
@@ -176,16 +197,95 @@ class QuantumDieTests(unittest.TestCase):
             "single_cronenberg_manifested",
         )
 
+        self.assertIs(
+            result.resolution_event,
+            event,
+        )
         self.assertEqual(
-            result[
-                "resolution"
-            ][
-                "resolution"
-            ][
-                "result"
-            ],
+            result.resolution_event.resolution.result,
             "single_cronenberg_manifested",
         )
+
+        exported = result.to_dict()
+        self.assertEqual(
+            exported["resolution"]["resolution"]["result"],
+            "single_cronenberg_manifested",
+        )
+
+        exported["resolution"]["resolution"]["result"] = (
+            "changed"
+        )
+
+        self.assertEqual(
+            result.resolution_event.resolution.result,
+            "single_cronenberg_manifested",
+        )
+
+    def test_roll_without_resolver_returns_object(self):
+        die = QuantumDie(resolver=None)
+
+        result = die.roll(
+            rng=SequenceRng([4])
+        )
+
+        self.assertIsInstance(
+            result,
+            QuantumDieRollResult,
+        )
+        self.assertIs(
+            result.roll_event,
+            die.history[0],
+        )
+        self.assertIsNone(
+            result.resolution_event
+        )
+
+        self.assertEqual(
+            result.to_dict(),
+            {
+                "die": "quantum_d20",
+                "value": 4,
+                "roll_number": 1,
+                "visibility": "universe_only",
+            },
+        )
+
+        with self.assertRaises(TypeError):
+            _ = result["value"]
+
+    def test_roll_result_rejects_invalid_objects(self):
+        with self.assertRaises(TypeError):
+            QuantumDieRollResult(
+                roll_event={},
+            )
+
+        event = QuantumDieRollEvent(
+            die="quantum_d20",
+            value=4,
+            roll_number=1,
+        )
+
+        with self.assertRaises(TypeError):
+            QuantumDieRollResult(
+                roll_event=event,
+                resolution_event={},
+            )
+
+        mismatch = QuantumDieResolutionEvent(
+            die="quantum_d20",
+            value=7,
+            roll_number=1,
+            source="test",
+            resolution=QuantumDieResolution(
+                result="test_resolution",
+            ),
+        )
+
+        with self.assertRaises(ValueError):
+            QuantumDieRollResult(
+                roll_event=event,
+                resolution_event=mismatch,
+            )
 
     def test_resolver_rejects_mapping_roll_event(
         self
@@ -219,13 +319,7 @@ class QuantumDieTests(unittest.TestCase):
         ]
 
         resolution_names = [
-            result[
-                "resolution"
-            ][
-                "resolution"
-            ][
-                "result"
-            ]
+            result.resolution_event.resolution.result
             for result in results
         ]
 
