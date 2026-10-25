@@ -109,7 +109,7 @@ class LemonadeReservoir:
             f"{self.amount_litres:.2f} litres"
         )
 
-        return event.to_dict()
+        return event
 
     def _mix_profiles(
         self,
@@ -268,7 +268,7 @@ class LemonadeReservoir:
                 "LEMONADE RESERVOIR IS EMPTY"
             )
 
-        return event.to_dict()
+        return event
 
     @property
     def public_state(self):

@@ -1,4 +1,9 @@
 import unittest
+from types import SimpleNamespace
+
+from meeting_place.meeting_place import MeetingPlace
+from multiverse import UniverseRegistry
+from universe.universe import Universe
 
 from meeting_place.lemonade_profile import (
     LemonadeAddedEvent,
@@ -193,10 +198,9 @@ class LemonadeProfileObjectStateTests(
             "source",
         )
 
-        self.assertEqual(
-            added["source"],
-            "test_batch",
-        )
+        self.assertIs(added, added_event)
+        self.assertEqual(added.source, "test_batch")
+        self._assert_no_mapping_api(added, "source")
 
         served = reservoir.serve(
             drinker_name="guest",
@@ -220,7 +224,11 @@ class LemonadeProfileObjectStateTests(
             profile,
         )
 
-        served["lemonade_profile"][
+        self.assertIs(served, served_event)
+        self._assert_no_mapping_api(served, "drinker")
+
+        snapshot = served.to_dict()
+        snapshot["lemonade_profile"][
             "traits"
         ]["acidity"] = 99.0
 
@@ -276,6 +284,62 @@ class LemonadeProfileObjectStateTests(
             ("first", "second"),
         )
 
+    def test_meeting_place_service_returns_event_object(
+        self
+    ):
+        universe = Universe()
+        universe.universe_registry = UniverseRegistry()
+
+        bar = MeetingPlace(universe)
+
+        added = bar.lemonade_reservoir.add_lemonade(
+            amount_litres=1.0,
+        )
+
+        self.assertIsInstance(
+            added,
+            LemonadeAddedEvent,
+        )
+        self.assertIs(
+            added,
+            bar.lemonade_reservoir.events[0],
+        )
+
+        guest = SimpleNamespace(
+            name="guest",
+            type="human",
+            location="at_bar",
+        )
+
+        served = bar.serve_lemonade(
+            guest,
+            location="at_bar",
+        )
+
+        self.assertIsInstance(
+            served,
+            LemonadeServedEvent,
+        )
+        self.assertIs(
+            served,
+            bar.lemonade_reservoir.events[-1],
+        )
+        self.assertEqual(served.drinker, "guest")
+        self.assertEqual(served.location, "at_bar")
+        self.assertEqual(served.remaining_litres, 0.5)
+
+        self._assert_no_mapping_api(
+            served,
+            "drinker",
+        )
+
+        exported = served.to_dict()
+        self.assertIsInstance(exported, dict)
+        self.assertEqual(
+            exported["name"],
+            "free_lemonade_served",
+        )
+
     def test_boundary_serialization_is_detached(
         self
     ):
@@ -304,7 +368,8 @@ class LemonadeProfileObjectStateTests(
             drinker_name="guest",
             location="bar",
         )
-        served["lemonade_profile"][
+        snapshot = served.to_dict()
+        snapshot["lemonade_profile"][
             "traits"
         ]["acidity"] = 77.0
 

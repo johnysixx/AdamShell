@@ -1607,7 +1607,7 @@ class MeetingPlace:
         self.dice_vial.roll()
         self.lemonade_signs.sync_with_reservoir(self.lemonade_reservoir)
         self.emit_event(f'{entity_name} drinks free lemonade at {location}')
-        return {'lemonade_event': event}
+        return event
 
     def serve_energy(self, entity):
         from universe.pre_cosmic_rules import ENERGY_SERVING_J
