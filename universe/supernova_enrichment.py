@@ -32,6 +32,8 @@ class SupernovaEnrichment:
 
         self.public_state = self._build_public_state()
 
+        self.universe.supernova_enrichment_layer = self
+
     @property
     def state(self):
         return self._state

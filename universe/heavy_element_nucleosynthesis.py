@@ -90,13 +90,26 @@ class HeavyElementNucleosynthesis:
         self.public_state = self._build_public_state()
 
     def forge_heavy_elements(self):
-        elements_up_to_iron = self.universe.world.get(
-            "elements_up_to_iron",
-            {},
+        nucleosynthesis_layer = getattr(
+            self.universe,
+            "stellar_nucleosynthesis_layer",
+            None,
         )
-        enriched_clouds = self.universe.world.get(
-            "enriched_clouds",
-            [],
+        supernova_layer = getattr(
+            self.universe,
+            "supernova_enrichment_layer",
+            None,
+        )
+
+        elements_up_to_iron = (
+            nucleosynthesis_layer.elements_up_to_iron
+            if nucleosynthesis_layer is not None
+            else {}
+        )
+        enriched_clouds = (
+            supernova_layer.enriched_clouds
+            if supernova_layer is not None
+            else ()
         )
 
         if "iron" not in elements_up_to_iron:
@@ -241,9 +254,16 @@ class HeavyElementNucleosynthesis:
         )
 
     def write_to_world(self):
-        elements_up_to_iron = self.universe.world.get(
-            "elements_up_to_iron",
-            {},
+        nucleosynthesis_layer = getattr(
+            self.universe,
+            "stellar_nucleosynthesis_layer",
+            None,
+        )
+
+        elements_up_to_iron = (
+            nucleosynthesis_layer.elements_up_to_iron
+            if nucleosynthesis_layer is not None
+            else {}
         )
 
         all_elements = {}

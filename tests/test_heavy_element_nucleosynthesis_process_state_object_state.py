@@ -9,11 +9,28 @@ from universe.heavy_element_nucleosynthesis_process_state import (
     HeavyElementNucleosynthesisProcessState,
 )
 from universe.universe import Universe
+from universe.stellar_nucleosynthesis import StellarNucleosynthesis
+from universe.supernova_enrichment import SupernovaEnrichment
 
 
 class HeavyElementNucleosynthesisProcessStateObjectStateTests(
     unittest.TestCase
 ):
+
+    def _wire_canonical_inputs(self, universe):
+        if "elements_up_to_iron" in universe.world:
+            nucleosynthesis = StellarNucleosynthesis(
+                universe
+            )
+            nucleosynthesis.elements_up_to_iron = (
+                universe.world["elements_up_to_iron"]
+            )
+
+        if "enriched_clouds" in universe.world:
+            supernova = SupernovaEnrichment(universe)
+            supernova.enriched_clouds = (
+                universe.world["enriched_clouds"]
+            )
 
     def _ready_universe(self):
         universe = Universe()
@@ -39,6 +56,8 @@ class HeavyElementNucleosynthesisProcessStateObjectStateTests(
                 can_form_stellar_systems=True,
             )
         ]
+
+        self._wire_canonical_inputs(universe)
 
         return universe
 
@@ -85,6 +104,8 @@ class HeavyElementNucleosynthesisProcessStateObjectStateTests(
                 origin="stellar_nucleosynthesis",
             )
         }
+
+        self._wire_canonical_inputs(universe)
 
         process = HeavyElementNucleosynthesis(
             universe
