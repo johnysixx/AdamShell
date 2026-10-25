@@ -27,7 +27,10 @@ class StellarNucleosynthesisProcessStateObjectStateTests(
             ),
         ]
 
-        Stars(universe).form_first_stars()
+        Stars(
+            universe,
+            source_clouds=universe.world["germinal_clouds"],
+        ).form_first_stars()
 
         process = StellarNucleosynthesis(
             universe

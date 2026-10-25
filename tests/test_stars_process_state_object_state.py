@@ -49,7 +49,10 @@ class StarsProcessStateObjectStateTests(
                 can_form_stars=True,
             ),
         ]
-        process = Stars(universe)
+        process = Stars(
+            universe,
+            source_clouds=universe.world["germinal_clouds"],
+        )
 
         result = process.form_first_stars()
 

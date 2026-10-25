@@ -12,8 +12,9 @@ from universe.stars_process_state import (
 
 class Stars:
 
-    def __init__(self, universe):
+    def __init__(self, universe, source_clouds=None):
         self.universe = universe
+        self.source_clouds = source_clouds
         self.name = "stars"
         self.type = "stellar_layer"
         self.state = StarsProcessState.READY
@@ -65,7 +66,19 @@ class Stars:
         )
 
     def _form_first_stars_unprotected(self):
-        germinal_clouds = self.universe.world.get("germinal_clouds", [])
+        if self.source_clouds is not None:
+            germinal_clouds = self.source_clouds
+        else:
+            clouds_layer = getattr(
+                self.universe,
+                "cosmic_clouds_layer",
+                None,
+            )
+            germinal_clouds = (
+                clouds_layer.clouds
+                if clouds_layer is not None
+                else ()
+            )
 
         for cloud in germinal_clouds:
             if not isinstance(cloud, StellarMaterialCloud):

@@ -59,7 +59,10 @@ class StellarFormationObjectStateTests(
                 can_form_stars=True,
             ),
         ]
-        process = Stars(universe)
+        process = Stars(
+            universe,
+            source_clouds=universe.world["germinal_clouds"],
+        )
         result = process.form_first_stars()
 
         return universe, process, result
@@ -96,7 +99,10 @@ class StellarFormationObjectStateTests(
                 can_form_stars=True,
             ),
         ]
-        process = Stars(universe)
+        process = Stars(
+            universe,
+            source_clouds=universe.world["germinal_clouds"],
+        )
         state = process.stellar_state
 
         process.form_first_stars()
@@ -221,7 +227,10 @@ class StellarFormationObjectStateTests(
                 "can_form_stars": True,
             },
         ]
-        process = Stars(universe)
+        process = Stars(
+            universe,
+            source_clouds=universe.world["germinal_clouds"],
+        )
 
         result = process.form_first_stars()
 
@@ -244,7 +253,10 @@ class StellarFormationObjectStateTests(
                 can_form_stars=True,
             ),
         ]
-        process = Stars(universe)
+        process = Stars(
+            universe,
+            source_clouds=universe.world["germinal_clouds"],
+        )
 
         def broken_history():
             raise RuntimeError(

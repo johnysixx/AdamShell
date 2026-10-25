@@ -105,7 +105,10 @@ class StellarDomainObjectStateTests(unittest.TestCase):
         cloud = self._cloud("formation_cloud")
         universe.world["germinal_clouds"] = [cloud]
 
-        process = Stars(universe)
+        process = Stars(
+            universe,
+            source_clouds=universe.world["germinal_clouds"],
+        )
         process.form_first_stars()
 
         self.assertIsInstance(process.stars[0], PrimordialStar)
