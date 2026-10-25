@@ -273,9 +273,6 @@ class Universe:
         self.entities.append(entity)
         UniverseLogger.event(f'New entity added: {entity.name}')
         entity_type = getattr(entity, 'type', None)
-        world_entity = self.world.get(entity.name)
-        if entity_type is None and isinstance(world_entity, dict):
-            entity_type = world_entity.get('type')
         meeting_place = getattr(self, 'meeting_place', None)
         if meeting_place is None:
             return
