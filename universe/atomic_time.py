@@ -77,7 +77,7 @@ class AtomicTime:
     def _define_si_second_unprotected(self):
         self.ensure_isotopes()
 
-        isotopes = self.universe.world.get("known_isotopes", {})
+        isotopes = self.isotopes_layer.isotopes
 
         if "caesium_133" not in isotopes:
             self.state = AtomicTimeProcessState.FAILED
@@ -145,7 +145,7 @@ class AtomicTime:
         return self.result
 
     def ensure_isotopes(self):
-        if not self.universe.world.get("known_isotopes"):
+        if not self.isotopes_layer.isotopes:
             self.isotopes_layer.form_reference_isotopes()
 
         self.atomic_time_state.isotopes_available = True
