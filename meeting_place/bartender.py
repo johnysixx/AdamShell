@@ -195,7 +195,7 @@ class Bartender(SocialMixin):
             event
         )
 
-        return event.to_dict()
+        return event
 
     def leave_for_lemon(
         self,
@@ -220,7 +220,7 @@ class Bartender(SocialMixin):
             'FOR A LEMON'
         )
 
-        return event.to_dict()
+        return event
 
     def return_with_lemon(
         self,
@@ -242,7 +242,7 @@ class Bartender(SocialMixin):
             'BARTENDER RETURNS WITH LEMON'
         )
 
-        return event.to_dict()
+        return event
 
     def record_chronicle_entry(
         self,

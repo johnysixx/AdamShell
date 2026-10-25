@@ -60,7 +60,7 @@ class Day0GodUnderstandsSweetnessTests(unittest.TestCase):
 
     def test_event_order(self):
         self.scene.advance_to_god_understands_sweetness()
-        names = [event['name'] for event in self.scene.history]
+        names = [event.name for event in self.scene.history]
         wine = names.index('god_tastes_existing_wine')
         explanation = names.index('lilith_explains_sweetness_to_god')
         mead = names.index('god_finishes_serpents_mead_and_understands_sweetness')

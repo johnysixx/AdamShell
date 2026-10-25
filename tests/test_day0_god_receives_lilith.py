@@ -54,7 +54,7 @@ class Day0GodReceivesLilithTests(unittest.TestCase):
 
     def test_cronenberg_precedes_successful_second_attempt(self):
         self.scene.advance_to_god_holding_lilith()
-        names = [event['name'] for event in self.scene.history]
+        names = [event.name for event in self.scene.history]
         failure = names.index('gods_lilith_fails_without_lemon')
         restock = names.index('bartender_returns_with_lemon_stock')
         success = names.index('bartender_mixes_gods_lilith')

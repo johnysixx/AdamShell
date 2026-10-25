@@ -18,7 +18,7 @@ class Day0FirstGoodWineDiscussionTests(unittest.TestCase):
 
     def test_lilith_drinks_first_then_serpent(self):
         result = self.scene.lilith_and_serpent_take_first_table_drinks()
-        names = [event['name'] for event in self.scene.history]
+        names = [event.name for event in self.scene.history]
         lilith_index = names.index('lilith_takes_first_sip_of_lilith')
         serpent_index = names.index('serpent_finishes_wine_at_table')
         self.assertLess(lilith_index, serpent_index)

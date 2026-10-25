@@ -17,7 +17,7 @@ class Day0LilithFinalServiceAndTableTests(unittest.TestCase):
 
     def test_serpent_is_already_at_table_when_bartender_returns(self):
         self.scene.advance_to_good_drink_discussion()
-        names = [event['name'] for event in self.scene.history]
+        names = [event.name for event in self.scene.history]
         serpent_move = names.index('serpent_moves_to_existing_table')
         bartender_return = names.index('bartender_returned_with_lemon')
         self.assertLess(serpent_move, bartender_return)
@@ -30,7 +30,7 @@ class Day0LilithFinalServiceAndTableTests(unittest.TestCase):
 
     def test_first_served_lilith_has_one_sugar_cube(self):
         result = self.scene.advance_to_good_drink_discussion()
-        names = [event['name'] for event in self.scene.history]
+        names = [event.name for event in self.scene.history]
         self.assertIn('bartender_mixes_final_lilith', names)
 
     def test_lilith_requests_one_more_sugar_cube(self):

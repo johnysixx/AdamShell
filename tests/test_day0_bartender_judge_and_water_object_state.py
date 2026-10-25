@@ -322,7 +322,7 @@ class Day0BartenderJudgeAndWaterObjectStateTests(
 
         judge = next(
             event
-            for event in scene.history
+            for event in scene.checkpoint()["history"]
             if event["name"]
             == (
                 "god_rejects_participant_vote_"
@@ -332,7 +332,7 @@ class Day0BartenderJudgeAndWaterObjectStateTests(
 
         water = next(
             event
-            for event in scene.history
+            for event in scene.checkpoint()["history"]
             if event["name"]
             == (
                 "bartender_serves_serpent_water_"
@@ -342,7 +342,7 @@ class Day0BartenderJudgeAndWaterObjectStateTests(
 
         move = next(
             event
-            for event in scene.history
+            for event in scene.checkpoint()["history"]
             if event["name"]
             == "lilith_and_god_move_to_bar"
         )

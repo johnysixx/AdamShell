@@ -226,7 +226,7 @@ class Day0BeerBitternessObjectStateTests(
 
         god_event = next(
             event
-            for event in scene.history
+            for event in scene.checkpoint()["history"]
             if event["name"]
             == (
                 "god_tastes_beer_and_"
@@ -236,7 +236,7 @@ class Day0BeerBitternessObjectStateTests(
 
         lilith_event = next(
             event
-            for event in scene.history
+            for event in scene.checkpoint()["history"]
             if event["name"]
             == (
                 "lilith_sips_lilith_"

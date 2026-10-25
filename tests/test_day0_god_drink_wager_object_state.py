@@ -278,7 +278,7 @@ class Day0GodDrinkWagerObjectStateTests(
 
         snapshot = next(
             event
-            for event in scene.history
+            for event in scene.checkpoint()["history"]
             if event["name"]
             == (
                 "serpent_offers_god_"
@@ -298,6 +298,29 @@ class Day0GodDrinkWagerObjectStateTests(
         self.assertTrue(
             scene.god_wager_participation_offer
             .accepted
+        )
+
+        recorded_offer = next(
+            event
+            for event in scene.history
+            if isinstance(
+                event,
+                SerpentOffersGodWagerParticipationEvent,
+            )
+        )
+
+        self.assertIsNone(
+            recorded_offer.accepted
+        )
+
+        self.assertIsNot(
+            recorded_offer,
+            scene.god_wager_participation_offer,
+        )
+
+        self.assertEqual(
+            recorded_offer.name,
+            snapshot["name"],
         )
 
 

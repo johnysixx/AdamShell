@@ -205,7 +205,7 @@ class BarDrinkWagerObjectStateTests(
             scene
             .serpent_proposes_drink_wager_to_lilith()
         )
-        proposal_event = scene.history[-1]
+        proposal_event = scene.checkpoint()["history"][-1]
         scene.lilith_accepts_drink_wager()
 
         self.assertIsInstance(

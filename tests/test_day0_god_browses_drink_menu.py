@@ -37,7 +37,7 @@ class Day0GodBrowsesDrinkMenuTests(unittest.TestCase):
 
     def test_order_of_events(self):
         self.scene.advance_to_god_browsing_menu()
-        names = [event['name'] for event in self.scene.history]
+        names = [event.name for event in self.scene.history]
         arrival = names.index('god_arrives_during_wine_discussion')
         look = names.index('god_looks_around_bar')
         continue_talk = names.index('serpent_and_lilith_continue_wine_discussion')

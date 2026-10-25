@@ -176,7 +176,7 @@ class Day0GarfieldArrivalTests(unittest.TestCase):
                 else event.name
             )
             for event
-            in self.scene.history
+            in self.scene.checkpoint()["history"]
         ]
         last_scratch = max((index for index, name in enumerate(names) if name == 'cat_d20_scratched'))
         prepared = names.index('cat_d20_sets_next_birth_to_garfield')

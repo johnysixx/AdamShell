@@ -50,7 +50,7 @@ class Day0GodJoinsDrinkWagerTests(unittest.TestCase):
 
     def test_event_order(self):
         self.scene.advance_to_three_way_drink_wager()
-        names = [event['name'] for event in self.scene.history]
+        names = [event.name for event in self.scene.history]
         explained = names.index('serpent_tells_god_about_drink_wager')
         offered = names.index('serpent_offers_god_wager_participation')
         accepted = names.index('god_accepts_drink_wager')

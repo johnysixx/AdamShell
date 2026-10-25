@@ -331,7 +331,7 @@ class Day0GodLibraryObjectStateTests(
         names = [
             event["name"]
             for event
-            in scene.history
+            in scene.checkpoint()["history"]
         ]
 
         self.assertIn(
@@ -362,7 +362,7 @@ class Day0GodLibraryObjectStateTests(
         left = next(
             event
             for event
-            in scene.history
+            in scene.checkpoint()["history"]
             if event["name"]
             == "god_left_library"
         )

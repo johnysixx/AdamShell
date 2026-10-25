@@ -164,14 +164,14 @@ class Day0SerpentReturnsToBarObjectStateTests(
 
         move = next(
             event
-            for event in scene.history
+            for event in scene.checkpoint()["history"]
             if event["name"]
             == "serpent_leaves_table_for_bar"
         )
 
         talk = next(
             event
-            for event in scene.history
+            for event in scene.checkpoint()["history"]
             if event["name"]
             == (
                 "lilith_and_god_continue_"

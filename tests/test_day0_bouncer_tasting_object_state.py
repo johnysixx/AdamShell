@@ -330,7 +330,7 @@ class Day0BouncerTastingObjectStateTests(
     ):
         names = {
             event["name"]
-            for event in self.scene.history
+            for event in self.scene.checkpoint()["history"]
             if isinstance(
                 event,
                 dict,

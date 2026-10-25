@@ -44,7 +44,7 @@ class Day0CatD20ArrivalTests(unittest.TestCase):
 
     def test_cat_d20_arrives_after_bouncer_panel_is_proposed(self):
         self.scene.advance_to_cat_d20_arrival()
-        names = [event['name'] for event in self.scene.history]
+        names = [event.name for event in self.scene.history]
         panel = names.index('bartender_proposes_bouncer_as_second_taster')
         cat = names.index('cat_d20_arrives_during_judge_discussion')
         self.assertLess(panel, cat)

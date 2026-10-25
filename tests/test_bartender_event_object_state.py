@@ -99,9 +99,6 @@ class BartenderEventObjectStateTests(
         for boundary in (
             started,
             refused,
-            learned,
-            left,
-            returned,
         ):
             self.assertIsInstance(
                 boundary,
@@ -115,6 +112,20 @@ class BartenderEventObjectStateTests(
             BartenderLeftForLemonEvent,
             BartenderReturnedWithLemonEvent,
         )
+
+        for index, returned_event in (
+            (2, learned),
+            (3, left),
+            (4, returned),
+        ):
+            self.assertIsInstance(
+                returned_event,
+                expected_types[index],
+            )
+            self.assertIs(
+                returned_event,
+                self.bartender.event_memory[index],
+            )
 
         self.assertEqual(
             len(

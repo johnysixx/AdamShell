@@ -346,7 +346,7 @@ class Day0CatD20ArrivalObjectStateTests(
 
         arrival = next(
             event
-            for event in scene.history
+            for event in scene.checkpoint()["history"]
             if (
                 isinstance(
                     event,
@@ -362,7 +362,7 @@ class Day0CatD20ArrivalObjectStateTests(
 
         accepted = next(
             event
-            for event in scene.history
+            for event in scene.checkpoint()["history"]
             if (
                 isinstance(
                     event,
@@ -378,7 +378,7 @@ class Day0CatD20ArrivalObjectStateTests(
 
         scratch = next(
             event
-            for event in scene.history
+            for event in scene.checkpoint()["history"]
             if (
                 isinstance(
                     event,

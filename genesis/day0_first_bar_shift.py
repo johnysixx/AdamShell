@@ -322,7 +322,7 @@ class Day0FirstBarShift:
             )
 
             self.history.append(
-                result.to_dict()
+                result
             )
 
             return result
@@ -341,7 +341,7 @@ class Day0FirstBarShift:
             )
 
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return event
@@ -409,7 +409,7 @@ class Day0FirstBarShift:
         born = SerpentBornEvent()
 
         self.history.append(
-            born.to_dict()
+            born
         )
 
         self.meeting_place.add_entity(
@@ -435,7 +435,7 @@ class Day0FirstBarShift:
         )
 
         self.history.append(
-            entered.to_dict()
+            entered
         )
 
         return self.serpent
@@ -499,7 +499,7 @@ class Day0FirstBarShift:
         )
 
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return result
@@ -551,11 +551,11 @@ class Day0FirstBarShift:
         )
 
         self.history.append(
-            proposal.to_dict()
+            proposal
         )
 
         self.history.append(
-            refusal.to_dict()
+            refusal
         )
 
         return SerpentBetProposalResult(
@@ -582,7 +582,7 @@ class Day0FirstBarShift:
         born = GodBornEvent()
 
         self.history.append(
-            born.to_dict()
+            born
         )
 
         self.library.assign_librarian(
@@ -606,7 +606,7 @@ class Day0FirstBarShift:
         )
 
         self.history.append(
-            entered.to_dict()
+            entered
         )
 
         self.first_book = (
@@ -629,7 +629,7 @@ class Day0FirstBarShift:
         )
 
         self.history.append(
-            began_book.to_dict()
+            began_book
         )
 
         return GodLibraryOpeningResult(
@@ -686,7 +686,7 @@ class Day0FirstBarShift:
         left = GodLeftLibraryEvent()
 
         self.history.append(
-            left.to_dict()
+            left
         )
 
         self.meeting_place.add_entity(
@@ -698,7 +698,7 @@ class Day0FirstBarShift:
         )
 
         self.history.append(
-            entered_bar.to_dict()
+            entered_bar
         )
 
         return GodLibraryDepartureResult(
@@ -727,7 +727,7 @@ class Day0FirstBarShift:
         )
 
         self.history.append(
-            order_event.to_dict()
+            order_event
         )
 
         unavailable = (
@@ -740,7 +740,7 @@ class Day0FirstBarShift:
             unavailable
         )
         self.history.append(
-            unavailable.to_dict()
+            unavailable
         )
 
         points_out_tree = (
@@ -751,7 +751,7 @@ class Day0FirstBarShift:
             points_out_tree
         )
         self.history.append(
-            points_out_tree.to_dict()
+            points_out_tree
         )
 
         learned = (
@@ -829,7 +829,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return event
@@ -872,7 +872,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         self.serpent_lilith_conversation.add_line(
@@ -932,7 +932,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         self.serpent_lilith_conversation.add_line(
@@ -979,7 +979,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         self.serpent_lilith_conversation.add_line(
@@ -1043,7 +1043,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         self.serpent_lilith_conversation.add_line(
@@ -1097,7 +1097,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return event
@@ -1170,7 +1170,7 @@ class Day0FirstBarShift:
         )
 
         self.history.append(
-            stock_event.to_dict()
+            stock_event
         )
         self.history.append(
             returned_boundary
@@ -1222,7 +1222,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return drink
@@ -1245,7 +1245,7 @@ class Day0FirstBarShift:
             correction
         )
         self.history.append(
-            correction.to_dict()
+            correction
         )
 
         return correction
@@ -1328,7 +1328,7 @@ class Day0FirstBarShift:
         )
 
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return (
@@ -1484,7 +1484,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return drink
@@ -1526,7 +1526,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return (
@@ -1565,7 +1565,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return event
@@ -1637,7 +1637,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return (
@@ -1688,7 +1688,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return event
@@ -1753,7 +1753,7 @@ class Day0FirstBarShift:
             lilith_event
         )
         self.history.append(
-            lilith_event.to_dict()
+            lilith_event
         )
 
         serpent_event = (
@@ -1764,7 +1764,7 @@ class Day0FirstBarShift:
             serpent_event
         )
         self.history.append(
-            serpent_event.to_dict()
+            serpent_event
         )
 
         return FirstTableDrinksResult(
@@ -1817,7 +1817,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return observation
@@ -1856,7 +1856,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return god
@@ -1890,7 +1890,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return event
@@ -1941,7 +1941,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return event
@@ -1968,7 +1968,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         discussion.resolved = False
@@ -2000,7 +2000,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return event
@@ -2034,7 +2034,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return event
@@ -2061,7 +2061,7 @@ class Day0FirstBarShift:
             tasting
         )
         self.history.append(
-            tasting.to_dict()
+            tasting
         )
 
         idea = BarDrinkIdea(
@@ -2089,7 +2089,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return (
@@ -2150,7 +2150,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return event
@@ -2175,7 +2175,7 @@ class Day0FirstBarShift:
             mead_event
         )
         self.history.append(
-            mead_event.to_dict()
+            mead_event
         )
 
         beer_event = (
@@ -2186,7 +2186,7 @@ class Day0FirstBarShift:
             beer_event
         )
         self.history.append(
-            beer_event.to_dict()
+            beer_event
         )
 
         return (
@@ -2238,7 +2238,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return observation
@@ -2304,7 +2304,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return GodsLilithFailureResult(
@@ -2340,7 +2340,7 @@ class Day0FirstBarShift:
             departure
         )
         self.history.append(
-            departure.to_dict()
+            departure
         )
 
         picked = []
@@ -2400,7 +2400,7 @@ class Day0FirstBarShift:
             returned
         )
         self.history.append(
-            returned.to_dict()
+            returned
         )
 
         self.meeting_place.refresh_basic_drinks()
@@ -2542,7 +2542,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return drink
@@ -2607,7 +2607,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return GodsLilithServiceResult(
@@ -2705,7 +2705,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return event
@@ -2759,7 +2759,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         self.god.bar_state.called_to_table_by = (
@@ -2840,7 +2840,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return event
@@ -2880,7 +2880,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         knowledge = (
@@ -2915,7 +2915,7 @@ class Day0FirstBarShift:
             rejection
         )
         self.history.append(
-            rejection.to_dict()
+            rejection
         )
 
         idea = BarDrinkIdea(
@@ -2955,7 +2955,7 @@ class Day0FirstBarShift:
             proposal
         )
         self.history.append(
-            proposal.to_dict()
+            proposal
         )
 
         return LilithAcidityRevisionResult(
@@ -3038,7 +3038,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return event
@@ -3048,9 +3048,7 @@ class Day0FirstBarShift:
     ):
         if (
             not self.history
-            or self.history[-1].get(
-                'name'
-            )
+            or self.history[-1].name
             != (
                 'lilith_gives_serpent_'
                 'taste_of_lilith'
@@ -3068,7 +3066,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return event
@@ -3111,7 +3109,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return event
@@ -3189,7 +3187,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return GodWineServiceResult(
@@ -3251,7 +3249,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return SerpentModerateAcidityResult(
@@ -3325,7 +3323,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return event
@@ -3358,7 +3356,7 @@ class Day0FirstBarShift:
             explanation
         )
         self.history.append(
-            explanation.to_dict()
+            explanation
         )
 
         self._entity_attr_setdefault(
@@ -3402,7 +3400,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         knowledge.sweetness = (
@@ -3452,7 +3450,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         self._entity_attr_setdefault(
@@ -3498,7 +3496,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            deepcopy(event)
         )
 
         return event
@@ -3554,7 +3552,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return event
@@ -3580,7 +3578,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         self._entity_attr_setdefault(
@@ -3658,7 +3656,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         discussion = (
@@ -3711,7 +3709,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return event
@@ -3753,7 +3751,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return event
@@ -3795,7 +3793,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return event
@@ -3841,7 +3839,7 @@ class Day0FirstBarShift:
             proposal
         )
         self.history.append(
-            proposal.to_dict()
+            proposal
         )
 
         return proposal
@@ -3876,7 +3874,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return event
@@ -3958,7 +3956,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return SerpentWaterServiceResult(
@@ -4017,7 +4015,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return event
@@ -4071,7 +4069,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return event
@@ -4115,7 +4113,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return event
@@ -4131,7 +4129,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return event
@@ -4174,7 +4172,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return event
@@ -4222,7 +4220,7 @@ class Day0FirstBarShift:
         )
 
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return CatD20DiscussionArrivalResult(
@@ -4283,7 +4281,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return event
@@ -4313,7 +4311,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return event
@@ -4346,7 +4344,7 @@ class Day0FirstBarShift:
                 event
             )
             self.history.append(
-                event.to_dict()
+                event
             )
             events.append(
                 event
@@ -4601,7 +4599,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return GarfieldArrivalResult(
@@ -4642,7 +4640,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         proposal = (
@@ -4690,7 +4688,7 @@ class Day0FirstBarShift:
             event
         )
         self.history.append(
-            event.to_dict()
+            event
         )
 
         bouncer.wager_knowledge = (
@@ -4791,7 +4789,7 @@ class Day0FirstBarShift:
         )
 
         self.history.append(
-            order_event.to_dict()
+            order_event
         )
 
         receipt = (
@@ -4818,7 +4816,7 @@ class Day0FirstBarShift:
         )
 
         self.history.append(
-            served_event.to_dict()
+            served_event
         )
 
         return BouncerTastingServiceResult(
@@ -4861,7 +4859,7 @@ class Day0FirstBarShift:
             )
 
             self.history.append(
-                event.to_dict()
+                event
             )
 
             tasting_events.append(
@@ -4877,7 +4875,7 @@ class Day0FirstBarShift:
         )
 
         self.history.append(
-            verdict.to_dict()
+            verdict
         )
 
         accepted = (
@@ -4889,7 +4887,7 @@ class Day0FirstBarShift:
         )
 
         self.history.append(
-            accepted.to_dict()
+            accepted
         )
 
         proposal = (
@@ -5230,7 +5228,7 @@ class Day0FirstBarShift:
         )
 
         self.history.append(
-            event.to_dict()
+            event
         )
 
         return discussion
@@ -5345,7 +5343,7 @@ class Day0FirstBarShift:
         )
 
         self.history.append(
-            born.to_dict()
+            born
         )
 
         self.meeting_place.add_entity(
@@ -5357,7 +5355,7 @@ class Day0FirstBarShift:
         )
 
         self.history.append(
-            entered.to_dict()
+            entered
         )
 
         return LilithEntryResult(
@@ -5387,4 +5385,4 @@ class Day0FirstBarShift:
                 'bar_state',
                 None
             )
-        return {'bar_time': self.meeting_place.bar_clock.time_text, 'shift_active': getattr(self.meeting_place.bartender, 'shift_active', False), 'serpent': {'exists': self.serpent is not None, 'in_bar': self.serpent in self.meeting_place.entities if self.serpent is not None else False, 'bar_state': serpent_bar_state.to_dict() if serpent_bar_state is not None else None, 'tab': serpent_tab.to_dict() if serpent_tab is not None else None}, 'god': {'exists': self.god is not None, 'in_library': self.library.god_present if self.god is not None else False, 'role': getattr(self.god, 'role', None) if self.god is not None else None, 'book': self.first_book}, 'lilith': {'exists': self.lilith is not None, 'in_bar': self.lilith in self.meeting_place.entities if self.lilith is not None else False}, 'history': list(self.history)}
+        return {'bar_time': self.meeting_place.bar_clock.time_text, 'shift_active': getattr(self.meeting_place.bartender, 'shift_active', False), 'serpent': {'exists': self.serpent is not None, 'in_bar': self.serpent in self.meeting_place.entities if self.serpent is not None else False, 'bar_state': serpent_bar_state.to_dict() if serpent_bar_state is not None else None, 'tab': serpent_tab.to_dict() if serpent_tab is not None else None}, 'god': {'exists': self.god is not None, 'in_library': self.library.god_present if self.god is not None else False, 'role': getattr(self.god, 'role', None) if self.god is not None else None, 'book': self.first_book}, 'lilith': {'exists': self.lilith is not None, 'in_bar': self.lilith in self.meeting_place.entities if self.lilith is not None else False}, 'history': [deepcopy(event.to_dict()) for event in self.history]}

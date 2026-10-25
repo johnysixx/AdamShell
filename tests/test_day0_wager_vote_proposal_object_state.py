@@ -180,14 +180,14 @@ class Day0WagerVoteProposalObjectStateTests(
 
         question = next(
             event
-            for event in scene.history
+            for event in scene.checkpoint()["history"]
             if event["name"]
             == "god_asks_who_will_decide_wager"
         )
 
         proposal = next(
             event
-            for event in scene.history
+            for event in scene.checkpoint()["history"]
             if event["name"]
             == "lilith_proposes_participant_vote"
         )

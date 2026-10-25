@@ -140,9 +140,7 @@ class Day0GodLilithLemonCronenbergTests(
         self.scene.advance_to_lemon_restock_after_god_order()
 
         names = [
-            event[
-                "name"
-            ]
+            event.name
             for event
             in self.scene.history
         ]

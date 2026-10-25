@@ -94,9 +94,7 @@ class Day0GodArrivesDuringWineDiscussionTests(
         self.scene.god_arrives_after_first_wine_observation()
 
         names = [
-            event[
-                "name"
-            ]
+            event.name
             for event
             in self.scene.history
         ]

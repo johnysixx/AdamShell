@@ -5,6 +5,8 @@ from genesis.day0_first_bar_shift import (
 )
 from genesis.day0_serpent_opening_state import (
     SerpentBetProposalResult,
+    SerpentBornEvent,
+    SerpentEnteredBarEvent,
     SerpentFirstDrinksServiceResult,
     SerpentOrdersFirstDrinksEvent,
     SerpentProposesBetEvent,
@@ -273,6 +275,64 @@ class Day0SerpentOpeningObjectStateTests(
             "accepted",
         )
 
+    def test_opening_history_stores_event_objects(self):
+        scene = self._scene()
+
+        started = scene.start_shift()
+        scene.serpent_is_born_and_enters()
+        service = scene.serpent_orders_first_drinks()
+        bet = scene.serpent_proposes_bet()
+
+        recorded = scene.history
+
+        self.assertEqual(len(recorded), 6)
+        self.assertIs(recorded[0], started)
+        self.assertIsInstance(
+            recorded[1], SerpentBornEvent
+        )
+        self.assertIsInstance(
+            recorded[2], SerpentEnteredBarEvent
+        )
+        self.assertIs(recorded[3], service.event)
+        self.assertIs(recorded[4], bet.proposal)
+        self.assertIs(recorded[5], bet.response)
+
+        snapshot = scene.checkpoint()["history"]
+
+        self.assertTrue(
+            all(
+                isinstance(entry, dict)
+                for entry in snapshot
+            )
+        )
+
+        snapshot[2]["bar_time"] = "changed"
+
+        self.assertEqual(
+            recorded[2].bar_time,
+            "04:20",
+        )
+        self.assertEqual(
+            scene.checkpoint()["history"][2]["bar_time"],
+            "04:20",
+        )
+
+    def test_repeated_shift_history_keeps_result_object(self):
+        scene = self._scene()
+
+        scene.start_shift()
+        result = scene.start_shift()
+
+        self.assertIs(
+            scene.history[-1],
+            result,
+        )
+
+        self.assertEqual(
+            scene.checkpoint()["history"][-1]["name"],
+            "bartender_shift_already_active",
+        )
+
     def test_history_remains_serialized_boundary(
         self
     ):
@@ -286,7 +346,7 @@ class Day0SerpentOpeningObjectStateTests(
         names = [
             event["name"]
             for event
-            in scene.history
+            in scene.checkpoint()["history"]
         ]
 
         self.assertEqual(
@@ -308,7 +368,7 @@ class Day0SerpentOpeningObjectStateTests(
                     dict,
                 )
                 for event
-                in scene.history
+                in scene.checkpoint()["history"]
             )
         )
 

@@ -558,7 +558,7 @@ class BarDrinkDiscussionObjectStateTests(
         history_event = next(
             item
             for item
-            in scene.history
+            in scene.checkpoint()["history"]
             if item.get(
                 "name"
             )

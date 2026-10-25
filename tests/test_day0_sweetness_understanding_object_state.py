@@ -219,7 +219,7 @@ class Day0SweetnessUnderstandingObjectStateTests(
         event = next(
             event
             for event in reversed(
-                scene.history
+                scene.checkpoint()["history"]
             )
             if event["name"]
             == (

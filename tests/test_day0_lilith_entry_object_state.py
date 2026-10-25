@@ -280,7 +280,7 @@ class Day0LilithEntryObjectStateTests(
         names = [
             event["name"]
             for event
-            in scene.history
+            in scene.checkpoint()["history"]
         ]
 
         self.assertEqual(
@@ -292,7 +292,7 @@ class Day0LilithEntryObjectStateTests(
         )
 
         self.assertEqual(
-            scene.history[-2],
+            scene.checkpoint()["history"][-2],
             {
                 "name":
                     "lilith_born",
@@ -300,11 +300,43 @@ class Day0LilithEntryObjectStateTests(
         )
 
         self.assertEqual(
-            scene.history[-1],
+            scene.checkpoint()["history"][-1],
             {
                 "name":
                     "lilith_entered_bar",
             },
+        )
+
+
+    def test_day0_history_is_object_only(
+        self
+    ):
+        scene = self._scene()
+        checkpoint = scene.advance_to_lilith_entry()
+
+        self.assertTrue(scene.history)
+
+        self.assertTrue(
+            all(
+                not isinstance(event, dict)
+                and isinstance(event.name, str)
+                for event in scene.history
+            )
+        )
+
+        self.assertTrue(
+            all(
+                isinstance(event, dict)
+                for event in checkpoint["history"]
+            )
+        )
+
+        self.assertEqual(
+            [event.name for event in scene.history],
+            [
+                event["name"]
+                for event in checkpoint["history"]
+            ],
         )
 
     def test_explicit_snapshots_are_boundaries(

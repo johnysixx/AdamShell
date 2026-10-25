@@ -290,7 +290,7 @@ class Day0BartenderBouncerPanelObjectStateTests(
 
         explanation = next(
             event
-            for event in scene.history
+            for event in scene.checkpoint()["history"]
             if event["name"]
             == (
                 "lilith_explains_wager_and_"
@@ -300,7 +300,7 @@ class Day0BartenderBouncerPanelObjectStateTests(
 
         panel = next(
             event
-            for event in scene.history
+            for event in scene.checkpoint()["history"]
             if event["name"]
             == (
                 "bartender_proposes_bouncer_"

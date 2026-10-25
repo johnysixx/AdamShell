@@ -22,7 +22,7 @@ class Day0ThirdWineIdeaTests(unittest.TestCase):
 
     def test_serpent_tastes_mead_then_beer(self):
         result = self.scene.advance_to_third_wine_idea()
-        names = [event['name'] for event in self.scene.history]
+        names = [event.name for event in self.scene.history]
         mead_index = names.index('serpent_tastes_mead')
         beer_index = names.index('serpent_tastes_beer')
         self.assertLess(mead_index, beer_index)

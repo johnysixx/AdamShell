@@ -279,7 +279,7 @@ class Day0GarfieldManifestationObjectStateTests(
 
         history_event = next(
             event
-            for event in scene.history
+            for event in scene.checkpoint()["history"]
             if (
                 isinstance(
                     event,

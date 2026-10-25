@@ -232,7 +232,7 @@ class Day0BouncerWagerEntryObjectStateTests(
 
         entry = next(
             event
-            for event in scene.history
+            for event in scene.checkpoint()["history"]
             if (
                 isinstance(
                     event,
@@ -245,7 +245,7 @@ class Day0BouncerWagerEntryObjectStateTests(
 
         explanation = next(
             event
-            for event in scene.history
+            for event in scene.checkpoint()["history"]
             if (
                 isinstance(
                     event,

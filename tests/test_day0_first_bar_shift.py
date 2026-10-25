@@ -29,8 +29,8 @@ class Day0FirstBarShiftTests(unittest.TestCase):
         self.assertEqual(self.bar.bar_clock.hour, 4)
         self.assertEqual(self.bar.bar_clock.minute, 20)
         self.assertEqual(self.bar.bar_clock.time_text, '04:20')
-        arrival = next((event for event in self.scene.history if event.get('name') == 'serpent_entered_bar'))
-        self.assertEqual(arrival['bar_time'], '04:20')
+        arrival = next((event for event in self.scene.history if event.name == 'serpent_entered_bar'))
+        self.assertEqual(arrival.bar_time, '04:20')
 
     def test_serpent_has_three_drinks_and_unpaid_tab(self):
         self.scene.start_shift()

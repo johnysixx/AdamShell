@@ -40,7 +40,7 @@ class Day0SerpentReturnsToBarTests(unittest.TestCase):
 
     def test_serpent_move_happens_before_private_table_talk(self):
         self.scene.advance_to_serpent_at_bar_lilith_with_god()
-        names = [event['name'] for event in self.scene.history]
+        names = [event.name for event in self.scene.history]
         move = names.index('serpent_leaves_table_for_bar')
         talk = names.index('lilith_and_god_continue_talking_at_table')
         self.assertLess(move, talk)

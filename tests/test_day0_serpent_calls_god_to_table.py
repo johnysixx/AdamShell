@@ -40,7 +40,7 @@ class Day0SerpentCallsGodToTableTests(unittest.TestCase):
 
     def test_call_precedes_god_joining_table(self):
         self.scene.advance_to_god_at_table()
-        names = [event['name'] for event in self.scene.history]
+        names = [event.name for event in self.scene.history]
         call_index = names.index('serpent_notices_god_and_calls_him_over')
         join_index = names.index('god_joins_serpent_and_lilith_at_table')
         self.assertLess(call_index, join_index)
