@@ -48,9 +48,6 @@ class RuleEngine:
                     f"{conflict.old} -> {conflict.new}"
                 )
 
-        creation_payload = resolution.to_dict()["effects"]
-        creation_payload.setdefault("state", {})
-
-        self._creation.apply(universe, creation_payload)
+        self._creation.apply(universe, resolution)
 
         return resolution

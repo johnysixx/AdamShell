@@ -1,5 +1,8 @@
 from core.entity.factory import EntityFactory
 from core.manifestation.light import LightManifestation
+from core.interaction.result_state import (
+    InteractionConflictResolutionResult,
+)
 
 
 class CreationEngine:
@@ -8,11 +11,26 @@ class CreationEngine:
         print("🔥 CREATION ENGINE LOADED")
         self._factory = EntityFactory()
 
-    def apply(self, universe, effects):
+    def apply(self, universe, resolution):
+        if not isinstance(
+            resolution,
+            InteractionConflictResolutionResult,
+        ):
+            raise TypeError(
+                "CreationEngine requires "
+                "InteractionConflictResolutionResult."
+            )
 
-        print("➡ CREATION ENGINE APPLY:", effects)
+        birth_allowed = None
+        manifest = None
 
-        birth_allowed = effects.get("birth_allowed", None)
+        for effect in resolution.effects:
+            if effect.key == "birth_allowed":
+                birth_allowed = effect.value
+            elif effect.key == "manifest":
+                manifest = effect.value
+
+        print("➡ CREATION ENGINE APPLY:", resolution)
 
         if birth_allowed is not None:
             for entity in universe.entities:
@@ -23,8 +41,6 @@ class CreationEngine:
 
 
     # 2. MANIFESTATION
-        manifest = effects.get("manifest", None)
-
         print("MANIFEST VALUE:", manifest, type(manifest))
 
         if manifest is not None and manifest == "Light":

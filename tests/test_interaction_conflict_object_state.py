@@ -1,6 +1,8 @@
 import unittest
 from types import SimpleNamespace
+from unittest.mock import patch
 
+from core.creation.engine import CreationEngine
 from core.interaction.conflict import ConflictEngine
 from core.interaction.rule_engine import RuleEngine
 from core.interaction.rules.light import LightRule
@@ -219,8 +221,15 @@ class InteractionConflictObjectStateTests(unittest.TestCase):
             [],
         )
 
-        self.assertEqual(
+        self.assertIs(
             created[0],
+            result,
+        )
+
+        snapshot = created[0].to_dict()
+
+        self.assertEqual(
+            snapshot["effects"],
             {
                 "state": {"light": True},
                 "manifest": "Light",
@@ -228,12 +237,184 @@ class InteractionConflictObjectStateTests(unittest.TestCase):
             },
         )
 
-        created[0]["state"]["light"] = False
+        snapshot["effects"]["state"]["light"] = False
 
         self.assertTrue(
             result.to_dict()["effects"][
                 "state"
             ]["light"]
+        )
+
+    def test_creation_engine_applies_typed_resolution(self):
+        engine = CreationEngine()
+
+        entity = SimpleNamespace(
+            birth_allowed=False,
+        )
+
+        universe = SimpleNamespace(
+            entities=[entity],
+        )
+
+        resolution = InteractionConflictResolutionResult(
+            effects=(
+                InteractionEffectValue(
+                    "birth_allowed",
+                    True,
+                ),
+                InteractionEffectValue(
+                    "manifest",
+                    "Light",
+                ),
+            ),
+            conflicts=(),
+        )
+
+        with patch(
+            "core.creation.engine.LightManifestation"
+        ) as manifestation:
+            engine.apply(
+                universe,
+                resolution,
+            )
+
+            manifestation.assert_called_once_with()
+
+            manifestation.return_value.apply.assert_called_once_with(
+                universe
+            )
+
+        self.assertTrue(
+            entity.birth_allowed
+        )
+
+    def test_creation_engine_skips_absent_effects(self):
+        engine = CreationEngine()
+
+        entity = SimpleNamespace(
+            birth_allowed=True,
+        )
+
+        universe = SimpleNamespace(
+            entities=[entity],
+        )
+
+        resolution = InteractionConflictResolutionResult(
+            effects=(),
+            conflicts=(),
+        )
+
+        with patch(
+            "core.creation.engine.LightManifestation"
+        ) as manifestation:
+            engine.apply(universe, resolution)
+
+            manifestation.assert_not_called()
+
+        self.assertTrue(
+            entity.birth_allowed
+        )
+
+    def test_creation_engine_ignores_other_manifest(self):
+        engine = CreationEngine()
+
+        entity = SimpleNamespace(
+            birth_allowed=True,
+        )
+
+        universe = SimpleNamespace(
+            entities=[entity],
+        )
+
+        resolution = InteractionConflictResolutionResult(
+            effects=(
+                InteractionEffectValue(
+                    "birth_allowed",
+                    False,
+                ),
+                InteractionEffectValue(
+                    "manifest",
+                    "Space",
+                ),
+            ),
+            conflicts=(),
+        )
+
+        with patch(
+            "core.creation.engine.LightManifestation"
+        ) as manifestation:
+            engine.apply(universe, resolution)
+
+            manifestation.assert_not_called()
+
+        self.assertFalse(
+            entity.birth_allowed
+        )
+
+    def test_creation_engine_rejects_mapping_payloads(self):
+        engine = CreationEngine()
+
+        entity = SimpleNamespace(
+            birth_allowed=False,
+        )
+
+        universe = SimpleNamespace(
+            entities=[entity],
+        )
+
+        for invalid in (
+            {},
+            {"birth_allowed": True},
+            [],
+            None,
+        ):
+            with self.subTest(
+                payload_type=type(invalid).__name__
+            ):
+                with self.assertRaises(TypeError):
+                    engine.apply(
+                        universe,
+                        invalid,
+                    )
+
+        self.assertFalse(
+            entity.birth_allowed
+        )
+
+    def test_creation_engine_keeps_last_effect_value(self):
+        engine = CreationEngine()
+
+        entity = SimpleNamespace(
+            birth_allowed=False,
+        )
+
+        universe = SimpleNamespace(
+            entities=[entity],
+        )
+
+        resolution = InteractionConflictResolutionResult(
+            effects=(
+                InteractionEffectValue(
+                    "birth_allowed",
+                    False,
+                ),
+                InteractionEffectValue(
+                    "birth_allowed",
+                    True,
+                ),
+            ),
+            conflicts=(),
+        )
+
+        with patch(
+            "core.creation.engine.LightManifestation"
+        ) as manifestation:
+            engine.apply(universe, resolution)
+
+            manifestation.assert_not_called()
+
+        self.assertTrue(
+            entity.birth_allowed
         )
 
     def test_resolver_returns_typed_results(self):
@@ -395,14 +576,23 @@ class InteractionConflictObjectStateTests(unittest.TestCase):
             result.conflicts[0],
         )
 
-        self.assertFalse(created[0]["light"])
-        self.assertTrue(created[0]["birth_allowed"])
+        self.assertIs(
+            created[0],
+            result,
+        )
+
+        snapshot = created[0].to_dict()
+
+        self.assertFalse(snapshot["effects"]["light"])
+        self.assertTrue(
+            snapshot["effects"]["birth_allowed"]
+        )
         self.assertEqual(
-            created[0]["state"],
+            snapshot["effects"]["state"],
             {"light": True},
         )
 
-        created[0]["state"]["light"] = False
+        snapshot["effects"]["state"]["light"] = False
 
         self.assertTrue(
             result.to_dict()["effects"]["state"]["light"]
