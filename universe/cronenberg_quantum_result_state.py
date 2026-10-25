@@ -49,9 +49,9 @@ class CronenbergQuantumPairConsumptionResult:
     def to_dict(self):
         return {
             "result": self.result,
-            "first": self.first,
-            "second": self.second,
-            "recombined": self.recombined,
+            "first": self.first.id,
+            "second": self.second.id,
+            "recombined": self.recombined.id,
             "event": self.event.to_dict(),
         }
 
@@ -99,9 +99,9 @@ class CronenbergQuantumPairMergeResult:
     def to_dict(self):
         return {
             "result": self.result,
-            "first": self.first,
-            "second": self.second,
-            "merged": self.merged,
+            "first": self.first.id,
+            "second": self.second.id,
+            "merged": self.merged.id,
             "event": self.event.to_dict(),
         }
 

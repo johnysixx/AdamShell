@@ -1,7 +1,6 @@
 import random
 from copy import deepcopy
 from dataclasses import dataclass, field
-from types import MappingProxyType
 
 from universe.logger import UniverseLogger
 from universe.quantum_tick_result_state import (
@@ -10,144 +9,10 @@ from universe.quantum_tick_result_state import (
 from quantum.error_boundary import (
     QuantumErrorResult,
 )
-
-
-class _FrozenCronenbergPairList(tuple):
-    pass
-
-
-class _FrozenCronenbergPairSet(frozenset):
-    pass
-
-
-def _freeze_cronenberg_pair_payload(
-    value
-):
-    if isinstance(
-        value,
-        dict
-    ):
-        return MappingProxyType(
-            {
-                key: (
-                    _freeze_cronenberg_pair_payload(
-                        item
-                    )
-                )
-                for key, item
-                in value.items()
-            }
-        )
-
-    if isinstance(
-        value,
-        list
-    ):
-        return _FrozenCronenbergPairList(
-            _freeze_cronenberg_pair_payload(
-                item
-            )
-            for item in value
-        )
-
-    if isinstance(
-        value,
-        tuple
-    ):
-        return tuple(
-            _freeze_cronenberg_pair_payload(
-                item
-            )
-            for item in value
-        )
-
-    if isinstance(
-        value,
-        set
-    ):
-        return _FrozenCronenbergPairSet(
-            _freeze_cronenberg_pair_payload(
-                item
-            )
-            for item in value
-        )
-
-    return value
-
-
-def _thaw_cronenberg_pair_payload(
-    value
-):
-    to_dict = getattr(
-        value,
-        "to_dict",
-        None,
-    )
-
-    if callable(to_dict):
-        return deepcopy(
-            to_dict()
-        )
-
-    if isinstance(
-        value,
-        MappingProxyType
-    ):
-        return {
-            key: (
-                _thaw_cronenberg_pair_payload(
-                    item
-                )
-            )
-            for key, item
-            in value.items()
-        }
-
-    if isinstance(
-        value,
-        _FrozenCronenbergPairList
-    ):
-        return [
-            _thaw_cronenberg_pair_payload(
-                item
-            )
-            for item in value
-        ]
-
-    if isinstance(
-        value,
-        tuple
-    ):
-        return tuple(
-            _thaw_cronenberg_pair_payload(
-                item
-            )
-            for item in value
-        )
-
-    if isinstance(
-        value,
-        _FrozenCronenbergPairSet
-    ):
-        return {
-            _thaw_cronenberg_pair_payload(
-                item
-            )
-            for item in value
-        }
-
-    if isinstance(
-        value,
-        frozenset
-    ):
-        return frozenset(
-            _thaw_cronenberg_pair_payload(
-                item
-            )
-            for item in value
-        )
-
-    return value
+from universe.cronenberg_quantum_result_state import (
+    CronenbergQuantumPairMergeResult,
+    CronenbergQuantumPairConsumptionResult,
+)
 
 
 @dataclass(slots=True, frozen=True)
@@ -225,8 +90,12 @@ class CronenbergQuantumTickEffectResult:
         return {
             "before_tick": self.before_tick,
             "after_tick": self.after_tick,
-            "tick_result": _thaw_cronenberg_pair_payload(
-                self.tick_result
+            "tick_result": (
+                None
+                if self.tick_result is None
+                else deepcopy(
+                    self.tick_result.to_dict()
+                )
             ),
         }
 
@@ -377,18 +246,26 @@ class CronenbergPairResolvedEffect:
         object.__setattr__(
             self,
             "effect",
-            str(
-                self.effect
-            ),
+            str(self.effect),
         )
 
-        object.__setattr__(
-            self,
-            "result",
-            _freeze_cronenberg_pair_payload(
-                self.result
+        if not isinstance(
+            self.result,
+            (
+                CronenbergPairSurvivalResult,
+                CronenbergQuantumTickEffectResult,
+                CronenbergSpinExchangeResult,
+                CronenbergGeometryShiftResult,
+                CronenbergPairPropertySumResult,
+                CronenbergPairPropertyEqualizationResult,
+                CronenbergQuantumPairMergeResult,
+                CronenbergQuantumPairConsumptionResult,
             ),
-        )
+        ):
+            raise TypeError(
+                "Cronenberg pair effect requires "
+                "a domain result object."
+            )
 
     def __deepcopy__(
         self,
@@ -400,9 +277,7 @@ class CronenbergPairResolvedEffect:
         return {
             "effect": self.effect,
             "result": deepcopy(
-                _thaw_cronenberg_pair_payload(
-                    self.result
-                )
+                self.result.to_dict()
             ),
         }
 

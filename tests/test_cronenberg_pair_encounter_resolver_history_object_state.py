@@ -1,5 +1,13 @@
 import unittest
 from copy import deepcopy
+from types import SimpleNamespace
+
+from universe.cronenberg_quantum_result_state import (
+    CronenbergQuantumPairMergedEvent,
+    CronenbergQuantumPairMergeResult,
+    CronenbergQuantumPairConsumedEvent,
+    CronenbergQuantumPairConsumptionResult,
+)
 
 from quantum.cronenberg_pair_encounter import (
     CronenbergPairSpin,
@@ -200,6 +208,162 @@ class CronenbergPairEncounterResolverHistoryObjectStateTests(
 
         self.assertTrue(
             effect.result.first_alive
+        )
+
+    def test_effect_preserves_domain_result_identity(
+        self
+    ):
+        produced = CronenbergPairSurvivalResult(
+            first_alive=True,
+            second_alive=True,
+            first_id="first",
+            second_id="second",
+        )
+
+        effect = CronenbergPairResolvedEffect(
+            effect="both_survive",
+            result=produced,
+        )
+
+        self.assertIs(effect.result, produced)
+        self.assertIs(deepcopy(effect), effect)
+
+        snapshot = effect.to_dict()
+
+        snapshot["result"]["first_alive"] = False
+
+        self.assertTrue(produced.first_alive)
+
+    def test_effect_rejects_mapping_payloads(
+        self
+    ):
+        for invalid in (
+            {},
+            {"first_alive": True},
+            [1, 2],
+            object(),
+            None,
+        ):
+            with self.subTest(
+                result_type=type(invalid).__name__
+            ):
+                with self.assertRaises(TypeError):
+                    CronenbergPairResolvedEffect(
+                        effect="both_survive",
+                        result=invalid,
+                    )
+
+    def test_quantum_transformation_exports_only_ids(
+        self
+    ):
+        first = SimpleNamespace(id="first")
+        second = SimpleNamespace(id="second")
+        merged = SimpleNamespace(id="merged")
+
+        merge_event = CronenbergQuantumPairMergedEvent(
+            pair_id="pair_1",
+            parents=("first", "second"),
+            merged_id="merged",
+            merged_size=3.0,
+            merged_energy=5.0,
+            merged_spin=0.0,
+            source="test",
+            tick=1,
+        )
+
+        merge_result = CronenbergQuantumPairMergeResult(
+            first=first,
+            second=second,
+            merged=merged,
+            event=merge_event,
+        )
+
+        merge_effect = CronenbergPairResolvedEffect(
+            effect="quantum_merge",
+            result=merge_result,
+        )
+
+        self.assertIs(
+            merge_effect.result,
+            merge_result,
+        )
+        self.assertIs(merge_result.merged, merged)
+
+        merge_snapshot = merge_effect.to_dict()
+
+        self.assertEqual(
+            merge_snapshot["result"]["first"],
+            "first",
+        )
+        self.assertEqual(
+            merge_snapshot["result"]["second"],
+            "second",
+        )
+        self.assertEqual(
+            merge_snapshot["result"]["merged"],
+            "merged",
+        )
+
+        recombined = SimpleNamespace(id="recombined")
+
+        consumption_event = (
+            CronenbergQuantumPairConsumedEvent(
+                pair_id="pair_1",
+                participants=("first", "second"),
+                recombined_id="recombined",
+                combined_size=3.0,
+                recombined_size=1.5,
+                combined_energy=5.0,
+                retained_energy=2.0,
+                released_energy=1.75,
+                dark_energy_created=1.25,
+                tick=2,
+            )
+        )
+
+        consumption_result = (
+            CronenbergQuantumPairConsumptionResult(
+                first=first,
+                second=second,
+                recombined=recombined,
+                event=consumption_event,
+            )
+        )
+
+        consumption_effect = CronenbergPairResolvedEffect(
+            effect="quantum_pair_consumption",
+            result=consumption_result,
+        )
+
+        self.assertIs(
+            consumption_effect.result,
+            consumption_result,
+        )
+        self.assertIs(
+            consumption_result.recombined,
+            recombined,
+        )
+
+        snapshot = consumption_effect.to_dict()
+
+        self.assertEqual(
+            snapshot["result"]["first"],
+            "first",
+        )
+        self.assertEqual(
+            snapshot["result"]["second"],
+            "second",
+        )
+        self.assertEqual(
+            snapshot["result"]["recombined"],
+            "recombined",
+        )
+
+        snapshot["result"]["recombined"] = "changed"
+
+        self.assertEqual(
+            recombined.id,
+            "recombined",
         )
 
     def test_boundary_snapshot_is_detached(
