@@ -137,6 +137,9 @@ class StellarDomainObjectStateTests(unittest.TestCase):
             "iron": {"atomic_number": 26},
         }
 
+        stars_layer = Stars(universe)
+        stars_layer.stars = universe.world["first_stars"]
+
         result = SupernovaEnrichment(universe).enrich_space()
 
         self.assertEqual(result.type, "quantum_error")

@@ -8,11 +8,28 @@ from universe.supernova_enrichment_process_state import (
     SupernovaEnrichmentProcessState,
 )
 from universe.universe import Universe
+from universe.stars import Stars
+from universe.stellar_nucleosynthesis import StellarNucleosynthesis
 
 
 class SupernovaEnrichmentProcessStateObjectStateTests(
     unittest.TestCase
 ):
+
+    def _wire_canonical_inputs(self, universe):
+        if "first_stars" in universe.world:
+            stars_layer = Stars(universe)
+            stars_layer.stars = universe.world[
+                "first_stars"
+            ]
+
+        if "elements_up_to_iron" in universe.world:
+            nucleosynthesis_layer = StellarNucleosynthesis(
+                universe
+            )
+            nucleosynthesis_layer.elements_up_to_iron = (
+                universe.world["elements_up_to_iron"]
+            )
 
     def _star(self):
         cloud = StellarMaterialCloud(
@@ -79,6 +96,8 @@ class SupernovaEnrichmentProcessStateObjectStateTests(
         universe.world["first_stars"] = [
             self._star()
         ]
+        self._wire_canonical_inputs(universe)
+
         process = SupernovaEnrichment(universe)
 
         result = process.enrich_space()
@@ -100,6 +119,8 @@ class SupernovaEnrichmentProcessStateObjectStateTests(
         universe.world["elements_up_to_iron"] = {
             "iron": self._iron(),
         }
+        self._wire_canonical_inputs(universe)
+
         process = SupernovaEnrichment(universe)
 
         result = process.enrich_space()

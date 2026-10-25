@@ -23,11 +23,28 @@ from universe.supernova_enrichment_process_state import (
     SupernovaEnrichmentProcessState,
 )
 from universe.universe import Universe
+from universe.stars import Stars
+from universe.stellar_nucleosynthesis import StellarNucleosynthesis
 
 
 class SupernovaEnrichmentObjectStateTests(
     unittest.TestCase
 ):
+
+    def _wire_canonical_inputs(self, universe):
+        if "first_stars" in universe.world:
+            stars_layer = Stars(universe)
+            stars_layer.stars = universe.world[
+                "first_stars"
+            ]
+
+        if "elements_up_to_iron" in universe.world:
+            nucleosynthesis_layer = StellarNucleosynthesis(
+                universe
+            )
+            nucleosynthesis_layer.elements_up_to_iron = (
+                universe.world["elements_up_to_iron"]
+            )
 
     def _assert_object_only(
         self,
@@ -110,6 +127,8 @@ class SupernovaEnrichmentObjectStateTests(
             ),
         }
 
+        self._wire_canonical_inputs(universe)
+
         process = SupernovaEnrichment(universe)
         result = process.enrich_space()
 
@@ -148,6 +167,8 @@ class SupernovaEnrichmentObjectStateTests(
                 26,
             )
         }
+
+        self._wire_canonical_inputs(universe)
 
         process = SupernovaEnrichment(universe)
         state = process.supernova_enrichment_state
@@ -228,6 +249,8 @@ class SupernovaEnrichmentObjectStateTests(
                 26,
             )
         }
+
+        self._wire_canonical_inputs(universe)
 
         process = SupernovaEnrichment(universe)
         process.enrich_space()
@@ -377,6 +400,8 @@ class SupernovaEnrichmentObjectStateTests(
         self
     ):
         universe = Universe()
+        self._wire_canonical_inputs(universe)
+
         process = SupernovaEnrichment(universe)
 
         result = process.enrich_space()
@@ -403,6 +428,8 @@ class SupernovaEnrichmentObjectStateTests(
         universe.world["first_stars"] = [
             self._star()
         ]
+
+        self._wire_canonical_inputs(universe)
 
         process = SupernovaEnrichment(universe)
         result = process.enrich_space()
@@ -439,6 +466,8 @@ class SupernovaEnrichmentObjectStateTests(
                 "atomic_number": 26,
             }
         }
+
+        self._wire_canonical_inputs(universe)
 
         result = SupernovaEnrichment(
             universe
@@ -489,6 +518,8 @@ class SupernovaEnrichmentObjectStateTests(
                 26,
             )
         }
+
+        self._wire_canonical_inputs(universe)
 
         process = SupernovaEnrichment(universe)
 

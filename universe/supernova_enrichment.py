@@ -81,13 +81,26 @@ class SupernovaEnrichment:
         )
 
     def _enrich_space_unprotected(self):
-        first_stars = self.universe.world.get(
-            "first_stars",
-            [],
+        stars_layer = getattr(
+            self.universe,
+            "stars_layer",
+            None,
         )
-        elements = self.universe.world.get(
-            "elements_up_to_iron",
-            {},
+        nucleosynthesis_layer = getattr(
+            self.universe,
+            "stellar_nucleosynthesis_layer",
+            None,
+        )
+
+        first_stars = (
+            stars_layer.stars
+            if stars_layer is not None
+            else ()
+        )
+        elements = (
+            nucleosynthesis_layer.elements_up_to_iron
+            if nucleosynthesis_layer is not None
+            else {}
         )
 
         if not first_stars:
