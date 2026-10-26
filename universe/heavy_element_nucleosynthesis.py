@@ -254,21 +254,6 @@ class HeavyElementNucleosynthesis:
         )
 
     def write_to_world(self):
-        nucleosynthesis_layer = getattr(
-            self.universe,
-            "stellar_nucleosynthesis_layer",
-            None,
-        )
-
-        elements_up_to_iron = (
-            nucleosynthesis_layer.elements_up_to_iron
-            if nucleosynthesis_layer is not None
-            else {}
-        )
-
-        all_elements = {}
-        all_elements.update(elements_up_to_iron)
-        all_elements.update(self.heavy_elements)
 
         self._refresh_public_state()
 
@@ -276,7 +261,7 @@ class HeavyElementNucleosynthesis:
             self.public_state
         )
         self.universe.world["heavy_elements"] = self.heavy_elements
-        self.universe.world["elements"] = all_elements
+
         self.universe.world["heavy_element_state"] = (
             self.process_state
         )

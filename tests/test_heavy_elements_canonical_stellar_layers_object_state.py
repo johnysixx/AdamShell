@@ -168,6 +168,8 @@ class HeavyElementsCanonicalStellarLayersTests(
             process.process_state.enriched_clouds_updated
         )
 
+        self.assertNotIn("elements", universe.world)
+
     def test_public_decoys_cannot_override_sources(
         self
     ):
@@ -201,12 +203,12 @@ class HeavyElementsCanonicalStellarLayersTests(
         )
 
         self.assertIs(
-            universe.world["elements"]["iron"],
+            supernova.enriched_clouds[0].composition["iron"],
             nuc.elements_up_to_iron["iron"],
         )
 
         self.assertIs(
-            universe.world["elements"]["gold"],
+            supernova.enriched_clouds[0].composition["gold"],
             process.heavy_elements["gold"],
         )
 
@@ -237,7 +239,7 @@ class HeavyElementsCanonicalStellarLayersTests(
         )
 
         self.assertIs(
-            universe.world["elements"]["iron"],
+            supernova.enriched_clouds[0].composition["iron"],
             nuc.elements_up_to_iron["iron"],
         )
 
@@ -401,7 +403,7 @@ class HeavyElementsCanonicalStellarLayersTests(
         )
 
         self.assertIs(
-            universe.world["elements"]["iron"],
+            supernova.enriched_clouds[0].composition["iron"],
             nuc.elements_up_to_iron["iron"],
         )
 
