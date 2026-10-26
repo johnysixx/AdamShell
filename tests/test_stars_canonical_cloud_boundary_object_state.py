@@ -3,7 +3,7 @@ import unittest
 from universe.cosmic_clouds import CosmicClouds
 from universe.cosmic_objects import StellarMaterialCloud
 from universe.primordial_objects import (
-    PrimordialCosmicComponent,
+    PrimordialElement,
 )
 from universe.stars import Stars
 from universe.stars_process_state import (
@@ -24,9 +24,8 @@ class StarsCanonicalCloudBoundaryObjectStateTests(
         universe.big_bang = big_bang
 
     def _primordial_component(self, name):
-        return PrimordialCosmicComponent(
+        return PrimordialElement(
             name=name,
-            type="element",
             state="formed",
             origin="big_bang_nucleosynthesis",
         )

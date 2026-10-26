@@ -2,7 +2,7 @@ import unittest
 
 from universe.chemical_objects import ChemicalElement
 from universe.cosmic_objects import StellarMaterialCloud
-from universe.primordial_objects import PrimordialCosmicComponent
+from universe.primordial_objects import PrimordialElement
 from universe.heavy_element_nucleosynthesis import (
     HeavyElementNucleosynthesis,
 )
@@ -87,9 +87,8 @@ class SupernovaEnrichmentObjectStateTests(
         )
 
     def _primordial_element(self, name):
-        return PrimordialCosmicComponent(
+        return PrimordialElement(
             name=name,
-            type="element",
             state="formed",
             origin="big_bang_nucleosynthesis",
         )

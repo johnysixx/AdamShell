@@ -5,7 +5,7 @@ from universe.cosmic_clouds_process_state import (
     CosmicCloudsProcessState,
 )
 from universe.primordial_objects import (
-    PrimordialCosmicComponent,
+    PrimordialElement,
 )
 from universe.universe import Universe
 from universe.big_bang import BigBang
@@ -21,9 +21,8 @@ class CosmicCloudsProcessStateObjectStateTests(
         universe.big_bang = big_bang
 
     def _primordial_element(self, name):
-        return PrimordialCosmicComponent(
+        return PrimordialElement(
             name=name,
-            type="element",
             state="formed",
             origin="big_bang_nucleosynthesis",
         )

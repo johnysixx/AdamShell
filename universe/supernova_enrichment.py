@@ -1,7 +1,7 @@
 from universe.physical_record_state import CosmicHistoryEvent
 from universe.chemical_objects import ChemicalElement
 from universe.cosmic_objects import StellarMaterialCloud
-from universe.primordial_objects import PrimordialCosmicComponent
+from universe.primordial_objects import PrimordialElement
 from universe.stellar_objects import PrimordialStar, Supernova
 from universe.supernova_enrichment_state import (
     SupernovaEnrichmentState,
@@ -171,7 +171,7 @@ class SupernovaEnrichment:
             if not isinstance(
                 element,
                 (
-                    PrimordialCosmicComponent,
+                    PrimordialElement,
                     ChemicalElement,
                 ),
             ):

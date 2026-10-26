@@ -6,7 +6,11 @@ from universe.big_bang_state import (
     BigBangCosmicState,
     BigBangRunResult,
 )
-from universe.primordial_objects import PrimordialCosmicComponent
+from universe.primordial_objects import (
+    PrimordialEnergy,
+    PrimordialMatter,
+    PrimordialElement,
+)
 from universe.universe import Universe
 
 
@@ -238,19 +242,22 @@ class BigBangCosmicObjectStateTests(
         for element in elements.values():
             self.assertIsInstance(
                 element,
-                PrimordialCosmicComponent,
+                PrimordialElement,
             )
             self.assertEqual(element.type, "element")
 
-        for component in components.values():
-            self.assertIsInstance(
-                component,
-                PrimordialCosmicComponent,
-            )
+        self.assertIsInstance(
+            components["energy"],
+            PrimordialEnergy,
+        )
+        self.assertIsInstance(
+            components["matter"],
+            PrimordialMatter,
+        )
 
         self.assertEqual(
             components["energy"].type,
-            "primordial_force",
+            "primordial_energy",
         )
         self.assertEqual(
             components["matter"].state,
@@ -336,6 +343,20 @@ class BigBangCosmicObjectStateTests(
             result.primordial_elements["energy"] = (
                 result.primordial_components["energy"]
             )
+
+    def test_domain_types_cannot_be_relabelled(self):
+        with self.assertRaises(TypeError):
+            PrimordialElement(
+                name="hydrogen",
+                state="formed",
+                type="primordial_energy",
+            )
+
+        with self.assertRaises(TypeError):
+            PrimordialEnergy(name="hydrogen")
+
+        with self.assertRaises(TypeError):
+            PrimordialMatter(name="hydrogen")
 
     def test_repeated_start_returns_same_runtime_result(
         self

@@ -7,7 +7,7 @@ from universe.cosmic_clouds_process_state import (
     CosmicCloudsProcessState,
 )
 from universe.cosmic_objects import StellarMaterialCloud
-from universe.primordial_objects import PrimordialCosmicComponent
+from universe.primordial_objects import PrimordialElement
 from universe.stars import Stars
 from universe.stars_process_state import StarsProcessState
 from universe.stellar_nucleosynthesis import (
@@ -29,9 +29,8 @@ class StellarNucleosynthesisCanonicalBigBangTests(
 ):
 
     def _component(self, name):
-        return PrimordialCosmicComponent(
+        return PrimordialElement(
             name=name,
-            type="element",
             state="formed",
             origin="big_bang_nucleosynthesis",
         )
@@ -326,7 +325,7 @@ class StellarNucleosynthesisCanonicalBigBangTests(
 
         with self.assertRaisesRegex(
             TypeError,
-            "element components",
+            "PrimordialElement",
         ):
             process.forge_elements_up_to_iron()
 
@@ -351,7 +350,7 @@ class StellarNucleosynthesisCanonicalBigBangTests(
 
         with self.assertRaisesRegex(
             TypeError,
-            "PrimordialCosmicComponent",
+            "PrimordialElement",
         ):
             process.forge_elements_up_to_iron()
 

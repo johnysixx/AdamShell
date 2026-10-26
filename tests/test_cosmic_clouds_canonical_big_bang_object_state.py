@@ -6,7 +6,7 @@ from universe.cosmic_clouds import CosmicClouds
 from universe.cosmic_clouds_process_state import (
     CosmicCloudsProcessState,
 )
-from universe.primordial_objects import PrimordialCosmicComponent
+from universe.primordial_objects import PrimordialElement, PrimordialEnergy
 from universe.stars import Stars
 from universe.stars_process_state import StarsProcessState
 from universe.universe import Universe
@@ -15,9 +15,8 @@ from universe.universe import Universe
 class CosmicCloudsCanonicalBigBangTests(unittest.TestCase):
 
     def _component(self, name):
-        return PrimordialCosmicComponent(
+        return PrimordialElement(
             name=name,
-            type="element",
             state="formed",
             origin="big_bang_nucleosynthesis",
         )
@@ -207,7 +206,7 @@ class CosmicCloudsCanonicalBigBangTests(unittest.TestCase):
 
         self.assertEqual(result.type, "quantum_error")
         self.assertIn(
-            "PrimordialCosmicComponent",
+            "PrimordialElement",
             result.cronenberg.origin.error_message,
         )
         self.assertEqual(
@@ -227,11 +226,7 @@ class CosmicCloudsCanonicalBigBangTests(unittest.TestCase):
                     "helium": self._component("helium"),
                 }
 
-                elements[name] = PrimordialCosmicComponent(
-                    name=name,
-                    type="primordial_force",
-                    state="released",
-                )
+                elements[name] = PrimordialEnergy()
 
                 universe, _ = self._canonical_big_bang(elements)
 
@@ -241,7 +236,7 @@ class CosmicCloudsCanonicalBigBangTests(unittest.TestCase):
 
                 self.assertEqual(result.type, "quantum_error")
                 self.assertIn(
-                    "element component",
+                    "PrimordialElement",
                     result.cronenberg.origin.error_message,
                 )
 

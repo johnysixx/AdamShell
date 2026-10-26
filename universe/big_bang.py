@@ -5,7 +5,11 @@ from universe.big_bang_state import (
 from universe.big_bang_process_state import (
     BigBangProcessState,
 )
-from universe.primordial_objects import PrimordialCosmicComponent
+from universe.primordial_objects import (
+    PrimordialEnergy,
+    PrimordialMatter,
+    PrimordialElement,
+)
 from universe.physical_record_state import CosmicHistoryEvent
 
 
@@ -118,15 +122,11 @@ class BigBang:
     def form_primordial_plasma(self):
         self.cosmic_state.primordial_plasma_formed = True
 
-        self.primordial_components["energy"] = PrimordialCosmicComponent(
-            name="energy",
-            type="primordial_force",
+        self.primordial_components["energy"] = PrimordialEnergy(
             state="released",
         )
 
-        self.primordial_components["matter"] = PrimordialCosmicComponent(
-            name="matter",
-            type="primordial_substance",
+        self.primordial_components["matter"] = PrimordialMatter(
             state="forming",
         )
 
@@ -143,23 +143,20 @@ class BigBang:
             .light_nuclei_conditions_prepared
         ) = True
 
-        self.primordial_elements["hydrogen"] = PrimordialCosmicComponent(
+        self.primordial_elements["hydrogen"] = PrimordialElement(
             name="hydrogen",
-            type="element",
             state="formed",
             origin="big_bang_nucleosynthesis",
         )
 
-        self.primordial_elements["helium"] = PrimordialCosmicComponent(
+        self.primordial_elements["helium"] = PrimordialElement(
             name="helium",
-            type="element",
             state="formed",
             origin="big_bang_nucleosynthesis",
         )
 
-        self.primordial_elements["trace_lithium"] = PrimordialCosmicComponent(
+        self.primordial_elements["trace_lithium"] = PrimordialElement(
             name="trace_lithium",
-            type="element",
             state="trace",
             origin="big_bang_nucleosynthesis",
         )

@@ -9,7 +9,9 @@ from universe.physical_record_state import (
     CosmicHistoryEvent,
 )
 from universe.primordial_objects import (
-    PrimordialCosmicComponent,
+    PrimordialEnergy,
+    PrimordialMatter,
+    PrimordialElement,
 )
 
 
@@ -47,8 +49,8 @@ class BigBangRunResult:
 
     state: BigBangProcessState
     phases: tuple[CosmicHistoryEvent, ...]
-    primordial_components: Mapping[str, PrimordialCosmicComponent]
-    primordial_elements: Mapping[str, PrimordialCosmicComponent]
+    primordial_components: Mapping[str, PrimordialEnergy | PrimordialMatter]
+    primordial_elements: Mapping[str, PrimordialElement]
     cosmic_state: "BigBangCosmicState"
 
     name: str = field(
@@ -92,9 +94,9 @@ class BigBangRunResult:
             phases,
         )
 
-        for registry_name, expects_elements in (
-            ("primordial_components", False),
-            ("primordial_elements", True),
+        for registry_name, accepted_types in (
+            ("primordial_components", (PrimordialEnergy, PrimordialMatter)),
+            ("primordial_elements", (PrimordialElement,)),
         ):
             registry = getattr(self, registry_name)
 
@@ -108,23 +110,17 @@ class BigBangRunResult:
             for key, component in values.items():
                 if not isinstance(
                     component,
-                    PrimordialCosmicComponent,
+                    accepted_types,
                 ):
                     raise TypeError(
                         f"Big Bang {registry_name} must contain "
-                        "PrimordialCosmicComponent objects."
+                        "objects of the required domain."
                     )
 
                 if key != component.name:
                     raise ValueError(
                         f"Big Bang {registry_name} keys must "
                         "match component names."
-                    )
-
-                if (component.type == "element") != expects_elements:
-                    raise TypeError(
-                        f"Big Bang {registry_name} contains "
-                        "a wrong-domain component."
                     )
 
             object.__setattr__(

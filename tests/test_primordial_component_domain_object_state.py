@@ -3,7 +3,7 @@ import unittest
 from universe.big_bang import BigBang
 from universe.cosmic_clouds import CosmicClouds
 from universe.cosmic_objects import StellarMaterialCloud
-from universe.primordial_objects import PrimordialCosmicComponent
+from universe.primordial_objects import PrimordialElement
 from universe.stellar_nucleosynthesis import StellarNucleosynthesis
 from universe.stellar_objects import PrimordialStar
 from universe.stars import Stars
@@ -20,9 +20,8 @@ class PrimordialComponentDomainObjectStateTests(
         universe.big_bang = big_bang
 
     def test_component_to_dict_is_detached_boundary(self):
-        component = PrimordialCosmicComponent(
+        component = PrimordialElement(
             name="hydrogen",
-            type="element",
             state="formed",
             origin="big_bang_nucleosynthesis",
         )
@@ -42,9 +41,8 @@ class PrimordialComponentDomainObjectStateTests(
             "hydrogen": {
                 "name": "hydrogen",
             },
-            "helium": PrimordialCosmicComponent(
+            "helium": PrimordialElement(
                 name="helium",
-                type="element",
                 state="formed",
             ),
         }
@@ -60,7 +58,7 @@ class PrimordialComponentDomainObjectStateTests(
             "quantum_error",
         )
         self.assertIn(
-            "PrimordialCosmicComponent",
+            "PrimordialElement",
             result.cronenberg.origin.error_message,
         )
 

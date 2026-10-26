@@ -9,7 +9,7 @@ from universe.cosmic_objects import StellarMaterialCloud
 from universe.stellar_formation_result_state import (
     CosmicCloudFormationResult,
 )
-from universe.primordial_objects import PrimordialCosmicComponent
+from universe.primordial_objects import PrimordialElement
 
 
 class CosmicClouds:
@@ -115,16 +115,11 @@ class CosmicClouds:
 
         if not isinstance(
             hydrogen,
-            PrimordialCosmicComponent,
+            PrimordialElement,
         ):
             raise TypeError(
                 "primordial hydrogen must be a "
-                "PrimordialCosmicComponent"
-            )
-
-        if hydrogen.type != "element":
-            raise TypeError(
-                "primordial hydrogen must be an element component"
+                "PrimordialElement"
             )
 
         self.cosmic_cloud_state.hydrogen_available = True
@@ -154,16 +149,11 @@ class CosmicClouds:
 
         if not isinstance(
             helium,
-            PrimordialCosmicComponent,
+            PrimordialElement,
         ):
             raise TypeError(
                 "primordial helium must be a "
-                "PrimordialCosmicComponent"
-            )
-
-        if helium.type != "element":
-            raise TypeError(
-                "primordial helium must be an element component"
+                "PrimordialElement"
             )
 
         self.cosmic_cloud_state.helium_available = True

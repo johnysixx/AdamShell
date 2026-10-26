@@ -5,7 +5,7 @@ from universe.chemical_objects import (
     ChemicalElement,
 )
 from universe.primordial_objects import (
-    PrimordialCosmicComponent,
+    PrimordialElement,
 )
 from universe.stellar_nucleosynthesis_process_state import (
     StellarNucleosynthesisProcessState,
@@ -20,7 +20,7 @@ def public_element_snapshot(
 ):
     if isinstance(
         element,
-        PrimordialCosmicComponent,
+        PrimordialElement,
     ):
         return element.to_dict()
 
@@ -57,7 +57,7 @@ def _freeze_element_registry(
         if not isinstance(
             element,
             (
-                PrimordialCosmicComponent,
+                PrimordialElement,
                 ChemicalElement,
             ),
         ):

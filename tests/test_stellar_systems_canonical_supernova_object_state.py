@@ -12,7 +12,7 @@ from universe.planets_process_state import (
     PlanetsProcessState,
 )
 from universe.primordial_objects import (
-    PrimordialCosmicComponent,
+    PrimordialElement,
 )
 from universe.stars import Stars
 from universe.stellar_nucleosynthesis import (
@@ -38,9 +38,8 @@ class StellarSystemsCanonicalSupernovaTests(
 ):
 
     def _primordial_element(self, name):
-        return PrimordialCosmicComponent(
+        return PrimordialElement(
             name=name,
-            type="element",
             state="formed",
             origin="big_bang_nucleosynthesis",
         )
