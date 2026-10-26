@@ -18,9 +18,17 @@ from universe.stellar_formation_result_state import (
     StarFormationResult,
 )
 from universe.universe import Universe
+from universe.big_bang import BigBang
 
 
 class CosmicCloudObjectStateTests(unittest.TestCase):
+
+    def _wire_canonical_big_bang(self, universe):
+        big_bang = BigBang(universe)
+        big_bang.primordial_elements = (
+            universe.world["primordial_elements"]
+        )
+        universe.big_bang = big_bang
 
     def _primordial_element(self, name):
         return PrimordialCosmicComponent(
@@ -59,6 +67,8 @@ class CosmicCloudObjectStateTests(unittest.TestCase):
             ),
         }
 
+        self._wire_canonical_big_bang(universe)
+
         process = CosmicClouds(universe)
         result = process.form_germinal_clouds()
 
@@ -90,6 +100,8 @@ class CosmicCloudObjectStateTests(unittest.TestCase):
                 "helium"
             ),
         }
+        self._wire_canonical_big_bang(universe)
+
         process = CosmicClouds(universe)
         state = process.cosmic_cloud_state
 
@@ -223,6 +235,8 @@ class CosmicCloudObjectStateTests(unittest.TestCase):
                 "helium"
             ),
         }
+        self._wire_canonical_big_bang(universe)
+
         process = CosmicClouds(universe)
 
         result = process.form_germinal_clouds()
@@ -249,6 +263,8 @@ class CosmicCloudObjectStateTests(unittest.TestCase):
                 "hydrogen"
             ),
         }
+        self._wire_canonical_big_bang(universe)
+
         process = CosmicClouds(universe)
 
         result = process.form_germinal_clouds()
@@ -297,6 +313,8 @@ class CosmicCloudObjectStateTests(unittest.TestCase):
                 "helium"
             ),
         }
+        self._wire_canonical_big_bang(universe)
+
         process = CosmicClouds(universe)
 
         def broken_history():

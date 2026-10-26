@@ -11,11 +11,19 @@ from universe.stars_process_state import (
 )
 from universe.stellar_objects import PrimordialStar
 from universe.universe import Universe
+from universe.big_bang import BigBang
 
 
 class StarsCanonicalCloudBoundaryObjectStateTests(
     unittest.TestCase
 ):
+
+    def _wire_canonical_big_bang(self, universe):
+        big_bang = BigBang(universe)
+        big_bang.primordial_elements = (
+            universe.world["primordial_elements"]
+        )
+        universe.big_bang = big_bang
 
     def _primordial_component(self, name):
         return PrimordialCosmicComponent(
@@ -48,6 +56,8 @@ class StarsCanonicalCloudBoundaryObjectStateTests(
                 "helium"
             ),
         }
+
+        self._wire_canonical_big_bang(universe)
 
         layer = CosmicClouds(universe)
 

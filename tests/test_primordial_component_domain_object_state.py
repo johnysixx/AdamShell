@@ -14,6 +14,13 @@ class PrimordialComponentDomainObjectStateTests(
     unittest.TestCase
 ):
 
+    def _wire_canonical_big_bang(self, universe):
+        big_bang = BigBang(universe)
+        big_bang.primordial_elements = (
+            universe.world["primordial_elements"]
+        )
+        universe.big_bang = big_bang
+
     def test_component_to_dict_is_detached_boundary(self):
         component = PrimordialCosmicComponent(
             name="hydrogen",
@@ -43,6 +50,8 @@ class PrimordialComponentDomainObjectStateTests(
                 state="formed",
             ),
         }
+
+        self._wire_canonical_big_bang(universe)
 
         result = CosmicClouds(
             universe

@@ -78,9 +78,16 @@ class CosmicClouds:
         )
 
     def _form_germinal_clouds_unprotected(self):
-        primordial_elements = self.universe.world.get(
-            "primordial_elements",
-            {},
+        big_bang = getattr(
+            self.universe,
+            "big_bang",
+            None,
+        )
+
+        primordial_elements = (
+            big_bang.primordial_elements
+            if big_bang is not None
+            else {}
         )
 
         if "hydrogen" not in primordial_elements:

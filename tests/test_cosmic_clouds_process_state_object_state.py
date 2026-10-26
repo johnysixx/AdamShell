@@ -8,11 +8,19 @@ from universe.primordial_objects import (
     PrimordialCosmicComponent,
 )
 from universe.universe import Universe
+from universe.big_bang import BigBang
 
 
 class CosmicCloudsProcessStateObjectStateTests(
     unittest.TestCase
 ):
+
+    def _wire_canonical_big_bang(self, universe):
+        big_bang = BigBang(universe)
+        big_bang.primordial_elements = (
+            universe.world["primordial_elements"]
+        )
+        universe.big_bang = big_bang
 
     def _primordial_element(self, name):
         return PrimordialCosmicComponent(
@@ -41,6 +49,8 @@ class CosmicCloudsProcessStateObjectStateTests(
                 "hydrogen"
             ),
         }
+        self._wire_canonical_big_bang(universe)
+
         process = CosmicClouds(universe)
 
         result = process.form_germinal_clouds()
@@ -64,6 +74,8 @@ class CosmicCloudsProcessStateObjectStateTests(
                 "helium"
             ),
         }
+        self._wire_canonical_big_bang(universe)
+
         process = CosmicClouds(universe)
 
         result = process.form_germinal_clouds()
