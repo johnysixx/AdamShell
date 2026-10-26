@@ -181,8 +181,13 @@ class StellarNucleosynthesis:
                     "PrimordialCosmicComponent objects"
                 )
 
-            if element.type == "element":
-                self.elements_up_to_iron[element_name] = element
+            if element.type != "element":
+                raise TypeError(
+                    "primordial_elements must contain "
+                    "element components"
+                )
+
+            self.elements_up_to_iron[element_name] = element
 
         for name, symbol, atomic_number in STELLAR_ELEMENT_SPECS:
             self.add_stellar_element(

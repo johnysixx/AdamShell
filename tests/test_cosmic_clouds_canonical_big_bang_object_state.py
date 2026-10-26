@@ -219,6 +219,32 @@ class CosmicCloudsCanonicalBigBangTests(unittest.TestCase):
             "form_germinal_clouds",
         )
 
+    def test_wrong_domain_element_is_rejected(self):
+        for name in ("hydrogen", "helium"):
+            with self.subTest(element=name):
+                elements = {
+                    "hydrogen": self._component("hydrogen"),
+                    "helium": self._component("helium"),
+                }
+
+                elements[name] = PrimordialCosmicComponent(
+                    name=name,
+                    type="primordial_force",
+                    state="released",
+                )
+
+                universe, _ = self._canonical_big_bang(elements)
+
+                result = CosmicClouds(
+                    universe
+                ).form_germinal_clouds()
+
+                self.assertEqual(result.type, "quantum_error")
+                self.assertIn(
+                    "element component",
+                    result.cronenberg.origin.error_message,
+                )
+
     def test_formation_never_reads_public_primordial_registry(
         self
     ):

@@ -1,4 +1,5 @@
 import unittest
+from dataclasses import replace
 
 from universe.big_bang import BigBang
 from universe.big_bang_state import (
@@ -131,6 +132,11 @@ class BigBangCosmicObjectStateTests(
             ],
         )
 
+        self.assertIs(
+            result.primordial_components["energy"],
+            universe.big_bang.primordial_components["energy"],
+        )
+
         for mapping_method in (
             "get",
             "keys",
@@ -164,6 +170,10 @@ class BigBangCosmicObjectStateTests(
             dict,
         )
         self.assertIsInstance(
+            snapshot["primordial_components"],
+            dict,
+        )
+        self.assertIsInstance(
             snapshot["phases"],
             list,
         )
@@ -184,6 +194,7 @@ class BigBangCosmicObjectStateTests(
         snapshot["cosmic_state"][
             "spacetime_expanded"
         ] = False
+        snapshot["primordial_components"]["energy"]["state"] = "changed"
         snapshot["primordial_elements"][
             "hydrogen"
         ]["state"] = "changed"
@@ -194,6 +205,10 @@ class BigBangCosmicObjectStateTests(
         process = universe.big_bang
         self.assertTrue(
             process.cosmic_state.spacetime_expanded
+        )
+        self.assertEqual(
+            process.primordial_components["energy"].state,
+            "released",
         )
         self.assertEqual(
             process.primordial_elements[
@@ -211,7 +226,21 @@ class BigBangCosmicObjectStateTests(
         universe.start_big_bang()
 
         self.assertNotIn("primordial_elements", universe.world)
-        components = universe.big_bang.primordial_elements
+        components = universe.big_bang.primordial_components
+        elements = universe.big_bang.primordial_elements
+
+        self.assertEqual(set(components), {"energy", "matter"})
+        self.assertEqual(
+            set(elements),
+            {"hydrogen", "helium", "trace_lithium"},
+        )
+
+        for element in elements.values():
+            self.assertIsInstance(
+                element,
+                PrimordialCosmicComponent,
+            )
+            self.assertEqual(element.type, "element")
 
         for component in components.values():
             self.assertIsInstance(
@@ -228,11 +257,11 @@ class BigBangCosmicObjectStateTests(
             "forming",
         )
         self.assertEqual(
-            components["hydrogen"].type,
+            elements["hydrogen"].type,
             "element",
         )
         self.assertEqual(
-            components["hydrogen"].origin,
+            elements["hydrogen"].origin,
             "big_bang_nucleosynthesis",
         )
 
@@ -277,6 +306,36 @@ class BigBangCosmicObjectStateTests(
             hydrogen.state,
             "formed",
         )
+
+    def test_result_rejects_cross_domain_components(self):
+        result = Universe().start_big_bang()
+
+        with self.assertRaisesRegex(
+            TypeError,
+            "primordial_elements",
+        ):
+            replace(
+                result,
+                primordial_elements={
+                    "energy": result.primordial_components["energy"],
+                },
+            )
+
+        with self.assertRaisesRegex(
+            TypeError,
+            "primordial_components",
+        ):
+            replace(
+                result,
+                primordial_components={
+                    "hydrogen": result.primordial_elements["hydrogen"],
+                },
+            )
+
+        with self.assertRaises(TypeError):
+            result.primordial_elements["energy"] = (
+                result.primordial_components["energy"]
+            )
 
     def test_repeated_start_returns_same_runtime_result(
         self

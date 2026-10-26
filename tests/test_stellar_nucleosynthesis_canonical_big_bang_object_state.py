@@ -287,10 +287,20 @@ class StellarNucleosynthesisCanonicalBigBangTests(
 
         self.assertIn(
             "energy",
-            universe.big_bang.primordial_elements,
+            universe.big_bang.primordial_components,
         )
 
         self.assertIn(
+            "matter",
+            universe.big_bang.primordial_components,
+        )
+
+        self.assertNotIn(
+            "energy",
+            universe.big_bang.primordial_elements,
+        )
+
+        self.assertNotIn(
             "matter",
             universe.big_bang.primordial_elements,
         )
@@ -304,6 +314,21 @@ class StellarNucleosynthesisCanonicalBigBangTests(
             "matter",
             process.elements_up_to_iron,
         )
+
+    def test_non_element_in_element_registry_is_rejected(self):
+        universe, _ = self._ready_stars()
+
+        universe.big_bang.primordial_elements["energy"] = (
+            universe.big_bang.primordial_components["energy"]
+        )
+
+        process = StellarNucleosynthesis(universe)
+
+        with self.assertRaisesRegex(
+            TypeError,
+            "element components",
+        ):
+            process.forge_elements_up_to_iron()
 
     def test_invalid_canonical_component_is_rejected(
         self

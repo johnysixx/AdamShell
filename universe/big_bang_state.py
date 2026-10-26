@@ -1,3 +1,4 @@
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from types import MappingProxyType
 
@@ -46,7 +47,8 @@ class BigBangRunResult:
 
     state: BigBangProcessState
     phases: tuple[CosmicHistoryEvent, ...]
-    primordial_elements: object
+    primordial_components: Mapping[str, PrimordialCosmicComponent]
+    primordial_elements: Mapping[str, PrimordialCosmicComponent]
     cosmic_state: "BigBangCosmicState"
 
     name: str = field(
@@ -90,28 +92,46 @@ class BigBangRunResult:
             phases,
         )
 
-        components = dict(
-            self.primordial_elements
-        )
+        for registry_name, expects_elements in (
+            ("primordial_components", False),
+            ("primordial_elements", True),
+        ):
+            registry = getattr(self, registry_name)
 
-        for component in components.values():
-            if not isinstance(
-                component,
-                PrimordialCosmicComponent,
-            ):
+            if not isinstance(registry, Mapping):
                 raise TypeError(
-                    "Big Bang primordial registry must "
-                    "contain PrimordialCosmicComponent "
-                    "objects."
+                    f"Big Bang {registry_name} must be a mapping."
                 )
 
-        object.__setattr__(
-            self,
-            "primordial_elements",
-            MappingProxyType(
-                components
-            ),
-        )
+            values = dict(registry)
+
+            for key, component in values.items():
+                if not isinstance(
+                    component,
+                    PrimordialCosmicComponent,
+                ):
+                    raise TypeError(
+                        f"Big Bang {registry_name} must contain "
+                        "PrimordialCosmicComponent objects."
+                    )
+
+                if key != component.name:
+                    raise ValueError(
+                        f"Big Bang {registry_name} keys must "
+                        "match component names."
+                    )
+
+                if (component.type == "element") != expects_elements:
+                    raise TypeError(
+                        f"Big Bang {registry_name} contains "
+                        "a wrong-domain component."
+                    )
+
+            object.__setattr__(
+                self,
+                registry_name,
+                MappingProxyType(values),
+            )
 
         if not isinstance(
             self.cosmic_state,
@@ -133,6 +153,11 @@ class BigBangRunResult:
                 phase.to_dict()
                 for phase in self.phases
             ],
+            "primordial_components": {
+                name: component.to_dict()
+                for name, component
+                in self.primordial_components.items()
+            },
             "primordial_elements": {
                 name: component.to_dict()
                 for name, component

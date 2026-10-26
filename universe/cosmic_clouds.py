@@ -122,6 +122,11 @@ class CosmicClouds:
                 "PrimordialCosmicComponent"
             )
 
+        if hydrogen.type != "element":
+            raise TypeError(
+                "primordial hydrogen must be an element component"
+            )
+
         self.cosmic_cloud_state.hydrogen_available = True
 
         if "helium" not in primordial_elements:
@@ -154,6 +159,11 @@ class CosmicClouds:
             raise TypeError(
                 "primordial helium must be a "
                 "PrimordialCosmicComponent"
+            )
+
+        if helium.type != "element":
+            raise TypeError(
+                "primordial helium must be an element component"
             )
 
         self.cosmic_cloud_state.helium_available = True

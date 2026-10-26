@@ -1,5 +1,3 @@
-from copy import deepcopy
-
 from universe.big_bang_state import (
     BigBangCosmicState,
     BigBangRunResult,
@@ -21,6 +19,7 @@ class BigBang:
 
         self.phases = []
 
+        self.primordial_components = {}
         self.primordial_elements = {}
 
         self.cosmic_state = BigBangCosmicState()
@@ -55,6 +54,10 @@ class BigBang:
                 phase.to_dict()
                 for phase in self.phases
             ],
+            "primordial_components": {
+                name: component.to_dict()
+                for name, component in self.primordial_components.items()
+            },
             "primordial_elements": {
                 name: component.to_dict()
                 for name, component in self.primordial_elements.items()
@@ -81,6 +84,9 @@ class BigBang:
             state=self.state,
             phases=tuple(
                 self.phases
+            ),
+            primordial_components=(
+                self.primordial_components
             ),
             primordial_elements=(
                 self.primordial_elements
@@ -112,13 +118,13 @@ class BigBang:
     def form_primordial_plasma(self):
         self.cosmic_state.primordial_plasma_formed = True
 
-        self.primordial_elements["energy"] = PrimordialCosmicComponent(
+        self.primordial_components["energy"] = PrimordialCosmicComponent(
             name="energy",
             type="primordial_force",
             state="released",
         )
 
-        self.primordial_elements["matter"] = PrimordialCosmicComponent(
+        self.primordial_components["matter"] = PrimordialCosmicComponent(
             name="matter",
             type="primordial_substance",
             state="forming",
