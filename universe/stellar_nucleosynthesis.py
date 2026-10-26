@@ -159,9 +159,16 @@ class StellarNucleosynthesis:
         )
         self.stellar_nucleosynthesis_state.stellar_fusion_active = True
 
-        primordial_elements = self.universe.world.get(
-            "primordial_elements",
-            {},
+        big_bang = getattr(
+            self.universe,
+            "big_bang",
+            None,
+        )
+
+        primordial_elements = (
+            big_bang.primordial_elements
+            if big_bang is not None
+            else {}
         )
 
         for element_name, element in primordial_elements.items():

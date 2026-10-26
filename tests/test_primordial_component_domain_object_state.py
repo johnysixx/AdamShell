@@ -71,9 +71,7 @@ class PrimordialComponentDomainObjectStateTests(
     ):
         universe = Universe()
 
-        BigBang(
-            universe
-        ).run_process()
+        universe.start_big_bang()
 
         cloud = StellarMaterialCloud(
             name="cloud",
@@ -162,6 +160,8 @@ class PrimordialComponentDomainObjectStateTests(
                 "type": "element",
             },
         }
+
+        self._wire_canonical_big_bang(universe)
 
         with self.assertRaises(
             TypeError

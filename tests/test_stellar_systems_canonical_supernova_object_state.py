@@ -30,6 +30,7 @@ from universe.stellar_systems_process_state import (
     StellarSystemsProcessState,
 )
 from universe.universe import Universe
+from universe.big_bang import BigBang
 
 
 class StellarSystemsCanonicalSupernovaTests(
@@ -69,6 +70,12 @@ class StellarSystemsCanonicalSupernovaTests(
                 "helium"
             ),
         }
+
+        big_bang = BigBang(universe)
+        big_bang.primordial_elements = (
+            universe.world["primordial_elements"]
+        )
+        universe.big_bang = big_bang
 
         source_cloud = StellarMaterialCloud(
             name="primordial_cloud",
