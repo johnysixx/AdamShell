@@ -101,8 +101,9 @@ class HeavyElementNucleosynthesisObjectStateTests(unittest.TestCase):
     def test_world_stores_state_object(self):
         universe, process, _ = self._forged_process()
 
+        self.assertNotIn("heavy_element_state", universe.world)
         self.assertIs(
-            universe.world["heavy_element_state"],
+            process.result.process_state,
             process.process_state,
         )
 

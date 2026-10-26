@@ -152,6 +152,22 @@ class SupernovaEnrichmentObjectStateTests(
             state.enriched_clouds_formed
         )
 
+    def test_supernova_state_has_canonical_owner(self):
+        universe, process, result = self._enriched_process()
+
+        self.assertNotIn(
+            "supernova_enrichment_state",
+            universe.world,
+        )
+        self.assertIs(
+            result.supernova_enrichment_state,
+            process.supernova_enrichment_state,
+        )
+        self.assertIs(
+            universe.supernova_enrichment_layer,
+            process,
+        )
+
     def test_enrichment_mutates_same_state_object(
         self
     ):
@@ -186,17 +202,19 @@ class SupernovaEnrichmentObjectStateTests(
             state.enriched_clouds_formed
         )
 
-    def test_world_stores_state_object_and_registries(
+    def test_canonical_state_and_runtime_registries(
         self
     ):
         universe, process, _ = (
             self._enriched_process()
         )
 
+        self.assertNotIn(
+            "supernova_enrichment_state",
+            universe.world,
+        )
         self.assertIs(
-            universe.world[
-                "supernova_enrichment_state"
-            ],
+            process.result.supernova_enrichment_state,
             process.supernova_enrichment_state,
         )
         self.assertIs(

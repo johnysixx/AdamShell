@@ -121,7 +121,8 @@ class StellarFormationObjectStateTests(
     ):
         universe, process, _ = self._formed_stars()
 
-        state = universe.world["stellar_state"]
+        self.assertNotIn("stellar_state", universe.world)
+        state = process.result.stellar_state
         self.assertIsInstance(
             state,
             StellarFormationState,

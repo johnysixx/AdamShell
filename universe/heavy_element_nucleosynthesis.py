@@ -261,7 +261,3 @@ class HeavyElementNucleosynthesis:
             self.public_state
         )
         self.universe.world["heavy_elements"] = self.heavy_elements
-
-        self.universe.world["heavy_element_state"] = (
-            self.process_state
-        )

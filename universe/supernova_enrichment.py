@@ -277,6 +277,3 @@ class SupernovaEnrichment:
         self.universe.world["enriched_clouds"] = (
             self.enriched_clouds
         )
-        self.universe.world["supernova_enrichment_state"] = (
-            self.supernova_enrichment_state
-        )

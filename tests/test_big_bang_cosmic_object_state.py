@@ -89,14 +89,15 @@ class BigBangCosmicObjectStateTests(
             state.light_separated_from_darkness
         )
 
-    def test_world_registry_stores_state_object(
+    def test_big_bang_owns_cosmic_state(
         self
     ):
         universe = Universe()
 
         universe.start_big_bang()
 
-        state = universe.world["cosmic_state"]
+        self.assertNotIn("cosmic_state", universe.world)
+        state = universe.big_bang.result.cosmic_state
         self.assertIsInstance(
             state,
             BigBangCosmicState,

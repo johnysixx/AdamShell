@@ -182,4 +182,3 @@ class Stars:
         self._refresh_public_state()
         self.universe.world["stars"] = self.public_state
         self.universe.world["first_stars"] = self.stars
-        self.universe.world["stellar_state"] = self.stellar_state

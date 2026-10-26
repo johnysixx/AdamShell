@@ -113,8 +113,9 @@ class CosmicCloudObjectStateTests(unittest.TestCase):
     def test_world_stores_state_object_and_registry(self):
         universe, process, _ = self._formed_clouds()
 
+        self.assertNotIn("cosmic_cloud_state", universe.world)
         self.assertIs(
-            universe.world["cosmic_cloud_state"],
+            process.result.cosmic_cloud_state,
             process.cosmic_cloud_state,
         )
         self.assertIs(

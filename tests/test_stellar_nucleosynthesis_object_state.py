@@ -73,8 +73,12 @@ class StellarNucleosynthesisObjectStateTests(unittest.TestCase):
     def test_world_stores_state_object(self):
         universe, process, _ = self._forged_process()
 
+        self.assertNotIn(
+            "stellar_nucleosynthesis_state",
+            universe.world,
+        )
         self.assertIs(
-            universe.world["stellar_nucleosynthesis_state"],
+            process.result.stellar_nucleosynthesis_state,
             process.stellar_nucleosynthesis_state,
         )
 

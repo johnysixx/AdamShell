@@ -204,4 +204,3 @@ class BigBang:
     def write_to_world(self):
         self.universe.world["big_bang"] = self.public_state
         self.universe.world["cosmic_history"] = self.phases
-        self.universe.world["cosmic_state"] = self.cosmic_state

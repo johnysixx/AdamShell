@@ -238,6 +238,3 @@ class CosmicClouds:
         self.universe.world["germinal_clouds"] = (
             self.clouds
         )
-        self.universe.world["cosmic_cloud_state"] = (
-            self.cosmic_cloud_state
-        )
