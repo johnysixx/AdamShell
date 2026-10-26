@@ -210,9 +210,8 @@ class BigBangCosmicObjectStateTests(
         universe = Universe()
         universe.start_big_bang()
 
-        components = universe.world[
-            "primordial_elements"
-        ]
+        self.assertNotIn("primordial_elements", universe.world)
+        components = universe.big_bang.primordial_elements
 
         for component in components.values():
             self.assertIsInstance(
@@ -241,9 +240,7 @@ class BigBangCosmicObjectStateTests(
         universe = Universe()
         universe.start_big_bang()
 
-        hydrogen = universe.world[
-            "primordial_elements"
-        ]["hydrogen"]
+        hydrogen = universe.big_bang.primordial_elements["hydrogen"]
 
         self._assert_object_only(
             hydrogen,
@@ -254,9 +251,7 @@ class BigBangCosmicObjectStateTests(
         universe = Universe()
         result = universe.start_big_bang()
 
-        hydrogen = universe.world[
-            "primordial_elements"
-        ]["hydrogen"]
+        hydrogen = universe.big_bang.primordial_elements["hydrogen"]
 
         self.assertIs(
             result.primordial_elements[

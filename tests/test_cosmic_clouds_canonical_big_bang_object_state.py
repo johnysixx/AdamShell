@@ -121,7 +121,7 @@ class CosmicCloudsCanonicalBigBangTests(unittest.TestCase):
     def test_missing_public_alias_does_not_block(self):
         universe, _ = self._started_big_bang()
 
-        universe.world.pop("primordial_elements", None)
+        self.assertNotIn("primordial_elements", universe.world)
 
         result = CosmicClouds(
             universe

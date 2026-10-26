@@ -18,11 +18,9 @@ class StarsCanonicalCloudBoundaryObjectStateTests(
     unittest.TestCase
 ):
 
-    def _wire_canonical_big_bang(self, universe):
+    def _wire_canonical_big_bang(self, universe, elements):
         big_bang = BigBang(universe)
-        big_bang.primordial_elements = (
-            universe.world["primordial_elements"]
-        )
+        big_bang.primordial_elements = elements
         universe.big_bang = big_bang
 
     def _primordial_component(self, name):
@@ -48,7 +46,7 @@ class StarsCanonicalCloudBoundaryObjectStateTests(
     def _formed_clouds(self):
         universe = Universe()
 
-        universe.world["primordial_elements"] = {
+        primordial_elements = {
             "hydrogen": self._primordial_component(
                 "hydrogen"
             ),
@@ -57,7 +55,7 @@ class StarsCanonicalCloudBoundaryObjectStateTests(
             ),
         }
 
-        self._wire_canonical_big_bang(universe)
+        self._wire_canonical_big_bang(universe, primordial_elements)
 
         layer = CosmicClouds(universe)
 

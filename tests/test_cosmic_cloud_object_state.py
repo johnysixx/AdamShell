@@ -23,11 +23,9 @@ from universe.big_bang import BigBang
 
 class CosmicCloudObjectStateTests(unittest.TestCase):
 
-    def _wire_canonical_big_bang(self, universe):
+    def _wire_canonical_big_bang(self, universe, elements):
         big_bang = BigBang(universe)
-        big_bang.primordial_elements = (
-            universe.world["primordial_elements"]
-        )
+        big_bang.primordial_elements = elements
         universe.big_bang = big_bang
 
     def _primordial_element(self, name):
@@ -58,7 +56,7 @@ class CosmicCloudObjectStateTests(unittest.TestCase):
 
     def _formed_clouds(self):
         universe = Universe()
-        universe.world["primordial_elements"] = {
+        primordial_elements = {
             "hydrogen": self._primordial_element(
                 "hydrogen"
             ),
@@ -67,7 +65,7 @@ class CosmicCloudObjectStateTests(unittest.TestCase):
             ),
         }
 
-        self._wire_canonical_big_bang(universe)
+        self._wire_canonical_big_bang(universe, primordial_elements)
 
         process = CosmicClouds(universe)
         result = process.form_germinal_clouds()
@@ -92,7 +90,7 @@ class CosmicCloudObjectStateTests(unittest.TestCase):
 
     def test_formation_mutates_same_state_object(self):
         universe = Universe()
-        universe.world["primordial_elements"] = {
+        primordial_elements = {
             "hydrogen": self._primordial_element(
                 "hydrogen"
             ),
@@ -100,7 +98,7 @@ class CosmicCloudObjectStateTests(unittest.TestCase):
                 "helium"
             ),
         }
-        self._wire_canonical_big_bang(universe)
+        self._wire_canonical_big_bang(universe, primordial_elements)
 
         process = CosmicClouds(universe)
         state = process.cosmic_cloud_state
@@ -230,12 +228,12 @@ class CosmicCloudObjectStateTests(unittest.TestCase):
 
     def test_missing_hydrogen_preserves_initial_state(self):
         universe = Universe()
-        universe.world["primordial_elements"] = {
+        primordial_elements = {
             "helium": self._primordial_element(
                 "helium"
             ),
         }
-        self._wire_canonical_big_bang(universe)
+        self._wire_canonical_big_bang(universe, primordial_elements)
 
         process = CosmicClouds(universe)
 
@@ -258,12 +256,12 @@ class CosmicCloudObjectStateTests(unittest.TestCase):
 
     def test_missing_helium_records_available_hydrogen(self):
         universe = Universe()
-        universe.world["primordial_elements"] = {
+        primordial_elements = {
             "hydrogen": self._primordial_element(
                 "hydrogen"
             ),
         }
-        self._wire_canonical_big_bang(universe)
+        self._wire_canonical_big_bang(universe, primordial_elements)
 
         process = CosmicClouds(universe)
 
@@ -305,7 +303,7 @@ class CosmicCloudObjectStateTests(unittest.TestCase):
 
     def test_formation_error_creates_cronenberg(self):
         universe = Universe()
-        universe.world["primordial_elements"] = {
+        primordial_elements = {
             "hydrogen": self._primordial_element(
                 "hydrogen"
             ),
@@ -313,7 +311,7 @@ class CosmicCloudObjectStateTests(unittest.TestCase):
                 "helium"
             ),
         }
-        self._wire_canonical_big_bang(universe)
+        self._wire_canonical_big_bang(universe, primordial_elements)
 
         process = CosmicClouds(universe)
 

@@ -175,10 +175,7 @@ class StellarNucleosynthesisCanonicalBigBangTests(
     ):
         universe, _ = self._ready_stars()
 
-        universe.world.pop(
-            "primordial_elements",
-            None,
-        )
+        self.assertNotIn("primordial_elements", universe.world)
 
         process = StellarNucleosynthesis(universe)
         result = process.forge_elements_up_to_iron()

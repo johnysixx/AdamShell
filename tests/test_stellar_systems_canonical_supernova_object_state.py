@@ -62,7 +62,7 @@ class StellarSystemsCanonicalSupernovaTests(
     def _prepared_chain(self):
         universe = Universe()
 
-        universe.world["primordial_elements"] = {
+        primordial_elements = {
             "hydrogen": self._primordial_element(
                 "hydrogen"
             ),
@@ -72,9 +72,7 @@ class StellarSystemsCanonicalSupernovaTests(
         }
 
         big_bang = BigBang(universe)
-        big_bang.primordial_elements = (
-            universe.world["primordial_elements"]
-        )
+        big_bang.primordial_elements = primordial_elements
         universe.big_bang = big_bang
 
         source_cloud = StellarMaterialCloud(

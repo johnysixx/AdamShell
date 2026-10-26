@@ -14,11 +14,9 @@ class PrimordialComponentDomainObjectStateTests(
     unittest.TestCase
 ):
 
-    def _wire_canonical_big_bang(self, universe):
+    def _wire_canonical_big_bang(self, universe, elements):
         big_bang = BigBang(universe)
-        big_bang.primordial_elements = (
-            universe.world["primordial_elements"]
-        )
+        big_bang.primordial_elements = elements
         universe.big_bang = big_bang
 
     def test_component_to_dict_is_detached_boundary(self):
@@ -40,7 +38,7 @@ class PrimordialComponentDomainObjectStateTests(
     def test_cosmic_clouds_reject_legacy_primordial_dict(self):
         universe = Universe()
 
-        universe.world["primordial_elements"] = {
+        primordial_elements = {
             "hydrogen": {
                 "name": "hydrogen",
             },
@@ -51,7 +49,7 @@ class PrimordialComponentDomainObjectStateTests(
             ),
         }
 
-        self._wire_canonical_big_bang(universe)
+        self._wire_canonical_big_bang(universe, primordial_elements)
 
         result = CosmicClouds(
             universe
@@ -99,9 +97,7 @@ class PrimordialComponentDomainObjectStateTests(
         stars_layer.stellar_state.stellar_fusion_possible = True
         stars_layer.write_to_world()
 
-        hydrogen = universe.world[
-            "primordial_elements"
-        ]["hydrogen"]
+        hydrogen = universe.big_bang.primordial_elements["hydrogen"]
 
         process = StellarNucleosynthesis(
             universe
@@ -152,16 +148,14 @@ class PrimordialComponentDomainObjectStateTests(
         stars_layer.stellar_state.stellar_fusion_possible = True
         stars_layer.write_to_world()
 
-        universe.world[
-            "primordial_elements"
-        ] = {
+        primordial_elements = {
             "hydrogen": {
                 "name": "hydrogen",
                 "type": "element",
             },
         }
 
-        self._wire_canonical_big_bang(universe)
+        self._wire_canonical_big_bang(universe, primordial_elements)
 
         with self.assertRaises(
             TypeError
