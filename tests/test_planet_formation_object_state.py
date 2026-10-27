@@ -150,8 +150,12 @@ class PlanetFormationObjectStateTests(
         state = process.planetary_state
 
         self.assertIs(process.planetary_state, state)
+        self.assertNotIn(
+            "planetary_state",
+            universe.world,
+        )
         self.assertIs(
-            universe.world["planetary_state"],
+            process.result.planetary_state,
             state,
         )
         self.assertTrue(state.planets_formed)

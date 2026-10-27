@@ -61,7 +61,7 @@ class PlanetaryMaterialDomainObjectStateTests(unittest.TestCase):
         planets_layer = Planets(universe)
         definitions = planets_layer.planetary_materials
         universe.world["planetary_materials"] = definitions
-        universe.world["planetary_state"] = PlanetFormationState(
+        source_state = PlanetFormationState(
             earth_formed=True,
             water_possible=True,
             ice_possible=True,
@@ -69,9 +69,7 @@ class PlanetaryMaterialDomainObjectStateTests(unittest.TestCase):
             organic_molecules_possible=True,
         )
 
-        planets_layer.planetary_state = (
-            universe.world["planetary_state"]
-        )
+        planets_layer.planetary_state = source_state
 
         process = PlanetaryMaterials(universe)
         process.materialize()
@@ -81,7 +79,7 @@ class PlanetaryMaterialDomainObjectStateTests(unittest.TestCase):
 
     def test_legacy_definition_dict_is_rejected(self):
         universe = Universe()
-        universe.world["planetary_state"] = PlanetFormationState(
+        source_state = PlanetFormationState(
             earth_formed=True,
             water_possible=True,
         )
@@ -92,9 +90,7 @@ class PlanetaryMaterialDomainObjectStateTests(unittest.TestCase):
             }
         }
         planets_layer = Planets(universe)
-        planets_layer.planetary_state = (
-            universe.world["planetary_state"]
-        )
+        planets_layer.planetary_state = source_state
         planets_layer.planetary_materials = (
             universe.world["planetary_materials"]
         )

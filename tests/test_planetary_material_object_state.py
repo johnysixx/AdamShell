@@ -29,13 +29,13 @@ class PlanetaryMaterialObjectStateTests(
     unittest.TestCase
 ):
 
-    def _wire_canonical_inputs(self, universe):
+    def _wire_canonical_inputs(
+        self, universe, source_state=None
+    ):
         planets_layer = Planets(universe)
 
-        if "planetary_state" in universe.world:
-            planets_layer.planetary_state = (
-                universe.world["planetary_state"]
-            )
+        if source_state is not None:
+            planets_layer.planetary_state = source_state
 
         if "planetary_materials" in universe.world:
             planets_layer.planetary_materials = (
@@ -87,7 +87,7 @@ class PlanetaryMaterialObjectStateTests(
 
     def _materialized_process(self):
         universe = Universe()
-        universe.world["planetary_state"] = (
+        source_state = (
             PlanetFormationState(
                 planets_formed=True,
                 earth_formed=True,
@@ -101,7 +101,7 @@ class PlanetaryMaterialObjectStateTests(
             self._possible_materials()
         )
 
-        self._wire_canonical_inputs(universe)
+        self._wire_canonical_inputs(universe, source_state)
 
         process = PlanetaryMaterials(universe)
         result = process.materialize()
@@ -246,7 +246,7 @@ class PlanetaryMaterialObjectStateTests(
         self
     ):
         universe = Universe()
-        universe.world["planetary_state"] = (
+        source_state = (
             PlanetFormationState(
                 planets_formed=True,
                 earth_formed=True,
@@ -256,7 +256,7 @@ class PlanetaryMaterialObjectStateTests(
         universe.world["planetary_materials"] = (
             self._possible_materials()
         )
-        self._wire_canonical_inputs(universe)
+        self._wire_canonical_inputs(universe, source_state)
 
         process = PlanetaryMaterials(universe)
 
@@ -281,7 +281,7 @@ class PlanetaryMaterialObjectStateTests(
         self
     ):
         universe = Universe()
-        universe.world["planetary_state"] = (
+        source_state = (
             PlanetFormationState(
                 planets_formed=True,
                 earth_formed=True,
@@ -297,7 +297,7 @@ class PlanetaryMaterialObjectStateTests(
                 requires=("hydrogen", "oxygen"),
             )
         }
-        self._wire_canonical_inputs(universe)
+        self._wire_canonical_inputs(universe, source_state)
 
         process = PlanetaryMaterials(universe)
 
@@ -322,7 +322,7 @@ class PlanetaryMaterialObjectStateTests(
         self
     ):
         universe = Universe()
-        self._wire_canonical_inputs(universe)
+        self._wire_canonical_inputs(universe, None)
 
         process = PlanetaryMaterials(universe)
 
@@ -362,7 +362,7 @@ class PlanetaryMaterialObjectStateTests(
         self
     ):
         universe = Universe()
-        universe.world["planetary_state"] = (
+        source_state = (
             PlanetFormationState(
                 earth_formed=True,
                 water_possible=True,
@@ -371,7 +371,7 @@ class PlanetaryMaterialObjectStateTests(
         universe.world["planetary_materials"] = (
             self._possible_materials()
         )
-        self._wire_canonical_inputs(universe)
+        self._wire_canonical_inputs(universe, source_state)
 
         process = PlanetaryMaterials(universe)
 

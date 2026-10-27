@@ -308,7 +308,6 @@ class Planets:
         self.universe.world["solar_planets"] = self.planets
         self.universe.world["earth"] = self.find_planet("earth")
         self.universe.world["planetary_materials"] = self.planetary_materials
-        self.universe.world["planetary_state"] = self.planetary_state
 
     def find_planet(self, name):
         for planet in self.planets:
