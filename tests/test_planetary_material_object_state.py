@@ -162,16 +162,20 @@ class PlanetaryMaterialObjectStateTests(
             self._materialized_process()
         )
 
+        self.assertNotIn(
+            "available_planetary_materials",
+            universe.world,
+        )
         self.assertIs(
-            universe.world[
-                "available_planetary_materials"
-            ],
-            process.available_materials,
+            universe.planetary_materials_layer,
+            process,
+        )
+        self.assertIs(
+            process.result.available_materials["water"],
+            process.available_materials["water"],
         )
         self.assertIsInstance(
-            universe.world[
-                "available_planetary_materials"
-            ],
+            process.available_materials,
             dict,
         )
         self.assertTrue(

@@ -217,9 +217,9 @@ class BiochemicalCanonicalPlanetaryMaterialsTests(
     ):
         universe, _, materials = self._materialized_chain()
 
-        universe.world.pop(
+        self.assertNotIn(
             "available_planetary_materials",
-            None,
+            universe.world,
         )
 
         process = BiochemicalFoundations(universe)
@@ -269,9 +269,9 @@ class BiochemicalCanonicalPlanetaryMaterialsTests(
     ):
         universe, _, materials = self._materialized_chain()
 
-        # Deliberately detach the public export. In normal
-        # operation the public and canonical registries
-        # share the same dictionary identity.
+        # Deliberately inject a detached world decoy.
+        # The canonical materials layer does not publish
+        # this runtime collection into Universe.world.
         universe.world["available_planetary_materials"] = dict(
             materials.available_materials
         )

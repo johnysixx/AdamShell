@@ -19,16 +19,14 @@ class BiochemicalCompoundDomainObjectStateTests(unittest.TestCase):
             name="organic_molecules",
             requires=("carbon", "hydrogen", "oxygen", "nitrogen"),
         )
-        universe.world["available_planetary_materials"] = {
+        source_materials = {
             "water": water.make_available(origin="test"),
             "organic_molecules": organic_molecules.make_available(
                 origin="test"
             ),
         }
         materials_layer = PlanetaryMaterials(universe)
-        materials_layer.available_materials = (
-            universe.world["available_planetary_materials"]
-        )
+        materials_layer.available_materials = source_materials
 
         process = BiochemicalFoundations(universe)
         result = process.form_biochemical_foundations()

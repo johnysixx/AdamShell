@@ -77,14 +77,10 @@ class BiochemicalFoundationsProcessStateObjectStateTests(
 
     def test_formation_sets_formed_enum(self):
         universe = Universe()
-        universe.world[
-            "available_planetary_materials"
-        ] = self._materials()
+        source_materials = self._materials()
 
         materials_layer = PlanetaryMaterials(universe)
-        materials_layer.available_materials = (
-            universe.world["available_planetary_materials"]
-        )
+        materials_layer.available_materials = source_materials
 
         process = BiochemicalFoundations(
             universe

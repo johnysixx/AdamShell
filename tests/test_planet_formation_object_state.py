@@ -419,11 +419,21 @@ class PlanetFormationObjectStateTests(
             result.state,
             PlanetaryMaterialsProcessState.MATERIALIZED,
         )
+        self.assertNotIn(
+            "available_planetary_materials",
+            universe.world,
+        )
+        self.assertIs(
+            universe.planetary_materials_layer,
+            process,
+        )
         self.assertIn(
             "water",
-            universe.world[
-                "available_planetary_materials"
-            ],
+            process.available_materials,
+        )
+        self.assertIs(
+            result.available_materials["water"],
+            process.available_materials["water"],
         )
         self.assertIn(
             "organic_molecules",

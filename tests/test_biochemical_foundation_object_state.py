@@ -51,13 +51,9 @@ class BiochemicalFoundationObjectStateTests(
 
     def _formed_process(self):
         universe = Universe()
-        universe.world[
-            "available_planetary_materials"
-        ] = self._materials()
+        source_materials = self._materials()
         materials_layer = PlanetaryMaterials(universe)
-        materials_layer.available_materials = (
-            universe.world["available_planetary_materials"]
-        )
+        materials_layer.available_materials = source_materials
 
         process = BiochemicalFoundations(universe)
         result = process.form_biochemical_foundations()
@@ -218,13 +214,11 @@ class BiochemicalFoundationObjectStateTests(
 
     def test_missing_material_preserves_initial_state(self):
         universe = Universe()
-        universe.world[
-            "available_planetary_materials"
-        ] = {"water": self._materials()["water"]}
+        source_materials = {
+            "water": self._materials()["water"]
+        }
         materials_layer = PlanetaryMaterials(universe)
-        materials_layer.available_materials = (
-            universe.world["available_planetary_materials"]
-        )
+        materials_layer.available_materials = source_materials
 
         process = BiochemicalFoundations(universe)
 
@@ -245,13 +239,9 @@ class BiochemicalFoundationObjectStateTests(
 
     def test_formation_error_creates_cronenberg(self):
         universe = Universe()
-        universe.world[
-            "available_planetary_materials"
-        ] = self._materials()
+        source_materials = self._materials()
         materials_layer = PlanetaryMaterials(universe)
-        materials_layer.available_materials = (
-            universe.world["available_planetary_materials"]
-        )
+        materials_layer.available_materials = source_materials
 
         process = BiochemicalFoundations(universe)
 

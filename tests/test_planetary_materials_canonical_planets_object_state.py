@@ -132,9 +132,13 @@ class PlanetaryMaterialsCanonicalPlanetsTests(
             process,
         )
 
+        self.assertNotIn(
+            "available_planetary_materials",
+            universe.world,
+        )
         self.assertIs(
-            universe.world["available_planetary_materials"],
-            process.available_materials,
+            result.available_materials["water"],
+            process.available_materials["water"],
         )
 
         self.assertNotIn(
