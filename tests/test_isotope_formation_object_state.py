@@ -92,19 +92,41 @@ class IsotopeFormationObjectStateTests(
         )
         self.assertEqual(state.isotope_count, 8)
 
-    def test_world_registry_stores_state_object(
+    def test_world_keeps_snapshot_without_live_isotope_state(
         self
     ):
         universe, process, _ = (
             self._formed_isotopes()
         )
 
-        state = universe.world["isotope_state"]
+        state = process.isotope_state
+
+        self.assertNotIn(
+            "isotope_state",
+            universe.world,
+        )
         self.assertIsInstance(
             state,
             IsotopeFormationState,
         )
-        self.assertIs(state, process.isotope_state)
+        self.assertIs(
+            process.result.isotope_state,
+            state,
+        )
+        self.assertIsInstance(
+            universe.world["isotopes"],
+            dict,
+        )
+        self.assertIsInstance(
+            universe.world["isotopes"]["isotope_state"],
+            dict,
+        )
+        self.assertEqual(
+            universe.world["isotopes"]["isotope_state"][
+                "isotope_count"
+            ],
+            len(process.isotopes),
+        )
         self.assertIsInstance(universe.world, dict)
 
     def test_runtime_result_is_object_and_snapshot_is_dict(

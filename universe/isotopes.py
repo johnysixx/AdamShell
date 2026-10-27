@@ -157,4 +157,3 @@ class Isotopes:
         self._refresh_public_state()
         self.universe.world["isotopes"] = self.public_state
         self.universe.world["known_isotopes"] = self.isotopes
-        self.universe.world["isotope_state"] = self.isotope_state
