@@ -235,6 +235,3 @@ class CosmicClouds:
         self.universe.world["cosmic_clouds"] = (
             self.public_state
         )
-        self.universe.world["germinal_clouds"] = (
-            self.clouds
-        )

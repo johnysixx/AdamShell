@@ -55,9 +55,10 @@ class CosmicCloudsCanonicalBigBangTests(unittest.TestCase):
         )
         self.assertEqual(len(process.clouds), 2)
 
+        self.assertNotIn("germinal_clouds", universe.world)
         self.assertIs(
-            universe.world["germinal_clouds"],
-            process.clouds,
+            result.clouds[0],
+            process.clouds[0],
         )
         self.assertIs(
             universe.cosmic_clouds_layer,

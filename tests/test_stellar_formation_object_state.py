@@ -43,7 +43,7 @@ class StellarFormationObjectStateTests(
 
     def _formed_stars(self):
         universe = Universe()
-        universe.world["germinal_clouds"] = [
+        source_clouds = [
             StellarMaterialCloud(
                 name="first_germinal_cloud",
                 type="germinal_cloud",
@@ -61,7 +61,7 @@ class StellarFormationObjectStateTests(
         ]
         process = Stars(
             universe,
-            source_clouds=universe.world["germinal_clouds"],
+            source_clouds=source_clouds,
         )
         result = process.form_first_stars()
 
@@ -90,7 +90,7 @@ class StellarFormationObjectStateTests(
         self
     ):
         universe = Universe()
-        universe.world["germinal_clouds"] = [
+        source_clouds = [
             StellarMaterialCloud(
                 name="first_germinal_cloud",
                 type="germinal_cloud",
@@ -101,7 +101,7 @@ class StellarFormationObjectStateTests(
         ]
         process = Stars(
             universe,
-            source_clouds=universe.world["germinal_clouds"],
+            source_clouds=source_clouds,
         )
         state = process.stellar_state
 
@@ -222,7 +222,7 @@ class StellarFormationObjectStateTests(
 
     def test_rejects_legacy_cloud_dict(self):
         universe = Universe()
-        universe.world["germinal_clouds"] = [
+        source_clouds = [
             {
                 "name": "legacy_cloud",
                 "can_form_stars": True,
@@ -230,7 +230,7 @@ class StellarFormationObjectStateTests(
         ]
         process = Stars(
             universe,
-            source_clouds=universe.world["germinal_clouds"],
+            source_clouds=source_clouds,
         )
 
         result = process.form_first_stars()
@@ -245,7 +245,7 @@ class StellarFormationObjectStateTests(
         self
     ):
         universe = Universe()
-        universe.world["germinal_clouds"] = [
+        source_clouds = [
             StellarMaterialCloud(
                 name="broken_cloud",
                 type="germinal_cloud",
@@ -256,7 +256,7 @@ class StellarFormationObjectStateTests(
         ]
         process = Stars(
             universe,
-            source_clouds=universe.world["germinal_clouds"],
+            source_clouds=source_clouds,
         )
 
         def broken_history():

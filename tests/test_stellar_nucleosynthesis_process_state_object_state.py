@@ -17,7 +17,7 @@ class StellarNucleosynthesisProcessStateObjectStateTests(
 
     def _forged_process(self):
         universe = Universe()
-        universe.world["germinal_clouds"] = [
+        source_clouds = [
             StellarMaterialCloud(
                 name="cloud_a",
                 type="germinal_cloud",
@@ -29,7 +29,7 @@ class StellarNucleosynthesisProcessStateObjectStateTests(
 
         Stars(
             universe,
-            source_clouds=universe.world["germinal_clouds"],
+            source_clouds=source_clouds,
         ).form_first_stars()
 
         process = StellarNucleosynthesis(

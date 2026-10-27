@@ -117,9 +117,10 @@ class StarsCanonicalCloudBoundaryObjectStateTests(
             layer.clouds[1],
         )
 
+        self.assertNotIn("germinal_clouds", universe.world)
         self.assertIs(
-            universe.world["germinal_clouds"],
-            layer.clouds,
+            process.stars[0].source_cloud,
+            layer.clouds[0],
         )
 
         self.assertIs(

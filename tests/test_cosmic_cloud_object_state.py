@@ -110,7 +110,7 @@ class CosmicCloudObjectStateTests(unittest.TestCase):
         self.assertTrue(state.germinal_clouds_formed)
         self.assertTrue(state.star_formation_possible)
 
-    def test_world_stores_state_object_and_registry(self):
+    def test_cosmic_clouds_own_state_and_registry(self):
         universe, process, _ = self._formed_clouds()
 
         self.assertNotIn("cosmic_cloud_state", universe.world)
@@ -118,14 +118,13 @@ class CosmicCloudObjectStateTests(unittest.TestCase):
             process.result.cosmic_cloud_state,
             process.cosmic_cloud_state,
         )
+        self.assertNotIn("germinal_clouds", universe.world)
         self.assertIs(
-            universe.world["germinal_clouds"],
-            process.clouds,
+            process.result.clouds[0],
+            process.clouds[0],
         )
-        self.assertIsInstance(
-            universe.world["germinal_clouds"],
-            list,
-        )
+        self.assertIsInstance(process.clouds, list)
+        self.assertIsInstance(process.result.clouds, tuple)
 
     def test_runtime_result_is_object_and_snapshot_is_dict(self):
         _, process, result = self._formed_clouds()

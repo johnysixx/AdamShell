@@ -102,11 +102,11 @@ class StellarDomainObjectStateTests(unittest.TestCase):
     def test_star_formation_preserves_cloud_identity(self):
         universe = Universe()
         cloud = self._cloud("formation_cloud")
-        universe.world["germinal_clouds"] = [cloud]
+        source_clouds = [cloud]
 
         process = Stars(
             universe,
-            source_clouds=universe.world["germinal_clouds"],
+            source_clouds=source_clouds,
         )
         process.form_first_stars()
 

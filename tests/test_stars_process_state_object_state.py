@@ -40,7 +40,7 @@ class StarsProcessStateObjectStateTests(
 
     def test_formation_sets_formed_enum(self):
         universe = Universe()
-        universe.world["germinal_clouds"] = [
+        source_clouds = [
             StellarMaterialCloud(
                 name="test_cloud",
                 type="germinal_cloud",
@@ -51,7 +51,7 @@ class StarsProcessStateObjectStateTests(
         ]
         process = Stars(
             universe,
-            source_clouds=universe.world["germinal_clouds"],
+            source_clouds=source_clouds,
         )
 
         result = process.form_first_stars()
