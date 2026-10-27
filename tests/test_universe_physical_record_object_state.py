@@ -149,11 +149,23 @@ class UniversePhysicalRecordObjectStateTests(
             standard,
             AtomicTimeStandard,
         )
+        self.assertNotIn(
+            "time_standards",
+            universe.world,
+        )
         self.assertIs(
-            universe.world["time_standards"][
+            result.time_standards["si_second"],
+            standard,
+        )
+        self.assertIs(
+            standard.isotope,
+            process.isotopes_layer.isotopes["caesium_133"],
+        )
+        self.assertIsInstance(
+            universe.world["atomic_time"]["time_standards"][
                 "si_second"
             ],
-            standard,
+            dict,
         )
         self.assertEqual(
             standard.frequency_hz,

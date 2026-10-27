@@ -110,8 +110,20 @@ class AtomicTimeObjectStateTests(
             ],
             dict,
         )
+        self.assertNotIn(
+            "time_standards",
+            universe.world,
+        )
         self.assertIsInstance(
-            universe.world["time_standards"],
+            process.time_standards,
+            dict,
+        )
+        self.assertIs(
+            process.result.time_standards["si_second"],
+            process.time_standards["si_second"],
+        )
+        self.assertIsInstance(
+            universe.world["atomic_time"]["time_standards"],
             dict,
         )
         self.assertIsInstance(universe.world, dict)
