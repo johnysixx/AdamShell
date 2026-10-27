@@ -147,9 +147,19 @@ class BiochemicalCanonicalPlanetaryMaterialsTests(
             planets,
         )
 
+        self.assertNotIn(
+            "biochemical_compounds",
+            universe.world,
+        )
         self.assertIs(
-            universe.world["biochemical_compounds"],
-            process.compounds,
+            result.compounds["sugars"],
+            process.compounds["sugars"],
+        )
+        self.assertIn(
+            "sugars",
+            universe.world["biochemical_foundations"][
+                "compounds"
+            ],
         )
 
         for name in process.compounds:

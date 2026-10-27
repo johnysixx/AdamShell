@@ -197,4 +197,3 @@ class BiochemicalFoundations:
     def write_to_world(self):
         self._refresh_public_state()
         self.universe.world["biochemical_foundations"] = self.public_state
-        self.universe.world["biochemical_compounds"] = self.compounds

@@ -135,9 +135,19 @@ class BiochemicalFoundationObjectStateTests(
     ):
         universe, process, result = self._formed_process()
 
+        self.assertNotIn(
+            "biochemical_compounds",
+            universe.world,
+        )
         self.assertIs(
-            universe.world["biochemical_compounds"],
-            process.compounds,
+            result.compounds["sugars"],
+            process.compounds["sugars"],
+        )
+        self.assertIn(
+            "sugars",
+            universe.world["biochemical_foundations"][
+                "compounds"
+            ],
         )
         self.assertIsInstance(
             process.compounds,

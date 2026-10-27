@@ -35,9 +35,17 @@ class BiochemicalCompoundDomainObjectStateTests(unittest.TestCase):
     def test_registry_values_are_compound_objects(self):
         universe, process, _ = self._formed_process()
 
+        self.assertNotIn(
+            "biochemical_compounds",
+            universe.world,
+        )
         self.assertIs(
-            universe.world["biochemical_compounds"],
-            process.compounds,
+            universe.biochemical_foundations_layer,
+            process,
+        )
+        self.assertIs(
+            process.result.compounds["sugars"],
+            process.compounds["sugars"],
         )
         self.assertIsInstance(process.compounds, dict)
         self.assertTrue(

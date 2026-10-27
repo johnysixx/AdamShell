@@ -370,9 +370,17 @@ class PlanetaryMaterialObjectStateTests(
             result.state,
             BiochemicalFoundationsProcessState.FORMED,
         )
+        self.assertNotIn(
+            "biochemical_compounds",
+            universe.world,
+        )
         self.assertIn(
             "sugars",
-            universe.world["biochemical_compounds"],
+            process.compounds,
+        )
+        self.assertIs(
+            result.compounds["sugars"],
+            process.compounds["sugars"],
         )
 
     def test_materialization_error_creates_cronenberg(
