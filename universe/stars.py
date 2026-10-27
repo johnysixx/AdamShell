@@ -181,4 +181,3 @@ class Stars:
     def write_to_world(self):
         self._refresh_public_state()
         self.universe.world["stars"] = self.public_state
-        self.universe.world["first_stars"] = self.stars

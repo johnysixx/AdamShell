@@ -116,7 +116,7 @@ class StellarFormationObjectStateTests(
             state.heavy_elements_possible
         )
 
-    def test_world_stores_state_object_and_registry(
+    def test_stars_own_state_and_runtime_registry(
         self
     ):
         universe, process, _ = self._formed_stars()
@@ -128,15 +128,17 @@ class StellarFormationObjectStateTests(
             StellarFormationState,
         )
         self.assertIs(state, process.stellar_state)
-        self.assertIsInstance(
-            universe.world["first_stars"],
-            list,
-        )
+        self.assertNotIn("first_stars", universe.world)
+        self.assertIsInstance(process.stars, list)
         self.assertTrue(
             all(
                 isinstance(star, PrimordialStar)
-                for star in universe.world["first_stars"]
+                for star in process.stars
             )
+        )
+        self.assertIs(
+            process.result.stars[0],
+            process.stars[0],
         )
         self.assertIsInstance(universe.world, dict)
 

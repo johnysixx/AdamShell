@@ -31,12 +31,14 @@ class SupernovaEnrichmentObjectStateTests(
     unittest.TestCase
 ):
 
-    def _wire_canonical_inputs(self, universe):
-        if "first_stars" in universe.world:
+    def _wire_canonical_inputs(
+        self,
+        universe,
+        source_stars=None,
+    ):
+        if source_stars is not None:
             stars_layer = Stars(universe)
-            stars_layer.stars = universe.world[
-                "first_stars"
-            ]
+            stars_layer.stars = source_stars
 
         if "elements_up_to_iron" in universe.world:
             nucleosynthesis_layer = StellarNucleosynthesis(
@@ -112,7 +114,7 @@ class SupernovaEnrichmentObjectStateTests(
     def _enriched_process(self):
         universe = Universe()
 
-        universe.world["first_stars"] = [
+        source_stars = [
             self._star()
         ]
         universe.world["elements_up_to_iron"] = {
@@ -126,7 +128,7 @@ class SupernovaEnrichmentObjectStateTests(
             ),
         }
 
-        self._wire_canonical_inputs(universe)
+        self._wire_canonical_inputs(universe, source_stars)
 
         process = SupernovaEnrichment(universe)
         result = process.enrich_space()
@@ -172,7 +174,7 @@ class SupernovaEnrichmentObjectStateTests(
         self
     ):
         universe = Universe()
-        universe.world["first_stars"] = [
+        source_stars = [
             self._star()
         ]
         universe.world["elements_up_to_iron"] = {
@@ -183,7 +185,7 @@ class SupernovaEnrichmentObjectStateTests(
             )
         }
 
-        self._wire_canonical_inputs(universe)
+        self._wire_canonical_inputs(universe, source_stars)
 
         process = SupernovaEnrichment(universe)
         state = process.supernova_enrichment_state
@@ -258,7 +260,7 @@ class SupernovaEnrichmentObjectStateTests(
     def test_supernova_keeps_source_star_object(self):
         universe = Universe()
         source_star = self._star("source_star")
-        universe.world["first_stars"] = [source_star]
+        source_stars = [source_star]
         universe.world["elements_up_to_iron"] = {
             "iron": self._forged_element(
                 "iron",
@@ -267,7 +269,7 @@ class SupernovaEnrichmentObjectStateTests(
             )
         }
 
-        self._wire_canonical_inputs(universe)
+        self._wire_canonical_inputs(universe, source_stars)
 
         process = SupernovaEnrichment(universe)
         process.enrich_space()
@@ -417,7 +419,6 @@ class SupernovaEnrichmentObjectStateTests(
         self
     ):
         universe = Universe()
-        self._wire_canonical_inputs(universe)
 
         process = SupernovaEnrichment(universe)
 
@@ -442,11 +443,11 @@ class SupernovaEnrichmentObjectStateTests(
         self
     ):
         universe = Universe()
-        universe.world["first_stars"] = [
+        source_stars = [
             self._star()
         ]
 
-        self._wire_canonical_inputs(universe)
+        self._wire_canonical_inputs(universe, source_stars)
 
         process = SupernovaEnrichment(universe)
         result = process.enrich_space()
@@ -473,7 +474,7 @@ class SupernovaEnrichmentObjectStateTests(
     def test_rejects_legacy_element_dict(self):
         universe = Universe()
 
-        universe.world["first_stars"] = [
+        source_stars = [
             self._star()
         ]
 
@@ -484,7 +485,7 @@ class SupernovaEnrichmentObjectStateTests(
             }
         }
 
-        self._wire_canonical_inputs(universe)
+        self._wire_canonical_inputs(universe, source_stars)
 
         result = SupernovaEnrichment(
             universe
@@ -525,7 +526,7 @@ class SupernovaEnrichmentObjectStateTests(
         self
     ):
         universe = Universe()
-        universe.world["first_stars"] = [
+        source_stars = [
             self._star()
         ]
         universe.world["elements_up_to_iron"] = {
@@ -536,7 +537,7 @@ class SupernovaEnrichmentObjectStateTests(
             )
         }
 
-        self._wire_canonical_inputs(universe)
+        self._wire_canonical_inputs(universe, source_stars)
 
         process = SupernovaEnrichment(universe)
 

@@ -123,9 +123,10 @@ class StarsCanonicalCloudBoundaryObjectStateTests(
             layer.clouds[0],
         )
 
+        self.assertNotIn("first_stars", universe.world)
         self.assertIs(
-            universe.world["first_stars"],
-            process.stars,
+            result.stars[0],
+            process.stars[0],
         )
 
     def test_world_decoy_cannot_replace_clouds(self):

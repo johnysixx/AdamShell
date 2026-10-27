@@ -130,15 +130,15 @@ class StellarDomainObjectStateTests(unittest.TestCase):
 
     def test_supernova_boundary_rejects_legacy_star_dict(self):
         universe = Universe()
-        universe.world["first_stars"] = [
-            {"name": "legacy_star"}
-        ]
+
         universe.world["elements_up_to_iron"] = {
             "iron": {"atomic_number": 26},
         }
 
         stars_layer = Stars(universe)
-        stars_layer.stars = universe.world["first_stars"]
+        stars_layer.stars = [
+            {"name": "legacy_star"}
+        ]
 
         result = SupernovaEnrichment(universe).enrich_space()
 

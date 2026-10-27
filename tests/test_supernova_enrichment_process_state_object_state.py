@@ -16,12 +16,14 @@ class SupernovaEnrichmentProcessStateObjectStateTests(
     unittest.TestCase
 ):
 
-    def _wire_canonical_inputs(self, universe):
-        if "first_stars" in universe.world:
+    def _wire_canonical_inputs(
+        self,
+        universe,
+        source_stars=None,
+    ):
+        if source_stars is not None:
             stars_layer = Stars(universe)
-            stars_layer.stars = universe.world[
-                "first_stars"
-            ]
+            stars_layer.stars = source_stars
 
         if "elements_up_to_iron" in universe.world:
             nucleosynthesis_layer = StellarNucleosynthesis(
@@ -93,10 +95,10 @@ class SupernovaEnrichmentProcessStateObjectStateTests(
 
     def test_missing_iron_sets_failed_enum(self):
         universe = Universe()
-        universe.world["first_stars"] = [
+        source_stars = [
             self._star()
         ]
-        self._wire_canonical_inputs(universe)
+        self._wire_canonical_inputs(universe, source_stars)
 
         process = SupernovaEnrichment(universe)
 
@@ -113,13 +115,13 @@ class SupernovaEnrichmentProcessStateObjectStateTests(
 
     def test_enrichment_sets_enriched_enum(self):
         universe = Universe()
-        universe.world["first_stars"] = [
+        source_stars = [
             self._star()
         ]
         universe.world["elements_up_to_iron"] = {
             "iron": self._iron(),
         }
-        self._wire_canonical_inputs(universe)
+        self._wire_canonical_inputs(universe, source_stars)
 
         process = SupernovaEnrichment(universe)
 
