@@ -95,9 +95,27 @@ class BiochemicalFoundationObjectStateTests(
         universe, process, _ = self._formed_process()
         state = process.biochemical_state
 
+        self.assertNotIn(
+            "biochemical_state",
+            universe.world,
+        )
         self.assertIs(
-            universe.world["biochemical_state"],
+            universe.biochemical_foundations_layer,
+            process,
+        )
+        self.assertIs(
+            process.result.biochemical_state,
             state,
+        )
+        self.assertIsInstance(
+            universe.world["biochemical_foundations"],
+            dict,
+        )
+        self.assertIsInstance(
+            universe.world["biochemical_foundations"][
+                "biochemical_state"
+            ],
+            dict,
         )
         self.assertTrue(
             state.water_based_chemistry_possible

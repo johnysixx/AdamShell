@@ -198,4 +198,3 @@ class BiochemicalFoundations:
         self._refresh_public_state()
         self.universe.world["biochemical_foundations"] = self.public_state
         self.universe.world["biochemical_compounds"] = self.compounds
-        self.universe.world["biochemical_state"] = self.biochemical_state
