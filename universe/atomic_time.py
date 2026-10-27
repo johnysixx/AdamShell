@@ -167,4 +167,3 @@ class AtomicTime:
         self._refresh_public_state()
         self.universe.world["atomic_time"] = self.public_state
         self.universe.world["time_standards"] = self.time_standards
-        self.universe.world["atomic_time_state"] = self.atomic_time_state

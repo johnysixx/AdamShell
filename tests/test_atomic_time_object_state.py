@@ -79,16 +79,37 @@ class AtomicTimeObjectStateTests(
             state.precision_time_available
         )
 
-    def test_world_registry_stores_state_object(
+    def test_world_keeps_snapshot_without_live_state(
         self
     ):
         universe, process, _ = (
             self._defined_atomic_time()
         )
 
-        state = universe.world["atomic_time_state"]
-        self.assertIsInstance(state, AtomicTimeState)
-        self.assertIs(state, process.atomic_time_state)
+        state = process.atomic_time_state
+
+        self.assertNotIn(
+            "atomic_time_state",
+            universe.world,
+        )
+        self.assertIsInstance(
+            state,
+            AtomicTimeState,
+        )
+        self.assertIs(
+            process.result.atomic_time_state,
+            state,
+        )
+        self.assertIsInstance(
+            universe.world["atomic_time"],
+            dict,
+        )
+        self.assertIsInstance(
+            universe.world["atomic_time"][
+                "atomic_time_state"
+            ],
+            dict,
+        )
         self.assertIsInstance(
             universe.world["time_standards"],
             dict,
@@ -236,9 +257,19 @@ class AtomicTimeObjectStateTests(
             snapshot["state"],
             "failed",
         )
+        self.assertNotIn(
+            "atomic_time_state",
+            universe.world,
+        )
         self.assertIs(
-            universe.world["atomic_time_state"],
+            result.atomic_time_state,
             process.atomic_time_state,
+        )
+        self.assertIsInstance(
+            universe.world["atomic_time"][
+                "atomic_time_state"
+            ],
+            dict,
         )
 
     def test_to_dict_is_detached_boundary(self):
