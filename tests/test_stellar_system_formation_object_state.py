@@ -284,9 +284,17 @@ class StellarSystemFormationObjectStateTests(
             result.state,
             PlanetsProcessState.FORMED,
         )
-        self.assertEqual(
-            universe.world["earth"].name,
+        self.assertNotIn(
             "earth",
+            universe.world,
+        )
+        self.assertEqual(
+            process.find_planet("earth").name,
+            "earth",
+        )
+        self.assertIs(
+            result.planets[2],
+            process.find_planet("earth"),
         )
 
     def test_formation_error_creates_cronenberg(

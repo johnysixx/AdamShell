@@ -138,8 +138,16 @@ class PlanetsCanonicalStellarSystemsTests(
 
         self.assertIsInstance(earth, EarthPlanet)
 
+        self.assertNotIn(
+            "earth",
+            universe.world,
+        )
         self.assertIs(
-            universe.world["earth"],
+            universe.planets_layer,
+            process,
+        )
+        self.assertIs(
+            process.planets[2],
             earth,
         )
 
@@ -342,8 +350,12 @@ class PlanetsCanonicalStellarSystemsTests(
             },
         )
 
+        self.assertNotIn(
+            "earth",
+            universe.world,
+        )
         self.assertIs(
-            universe.world["earth"],
+            process.result.planets[2],
             process.find_planet("earth"),
         )
 

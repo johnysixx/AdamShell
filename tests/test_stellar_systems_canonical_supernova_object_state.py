@@ -416,7 +416,13 @@ class StellarSystemsCanonicalSupernovaTests(
             PlanetsProcessState.FORMED,
         )
 
-        earth = universe.world["earth"]
+        earth = universe.planets_layer.find_planet("earth")
+
+        self.assertNotIn("earth", universe.world)
+        self.assertIs(
+            planet_result.planets[2],
+            earth,
+        )
 
         self.assertEqual(earth.name, "earth")
         self.assertTrue(earth.water_possible)

@@ -135,7 +135,9 @@ class PlanetDomainObjectStateTests(unittest.TestCase):
 
         self.assertIsInstance(earth, EarthPlanet)
         self.assertIsInstance(earth, Planet)
-        self.assertIs(universe.world["earth"], earth)
+        self.assertNotIn("earth", universe.world)
+        self.assertIs(earth, process.planets[2])
+        self.assertIs(process.result.planets[2], earth)
         self._assert_object_only(earth, "water_possible")
         self.assertTrue(earth.has_iron_core)
         self.assertTrue(earth.has_rocky_crust)

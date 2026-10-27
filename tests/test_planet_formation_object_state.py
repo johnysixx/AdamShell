@@ -188,9 +188,17 @@ class PlanetFormationObjectStateTests(
             universe.world["planetary_materials"],
             process.planetary_materials,
         )
+        self.assertNotIn(
+            "earth",
+            universe.world,
+        )
         self.assertIs(
-            universe.world["earth"],
+            process.find_planet("earth"),
             process.planets[2],
+        )
+        self.assertIs(
+            process.result.planets[2],
+            process.find_planet("earth"),
         )
         self.assertIsInstance(
             process.planets,
@@ -207,7 +215,7 @@ class PlanetFormationObjectStateTests(
             )
         )
         self.assertIsInstance(
-            universe.world["earth"],
+            process.find_planet("earth"),
             EarthPlanet,
         )
         self.assertTrue(
