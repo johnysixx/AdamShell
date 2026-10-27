@@ -274,6 +274,3 @@ class SupernovaEnrichment:
             self.public_state
         )
         self.universe.world["supernovae"] = self.supernovae
-        self.universe.world["enriched_clouds"] = (
-            self.enriched_clouds
-        )

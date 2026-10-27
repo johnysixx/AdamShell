@@ -22,7 +22,7 @@ from universe.supernova_enrichment import SupernovaEnrichment
 class HeavyElementNucleosynthesisObjectStateTests(unittest.TestCase):
 
     def _wire_canonical_inputs(
-        self, universe, source_elements
+        self, universe, source_elements, source_clouds=None
     ):
         if source_elements is not None:
             nucleosynthesis = StellarNucleosynthesis(
@@ -32,10 +32,10 @@ class HeavyElementNucleosynthesisObjectStateTests(unittest.TestCase):
                 source_elements
             )
 
-        if "enriched_clouds" in universe.world:
+        if source_clouds is not None:
             supernova = SupernovaEnrichment(universe)
             supernova.enriched_clouds = (
-                universe.world["enriched_clouds"]
+                source_clouds
             )
 
     def _forged_process(self):
@@ -53,7 +53,7 @@ class HeavyElementNucleosynthesisObjectStateTests(unittest.TestCase):
             )
         }
 
-        universe.world["enriched_clouds"] = [
+        source_clouds = [
             StellarMaterialCloud(
                 name="enriched_cloud",
                 type="enriched_stellar_cloud",
@@ -64,7 +64,7 @@ class HeavyElementNucleosynthesisObjectStateTests(unittest.TestCase):
         ]
 
         self._wire_canonical_inputs(
-            universe, source_elements
+            universe, source_elements, source_clouds
         )
 
         process = HeavyElementNucleosynthesis(universe)
@@ -113,7 +113,8 @@ class HeavyElementNucleosynthesisObjectStateTests(unittest.TestCase):
 
     def test_enrichment_updates_cloud_through_object_api(self):
         universe, _, _ = self._forged_process()
-        cloud = universe.world["enriched_clouds"][0]
+        self.assertNotIn("enriched_clouds", universe.world)
+        cloud = universe.supernova_enrichment_layer.enriched_clouds[0]
 
         self.assertIn("gold", cloud.composition)
         self.assertTrue(cloud.contains_heavy_elements)
@@ -215,7 +216,7 @@ class HeavyElementNucleosynthesisObjectStateTests(unittest.TestCase):
             gold,
         )
         self.assertIs(
-            universe.world["enriched_clouds"][0]
+            universe.supernova_enrichment_layer.enriched_clouds[0]
             .composition["gold"],
             gold,
         )
@@ -245,7 +246,7 @@ class HeavyElementNucleosynthesisObjectStateTests(unittest.TestCase):
             }
         }
 
-        universe.world["enriched_clouds"] = [
+        source_clouds = [
             StellarMaterialCloud(
                 name="enriched_cloud",
                 type="enriched_stellar_cloud",
@@ -256,7 +257,7 @@ class HeavyElementNucleosynthesisObjectStateTests(unittest.TestCase):
         ]
 
         self._wire_canonical_inputs(
-            universe, source_elements
+            universe, source_elements, source_clouds
         )
 
         with self.assertRaises(TypeError):

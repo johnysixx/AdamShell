@@ -18,7 +18,7 @@ class HeavyElementNucleosynthesisProcessStateObjectStateTests(
 ):
 
     def _wire_canonical_inputs(
-        self, universe, source_elements
+        self, universe, source_elements, source_clouds=None
     ):
         if source_elements is not None:
             nucleosynthesis = StellarNucleosynthesis(
@@ -28,10 +28,10 @@ class HeavyElementNucleosynthesisProcessStateObjectStateTests(
                 source_elements
             )
 
-        if "enriched_clouds" in universe.world:
+        if source_clouds is not None:
             supernova = SupernovaEnrichment(universe)
             supernova.enriched_clouds = (
-                universe.world["enriched_clouds"]
+                source_clouds
             )
 
     def _ready_universe(self):
@@ -49,7 +49,7 @@ class HeavyElementNucleosynthesisProcessStateObjectStateTests(
             )
         }
 
-        universe.world["enriched_clouds"] = [
+        source_clouds = [
             StellarMaterialCloud(
                 name="enriched_cloud",
                 type="enriched_stellar_cloud",
@@ -60,7 +60,7 @@ class HeavyElementNucleosynthesisProcessStateObjectStateTests(
         ]
 
         self._wire_canonical_inputs(
-            universe, source_elements
+            universe, source_elements, source_clouds
         )
 
         return universe

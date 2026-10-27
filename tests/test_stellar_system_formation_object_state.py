@@ -48,7 +48,7 @@ class StellarSystemFormationObjectStateTests(
 
     def _formed_process(self):
         universe = Universe()
-        universe.world["enriched_clouds"] = [
+        source_clouds = [
             StellarMaterialCloud(
                 name="first_enriched_cloud",
                 type="enriched_stellar_cloud",
@@ -65,7 +65,7 @@ class StellarSystemFormationObjectStateTests(
 
         supernova_layer = SupernovaEnrichment(universe)
         supernova_layer.enriched_clouds = (
-            universe.world["enriched_clouds"]
+            source_clouds
         )
 
         process = StellarSystems(universe)
@@ -218,7 +218,7 @@ class StellarSystemFormationObjectStateTests(
         self
     ):
         universe = Universe()
-        universe.world["enriched_clouds"] = [
+        source_clouds = [
             StellarMaterialCloud(
                 name="hydrogen_cloud",
                 type="enriched_stellar_cloud",
@@ -229,7 +229,7 @@ class StellarSystemFormationObjectStateTests(
         ]
         supernova_layer = SupernovaEnrichment(universe)
         supernova_layer.enriched_clouds = (
-            universe.world["enriched_clouds"]
+            source_clouds
         )
 
         process = StellarSystems(universe)
@@ -288,7 +288,7 @@ class StellarSystemFormationObjectStateTests(
         self
     ):
         universe = Universe()
-        universe.world["enriched_clouds"] = [
+        source_clouds = [
             StellarMaterialCloud(
                 name="broken_cloud",
                 type="enriched_stellar_cloud",
@@ -299,7 +299,7 @@ class StellarSystemFormationObjectStateTests(
         ]
         supernova_layer = SupernovaEnrichment(universe)
         supernova_layer.enriched_clouds = (
-            universe.world["enriched_clouds"]
+            source_clouds
         )
 
         process = StellarSystems(universe)

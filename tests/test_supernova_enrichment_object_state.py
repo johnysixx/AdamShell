@@ -228,17 +228,29 @@ class SupernovaEnrichmentObjectStateTests(
             universe.world["supernovae"],
             process.supernovae,
         )
+        self.assertNotIn(
+            "enriched_clouds",
+            universe.world,
+        )
         self.assertIs(
-            universe.world["enriched_clouds"],
-            process.enriched_clouds,
+            universe.supernova_enrichment_layer,
+            process,
+        )
+        self.assertIs(
+            process.result.enriched_clouds[0],
+            process.enriched_clouds[0],
         )
         self.assertIsInstance(
             universe.world["supernovae"],
             list,
         )
         self.assertIsInstance(
-            universe.world["enriched_clouds"],
+            process.enriched_clouds,
             list,
+        )
+        self.assertIsInstance(
+            process.result.enriched_clouds,
+            tuple,
         )
 
     def test_enriched_cloud_is_object_only(self):

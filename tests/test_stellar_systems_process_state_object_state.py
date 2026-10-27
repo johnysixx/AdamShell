@@ -41,7 +41,7 @@ class StellarSystemsProcessStateObjectStateTests(
 
     def test_formation_sets_formed_enum(self):
         universe = Universe()
-        universe.world["enriched_clouds"] = [
+        source_clouds = [
             StellarMaterialCloud(
                 name="test_enriched_cloud",
                 type="enriched_stellar_cloud",
@@ -57,7 +57,7 @@ class StellarSystemsProcessStateObjectStateTests(
         ]
         supernova_layer = SupernovaEnrichment(universe)
         supernova_layer.enriched_clouds = (
-            universe.world["enriched_clouds"]
+            source_clouds
         )
 
         process = StellarSystems(universe)
