@@ -233,4 +233,3 @@ class StellarSystems:
         self.universe.world["stellar_systems"] = self.public_state
         self.universe.world["systems"] = self.systems
         self.universe.world["solar_system"] = self.systems[0] if self.systems else None
-        self.universe.world["stellar_system_state"] = self.system_state

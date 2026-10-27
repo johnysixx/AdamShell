@@ -103,8 +103,12 @@ class StellarSystemFormationObjectStateTests(
         state = process.system_state
 
         self.assertIs(process.system_state, state)
+        self.assertNotIn(
+            "stellar_system_state",
+            universe.world,
+        )
         self.assertIs(
-            universe.world["stellar_system_state"],
+            process.result.system_state,
             state,
         )
         self.assertTrue(state.stellar_systems_formed)

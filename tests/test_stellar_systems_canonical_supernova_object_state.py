@@ -172,8 +172,12 @@ class StellarSystemsCanonicalSupernovaTests(
             process.systems,
         )
 
+        self.assertNotIn(
+            "stellar_system_state",
+            universe.world,
+        )
         self.assertIs(
-            universe.world["stellar_system_state"],
+            process.result.system_state,
             process.system_state,
         )
 
