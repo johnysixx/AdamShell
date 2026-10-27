@@ -231,5 +231,3 @@ class StellarSystems:
     def write_to_world(self):
         self._refresh_public_state()
         self.universe.world["stellar_systems"] = self.public_state
-        self.universe.world["systems"] = self.systems
-        self.universe.world["solar_system"] = self.systems[0] if self.systems else None

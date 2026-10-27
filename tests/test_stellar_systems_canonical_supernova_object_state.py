@@ -162,14 +162,16 @@ class StellarSystemsCanonicalSupernovaTests(
             cloud,
         )
 
-        self.assertIs(
-            universe.world["solar_system"],
-            process.systems[0],
-        )
+        self.assertNotIn("solar_system", universe.world)
+        self.assertNotIn("systems", universe.world)
 
         self.assertIs(
-            universe.world["systems"],
-            process.systems,
+            result.systems[0],
+            process.systems[0],
+        )
+        self.assertIs(
+            result.systems[1],
+            process.systems[1],
         )
 
         self.assertNotIn(

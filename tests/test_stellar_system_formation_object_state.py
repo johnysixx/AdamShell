@@ -121,33 +121,34 @@ class StellarSystemFormationObjectStateTests(
         )
         self.assertTrue(state.rocky_worlds_possible)
 
-    def test_world_keeps_boundary_registries(
+    def test_canonical_systems_preserve_object_identity(
         self
     ):
-        universe, process, _ = self._formed_process()
+        universe, process, result = self._formed_process()
+
+        self.assertNotIn("systems", universe.world)
+        self.assertNotIn("solar_system", universe.world)
 
         self.assertIs(
-            universe.world["systems"],
-            process.systems,
+            universe.stellar_systems_layer,
+            process,
+        )
+        self.assertIsInstance(process.systems, list)
+
+        self.assertIsInstance(
+            process.systems[0],
+            StellarSystem,
         )
         self.assertIs(
-            universe.world["solar_system"],
+            result.systems[0],
             process.systems[0],
         )
         self.assertIsInstance(
-            universe.world["systems"],
-            list,
-        )
-        self.assertIsInstance(
-            universe.world["solar_system"],
-            StellarSystem,
-        )
-        self.assertIsInstance(
-            universe.world["solar_system"].star,
+            process.systems[0].star,
             SecondGenerationStar,
         )
         self.assertIsInstance(
-            universe.world["solar_system"].protoplanetary_disk,
+            process.systems[0].protoplanetary_disk,
             ProtoplanetaryDisk,
         )
 

@@ -28,12 +28,12 @@ class PlanetFormationObjectStateTests(
     unittest.TestCase
 ):
 
-    def _wire_canonical_system(self, universe):
-        if "solar_system" in universe.world:
+    def _wire_canonical_system(
+        self, universe, source_system=None
+    ):
+        if source_system is not None:
             systems_layer = StellarSystems(universe)
-            systems_layer.systems.append(
-                universe.world["solar_system"]
-            )
+            systems_layer.systems.append(source_system)
 
 
     def _assert_object_only(
@@ -103,7 +103,7 @@ class PlanetFormationObjectStateTests(
 
     def _formed_process(self):
         universe = Universe()
-        universe.world["solar_system"] = self._solar_system(
+        source_system = self._solar_system(
             (
                 "hydrogen",
                 "carbon",
@@ -116,7 +116,7 @@ class PlanetFormationObjectStateTests(
             )
         )
 
-        self._wire_canonical_system(universe)
+        self._wire_canonical_system(universe, source_system)
 
         process = Planets(universe)
         result = process.form_planets()
@@ -287,10 +287,10 @@ class PlanetFormationObjectStateTests(
         self
     ):
         universe = Universe()
-        universe.world["solar_system"] = self._solar_system(
+        source_system = self._solar_system(
             ("hydrogen",)
         )
-        self._wire_canonical_system(universe)
+        self._wire_canonical_system(universe, source_system)
 
         process = Planets(universe)
 
@@ -321,7 +321,7 @@ class PlanetFormationObjectStateTests(
         self
     ):
         universe = Universe()
-        self._wire_canonical_system(universe)
+        self._wire_canonical_system(universe, None)
 
         process = Planets(universe)
 
@@ -342,11 +342,11 @@ class PlanetFormationObjectStateTests(
 
     def test_inactive_disk_preserves_state(self):
         universe = Universe()
-        universe.world["solar_system"] = self._solar_system(
+        source_system = self._solar_system(
             (),
             can_form_planets=False,
         )
-        self._wire_canonical_system(universe)
+        self._wire_canonical_system(universe, source_system)
 
         process = Planets(universe)
 
@@ -368,11 +368,11 @@ class PlanetFormationObjectStateTests(
 
     def test_legacy_solar_system_dict_is_rejected(self):
         universe = Universe()
-        universe.world["solar_system"] = {
+        source_system = {
             "name": "legacy_solar_system",
             "protoplanetary_disk": {},
         }
-        self._wire_canonical_system(universe)
+        self._wire_canonical_system(universe, source_system)
 
         process = Planets(universe)
 
@@ -406,10 +406,10 @@ class PlanetFormationObjectStateTests(
         self
     ):
         universe = Universe()
-        universe.world["solar_system"] = self._solar_system(
+        source_system = self._solar_system(
             ("iron",)
         )
-        self._wire_canonical_system(universe)
+        self._wire_canonical_system(universe, source_system)
 
         process = Planets(universe)
 

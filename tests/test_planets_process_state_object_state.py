@@ -18,12 +18,12 @@ class PlanetsProcessStateObjectStateTests(
     unittest.TestCase
 ):
 
-    def _wire_canonical_system(self, universe):
-        if "solar_system" in universe.world:
+    def _wire_canonical_system(
+        self, universe, source_system=None
+    ):
+        if source_system is not None:
             systems_layer = StellarSystems(universe)
-            systems_layer.systems.append(
-                universe.world["solar_system"]
-            )
+            systems_layer.systems.append(source_system)
 
 
     def _solar_system(
@@ -105,12 +105,12 @@ class PlanetsProcessStateObjectStateTests(
 
     def test_inactive_disk_sets_failed_enum(self):
         universe = Universe()
-        universe.world["solar_system"] = (
+        source_system = (
             self._solar_system(
                 can_form_planets=False,
             )
         )
-        self._wire_canonical_system(universe)
+        self._wire_canonical_system(universe, source_system)
 
         process = Planets(universe)
 
@@ -127,10 +127,10 @@ class PlanetsProcessStateObjectStateTests(
 
     def test_formation_sets_formed_enum(self):
         universe = Universe()
-        universe.world["solar_system"] = (
+        source_system = (
             self._solar_system()
         )
-        self._wire_canonical_system(universe)
+        self._wire_canonical_system(universe, source_system)
 
         process = Planets(universe)
 

@@ -125,8 +125,12 @@ class PlanetsCanonicalStellarSystemsTests(
             systems,
         )
 
+        self.assertNotIn(
+            "solar_system",
+            universe.world,
+        )
         self.assertIs(
-            universe.world["solar_system"],
+            universe.stellar_systems_layer.systems[0],
             systems.systems[0],
         )
 
