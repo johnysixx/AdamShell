@@ -172,9 +172,17 @@ class PlanetFormationObjectStateTests(
     ):
         universe, process, _ = self._formed_process()
 
+        self.assertNotIn(
+            "solar_planets",
+            universe.world,
+        )
         self.assertIs(
-            universe.world["solar_planets"],
-            process.planets,
+            universe.planets_layer,
+            process,
+        )
+        self.assertIs(
+            process.result.planets[2],
+            process.planets[2],
         )
         self.assertIs(
             universe.world["planetary_materials"],
@@ -185,7 +193,7 @@ class PlanetFormationObjectStateTests(
             process.planets[2],
         )
         self.assertIsInstance(
-            universe.world["solar_planets"],
+            process.planets,
             list,
         )
         self.assertIsInstance(
@@ -205,7 +213,7 @@ class PlanetFormationObjectStateTests(
         self.assertTrue(
             all(
                 isinstance(planet, Planet)
-                for planet in universe.world["solar_planets"]
+                for planet in process.planets
             )
         )
 

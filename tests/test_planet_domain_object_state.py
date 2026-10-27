@@ -112,9 +112,13 @@ class PlanetDomainObjectStateTests(unittest.TestCase):
                 for planet in process.planets
             )
         )
+        self.assertNotIn(
+            "solar_planets",
+            universe.world,
+        )
         self.assertIs(
-            universe.world["solar_planets"],
-            process.planets,
+            universe.planets_layer,
+            process,
         )
 
     def test_planet_is_object_only(self):
