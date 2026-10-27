@@ -190,4 +190,3 @@ class PlanetaryMaterials:
         self._refresh_public_state()
         self.universe.world["planetary_material_layer"] = self.public_state
         self.universe.world["available_planetary_materials"] = self.available_materials
-        self.universe.world["planetary_material_state"] = self.material_state
