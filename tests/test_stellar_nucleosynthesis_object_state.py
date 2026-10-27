@@ -82,6 +82,27 @@ class StellarNucleosynthesisObjectStateTests(unittest.TestCase):
             process.stellar_nucleosynthesis_state,
         )
 
+    def test_elements_registry_has_single_runtime_owner(self):
+        universe, process, result = self._forged_process()
+
+        self.assertNotIn(
+            "elements_up_to_iron",
+            universe.world,
+        )
+        self.assertIs(
+            universe.stellar_nucleosynthesis_layer,
+            process,
+        )
+        self.assertIs(
+            result.elements_up_to_iron["iron"],
+            process.elements_up_to_iron["iron"],
+        )
+
+        self.assertEqual(
+            set(result.elements_up_to_iron),
+            set(process.elements_up_to_iron),
+        )
+
     def test_runtime_result_is_object_and_snapshot_is_dict(
         self
     ):

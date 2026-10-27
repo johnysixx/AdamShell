@@ -21,13 +21,15 @@ from universe.supernova_enrichment import SupernovaEnrichment
 
 class HeavyElementNucleosynthesisObjectStateTests(unittest.TestCase):
 
-    def _wire_canonical_inputs(self, universe):
-        if "elements_up_to_iron" in universe.world:
+    def _wire_canonical_inputs(
+        self, universe, source_elements
+    ):
+        if source_elements is not None:
             nucleosynthesis = StellarNucleosynthesis(
                 universe
             )
             nucleosynthesis.elements_up_to_iron = (
-                universe.world["elements_up_to_iron"]
+                source_elements
             )
 
         if "enriched_clouds" in universe.world:
@@ -39,7 +41,7 @@ class HeavyElementNucleosynthesisObjectStateTests(unittest.TestCase):
     def _forged_process(self):
         universe = Universe()
 
-        universe.world["elements_up_to_iron"] = {
+        source_elements = {
             "iron": ChemicalElement(
                 name="iron",
                 symbol="Fe",
@@ -61,7 +63,9 @@ class HeavyElementNucleosynthesisObjectStateTests(unittest.TestCase):
             )
         ]
 
-        self._wire_canonical_inputs(universe)
+        self._wire_canonical_inputs(
+            universe, source_elements
+        )
 
         process = HeavyElementNucleosynthesis(universe)
         result = process.forge_heavy_elements()
@@ -234,7 +238,7 @@ class HeavyElementNucleosynthesisObjectStateTests(unittest.TestCase):
     def test_rejects_legacy_iron_dict(self):
         universe = Universe()
 
-        universe.world["elements_up_to_iron"] = {
+        source_elements = {
             "iron": {
                 "name": "iron",
                 "atomic_number": 26,
@@ -251,7 +255,9 @@ class HeavyElementNucleosynthesisObjectStateTests(unittest.TestCase):
             )
         ]
 
-        self._wire_canonical_inputs(universe)
+        self._wire_canonical_inputs(
+            universe, source_elements
+        )
 
         with self.assertRaises(TypeError):
             HeavyElementNucleosynthesis(

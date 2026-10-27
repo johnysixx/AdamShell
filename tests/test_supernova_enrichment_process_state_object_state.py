@@ -20,17 +20,18 @@ class SupernovaEnrichmentProcessStateObjectStateTests(
         self,
         universe,
         source_stars=None,
+        source_elements=None,
     ):
         if source_stars is not None:
             stars_layer = Stars(universe)
             stars_layer.stars = source_stars
 
-        if "elements_up_to_iron" in universe.world:
+        if source_elements is not None:
             nucleosynthesis_layer = StellarNucleosynthesis(
                 universe
             )
             nucleosynthesis_layer.elements_up_to_iron = (
-                universe.world["elements_up_to_iron"]
+                source_elements
             )
 
     def _star(self):
@@ -98,7 +99,9 @@ class SupernovaEnrichmentProcessStateObjectStateTests(
         source_stars = [
             self._star()
         ]
-        self._wire_canonical_inputs(universe, source_stars)
+        self._wire_canonical_inputs(
+            universe, source_stars, None
+        )
 
         process = SupernovaEnrichment(universe)
 
@@ -118,10 +121,12 @@ class SupernovaEnrichmentProcessStateObjectStateTests(
         source_stars = [
             self._star()
         ]
-        universe.world["elements_up_to_iron"] = {
+        source_elements = {
             "iron": self._iron(),
         }
-        self._wire_canonical_inputs(universe, source_stars)
+        self._wire_canonical_inputs(
+            universe, source_stars, source_elements
+        )
 
         process = SupernovaEnrichment(universe)
 

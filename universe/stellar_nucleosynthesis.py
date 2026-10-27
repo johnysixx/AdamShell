@@ -250,6 +250,3 @@ class StellarNucleosynthesis:
         self.universe.world["stellar_nucleosynthesis"] = (
             self.public_state
         )
-        self.universe.world["elements_up_to_iron"] = (
-            self.elements_up_to_iron
-        )

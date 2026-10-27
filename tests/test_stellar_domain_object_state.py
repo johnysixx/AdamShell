@@ -131,9 +131,6 @@ class StellarDomainObjectStateTests(unittest.TestCase):
     def test_supernova_boundary_rejects_legacy_star_dict(self):
         universe = Universe()
 
-        universe.world["elements_up_to_iron"] = {
-            "iron": {"atomic_number": 26},
-        }
 
         stars_layer = Stars(universe)
         stars_layer.stars = [

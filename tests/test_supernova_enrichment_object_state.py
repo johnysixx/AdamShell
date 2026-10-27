@@ -35,17 +35,18 @@ class SupernovaEnrichmentObjectStateTests(
         self,
         universe,
         source_stars=None,
+        source_elements=None,
     ):
         if source_stars is not None:
             stars_layer = Stars(universe)
             stars_layer.stars = source_stars
 
-        if "elements_up_to_iron" in universe.world:
+        if source_elements is not None:
             nucleosynthesis_layer = StellarNucleosynthesis(
                 universe
             )
             nucleosynthesis_layer.elements_up_to_iron = (
-                universe.world["elements_up_to_iron"]
+                source_elements
             )
 
     def _assert_object_only(
@@ -117,7 +118,7 @@ class SupernovaEnrichmentObjectStateTests(
         source_stars = [
             self._star()
         ]
-        universe.world["elements_up_to_iron"] = {
+        source_elements = {
             "hydrogen": self._primordial_element(
                 "hydrogen"
             ),
@@ -128,7 +129,9 @@ class SupernovaEnrichmentObjectStateTests(
             ),
         }
 
-        self._wire_canonical_inputs(universe, source_stars)
+        self._wire_canonical_inputs(
+            universe, source_stars, source_elements
+        )
 
         process = SupernovaEnrichment(universe)
         result = process.enrich_space()
@@ -177,7 +180,7 @@ class SupernovaEnrichmentObjectStateTests(
         source_stars = [
             self._star()
         ]
-        universe.world["elements_up_to_iron"] = {
+        source_elements = {
             "iron": self._forged_element(
                 "iron",
                 "Fe",
@@ -185,7 +188,9 @@ class SupernovaEnrichmentObjectStateTests(
             )
         }
 
-        self._wire_canonical_inputs(universe, source_stars)
+        self._wire_canonical_inputs(
+            universe, source_stars, source_elements
+        )
 
         process = SupernovaEnrichment(universe)
         state = process.supernova_enrichment_state
@@ -261,7 +266,7 @@ class SupernovaEnrichmentObjectStateTests(
         universe = Universe()
         source_star = self._star("source_star")
         source_stars = [source_star]
-        universe.world["elements_up_to_iron"] = {
+        source_elements = {
             "iron": self._forged_element(
                 "iron",
                 "Fe",
@@ -269,7 +274,9 @@ class SupernovaEnrichmentObjectStateTests(
             )
         }
 
-        self._wire_canonical_inputs(universe, source_stars)
+        self._wire_canonical_inputs(
+            universe, source_stars, source_elements
+        )
 
         process = SupernovaEnrichment(universe)
         process.enrich_space()
@@ -408,10 +415,13 @@ class SupernovaEnrichmentObjectStateTests(
             .composition["iron"].atomic_number,
             26,
         )
+        self.assertNotIn(
+            "elements_up_to_iron",
+            universe.world,
+        )
         self.assertEqual(
-            universe.world[
-                "elements_up_to_iron"
-            ]["iron"].atomic_number,
+            universe.stellar_nucleosynthesis_layer
+            .elements_up_to_iron["iron"].atomic_number,
             26,
         )
 
@@ -447,7 +457,9 @@ class SupernovaEnrichmentObjectStateTests(
             self._star()
         ]
 
-        self._wire_canonical_inputs(universe, source_stars)
+        self._wire_canonical_inputs(
+            universe, source_stars, None
+        )
 
         process = SupernovaEnrichment(universe)
         result = process.enrich_space()
@@ -478,14 +490,16 @@ class SupernovaEnrichmentObjectStateTests(
             self._star()
         ]
 
-        universe.world["elements_up_to_iron"] = {
+        source_elements = {
             "iron": {
                 "name": "iron",
                 "atomic_number": 26,
             }
         }
 
-        self._wire_canonical_inputs(universe, source_stars)
+        self._wire_canonical_inputs(
+            universe, source_stars, source_elements
+        )
 
         result = SupernovaEnrichment(
             universe
@@ -529,7 +543,7 @@ class SupernovaEnrichmentObjectStateTests(
         source_stars = [
             self._star()
         ]
-        universe.world["elements_up_to_iron"] = {
+        source_elements = {
             "iron": self._forged_element(
                 "iron",
                 "Fe",
@@ -537,7 +551,9 @@ class SupernovaEnrichmentObjectStateTests(
             )
         }
 
-        self._wire_canonical_inputs(universe, source_stars)
+        self._wire_canonical_inputs(
+            universe, source_stars, source_elements
+        )
 
         process = SupernovaEnrichment(universe)
 

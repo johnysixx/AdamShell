@@ -17,13 +17,15 @@ class HeavyElementNucleosynthesisProcessStateObjectStateTests(
     unittest.TestCase
 ):
 
-    def _wire_canonical_inputs(self, universe):
-        if "elements_up_to_iron" in universe.world:
+    def _wire_canonical_inputs(
+        self, universe, source_elements
+    ):
+        if source_elements is not None:
             nucleosynthesis = StellarNucleosynthesis(
                 universe
             )
             nucleosynthesis.elements_up_to_iron = (
-                universe.world["elements_up_to_iron"]
+                source_elements
             )
 
         if "enriched_clouds" in universe.world:
@@ -35,7 +37,7 @@ class HeavyElementNucleosynthesisProcessStateObjectStateTests(
     def _ready_universe(self):
         universe = Universe()
 
-        universe.world["elements_up_to_iron"] = {
+        source_elements = {
             "iron": ChemicalElement(
                 name="iron",
                 symbol="Fe",
@@ -57,7 +59,9 @@ class HeavyElementNucleosynthesisProcessStateObjectStateTests(
             )
         ]
 
-        self._wire_canonical_inputs(universe)
+        self._wire_canonical_inputs(
+            universe, source_elements
+        )
 
         return universe
 
@@ -93,7 +97,7 @@ class HeavyElementNucleosynthesisProcessStateObjectStateTests(
 
     def test_missing_clouds_sets_failed_enum(self):
         universe = Universe()
-        universe.world["elements_up_to_iron"] = {
+        source_elements = {
             "iron": ChemicalElement(
                 name="iron",
                 symbol="Fe",
@@ -105,7 +109,9 @@ class HeavyElementNucleosynthesisProcessStateObjectStateTests(
             )
         }
 
-        self._wire_canonical_inputs(universe)
+        self._wire_canonical_inputs(
+            universe, source_elements
+        )
 
         process = HeavyElementNucleosynthesis(
             universe
