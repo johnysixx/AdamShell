@@ -60,7 +60,6 @@ class PlanetaryMaterialDomainObjectStateTests(unittest.TestCase):
         universe = Universe()
         planets_layer = Planets(universe)
         definitions = planets_layer.planetary_materials
-        universe.world["planetary_materials"] = definitions
         source_state = PlanetFormationState(
             earth_formed=True,
             water_possible=True,
@@ -83,7 +82,7 @@ class PlanetaryMaterialDomainObjectStateTests(unittest.TestCase):
             earth_formed=True,
             water_possible=True,
         )
-        universe.world["planetary_materials"] = {
+        source_materials = {
             "water": {
                 "name": "water",
                 "requires": ["hydrogen", "oxygen"],
@@ -91,9 +90,7 @@ class PlanetaryMaterialDomainObjectStateTests(unittest.TestCase):
         }
         planets_layer = Planets(universe)
         planets_layer.planetary_state = source_state
-        planets_layer.planetary_materials = (
-            universe.world["planetary_materials"]
-        )
+        planets_layer.planetary_materials = source_materials
 
         process = PlanetaryMaterials(universe)
 

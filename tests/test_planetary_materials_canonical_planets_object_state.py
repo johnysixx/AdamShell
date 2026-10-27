@@ -205,7 +205,10 @@ class PlanetaryMaterialsCanonicalPlanetsTests(
             "planetary_state",
             universe.world,
         )
-        universe.world.pop("planetary_materials", None)
+        self.assertNotIn(
+            "planetary_materials",
+            universe.world,
+        )
 
         process = PlanetaryMaterials(universe)
         result = process.materialize()

@@ -305,7 +305,6 @@ class Planets:
     def write_to_world(self):
         self._refresh_public_state()
         self.universe.world["planets"] = self.public_state
-        self.universe.world["planetary_materials"] = self.planetary_materials
 
     def find_planet(self, name):
         for planet in self.planets:

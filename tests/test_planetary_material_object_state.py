@@ -30,17 +30,16 @@ class PlanetaryMaterialObjectStateTests(
 ):
 
     def _wire_canonical_inputs(
-        self, universe, source_state=None
+        self, universe, source_state=None,
+        source_materials=None
     ):
         planets_layer = Planets(universe)
 
         if source_state is not None:
             planets_layer.planetary_state = source_state
 
-        if "planetary_materials" in universe.world:
-            planets_layer.planetary_materials = (
-                universe.world["planetary_materials"]
-            )
+        if source_materials is not None:
+            planets_layer.planetary_materials = source_materials
 
     def _assert_object_only(
         self,
@@ -97,11 +96,13 @@ class PlanetaryMaterialObjectStateTests(
                 organic_molecules_possible=True,
             )
         )
-        universe.world["planetary_materials"] = (
+        source_materials = (
             self._possible_materials()
         )
 
-        self._wire_canonical_inputs(universe, source_state)
+        self._wire_canonical_inputs(
+            universe, source_state, source_materials
+        )
 
         process = PlanetaryMaterials(universe)
         result = process.materialize()
@@ -253,10 +254,12 @@ class PlanetaryMaterialObjectStateTests(
                 water_possible=True,
             )
         )
-        universe.world["planetary_materials"] = (
+        source_materials = (
             self._possible_materials()
         )
-        self._wire_canonical_inputs(universe, source_state)
+        self._wire_canonical_inputs(
+            universe, source_state, source_materials
+        )
 
         process = PlanetaryMaterials(universe)
 
@@ -291,13 +294,15 @@ class PlanetaryMaterialObjectStateTests(
                 organic_molecules_possible=True,
             )
         )
-        universe.world["planetary_materials"] = {
+        source_materials = {
             "water": PlanetaryMaterial(
                 name="water",
                 requires=("hydrogen", "oxygen"),
             )
         }
-        self._wire_canonical_inputs(universe, source_state)
+        self._wire_canonical_inputs(
+            universe, source_state, source_materials
+        )
 
         process = PlanetaryMaterials(universe)
 
@@ -368,10 +373,12 @@ class PlanetaryMaterialObjectStateTests(
                 water_possible=True,
             )
         )
-        universe.world["planetary_materials"] = (
+        source_materials = (
             self._possible_materials()
         )
-        self._wire_canonical_inputs(universe, source_state)
+        self._wire_canonical_inputs(
+            universe, source_state, source_materials
+        )
 
         process = PlanetaryMaterials(universe)
 
