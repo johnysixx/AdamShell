@@ -26,7 +26,7 @@ class MoleculeDomainObjectStateTests(unittest.TestCase):
         return universe, process, result
 
     def test_registry_contains_molecule_objects(self):
-        universe, process, _ = self._formed_molecules()
+        universe, process, result = self._formed_molecules()
 
         water = process.molecules["water"]
 
@@ -37,9 +37,19 @@ class MoleculeDomainObjectStateTests(unittest.TestCase):
         self.assertEqual(water.atom_count, 3)
         self.assertEqual(water.component_count("hydrogen"), 2)
         self.assertEqual(water.component_count("oxygen"), 1)
+        self.assertNotIn(
+            "known_molecules",
+            universe.world,
+        )
         self.assertIs(
-            universe.world["known_molecules"]["water"],
+            result.molecules["water"],
             water,
+        )
+        self.assertIsInstance(
+            universe.world["molecules"][
+                "molecules"
+            ]["water"],
+            dict,
         )
 
     def test_molecule_components_compose_element_objects(self):

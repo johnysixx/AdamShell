@@ -241,4 +241,3 @@ class Molecules:
     def write_to_world(self):
         self._refresh_public_state()
         self.universe.world["molecules"] = self.public_state
-        self.universe.world["known_molecules"] = self.molecules

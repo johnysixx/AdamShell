@@ -1,5 +1,6 @@
 import unittest
 
+from universe.chemical_objects import ChemicalMolecule
 from universe.molecule_state import MoleculeFormationState
 from universe.molecules import Molecules
 from universe.physical_formation_result_state import (
@@ -85,7 +86,7 @@ class MoleculeFormationObjectStateTests(
         self.assertTrue(state.alcohols_available)
         self.assertEqual(state.molecule_count, 6)
 
-    def test_world_keeps_snapshot_without_live_molecule_state(
+    def test_world_keeps_snapshot_without_live_molecule_registries(
         self
     ):
         universe, process, _ = (
@@ -130,9 +131,9 @@ class MoleculeFormationObjectStateTests(
             ),
             set(process.molecules),
         )
-        self.assertIs(
-            universe.world["known_molecules"],
-            process.molecules,
+        self.assertNotIn(
+            "known_molecules",
+            universe.world,
         )
         self.assertIsInstance(universe.world, dict)
 
@@ -148,7 +149,7 @@ class MoleculeFormationObjectStateTests(
     def test_runtime_result_is_object_and_snapshot_is_dict(
         self
     ):
-        _, process, result = self._formed_molecules()
+        universe, process, result = self._formed_molecules()
 
         self.assertIsInstance(
             result,
@@ -162,9 +163,111 @@ class MoleculeFormationObjectStateTests(
             result.molecule_state,
             process.molecule_state,
         )
-        self.assertIs(
-            result.molecules["water"],
-            process.molecules["water"],
+        expected = {
+            "water": {
+                "hydrogen": 2,
+                "oxygen": 1,
+            },
+            "carbon_dioxide": {
+                "carbon": 1,
+                "oxygen": 2,
+            },
+            "methane": {
+                "carbon": 1,
+                "hydrogen": 4,
+            },
+            "ammonia": {
+                "nitrogen": 1,
+                "hydrogen": 3,
+            },
+            "methanol": {
+                "carbon": 1,
+                "hydrogen": 4,
+                "oxygen": 1,
+            },
+            "ethanol": {
+                "carbon": 2,
+                "hydrogen": 6,
+                "oxygen": 1,
+            },
+        }
+
+        self.assertEqual(
+            set(process.molecules),
+            set(expected),
+        )
+        self.assertEqual(
+            set(result.molecules),
+            set(expected),
+        )
+
+        public_molecules = universe.world[
+            "molecules"
+        ]["molecules"]
+
+        self.assertEqual(
+            set(public_molecules),
+            set(expected),
+        )
+
+        for name, components in expected.items():
+            with self.subTest(molecule=name):
+                molecule = process.molecules[name]
+
+                self.assertIsInstance(
+                    molecule,
+                    ChemicalMolecule,
+                )
+                self.assertIs(
+                    result.molecules[name],
+                    molecule,
+                )
+
+                self.assertEqual(
+                    {
+                        element.name: count
+                        for element, count
+                        in molecule.components.items()
+                    },
+                    components,
+                )
+
+                for element in molecule.components:
+                    self.assertIs(
+                        element,
+                        process.periodic_table.elements[
+                            element.atomic_number
+                        ],
+                    )
+
+                self.assertIsInstance(
+                    public_molecules[name],
+                    dict,
+                )
+                self.assertEqual(
+                    public_molecules[name],
+                    molecule.to_dict(),
+                )
+
+        # The public world snapshot must not mutate
+        # the canonical ChemicalMolecule objects.
+
+        public_molecules["water"]["components"][
+            "hydrogen"
+        ] = 99
+
+        self.assertEqual(
+            process.molecules[
+                "water"
+            ].component_count("hydrogen"),
+            2,
+        )
+
+        self.assertEqual(
+            result.to_dict()["molecules"][
+                "water"
+            ]["components"]["hydrogen"],
+            2,
         )
 
         snapshot = result.to_dict()
