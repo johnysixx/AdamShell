@@ -78,7 +78,7 @@ class AtomFormationObjectStateTests(
         )
         self.assertEqual(state.atom_count, 4)
 
-    def test_world_keeps_snapshot_without_live_atom_state(
+    def test_world_keeps_snapshot_without_live_atom_registries(
         self
     ):
         universe, process, _ = self._formed_atoms()
@@ -116,16 +116,22 @@ class AtomFormationObjectStateTests(
                 "atom_state"
             ]["neutral_atoms_available"]
         )
-        self.assertIs(
-            universe.world["neutral_atoms"],
-            process.atoms,
+        self.assertNotIn(
+            "neutral_atoms",
+            universe.world,
+        )
+        self.assertEqual(
+            set(
+                universe.world["atoms"]["atoms"]
+            ),
+            set(process.atoms),
         )
         self.assertIsInstance(universe.world, dict)
 
     def test_runtime_result_is_object_and_snapshot_is_dict(
         self
     ):
-        _, process, result = self._formed_atoms()
+        universe, process, result = self._formed_atoms()
 
         self.assertIsInstance(
             result,
@@ -139,10 +145,54 @@ class AtomFormationObjectStateTests(
             result.atom_state,
             process.atom_state,
         )
-        self.assertIs(
-            result.atoms["hydrogen_atom"],
-            process.atoms["hydrogen_atom"],
+        self.assertEqual(
+            {
+                atom.atomic_number
+                for atom in process.atoms.values()
+            },
+            {1, 2, 55, 119},
         )
+        self.assertEqual(
+            set(result.atoms),
+            set(process.atoms),
+        )
+
+        public_atoms = universe.world[
+            "atoms"
+        ]["atoms"]
+
+        for name, atom in process.atoms.items():
+            with self.subTest(atom=name):
+                self.assertIsInstance(
+                    atom,
+                    NeutralAtom,
+                )
+                self.assertIs(
+                    result.atoms[name],
+                    atom,
+                )
+                self.assertIs(
+                    atom.element,
+                    process.periodic_table.get_element(
+                        atom.atomic_number
+                    ),
+                )
+                self.assertIsInstance(
+                    public_atoms[name],
+                    dict,
+                )
+                self.assertEqual(
+                    public_atoms[name],
+                    atom.to_dict(),
+                )
+                self.assertEqual(
+                    atom.protons,
+                    atom.electrons,
+                )
+                self.assertEqual(
+                    atom.net_charge,
+                    0,
+                )
 
         snapshot = result.to_dict()
 

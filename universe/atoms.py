@@ -130,4 +130,3 @@ class Atoms:
     def write_to_world(self):
         self._refresh_public_state()
         self.universe.world["atoms"] = self.public_state
-        self.universe.world["neutral_atoms"] = self.atoms
