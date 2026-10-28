@@ -185,7 +185,7 @@ class AtomicNucleiObjectStateTests(
         )
 
 
-    def test_nucleus_registry_stores_domain_objects(
+    def test_canonical_nuclei_registry_without_world_alias(
         self
     ):
         universe, process, _ = self._formed_nuclei()
@@ -205,11 +205,56 @@ class AtomicNucleiObjectStateTests(
             helium,
             AtomicNucleus,
         )
-        self.assertIs(
-            universe.world["light_nuclei"][
-                "hydrogen_nucleus"
-            ],
-            hydrogen,
+        self.assertNotIn(
+            "light_nuclei",
+            universe.world,
+        )
+
+        self.assertEqual(
+            set(process.nuclei),
+            {
+                "hydrogen_nucleus",
+                "deuterium_nucleus",
+                "helium_nucleus",
+                "trace_lithium_nucleus",
+            },
+        )
+
+        public_nuclei = universe.world[
+            "atomic_nuclei"
+        ]["nuclei"]
+
+        self.assertIsInstance(
+            public_nuclei,
+            dict,
+        )
+
+        for name, nucleus in process.nuclei.items():
+            with self.subTest(nucleus=name):
+                self.assertIsInstance(
+                    nucleus,
+                    AtomicNucleus,
+                )
+                self.assertIs(
+                    process.result.nuclei[name],
+                    nucleus,
+                )
+                self.assertIsInstance(
+                    public_nuclei[name],
+                    dict,
+                )
+                self.assertEqual(
+                    public_nuclei[name],
+                    nucleus.to_dict(),
+                )
+
+        public_nuclei["hydrogen_nucleus"][
+            "state"
+        ] = "changed"
+
+        self.assertEqual(
+            hydrogen.state,
+            "formed",
         )
 
     def test_nucleus_is_object_only(

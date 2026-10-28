@@ -151,4 +151,3 @@ class AtomicNuclei:
     def write_to_world(self):
         self._refresh_public_state()
         self.universe.world["atomic_nuclei"] = self.public_state
-        self.universe.world["light_nuclei"] = self.nuclei
