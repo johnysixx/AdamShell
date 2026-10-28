@@ -78,17 +78,48 @@ class AtomFormationObjectStateTests(
         )
         self.assertEqual(state.atom_count, 4)
 
-    def test_world_registry_stores_state_object(
+    def test_world_keeps_snapshot_without_live_atom_state(
         self
     ):
         universe, process, _ = self._formed_atoms()
 
-        state = universe.world["atom_state"]
+        state = process.atom_state
+
+        self.assertNotIn(
+            "atom_state",
+            universe.world,
+        )
         self.assertIsInstance(
             state,
             AtomFormationState,
         )
-        self.assertIs(state, process.atom_state)
+        self.assertIs(
+            process.result.atom_state,
+            state,
+        )
+        self.assertIsInstance(
+            universe.world["atoms"],
+            dict,
+        )
+        self.assertIsInstance(
+            universe.world["atoms"]["atom_state"],
+            dict,
+        )
+        self.assertEqual(
+            universe.world["atoms"][
+                "atom_state"
+            ]["atom_count"],
+            len(process.atoms),
+        )
+        self.assertTrue(
+            universe.world["atoms"][
+                "atom_state"
+            ]["neutral_atoms_available"]
+        )
+        self.assertIs(
+            universe.world["neutral_atoms"],
+            process.atoms,
+        )
         self.assertIsInstance(universe.world, dict)
 
     def test_runtime_result_is_object_and_snapshot_is_dict(

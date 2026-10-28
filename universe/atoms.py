@@ -131,4 +131,3 @@ class Atoms:
         self._refresh_public_state()
         self.universe.world["atoms"] = self.public_state
         self.universe.world["neutral_atoms"] = self.atoms
-        self.universe.world["atom_state"] = self.atom_state
