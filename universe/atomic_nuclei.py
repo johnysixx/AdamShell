@@ -152,4 +152,3 @@ class AtomicNuclei:
         self._refresh_public_state()
         self.universe.world["atomic_nuclei"] = self.public_state
         self.universe.world["light_nuclei"] = self.nuclei
-        self.universe.world["nuclear_state"] = self.nuclear_state

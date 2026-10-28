@@ -79,17 +79,48 @@ class AtomicNucleiObjectStateTests(
         for value in state.to_dict().values():
             self.assertTrue(value)
 
-    def test_world_registry_stores_state_object(
+    def test_world_keeps_snapshot_without_live_nuclear_state(
         self
     ):
         universe, process, _ = self._formed_nuclei()
 
-        state = universe.world["nuclear_state"]
+        state = process.nuclear_state
+
+        self.assertNotIn(
+            "nuclear_state",
+            universe.world,
+        )
         self.assertIsInstance(
             state,
             NuclearFormationState,
         )
-        self.assertIs(state, process.nuclear_state)
+        self.assertIs(
+            process.result.nuclear_state,
+            state,
+        )
+        self.assertIsInstance(
+            universe.world["atomic_nuclei"],
+            dict,
+        )
+        self.assertIsInstance(
+            universe.world["atomic_nuclei"][
+                "nuclear_state"
+            ],
+            dict,
+        )
+        self.assertTrue(
+            universe.world["atomic_nuclei"][
+                "nuclear_state"
+            ]["light_nuclei_formed"]
+        )
+        self.assertEqual(
+            set(
+                universe.world["atomic_nuclei"][
+                    "nuclei"
+                ]
+            ),
+            set(process.nuclei),
+        )
         self.assertIsInstance(universe.world, dict)
 
     def test_runtime_result_is_object_and_snapshot_is_dict(
