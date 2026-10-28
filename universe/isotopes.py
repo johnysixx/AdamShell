@@ -156,4 +156,3 @@ class Isotopes:
     def write_to_world(self):
         self._refresh_public_state()
         self.universe.world["isotopes"] = self.public_state
-        self.universe.world["known_isotopes"] = self.isotopes

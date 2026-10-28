@@ -24,8 +24,9 @@ class AtomicTimeIsotopeBoundaryObjectStateTests(
     ):
         universe = Universe()
 
+        decoy_caesium = object()
         universe.world["known_isotopes"] = {
-            "caesium_133": object(),
+            "caesium_133": decoy_caesium,
         }
 
         process = AtomicTime(universe)
@@ -41,9 +42,19 @@ class AtomicTimeIsotopeBoundaryObjectStateTests(
             Isotope,
         )
 
-        self.assertIs(
+        self.assertIsNot(
             universe.world["known_isotopes"],
             isotopes,
+        )
+        self.assertIs(
+            universe.world["known_isotopes"]["caesium_133"],
+            decoy_caesium,
+        )
+        self.assertIsInstance(
+            universe.world["isotopes"]["isotopes"][
+                "caesium_133"
+            ],
+            dict,
         )
 
         self.assertTrue(
@@ -186,9 +197,9 @@ class AtomicTimeIsotopeBoundaryObjectStateTests(
         canonical = process.isotopes_layer.isotopes
         caesium = canonical["caesium_133"]
 
-        universe.world.pop(
+        self.assertNotIn(
             "known_isotopes",
-            None,
+            universe.world,
         )
 
         process.isotopes_layer.form_reference_isotopes = Mock(
@@ -215,6 +226,14 @@ class AtomicTimeIsotopeBoundaryObjectStateTests(
         self
     ):
         class GuardedWorld(dict):
+
+            def __getitem__(self, key):
+                if key == "known_isotopes":
+                    raise AssertionError(
+                        "AtomicTime must not index "
+                        "world isotope registry."
+                    )
+                return super().__getitem__(key)
 
             def get(self, key, default=None):
                 if key == "known_isotopes":
@@ -252,9 +271,9 @@ class AtomicTimeIsotopeBoundaryObjectStateTests(
             ],
         )
 
-        self.assertIs(
-            universe.world["known_isotopes"],
-            process.isotopes_layer.isotopes,
+        self.assertNotIn(
+            "known_isotopes",
+            universe.world,
         )
 
     def test_public_standard_export_is_detached(

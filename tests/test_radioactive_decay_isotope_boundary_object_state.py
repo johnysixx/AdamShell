@@ -25,8 +25,9 @@ class RadioactiveDecayIsotopeBoundaryObjectStateTests(
     ):
         universe = Universe()
 
+        decoy_carbon = object()
         universe.world["known_isotopes"] = {
-            "carbon_14": object(),
+            "carbon_14": decoy_carbon,
         }
 
         process = RadioactiveDecay(universe)
@@ -46,9 +47,19 @@ class RadioactiveDecayIsotopeBoundaryObjectStateTests(
             process.decay_state.isotopes_available
         )
 
-        self.assertIs(
+        self.assertIsNot(
             universe.world["known_isotopes"],
             registry,
+        )
+        self.assertIs(
+            universe.world["known_isotopes"]["carbon_14"],
+            decoy_carbon,
+        )
+        self.assertIsInstance(
+            universe.world["isotopes"]["isotopes"][
+                "carbon_14"
+            ],
+            dict,
         )
 
     def test_definition_uses_canonical_isotopes(
@@ -234,9 +245,9 @@ class RadioactiveDecayIsotopeBoundaryObjectStateTests(
         registry = process.isotopes_layer.isotopes
         carbon = registry["carbon_14"]
 
-        universe.world.pop(
+        self.assertNotIn(
             "known_isotopes",
-            None,
+            universe.world,
         )
 
         process.isotopes_layer.form_reference_isotopes = Mock(
@@ -263,6 +274,14 @@ class RadioactiveDecayIsotopeBoundaryObjectStateTests(
         self
     ):
         class GuardedWorld(dict):
+
+            def __getitem__(self, key):
+                if key == "known_isotopes":
+                    raise AssertionError(
+                        "RadioactiveDecay must not index "
+                        "world isotope registry."
+                    )
+                return super().__getitem__(key)
 
             def get(self, key, default=None):
                 if key == "known_isotopes":
@@ -296,9 +315,9 @@ class RadioactiveDecayIsotopeBoundaryObjectStateTests(
             4,
         )
 
-        self.assertIs(
-            universe.world["known_isotopes"],
-            process.isotopes_layer.isotopes,
+        self.assertNotIn(
+            "known_isotopes",
+            universe.world,
         )
 
         self.assertTrue(
