@@ -317,4 +317,3 @@ class PeriodicTable:
             for element in self.elements.values()
         }
         self.universe.world["future_elements"] = self.future_elements
-        self.universe.world["element_registry_state"] = self.registry_state

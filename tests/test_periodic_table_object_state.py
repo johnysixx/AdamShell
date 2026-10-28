@@ -80,28 +80,70 @@ class PeriodicTableObjectStateTests(
         )
         self.assertEqual(state.future_element_count, 0)
 
-    def test_world_registry_stores_state_object(
+    def test_world_keeps_snapshot_without_live_registry_state(
         self
     ):
         universe, table, _ = self._built_table()
 
-        state = universe.world[
-            "element_registry_state"
-        ]
+        state = table.registry_state
+
+        self.assertNotIn(
+            "element_registry_state",
+            universe.world,
+        )
         self.assertIsInstance(
             state,
             PeriodicTableRegistryState,
         )
-        self.assertIs(state, table.registry_state)
+        self.assertIs(
+            table.result.registry_state,
+            state,
+        )
+
+        public_state = universe.world[
+            "periodic_table"
+        ]
+
         self.assertIsInstance(
-            universe.world[
-                "elements_by_atomic_number"
-            ],
+            public_state,
             dict,
         )
         self.assertIsInstance(
-            universe.world["future_elements"],
+            public_state["registry_state"],
             dict,
+        )
+        self.assertEqual(
+            public_state["registry_state"],
+            state.to_dict(),
+        )
+
+        self.assertIs(
+            universe.world[
+                "elements_by_atomic_number"
+            ],
+            table.elements,
+        )
+        self.assertIs(
+            universe.world["future_elements"],
+            table.future_elements,
+        )
+
+        self.assertEqual(
+            len(table.elements),
+            118,
+        )
+        self.assertEqual(
+            state.known_element_count,
+            118,
+        )
+
+        public_state["registry_state"][
+            "known_element_count"
+        ] = 999
+
+        self.assertEqual(
+            state.known_element_count,
+            118,
         )
         self.assertIsInstance(universe.world, dict)
 
@@ -172,16 +214,40 @@ class PeriodicTableObjectStateTests(
             element,
             "atomic_number",
         )
+        self.assertNotIn(
+            "element_registry_state",
+            universe.world,
+        )
         self.assertIs(
-            universe.world[
-                "element_registry_state"
-            ],
+            table.result.registry_state,
             state,
         )
+        self.assertIs(
+            table.future_elements[119],
+            element,
+        )
+        self.assertIs(
+            universe.world["future_elements"][119],
+            element,
+        )
+
+        public_state = universe.world[
+            "periodic_table"
+        ]
+
         self.assertEqual(
-            universe.world["periodic_table"][
-                "registry_state"
-            ]["future_element_count"],
+            public_state["registry_state"][
+                "future_element_count"
+            ],
+            1,
+        )
+
+        public_state["registry_state"][
+            "future_element_count"
+        ] = 999
+
+        self.assertEqual(
+            state.future_element_count,
             1,
         )
 
