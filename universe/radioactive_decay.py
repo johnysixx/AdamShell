@@ -202,4 +202,3 @@ class RadioactiveDecay:
         self._refresh_public_state()
         self.universe.world["radioactive_decay"] = self.public_state
         self.universe.world["decay_patterns"] = self.decay_patterns
-        self.universe.world["decay_state"] = self.decay_state

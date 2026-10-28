@@ -85,17 +85,41 @@ class RadioactiveDecayObjectStateTests(
         )
         self.assertEqual(state.decay_pattern_count, 4)
 
-    def test_world_registry_stores_state_object(
+    def test_world_keeps_snapshot_without_live_decay_state(
         self
     ):
         universe, process, _ = self._defined_decay()
 
-        state = universe.world["decay_state"]
+        state = process.decay_state
+
+        self.assertNotIn(
+            "decay_state",
+            universe.world,
+        )
         self.assertIsInstance(
             state,
             RadioactiveDecayState,
         )
-        self.assertIs(state, process.decay_state)
+        self.assertIs(
+            process.result.decay_state,
+            state,
+        )
+        self.assertIsInstance(
+            universe.world["radioactive_decay"],
+            dict,
+        )
+        self.assertIsInstance(
+            universe.world["radioactive_decay"][
+                "decay_state"
+            ],
+            dict,
+        )
+        self.assertEqual(
+            universe.world["radioactive_decay"][
+                "decay_state"
+            ]["decay_pattern_count"],
+            len(process.decay_patterns),
+        )
         self.assertIsInstance(
             universe.world["decay_patterns"],
             dict,
