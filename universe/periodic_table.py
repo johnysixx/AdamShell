@@ -316,4 +316,3 @@ class PeriodicTable:
             element.name: element
             for element in self.elements.values()
         }
-        self.universe.world["future_elements"] = self.future_elements

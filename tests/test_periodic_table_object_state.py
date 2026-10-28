@@ -123,9 +123,13 @@ class PeriodicTableObjectStateTests(
             ],
             table.elements,
         )
-        self.assertIs(
-            universe.world["future_elements"],
+        self.assertNotIn(
+            "future_elements",
+            universe.world,
+        )
+        self.assertEqual(
             table.future_elements,
+            {},
         )
 
         self.assertEqual(
@@ -226,8 +230,16 @@ class PeriodicTableObjectStateTests(
             table.future_elements[119],
             element,
         )
+        self.assertNotIn(
+            "future_elements",
+            universe.world,
+        )
         self.assertIs(
-            universe.world["future_elements"][119],
+            table.get_element(119),
+            element,
+        )
+        self.assertIs(
+            table.create_future_element(119),
             element,
         )
 
@@ -249,6 +261,66 @@ class PeriodicTableObjectStateTests(
         self.assertEqual(
             state.future_element_count,
             1,
+        )
+
+        for atomic_number in (119, 120):
+            with self.subTest(
+                atomic_number=atomic_number
+            ):
+                cached = table.get_element(
+                    atomic_number
+                )
+
+                self.assertIsInstance(
+                    cached,
+                    ChemicalElement,
+                )
+                self.assertIs(
+                    cached,
+                    table.future_elements[
+                        atomic_number
+                    ],
+                )
+                self.assertIs(
+                    cached,
+                    table.create_future_element(
+                        atomic_number
+                    ),
+                )
+                self.assertEqual(
+                    cached.atomic_number,
+                    atomic_number,
+                )
+                self.assertFalse(
+                    cached.official
+                )
+                self.assertFalse(
+                    cached.discovered
+                )
+
+        self.assertEqual(
+            len(table.future_elements),
+            2,
+        )
+        self.assertEqual(
+            state.future_element_count,
+            2,
+        )
+        self.assertIs(
+            table.result.registry_state,
+            state,
+        )
+        self.assertEqual(
+            universe.world[
+                "periodic_table"
+            ]["registry_state"][
+                "future_element_count"
+            ],
+            2,
+        )
+        self.assertNotIn(
+            "future_elements",
+            universe.world,
         )
 
     def test_build_error_creates_cronenberg(self):
