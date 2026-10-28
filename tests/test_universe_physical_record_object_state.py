@@ -206,11 +206,15 @@ class UniversePhysicalRecordObjectStateTests(
             pattern,
             RadioactiveDecayPattern,
         )
-        self.assertIs(
-            universe.world["decay_patterns"][
-                "carbon_14_decay"
-            ],
-            pattern,
+        self.assertNotIn(
+            "decay_patterns",
+            universe.world,
+        )
+        self.assertIsInstance(
+            universe.world["radioactive_decay"][
+                "decay_patterns"
+            ]["carbon_14_decay"],
+            dict,
         )
         self.assertEqual(
             pattern.state,

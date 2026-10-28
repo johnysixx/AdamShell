@@ -332,10 +332,31 @@ class RadioactiveDecayIsotopeBoundaryObjectStateTests(
 
         result = process.define_reference_decay()
 
-        self.assertIs(
-            universe.world["decay_patterns"],
-            process.decay_patterns,
+        self.assertNotIn(
+            "decay_patterns",
+            universe.world,
         )
+        self.assertEqual(
+            set(
+                universe.world["radioactive_decay"][
+                    "decay_patterns"
+                ]
+            ),
+            set(process.decay_patterns),
+        )
+
+        for name, pattern in process.decay_patterns.items():
+            with self.subTest(pattern=name):
+                self.assertIs(
+                    result.decay_patterns[name],
+                    pattern,
+                )
+                self.assertIsInstance(
+                    universe.world["radioactive_decay"][
+                        "decay_patterns"
+                    ][name],
+                    dict,
+                )
 
         self.assertNotIn(
             "decay_state",

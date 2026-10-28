@@ -201,4 +201,3 @@ class RadioactiveDecay:
     def write_to_world(self):
         self._refresh_public_state()
         self.universe.world["radioactive_decay"] = self.public_state
-        self.universe.world["decay_patterns"] = self.decay_patterns
