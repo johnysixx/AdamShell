@@ -119,9 +119,12 @@ class ChemicalPeriodicTableBoundaryObjectStateTests(
         hydrogen = process.periodic_table.elements[1]
         oxygen = process.periodic_table.elements[8]
 
+        hydrogen_decoy = object()
+        oxygen_decoy = object()
+
         universe.world["chemical_elements"] = {
-            "hydrogen": object(),
-            "oxygen": object(),
+            "hydrogen": hydrogen_decoy,
+            "oxygen": oxygen_decoy,
         }
 
         molecule = process.create_molecule(
@@ -159,6 +162,19 @@ class ChemicalPeriodicTableBoundaryObjectStateTests(
         self.assertEqual(
             molecule.component_count("hydrogen"),
             2,
+        )
+
+        self.assertIs(
+            universe.world["chemical_elements"][
+                "hydrogen"
+            ],
+            hydrogen_decoy,
+        )
+        self.assertIs(
+            universe.world["chemical_elements"][
+                "oxygen"
+            ],
+            oxygen_decoy,
         )
 
     def test_direct_molecule_creation_initializes_own_table(
@@ -295,9 +311,30 @@ class ChemicalPeriodicTableBoundaryObjectStateTests(
             process.periodic_table.elements,
         )
 
+        self.assertNotIn(
+            "chemical_elements",
+            universe.world,
+        )
+
+        hydrogen = next(
+            element
+            for element in molecule.components
+            if element.name == "hydrogen"
+        )
+
+        oxygen = next(
+            element
+            for element in molecule.components
+            if element.name == "oxygen"
+        )
+
         self.assertIs(
-            universe.world["chemical_elements"]["hydrogen"],
+            hydrogen,
             process.periodic_table.elements[1],
+        )
+        self.assertIs(
+            oxygen,
+            process.periodic_table.elements[8],
         )
 
 

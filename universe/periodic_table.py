@@ -312,7 +312,3 @@ class PeriodicTable:
         self._refresh_public_state()
         self.universe.world["periodic_table"] = self.public_state
         self.universe.world["elements_by_atomic_number"] = self.elements
-        self.universe.world["chemical_elements"] = {
-            element.name: element
-            for element in self.elements.values()
-        }

@@ -66,11 +66,31 @@ class MoleculeDomainObjectStateTests(unittest.TestCase):
             )
         )
 
-        hydrogen = universe.world["chemical_elements"]["hydrogen"]
-        oxygen = universe.world["chemical_elements"]["oxygen"]
+        hydrogen = process.periodic_table.elements[1]
+        oxygen = process.periodic_table.elements[8]
 
-        self.assertEqual(water.components[hydrogen], 2)
-        self.assertEqual(water.components[oxygen], 1)
+        self.assertNotIn(
+            "chemical_elements",
+            universe.world,
+        )
+
+        self.assertEqual(
+            water.components[hydrogen],
+            2,
+        )
+        self.assertEqual(
+            water.components[oxygen],
+            1,
+        )
+
+        for element in water.components:
+            with self.subTest(element=element.name):
+                self.assertIs(
+                    element,
+                    process.periodic_table.elements[
+                        element.atomic_number
+                    ],
+                )
 
     def test_component_registry_is_read_only(self):
         _, process, _ = self._formed_molecules()

@@ -52,9 +52,37 @@ class ChemicalDomainObjectStateTests(unittest.TestCase):
             universe.world["elements_by_atomic_number"][1],
             hydrogen,
         )
+        self.assertNotIn(
+            "chemical_elements",
+            universe.world,
+        )
         self.assertIs(
-            universe.world["chemical_elements"]["hydrogen"],
+            table.get_element(1),
             hydrogen,
+        )
+        self.assertEqual(
+            len(table.elements),
+            118,
+        )
+        self.assertEqual(
+            len({
+                id(element)
+                for element in table.elements.values()
+            }),
+            118,
+        )
+
+        for atomic_number, registered in table.elements.items():
+            self.assertIs(
+                table.get_element(atomic_number),
+                registered,
+            )
+
+        table.create_future_element(119)
+
+        self.assertNotIn(
+            "chemical_elements",
+            universe.world,
         )
 
     def test_future_element_is_object_and_cached(self):
