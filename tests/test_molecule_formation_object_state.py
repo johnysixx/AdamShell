@@ -85,24 +85,65 @@ class MoleculeFormationObjectStateTests(
         self.assertTrue(state.alcohols_available)
         self.assertEqual(state.molecule_count, 6)
 
-    def test_world_registry_stores_state_object(
+    def test_world_keeps_snapshot_without_live_molecule_state(
         self
     ):
         universe, process, _ = (
             self._formed_molecules()
         )
 
-        state = universe.world["molecule_state"]
+        state = process.molecule_state
+
+        self.assertNotIn(
+            "molecule_state",
+            universe.world,
+        )
         self.assertIsInstance(
             state,
             MoleculeFormationState,
         )
-        self.assertIs(state, process.molecule_state)
+        self.assertIs(
+            process.result.molecule_state,
+            state,
+        )
         self.assertIsInstance(
-            universe.world["known_molecules"],
+            universe.world["molecules"],
             dict,
         )
+        self.assertIsInstance(
+            universe.world["molecules"][
+                "molecule_state"
+            ],
+            dict,
+        )
+        self.assertEqual(
+            universe.world["molecules"][
+                "molecule_state"
+            ]["molecule_count"],
+            len(process.molecules),
+        )
+        self.assertEqual(
+            set(
+                universe.world["molecules"][
+                    "molecules"
+                ]
+            ),
+            set(process.molecules),
+        )
+        self.assertIs(
+            universe.world["known_molecules"],
+            process.molecules,
+        )
         self.assertIsInstance(universe.world, dict)
+
+        universe.world["molecules"][
+            "molecule_state"
+        ]["molecule_count"] = 99
+
+        self.assertEqual(
+            state.molecule_count,
+            6,
+        )
 
     def test_runtime_result_is_object_and_snapshot_is_dict(
         self

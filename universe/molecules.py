@@ -242,4 +242,3 @@ class Molecules:
         self._refresh_public_state()
         self.universe.world["molecules"] = self.public_state
         self.universe.world["known_molecules"] = self.molecules
-        self.universe.world["molecule_state"] = self.molecule_state
