@@ -80,19 +80,99 @@ class ParticleFormationObjectStateTests(
         for value in state.to_dict().values():
             self.assertTrue(value)
 
-    def test_world_registry_stores_state_object(
+    def test_world_keeps_snapshot_without_live_particle_state(
         self
     ):
         universe, process, _ = (
             self._formed_particles()
         )
 
-        state = universe.world["particle_state"]
+        state = process.particle_state
+        result = process.result
+
+        self.assertNotIn(
+            "particle_state",
+            universe.world,
+        )
         self.assertIsInstance(
             state,
             ParticleFormationState,
         )
-        self.assertIs(state, process.particle_state)
+        self.assertIs(
+            result.particle_state,
+            state,
+        )
+
+        public_state = universe.world["particles"]
+
+        self.assertIsInstance(
+            public_state,
+            dict,
+        )
+        self.assertIsInstance(
+            public_state["particle_state"],
+            dict,
+        )
+        self.assertEqual(
+            public_state["particle_state"],
+            state.to_dict(),
+        )
+
+        self.assertTrue(
+            state.nucleons_formed,
+        )
+
+        for name in (
+            "elementary_particles",
+            "composite_particles",
+            "fields",
+            "interactions",
+        ):
+            self.assertIsInstance(
+                public_state[name],
+                dict,
+            )
+
+        self.assertIs(
+            universe.world["elementary_particles"],
+            process.elementary_particles,
+        )
+        self.assertIs(
+            universe.world["composite_particles"],
+            process.composite_particles,
+        )
+        self.assertIs(
+            universe.world["particle_fields"],
+            process.fields,
+        )
+        self.assertIs(
+            universe.world["particle_interactions"],
+            process.interactions,
+        )
+
+        self.assertIs(
+            universe.world["nucleons"]["proton"],
+            process.composite_particles["proton"],
+        )
+        self.assertIs(
+            universe.world["nucleons"]["neutron"],
+            process.composite_particles["neutron"],
+        )
+
+        # Mutating the public snapshot must not
+        # change the canonical runtime state.
+
+        public_state["particle_state"][
+            "nucleons_formed"
+        ] = False
+
+        self.assertTrue(
+            state.nucleons_formed,
+        )
+        self.assertTrue(
+            result.particle_state.nucleons_formed,
+        )
+
         self.assertIsInstance(universe.world, dict)
 
     def test_runtime_result_is_object_and_snapshot_is_dict(
@@ -219,7 +299,9 @@ class ParticleFormationObjectStateTests(
     def test_atomic_nuclei_consume_object_state(
         self
     ):
-        universe, _, _ = self._formed_particles()
+        universe, particles, particle_result = (
+            self._formed_particles()
+        )
         nuclei = AtomicNuclei(universe)
 
         result = nuclei.form_light_nuclei()
@@ -236,10 +318,16 @@ class ParticleFormationObjectStateTests(
             "hydrogen_nucleus",
             nuclei.nuclei,
         )
+        self.assertIs(
+            particle_result.particle_state,
+            particles.particle_state,
+        )
         self.assertTrue(
-            universe.world[
-                "particle_state"
-            ].nucleons_formed
+            particles.particle_state.nucleons_formed,
+        )
+        self.assertNotIn(
+            "particle_state",
+            universe.world,
         )
 
     def test_to_dict_is_detached_boundary(

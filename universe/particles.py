@@ -328,4 +328,3 @@ class Particles:
         }
         self.universe.world["particle_fields"] = self.fields
         self.universe.world["particle_interactions"] = self.interactions
-        self.universe.world["particle_state"] = self.particle_state
