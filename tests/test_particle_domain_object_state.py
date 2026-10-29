@@ -103,9 +103,43 @@ class ParticleDomainObjectStateTests(unittest.TestCase):
             result.composite_particles["neutron"],
             process.composite_particles["neutron"],
         )
-        self.assertIs(
-            universe.world["particle_fields"],
-            process.fields,
+        self.assertNotIn(
+            "particle_fields",
+            universe.world,
+        )
+
+        public_fields = universe.world["particles"]["fields"]
+
+        self.assertEqual(
+            set(process.fields),
+            {"higgs_field", "gravity_field"},
+        )
+
+        for name in ("higgs_field", "gravity_field"):
+            field = process.fields[name]
+
+            self.assertIsInstance(
+                field,
+                ParticleField,
+            )
+            self.assertIs(
+                result.fields[name],
+                field,
+            )
+            self.assertEqual(
+                public_fields[name],
+                field.to_dict(),
+            )
+
+        public_fields["higgs_field"]["state"] = "changed"
+
+        self.assertEqual(
+            process.fields["higgs_field"].state,
+            "active",
+        )
+        self.assertEqual(
+            result.fields["higgs_field"].state,
+            "active",
         )
         self.assertIs(
             universe.world["particle_interactions"],

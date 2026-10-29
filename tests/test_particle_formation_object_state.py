@@ -153,9 +153,21 @@ class ParticleFormationObjectStateTests(
             set(public_state["composite_particles"]),
             {"proton", "neutron"},
         )
+        self.assertNotIn(
+            "particle_fields",
+            universe.world,
+        )
+        self.assertEqual(
+            set(public_state["fields"]),
+            {"higgs_field", "gravity_field"},
+        )
         self.assertIs(
-            universe.world["particle_fields"],
-            process.fields,
+            result.fields["higgs_field"],
+            process.fields["higgs_field"],
+        )
+        self.assertIs(
+            result.fields["gravity_field"],
+            process.fields["gravity_field"],
         )
         self.assertIs(
             universe.world["particle_interactions"],

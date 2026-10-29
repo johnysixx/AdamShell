@@ -320,5 +320,4 @@ class Particles:
     def write_to_world(self):
         self._refresh_public_state()
         self.universe.world["particles"] = self.public_state
-        self.universe.world["particle_fields"] = self.fields
         self.universe.world["particle_interactions"] = self.interactions
