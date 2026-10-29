@@ -322,9 +322,5 @@ class Particles:
         self.universe.world["particles"] = self.public_state
         self.universe.world["elementary_particles"] = self.elementary_particles
         self.universe.world["composite_particles"] = self.composite_particles
-        self.universe.world["nucleons"] = {
-            "proton": self.composite_particles["proton"],
-            "neutron": self.composite_particles["neutron"]
-        }
         self.universe.world["particle_fields"] = self.fields
         self.universe.world["particle_interactions"] = self.interactions

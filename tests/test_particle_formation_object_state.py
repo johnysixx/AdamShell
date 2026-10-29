@@ -150,13 +150,31 @@ class ParticleFormationObjectStateTests(
             process.interactions,
         )
 
+        self.assertNotIn(
+            "nucleons",
+            universe.world,
+        )
+
         self.assertIs(
-            universe.world["nucleons"]["proton"],
+            result.composite_particles["proton"],
             process.composite_particles["proton"],
         )
         self.assertIs(
-            universe.world["nucleons"]["neutron"],
+            result.composite_particles["neutron"],
             process.composite_particles["neutron"],
+        )
+
+        public_composites = public_state[
+            "composite_particles"
+        ]
+
+        self.assertIsInstance(
+            public_composites["proton"],
+            dict,
+        )
+        self.assertIsInstance(
+            public_composites["neutron"],
+            dict,
         )
 
         # Mutating the public snapshot must not
@@ -327,6 +345,10 @@ class ParticleFormationObjectStateTests(
         )
         self.assertNotIn(
             "particle_state",
+            universe.world,
+        )
+        self.assertNotIn(
+            "nucleons",
             universe.world,
         )
 

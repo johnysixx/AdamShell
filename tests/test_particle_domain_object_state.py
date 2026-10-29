@@ -118,19 +118,95 @@ class ParticleDomainObjectStateTests(unittest.TestCase):
             ),
         )
 
-    def test_world_nucleon_registry_points_to_objects(self):
-        universe, process, _ = self._formed_particles()
+    def test_nucleons_use_canonical_composite_particle_objects(self):
+        universe, process, result = (
+            self._formed_particles()
+        )
 
-        nucleons = universe.world["nucleons"]
+        self.assertNotIn(
+            "nucleons",
+            universe.world,
+        )
 
-        self.assertIsInstance(nucleons, dict)
+        self.assertEqual(
+            set(process.composite_particles),
+            {"proton", "neutron"},
+        )
+
+        proton = process.composite_particles["proton"]
+        neutron = process.composite_particles["neutron"]
+
+        self.assertIsInstance(
+            proton,
+            CompositeParticle,
+        )
+        self.assertIsInstance(
+            neutron,
+            CompositeParticle,
+        )
+
         self.assertIs(
-            nucleons["proton"],
-            process.composite_particles["proton"],
+            result.composite_particles["proton"],
+            proton,
         )
         self.assertIs(
-            nucleons["neutron"],
-            process.composite_particles["neutron"],
+            result.composite_particles["neutron"],
+            neutron,
+        )
+
+        self.assertEqual(
+            proton.composition,
+            ("up_quark", "up_quark", "down_quark"),
+        )
+        self.assertEqual(
+            neutron.composition,
+            ("up_quark", "down_quark", "down_quark"),
+        )
+
+        self.assertEqual(
+            proton.electric_charge,
+            "+1",
+        )
+        self.assertEqual(
+            neutron.electric_charge,
+            "0",
+        )
+
+        public_composites = universe.world[
+            "particles"
+        ]["composite_particles"]
+
+        self.assertIsInstance(
+            public_composites["proton"],
+            dict,
+        )
+        self.assertIsInstance(
+            public_composites["neutron"],
+            dict,
+        )
+
+        self.assertEqual(
+            public_composites["proton"]["composition"],
+            list(proton.composition),
+        )
+        self.assertEqual(
+            public_composites["neutron"]["composition"],
+            list(neutron.composition),
+        )
+
+        public_composites[
+            "proton"
+        ]["composition"].append("changed")
+
+        self.assertNotIn(
+            "changed",
+            proton.composition,
+        )
+        self.assertNotIn(
+            "changed",
+            result.composite_particles[
+                "proton"
+            ].composition,
         )
 
     def test_public_state_serializes_objects_at_boundary(self):
