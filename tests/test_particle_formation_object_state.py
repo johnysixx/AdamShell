@@ -169,9 +169,21 @@ class ParticleFormationObjectStateTests(
             result.fields["gravity_field"],
             process.fields["gravity_field"],
         )
+        self.assertNotIn(
+            "particle_interactions",
+            universe.world,
+        )
+        self.assertEqual(
+            set(public_state["interactions"]),
+            set(process.interactions),
+        )
+        self.assertEqual(
+            len(process.interactions),
+            5,
+        )
         self.assertIs(
-            universe.world["particle_interactions"],
-            process.interactions,
+            result.interactions["strong_interaction"],
+            process.interactions["strong_interaction"],
         )
 
         self.assertNotIn(

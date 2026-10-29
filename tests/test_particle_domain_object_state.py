@@ -141,9 +141,62 @@ class ParticleDomainObjectStateTests(unittest.TestCase):
             result.fields["higgs_field"].state,
             "active",
         )
-        self.assertIs(
-            universe.world["particle_interactions"],
-            process.interactions,
+        self.assertNotIn(
+            "particle_interactions",
+            universe.world,
+        )
+
+        expected_interactions = {
+            "strong_interaction",
+            "electromagnetic_interaction",
+            "weak_interaction",
+            "higgs_mechanism",
+            "beta_decay_pattern",
+        }
+
+        self.assertEqual(
+            set(process.interactions),
+            expected_interactions,
+        )
+
+        public_interactions = universe.world[
+            "particles"
+        ]["interactions"]
+
+        self.assertEqual(
+            set(public_interactions),
+            expected_interactions,
+        )
+
+        for name, interaction in process.interactions.items():
+            self.assertIsInstance(
+                interaction,
+                ParticleInteraction,
+            )
+            self.assertIs(
+                result.interactions[name],
+                interaction,
+            )
+            self.assertEqual(
+                public_interactions[name],
+                interaction.to_dict(),
+            )
+
+        public_interactions[
+            "strong_interaction"
+        ]["effect"] = "changed"
+
+        self.assertNotEqual(
+            process.interactions[
+                "strong_interaction"
+            ].effect,
+            "changed",
+        )
+        self.assertNotEqual(
+            result.interactions[
+                "strong_interaction"
+            ].effect,
+            "changed",
         )
 
     def test_domain_entities_do_not_support_mapping_access(self):
