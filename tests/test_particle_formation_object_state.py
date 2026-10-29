@@ -145,9 +145,13 @@ class ParticleFormationObjectStateTests(
             result.elementary_particles["up_quark"],
             process.elementary_particles["up_quark"],
         )
-        self.assertIs(
-            universe.world["composite_particles"],
-            process.composite_particles,
+        self.assertNotIn(
+            "composite_particles",
+            universe.world,
+        )
+        self.assertEqual(
+            set(public_state["composite_particles"]),
+            {"proton", "neutron"},
         )
         self.assertIs(
             universe.world["particle_fields"],

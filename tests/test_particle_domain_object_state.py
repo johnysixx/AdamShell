@@ -91,9 +91,17 @@ class ParticleDomainObjectStateTests(unittest.TestCase):
                     public_elements[name],
                     particle.to_dict(),
                 )
+        self.assertNotIn(
+            "composite_particles",
+            universe.world,
+        )
         self.assertIs(
-            universe.world["composite_particles"],
-            process.composite_particles,
+            result.composite_particles["proton"],
+            process.composite_particles["proton"],
+        )
+        self.assertIs(
+            result.composite_particles["neutron"],
+            process.composite_particles["neutron"],
         )
         self.assertIs(
             universe.world["particle_fields"],
