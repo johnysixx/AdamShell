@@ -35,7 +35,7 @@ class ParticleDomainObjectStateTests(unittest.TestCase):
         return universe, process, result
 
     def test_particle_registries_store_domain_objects(self):
-        universe, process, _ = self._formed_particles()
+        universe, process, result = self._formed_particles()
 
         self.assertIsInstance(
             process.elementary_particles["up_quark"],
@@ -54,10 +54,43 @@ class ParticleDomainObjectStateTests(unittest.TestCase):
             ParticleInteraction,
         )
 
-        self.assertIs(
-            universe.world["elementary_particles"],
-            process.elementary_particles,
+        self.assertNotIn(
+            "elementary_particles",
+            universe.world,
         )
+
+        self.assertEqual(
+            len(process.elementary_particles),
+            18,
+        )
+        self.assertEqual(
+            len(result.elementary_particles),
+            18,
+        )
+
+        public_elements = universe.world[
+            "particles"
+        ]["elementary_particles"]
+
+        self.assertEqual(
+            len(public_elements),
+            18,
+        )
+
+        for name, particle in process.elementary_particles.items():
+            with self.subTest(particle=name):
+                self.assertIsInstance(
+                    particle,
+                    ElementaryParticle,
+                )
+                self.assertIs(
+                    result.elementary_particles[name],
+                    particle,
+                )
+                self.assertEqual(
+                    public_elements[name],
+                    particle.to_dict(),
+                )
         self.assertIs(
             universe.world["composite_particles"],
             process.composite_particles,

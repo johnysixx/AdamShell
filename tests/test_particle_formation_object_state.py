@@ -133,9 +133,17 @@ class ParticleFormationObjectStateTests(
                 dict,
             )
 
+        self.assertNotIn(
+            "elementary_particles",
+            universe.world,
+        )
+        self.assertEqual(
+            len(public_state["elementary_particles"]),
+            18,
+        )
         self.assertIs(
-            universe.world["elementary_particles"],
-            process.elementary_particles,
+            result.elementary_particles["up_quark"],
+            process.elementary_particles["up_quark"],
         )
         self.assertIs(
             universe.world["composite_particles"],
