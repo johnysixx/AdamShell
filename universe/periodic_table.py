@@ -311,4 +311,3 @@ class PeriodicTable:
     def write_to_world(self):
         self._refresh_public_state()
         self.universe.world["periodic_table"] = self.public_state
-        self.universe.world["elements_by_atomic_number"] = self.elements

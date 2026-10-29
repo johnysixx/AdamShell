@@ -48,9 +48,15 @@ class ChemicalDomainObjectStateTests(unittest.TestCase):
         self.assertEqual(hydrogen.protons, 1)
         self.assertTrue(hydrogen.official)
         self.assertTrue(hydrogen.discovered)
-        self.assertIs(
-            universe.world["elements_by_atomic_number"][1],
-            hydrogen,
+        self.assertNotIn(
+            "elements_by_atomic_number",
+            universe.world,
+        )
+        self.assertEqual(
+            universe.world["periodic_table"][
+                "registry_state"
+            ]["known_element_count"],
+            118,
         )
         self.assertNotIn(
             "chemical_elements",

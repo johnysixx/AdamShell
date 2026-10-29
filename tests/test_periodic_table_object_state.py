@@ -117,12 +117,19 @@ class PeriodicTableObjectStateTests(
             state.to_dict(),
         )
 
-        self.assertIs(
-            universe.world[
-                "elements_by_atomic_number"
-            ],
-            table.elements,
+        self.assertNotIn(
+            "elements_by_atomic_number",
+            universe.world,
         )
+
+        for atomic_number in (1, 6, 8, 118):
+            with self.subTest(
+                atomic_number=atomic_number
+            ):
+                self.assertIs(
+                    table.get_element(atomic_number),
+                    table.elements[atomic_number],
+                )
         self.assertNotIn(
             "future_elements",
             universe.world,
@@ -232,6 +239,10 @@ class PeriodicTableObjectStateTests(
         )
         self.assertNotIn(
             "future_elements",
+            universe.world,
+        )
+        self.assertNotIn(
+            "elements_by_atomic_number",
             universe.world,
         )
         self.assertIs(

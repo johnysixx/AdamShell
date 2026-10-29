@@ -18,9 +18,12 @@ class ChemicalPeriodicTableBoundaryObjectStateTests(
     ):
         universe = Universe()
 
-        universe.world["elements_by_atomic_number"] = {
+        legacy_elements = {
             1: "legacy_hydrogen",
         }
+        universe.world[
+            "elements_by_atomic_number"
+        ] = legacy_elements
 
         process = Atoms(universe)
 
@@ -37,6 +40,10 @@ class ChemicalPeriodicTableBoundaryObjectStateTests(
 
         self.assertIs(
             universe.world["elements_by_atomic_number"],
+            legacy_elements,
+        )
+        self.assertIsNot(
+            legacy_elements,
             process.periodic_table.elements,
         )
 
@@ -52,9 +59,12 @@ class ChemicalPeriodicTableBoundaryObjectStateTests(
     ):
         universe = Universe()
 
-        universe.world["elements_by_atomic_number"] = {
+        legacy_elements = {
             6: "legacy_carbon",
         }
+        universe.world[
+            "elements_by_atomic_number"
+        ] = legacy_elements
 
         process = Isotopes(universe)
 
@@ -80,15 +90,22 @@ class ChemicalPeriodicTableBoundaryObjectStateTests(
             isotope.element,
             process.periodic_table.elements[6],
         )
+        self.assertIs(
+            universe.world["elements_by_atomic_number"],
+            legacy_elements,
+        )
 
     def test_molecules_build_own_table_despite_world_decoy(
         self
     ):
         universe = Universe()
 
-        universe.world["elements_by_atomic_number"] = {
+        legacy_elements = {
             8: "legacy_oxygen",
         }
+        universe.world[
+            "elements_by_atomic_number"
+        ] = legacy_elements
 
         process = Molecules(universe)
 
@@ -105,6 +122,10 @@ class ChemicalPeriodicTableBoundaryObjectStateTests(
 
         self.assertIs(
             universe.world["elements_by_atomic_number"],
+            legacy_elements,
+        )
+        self.assertIsNot(
+            legacy_elements,
             process.periodic_table.elements,
         )
 
@@ -244,7 +265,11 @@ class ChemicalPeriodicTableBoundaryObjectStateTests(
             )
         )
 
-        universe.world["elements_by_atomic_number"] = {}
+        legacy_empty_elements = {}
+
+        universe.world[
+            "elements_by_atomic_number"
+        ] = legacy_empty_elements
 
         process.ensure_periodic_table()
 
@@ -259,6 +284,11 @@ class ChemicalPeriodicTableBoundaryObjectStateTests(
         )
 
         process.periodic_table.build_known_table.assert_not_called()
+
+        self.assertIs(
+            universe.world["elements_by_atomic_number"],
+            legacy_empty_elements,
+        )
 
     def test_readiness_and_resolution_do_not_read_world_get(
         self
@@ -306,9 +336,9 @@ class ChemicalPeriodicTableBoundaryObjectStateTests(
             1,
         )
 
-        self.assertIs(
-            universe.world["elements_by_atomic_number"],
-            process.periodic_table.elements,
+        self.assertNotIn(
+            "elements_by_atomic_number",
+            universe.world,
         )
 
         self.assertNotIn(
