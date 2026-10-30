@@ -158,7 +158,18 @@ class Universe:
         if hasattr(self, 'quantum_space'):
             geometry_state = self.quantum_space.geometry_engine.public_state
         quantum_layer_map = {'tick': self.universe_tick, 'boxes': [box.public_state for box in self.quantum_boxes if getattr(box, 'current_layer', None) == 'quantum_layer'], 'space': self.quantum_space.public_state if hasattr(self, 'quantum_space') else {}}
-        return {'universe_id': self.id, 'tick': self.universe_tick, 'energy': self.energy_pool, 'pressure': self.pressure, 'entropy': self.entropy, 'statistics': self.statistics.public_state, 'geometry': geometry_state, 'quantum_layer_map': quantum_layer_map}
+        snapshot = {'universe_id': self.id, 'tick': self.universe_tick, 'energy': self.energy_pool, 'pressure': self.pressure, 'entropy': self.entropy, 'statistics': self.statistics.public_state, 'geometry': geometry_state, 'quantum_layer_map': quantum_layer_map}
+        snapshot["word_replay_state"] = {
+            "light": getattr(self, "light", None),
+            "space": getattr(self, "space", None),
+            "chaos": getattr(self, "chaos", None),
+            "order": getattr(self, "order", None),
+            "deep": getattr(self, "deep", None),
+            "rules_modified": getattr(
+                self, "rules_modified", None
+            ),
+        }
+        return snapshot
 
     def start_big_bang(self):
         if self.big_bang_started:
