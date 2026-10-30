@@ -529,8 +529,21 @@ class Universe:
         cat.state = 'juvenile_cat_from_quantum_box'
         return cat
 
-    def create_quantum_box(self, rng=None, layer='quantum_layer'):
-        box = QuantumBox(rng=rng)
+    def create_quantum_box(
+        self,
+        rng=None,
+        layer='quantum_layer',
+        box_id=None,
+    ):
+        if box_id is not None and any(
+            box.id == box_id
+            for box in self.quantum_boxes
+        ):
+            raise ValueError(
+                "Quantum box ID already exists."
+            )
+
+        box = QuantumBox(rng=rng, box_id=box_id)
         box.current_layer = layer
         self.quantum_boxes.append(box)
         self.statistics.record_quantum_box_created()

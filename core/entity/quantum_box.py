@@ -168,9 +168,20 @@ class QuantumBoxCollapseState:
 
 class QuantumBox:
 
-    def __init__(self, rng=None):
+    def __init__(self, rng=None, box_id=None):
+        if box_id is not None and (
+            not isinstance(box_id, str) or not box_id
+        ):
+            raise ValueError(
+                "Quantum box ID must be a non-empty string."
+            )
+
         rng = rng or random
-        self.id = f'quantum_box_{uuid.uuid4().hex[:8]}'
+        self.id = (
+            f'quantum_box_{uuid.uuid4().hex[:8]}'
+            if box_id is None
+            else box_id
+        )
         self._position = SpatialVector3(
             x=rng.uniform(-1.0, 1.0),
             y=rng.uniform(-1.0, 1.0),
