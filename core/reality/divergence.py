@@ -29,6 +29,9 @@ class DivergenceInjector:
                 break
             new_chronicle.record(word)
 
+        if divergence_point == len(words):
+            new_chronicle.record(new_word)
+
         new_universe = Universe(universe_id=f"{universe.id}-div")
 
         new_chronicle.replay(new_universe)
