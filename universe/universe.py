@@ -562,6 +562,32 @@ class Universe:
         UniverseLogger.event(f"QUANTUM BOX CREATED: {box.id} AT x={box.position.x:.3f} y={box.position.y:.3f} z={box.position.z:.3f}")
         return box
 
+    def replay_quantum_box_created(self, event):
+        if not isinstance(event, QuantumBoxCreatedEvent):
+            raise TypeError(
+                "Quantum box replay requires "
+                "a QuantumBoxCreatedEvent object."
+            )
+
+        if any(
+            box.id == event.box_id
+            for box in self.quantum_boxes
+        ):
+            raise ValueError(
+                "Quantum box ID already exists."
+            )
+
+        box = QuantumBox(
+            box_id=event.box_id,
+            position=event.position,
+        )
+        box.current_layer = event.layer
+
+        self.quantum_boxes.append(box)
+        self.statistics.record_quantum_box_created()
+
+        return box
+
     def should_collapse_quantum_box(self, box, rng=None):
         import random
         rng = rng or random

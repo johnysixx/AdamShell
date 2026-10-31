@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 
 from core.actualization.possibility import Possibility
 from core.actualization.potential import Potential
-from core.entity.components import SpatialVector3
+from core.entity.components import SpatialVector3, require_spatial_vector
 from core.entity.cat_quantum_transfer_phase import (
     CatQuantumTransferPhase,
 )
@@ -168,7 +168,7 @@ class QuantumBoxCollapseState:
 
 class QuantumBox:
 
-    def __init__(self, rng=None, box_id=None):
+    def __init__(self, rng=None, box_id=None, position=None):
         if box_id is not None and (
             not isinstance(box_id, str) or not box_id
         ):
@@ -182,10 +182,17 @@ class QuantumBox:
             if box_id is None
             else box_id
         )
-        self._position = SpatialVector3(
-            x=rng.uniform(-1.0, 1.0),
-            y=rng.uniform(-1.0, 1.0),
-            z=rng.uniform(-1.0, 1.0),
+        self._position = (
+            SpatialVector3(
+                x=rng.uniform(-1.0, 1.0),
+                y=rng.uniform(-1.0, 1.0),
+                z=rng.uniform(-1.0, 1.0),
+            )
+            if position is None
+            else require_spatial_vector(
+                position,
+                field_name="quantum box initial position",
+            )
         )
         self.state = 'superposition'
         self.age_ticks = 0
