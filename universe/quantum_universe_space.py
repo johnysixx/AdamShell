@@ -1,6 +1,5 @@
 import random
-import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from core.entity.quantum_cat_route import (
     QuantumCatRoute,
     QuantumCatRouteEncounter,
@@ -133,16 +132,25 @@ class QuantumUniverseSpace:
         new_staircases = []
         target_count = rng.randint(8, 16)
         missing_count = target_count
-        for _ in range(missing_count):
-            staircase_id = f'staircase_{uuid.uuid4().hex[:8]}'
+        for index in range(missing_count):
             new_staircases.append(
                 self._create_staircase(
-                    staircase_id=staircase_id,
+                    staircase_id=f'staircase_pending_{index}',
                     rng=rng,
                 )
             )
-        self.staircases = new_staircases
+
         self.configuration_seed = rng.randint(0, 2 ** 63 - 1)
+        self.staircases = [
+            replace(
+                staircase,
+                id=(
+                    f'staircase_{self.configuration_seed:016x}'
+                    f'_{index:02x}'
+                ),
+            )
+            for index, staircase in enumerate(new_staircases)
+        ]
         self.configuration_id = f'quantum_configuration_{self.configuration_seed}'
         self.geometry_engine.configure(self.configuration_seed)
         self.reconfiguration_count += 1
