@@ -53,6 +53,9 @@ from universe.universe_lifecycle_state import (
 from universe.universe_history_state import (
     UniverseHistorySnapshot,
 )
+from universe.quantum_box_creation_state import (
+    QuantumBoxCreatedEvent,
+)
 from universe.universe_tick_result_state import (
     UniverseTickPhaseCompletedResult,
     UniverseTickPhaseErrorResult,
@@ -545,8 +548,17 @@ class Universe:
 
         box = QuantumBox(rng=rng, box_id=box_id)
         box.current_layer = layer
+
+        creation_event = QuantumBoxCreatedEvent(
+            box_id=box.id,
+            position=box.position,
+            layer=box.current_layer,
+            tick=self.quantum_state.tick_count,
+        )
+
         self.quantum_boxes.append(box)
         self.statistics.record_quantum_box_created()
+        self.quantum_events.append(creation_event)
         UniverseLogger.event(f"QUANTUM BOX CREATED: {box.id} AT x={box.position.x:.3f} y={box.position.y:.3f} z={box.position.z:.3f}")
         return box
 
