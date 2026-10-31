@@ -67,7 +67,7 @@ class UniverseQuantumHistoryReplayer:
             )
 
         # Validate the box event stream before staging.
-        QuantumBoxLifecycleValidator.validate(box_events)
+        active_boxes = QuantumBoxLifecycleValidator.validate(box_events)
 
         # Work only with detached objects until both
         # replay engines have completed successfully.
@@ -97,6 +97,28 @@ class UniverseQuantumHistoryReplayer:
             staged,
             box_events,
         )
+
+        # Restore the ages of surviving boxes using
+        # their most recent creation tick.
+        for record in active_boxes:
+            box = next(
+                (
+                    item
+                    for item in staged.quantum_boxes
+                    if item.id == record.box_id
+                ),
+                None,
+            )
+
+            if box is None:
+                raise RuntimeError(
+                    "Validated active quantum box missing "
+                    "from staged replay."
+                )
+
+            box.age_ticks = (
+                last_tick - record.created_tick
+            )
 
         # Both streams succeeded. Publish their state
         # without replacing existing Universe objects.
