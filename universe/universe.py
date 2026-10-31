@@ -65,6 +65,9 @@ from universe.quantum_box_disappearance_state import (
 from universe.quantum_box_lifecycle_replayer import (
     QuantumBoxLifecycleReplayer,
 )
+from universe.quantum_box_lifecycle_operations import (
+    QuantumBoxLifecycleOperations,
+)
 from universe.universe_tick_result_state import (
     UniverseTickPhaseCompletedResult,
     UniverseTickPhaseErrorResult,
@@ -586,66 +589,16 @@ class Universe:
         return box
 
     def replay_quantum_box_created(self, event):
-        if not isinstance(event, QuantumBoxCreatedEvent):
-            raise TypeError(
-                "Quantum box replay requires "
-                "a QuantumBoxCreatedEvent object."
-            )
-
-        if any(
-            box.id == event.box_id
-            for box in self.quantum_boxes
-        ):
-            raise ValueError(
-                "Quantum box ID already exists."
-            )
-
-        box = QuantumBox(
-            box_id=event.box_id,
-            position=event.position,
+        return QuantumBoxLifecycleOperations.replay_created(
+            self,
+            event,
         )
-        box.current_layer = event.layer
-
-        self.quantum_boxes.append(box)
-        self.statistics.record_quantum_box_created()
-
-        return box
 
     def replay_quantum_box_collapsed(self, event):
-        if not isinstance(event, QuantumBoxCollapsedEvent):
-            raise TypeError(
-                "Quantum box collapse replay requires "
-                "a QuantumBoxCollapsedEvent object."
-            )
-
-        box = next(
-            (
-                box
-                for box in self.quantum_boxes
-                if box.id == event.quantum_box_id
-            ),
-            None,
+        return QuantumBoxLifecycleOperations.replay_collapsed(
+            self,
+            event,
         )
-
-        if box is None:
-            raise ValueError(
-                "Quantum box not found for collapse replay."
-            )
-
-        if box.collapse.collapsed:
-            raise ValueError(
-                "Quantum box is already collapsed."
-            )
-
-        result = box.resolve_state(
-            result=event.result,
-            cause=event.cause,
-            observer=event.observer,
-            tick=event.tick,
-        )
-
-        self.statistics.record_quantum_collapse()
-        return result
 
     def _remove_quantum_box(self, box, cause):
         event = QuantumBoxDisappearedEvent(
@@ -664,34 +617,10 @@ class Universe:
         return event
 
     def replay_quantum_box_disappeared(self, event):
-        if not isinstance(event, QuantumBoxDisappearedEvent):
-            raise TypeError(
-                "Quantum box disappearance replay requires "
-                "a QuantumBoxDisappearedEvent object."
-            )
-
-        box = next(
-            (
-                box for box in self.quantum_boxes
-                if box.id == event.box_id
-            ),
-            None,
+        return QuantumBoxLifecycleOperations.replay_disappeared(
+            self,
+            event,
         )
-
-        if box is None:
-            raise ValueError(
-                "Quantum box not found for disappearance replay."
-            )
-
-        if not box.collapse.collapsed:
-            raise ValueError(
-                "Quantum box must collapse before disappearance."
-            )
-
-        self.quantum_boxes.remove(box)
-        self.statistics.record_quantum_box_disappeared()
-
-        return box
 
     def replay_quantum_box_history(self, events):
         return QuantumBoxLifecycleReplayer.replay(

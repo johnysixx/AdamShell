@@ -7,7 +7,10 @@ from universe.quantum_box_creation_state import (
 from universe.quantum_box_disappearance_state import (
     QuantumBoxDisappearedEvent,
 )
-from universe.universe_statistics import UniverseStatistics
+from universe.quantum_box_lifecycle_operations import (
+    QuantumBoxLifecycleOperations,
+    QuantumBoxReplayStage,
+)
 
 
 class QuantumBoxLifecycleReplayer:
@@ -106,23 +109,19 @@ class QuantumBoxLifecycleReplayer:
 
                 collapse_causes.pop(event.box_id, None)
 
-        # Stage on an isolated Universe shell. The existing
-        # replay methods access only these three attributes.
-        # No Universe.__init__, RNG or UUID is invoked.
-        staged = object.__new__(type(universe))
-        staged.quantum_boxes = []
-        staged.quantum_events = []
-        staged.statistics = UniverseStatistics()
+        # Stage on an explicit object-state container.
+        # No Universe constructor, RNG or UUID is invoked.
+        staged = QuantumBoxReplayStage()
 
         for event in events:
             if isinstance(event, QuantumBoxCreatedEvent):
-                staged.replay_quantum_box_created(event)
+                QuantumBoxLifecycleOperations.replay_created(staged, event)
 
             elif isinstance(event, QuantumBoxCollapsedEvent):
-                staged.replay_quantum_box_collapsed(event)
+                QuantumBoxLifecycleOperations.replay_collapsed(staged, event)
 
             else:
-                staged.replay_quantum_box_disappeared(event)
+                QuantumBoxLifecycleOperations.replay_disappeared(staged, event)
 
         # Commit only after all events replay successfully.
         universe.quantum_boxes.extend(staged.quantum_boxes)
