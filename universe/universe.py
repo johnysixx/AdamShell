@@ -49,6 +49,12 @@ from universe.quantum_state import UniverseQuantumState
 from universe.quantum_tick_result_state import (
     UniverseQuantumTickResult,
 )
+from universe.quantum_tick_advanced_state import (
+    UniverseQuantumTickAdvancedEvent,
+)
+from universe.quantum_clock_replayer import (
+    UniverseQuantumClockReplayer,
+)
 from universe.spacetime import UniverseSpacetimeState
 from universe.universe_lifecycle_state import (
     UniverseLifecycleState,
@@ -119,6 +125,7 @@ class Universe:
         self.quantum_die = QuantumDie(resolver=self.quantum_die_resolver)
         self.quantum_boxes = []
         self.quantum_events = []
+        self.quantum_clock_events = []
         self.cronenbergs = []
         self.cronenberg_count = 0
         self.quantum_event_bus = QuantumEventBus()
@@ -628,6 +635,12 @@ class Universe:
             events,
         )
 
+    def replay_quantum_clock_history(self, events):
+        return UniverseQuantumClockReplayer.replay(
+            self,
+            events,
+        )
+
     def should_collapse_quantum_box(self, box, rng=None):
         import random
         rng = rng or random
@@ -657,6 +670,12 @@ class Universe:
         if not self.quantum_state.enabled:
             return
         self.quantum_state.advance_tick()
+        self.quantum_clock_events.append(
+            UniverseQuantumTickAdvancedEvent(
+                tick=self.quantum_state.tick_count,
+                observer=self.quantum_state.observer,
+            )
+        )
         for box in list(self.quantum_boxes):
             box.age_ticks += 1
             if not self.should_collapse_quantum_box(box):
