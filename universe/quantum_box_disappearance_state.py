@@ -23,13 +23,11 @@ class QuantumBoxDisappearedEvent:
                 "Disappearance requires a non-empty cause."
             )
 
-        tick = int(self.tick)
-        if tick < 0:
+        if type(self.tick) is not int or self.tick < 0:
             raise ValueError(
-                "Quantum box disappearance tick cannot be negative."
+                "Quantum box disappearance tick must be "
+                "a non-negative integer."
             )
-
-        object.__setattr__(self, "tick", tick)
 
     def to_dict(self):
         return {

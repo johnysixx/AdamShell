@@ -140,27 +140,15 @@ class QuantumBoxLifecycleValidatorTests(unittest.TestCase):
 
     def test_missing_collapse_cause_is_rejected(self):
         with self.assertRaises(ValueError):
-            QuantumBoxLifecycleValidator.validate(
-                (
-                    self.created(),
-                    self.collapsed(cause=""),
-                )
-            )
+            self.collapsed(cause="")
 
     def test_invalid_collapse_box_id_is_rejected(self):
         with self.assertRaises(ValueError):
-            QuantumBoxLifecycleValidator.validate(
-                (
-                    self.created(),
-                    self.collapsed(box_id=""),
-                )
-            )
+            self.collapsed(box_id="")
 
     def test_negative_tick_is_rejected(self):
         with self.assertRaises(ValueError):
-            QuantumBoxLifecycleValidator.validate(
-                (self.created(tick=-1),)
-            )
+            self.created(tick=-1)
 
     def test_boolean_tick_is_rejected(self):
         with self.assertRaises(ValueError):

@@ -114,6 +114,48 @@ class QuantumBoxCollapsedEvent:
         init=False,
     )
 
+    def __post_init__(self):
+        if (
+            not isinstance(self.quantum_box_id, str)
+            or not self.quantum_box_id
+        ):
+            raise ValueError(
+                "Quantum collapse requires a valid box ID."
+            )
+
+        if (
+            not isinstance(self.result, str)
+            or not self.result
+        ):
+            raise ValueError(
+                "Quantum collapse requires a valid result."
+            )
+
+        if (
+            not isinstance(self.cause, str)
+            or not self.cause
+        ):
+            raise ValueError(
+                "Quantum collapse requires a valid cause."
+            )
+
+        if (
+            self.observer is not None
+            and not isinstance(self.observer, str)
+        ):
+            raise ValueError(
+                "Quantum collapse observer must be text or None."
+            )
+
+        if self.tick is not None and (
+            type(self.tick) is not int
+            or self.tick < 0
+        ):
+            raise ValueError(
+                "Quantum collapse tick must be "
+                "a non-negative integer or None."
+            )
+
 
 QUANTUM_BOX_COLLAPSE_RESULT_TYPES = (
     QuantumBoxAlreadyCollapsedResult,

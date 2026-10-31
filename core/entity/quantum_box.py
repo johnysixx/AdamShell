@@ -396,6 +396,14 @@ class QuantumBox:
                 f"Unknown quantum box result: {result}"
             )
 
+        event = QuantumBoxCollapsedEvent(
+            quantum_box_id=self.id,
+            result=result,
+            cause=cause,
+            observer=observer,
+            tick=tick,
+        )
+
         self.content.resolve(
             result
         )
@@ -415,13 +423,7 @@ class QuantumBox:
             f"RESULT={result}"
         )
 
-        return QuantumBoxCollapsedEvent(
-            quantum_box_id=self.id,
-            result=result,
-            cause=cause,
-            observer=observer,
-            tick=tick,
-        )
+        return event
 
     def collapse_state(self, cause, observer=None, tick=None, rng=None):
         if self.collapse.collapsed:

@@ -36,11 +36,11 @@ class QuantumBoxCreatedEvent:
             ),
         )
 
-        object.__setattr__(
-            self,
-            "tick",
-            int(self.tick),
-        )
+        if type(self.tick) is not int or self.tick < 0:
+            raise ValueError(
+                "Quantum box creation tick must be "
+                "a non-negative integer."
+            )
 
     def to_dict(self):
         return {
