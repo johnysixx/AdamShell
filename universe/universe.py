@@ -58,6 +58,9 @@ from universe.quantum_clock_replayer import (
 from universe.quantum_history_replayer import (
     UniverseQuantumHistoryReplayer,
 )
+from universe.quantum_lifecycle_timeline import (
+    UniverseQuantumLifecycleTimeline,
+)
 from universe.spacetime import UniverseSpacetimeState
 from universe.universe_lifecycle_state import (
     UniverseLifecycleState,
@@ -654,6 +657,12 @@ class Universe:
             self,
             box_events=box_events,
             clock_events=clock_events,
+        )
+
+    def quantum_lifecycle_timeline(self):
+        return UniverseQuantumLifecycleTimeline.merge(
+            box_events=self.quantum_events,
+            clock_events=self.quantum_clock_events,
         )
 
     def should_collapse_quantum_box(self, box, rng=None):
