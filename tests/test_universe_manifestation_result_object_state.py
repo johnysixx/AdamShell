@@ -123,7 +123,7 @@ class UniverseManifestationResultObjectStateTests(
         self.assertEqual(event.box_id, box.id)
         self.assertIs(event.observer, observer)
         self.assertIs(
-            universe.quantum_events[-1],
+            universe.quantum_events[-2],
             event,
         )
 
@@ -138,7 +138,7 @@ class UniverseManifestationResultObjectStateTests(
 
         universe.tick_quantum_unprotected()
 
-        event = universe.quantum_events[-1]
+        event = universe.quantum_events[-2]
 
         self.assertIsInstance(
             event,

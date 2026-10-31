@@ -59,6 +59,9 @@ from universe.universe_history_state import (
 from universe.quantum_box_creation_state import (
     QuantumBoxCreatedEvent,
 )
+from universe.quantum_box_disappearance_state import (
+    QuantumBoxDisappearedEvent,
+)
 from universe.universe_tick_result_state import (
     UniverseTickPhaseCompletedResult,
     UniverseTickPhaseErrorResult,
@@ -411,7 +414,7 @@ class Universe:
         result = box.collapse_state(cause='opened', observer=observer, tick=self.quantum_state.tick_count, rng=rng)
         self.statistics.record_quantum_collapse()
 
-        if not was_collapsed:
+        if not was_collapsed and box.collapse.collapsed:
             self.quantum_events.append(
                 QuantumBoxCollapsedEvent(
                     quantum_box_id=box.id,
@@ -441,9 +444,10 @@ class Universe:
                 tick=self.quantum_state.tick_count,
             )
             UniverseLogger.event(f'QUANTUM BOX WAS EMPTY: {box.id}')
-        self.quantum_boxes.remove(box)
-        self.statistics.record_quantum_box_disappeared()
-        UniverseLogger.event(f'QUANTUM BOX DISAPPEARED: {box.id}')
+        self._remove_quantum_box(
+            box,
+            cause='opened',
+        )
         return event
 
     def manifest_cat(
@@ -640,6 +644,52 @@ class Universe:
         self.statistics.record_quantum_collapse()
         return result
 
+    def _remove_quantum_box(self, box, cause):
+        event = QuantumBoxDisappearedEvent(
+            box_id=box.id,
+            cause=cause,
+            tick=self.quantum_state.tick_count,
+        )
+
+        self.quantum_boxes.remove(box)
+        self.statistics.record_quantum_box_disappeared()
+        self.quantum_events.append(event)
+
+        UniverseLogger.event(
+            f'QUANTUM BOX DISAPPEARED: {box.id}'
+        )
+        return event
+
+    def replay_quantum_box_disappeared(self, event):
+        if not isinstance(event, QuantumBoxDisappearedEvent):
+            raise TypeError(
+                "Quantum box disappearance replay requires "
+                "a QuantumBoxDisappearedEvent object."
+            )
+
+        box = next(
+            (
+                box for box in self.quantum_boxes
+                if box.id == event.box_id
+            ),
+            None,
+        )
+
+        if box is None:
+            raise ValueError(
+                "Quantum box not found for disappearance replay."
+            )
+
+        if not box.collapse.collapsed:
+            raise ValueError(
+                "Quantum box must collapse before disappearance."
+            )
+
+        self.quantum_boxes.remove(box)
+        self.statistics.record_quantum_box_disappeared()
+
+        return box
+
     def should_collapse_quantum_box(self, box, rng=None):
         import random
         rng = rng or random
@@ -677,7 +727,7 @@ class Universe:
             result = box.collapse_state(cause='spontaneous', observer=None, tick=self.quantum_state.tick_count)
             self.statistics.record_quantum_collapse()
 
-            if not was_collapsed:
+            if not was_collapsed and box.collapse.collapsed:
                 self.quantum_events.append(
                     QuantumBoxCollapsedEvent(
                         quantum_box_id=box.id,
@@ -700,9 +750,10 @@ class Universe:
                 UniverseLogger.event(f'CAT MANIFESTS FROM SPONTANEOUS QUANTUM COLLAPSE: {box.id}')
             else:
                 UniverseLogger.event(f'SPONTANEOUSLY COLLAPSED BOX WAS EMPTY: {box.id}')
-            self.quantum_boxes.remove(box)
-            self.statistics.record_quantum_box_disappeared()
-            UniverseLogger.event(f'QUANTUM BOX DISAPPEARED: {box.id}')
+            self._remove_quantum_box(
+                box,
+                cause='spontaneous',
+            )
         UniverseLogger.event(f"QUANTUM TICK FLUCTUATION={self.quantum_state.fluctuation:.2f} UNCERTAINTY={self.quantum_state.uncertainty:.3f} QENTROPY={self.quantum_state.entropy_delta:.4f} ")
 
         return UniverseQuantumTickResult(

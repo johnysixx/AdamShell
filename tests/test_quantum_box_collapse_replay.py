@@ -46,9 +46,9 @@ class QuantumBoxCollapseReplayTests(unittest.TestCase):
             returned,
             EmptyQuantumBoxOpenedEvent,
         )
-        self.assertEqual(len(source.quantum_events), 2)
+        self.assertEqual(len(source.quantum_events), 3)
 
-        created, collapsed = source.quantum_events
+        created, collapsed = source.quantum_events[:2]
 
         self.assertIsInstance(created, QuantumBoxCreatedEvent)
         self.assertIsInstance(collapsed, QuantumBoxCollapsedEvent)
@@ -61,7 +61,7 @@ class QuantumBoxCollapseReplayTests(unittest.TestCase):
 
     def test_replay_reconstructs_collapsed_box(self):
         source, original, _ = self.make_collapsed_history()
-        created, collapsed = source.quantum_events
+        created, collapsed = source.quantum_events[:2]
 
         target = Universe(universe_id="target")
         restored = target.replay_quantum_box_created(created)
@@ -80,7 +80,7 @@ class QuantumBoxCollapseReplayTests(unittest.TestCase):
 
     def test_collapse_replay_uses_no_randomness(self):
         source, _, _ = self.make_collapsed_history()
-        created, collapsed = source.quantum_events
+        created, collapsed = source.quantum_events[:2]
 
         target = Universe(universe_id="deterministic")
         target.replay_quantum_box_created(created)
@@ -103,7 +103,7 @@ class QuantumBoxCollapseReplayTests(unittest.TestCase):
 
     def test_replay_does_not_append_history_or_advance_clock(self):
         source, _, _ = self.make_collapsed_history()
-        created, collapsed = source.quantum_events
+        created, collapsed = source.quantum_events[:2]
 
         target = Universe(universe_id="history")
         target.replay_quantum_box_created(created)
@@ -122,7 +122,7 @@ class QuantumBoxCollapseReplayTests(unittest.TestCase):
 
     def test_duplicate_collapse_replay_is_rejected(self):
         source, _, _ = self.make_collapsed_history()
-        created, collapsed = source.quantum_events
+        created, collapsed = source.quantum_events[:2]
 
         target = Universe(universe_id="duplicate")
         target.replay_quantum_box_created(created)
@@ -142,7 +142,7 @@ class QuantumBoxCollapseReplayTests(unittest.TestCase):
 
     def test_replay_requires_existing_box(self):
         source, _, _ = self.make_collapsed_history()
-        collapsed = source.quantum_events[-1]
+        collapsed = source.quantum_events[-2]
 
         target = Universe(universe_id="missing")
 
@@ -203,7 +203,7 @@ class QuantumBoxCollapseReplayTests(unittest.TestCase):
         ):
             universe.tick_quantum_unprotected()
 
-        collapsed = universe.quantum_events[-1]
+        collapsed = universe.quantum_events[-2]
 
         self.assertIsInstance(
             collapsed,
