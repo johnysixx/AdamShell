@@ -17,6 +17,9 @@ from universe.big_bang import BigBang
 from cats.cat_development_stage import CatDevelopmentStage
 from cats.cat_quantum_box_origin_state import CatQuantumBoxOriginState
 from core.entity.quantum_box import QuantumBox
+from core.entity.quantum_box_operation_result_state import (
+    QuantumBoxCollapsedEvent,
+)
 from universe.universe_statistics import UniverseStatistics
 from universe.cronenberg_population_statistics import CronenbergPopulationStatistics
 from universe.cronenberg_manifestation_state import (
@@ -404,8 +407,21 @@ class Universe:
         if box is None:
             UniverseLogger.event(f'QUANTUM BOX NOT FOUND: {box_id}')
             return None
+        was_collapsed = box.collapse.collapsed
         result = box.collapse_state(cause='opened', observer=observer, tick=self.quantum_state.tick_count, rng=rng)
         self.statistics.record_quantum_collapse()
+
+        if not was_collapsed:
+            self.quantum_events.append(
+                QuantumBoxCollapsedEvent(
+                    quantum_box_id=box.id,
+                    result=result,
+                    cause='opened',
+                    observer=observer,
+                    tick=self.quantum_state.tick_count,
+                )
+            )
+
         if result == 'cat':
             manifestation = self.manifest_cat(
                 name=f'cat_from_{box.id}',
@@ -588,6 +604,42 @@ class Universe:
 
         return box
 
+    def replay_quantum_box_collapsed(self, event):
+        if not isinstance(event, QuantumBoxCollapsedEvent):
+            raise TypeError(
+                "Quantum box collapse replay requires "
+                "a QuantumBoxCollapsedEvent object."
+            )
+
+        box = next(
+            (
+                box
+                for box in self.quantum_boxes
+                if box.id == event.quantum_box_id
+            ),
+            None,
+        )
+
+        if box is None:
+            raise ValueError(
+                "Quantum box not found for collapse replay."
+            )
+
+        if box.collapse.collapsed:
+            raise ValueError(
+                "Quantum box is already collapsed."
+            )
+
+        result = box.resolve_state(
+            result=event.result,
+            cause=event.cause,
+            observer=event.observer,
+            tick=event.tick,
+        )
+
+        self.statistics.record_quantum_collapse()
+        return result
+
     def should_collapse_quantum_box(self, box, rng=None):
         import random
         rng = rng or random
@@ -621,8 +673,21 @@ class Universe:
             box.age_ticks += 1
             if not self.should_collapse_quantum_box(box):
                 continue
+            was_collapsed = box.collapse.collapsed
             result = box.collapse_state(cause='spontaneous', observer=None, tick=self.quantum_state.tick_count)
             self.statistics.record_quantum_collapse()
+
+            if not was_collapsed:
+                self.quantum_events.append(
+                    QuantumBoxCollapsedEvent(
+                        quantum_box_id=box.id,
+                        result=result,
+                        cause='spontaneous',
+                        observer=None,
+                        tick=self.quantum_state.tick_count,
+                    )
+                )
+
             if result == 'cat':
                 self.manifest_cat(
                     name=f'cat_from_{box.id}',
