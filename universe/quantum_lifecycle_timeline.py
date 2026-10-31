@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 from universe.quantum_box_lifecycle_validator import (
     QuantumBoxLifecycleValidator,
 )
@@ -6,11 +8,24 @@ from universe.quantum_tick_advanced_state import (
 )
 
 
+@dataclass(slots=True, frozen=True)
+class _ValidatedQuantumLifecycleHistory:
+    events: tuple
+    active_boxes: tuple
+
+
 class UniverseQuantumLifecycleTimeline:
     """Read-only chronology of clock and box lifecycle events."""
 
     @staticmethod
     def merge(*, box_events, clock_events):
+        return UniverseQuantumLifecycleTimeline.validate(
+            box_events=box_events,
+            clock_events=clock_events,
+        ).events
+
+    @staticmethod
+    def validate(*, box_events, clock_events):
         try:
             box_events = tuple(box_events)
         except TypeError as error:
@@ -26,7 +41,7 @@ class UniverseQuantumLifecycleTimeline:
             ) from error
 
         # Reuse the canonical lifecycle validator.
-        QuantumBoxLifecycleValidator.validate(box_events)
+        active_boxes = QuantumBoxLifecycleValidator.validate(box_events)
 
         for expected_tick, event in enumerate(
             clock_events,
@@ -86,4 +101,7 @@ class UniverseQuantumLifecycleTimeline:
                 "Quantum timeline could not place every event."
             )
 
-        return tuple(ordered)
+        return _ValidatedQuantumLifecycleHistory(
+            events=tuple(ordered),
+            active_boxes=active_boxes,
+        )

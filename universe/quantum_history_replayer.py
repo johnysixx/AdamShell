@@ -4,8 +4,8 @@ from core.entity.quantum_box import QuantumBox
 from universe.quantum_box_lifecycle_replayer import (
     QuantumBoxLifecycleReplayer,
 )
-from universe.quantum_box_lifecycle_validator import (
-    QuantumBoxLifecycleValidator,
+from universe.quantum_lifecycle_timeline import (
+    UniverseQuantumLifecycleTimeline,
 )
 from universe.quantum_clock_replayer import (
     UniverseQuantumClockReplayer,
@@ -66,8 +66,12 @@ class UniverseQuantumHistoryReplayer:
                 "Combined replay requires UniverseQuantumState."
             )
 
-        # Validate the box event stream before staging.
-        active_boxes = QuantumBoxLifecycleValidator.validate(box_events)
+        # One shared validator for both histories.
+        validated = UniverseQuantumLifecycleTimeline.validate(
+            box_events=box_events,
+            clock_events=clock_events,
+        )
+        active_boxes = validated.active_boxes
 
         # Work only with detached objects until both
         # replay engines have completed successfully.
@@ -80,18 +84,8 @@ class UniverseQuantumHistoryReplayer:
             clock_events,
         )
 
-        # A box event cannot reference a clock tick
-        # absent from the supplied clock history.
+        # Cross-stream chronology was validated above.
         last_tick = staged.quantum_state.tick_count
-
-        if any(
-            event.tick > last_tick
-            for event in box_events
-        ):
-            raise ValueError(
-                "Quantum box history references "
-                "an unrecorded clock tick."
-            )
 
         QuantumBoxLifecycleReplayer.replay(
             staged,
