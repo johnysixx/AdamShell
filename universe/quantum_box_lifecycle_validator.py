@@ -113,6 +113,17 @@ class QuantumBoxLifecycleValidator:
                         "Quantum box is already collapsed."
                     )
 
+                # Spontaneous collapse occurs during a
+                # quantum tick, after the box has aged.
+                if (
+                    event.cause == "spontaneous"
+                    and tick <= current.created_tick
+                ):
+                    raise ValueError(
+                        "Spontaneous quantum box collapse "
+                        "requires a later tick than creation."
+                    )
+
                 active[position] = replace(
                     current,
                     collapse_tick=tick,
