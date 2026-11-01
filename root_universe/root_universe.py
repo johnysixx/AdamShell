@@ -83,13 +83,13 @@ class RootUniverse:
     def can_read(self, entity_name):
         return (
             entity_name
-            in self.root_universe_state.permissions["can_read"]
+            in self.root_universe_state.permissions.can_read
         )
 
     def can_modify(self, entity_name):
         return (
             entity_name
-            in self.root_universe_state.permissions["can_modify"]
+            in self.root_universe_state.permissions.can_modify
         )
 
     def apply_eden_influence(self, entity_name, influence):

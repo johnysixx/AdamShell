@@ -13,18 +13,25 @@ def _default_access():
     }
 
 
-def _default_permissions():
-    return {
-        "can_modify": ["god"],
-        "can_read": [
-            "god",
-            "serpent",
-            "adam",
-            "eve",
-            "pazuzu",
-            "classical_probe_debug_entity",
-        ],
-    }
+@dataclass(slots=True, frozen=True)
+class RootUniversePermissions:
+    """Immutable root universe permission rules."""
+
+    can_modify: tuple[str, ...] = ("god",)
+    can_read: tuple[str, ...] = (
+        "god",
+        "serpent",
+        "adam",
+        "eve",
+        "pazuzu",
+        "classical_probe_debug_entity",
+    )
+
+    def to_dict(self):
+        return {
+            "can_modify": list(self.can_modify),
+            "can_read": list(self.can_read),
+        }
 
 
 def _default_eden():
@@ -43,8 +50,8 @@ class RootUniverseState:
     administrator: str = "god"
     part_of_physics: bool = True
     access: dict = field(default_factory=_default_access)
-    permissions: dict = field(
-        default_factory=_default_permissions
+    permissions: RootUniversePermissions = field(
+        default_factory=RootUniversePermissions
     )
     eden: dict = field(default_factory=_default_eden)
     eden_influence: list = field(default_factory=list)
@@ -61,7 +68,7 @@ class RootUniverseState:
             "administrator": self.administrator,
             "part_of_physics": self.part_of_physics,
             "access": deepcopy(self.access),
-            "permissions": deepcopy(self.permissions),
+            "permissions": self.permissions.to_dict(),
             "eden": deepcopy(self.eden),
             "eden_influence": deepcopy(self.eden_influence),
             "history_started": self.history_started,

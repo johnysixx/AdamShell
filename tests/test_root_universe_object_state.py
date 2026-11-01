@@ -1,8 +1,12 @@
 import unittest
+from dataclasses import FrozenInstanceError
 
 from multiverse import UniverseRegistry
 from root_universe import RootUniverse
-from root_universe.root_universe_state import RootUniverseState
+from root_universe.root_universe_state import (
+    RootUniversePermissions,
+    RootUniverseState,
+)
 from universe.universe import Universe
 
 
@@ -52,13 +56,39 @@ class RootUniverseObjectStateTests(unittest.TestCase):
         state = root_universe.root_universe_state
 
         self.assertIsInstance(state.access, dict)
-        self.assertIsInstance(state.permissions, dict)
+        self.assertIsInstance(
+            state.permissions,
+            RootUniversePermissions,
+        )
+        self.assertIsInstance(
+            state.to_dict()["permissions"],
+            dict,
+        )
         self.assertIsInstance(state.eden, dict)
         self.assertIsInstance(state.eden_influence, list)
         self.assertIsInstance(state.history, list)
         self.assertTrue(root_universe.can_read("serpent"))
         self.assertTrue(root_universe.can_modify("god"))
         self.assertFalse(root_universe.can_modify("serpent"))
+
+    def test_permissions_are_immutable(self):
+        first = RootUniverseState()
+        second = RootUniverseState()
+
+        self.assertIsNot(first.permissions, second.permissions)
+        self.assertEqual(first.permissions.can_modify, ("god",))
+        self.assertIn("serpent", first.permissions.can_read)
+
+        with self.assertRaises(FrozenInstanceError):
+            first.permissions.can_modify = ("serpent",)
+
+        with self.assertRaises(TypeError):
+            _ = first.permissions["can_modify"]
+
+        snapshot = first.to_dict()
+        snapshot["permissions"]["can_modify"].append("serpent")
+
+        self.assertEqual(first.permissions.can_modify, ("god",))
 
     def test_world_stores_object_and_dict_boundaries(self):
         universe, root_universe = self._root_universe()
@@ -152,7 +182,7 @@ class RootUniverseObjectStateTests(unittest.TestCase):
             "eden_influence"
         ].append({"event": "changed"})
 
-        self.assertEqual(state.permissions["can_modify"], ["god"])
+        self.assertEqual(state.permissions.can_modify, ("god",))
         self.assertEqual(state.eden_influence, [])
 
     def test_to_dict_is_deeply_detached(self):
@@ -164,7 +194,7 @@ class RootUniverseObjectStateTests(unittest.TestCase):
         )
         snapshot["history"].append("changed")
 
-        self.assertEqual(state.permissions["can_modify"], ["god"])
+        self.assertEqual(state.permissions.can_modify, ("god",))
         self.assertEqual(state.history, [])
 
 
