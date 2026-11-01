@@ -4,6 +4,7 @@ from dataclasses import FrozenInstanceError
 from multiverse import UniverseRegistry
 from root_universe import RootUniverse
 from root_universe.root_universe_state import (
+    RootUniverseAccess,
     RootUniverseEden,
     RootUniversePermissions,
     RootUniverseState,
@@ -56,7 +57,14 @@ class RootUniverseObjectStateTests(unittest.TestCase):
         _, root_universe = self._root_universe()
         state = root_universe.root_universe_state
 
-        self.assertIsInstance(state.access, dict)
+        self.assertIsInstance(
+            state.access,
+            RootUniverseAccess,
+        )
+        self.assertIsInstance(
+            state.to_dict()["access"],
+            dict,
+        )
         self.assertIsInstance(
             state.permissions,
             RootUniversePermissions,
@@ -126,6 +134,48 @@ class RootUniverseObjectStateTests(unittest.TestCase):
         self.assertEqual(
             root.root_universe_state.eden.role,
             "sandbox",
+        )
+
+    def test_access_metadata_is_immutable(self):
+        first = RootUniverseState()
+        second = RootUniverseState()
+
+        self.assertIsInstance(first.access, RootUniverseAccess)
+        self.assertIsNot(first.access, second.access)
+
+        expected = {
+            "god": "write",
+            "serpent": "read",
+            "adam": "read",
+            "eve": "read",
+            "pazuzu": "read",
+            "classical_probe_debug_entity": "read",
+        }
+
+        self.assertEqual(first.access.to_dict(), expected)
+        self.assertEqual(first.to_dict()["access"], expected)
+
+        with self.assertRaises(FrozenInstanceError):
+            first.access.god = "read"
+
+        with self.assertRaises(TypeError):
+            _ = first.access["god"]
+
+        snapshot = first.to_dict()
+        snapshot["access"]["god"] = "read"
+
+        self.assertEqual(first.access.god, "write")
+        self.assertEqual(second.access.god, "write")
+
+        _, root = self._root_universe()
+        public = root.public_state
+
+        self.assertEqual(public["access"], expected)
+        public["access"]["god"] = "read"
+
+        self.assertEqual(
+            root.root_universe_state.access.god,
+            "write",
         )
 
     def test_world_stores_object_and_dict_boundaries(self):

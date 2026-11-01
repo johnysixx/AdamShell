@@ -2,15 +2,28 @@ from copy import deepcopy
 from dataclasses import dataclass, field
 
 
-def _default_access():
-    return {
-        "god": "write",
-        "serpent": "read",
-        "adam": "read",
-        "eve": "read",
-        "pazuzu": "read",
-        "classical_probe_debug_entity": "read",
-    }
+@dataclass(slots=True, frozen=True)
+class RootUniverseAccess:
+    """Immutable root reality access metadata."""
+
+    god: str = "write"
+    serpent: str = "read"
+    adam: str = "read"
+    eve: str = "read"
+    pazuzu: str = "read"
+    classical_probe_debug_entity: str = "read"
+
+    def to_dict(self):
+        return {
+            "god": self.god,
+            "serpent": self.serpent,
+            "adam": self.adam,
+            "eve": self.eve,
+            "pazuzu": self.pazuzu,
+            "classical_probe_debug_entity": (
+                self.classical_probe_debug_entity
+            ),
+        }
 
 
 @dataclass(slots=True, frozen=True)
@@ -55,7 +68,9 @@ class RootUniverseState:
     creator: str = "god"
     administrator: str = "god"
     part_of_physics: bool = True
-    access: dict = field(default_factory=_default_access)
+    access: RootUniverseAccess = field(
+        default_factory=RootUniverseAccess
+    )
     permissions: RootUniversePermissions = field(
         default_factory=RootUniversePermissions
     )
@@ -73,7 +88,7 @@ class RootUniverseState:
             "creator": self.creator,
             "administrator": self.administrator,
             "part_of_physics": self.part_of_physics,
-            "access": deepcopy(self.access),
+            "access": self.access.to_dict(),
             "permissions": self.permissions.to_dict(),
             "eden": self.eden.to_dict(),
             "eden_influence": deepcopy(self.eden_influence),
