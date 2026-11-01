@@ -1,6 +1,10 @@
 import unittest
 from types import SimpleNamespace
 
+from core.entity.world_existence_state import (
+    WorldExistenceState,
+)
+
 from meeting_place.bar_objects import BarDrink
 from meeting_place.bar_payment_state import BarPaymentState
 from meeting_place.bar_payment_kind import BarPaymentKind
@@ -87,10 +91,9 @@ class BarPaymentObjectStateTests(unittest.TestCase):
         guest = SimpleNamespace(
             name="root_guest",
             type="root_entity",
-            existence_by_world={
-                "root_universe":
-                    10.0,
-            },
+            existence_by_world=WorldExistenceState.of(
+                root_universe=10.0,
+            ),
         )
 
         payment = (
@@ -121,9 +124,7 @@ class BarPaymentObjectStateTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            guest.existence_by_world[
-                "root_universe"
-            ],
+            guest.existence_by_world.percent_in("root_universe"),
             0.0,
         )
 
@@ -140,12 +141,10 @@ class BarPaymentObjectStateTests(unittest.TestCase):
         guest = SimpleNamespace(
             name="physical_guest",
             type="physical_entity",
-            existence_by_world={
-                "physical_universe":
-                    20.0,
-                "idea_universe":
-                    0.0,
-            },
+            existence_by_world=WorldExistenceState.of(
+                physical_universe=20.0,
+                idea_universe=0.0,
+            ),
         )
 
         payment = (
@@ -166,16 +165,12 @@ class BarPaymentObjectStateTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            guest.existence_by_world[
-                "physical_universe"
-            ],
+            guest.existence_by_world.percent_in("physical_universe"),
             0.0,
         )
 
         self.assertEqual(
-            guest.existence_by_world[
-                "idea_universe"
-            ],
+            guest.existence_by_world.percent_in("idea_universe"),
             20.0,
         )
 

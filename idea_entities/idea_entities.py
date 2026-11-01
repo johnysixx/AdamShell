@@ -1,4 +1,7 @@
 from core.entity.departure_state import EntityDepartureIntent
+from core.entity.world_existence_state import (
+    WorldExistenceState,
+)
 from core.entity.social_entity import SocialEntity
 from universe.pre_cosmic_rules import IDEA_ENTITY_INITIAL_ENERGY_J, IDEA_ENTITY_ARCHETYPE_EXISTENCE_THRESHOLD_PCT
 from universe.logger import UniverseLogger
@@ -81,7 +84,19 @@ class IdeaEntities:
 
     def create_idea_entity(self, name, role='primordial_idea_entity', active=False, existence_pct=0.0, native_world='idea_universe', existence_by_world=None):
         if existence_by_world is None:
-            existence_by_world = {'idea_universe': existence_pct, 'root_universe': 0.0, 'eden': 0.0}
+            existence_by_world = WorldExistenceState.of(
+                idea_universe=existence_pct,
+                root_universe=0.0,
+                eden=0.0,
+            )
+        elif not isinstance(
+            existence_by_world,
+            WorldExistenceState,
+        ):
+            raise TypeError(
+                "Idea entity existence requires "
+                "WorldExistenceState."
+            )
         idea_entity = SocialEntity(
             name=name,
             type='idea_entity',

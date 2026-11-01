@@ -1,4 +1,7 @@
 from library.god_book import GodBook
+from core.entity.world_existence_state import (
+    WorldExistenceState,
+)
 from core.entity.departure_state import EntityDepartureIntent
 from core.entity.social_entity import _entity_attr_setdefault
 from core.entity.social_entity import SocialEntity
@@ -66,12 +69,12 @@ class Gods:
             forbidden=False,
             existence_pct=100.0,
             native_world='gods_layer',
-            existence_by_world={
-                'gods_layer': 100.0,
-                'idea_universe': 100.0,
-                'root_universe': 0.0,
-                'eden': 0.0,
-            },
+            existence_by_world=WorldExistenceState.of(
+                gods_layer=100.0,
+                idea_universe=100.0,
+                root_universe=0.0,
+                eden=0.0,
+            ),
             departure_intent=EntityDepartureIntent(),
             creative_will=0.0,
             energy_j=GOD_INITIAL_ENERGY_J,

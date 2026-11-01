@@ -1,5 +1,9 @@
 from dataclasses import dataclass, field
 
+from core.entity.world_existence_state import (
+    WorldExistenceState,
+)
+
 
 @dataclass(slots=True, frozen=True)
 class SocialInteractionRecord:
@@ -86,6 +90,18 @@ class SocialRelationship:
 
 class EntityObject:
 
+    def __setattr__(self, name, value):
+        if (
+            name == "existence_by_world"
+            and not isinstance(value, WorldExistenceState)
+        ):
+            raise TypeError(
+                "existence_by_world requires "
+                "WorldExistenceState."
+            )
+
+        super().__setattr__(name, value)
+
     def __init__(self, **state):
         for key, value in state.items():
             setattr(self, key, value)
@@ -96,10 +112,32 @@ class EntityObject:
             return mapping
         if not isinstance(mapping, dict):
             raise TypeError('EntityObject.from_mapping requires dict input.')
-        return cls(**mapping)
+        values = dict(mapping)
+
+        if isinstance(
+            values.get("existence_by_world"),
+            dict,
+        ):
+            values["existence_by_world"] = (
+                WorldExistenceState.from_mapping(
+                    values["existence_by_world"]
+                )
+            )
+
+        return cls(**values)
 
     def to_dict(self):
-        return dict(self.__dict__)
+        snapshot = dict(self.__dict__)
+
+        if isinstance(
+            snapshot.get("existence_by_world"),
+            WorldExistenceState,
+        ):
+            snapshot["existence_by_world"] = (
+                snapshot["existence_by_world"].to_dict()
+            )
+
+        return snapshot
 
     def __repr__(self):
         name = getattr(self, 'name', None)

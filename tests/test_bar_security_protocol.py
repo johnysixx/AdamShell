@@ -440,7 +440,7 @@ class BarSecurityProtocolTests(unittest.TestCase):
         service = self.geometry.find_cell(name='bar_service_floor')
         result = self.protocol.handle_guest_entry(guest, service)
         self.assertTrue(result)
-        self.assertEqual(guest.existence_by_world, {'idea_universe': 20.0, 'root_universe': 0.0, 'eden': 40.0})
+        self.assertEqual(guest.existence_by_world.to_dict(), {'idea_universe': 20.0, 'root_universe': 0.0, 'eden': 40.0})
         self.assertTrue(guest.exists_somewhere)
 
     def test_ejection_marks_entity_gone_if_no_world_existence_remains(self):
@@ -448,7 +448,7 @@ class BarSecurityProtocolTests(unittest.TestCase):
         service = self.geometry.find_cell(name='bar_service_floor')
         result = self.protocol.handle_guest_entry(guest, service)
         self.assertTrue(result)
-        self.assertEqual(guest.existence_by_world, {'idea_universe': 0.0, 'root_universe': 0.0, 'eden': 0.0})
+        self.assertEqual(guest.existence_by_world.to_dict(), {'idea_universe': 0.0, 'root_universe': 0.0, 'eden': 0.0})
         self.assertFalse(guest.exists_somewhere)
 
     def test_ban_applies_to_new_manifestation_of_same_identity(self):

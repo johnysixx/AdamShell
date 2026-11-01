@@ -1,5 +1,9 @@
 from copy import deepcopy
 
+from core.entity.world_existence_state import (
+    WorldExistenceState,
+)
+
 from idea_entities.archetype_state import (
     ArchetypePrincipleState,
     IdeaEntityAccessProfile,
@@ -383,11 +387,11 @@ class Day0FirstBarShift:
                 active=True,
                 existence_pct=100.0,
                 native_world='idea_universe',
-                existence_by_world={
-                    'idea_universe': 100.0,
-                    'root_universe': 0.0,
-                    'eden': 0.0,
-                },
+                existence_by_world=WorldExistenceState.of(
+                    idea_universe=100.0,
+                    root_universe=0.0,
+                    eden=0.0,
+                ),
             )
         )
 

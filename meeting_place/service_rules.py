@@ -1,3 +1,6 @@
+from core.entity.world_existence_state import (
+    WorldExistenceState,
+)
 from universe.pre_cosmic_rules import REALITY_PAYMENT_RATIO, WILL_GAIN_PER_ENERGY_SERVING, captured_by_bar
 from core.entity.existence_energy import existence_pct_to_energy_j
 from meeting_place.bar_payment_state import BarPaymentState
@@ -39,10 +42,20 @@ class BarServiceRules:
                 existence_paid_pct=0.0,
             )
         if entity_type == 'root_entity':
-            existence_by_world = self._get(entity, 'existence_by_world', {})
-            current = float(existence_by_world.get('root_universe', 0.0))
+            existence_by_world = self._existence_state(entity)
+            current = existence_by_world.percent_in(
+                'root_universe'
+            )
             existence_paid_pct = min(25.0, current)
-            existence_by_world['root_universe'] = current - existence_paid_pct
+
+            self._set(
+                entity,
+                'existence_by_world',
+                existence_by_world.with_percent(
+                    'root_universe',
+                    current - existence_paid_pct,
+                ),
+            )
             return BarPaymentState(
                 name='root_entity_basic_drink_payment',
                 entity=entity_name,
@@ -51,13 +64,33 @@ class BarServiceRules:
                 energy_paid_j=0.0,
             )
         if entity_type == 'physical_entity':
-            existence_by_world = self._get(entity, 'existence_by_world', {})
-            physical_before = float(existence_by_world.get('physical_universe', 0.0))
+            existence_by_world = self._existence_state(entity)
+            physical_before = existence_by_world.percent_in(
+                'physical_universe'
+            )
             existence_paid_pct = min(90.0, physical_before)
-            existence_by_world['physical_universe'] = physical_before - existence_paid_pct
             idea_gain_pct = min(40.0, existence_paid_pct)
-            idea_before = float(existence_by_world.get('idea_universe', 0.0))
-            existence_by_world['idea_universe'] = min(100.0, idea_before + idea_gain_pct)
+            idea_before = existence_by_world.percent_in(
+                'idea_universe'
+            )
+
+            updated_existence = (
+                existence_by_world
+                .with_percent(
+                    'physical_universe',
+                    physical_before - existence_paid_pct,
+                )
+                .with_percent(
+                    'idea_universe',
+                    min(100.0, idea_before + idea_gain_pct),
+                )
+            )
+
+            self._set(
+                entity,
+                'existence_by_world',
+                updated_existence,
+            )
             converted_pct = max(0.0, existence_paid_pct - idea_gain_pct)
             generated_energy_j = existence_pct_to_energy_j(converted_pct)
             bar_energy_j = captured_by_bar(generated_energy_j)
@@ -168,6 +201,23 @@ class BarServiceRules:
         will = self._get(entity, 'will', 0.0)
         idea_capacity = will * (existence_pct / 100.0)
         self._set(entity, 'idea_capacity', idea_capacity)
+
+    def _existence_state(self, entity):
+        state = getattr(
+            entity,
+            'existence_by_world',
+            None,
+        )
+
+        if state is None:
+            return WorldExistenceState()
+
+        if not isinstance(state, WorldExistenceState):
+            raise TypeError(
+                "Bar payment requires WorldExistenceState."
+            )
+
+        return state
 
     def _get(self, entity, key, default=None):
         return getattr(entity, key, default)

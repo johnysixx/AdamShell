@@ -1,5 +1,9 @@
 from dataclasses import dataclass
 
+from core.entity.world_existence_state import (
+    WorldExistenceState,
+)
+
 
 @dataclass(slots=True, frozen=True)
 class ExistenceRemovalResult:
@@ -14,29 +18,64 @@ class ExistenceResolver:
         return getattr(entity, key, default)
 
     @staticmethod
+    def _world_state(entity):
+        state = getattr(
+            entity,
+            "existence_by_world",
+            None,
+        )
+
+        if state is None:
+            return WorldExistenceState()
+
+        if not isinstance(state, WorldExistenceState):
+            raise TypeError(
+                "Entity existence_by_world must use "
+                "WorldExistenceState."
+            )
+
+        return state
+
+    @staticmethod
     def get_strongest_world(entity):
-        existence_by_world = ExistenceResolver._get(entity, 'existence_by_world', {})
-        native_world = ExistenceResolver._get(entity, 'native_world')
-        if not existence_by_world:
-            return native_world
-        highest_existence = max(existence_by_world.values())
-        strongest_worlds = [world for world, existence in existence_by_world.items() if existence == highest_existence]
-        if native_world in strongest_worlds:
-            return native_world
-        return strongest_worlds[0]
+        state = ExistenceResolver._world_state(entity)
+
+        return state.strongest_world(
+            native_world=getattr(
+                entity,
+                "native_world",
+                None,
+            )
+        )
 
     @staticmethod
     def remove_from_strongest_world(entity):
-        strongest_world = ExistenceResolver.get_strongest_world(entity)
-        existence_by_world = ExistenceResolver._get(entity, 'existence_by_world', {})
+        state = ExistenceResolver._world_state(entity)
+
+        strongest_world = state.strongest_world(
+            native_world=getattr(
+                entity,
+                "native_world",
+                None,
+            )
+        )
+
         if strongest_world is None:
             return ExistenceRemovalResult(
                 world=None,
                 removed_existence_pct=0.0,
             )
-        removed_existence_pct = float(existence_by_world.get(strongest_world, 0.0))
-        if strongest_world in existence_by_world:
-            existence_by_world[strongest_world] = 0.0
+
+        removed_existence_pct = state.percent_in(
+            strongest_world
+        )
+
+        if state.has_world(strongest_world):
+            entity.existence_by_world = state.with_percent(
+                strongest_world,
+                0.0,
+            )
+
         return ExistenceRemovalResult(
             world=strongest_world,
             removed_existence_pct=removed_existence_pct,
@@ -44,5 +83,8 @@ class ExistenceResolver:
 
     @staticmethod
     def exists_anywhere(entity):
-        existence_by_world = ExistenceResolver._get(entity, 'existence_by_world', {})
-        return any((float(existence) > 0.0 for existence in existence_by_world.values()))
+        return (
+            ExistenceResolver
+            ._world_state(entity)
+            .exists_anywhere()
+        )

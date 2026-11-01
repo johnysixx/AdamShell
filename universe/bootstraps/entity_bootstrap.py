@@ -1,4 +1,7 @@
 from universe.logger import UniverseLogger
+from core.entity.world_existence_state import (
+    WorldExistenceState,
+)
 from cats import Cats
 from gods import Gods
 from idea_entities import IdeaEntities
@@ -200,11 +203,11 @@ class EntityBootstrap:
             active=False,
             existence_pct=100.0,
             native_world="idea_universe",
-            existence_by_world={
-                "idea_universe": 100.0,
-                "root_universe": 0.0,
-                "eden": 0.0
-            }
+            existence_by_world=WorldExistenceState.of(
+                idea_universe=100.0,
+                root_universe=0.0,
+                eden=0.0,
+            )
         )
 
         self.serpent.energy_j = 0.0
@@ -328,7 +331,3 @@ class EntityBootstrap:
             state="unresolved",
             meaning=None
         )
-
-
-
-

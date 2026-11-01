@@ -41,8 +41,8 @@ class PrimordialParentsTests(unittest.TestCase):
         self.assertEqual(apsu.role, 'primordial_father')
         self.assertEqual(tiamat.native_world, 'gods_layer')
         self.assertEqual(apsu.native_world, 'gods_layer')
-        self.assertEqual(tiamat.existence_by_world['idea_universe'], 100.0)
-        self.assertEqual(apsu.existence_by_world['idea_universe'], 100.0)
+        self.assertEqual(tiamat.existence_by_world.percent_in('idea_universe'), 100.0)
+        self.assertEqual(apsu.existence_by_world.percent_in('idea_universe'), 100.0)
 
     def test_created_god_originates_in_gods_layer(self):
         universe = Universe()
@@ -50,8 +50,8 @@ class PrimordialParentsTests(unittest.TestCase):
         gods = Gods(universe)
         god = gods.create_god(name='god', role='creator_entity')
         self.assertEqual(god.native_world, 'gods_layer')
-        self.assertEqual(god.existence_by_world['idea_universe'], 100.0)
-        self.assertEqual(god.existence_by_world['eden'], 0.0)
+        self.assertEqual(god.existence_by_world.percent_in('idea_universe'), 100.0)
+        self.assertEqual(god.existence_by_world.percent_in('eden'), 0.0)
 
     def test_primordial_parents_have_water_aspects(self):
         universe = Universe()
