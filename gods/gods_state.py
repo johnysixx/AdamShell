@@ -18,6 +18,71 @@ class GodsPermissions:
         }
 
 
+@dataclass(slots=True, frozen=True)
+class GodMaskEntry:
+    name: str
+    mask: object
+
+
+@dataclass(slots=True, frozen=True)
+class GodMaskRegistry:
+    entries: tuple[GodMaskEntry, ...] = ()
+
+    def __post_init__(self):
+        if not isinstance(self.entries, tuple):
+            raise TypeError(
+                "Mask registry entries must be a tuple."
+            )
+
+        if any(
+            not isinstance(entry, GodMaskEntry)
+            or not isinstance(entry.name, str)
+            for entry in self.entries
+        ):
+            raise TypeError(
+                "Mask registry requires GodMaskEntry objects."
+            )
+
+        names = tuple(
+            entry.name for entry in self.entries
+        )
+
+        if len(set(names)) != len(names):
+            raise ValueError(
+                "Mask registry contains duplicate names."
+            )
+
+    def mask_named(self, name):
+        for entry in self.entries:
+            if entry.name == name:
+                return entry.mask
+
+        return None
+
+    def with_mask(self, name, mask):
+        if not isinstance(name, str) or not name:
+            raise TypeError(
+                "Mask name must be a nonempty string."
+            )
+
+        if mask is None or isinstance(mask, dict):
+            raise TypeError(
+                "Mask must be an object entity."
+            )
+
+        entry = GodMaskEntry(name=name, mask=mask)
+
+        if self.mask_named(name) is not None:
+            entries = tuple(
+                entry if old.name == name else old
+                for old in self.entries
+            )
+        else:
+            entries = self.entries + (entry,)
+
+        return GodMaskRegistry(entries=entries)
+
+
 def _serialize_gods_state_value(
     value,
 ):

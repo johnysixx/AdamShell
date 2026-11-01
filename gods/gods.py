@@ -6,6 +6,7 @@ from gods.god_actor_state import GodCreationLimits, GodDivineAttributes
 from gods.gods_state import (
     GodBookCreatedEvent,
     GodMaskReleasedResult,
+    GodMaskRegistry,
     GodsState,
 )
 from universe.pre_cosmic_rules import GOD_INITIAL_ENERGY_J
@@ -78,6 +79,8 @@ class Gods:
             divine_attributes=GodDivineAttributes(),
             creation_limits=GodCreationLimits(),
             permissions=self.permissions,
+            masks=GodMaskRegistry(),
+            active_mask=None,
             created_entities=[],
             administers=[],
             book_created=False,
@@ -140,7 +143,10 @@ class Gods:
     def assume_mask(self, god, mask_name, role):
         knowledge = _entity_attr_setdefault(god, 'knowledge', set())
         research_book = _entity_attr_setdefault(god, 'research_book', [])
-        masks = _entity_attr_setdefault(god, 'masks', {})
+        if not isinstance(god.masks, GodMaskRegistry):
+            raise TypeError(
+                "God masks require GodMaskRegistry."
+            )
         mask = SocialEntity(
             name=mask_name,
             type='god_mask',
@@ -150,15 +156,28 @@ class Gods:
             knowledge=knowledge,
             research_book=research_book,
         )
-        masks[mask_name] = mask
+        god.masks = god.masks.with_mask(
+            name=mask_name,
+            mask=mask,
+        )
         god.active_mask = mask_name
         return mask
 
     def release_mask(self, god, mask_name):
-        masks = getattr(god, 'masks', {})
-        if mask_name not in masks:
-            raise RuntimeError(f'Mask not found: {mask_name}')
-        mask = masks[mask_name]
+        if not isinstance(
+            getattr(god, 'masks', None),
+            GodMaskRegistry,
+        ):
+            raise TypeError(
+                "God masks require GodMaskRegistry."
+            )
+
+        mask = god.masks.mask_named(mask_name)
+
+        if mask is None:
+            raise RuntimeError(
+                f'Mask not found: {mask_name}'
+            )
         mask.active = False
         if getattr(god, 'active_mask', None) == mask_name:
             god.active_mask = None

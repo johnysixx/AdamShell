@@ -45,8 +45,9 @@ class Day0GodTastesLilithTests(unittest.TestCase):
 
     def test_tasting_does_not_create_creator_mask(self):
         self.scene.advance_to_god_first_lilith_taste()
-        masks = getattr(self.scene.god, 'masks', {})
-        self.assertNotIn('creator', masks)
+        self.assertIsNone(
+            self.scene.god.masks.mask_named("creator")
+        )
         self.assertNotEqual(getattr(self.scene.god, 'active_mask', None), 'creator')
 if __name__ == '__main__':
     unittest.main()

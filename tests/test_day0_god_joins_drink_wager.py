@@ -46,7 +46,9 @@ class Day0GodJoinsDrinkWagerTests(unittest.TestCase):
 
     def test_joining_wager_does_not_create_creator_mask(self):
         self.scene.advance_to_three_way_drink_wager()
-        self.assertNotIn('creator', getattr(self.scene.god, 'masks', {}))
+        self.assertIsNone(
+            self.scene.god.masks.mask_named("creator")
+        )
 
     def test_event_order(self):
         self.scene.advance_to_three_way_drink_wager()

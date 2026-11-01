@@ -47,7 +47,9 @@ class Day0SerpentCallsGodToTableTests(unittest.TestCase):
 
     def test_god_still_has_no_creator_mask(self):
         self.scene.advance_to_god_at_table()
-        self.assertNotIn('creator', getattr(self.scene.god, 'masks', {}))
+        self.assertIsNone(
+            self.scene.god.masks.mask_named("creator")
+        )
         self.assertNotEqual(getattr(self.scene.god, 'active_mask', None), 'creator')
 
     def test_wine_discussion_is_not_changed_by_arrival(self):
