@@ -597,12 +597,7 @@ class Day0FirstBarShift:
         )
 
         entered = GodEnteredLibraryEvent(
-            door_sign=(
-                self.library
-                .door[
-                    'god_sign'
-                ]
-            ),
+            door_sign=self.library.door.god_sign,
         )
 
         self.history.append(

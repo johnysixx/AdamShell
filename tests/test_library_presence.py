@@ -8,6 +8,7 @@ from library.god_book_library_status import (
 )
 from library.library_state import (
     GodLeftLibraryEvent,
+    LibraryVisitor,
 )
 
 
@@ -55,12 +56,12 @@ class LibraryPresenceTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            library.door["state"],
+            library.door.state,
             "open"
         )
 
         self.assertEqual(
-            library.door["sign"],
+            library.door.sign,
             "OPEN"
         )
 
@@ -81,7 +82,7 @@ class LibraryPresenceTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            library.door["god_sign"],
+            library.door.god_sign,
             "GOD IS: IN"
         )
 
@@ -94,7 +95,7 @@ class LibraryPresenceTests(unittest.TestCase):
         )
 
         self.assertIsNone(
-            library.door["god_sign"]
+            library.door.god_sign
         )
 
         self.assertTrue(
@@ -124,7 +125,7 @@ class LibraryPresenceTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            library.door["sign"],
+            library.door.sign,
             "OPEN"
         )
 
@@ -138,7 +139,7 @@ class LibraryPresenceTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            library.door["sign"],
+            library.door.sign,
             "OPEN"
         )
 
@@ -154,10 +155,10 @@ class LibraryPresenceTests(unittest.TestCase):
             god
         )
 
-        pilgrim = {
-            "name": "pilgrim_1",
-            "type": "pilgrim"
-        }
+        pilgrim = LibraryVisitor(
+            name="pilgrim_1",
+            visitor_type="pilgrim",
+        )
 
         entered = library.enter(
             pilgrim
@@ -177,12 +178,12 @@ class LibraryPresenceTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            library.door["sign"],
+            library.door.sign,
             "OPEN"
         )
 
         self.assertIsNone(
-            library.door["god_sign"]
+            library.door.god_sign
         )
 
 
@@ -197,10 +198,10 @@ class LibraryPresenceTests(unittest.TestCase):
             god
         )
 
-        pilgrim = {
-            "name": "pilgrim_2",
-            "type": "pilgrim"
-        }
+        pilgrim = LibraryVisitor(
+            name="pilgrim_2",
+            visitor_type="pilgrim",
+        )
 
         entered = library.enter(
             pilgrim
@@ -216,7 +217,7 @@ class LibraryPresenceTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            library.door["god_sign"],
+            library.door.god_sign,
             "GOD IS: IN"
         )
 
@@ -269,7 +270,7 @@ class LibraryPresenceTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            library.door["god_sign"],
+            library.door.god_sign,
             "GOD IS: IN"
         )
 
@@ -320,7 +321,7 @@ class LibraryPresenceTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            library.door["god_sign"],
+            library.door.god_sign,
             "GOD IS: IN"
         )
 
@@ -414,7 +415,7 @@ class LibraryPresenceTests(unittest.TestCase):
         )
 
         self.assertIsNone(
-            library.door["god_sign"]
+            library.door.god_sign
         )
 
         self.assertTrue(
@@ -430,6 +431,3 @@ if __name__ == "__main__":
     unittest.main()
 if __name__ == "__main__":
     unittest.main()
-
-
-

@@ -26,7 +26,7 @@ class GodBookTests(unittest.TestCase):
         library.shelve_book(god.book)
         self.assertEqual(god.role, 'librarian')
         self.assertTrue(library.god_present)
-        self.assertEqual(library.door['god_sign'], 'GOD IS: IN')
+        self.assertEqual(library.door.god_sign, 'GOD IS: IN')
         self.assertIs(
             god.book.library_status,
             GodBookLibraryStatus.SHELVED,

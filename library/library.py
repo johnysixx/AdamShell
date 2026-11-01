@@ -1,8 +1,14 @@
+from dataclasses import replace
+
 from library.library_state import (
     GodEnteredLibraryEvent,
     GodLeftLibraryEvent,
     LibraryEvent,
     LibraryPresenceStatusResult,
+    LibraryAccess,
+    LibraryDoor,
+    LibraryPermissions,
+    LibraryVisitor,
     LibraryState,
 )
 from library.god_book_library_status import (
@@ -51,6 +57,19 @@ class Library:
 
     @visitors.setter
     def visitors(self, value):
+        if not isinstance(value, tuple):
+            raise TypeError(
+                "Visitors require tuple state."
+            )
+
+        if any(
+            not isinstance(visitor, LibraryVisitor)
+            for visitor in value
+        ):
+            raise TypeError(
+                "Visitors require LibraryVisitor objects."
+            )
+
         self.library_state.visitors = value
 
     @property
@@ -99,6 +118,11 @@ class Library:
 
     @door.setter
     def door(self, value):
+        if not isinstance(value, LibraryDoor):
+            raise TypeError(
+                "Library door requires LibraryDoor."
+            )
+
         self.library_state.door = value
 
     @property
@@ -107,6 +131,10 @@ class Library:
 
     @access.setter
     def access(self, value):
+        if not isinstance(value, LibraryAccess):
+            raise TypeError(
+                "Library access requires LibraryAccess."
+            )
         self.library_state.access = value
 
     @property
@@ -115,6 +143,11 @@ class Library:
 
     @permissions.setter
     def permissions(self, value):
+        if not isinstance(value, LibraryPermissions):
+            raise TypeError(
+                "Library permissions require LibraryPermissions."
+            )
+
         self.library_state.permissions = value
 
     @property
@@ -123,8 +156,8 @@ class Library:
             "type": self.library_state.layer_type,
             "state": self.library_state.status,
             "librarian": self.librarian,
-            "access": self.access,
-            "permissions": self.permissions,
+            "access": self.access.to_dict(),
+            "permissions": self.permissions.to_dict(),
             "books": self.books,
             "catalog": self.catalog,
             "god_present": self.god_present,
@@ -153,8 +186,11 @@ class Library:
         self.is_open = True
         self.door_sign = "OPEN"
 
-        self.door["state"] = "open"
-        self.door["sign"] = "OPEN"
+        self.door = replace(
+            self.door,
+            state="open",
+            sign="OPEN",
+        )
 
         self.write_to_world()
 
@@ -168,12 +204,14 @@ class Library:
         self,
         visitor
     ):
+        if not isinstance(visitor, LibraryVisitor):
+            raise TypeError(
+                "Library entry requires LibraryVisitor."
+            )
+
         self.update_presence()
 
-        name = visitor.get(
-            "name",
-            "unknown"
-        )
+        name = visitor.name
 
         if not self.is_open:
             UniverseLogger.event(
@@ -182,8 +220,9 @@ class Library:
             return False
 
         if visitor not in self.visitors:
-            self.visitors.append(
-                visitor
+            self.visitors = (
+                *self.visitors,
+                visitor,
             )
 
         self.write_to_world()
@@ -203,17 +242,16 @@ class Library:
 
         self.god_present = True
 
-        self.door["god_sign"] = (
-            "GOD IS: IN"
+        self.door = replace(
+            self.door,
+            god_sign="GOD IS: IN",
         )
 
         self.write_to_world()
 
         return GodEnteredLibraryEvent(
             god=god,
-            door_sign=self.door[
-                "god_sign"
-            ],
+            door_sign=self.door.god_sign,
         )
 
     def god_leaves(
@@ -250,7 +288,10 @@ class Library:
 
         self.god_present = False
 
-        self.door["god_sign"] = None
+        self.door = replace(
+            self.door,
+            god_sign=None,
+        )
 
         self.write_to_world()
 
@@ -442,10 +483,10 @@ class Library:
         return True
 
     def can_read(self, entity_name):
-        return self.permissions.get(entity_name) in ["read", "write"]
+        return self.permissions.access_for(entity_name) in ("read", "write")
 
     def can_write(self, entity_name):
-        return self.permissions.get(entity_name) == "write"
+        return self.permissions.access_for(entity_name) == "write"
 
     def add_book(self, entity_name, book):
         if not self.can_write(entity_name):
@@ -492,5 +533,3 @@ class Library:
 
     def _clear_events(self):
         self.events = []
-
-
