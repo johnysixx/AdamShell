@@ -4,6 +4,7 @@ from dataclasses import FrozenInstanceError
 from multiverse import UniverseRegistry
 from root_universe import RootUniverse
 from root_universe.root_universe_state import (
+    RootUniverseEden,
     RootUniversePermissions,
     RootUniverseState,
 )
@@ -64,7 +65,8 @@ class RootUniverseObjectStateTests(unittest.TestCase):
             state.to_dict()["permissions"],
             dict,
         )
-        self.assertIsInstance(state.eden, dict)
+        self.assertIsInstance(state.eden, RootUniverseEden)
+        self.assertIsInstance(state.to_dict()["eden"], dict)
         self.assertIsInstance(state.eden_influence, list)
         self.assertIsInstance(state.history, list)
         self.assertTrue(root_universe.can_read("serpent"))
@@ -89,6 +91,42 @@ class RootUniverseObjectStateTests(unittest.TestCase):
         snapshot["permissions"]["can_modify"].append("serpent")
 
         self.assertEqual(first.permissions.can_modify, ("god",))
+
+    def test_eden_metadata_is_immutable(self):
+        state = RootUniverseState()
+
+        self.assertIsInstance(state.eden, RootUniverseEden)
+        self.assertEqual(state.eden.role, "sandbox")
+        self.assertTrue(state.eden.history_origin)
+        self.assertFalse(state.eden.direct_parent)
+
+        with self.assertRaises(FrozenInstanceError):
+            state.eden.role = "changed"
+
+        with self.assertRaises(TypeError):
+            _ = state.eden["role"]
+
+        expected = {
+            "role": "sandbox",
+            "history_origin": True,
+            "direct_parent": False,
+        }
+
+        snapshot = state.to_dict()
+        self.assertEqual(snapshot["eden"], expected)
+
+        snapshot["eden"]["role"] = "changed"
+        self.assertEqual(state.eden.role, "sandbox")
+
+        _, root = self._root_universe()
+        public = root.public_state
+        self.assertEqual(public["eden"], expected)
+
+        public["eden"]["role"] = "changed"
+        self.assertEqual(
+            root.root_universe_state.eden.role,
+            "sandbox",
+        )
 
     def test_world_stores_object_and_dict_boundaries(self):
         universe, root_universe = self._root_universe()

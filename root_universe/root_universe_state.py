@@ -34,12 +34,18 @@ class RootUniversePermissions:
         }
 
 
-def _default_eden():
-    return {
-        "role": "sandbox",
-        "history_origin": True,
-        "direct_parent": False,
-    }
+@dataclass(slots=True, frozen=True)
+class RootUniverseEden:
+    role: str = "sandbox"
+    history_origin: bool = True
+    direct_parent: bool = False
+
+    def to_dict(self):
+        return {
+            "role": self.role,
+            "history_origin": self.history_origin,
+            "direct_parent": self.direct_parent,
+        }
 
 
 @dataclass(slots=True)
@@ -53,7 +59,7 @@ class RootUniverseState:
     permissions: RootUniversePermissions = field(
         default_factory=RootUniversePermissions
     )
-    eden: dict = field(default_factory=_default_eden)
+    eden: RootUniverseEden = field(default_factory=RootUniverseEden)
     eden_influence: list = field(default_factory=list)
     history_started: bool = False
     awaiting_adam_and_eve: bool = True
@@ -69,7 +75,7 @@ class RootUniverseState:
             "part_of_physics": self.part_of_physics,
             "access": deepcopy(self.access),
             "permissions": self.permissions.to_dict(),
-            "eden": deepcopy(self.eden),
+            "eden": self.eden.to_dict(),
             "eden_influence": deepcopy(self.eden_influence),
             "history_started": self.history_started,
             "awaiting_adam_and_eve": (
