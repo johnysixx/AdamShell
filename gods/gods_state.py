@@ -2,12 +2,20 @@ from copy import deepcopy
 from dataclasses import dataclass, field
 
 
-def _default_permissions():
-    return {
-        "can_create": True,
-        "can_administer": True,
-        "can_modify": True,
-    }
+@dataclass(slots=True, frozen=True)
+class GodsPermissions:
+    """Immutable permissions for the gods layer."""
+
+    can_create: bool = True
+    can_administer: bool = True
+    can_modify: bool = True
+
+    def to_dict(self):
+        return {
+            "can_create": self.can_create,
+            "can_administer": self.can_administer,
+            "can_modify": self.can_modify,
+        }
 
 
 def _serialize_gods_state_value(
@@ -109,8 +117,8 @@ class GodsState:
     gods: list = field(default_factory=list)
     events: list = field(default_factory=list)
     tick_count: int = 0
-    permissions: dict = field(
-        default_factory=_default_permissions
+    permissions: GodsPermissions = field(
+        default_factory=GodsPermissions
     )
 
     def to_dict(self):
@@ -125,5 +133,5 @@ class GodsState:
                 for event in self.events
             ],
             "tick_count": self.tick_count,
-            "permissions": dict(self.permissions),
+            "permissions": self.permissions.to_dict(),
         }

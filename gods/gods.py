@@ -47,7 +47,7 @@ class Gods:
             'type': self.gods_state.layer_type,
             'state': self.gods_state.status,
             'gods': self.gods,
-            'permissions': self.permissions,
+            'permissions': self.permissions.to_dict(),
             'gods_state': self.gods_state.to_dict(),
         }
 

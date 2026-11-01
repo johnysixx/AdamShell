@@ -1,8 +1,10 @@
 import unittest
+from dataclasses import FrozenInstanceError
 
 from gods.gods import Gods
 from gods.gods_state import (
     GodBookCreatedEvent,
+    GodsPermissions,
     GodsState,
 )
 from universe.universe import Universe
@@ -42,8 +44,16 @@ class GodsObjectStateTests(unittest.TestCase):
         self.assertEqual(state.gods, [])
         self.assertEqual(state.events, [])
         self.assertEqual(state.tick_count, 0)
-        self.assertEqual(
+        self.assertIsInstance(
             state.permissions,
+            GodsPermissions,
+        )
+        self.assertTrue(state.permissions.can_create)
+        self.assertTrue(state.permissions.can_administer)
+        self.assertTrue(state.permissions.can_modify)
+
+        self.assertEqual(
+            state.permissions.to_dict(),
             {
                 "can_create": True,
                 "can_administer": True,
@@ -58,6 +68,91 @@ class GodsObjectStateTests(unittest.TestCase):
         self.assertIs(gods.gods, state.gods)
         self.assertIs(gods.events, state.events)
         self.assertIs(gods.permissions, state.permissions)
+
+    def test_permissions_are_immutable_object_state(self):
+        first = GodsState()
+        second = GodsState()
+
+        self.assertIsInstance(
+            first.permissions,
+            GodsPermissions,
+        )
+        self.assertIsNot(
+            first.permissions,
+            second.permissions,
+        )
+
+        self.assertTrue(first.permissions.can_create)
+        self.assertTrue(first.permissions.can_administer)
+        self.assertTrue(first.permissions.can_modify)
+
+        with self.assertRaises(FrozenInstanceError):
+            first.permissions.can_create = False
+
+        with self.assertRaises(TypeError):
+            _ = first.permissions["can_create"]
+
+        for mapping_method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+        ):
+            self.assertFalse(
+                hasattr(first.permissions, mapping_method)
+            )
+
+        snapshot = first.to_dict()
+        snapshot["permissions"]["can_create"] = False
+
+        self.assertTrue(first.permissions.can_create)
+        self.assertTrue(second.permissions.can_create)
+
+    def test_created_god_owns_typed_permissions(self):
+        universe, gods = self._layer()
+
+        god = gods.create_god(
+            name="god",
+            role="creator_entity",
+        )
+
+        self.assertIsInstance(
+            god.permissions,
+            GodsPermissions,
+        )
+        self.assertIs(
+            god.permissions,
+            gods.permissions,
+        )
+        self.assertIs(
+            god.permissions,
+            gods.gods_state.permissions,
+        )
+
+        expected = {
+            "can_create": True,
+            "can_administer": True,
+            "can_modify": True,
+        }
+
+        public = universe.world["gods"]
+
+        self.assertEqual(public["permissions"], expected)
+        self.assertEqual(
+            public["gods_state"]["permissions"],
+            expected,
+        )
+
+        public["permissions"]["can_create"] = False
+        public["gods_state"]["permissions"][
+            "can_modify"
+        ] = False
+
+        self.assertTrue(god.permissions.can_create)
+        self.assertTrue(god.permissions.can_modify)
+
+        with self.assertRaises(TypeError):
+            _ = god.permissions["can_modify"]
 
     def test_world_keeps_object_and_dict_boundaries(self):
         universe, gods = self._layer()
@@ -80,9 +175,13 @@ class GodsObjectStateTests(unittest.TestCase):
         boundary = universe.world["gods"]
 
         self.assertIs(boundary["gods"], gods.gods)
-        self.assertIs(
+        self.assertIsInstance(
             boundary["permissions"],
-            gods.permissions,
+            dict,
+        )
+        self.assertEqual(
+            boundary["permissions"],
+            gods.permissions.to_dict(),
         )
 
     def test_god_creation_mutates_same_state_object(self):
@@ -222,7 +321,7 @@ class GodsObjectStateTests(unittest.TestCase):
 
         self.assertEqual(gods.events, [])
         self.assertTrue(
-            gods.permissions["can_create"]
+            gods.permissions.can_create
         )
         self.assertEqual(gods.gods, [])
 
@@ -240,7 +339,7 @@ class GodsObjectStateTests(unittest.TestCase):
 
         self.assertEqual(state.events, [])
         self.assertTrue(
-            state.permissions["can_create"]
+            state.permissions.can_create
         )
         self.assertEqual(state.gods, [])
 
