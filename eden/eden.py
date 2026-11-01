@@ -4,7 +4,7 @@ from eden.creation_objects import (
     CreationDayRecord,
     CreationLight,
 )
-from eden.eden_state import EdenState
+from eden.eden_state import EdenPermissions, EdenState
 from eden.living_objects import EdenAnimal, EdenFruitTree, EdenPlant
 from universe.logger import UniverseLogger
 
@@ -109,6 +109,10 @@ class Eden:
 
     @permissions.setter
     def permissions(self, value):
+        if not isinstance(value, EdenPermissions):
+            raise TypeError(
+                "Eden permissions require EdenPermissions."
+            )
         self.eden_state.permissions = value
 
     @property
@@ -120,7 +124,7 @@ class Eden:
             "creator": self.eden_state.creator,
             "created_by": self.eden_state.created_by,
             "administrator": self.eden_state.administrator,
-            "permissions": self.permissions,
+            "permissions": self.permissions.to_dict(),
             "eden_state": self.eden_state.to_dict(),
         }
 
@@ -283,5 +287,3 @@ class Eden:
 
     def get_time(self):
         return self.universe.physics["time"].tick
-
-

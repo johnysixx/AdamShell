@@ -2,11 +2,18 @@ from copy import deepcopy
 from dataclasses import dataclass, field
 
 
-def _default_permissions():
-    return {
-        "can_administer": ["god"],
-        "can_modify": ["god"],
-    }
+@dataclass(slots=True, frozen=True)
+class EdenPermissions:
+    """Immutable Eden authorization rules."""
+
+    can_administer: tuple[str, ...] = ("god",)
+    can_modify: tuple[str, ...] = ("god",)
+
+    def to_dict(self):
+        return {
+            "can_administer": list(self.can_administer),
+            "can_modify": list(self.can_modify),
+        }
 
 
 def _snapshot_entity(entity):
@@ -25,8 +32,8 @@ class EdenState:
     creator: str = "god"
     created_by: str = "god"
     administrator: str = "god"
-    permissions: dict = field(
-        default_factory=_default_permissions
+    permissions: EdenPermissions = field(
+        default_factory=EdenPermissions
     )
     entities: list = field(default_factory=list)
     plants: list = field(default_factory=list)
@@ -47,10 +54,7 @@ class EdenState:
             "creator": self.creator,
             "created_by": self.created_by,
             "administrator": self.administrator,
-            "permissions": {
-                name: list(entities)
-                for name, entities in self.permissions.items()
-            },
+            "permissions": self.permissions.to_dict(),
             "entities": [
                 _snapshot_entity(entity)
                 for entity in self.entities

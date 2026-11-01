@@ -1,7 +1,8 @@
 import unittest
+from dataclasses import FrozenInstanceError
 
 from eden import Eden
-from eden.eden_state import EdenState
+from eden.eden_state import EdenPermissions, EdenState
 from universe.universe import Universe
 
 
@@ -56,6 +57,84 @@ class EdenObjectStateTests(unittest.TestCase):
         self.assertIs(eden.relations, state.relations)
         self.assertIs(eden.permissions, state.permissions)
 
+    def test_permissions_are_immutable_and_detached(self):
+        first = EdenState()
+        second = EdenState()
+
+        self.assertIsInstance(
+            first.permissions,
+            EdenPermissions,
+        )
+        self.assertIsNot(
+            first.permissions,
+            second.permissions,
+        )
+
+        expected = {
+            "can_administer": ["god"],
+            "can_modify": ["god"],
+        }
+
+        self.assertEqual(
+            first.permissions.to_dict(),
+            expected,
+        )
+
+        with self.assertRaises(FrozenInstanceError):
+            first.permissions.can_modify = ("serpent",)
+
+        with self.assertRaises(TypeError):
+            _ = first.permissions["can_modify"]
+
+        snapshot = first.to_dict()
+        snapshot["permissions"]["can_modify"].append(
+            "serpent"
+        )
+
+        self.assertEqual(
+            first.permissions.can_modify,
+            ("god",),
+        )
+
+        universe, eden = self._eden()
+        public = eden.public_state
+
+        self.assertEqual(public["permissions"], expected)
+        self.assertIsInstance(
+            universe.world["eden"]["permissions"],
+            dict,
+        )
+
+        public["permissions"]["can_modify"].append(
+            "serpent"
+        )
+
+        self.assertEqual(
+            eden.permissions.can_modify,
+            ("god",),
+        )
+
+    def test_permissions_setter_requires_object(self):
+        _, eden = self._eden()
+
+        permissions = EdenPermissions(
+            can_modify=("god", "serpent"),
+        )
+        eden.permissions = permissions
+
+        self.assertIs(eden.permissions, permissions)
+        self.assertIs(
+            eden.eden_state.permissions,
+            permissions,
+        )
+
+        with self.assertRaises(TypeError):
+            eden.permissions = {
+                "can_modify": ["god"],
+            }
+
+        self.assertIs(eden.permissions, permissions)
+
     def test_world_keeps_object_and_dict_boundaries(self):
         universe, eden = self._eden()
 
@@ -79,7 +158,14 @@ class EdenObjectStateTests(unittest.TestCase):
         self.assertEqual(boundary["creator"], "god")
         self.assertEqual(boundary["created_by"], "god")
         self.assertEqual(boundary["administrator"], "god")
-        self.assertIs(boundary["permissions"], eden.permissions)
+        self.assertEqual(
+            boundary["permissions"],
+            {
+                "can_administer": ["god"],
+                "can_modify": ["god"],
+            },
+        )
+        self.assertIsInstance(boundary["permissions"], dict)
 
     def test_add_entity_mutates_same_state_object(self):
         universe, eden = self._eden()
@@ -143,8 +229,8 @@ class EdenObjectStateTests(unittest.TestCase):
         snapshot["entities"].append("changed")
 
         self.assertEqual(
-            eden.eden_state.permissions["can_modify"],
-            ["god"],
+            eden.eden_state.permissions.can_modify,
+            ("god",),
         )
         self.assertEqual(eden.eden_state.entities, [])
 
@@ -158,8 +244,8 @@ class EdenObjectStateTests(unittest.TestCase):
         snapshot["animals"].append("changed")
 
         self.assertEqual(
-            state.permissions["can_administer"],
-            ["god"],
+            state.permissions.can_administer,
+            ("god",),
         )
         self.assertEqual(state.animals, [])
 
