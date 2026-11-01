@@ -203,6 +203,3 @@ class EnergyGate:
         self.universe.world["energy_gate"] = (
             self.public_state
         )
-        self.universe.world["energy_gate_state"] = (
-            self.gate_state
-        )

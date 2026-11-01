@@ -43,7 +43,7 @@ class EnergyGateObjectStateTests(unittest.TestCase):
         self.assertFalse(state.big_bang_allowed)
         self.assertFalse(state.big_bang_started)
 
-    def test_collection_mutates_same_world_state(self):
+    def test_collection_mutates_canonical_state(self):
         universe = Universe()
         gate = EnergyGate(universe, threshold_j=10.0)
         state = gate.gate_state
@@ -51,9 +51,13 @@ class EnergyGateObjectStateTests(unittest.TestCase):
         result = gate.collect_energy("idea", 4.0)
 
         self.assertIs(gate.gate_state, state)
-        self.assertIs(
-            universe.world["energy_gate_state"],
-            state,
+        self.assertNotIn(
+            "energy_gate_state",
+            universe.world,
+        )
+        self.assertEqual(
+            universe.world["energy_gate"]["gate_state"],
+            state.to_dict(),
         )
         self.assertEqual(state.idea_energy_j, 4.0)
         self.assertEqual(state.energy_ratio, 0.4)
@@ -87,6 +91,34 @@ class EnergyGateObjectStateTests(unittest.TestCase):
         )
         self.assertEqual(
             result.events[0].source,
+            "idea",
+        )
+
+        public_state = universe.world["energy_gate"]
+
+        self.assertIsInstance(
+            public_state["gate_state"],
+            dict,
+        )
+        self.assertEqual(
+            public_state["events"][0],
+            event.to_dict(),
+        )
+
+        public_state["gate_state"][
+            "idea_energy_j"
+        ] = 999.0
+
+        public_state["events"][0][
+            "source"
+        ] = "changed"
+
+        self.assertEqual(
+            state.idea_energy_j,
+            4.0,
+        )
+        self.assertEqual(
+            event.source,
             "idea",
         )
 
@@ -201,6 +233,16 @@ class EnergyGateObjectStateTests(unittest.TestCase):
 
         gate.collect_energy("first", 4.0)
 
+        self.assertNotIn(
+            "energy_gate_state",
+            universe.world,
+        )
+        self.assertFalse(
+            universe.world["energy_gate"][
+                "gate_state"
+            ]["big_bang_allowed"]
+        )
+
         self.assertIs(
             gate.state,
             EnergyGateProcessState.CLOSED,
@@ -209,6 +251,16 @@ class EnergyGateObjectStateTests(unittest.TestCase):
         self.assertFalse(gate.gate_state.big_bang_allowed)
 
         gate.collect_energy("second", 6.0)
+
+        self.assertNotIn(
+            "energy_gate_state",
+            universe.world,
+        )
+        self.assertTrue(
+            universe.world["energy_gate"][
+                "gate_state"
+            ]["big_bang_allowed"]
+        )
 
         self.assertIs(
             gate.state,
