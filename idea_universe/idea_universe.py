@@ -350,9 +350,14 @@ class IdeaUniverse:
                     object_id=nebula.id,
                     remnants=tuple(
                         PrimordialRemnantCreation.from_remnant(
-                            remnant
+                            remnant,
+                            source_star_id=star.id,
                         )
-                        for remnant in remnants
+                        for star, remnant in zip(
+                            stars,
+                            remnants,
+                            strict=True,
+                        )
                     ),
                 )
             )
@@ -406,6 +411,7 @@ class IdeaUniverse:
 
         stars = []
         by_id = {}
+        pending_remnants = {}
         nebula = None
 
         for event in history.events:
@@ -455,7 +461,20 @@ class IdeaUniverse:
                         "Invalid primordial star transition."
                     )
 
-                star.state = event.state
+                if (
+                    event.state
+                    is PrimordialIdeaStarState.EXPLODED
+                ):
+                    expected_remnant = star.explode()
+
+                    pending_remnants[star.id] = (
+                        PrimordialRemnantCreation.from_remnant(
+                            expected_remnant,
+                            source_star_id=star.id,
+                        )
+                    )
+                else:
+                    star.state = event.state
 
             elif type(event) is PrimordialNebulaCreated:
                 next_cursor = cursor.with_next_nebula()
@@ -466,6 +485,42 @@ class IdeaUniverse:
                         "an unexpected canonical ID."
                     )
 
+                recorded_remnants = {}
+
+                for remnant in event.remnants:
+                    source_id = remnant.source_star_id
+
+                    if source_id in recorded_remnants:
+                        raise ValueError(
+                            "Duplicate primordial star remnant."
+                        )
+
+                    expected = pending_remnants.get(
+                        source_id
+                    )
+
+                    if expected is None:
+                        raise ValueError(
+                            "Remnant references an unknown "
+                            "or already consumed explosion."
+                        )
+
+                    if remnant != expected:
+                        raise ValueError(
+                            "Remnant provenance or elemental "
+                            "contents do not match explosion."
+                        )
+
+                    recorded_remnants[source_id] = remnant
+
+                if set(recorded_remnants) != set(
+                    pending_remnants
+                ):
+                    raise ValueError(
+                        "Nebula creation must consume "
+                        "all pending explosion remnants."
+                    )
+
                 nebula = PrimordialNebula(
                     object_id=event.object_id,
                     source_remnants=[
@@ -474,6 +529,7 @@ class IdeaUniverse:
                     ],
                 )
 
+                pending_remnants.clear()
                 cursor = next_cursor
 
             else:

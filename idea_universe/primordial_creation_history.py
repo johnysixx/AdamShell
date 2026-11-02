@@ -20,10 +20,13 @@ def _require_id(object_id):
 
 @dataclass(frozen=True, slots=True)
 class PrimordialRemnantCreation:
+    source_star_id: str
     source: str
     elemental_potentials: tuple[tuple[str, float], ...]
 
     def __post_init__(self):
+        _require_id(self.source_star_id)
+
         if not isinstance(self.source, str):
             raise TypeError(
                 "Remnant source must be a string."
@@ -65,7 +68,7 @@ class PrimordialRemnantCreation:
             )
 
     @classmethod
-    def from_remnant(cls, remnant):
+    def from_remnant(cls, remnant, *, source_star_id):
         if not isinstance(
             remnant,
             PrimordialNebulaRemnant,
@@ -86,6 +89,7 @@ class PrimordialRemnantCreation:
         )
 
         return cls(
+            source_star_id=source_star_id,
             source=remnant.source,
             elemental_potentials=potentials,
         )

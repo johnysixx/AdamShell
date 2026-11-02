@@ -442,6 +442,7 @@ class PrimordialCreationHistoryReplayTests(unittest.TestCase):
     def test_remnant_fact_rejects_mutable_potentials(self):
         with self.assertRaises(TypeError):
             PrimordialRemnantCreation(
+                source_star_id="test:star:1",
                 source="star",
                 elemental_potentials={
                     "carbon": 1.0,
