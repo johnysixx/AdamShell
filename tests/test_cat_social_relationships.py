@@ -108,9 +108,8 @@ class CatSocialRelationshipsTests(
 
         relation = (
             self.cat
-            .social_relationships[
-                "lilith"
-            ]
+            .social_relationships
+            .relationship_for("lilith")
         )
 
         self.assertEqual(
