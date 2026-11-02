@@ -88,12 +88,12 @@ class QuantumDirectorTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            len(director.research_book),
+            director.shared_memory.record_count,
             1
         )
 
         self.assertEqual(
-            director.research_book[0].event,
+            director.shared_memory.record_at(0).event,
             "primordial_idea_star_created"
         )
 
@@ -151,22 +151,22 @@ class QuantumDirectorTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            len(director.research_book),
+            director.shared_memory.record_count,
             2
         )
 
         self.assertEqual(
-            director.research_book[0].event,
+            director.shared_memory.record_at(0).event,
             "primordial_idea_star_exploded"
         )
 
         self.assertEqual(
-            director.research_book[1].event,
+            director.shared_memory.record_at(1).event,
             "primordial_nebula_created"
         )
 
         self.assertIs(
-            director.research_book[1].subject,
+            director.shared_memory.record_at(1).subject,
             nebula
         )
 
@@ -211,7 +211,7 @@ class QuantumDirectorTests(unittest.TestCase):
 
         self.assertIn(
             "liquid_hydrocarbons_identified",
-            director.knowledge
+            director.shared_memory.state.knowledge
         )
 
 
@@ -261,7 +261,7 @@ class QuantumDirectorTests(unittest.TestCase):
 
         self.assertIn(
             "liquid_hydrocarbon_mining",
-            director.knowledge
+            director.shared_memory.state.knowledge
         )
 
         self.assertEqual(
@@ -364,7 +364,7 @@ class QuantumDirectorTests(unittest.TestCase):
         )
 
         self.assertIs(
-            director.research_book[-1],
+            director.shared_memory.record_at(-1),
             result,
         )
 
@@ -411,10 +411,3 @@ if __name__ == "__main__":
     unittest.main()
 if __name__ == "__main__":
     unittest.main()
-
-
-
-
-
-
-

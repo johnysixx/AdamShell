@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
 from core.entity.social_entity import SocialEntity
+from gods.god_memory_state import GodSharedMemory
 from gods.gods_state import (
     GodMaskRegistry,
     GodsPermissions,
@@ -61,7 +62,13 @@ class GodEntity(SocialEntity):
     """God actor with protected object-state fields."""
 
     def __setattr__(self, name, value):
-        if name == "masks":
+        if name == "shared_memory":
+            if not isinstance(value, GodSharedMemory):
+                raise TypeError(
+                    "God shared memory requires GodSharedMemory."
+                )
+
+        elif name == "masks":
             if not isinstance(value, GodMaskRegistry):
                 raise TypeError(
                     "God masks require GodMaskRegistry."

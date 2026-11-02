@@ -33,12 +33,8 @@ class QuantumDirector:
         self.layer = "quantum_layer"
         self.zone = "stable_zone"
 
-        self.research_book = (
-            self.god.research_book
-        )
-
-        self.knowledge = (
-            self.god.knowledge
+        self.shared_memory = (
+            self.god.shared_memory
         )
 
         self.corporation_state = (
@@ -58,7 +54,7 @@ class QuantumDirector:
                 "must be a QuantumDirectorRecord."
             )
 
-        self.research_book.append(
+        self.shared_memory.record(
             observation
         )
 
@@ -86,7 +82,7 @@ class QuantumDirector:
                 "liquid_hydrocarbons_identified"
             )
 
-            self.knowledge.add(
+            self.shared_memory.learn(
                 finding
             )
 
@@ -102,16 +98,15 @@ class QuantumDirector:
         self,
         nebula,
     ):
-        if (
+        if not self.shared_memory.knows(
             "liquid_hydrocarbons_identified"
-            not in self.knowledge
         ):
             raise RuntimeError(
                 "Liquid hydrocarbons must be "
                 "identified first."
             )
 
-        self.knowledge.add(
+        self.shared_memory.learn(
             "liquid_hydrocarbon_mining"
         )
 
@@ -126,9 +121,8 @@ class QuantumDirector:
         nebula,
         amount,
     ):
-        if (
+        if not self.shared_memory.knows(
             "liquid_hydrocarbon_mining"
-            not in self.knowledge
         ):
             raise RuntimeError(
                 "Mining method has not been "

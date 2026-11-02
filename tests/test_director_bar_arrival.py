@@ -117,7 +117,7 @@ class DirectorBarArrivalTests(
         )
 
         self.assertIs(
-            director.research_book[-1],
+            director.shared_memory.record_at(-1),
             result,
         )
 

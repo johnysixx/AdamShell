@@ -3,7 +3,7 @@ from core.entity.world_existence_state import (
     WorldExistenceState,
 )
 from core.entity.departure_state import EntityDepartureIntent
-from core.entity.social_entity import _entity_attr_setdefault
+from gods.god_memory_state import GodSharedMemory
 from core.entity.social_entity import SocialEntity
 from gods.god_actor_state import (
     GodCreationLimits,
@@ -87,6 +87,7 @@ class Gods:
             creation_limits=GodCreationLimits(),
             permissions=self.permissions,
             masks=GodMaskRegistry(),
+            shared_memory=GodSharedMemory(),
             active_mask=None,
             created_entities=[],
             administers=[],
@@ -148,8 +149,13 @@ class Gods:
         self.events.clear()
 
     def assume_mask(self, god, mask_name, role):
-        knowledge = _entity_attr_setdefault(god, 'knowledge', set())
-        research_book = _entity_attr_setdefault(god, 'research_book', [])
+        memory = getattr(god, "shared_memory", None)
+
+        if not isinstance(memory, GodSharedMemory):
+            raise TypeError(
+                "God masks require shared object memory."
+            )
+
         if not isinstance(god.masks, GodMaskRegistry):
             raise TypeError(
                 "God masks require GodMaskRegistry."
@@ -160,8 +166,7 @@ class Gods:
             role=role,
             active=True,
             mask_of=god,
-            knowledge=knowledge,
-            research_book=research_book,
+            shared_memory=memory,
         )
         god.masks = god.masks.with_mask(
             name=mask_name,

@@ -2,6 +2,7 @@ import unittest
 from dataclasses import FrozenInstanceError
 from universe.universe import Universe
 from gods.gods import Gods
+from gods.god_memory_state import GodMemoryNote
 from gods.gods_state import (
     GodMaskEntry,
     GodMaskRegistry,
@@ -162,8 +163,10 @@ class GodMaskTests(unittest.TestCase):
         self.assertIs(director.mask_of, god)
         self.assertEqual(director.name, 'director')
         self.assertEqual(director.role, 'quantum_director')
-        self.assertIs(director.knowledge, god.knowledge)
-        self.assertIs(director.research_book, god.research_book)
+        self.assertIs(
+            director.shared_memory,
+            god.shared_memory,
+        )
         self.assertEqual(god.name, 'god')
 
     def test_quantum_director_wraps_god_director_mask(self):
@@ -175,18 +178,19 @@ class GodMaskTests(unittest.TestCase):
         self.assertIs(director.god, god)
         self.assertIs(director.mask.mask_of, god)
         self.assertEqual(director.mask.name, 'director')
-        self.assertIs(director.knowledge, god.knowledge)
-        self.assertIs(director.research_book, god.research_book)
+        self.assertIs(
+            director.shared_memory,
+            god.shared_memory,
+        )
 
     def test_god_can_release_marduk_mask_without_losing_memory(self):
         universe = Universe()
         gods = Gods(universe)
         god = gods.create_god(name='god', role='creator_entity')
         marduk = gods.assume_mask(god=god, mask_name='marduk', role='divine_champion')
-        god.knowledge.add('tiamat_defeated')
-        god.research_book.append({'event': 'cosmos_ordered'})
-        knowledge = god.knowledge
-        research_book = god.research_book
+        god.shared_memory.learn('tiamat_defeated')
+        god.shared_memory.record(GodMemoryNote('cosmos_ordered'))
+        memory = god.shared_memory
         released = gods.release_mask(god=god, mask_name='marduk')
         self.assertIsInstance(
             released,
@@ -225,10 +229,13 @@ class GodMaskTests(unittest.TestCase):
                 'released_mask'
             ]
         self.assertIsNone(god.active_mask)
-        self.assertIs(god.knowledge, knowledge)
-        self.assertIs(god.research_book, research_book)
-        self.assertIn('tiamat_defeated', god.knowledge)
-        self.assertEqual(god.research_book[0]['event'], 'cosmos_ordered')
+        self.assertIs(god.shared_memory, memory)
+        self.assertIs(marduk.shared_memory, memory)
+        self.assertTrue(memory.knows('tiamat_defeated'))
+        self.assertEqual(
+            memory.record_at(0).event,
+            'cosmos_ordered',
+        )
         self.assertEqual(god.name, 'god')
         self.assertFalse(getattr(marduk, 'active', False))
 
@@ -237,19 +244,21 @@ class GodMaskTests(unittest.TestCase):
         gods = Gods(universe)
         god = gods.create_god(name='god', role='creator_entity')
         marduk = gods.assume_mask(god=god, mask_name='marduk', role='divine_champion')
-        god.knowledge.add('cosmos_ordered')
-        god.research_book.append({'event': 'tiamat_defeated'})
-        knowledge = god.knowledge
-        research_book = god.research_book
+        god.shared_memory.learn('cosmos_ordered')
+        god.shared_memory.record(GodMemoryNote('tiamat_defeated'))
+        memory = god.shared_memory
         gods.release_mask(god=god, mask_name='marduk')
         director = gods.assume_mask(god=god, mask_name='director', role='quantum_director')
         self.assertFalse(marduk.active)
         self.assertTrue(director.active)
         self.assertEqual(god.active_mask, 'director')
-        self.assertIs(director.knowledge, knowledge)
-        self.assertIs(director.research_book, research_book)
-        self.assertIn('cosmos_ordered', director.knowledge)
-        self.assertEqual(director.research_book[0]['event'], 'tiamat_defeated')
+        self.assertIs(director.shared_memory, memory)
+        self.assertIs(marduk.shared_memory, memory)
+        self.assertTrue(memory.knows('cosmos_ordered'))
+        self.assertEqual(
+            memory.record_at(0).event,
+            'tiamat_defeated',
+        )
 if __name__ == '__main__':
     unittest.main()
 if __name__ == '__main__':
