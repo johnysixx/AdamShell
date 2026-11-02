@@ -1,4 +1,7 @@
 from idea_universe.idea_universe_state import IdeaUniverseState
+from idea_universe.primordial_identity_cursor import (
+    PrimordialIdentityCursor,
+)
 from idea_universe.primordial_idea_star import PrimordialIdeaStar
 from idea_universe.primordial_nebula import PrimordialNebula
 from idea_universe.primordial_waters import PrimordialWaters
@@ -18,9 +21,6 @@ class IdeaUniverse:
         self.events = []
         self.starry_sky = []
 
-        self._primordial_star_serial = 0
-        self._primordial_nebula_serial = 0
-
         self.idea_universe_state = IdeaUniverseState()
         self.state = self.idea_universe_state
 
@@ -38,6 +38,15 @@ class IdeaUniverse:
         self.universe_id = registry.register_universe(
             name=self.name,
             universe_type=self.type,
+        )
+
+        self._primordial_identity_cursor = (
+            PrimordialIdentityCursor(
+                scope=(
+                    f"{self.universe.id}:"
+                    f"idea_universe:{self.universe_id}"
+                )
+            )
         )
 
         self.primordial_waters = PrimordialWaters()
@@ -171,6 +180,40 @@ class IdeaUniverse:
         )
 
     @property
+    def primordial_identity_cursor(self):
+        return self._primordial_identity_cursor
+
+    def restore_primordial_identity_cursor(self, cursor):
+        if not isinstance(cursor, PrimordialIdentityCursor):
+            raise TypeError(
+                "Replay requires PrimordialIdentityCursor."
+            )
+
+        current = self._primordial_identity_cursor
+
+        if cursor.scope != current.scope:
+            raise ValueError(
+                "Replay identity scope does not match "
+                "the target IdeaUniverse."
+            )
+
+        if (
+            self.starry_sky
+            or self.primordial_nebula is not None
+            or current.star_serial != 0
+            or current.nebula_serial != 0
+        ):
+            raise RuntimeError(
+                "Identity cursor can be restored only "
+                "into a fresh IdeaUniverse."
+            )
+
+        self._primordial_identity_cursor = cursor
+        self.write_to_world()
+
+        return cursor
+
+    @property
     def public_state(self):
         return {
             "name": self.name,
@@ -182,6 +225,9 @@ class IdeaUniverse:
             "entities": self.entities,
             "events": self.events,
             "starry_sky": self.starry_sky,
+            "primordial_identity_cursor": (
+                self.primordial_identity_cursor.to_dict()
+            ),
             "idea_universe_state": (
                 self.idea_universe_state.to_dict()
             ),
@@ -209,18 +255,17 @@ class IdeaUniverse:
                 "Primordial idea star requires stellar epoch."
             )
 
-        serial = self._primordial_star_serial + 1
+        cursor = (
+            self.primordial_identity_cursor.with_next_star()
+        )
 
         star = PrimordialIdeaStar(
-            object_id=(
-                f"{self.universe.id}:"
-                f"idea_universe:{self.universe_id}:"
-                f"primordial_star:{serial}"
-            )
+            object_id=cursor.star_id
         )
 
         self.starry_sky.append(star)
-        self._primordial_star_serial = serial
+        self._primordial_identity_cursor = cursor
+        self.write_to_world()
 
         return star
 
@@ -240,18 +285,16 @@ class IdeaUniverse:
             stars.append(star)
             remnants.append(remnant)
 
-        serial = self._primordial_nebula_serial + 1
+        cursor = (
+            self.primordial_identity_cursor.with_next_nebula()
+        )
 
         nebula = PrimordialNebula(
             source_remnants=remnants,
-            object_id=(
-                f"{self.universe.id}:"
-                f"idea_universe:{self.universe_id}:"
-                f"primordial_nebula:{serial}"
-            ),
+            object_id=cursor.nebula_id,
         )
 
-        self._primordial_nebula_serial = serial
+        self._primordial_identity_cursor = cursor
         self.primordial_nebula = nebula
         self.write_to_world()
 
