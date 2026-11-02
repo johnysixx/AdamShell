@@ -185,7 +185,8 @@ class QuantumDirectorTests(unittest.TestCase):
         )
 
         nebula = PrimordialNebula(
-            source_remnants=[]
+            source_remnants=[],
+            object_id="director_test_nebula",
         )
 
         nebula.elemental_potentials[
@@ -229,7 +230,8 @@ class QuantumDirectorTests(unittest.TestCase):
         )
 
         nebula = PrimordialNebula(
-            source_remnants=[]
+            source_remnants=[],
+            object_id="director_test_nebula",
         )
 
         with self.assertRaises(
@@ -284,7 +286,8 @@ class QuantumDirectorTests(unittest.TestCase):
         )
 
         nebula = PrimordialNebula(
-            source_remnants=[]
+            source_remnants=[],
+            object_id="director_test_nebula",
         )
 
         nebula.size = 100.0
@@ -351,7 +354,8 @@ class QuantumDirectorTests(unittest.TestCase):
         )
 
         nebula = PrimordialNebula(
-            source_remnants=[]
+            source_remnants=[],
+            object_id="director_test_nebula",
         )
 
         result = director.study_nebula(

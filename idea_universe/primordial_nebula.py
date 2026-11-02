@@ -13,10 +13,23 @@ LIQUID_HYDROCARBON_MINING_THRESHOLD = 100.0
 
 class PrimordialNebula:
 
+    historical_identity_required = True
+
     def __init__(
         self,
         source_remnants=None,
+        object_id=None,
     ):
+        if object_id is not None and (
+            not isinstance(object_id, str)
+            or not object_id.strip()
+        ):
+            raise ValueError(
+                "Primordial nebula ID must be "
+                "a nonempty string."
+            )
+
+        self._id = object_id
         self.name = "primordial_nebula"
         self.type = "primordial_nebula"
 
@@ -72,6 +85,10 @@ class PrimordialNebula:
             self
             .primordial_nebula_state
         )
+
+    @property
+    def id(self):
+        return self._id
 
     @property
     def tick_count(self):
@@ -270,6 +287,8 @@ class PrimordialNebula:
     @property
     def public_state(self):
         return {
+            "id":
+                self.id,
             "name":
                 self.name,
             "type":

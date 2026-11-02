@@ -18,6 +18,9 @@ class IdeaUniverse:
         self.events = []
         self.starry_sky = []
 
+        self._primordial_star_serial = 0
+        self._primordial_nebula_serial = 0
+
         self.idea_universe_state = IdeaUniverseState()
         self.state = self.idea_universe_state
 
@@ -206,8 +209,18 @@ class IdeaUniverse:
                 "Primordial idea star requires stellar epoch."
             )
 
-        star = PrimordialIdeaStar()
+        serial = self._primordial_star_serial + 1
+
+        star = PrimordialIdeaStar(
+            object_id=(
+                f"{self.universe.id}:"
+                f"idea_universe:{self.universe_id}:"
+                f"primordial_star:{serial}"
+            )
+        )
+
         self.starry_sky.append(star)
+        self._primordial_star_serial = serial
 
         return star
 
@@ -227,9 +240,19 @@ class IdeaUniverse:
             stars.append(star)
             remnants.append(remnant)
 
-        self.primordial_nebula = PrimordialNebula(
-            source_remnants=remnants
+        serial = self._primordial_nebula_serial + 1
+
+        nebula = PrimordialNebula(
+            source_remnants=remnants,
+            object_id=(
+                f"{self.universe.id}:"
+                f"idea_universe:{self.universe_id}:"
+                f"primordial_nebula:{serial}"
+            ),
         )
+
+        self._primordial_nebula_serial = serial
+        self.primordial_nebula = nebula
         self.write_to_world()
 
         return PrimordialStellarEpochResult(

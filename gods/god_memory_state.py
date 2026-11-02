@@ -92,6 +92,26 @@ class GodObservationFact:
 
     @staticmethod
     def _capture_reference(name, reference):
+        if getattr(
+            type(reference),
+            "historical_identity_required",
+            False,
+        ):
+            identity = getattr(
+                reference,
+                "id",
+                None,
+            )
+
+            if (
+                not isinstance(identity, str)
+                or not identity
+            ):
+                raise TypeError(
+                    "Historical observation requires "
+                    "a canonical entity ID."
+                )
+
         if isinstance(reference, dict):
             raise TypeError(
                 "Historical references must be objects."

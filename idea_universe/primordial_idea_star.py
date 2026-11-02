@@ -8,12 +8,28 @@ from idea_universe.primordial_stellar_state import (
 
 class PrimordialIdeaStar:
 
-    def __init__(self):
+    historical_identity_required = True
+
+    def __init__(self, object_id=None):
+        if object_id is not None and (
+            not isinstance(object_id, str)
+            or not object_id.strip()
+        ):
+            raise ValueError(
+                "Primordial star ID must be "
+                "a nonempty string."
+            )
+
+        self._id = object_id
         self.name = "primordial_idea_star"
         self.type = "primordial_idea_star"
         self.state = (
             PrimordialIdeaStarState.CREATED
         )
+
+    @property
+    def id(self):
+        return self._id
 
     @property
     def state(self):
