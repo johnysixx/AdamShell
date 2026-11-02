@@ -2,6 +2,16 @@ from idea_universe.idea_universe_state import IdeaUniverseState
 from idea_universe.primordial_identity_cursor import (
     PrimordialIdentityCursor,
 )
+from idea_universe.primordial_creation_history import (
+    PrimordialCreationHistory,
+    PrimordialNebulaCreated,
+    PrimordialRemnantCreation,
+    PrimordialStarCreated,
+    PrimordialStarTransition,
+)
+from idea_universe.primordial_idea_star_state import (
+    PrimordialIdeaStarState,
+)
 from idea_universe.primordial_idea_star import PrimordialIdeaStar
 from idea_universe.primordial_nebula import PrimordialNebula
 from idea_universe.primordial_waters import PrimordialWaters
@@ -46,6 +56,12 @@ class IdeaUniverse:
                     f"{self.universe.id}:"
                     f"idea_universe:{self.universe_id}"
                 )
+            )
+        )
+
+        self._primordial_creation_history = (
+            PrimordialCreationHistory(
+                scope=self.primordial_identity_cursor.scope
             )
         )
 
@@ -180,6 +196,10 @@ class IdeaUniverse:
         )
 
     @property
+    def primordial_creation_history(self):
+        return self._primordial_creation_history
+
+    @property
     def primordial_identity_cursor(self):
         return self._primordial_identity_cursor
 
@@ -263,8 +283,17 @@ class IdeaUniverse:
             object_id=cursor.star_id
         )
 
+        history = (
+            self.primordial_creation_history.with_event(
+                PrimordialStarCreated(
+                    object_id=star.id
+                )
+            )
+        )
+
         self.starry_sky.append(star)
         self._primordial_identity_cursor = cursor
+        self._primordial_creation_history = history
         self.write_to_world()
 
         return star
@@ -280,8 +309,29 @@ class IdeaUniverse:
 
         for _ in range(star_count):
             star = self.create_primordial_star()
+
             star.ignite()
+
+            self._primordial_creation_history = (
+                self.primordial_creation_history.with_event(
+                    PrimordialStarTransition(
+                        object_id=star.id,
+                        state=star.state,
+                    )
+                )
+            )
+
             remnant = star.explode()
+
+            self._primordial_creation_history = (
+                self.primordial_creation_history.with_event(
+                    PrimordialStarTransition(
+                        object_id=star.id,
+                        state=star.state,
+                    )
+                )
+            )
+
             stars.append(star)
             remnants.append(remnant)
 
@@ -294,7 +344,22 @@ class IdeaUniverse:
             object_id=cursor.nebula_id,
         )
 
+        history = (
+            self.primordial_creation_history.with_event(
+                PrimordialNebulaCreated(
+                    object_id=nebula.id,
+                    remnants=tuple(
+                        PrimordialRemnantCreation.from_remnant(
+                            remnant
+                        )
+                        for remnant in remnants
+                    ),
+                )
+            )
+        )
+
         self._primordial_identity_cursor = cursor
+        self._primordial_creation_history = history
         self.primordial_nebula = nebula
         self.write_to_world()
 
@@ -305,6 +370,126 @@ class IdeaUniverse:
             stars=stars,
             remnants=remnants,
         )
+
+    def replay_primordial_creation_history(self, history):
+        if not isinstance(
+            history,
+            PrimordialCreationHistory,
+        ):
+            raise TypeError(
+                "Replay requires PrimordialCreationHistory."
+            )
+
+        current_cursor = self.primordial_identity_cursor
+
+        if history.scope != current_cursor.scope:
+            raise ValueError(
+                "Creation history scope does not match."
+            )
+
+        if (
+            self.starry_sky
+            or self.primordial_nebula is not None
+            or current_cursor.star_serial != 0
+            or current_cursor.nebula_serial != 0
+            or self.primordial_creation_history.events
+        ):
+            raise RuntimeError(
+                "Creation history replay requires "
+                "a fresh IdeaUniverse."
+            )
+
+        # Rebuild everything before mutating target layer.
+        cursor = PrimordialIdentityCursor(
+            scope=history.scope
+        )
+
+        stars = []
+        by_id = {}
+        nebula = None
+
+        for event in history.events:
+            if type(event) is PrimordialStarCreated:
+                next_cursor = cursor.with_next_star()
+
+                if event.object_id != next_cursor.star_id:
+                    raise ValueError(
+                        "Star creation history contains "
+                        "an unexpected canonical ID."
+                    )
+
+                star = PrimordialIdeaStar(
+                    object_id=event.object_id
+                )
+
+                stars.append(star)
+                by_id[star.id] = star
+                cursor = next_cursor
+
+            elif type(event) is PrimordialStarTransition:
+                star = by_id.get(event.object_id)
+
+                if star is None:
+                    raise ValueError(
+                        "Star transition references "
+                        "an unknown star."
+                    )
+
+                valid_transition = (
+                    (
+                        star.state
+                        is PrimordialIdeaStarState.CREATED
+                        and event.state
+                        is PrimordialIdeaStarState.BURNING
+                    )
+                    or (
+                        star.state
+                        is PrimordialIdeaStarState.BURNING
+                        and event.state
+                        is PrimordialIdeaStarState.EXPLODED
+                    )
+                )
+
+                if not valid_transition:
+                    raise ValueError(
+                        "Invalid primordial star transition."
+                    )
+
+                star.state = event.state
+
+            elif type(event) is PrimordialNebulaCreated:
+                next_cursor = cursor.with_next_nebula()
+
+                if event.object_id != next_cursor.nebula_id:
+                    raise ValueError(
+                        "Nebula creation history contains "
+                        "an unexpected canonical ID."
+                    )
+
+                nebula = PrimordialNebula(
+                    object_id=event.object_id,
+                    source_remnants=[
+                        remnant.to_remnant()
+                        for remnant in event.remnants
+                    ],
+                )
+
+                cursor = next_cursor
+
+            else:
+                raise TypeError(
+                    "Unsupported primordial history event."
+                )
+
+        # Commit reconstructed state only after validation.
+        self.starry_sky[:] = stars
+        self.primordial_nebula = nebula
+        self._primordial_identity_cursor = cursor
+        self._primordial_creation_history = history
+
+        self.write_to_world()
+
+        return tuple(stars), nebula
 
     def add_entity(self, entity):
         entity.origin_layer = "idea_universe"
