@@ -7,7 +7,7 @@ from gods.gods_state import (
 )
 
 
-@dataclass(slots=True)
+@dataclass(frozen=True, slots=True)
 class GodDivineAttributes:
     aseity: bool = True
     eternity: bool = True

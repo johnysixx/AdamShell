@@ -1,4 +1,5 @@
 import unittest
+from dataclasses import FrozenInstanceError, replace
 from unittest.mock import patch
 
 from core.entity.departure_state import EntityDepartureIntent
@@ -113,6 +114,86 @@ class PrimordialActorCreationObjectStateTests(unittest.TestCase):
 
         intent.cancel_departure()
         self.assertFalse(intent.wants_to_leave)
+
+    def test_divine_attributes_are_frozen(self):
+        divine = GodDivineAttributes()
+
+        with self.assertRaises(FrozenInstanceError):
+            divine.aseity = False
+
+        with self.assertRaises(FrozenInstanceError):
+            divine.creative_authority = "granted"
+
+        with self.assertRaises(TypeError):
+            _ = divine["creative_authority"]
+
+        updated = replace(
+            divine,
+            creative_authority="granted",
+        )
+
+        self.assertIsNot(updated, divine)
+
+        self.assertEqual(
+            divine.creative_authority,
+            "potential",
+        )
+
+        self.assertEqual(
+            updated.creative_authority,
+            "granted",
+        )
+
+        snapshot = updated.to_dict()
+        snapshot["creative_authority"] = "changed"
+
+        self.assertEqual(
+            updated.creative_authority,
+            "granted",
+        )
+
+    def test_god_replaces_divine_state_without_mutation(self):
+        layer = Gods(Universe())
+
+        god = layer.create_god(
+            name="god",
+            role="creator_entity",
+        )
+
+        original = god.divine_attributes
+
+        god.divine_attributes = replace(
+            original,
+            creative_authority="granted",
+        )
+
+        self.assertIsNot(
+            god.divine_attributes,
+            original,
+        )
+
+        self.assertEqual(
+            original.creative_authority,
+            "potential",
+        )
+
+        self.assertEqual(
+            god.divine_attributes.creative_authority,
+            "granted",
+        )
+
+        with self.assertRaises(FrozenInstanceError):
+            god.divine_attributes.sovereignty = "absolute"
+
+        with self.assertRaises(TypeError):
+            god.divine_attributes = {
+                "creative_authority": "granted",
+            }
+
+        self.assertEqual(
+            god.divine_attributes.creative_authority,
+            "granted",
+        )
 
     def test_substate_snapshots_are_detached_dicts(self):
         intent = EntityDepartureIntent()
