@@ -2,8 +2,15 @@ import unittest
 from dataclasses import FrozenInstanceError
 
 from gods.gods import Gods
+from gods.god_actor_state import (
+    GodCreationLimits,
+    GodDivineAttributes,
+    GodEntity,
+)
+from core.entity.social_entity import SocialEntity
 from gods.gods_state import (
     GodBookCreatedEvent,
+    GodMaskRegistry,
     GodsPermissions,
     GodsState,
 )
@@ -107,6 +114,115 @@ class GodsObjectStateTests(unittest.TestCase):
 
         self.assertTrue(first.permissions.can_create)
         self.assertTrue(second.permissions.can_create)
+
+    def test_created_god_uses_protected_actor(self):
+        _, gods = self._layer()
+
+        god = gods.create_god(
+            name="god",
+            role="librarian",
+        )
+
+        self.assertIsInstance(god, GodEntity)
+        self.assertIsInstance(god, SocialEntity)
+
+        self.assertIsInstance(
+            god.masks,
+            GodMaskRegistry,
+        )
+        self.assertIsInstance(
+            god.permissions,
+            GodsPermissions,
+        )
+        self.assertIsInstance(
+            god.creation_limits,
+            GodCreationLimits,
+        )
+        self.assertIsInstance(
+            god.divine_attributes,
+            GodDivineAttributes,
+        )
+
+        self.assertIs(
+            god.permissions,
+            gods.permissions,
+        )
+        self.assertIsNone(god.active_mask)
+
+    def test_god_rejects_mapping_state_replacement(self):
+        _, gods = self._layer()
+
+        god = gods.create_god(
+            name="god",
+            role="creator_entity",
+        )
+
+        protected = (
+            ("masks", {}),
+            ("permissions", {}),
+            ("creation_limits", {}),
+            ("divine_attributes", {}),
+            ("active_mask", {}),
+            ("existence_by_world", {}),
+        )
+
+        originals = {
+            name: getattr(god, name)
+            for name, _ in protected
+        }
+
+        for name, invalid_value in protected:
+            with self.subTest(field=name):
+                with self.assertRaises(TypeError):
+                    setattr(
+                        god,
+                        name,
+                        invalid_value,
+                    )
+
+                self.assertIs(
+                    getattr(god, name),
+                    originals[name],
+                )
+
+        with self.assertRaises(TypeError):
+            god.masks = None
+
+        with self.assertRaises(TypeError):
+            god.permissions = None
+
+        god.active_mask = "director"
+        self.assertEqual(
+            god.active_mask,
+            "director",
+        )
+
+        god.active_mask = None
+        self.assertIsNone(god.active_mask)
+
+        director = gods.assume_mask(
+            god=god,
+            mask_name="director",
+            role="quantum_director",
+        )
+
+        self.assertIs(
+            god.masks.mask_named("director"),
+            director,
+        )
+        self.assertEqual(
+            god.active_mask,
+            "director",
+        )
+
+        released = gods.release_mask(
+            god=god,
+            mask_name="director",
+        )
+
+        self.assertIs(released.mask, director)
+        self.assertFalse(director.active)
+        self.assertIsNone(god.active_mask)
 
     def test_created_god_owns_typed_permissions(self):
         universe, gods = self._layer()

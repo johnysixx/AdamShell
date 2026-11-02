@@ -5,7 +5,11 @@ from core.entity.world_existence_state import (
 from core.entity.departure_state import EntityDepartureIntent
 from core.entity.social_entity import _entity_attr_setdefault
 from core.entity.social_entity import SocialEntity
-from gods.god_actor_state import GodCreationLimits, GodDivineAttributes
+from gods.god_actor_state import (
+    GodCreationLimits,
+    GodDivineAttributes,
+    GodEntity,
+)
 from gods.gods_state import (
     GodBookCreatedEvent,
     GodMaskReleasedResult,
@@ -60,7 +64,7 @@ class Gods:
         self.universe.world['gods_state'] = self.gods_state
 
     def create_god(self, name, role='god_entity'):
-        god = SocialEntity(
+        god = GodEntity(
             name=name,
             type='god',
             role=role,

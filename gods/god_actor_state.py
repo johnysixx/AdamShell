@@ -1,5 +1,11 @@
 from dataclasses import dataclass
 
+from core.entity.social_entity import SocialEntity
+from gods.gods_state import (
+    GodMaskRegistry,
+    GodsPermissions,
+)
+
 
 @dataclass(slots=True)
 class GodDivineAttributes:
@@ -49,3 +55,46 @@ class GodCreationLimits:
                 self.limited_by_current_reality_rules
             ),
         }
+
+
+class GodEntity(SocialEntity):
+    """God actor with protected object-state fields."""
+
+    def __setattr__(self, name, value):
+        if name == "masks":
+            if not isinstance(value, GodMaskRegistry):
+                raise TypeError(
+                    "God masks require GodMaskRegistry."
+                )
+
+        elif name == "permissions":
+            if not isinstance(value, GodsPermissions):
+                raise TypeError(
+                    "God permissions require GodsPermissions."
+                )
+
+        elif name == "creation_limits":
+            if not isinstance(value, GodCreationLimits):
+                raise TypeError(
+                    "God creation limits require "
+                    "GodCreationLimits."
+                )
+
+        elif name == "divine_attributes":
+            if not isinstance(value, GodDivineAttributes):
+                raise TypeError(
+                    "God divine attributes require "
+                    "GodDivineAttributes."
+                )
+
+        elif name == "active_mask":
+            if (
+                value is not None
+                and not isinstance(value, str)
+            ):
+                raise TypeError(
+                    "Active god mask must be a string "
+                    "or None."
+                )
+
+        super().__setattr__(name, value)
