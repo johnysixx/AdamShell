@@ -5,6 +5,7 @@ from idea_universe.primordial_identity_cursor import (
 from idea_universe.primordial_creation_history import (
     PrimordialCreationHistory,
     PrimordialNebulaCreated,
+    PrimordialNebulaPhysicsEvent,
     PrimordialRemnantCreation,
     PrimordialStarCreated,
     PrimordialStarTransition,
@@ -195,6 +196,26 @@ class IdeaUniverse:
             value,
         )
 
+    def _record_primordial_nebula_physics(
+        self,
+        object_id,
+        operation,
+        value,
+        result,
+    ):
+        event = PrimordialNebulaPhysicsEvent(
+            object_id=object_id,
+            operation=operation,
+            value=value,
+            result=result,
+        )
+
+        self._primordial_creation_history = (
+            self.primordial_creation_history.with_event(
+                event
+            )
+        )
+
     @property
     def primordial_creation_history(self):
         return self._primordial_creation_history
@@ -366,6 +387,11 @@ class IdeaUniverse:
         self._primordial_identity_cursor = cursor
         self._primordial_creation_history = history
         self.primordial_nebula = nebula
+
+        nebula.bind_physics_recorder(
+            self._record_primordial_nebula_physics
+        )
+
         self.write_to_world()
 
         return PrimordialStellarEpochResult(
@@ -412,6 +438,7 @@ class IdeaUniverse:
         stars = []
         by_id = {}
         pending_remnants = {}
+        nebula_by_id = {}
         nebula = None
 
         for event in history.events:
@@ -529,8 +556,54 @@ class IdeaUniverse:
                     ],
                 )
 
+                nebula_by_id[nebula.id] = nebula
                 pending_remnants.clear()
                 cursor = next_cursor
+
+            elif type(event) is PrimordialNebulaPhysicsEvent:
+                target = nebula_by_id.get(event.object_id)
+
+                if target is None:
+                    raise ValueError(
+                        "Physics event references unknown nebula."
+                    )
+
+                operation = event.operation
+
+                if operation == "set_size":
+                    target.size = event.value
+                    result = target.size
+
+                elif operation == "form_hydrocarbons":
+                    result = target.form_hydrocarbons()
+
+                elif operation == "form_liquid_hydrocarbons":
+                    result = target.form_liquid_hydrocarbons()
+
+                elif operation == "record_liquid_hydrocarbon_level":
+                    result = (
+                        target.record_liquid_hydrocarbon_level(
+                            event.value
+                        )
+                    )
+
+                elif operation == "mine_liquid_hydrocarbons":
+                    result = target.mine_liquid_hydrocarbons(
+                        event.value
+                    )
+
+                elif operation == "tick":
+                    result = target.tick()
+
+                else:
+                    raise ValueError(
+                        "Unsupported nebula physics operation."
+                    )
+
+                if result != event.result:
+                    raise ValueError(
+                        "Primordial nebula physics result mismatch."
+                    )
 
             else:
                 raise TypeError(
@@ -542,6 +615,11 @@ class IdeaUniverse:
         self.primordial_nebula = nebula
         self._primordial_identity_cursor = cursor
         self._primordial_creation_history = history
+
+        for replayed_nebula in nebula_by_id.values():
+            replayed_nebula.bind_physics_recorder(
+                self._record_primordial_nebula_physics
+            )
 
         self.write_to_world()
 

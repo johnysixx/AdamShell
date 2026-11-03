@@ -153,10 +153,72 @@ class PrimordialNebulaCreated:
             )
 
 
+_NEBULA_PHYSICS_OPERATIONS = frozenset({
+    "set_size",
+    "form_hydrocarbons",
+    "form_liquid_hydrocarbons",
+    "record_liquid_hydrocarbon_level",
+    "mine_liquid_hydrocarbons",
+    "tick",
+})
+
+
+@dataclass(frozen=True, slots=True)
+class PrimordialNebulaPhysicsEvent:
+    object_id: str
+    operation: str
+    value: float | None = None
+    result: float | int | None = None
+
+    def __post_init__(self):
+        _require_id(self.object_id)
+
+        if self.operation not in _NEBULA_PHYSICS_OPERATIONS:
+            raise ValueError(
+                "Unsupported primordial nebula operation."
+            )
+
+        requires_value = self.operation in {
+            "set_size",
+            "record_liquid_hydrocarbon_level",
+            "mine_liquid_hydrocarbons",
+        }
+
+        if requires_value:
+            if (
+                isinstance(self.value, bool)
+                or not isinstance(self.value, (int, float))
+            ):
+                raise TypeError(
+                    "Nebula operation requires numeric value."
+                )
+        elif self.value is not None:
+            raise ValueError(
+                "Unexpected nebula operation value."
+            )
+
+        if self.operation == "tick":
+            if (
+                type(self.result) is not int
+                or self.result < 1
+            ):
+                raise TypeError(
+                    "Nebula tick result must be positive integer."
+                )
+        elif (
+            isinstance(self.result, bool)
+            or not isinstance(self.result, (int, float))
+        ):
+            raise TypeError(
+                "Nebula operation requires numeric result."
+            )
+
+
 _CREATION_EVENTS = (
     PrimordialStarCreated,
     PrimordialStarTransition,
     PrimordialNebulaCreated,
+    PrimordialNebulaPhysicsEvent,
 )
 
 

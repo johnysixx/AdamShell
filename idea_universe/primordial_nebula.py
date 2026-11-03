@@ -86,6 +86,41 @@ class PrimordialNebula:
             .primordial_nebula_state
         )
 
+        self._physics_recorder = None
+
+    def bind_physics_recorder(self, recorder):
+        if not callable(recorder):
+            raise TypeError(
+                "Nebula physics recorder must be callable."
+            )
+
+        if self.id is None:
+            raise ValueError(
+                "Recorded nebula requires canonical ID."
+            )
+
+        if self._physics_recorder is not None:
+            raise RuntimeError(
+                "Nebula physics recorder already bound."
+            )
+
+        self._physics_recorder = recorder
+
+    def _record_physics(
+        self,
+        operation,
+        *,
+        value=None,
+        result=None,
+    ):
+        if self._physics_recorder is not None:
+            self._physics_recorder(
+                self.id,
+                operation,
+                value,
+                result,
+            )
+
     @property
     def id(self):
         return self._id
@@ -127,6 +162,12 @@ class PrimordialNebula:
             .primordial_nebula_state
             .size
         ) = value
+
+        self._record_physics(
+            "set_size",
+            value=self.size,
+            result=self.size,
+        )
 
     @property
     def stars(self):
@@ -334,6 +375,11 @@ class PrimordialNebula:
             "hydrocarbons"
         ] = amount
 
+        self._record_physics(
+            "form_hydrocarbons",
+            result=amount,
+        )
+
         return amount
 
     def can_mine_liquid_hydrocarbons(
@@ -369,6 +415,11 @@ class PrimordialNebula:
             "liquid_hydrocarbons"
         ] = hydrocarbons
 
+        self._record_physics(
+            "form_liquid_hydrocarbons",
+            result=hydrocarbons,
+        )
+
         return hydrocarbons
 
     def record_liquid_hydrocarbon_level(
@@ -386,6 +437,12 @@ class PrimordialNebula:
         )
 
         self.mined_from_current_growth = 0.0
+
+        self._record_physics(
+            "record_liquid_hydrocarbon_level",
+            value=self.current_liquid_hydrocarbon_level,
+            result=self.current_liquid_hydrocarbon_level,
+        )
 
         return (
             self
@@ -462,9 +519,20 @@ class PrimordialNebula:
             amount
         )
 
+        self._record_physics(
+            "mine_liquid_hydrocarbons",
+            value=amount,
+            result=amount,
+        )
+
         return amount
 
     def tick(self):
         self.tick_count += 1
+
+        self._record_physics(
+            "tick",
+            result=self.tick_count,
+        )
 
         return self.tick_count
