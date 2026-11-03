@@ -1,3 +1,5 @@
+from copy import deepcopy
+from types import MappingProxyType
 from idea_universe.primordial_nebula_state import (
     PrimordialNebulaState,
 )
@@ -70,7 +72,7 @@ class PrimordialNebula:
                     + amount
                 )
 
-        self.primordial_nebula_state = (
+        self._nebula_state = (
             PrimordialNebulaState(
                 source_remnants=(
                     source_remnants
@@ -79,11 +81,6 @@ class PrimordialNebula:
                     elemental_potentials
                 ),
             )
-        )
-
-        self.state = (
-            self
-            .primordial_nebula_state
         )
 
         self._physics_recorder = None
@@ -112,6 +109,7 @@ class PrimordialNebula:
         *,
         value=None,
         result=None,
+        element=None,
     ):
         if self._physics_recorder is not None:
             self._physics_recorder(
@@ -119,7 +117,19 @@ class PrimordialNebula:
                 operation,
                 value,
                 result,
+                element,
             )
+
+
+    @property
+    def primordial_nebula_state(self):
+        if self._physics_recorder is None:
+            return self._nebula_state
+        return deepcopy(self._nebula_state)
+
+    @property
+    def state(self):
+        return self.primordial_nebula_state
 
     @property
     def id(self):
@@ -128,8 +138,7 @@ class PrimordialNebula:
     @property
     def tick_count(self):
         return (
-            self
-            .primordial_nebula_state
+            self._nebula_state
             .tick_count
         )
 
@@ -138,17 +147,19 @@ class PrimordialNebula:
         self,
         value,
     ):
+        if self._physics_recorder is not None:
+            raise RuntimeError(
+                "Protected recorded field: tick_count"
+            )
         (
-            self
-            .primordial_nebula_state
+            self._nebula_state
             .tick_count
         ) = value
 
     @property
     def size(self):
         return (
-            self
-            .primordial_nebula_state
+            self._nebula_state
             .size
         )
 
@@ -157,23 +168,30 @@ class PrimordialNebula:
         self,
         value,
     ):
-        (
-            self
-            .primordial_nebula_state
-            .size
-        ) = value
+        from math import isfinite
+
+        if isinstance(value, bool) or not isinstance(
+            value, (int, float)
+        ):
+            raise TypeError("Nebula size must be numeric.")
+
+        if not isfinite(float(value)):
+            raise ValueError("Nebula size must be finite.")
 
         self._record_physics(
             "set_size",
-            value=self.size,
-            result=self.size,
+            value=value,
+            result=value,
         )
+
+        self._nebula_state.size = value
 
     @property
     def stars(self):
+        if self._physics_recorder is not None:
+            return tuple(deepcopy(self._nebula_state.stars))
         return (
-            self
-            .primordial_nebula_state
+            self._nebula_state
             .stars
         )
 
@@ -182,17 +200,19 @@ class PrimordialNebula:
         self,
         value,
     ):
+        if self._physics_recorder is not None:
+            raise RuntimeError("Recorded stars are protected.")
         (
-            self
-            .primordial_nebula_state
+            self._nebula_state
             .stars
         ) = value
 
     @property
     def source_remnants(self):
+        if self._physics_recorder is not None:
+            return tuple(deepcopy(self._nebula_state.source_remnants))
         return (
-            self
-            .primordial_nebula_state
+            self._nebula_state
             .source_remnants
         )
 
@@ -201,6 +221,8 @@ class PrimordialNebula:
         self,
         value,
     ):
+        if self._physics_recorder is not None:
+            raise RuntimeError("Recorded remnants are protected.")
         remnants = list(
             value
         )
@@ -217,14 +239,12 @@ class PrimordialNebula:
                 )
 
         (
-            self
-            .primordial_nebula_state
+            self._nebula_state
             .source_remnants
         ) = remnants
 
         (
-            self
-            .primordial_nebula_state
+            self._nebula_state
             .source_remnant_count
         ) = len(
             remnants
@@ -233,8 +253,7 @@ class PrimordialNebula:
     @property
     def source_remnant_count(self):
         return (
-            self
-            .primordial_nebula_state
+            self._nebula_state
             .source_remnant_count
         )
 
@@ -243,17 +262,23 @@ class PrimordialNebula:
         self,
         value,
     ):
+        if self._physics_recorder is not None:
+            raise RuntimeError(
+                "Protected recorded field: source_remnant_count"
+            )
         (
-            self
-            .primordial_nebula_state
+            self._nebula_state
             .source_remnant_count
         ) = value
 
     @property
     def elemental_potentials(self):
+        if self._physics_recorder is not None:
+            return MappingProxyType(
+                self._nebula_state.elemental_potentials
+            )
         return (
-            self
-            .primordial_nebula_state
+            self._nebula_state
             .elemental_potentials
         )
 
@@ -262,17 +287,17 @@ class PrimordialNebula:
         self,
         value,
     ):
+        if self._physics_recorder is not None:
+            raise RuntimeError("Recorded potentials are protected.")
         (
-            self
-            .primordial_nebula_state
+            self._nebula_state
             .elemental_potentials
         ) = value
 
     @property
     def previous_liquid_hydrocarbon_level(self):
         return (
-            self
-            .primordial_nebula_state
+            self._nebula_state
             .previous_liquid_hydrocarbon_level
         )
 
@@ -281,17 +306,19 @@ class PrimordialNebula:
         self,
         value,
     ):
+        if self._physics_recorder is not None:
+            raise RuntimeError(
+                "Protected recorded field: previous_liquid_hydrocarbon_level"
+            )
         (
-            self
-            .primordial_nebula_state
+            self._nebula_state
             .previous_liquid_hydrocarbon_level
         ) = value
 
     @property
     def current_liquid_hydrocarbon_level(self):
         return (
-            self
-            .primordial_nebula_state
+            self._nebula_state
             .current_liquid_hydrocarbon_level
         )
 
@@ -300,17 +327,19 @@ class PrimordialNebula:
         self,
         value,
     ):
+        if self._physics_recorder is not None:
+            raise RuntimeError(
+                "Protected recorded field: current_liquid_hydrocarbon_level"
+            )
         (
-            self
-            .primordial_nebula_state
+            self._nebula_state
             .current_liquid_hydrocarbon_level
         ) = value
 
     @property
     def mined_from_current_growth(self):
         return (
-            self
-            .primordial_nebula_state
+            self._nebula_state
             .mined_from_current_growth
         )
 
@@ -319,9 +348,12 @@ class PrimordialNebula:
         self,
         value,
     ):
+        if self._physics_recorder is not None:
+            raise RuntimeError(
+                "Protected recorded field: mined_from_current_growth"
+            )
         (
-            self
-            .primordial_nebula_state
+            self._nebula_state
             .mined_from_current_growth
         ) = value
 
@@ -335,11 +367,34 @@ class PrimordialNebula:
             "type":
                 self.type,
             **(
-                self
-                .primordial_nebula_state
+                self._nebula_state
                 .to_dict()
             ),
         }
+
+
+    def set_elemental_potential(self, element, amount):
+        from math import isfinite
+
+        if not isinstance(element, str) or not element.strip():
+            raise ValueError("Element name required.")
+        if isinstance(amount, bool) or not isinstance(
+            amount, (int, float)
+        ):
+            raise TypeError("Numeric amount required.")
+
+        amount = float(amount)
+        if not isfinite(amount):
+            raise ValueError("Finite amount required.")
+
+        self._record_physics(
+            "set_elemental_potential",
+            value=amount,
+            result=amount,
+            element=element,
+        )
+        self._nebula_state.elemental_potentials[element] = amount
+        return amount
 
     def form_hydrocarbons(self):
         hydrogen = (
@@ -371,14 +426,14 @@ class PrimordialNebula:
             carbon,
         )
 
-        self.elemental_potentials[
-            "hydrocarbons"
-        ] = amount
-
         self._record_physics(
             "form_hydrocarbons",
             result=amount,
         )
+        self._nebula_state.elemental_potentials[
+            "hydrocarbons"
+        ] = amount
+
 
         return amount
 
@@ -411,14 +466,14 @@ class PrimordialNebula:
         if hydrocarbons <= 0.0:
             return 0.0
 
-        self.elemental_potentials[
-            "liquid_hydrocarbons"
-        ] = hydrocarbons
-
         self._record_physics(
             "form_liquid_hydrocarbons",
             result=hydrocarbons,
         )
+        self._nebula_state.elemental_potentials[
+            "liquid_hydrocarbons"
+        ] = hydrocarbons
+
 
         return hydrocarbons
 
@@ -426,27 +481,27 @@ class PrimordialNebula:
         self,
         level,
     ):
-        self.previous_liquid_hydrocarbon_level = (
-            self.current_liquid_hydrocarbon_level
+        level = float(level)
+        self._record_physics(
+            "record_liquid_hydrocarbon_level",
+            value=level,
+            result=level,
+        )
+        self._nebula_state.previous_liquid_hydrocarbon_level = (
+            self._nebula_state.current_liquid_hydrocarbon_level
         )
 
-        self.current_liquid_hydrocarbon_level = (
+        self._nebula_state.current_liquid_hydrocarbon_level = (
             float(
                 level
             )
         )
 
-        self.mined_from_current_growth = 0.0
+        self._nebula_state.mined_from_current_growth = 0.0
 
-        self._record_physics(
-            "record_liquid_hydrocarbon_level",
-            value=self.current_liquid_hydrocarbon_level,
-            result=self.current_liquid_hydrocarbon_level,
-        )
 
         return (
-            self
-            .current_liquid_hydrocarbon_level
+            self._nebula_state.current_liquid_hydrocarbon_level
         )
 
     def available_liquid_hydrocarbon_mining(
@@ -511,28 +566,28 @@ class PrimordialNebula:
                 "exceeded."
             )
 
-        self.current_liquid_hydrocarbon_level -= (
-            amount
-        )
-
-        self.mined_from_current_growth += (
-            amount
-        )
-
         self._record_physics(
             "mine_liquid_hydrocarbons",
             value=amount,
             result=amount,
         )
+        self._nebula_state.current_liquid_hydrocarbon_level -= (
+            amount
+        )
+
+        self._nebula_state.mined_from_current_growth += (
+            amount
+        )
+
 
         return amount
 
     def tick(self):
-        self.tick_count += 1
-
         self._record_physics(
             "tick",
-            result=self.tick_count,
+            result=self._nebula_state.tick_count + 1,
         )
+        self._nebula_state.tick_count += 1
 
-        return self.tick_count
+
+        return self._nebula_state.tick_count

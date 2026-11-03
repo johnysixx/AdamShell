@@ -155,6 +155,7 @@ class PrimordialNebulaCreated:
 
 _NEBULA_PHYSICS_OPERATIONS = frozenset({
     "set_size",
+    "set_elemental_potential",
     "form_hydrocarbons",
     "form_liquid_hydrocarbons",
     "record_liquid_hydrocarbon_level",
@@ -169,9 +170,16 @@ class PrimordialNebulaPhysicsEvent:
     operation: str
     value: float | None = None
     result: float | int | None = None
+    element: str | None = None
 
     def __post_init__(self):
         _require_id(self.object_id)
+
+        if self.operation == "set_elemental_potential":
+            if not isinstance(self.element, str) or not self.element.strip():
+                raise ValueError("Element name required.")
+        elif self.element is not None:
+            raise ValueError("Unexpected element field.")
 
         if self.operation not in _NEBULA_PHYSICS_OPERATIONS:
             raise ValueError(
@@ -180,6 +188,7 @@ class PrimordialNebulaPhysicsEvent:
 
         requires_value = self.operation in {
             "set_size",
+            "set_elemental_potential",
             "record_liquid_hydrocarbon_level",
             "mine_liquid_hydrocarbons",
         }

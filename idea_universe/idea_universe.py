@@ -202,12 +202,14 @@ class IdeaUniverse:
         operation,
         value,
         result,
+        element=None,
     ):
         event = PrimordialNebulaPhysicsEvent(
             object_id=object_id,
             operation=operation,
             value=value,
             result=result,
+            element=element,
         )
 
         self._primordial_creation_history = (
@@ -573,6 +575,12 @@ class IdeaUniverse:
                 if operation == "set_size":
                     target.size = event.value
                     result = target.size
+
+                elif operation == "set_elemental_potential":
+                    result = target.set_elemental_potential(
+                        event.element,
+                        event.value,
+                    )
 
                 elif operation == "form_hydrocarbons":
                     result = target.form_hydrocarbons()
