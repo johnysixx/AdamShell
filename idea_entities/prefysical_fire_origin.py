@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from core.entity.social_entity import SocialEntity
 
 from core.entity.serpent_d20 import (
     SerpentD20PublicRollEvent,
@@ -923,10 +924,9 @@ class PrefysicalFireOrigin:
         )
 
         before = float(
-            masculine.get(
-                "energy_j",
-                0.0
-            )
+            masculine.energy_j
+            if isinstance(masculine, SocialEntity)
+            else masculine.get("energy_j", 0.0)
         )
 
         converted = (
@@ -942,12 +942,11 @@ class PrefysicalFireOrigin:
             )
         )
 
-        masculine[
-            "energy_j"
-        ] = (
-            before
-            - converted
-        )
+        after = before - converted
+        if isinstance(masculine, SocialEntity):
+            masculine.energy_j = after
+        else:
+            masculine["energy_j"] = after
 
         self.energy_conversion.masculine_energy_spent_j += (
             converted
@@ -957,11 +956,7 @@ class PrefysicalFireOrigin:
             converted
         )
 
-        after = float(
-            masculine[
-                "energy_j"
-            ]
-        )
+
 
         return (
             PrefysicalFireEnergyConversionEvent(
@@ -1072,8 +1067,7 @@ class PrefysicalFireOrigin:
         )
 
         if not isinstance(
-            masculine,
-            dict
+            masculine, (SocialEntity, dict)
         ):
             raise RuntimeError(
                 "Pazuzu masculine principle "
