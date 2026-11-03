@@ -1,4 +1,5 @@
 import unittest
+from core.entity.social_entity import SocialEntity
 
 from universe.universe import Universe
 from idea_entities import IdeaEntities
@@ -71,11 +72,11 @@ class PrefysicalFireStoryTests(
         # Existing masculine principle.
         self.universe.world[
             "pazuzu_masculine_principle"
-        ] = {
-            "name": "pazuzu",
-            "type": "idea_entity",
-            "energy_j": 100.0
-        }
+        ] = SocialEntity(
+            name="pazuzu",
+            type="idea_entity",
+            energy_j=100.0,
+        )
 
         self.fire_origin = (
             self.idea_entities
@@ -112,9 +113,7 @@ class PrefysicalFireStoryTests(
         )
 
         before_energy = (
-            masculine[
-                "energy_j"
-            ]
+            masculine.energy_j
         )
 
         before_rolls = (
@@ -133,9 +132,7 @@ class PrefysicalFireStoryTests(
         )
 
         after_energy = (
-            masculine[
-                "energy_j"
-            ]
+            masculine.energy_j
         )
 
         after_rolls = (

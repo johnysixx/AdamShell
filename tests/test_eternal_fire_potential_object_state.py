@@ -1,4 +1,5 @@
 import unittest
+from core.entity.social_entity import SocialEntity
 
 from core.entity.serpent_d20 import SerpentD20
 from core.eternal_flame.eternal_flame import EternalFlame
@@ -56,11 +57,11 @@ class EternalFirePotentialObjectStateTests(unittest.TestCase):
     def _system(self):
         universe = Universe()
         idea_entities = IdeaEntities(universe)
-        universe.world["pazuzu_masculine_principle"] = {
-            "name": "pazuzu",
-            "type": "idea_entity",
-            "energy_j": 100.0,
-        }
+        universe.world["pazuzu_masculine_principle"] = SocialEntity(
+            name="pazuzu",
+            type="idea_entity",
+            energy_j=100.0,
+        )
         origin = idea_entities.prefysical_fire_origin
         origin.begin()
 

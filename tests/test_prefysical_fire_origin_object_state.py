@@ -1,4 +1,5 @@
 import unittest
+from core.entity.social_entity import SocialEntity
 
 from idea_entities import IdeaEntities
 from idea_entities.prefysical_fire_origin import (
@@ -47,11 +48,11 @@ class PrefysicalFireOriginObjectStateTests(unittest.TestCase):
     def _origin(self, begin=True):
         universe = Universe()
         idea_entities = IdeaEntities(universe)
-        universe.world["pazuzu_masculine_principle"] = {
-            "name": "pazuzu",
-            "type": "idea_entity",
-            "energy_j": 100.0,
-        }
+        universe.world["pazuzu_masculine_principle"] = SocialEntity(
+            name="pazuzu",
+            type="idea_entity",
+            energy_j=100.0,
+        )
         origin = idea_entities.prefysical_fire_origin
 
         if begin:
@@ -127,7 +128,7 @@ class PrefysicalFireOriginObjectStateTests(unittest.TestCase):
         conversion = origin.energy_conversion
         before = universe.world[
             "pazuzu_masculine_principle"
-        ]["energy_j"]
+        ].energy_j
 
         result = origin.attempt_ignition(
             rng=FixedRng(10)

@@ -925,8 +925,6 @@ class PrefysicalFireOrigin:
 
         before = float(
             masculine.energy_j
-            if isinstance(masculine, SocialEntity)
-            else masculine.get("energy_j", 0.0)
         )
 
         converted = (
@@ -943,10 +941,7 @@ class PrefysicalFireOrigin:
         )
 
         after = before - converted
-        if isinstance(masculine, SocialEntity):
-            masculine.energy_j = after
-        else:
-            masculine["energy_j"] = after
+        masculine.energy_j = after
 
         self.energy_conversion.masculine_energy_spent_j += (
             converted
@@ -1066,12 +1061,16 @@ class PrefysicalFireOrigin:
             )
         )
 
-        if not isinstance(
-            masculine, (SocialEntity, dict)
-        ):
+        if masculine is None:
             raise RuntimeError(
                 "Pazuzu masculine principle "
                 "is missing."
+            )
+
+        if not isinstance(masculine, SocialEntity):
+            raise TypeError(
+                "Pazuzu masculine principle "
+                "requires SocialEntity."
             )
 
         return masculine

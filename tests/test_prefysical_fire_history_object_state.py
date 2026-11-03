@@ -1,4 +1,5 @@
 import unittest
+from core.entity.social_entity import SocialEntity
 
 from idea_entities import IdeaEntities
 from idea_entities.prefysical_fire_origin import (
@@ -22,11 +23,11 @@ class PrefysicalFireHistoryObjectStateTests(
 
         self.universe.world[
             "pazuzu_masculine_principle"
-        ] = {
-            "name": "pazuzu",
-            "type": "idea_entity",
-            "energy_j": 100.0,
-        }
+        ] = SocialEntity(
+            name="pazuzu",
+            type="idea_entity",
+            energy_j=100.0,
+        )
 
         self.origin = (
             self.idea_entities

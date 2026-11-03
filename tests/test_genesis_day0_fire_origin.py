@@ -1,4 +1,5 @@
 import unittest
+from core.entity.social_entity import SocialEntity
 
 from multiverse import UniverseRegistry
 from universe.universe import Universe
@@ -83,10 +84,11 @@ class GenesisDay0FireOriginTests(
         ):
             self.universe.world[
                 name
-            ] = {
-                "name": name,
-                "type": "idea_entity"
-            }
+            ] = SocialEntity(
+                name=name,
+                type="idea_entity",
+                energy_j=0.0,
+            )
 
         self.day0 = GenesisDay0(
             self.universe,

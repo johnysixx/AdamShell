@@ -1,4 +1,5 @@
 import unittest
+from core.entity.social_entity import SocialEntity
 
 from genesis.day0 import GenesisDay0
 from genesis.day0_state import (
@@ -45,11 +46,11 @@ class GenesisDay0ObjectStateTests(unittest.TestCase):
             "lilith",
             "pazuzu_masculine_principle",
         ):
-            universe.world[name] = {
-                "name": name,
-                "type": "idea_entity",
-                "energy_j": 100.0,
-            }
+            universe.world[name] = SocialEntity(
+                name=name,
+                type="idea_entity",
+                energy_j=100.0,
+            )
 
         day0 = GenesisDay0(universe, idea_entities)
 
