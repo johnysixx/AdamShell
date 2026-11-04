@@ -240,6 +240,11 @@ class EntityObject:
             raise TypeError('EntityObject.from_mapping requires dict input.')
         values = dict(mapping)
 
+        if "metadata" in values:
+            values["metadata"] = deepcopy(
+                values["metadata"]
+            )
+
         if isinstance(
             values.get("existence_by_world"),
             dict,
