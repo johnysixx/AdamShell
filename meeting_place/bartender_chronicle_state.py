@@ -485,7 +485,7 @@ class BartenderShiftChronicle:
             "shift_end_tick":
                 self.shift_end_tick,
             "events": [
-                event.to_dict()
+                deepcopy(event.to_dict())
                 for event
                 in self.events
             ],
