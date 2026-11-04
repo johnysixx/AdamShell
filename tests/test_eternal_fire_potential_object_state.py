@@ -825,6 +825,230 @@ class EternalFirePotentialObjectStateTests(unittest.TestCase):
             fire,
         )
 
+    def test_ignition_metadata_snapshots_are_detached(self):
+        fields = (
+            "ignited_by",
+            "ignited_at_idea_tick",
+            "ignited_at_logical_step",
+            "flame_state",
+            "origin_roll_id",
+        )
+
+        fire = EternalFirePotential(
+            actualized=True,
+        )
+
+        sources = {}
+
+        for name in fields:
+            source = {
+                "history": ["original"],
+            }
+
+            sources[name] = source
+            setattr(fire, name, source)
+
+        first = fire.to_dict()
+        second = fire.to_dict()
+
+        for name in fields:
+            first[name]["history"].append(
+                "snapshot_only"
+            )
+
+            self.assertEqual(
+                sources[name]["history"],
+                ["original"],
+            )
+
+            self.assertEqual(
+                second[name]["history"],
+                ["original"],
+            )
+
+            self.assertEqual(
+                fire.to_dict()[name]["history"],
+                ["original"],
+            )
+
+            self.assertIs(
+                getattr(fire, name),
+                sources[name],
+            )
+
+            self.assertIsNot(
+                first[name],
+                sources[name],
+            )
+
+    def test_ignition_snapshots_ignore_later_changes(self):
+        fields = (
+            "ignited_by",
+            "ignited_at_idea_tick",
+            "ignited_at_logical_step",
+            "flame_state",
+            "origin_roll_id",
+        )
+
+        fire = EternalFirePotential(
+            actualized=True,
+        )
+
+        sources = {
+            name: {"values": ["original"]}
+            for name in fields
+        }
+
+        for name, source in sources.items():
+            setattr(fire, name, source)
+
+        snapshot = fire.to_dict()
+
+        for source in sources.values():
+            source["values"].append(
+                "live_change"
+            )
+
+        current = fire.to_dict()
+
+        for name in fields:
+            self.assertEqual(
+                snapshot[name]["values"],
+                ["original"],
+            )
+
+            self.assertEqual(
+                current[name]["values"],
+                ["original", "live_change"],
+            )
+
+            self.assertIs(
+                getattr(fire, name),
+                sources[name],
+            )
+
+        unignited = EternalFirePotential()
+        unignited_snapshot = unignited.to_dict()
+
+        for name in fields:
+            self.assertNotIn(
+                name,
+                unignited_snapshot,
+            )
+
+    def test_world_ignition_snapshots_keep_fire_identity(self):
+        universe = Universe()
+        layer = IdeaEntities(universe)
+
+        fire = layer.eternal_fire
+
+        fields = (
+            "ignited_by",
+            "ignited_at_idea_tick",
+            "ignited_at_logical_step",
+            "flame_state",
+            "origin_roll_id",
+        )
+
+        sources = {
+            name: {"history": ["original"]}
+            for name in fields
+        }
+
+        fire.state = EternalFirePotentialState.BURNING
+        fire.actualized = True
+
+        for name, source in sources.items():
+            setattr(fire, name, source)
+
+        layer.write_to_world()
+
+        boundary = universe.world[
+            "idea_entities"
+        ]
+
+        world_snapshot = boundary[
+            "eternal_fire"
+        ]
+
+        state_snapshot = boundary[
+            "idea_entities_state"
+        ]["eternal_fire"]
+
+        public_snapshot = layer.public_state[
+            "eternal_fire"
+        ]
+
+        self.assertIs(
+            layer.eternal_fire,
+            fire,
+        )
+
+        self.assertIs(
+            layer.idea_entities_state.eternal_fire,
+            fire,
+        )
+
+        self.assertIs(
+            universe.world["idea_entities_state"],
+            layer.idea_entities_state,
+        )
+
+        for name in fields:
+            self.assertIs(
+                getattr(fire, name),
+                sources[name],
+            )
+
+            world_snapshot[name]["history"].append(
+                "snapshot_only"
+            )
+
+            self.assertEqual(
+                sources[name]["history"],
+                ["original"],
+            )
+
+            self.assertEqual(
+                state_snapshot[name]["history"],
+                ["original"],
+            )
+
+            self.assertEqual(
+                public_snapshot[name]["history"],
+                ["original"],
+            )
+
+        for source in sources.values():
+            source["history"].append(
+                "live_change"
+            )
+
+        current = layer.public_state[
+            "eternal_fire"
+        ]
+
+        for name in fields:
+            self.assertEqual(
+                state_snapshot[name]["history"],
+                ["original"],
+            )
+
+            self.assertEqual(
+                public_snapshot[name]["history"],
+                ["original"],
+            )
+
+            self.assertEqual(
+                current[name]["history"],
+                ["original", "live_change"],
+            )
+
+        self.assertIs(
+            layer.eternal_fire,
+            fire,
+        )
+
     def test_to_dict_is_deeply_detached(self):
         fire = EternalFirePotential()
         fire.actualized = True

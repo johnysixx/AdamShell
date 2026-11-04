@@ -124,15 +124,23 @@ class EternalFirePotential:
 
         if self.actualized:
             public_state.update({
-                "ignited_by": self.ignited_by,
-                "ignited_at_idea_tick": self.ignited_at_idea_tick,
-                "ignited_at_logical_step": (
+                "ignited_by": deepcopy(
+                    self.ignited_by
+                ),
+                "ignited_at_idea_tick": deepcopy(
+                    self.ignited_at_idea_tick
+                ),
+                "ignited_at_logical_step": deepcopy(
                     self.ignited_at_logical_step
                 ),
-                "flame_state": self.flame_state,
+                "flame_state": deepcopy(
+                    self.flame_state
+                ),
                 "fuel": self.fuel.to_dict(),
                 "heat_energy_j": self.heat_energy_j,
-                "origin_roll_id": self.origin_roll_id,
+                "origin_roll_id": deepcopy(
+                    self.origin_roll_id
+                ),
             })
 
         if self.meaning is not None:
