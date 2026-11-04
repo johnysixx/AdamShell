@@ -15,7 +15,9 @@ class PrefysicalFireMaterials:
             "wood_sticks": self.wood_sticks,
             "dry_grass": self.dry_grass,
             "found_by": self.found_by,
-            "handed_to": self.handed_to,
+            "handed_to": deepcopy(
+                self.handed_to
+            ),
         }
 
 

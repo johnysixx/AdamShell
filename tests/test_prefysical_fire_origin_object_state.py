@@ -466,6 +466,199 @@ class PrefysicalFireOriginObjectStateTests(unittest.TestCase):
             roles,
         )
 
+    def test_material_recipient_snapshot_detaches_nested_data(self):
+        recipient = {
+            "name": "pazuzu",
+            "inventory": {
+                "items": ["wood"],
+            },
+        }
+
+        materials = PrefysicalFireMaterials(
+            handed_to=recipient,
+        )
+
+        first = materials.to_dict()
+        second = materials.to_dict()
+
+        first["handed_to"]["inventory"][
+            "items"
+        ].append("snapshot_only")
+
+        self.assertEqual(
+            recipient["inventory"]["items"],
+            ["wood"],
+        )
+
+        self.assertEqual(
+            second["handed_to"]["inventory"][
+                "items"
+            ],
+            ["wood"],
+        )
+
+        self.assertEqual(
+            materials.to_dict()["handed_to"][
+                "inventory"
+            ]["items"],
+            ["wood"],
+        )
+
+        self.assertIs(
+            materials.handed_to,
+            recipient,
+        )
+
+        self.assertIsNot(
+            first["handed_to"],
+            recipient,
+        )
+
+    def test_material_recipient_snapshot_ignores_later_changes(self):
+        recipient = {
+            "name": "pazuzu",
+            "history": ["original"],
+        }
+
+        materials = PrefysicalFireMaterials(
+            handed_to=recipient,
+        )
+
+        snapshot = materials.to_dict()
+
+        recipient["history"].append(
+            "live_change"
+        )
+
+        self.assertEqual(
+            snapshot["handed_to"]["history"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            materials.to_dict()["handed_to"][
+                "history"
+            ],
+            ["original", "live_change"],
+        )
+
+        self.assertIs(
+            materials.handed_to,
+            recipient,
+        )
+
+        default_materials = PrefysicalFireMaterials()
+
+        self.assertIsNone(
+            default_materials.to_dict()["handed_to"]
+        )
+
+        self.assertEqual(
+            PrefysicalFireMaterials(
+                handed_to="pazuzu_masculine_principle"
+            ).to_dict()["handed_to"],
+            "pazuzu_masculine_principle",
+        )
+
+    def test_world_material_snapshots_preserve_live_identity(self):
+        universe = Universe()
+        layer = IdeaEntities(universe)
+
+        origin = layer.prefysical_fire_origin
+        materials = origin.materials
+
+        recipient = {
+            "name": "pazuzu",
+            "inventory": {
+                "wood": ["original"],
+            },
+        }
+
+        materials.handed_to = recipient
+
+        layer.write_to_world()
+
+        world_snapshot = universe.world[
+            "idea_entities"
+        ]["prefysical_fire_origin"]["materials"]
+
+        public_snapshot = layer.public_state[
+            "prefysical_fire_origin"
+        ]["materials"]
+
+        origin_snapshot = origin.public_state[
+            "materials"
+        ]
+
+        self.assertIs(
+            origin.materials,
+            materials,
+        )
+
+        self.assertIs(
+            materials.handed_to,
+            recipient,
+        )
+
+        world_snapshot["handed_to"][
+            "inventory"
+        ]["wood"].append("snapshot_only")
+
+        self.assertEqual(
+            recipient["inventory"]["wood"],
+            ["original"],
+        )
+
+        for snapshot in (
+            public_snapshot,
+            origin_snapshot,
+        ):
+            self.assertEqual(
+                snapshot["handed_to"][
+                    "inventory"
+                ]["wood"],
+                ["original"],
+            )
+
+        recipient["inventory"]["wood"].append(
+            "live_change"
+        )
+
+        self.assertEqual(
+            world_snapshot["handed_to"][
+                "inventory"
+            ]["wood"],
+            ["original", "snapshot_only"],
+        )
+
+        self.assertEqual(
+            public_snapshot["handed_to"][
+                "inventory"
+            ]["wood"],
+            ["original"],
+        )
+
+        current = layer.public_state[
+            "prefysical_fire_origin"
+        ]["materials"]
+
+        self.assertEqual(
+            current["handed_to"]["inventory"][
+                "wood"
+            ],
+            ["original", "live_change"],
+        )
+
+        self.assertIs(
+            layer.prefysical_fire_origin,
+            origin,
+        )
+
+        self.assertIs(
+            origin.materials,
+            materials,
+        )
+
     def test_to_dict_snapshots_are_detached(self):
         materials = PrefysicalFireMaterials()
         conversion = PrefysicalFireEnergyConversion()
