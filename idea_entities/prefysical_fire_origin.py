@@ -250,7 +250,7 @@ class PrefysicalFireEvent:
             "participants": list(
                 self.participants
             ),
-            "details": (
+            "details": deepcopy(
                 _thaw_prefysical_fire_payload(
                     self.details
                 )

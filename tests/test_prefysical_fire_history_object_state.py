@@ -400,6 +400,216 @@ class PrefysicalFireHistoryObjectStateTests(
             event,
         )
 
+    def test_direct_event_snapshot_detaches_nested_payload(self):
+        payload = SimpleNamespace(
+            notes=["original"],
+        )
+
+        event = PrefysicalFireEvent(
+            name="direct_snapshot_test",
+            layer="prefysical_fire",
+            logical_step=1,
+            participants=("serpent",),
+            details={
+                "metadata": payload,
+            },
+        )
+
+        first = event.to_dict()
+        second = event.to_dict()
+
+        first["details"]["metadata"].notes.append(
+            "snapshot_only"
+        )
+
+        self.assertEqual(
+            payload.notes,
+            ["original"],
+        )
+
+        self.assertEqual(
+            second["details"]["metadata"].notes,
+            ["original"],
+        )
+
+        self.assertEqual(
+            event.to_dict()["details"]["metadata"].notes,
+            ["original"],
+        )
+
+        self.assertIs(
+            event.details["metadata"],
+            payload,
+        )
+
+        self.assertIsNot(
+            first["details"]["metadata"],
+            payload,
+        )
+
+        self.assertEqual(
+            first["participants"],
+            ["serpent"],
+        )
+
+    def test_direct_event_snapshot_ignores_live_changes(self):
+        payload = SimpleNamespace(
+            metadata={
+                "notes": ["original"],
+            },
+        )
+
+        event = PrefysicalFireEvent(
+            name="live_payload_change_test",
+            layer="prefysical_fire",
+            logical_step=2,
+            participants=("lilith",),
+            details={
+                "payload": payload,
+            },
+        )
+
+        snapshot = event.to_dict()
+
+        payload.metadata["notes"].append(
+            "live_change"
+        )
+
+        self.assertEqual(
+            snapshot["details"]["payload"].metadata[
+                "notes"
+            ],
+            ["original"],
+        )
+
+        current = event.to_dict()
+
+        self.assertEqual(
+            current["details"]["payload"].metadata[
+                "notes"
+            ],
+            ["original", "live_change"],
+        )
+
+        snapshot["details"]["payload"].metadata[
+            "notes"
+        ].append("snapshot_only")
+
+        self.assertEqual(
+            payload.metadata["notes"],
+            ["original", "live_change"],
+        )
+
+        self.assertIs(
+            event.details["payload"],
+            payload,
+        )
+
+    def test_direct_and_world_event_snapshots_are_independent(self):
+        payload = SimpleNamespace(
+            notes=["original"],
+        )
+
+        event = PrefysicalFireEvent(
+            name="world_direct_snapshot_test",
+            layer="prefysical_fire",
+            logical_step=1,
+            participants=("serpent", "lilith"),
+            details={
+                "metadata": payload,
+            },
+        )
+
+        self.origin.record_event(event)
+        self.idea_entities.write_to_world()
+
+        direct = event.to_dict()
+
+        world_snapshot = self.universe.world[
+            "idea_entities"
+        ]["prefysical_fire_origin"]["history"][0]
+
+        public_snapshot = self.origin.public_state[
+            "history"
+        ][0]
+
+        direct["details"]["metadata"].notes.append(
+            "direct_only"
+        )
+
+        self.assertEqual(
+            payload.notes,
+            ["original"],
+        )
+
+        self.assertEqual(
+            world_snapshot["details"][
+                "metadata"
+            ].notes,
+            ["original"],
+        )
+
+        self.assertEqual(
+            public_snapshot["details"][
+                "metadata"
+            ].notes,
+            ["original"],
+        )
+
+        world_snapshot["details"][
+            "metadata"
+        ].notes.append("world_only")
+
+        self.assertEqual(
+            payload.notes,
+            ["original"],
+        )
+
+        self.assertEqual(
+            direct["details"]["metadata"].notes,
+            ["original", "direct_only"],
+        )
+
+        self.assertEqual(
+            public_snapshot["details"][
+                "metadata"
+            ].notes,
+            ["original"],
+        )
+
+        payload.notes.append(
+            "live_change"
+        )
+
+        self.assertEqual(
+            direct["details"]["metadata"].notes,
+            ["original", "direct_only"],
+        )
+
+        self.assertEqual(
+            world_snapshot["details"][
+                "metadata"
+            ].notes,
+            ["original", "world_only"],
+        )
+
+        self.assertEqual(
+            event.to_dict()["details"][
+                "metadata"
+            ].notes,
+            ["original", "live_change"],
+        )
+
+        self.assertIs(
+            self.origin.history[0],
+            event,
+        )
+
+        self.assertIs(
+            event.details["metadata"],
+            payload,
+        )
+
     def test_history_rejects_mapping_event(
         self
     ):
