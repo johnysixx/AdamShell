@@ -6,6 +6,22 @@ from eden.eden_state import EdenPermissions, EdenState
 from universe.universe import Universe
 
 
+class MutableSerializedEdenEntity:
+
+    def __init__(self):
+        self.metadata = {
+            "nested": {
+                "tags": ["original"],
+            },
+        }
+
+    def to_dict(self):
+        return {
+            "name": "test_eden_entity",
+            "metadata": self.metadata,
+        }
+
+
 class EdenObjectStateTests(unittest.TestCase):
 
     def _eden(self):
@@ -233,6 +249,143 @@ class EdenObjectStateTests(unittest.TestCase):
             ("god",),
         )
         self.assertEqual(eden.eden_state.entities, [])
+
+    def test_serialized_entity_snapshot_detaches_nested_data(self):
+        entity = MutableSerializedEdenEntity()
+
+        state = EdenState(
+            entities=[entity],
+        )
+
+        first = state.to_dict()
+        second = state.to_dict()
+
+        first["entities"][0]["metadata"][
+            "nested"
+        ]["tags"].append("snapshot_only")
+
+        self.assertEqual(
+            entity.metadata["nested"]["tags"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            second["entities"][0]["metadata"][
+                "nested"
+            ]["tags"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            state.to_dict()["entities"][0][
+                "metadata"
+            ]["nested"]["tags"],
+            ["original"],
+        )
+
+        self.assertIs(
+            state.entities[0],
+            entity,
+        )
+
+    def test_eden_public_snapshot_ignores_live_entity_changes(self):
+        universe, eden = self._eden()
+        entity = MutableSerializedEdenEntity()
+
+        eden.add_entity(entity)
+
+        self.assertIs(
+            eden.entities[0],
+            entity,
+        )
+
+        snapshot = eden.public_state["eden_state"]
+        world_snapshot = universe.world[
+            "eden"
+        ]["eden_state"]
+
+        entity.metadata["nested"][
+            "tags"
+        ].append("live_change")
+
+        self.assertEqual(
+            snapshot["entities"][0]["metadata"][
+                "nested"
+            ]["tags"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            world_snapshot["entities"][0][
+                "metadata"
+            ]["nested"]["tags"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            eden.public_state["eden_state"][
+                "entities"
+            ][0]["metadata"]["nested"]["tags"],
+            ["original", "live_change"],
+        )
+
+        self.assertIs(
+            eden.eden_state.entities[0],
+            entity,
+        )
+
+    def test_all_eden_entity_collections_keep_live_identity(self):
+        entity = MutableSerializedEdenEntity()
+
+        state = EdenState(
+            entities=[entity],
+            plants=[entity],
+            trees=[entity],
+            animals=[entity],
+        )
+
+        snapshot = state.to_dict()
+
+        for collection in (
+            "entities",
+            "plants",
+            "trees",
+            "animals",
+        ):
+            self.assertIs(
+                getattr(state, collection)[0],
+                entity,
+            )
+
+            self.assertEqual(
+                snapshot[collection][0][
+                    "metadata"
+                ]["nested"]["tags"],
+                ["original"],
+            )
+
+        snapshot["plants"][0]["metadata"][
+            "nested"
+        ]["tags"].append("snapshot_only")
+
+        self.assertEqual(
+            entity.metadata["nested"]["tags"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            snapshot["trees"][0]["metadata"][
+                "nested"
+            ]["tags"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            state.to_dict()["plants"][0][
+                "metadata"
+            ]["nested"]["tags"],
+            ["original"],
+        )
 
     def test_to_dict_is_detached_boundary(self):
         state = EdenState()

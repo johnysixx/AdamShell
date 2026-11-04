@@ -19,7 +19,9 @@ class EdenPermissions:
 def _snapshot_entity(entity):
     to_dict = getattr(entity, "to_dict", None)
     if callable(to_dict):
-        return to_dict()
+        return deepcopy(
+            to_dict()
+        )
     return deepcopy(entity)
 
 
