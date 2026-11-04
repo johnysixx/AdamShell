@@ -21,6 +21,168 @@ class SocialEntityMetadataSnapshotTests(
             },
         )
 
+    def test_direct_constructor_captures_metadata(self):
+        external = {
+            "preferences": {
+                "notes": ["original"],
+            },
+        }
+
+        entity = SocialEntity(
+            name="direct_guest",
+            type="human",
+            metadata=external,
+        )
+
+        self.assertIsNot(
+            entity.metadata,
+            external,
+        )
+
+        self.assertIsNot(
+            entity.metadata["preferences"],
+            external["preferences"],
+        )
+
+        external["preferences"][
+            "notes"
+        ].append("external_change")
+
+        self.assertEqual(
+            entity.metadata["preferences"]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            entity.to_dict()["metadata"][
+                "preferences"
+            ]["notes"],
+            ["original"],
+        )
+
+    def test_direct_entities_do_not_share_metadata(self):
+        shared = {
+            "preferences": {
+                "notes": ["original"],
+            },
+        }
+
+        first = SocialEntity(
+            name="first",
+            type="human",
+            metadata=shared,
+        )
+
+        second = SocialEntity(
+            name="second",
+            type="human",
+            metadata=shared,
+        )
+
+        first.metadata["preferences"][
+            "notes"
+        ].append("first_only")
+
+        self.assertEqual(
+            first.metadata["preferences"]["notes"],
+            ["original", "first_only"],
+        )
+
+        self.assertEqual(
+            second.metadata["preferences"]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            shared["preferences"]["notes"],
+            ["original"],
+        )
+
+        self.assertIsNot(
+            first.metadata["preferences"],
+            second.metadata["preferences"],
+        )
+
+    def test_direct_constructor_keeps_typed_references(self):
+        from core.entity.world_existence_state import (
+            WorldExistenceState,
+        )
+
+        existence = WorldExistenceState.of(
+            root_universe=70.0,
+        )
+
+        relationships = (
+            SocialRelationshipRegistry.from_mapping({
+                "lilith": {
+                    "affinity": 0.4,
+                    "pet_count": 2,
+                    "last_interaction": "pet",
+                },
+            })
+        )
+
+        external = {
+            "preferences": {
+                "notes": ["original"],
+            },
+        }
+
+        entity = SocialEntity(
+            name="typed_direct_guest",
+            type="human",
+            metadata=external,
+            existence_by_world=existence,
+            social_relationships=relationships,
+        )
+
+        self.assertIs(
+            entity.existence_by_world,
+            existence,
+        )
+
+        self.assertIs(
+            entity.social_relationships,
+            relationships,
+        )
+
+        self.assertIs(
+            SocialEntity.from_mapping(entity),
+            entity,
+        )
+
+        snapshot = entity.to_dict()
+
+        snapshot["metadata"]["preferences"][
+            "notes"
+        ].append("snapshot_only")
+
+        snapshot["social_relationships"][
+            "lilith"
+        ]["affinity"] = 1.0
+
+        self.assertEqual(
+            entity.metadata["preferences"]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            external["preferences"]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            existence.percent_in("root_universe"),
+            70.0,
+        )
+
+        self.assertEqual(
+            relationships.relationship_for(
+                "lilith"
+            ).affinity,
+            0.4,
+        )
+
     def test_from_mapping_captures_nested_metadata(self):
         source = {
             "name": "imported_entity",

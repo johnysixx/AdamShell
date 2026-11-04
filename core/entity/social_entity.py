@@ -230,6 +230,9 @@ class EntityObject:
 
     def __init__(self, **state):
         for key, value in state.items():
+            if key == "metadata":
+                value = deepcopy(value)
+
             setattr(self, key, value)
 
     @classmethod
