@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from core.eternal_flame.eternal_flame_objects import (
     EternalFlameHistoryRecord,
     EternalFlameSourceIdea,
@@ -72,13 +74,13 @@ class EternalFlame:
             'type': self.type,
             'state': self.state.value,
             'ignited': self.ignited,
-            'ignited_at_tick': self.ignited_at_tick,
+            'ignited_at_tick': deepcopy(self.ignited_at_tick),
             'source_idea': (
                 None
                 if self.source_idea is None
                 else self.source_idea.to_dict()
             ),
-            'keeper': self.keeper,
+            'keeper': deepcopy(self.keeper),
             'continuity_intact': self.continuity_intact,
             'history': [
                 record.to_dict()
