@@ -1,5 +1,6 @@
 from core.entity.social_entity import SocialEntity
 import unittest
+from types import SimpleNamespace
 from universe.cat_recipient_registry import CatRecipientRegistry
 
 class CatRecipientRegistryTests(unittest.TestCase):
@@ -72,6 +73,119 @@ class CatRecipientRegistryTests(unittest.TestCase):
         updated = registry.public_state
         self.assertTrue(
             updated["recipients"][0]["needs_cat"]
+        )
+
+    def test_register_rejects_missing_serializer(self):
+        registry = CatRecipientRegistry()
+
+        entity = SimpleNamespace(
+            id="invalid",
+            type="human",
+            needs_cat=True,
+        )
+
+        with self.assertRaisesRegex(
+            TypeError,
+            "to_dict",
+        ):
+            registry.register(entity)
+
+        self.assertEqual(
+            registry.recipients,
+            [],
+        )
+
+        self.assertEqual(
+            registry.public_state["recipient_count"],
+            0,
+        )
+
+    def test_register_rejects_noncallable_serializer(self):
+        registry = CatRecipientRegistry()
+
+        entity = SimpleNamespace(
+            id="invalid",
+            type="human",
+            needs_cat=True,
+            to_dict=None,
+        )
+
+        with self.assertRaisesRegex(
+            TypeError,
+            "to_dict",
+        ):
+            registry.register(entity)
+
+        self.assertEqual(
+            registry.waiting_for_cat(),
+            [],
+        )
+
+        self.assertEqual(
+            registry.public_state["recipients"],
+            [],
+        )
+
+    def test_invalid_registration_preserves_valid_recipients(self):
+        registry = CatRecipientRegistry()
+
+        valid = SocialEntity(
+            id="alice",
+            type="human",
+            needs_cat=True,
+        )
+
+        self.assertIs(
+            registry.register(valid),
+            valid,
+        )
+
+        invalid = SimpleNamespace(
+            id="broken",
+            type="human",
+            needs_cat=True,
+        )
+
+        with self.assertRaisesRegex(
+            TypeError,
+            "to_dict",
+        ):
+            registry.register(invalid)
+
+        self.assertIs(
+            registry.find("alice"),
+            valid,
+        )
+
+        self.assertEqual(
+            registry.waiting_for_cat(),
+            [valid],
+        )
+
+        self.assertIs(
+            registry.register(valid),
+            valid,
+        )
+
+        self.assertEqual(
+            len(registry.recipients),
+            1,
+        )
+
+        snapshot = registry.public_state
+
+        self.assertEqual(
+            snapshot["recipient_count"],
+            1,
+        )
+
+        self.assertEqual(
+            snapshot["recipients"],
+            [{
+                "id": "alice",
+                "type": "human",
+                "needs_cat": True,
+            }],
         )
 
     def test_empty_registry_public_state(self):

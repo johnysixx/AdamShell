@@ -22,6 +22,13 @@ class CatRecipientRegistry:
             raise TypeError(
                 "Cat recipient requires entity identity."
             )
+        if not callable(
+            getattr(entity, "to_dict", None)
+        ):
+            raise TypeError(
+                "Cat recipient requires callable to_dict()."
+            )
+
         if entity not in self.recipients:
             self.recipients.append(entity)
         return entity
