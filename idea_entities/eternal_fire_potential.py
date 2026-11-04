@@ -108,8 +108,12 @@ class EternalFirePotential:
             "type": self.type,
             "state": self.state.value,
             "actualized": self.actualized,
-            "physical_time": self.physical_time,
-            "physical_location": self.physical_location,
+            "physical_time": deepcopy(
+                self.physical_time
+            ),
+            "physical_location": deepcopy(
+                self.physical_location
+            ),
             "requires_maintenance": self.requires_maintenance,
             "maintainer": self.maintainer,
             "interactions": [

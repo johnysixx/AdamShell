@@ -551,6 +551,280 @@ class EternalFirePotentialObjectStateTests(unittest.TestCase):
             fire,
         )
 
+    def test_physical_snapshots_detach_nested_data(self):
+        clock = {
+            "phase": {
+                "ticks": [1],
+            },
+        }
+
+        location = {
+            "coordinates": {
+                "x": [2.0],
+            },
+        }
+
+        fire = EternalFirePotential()
+        fire.physical_time = clock
+        fire.physical_location = location
+
+        first = fire.to_dict()
+        second = fire.to_dict()
+
+        first["physical_time"]["phase"][
+            "ticks"
+        ].append(999)
+
+        first["physical_location"][
+            "coordinates"
+        ]["x"].append(999.0)
+
+        self.assertEqual(
+            clock["phase"]["ticks"],
+            [1],
+        )
+
+        self.assertEqual(
+            location["coordinates"]["x"],
+            [2.0],
+        )
+
+        self.assertEqual(
+            second["physical_time"]["phase"][
+                "ticks"
+            ],
+            [1],
+        )
+
+        self.assertEqual(
+            second["physical_location"][
+                "coordinates"
+            ]["x"],
+            [2.0],
+        )
+
+        self.assertIs(
+            fire.physical_time,
+            clock,
+        )
+
+        self.assertIs(
+            fire.physical_location,
+            location,
+        )
+
+        self.assertIsNot(
+            first["physical_time"],
+            clock,
+        )
+
+        self.assertIsNot(
+            first["physical_location"],
+            location,
+        )
+
+    def test_physical_snapshots_ignore_later_live_changes(self):
+        fire = EternalFirePotential()
+
+        clock = {
+            "history": ["original"],
+        }
+
+        location = {
+            "route": ["origin"],
+        }
+
+        fire.physical_time = clock
+        fire.physical_location = location
+
+        snapshot = fire.to_dict()
+
+        clock["history"].append("live_change")
+        location["route"].append("live_change")
+
+        self.assertEqual(
+            snapshot["physical_time"][
+                "history"
+            ],
+            ["original"],
+        )
+
+        self.assertEqual(
+            snapshot["physical_location"][
+                "route"
+            ],
+            ["origin"],
+        )
+
+        current = fire.to_dict()
+
+        self.assertEqual(
+            current["physical_time"][
+                "history"
+            ],
+            ["original", "live_change"],
+        )
+
+        self.assertEqual(
+            current["physical_location"][
+                "route"
+            ],
+            ["origin", "live_change"],
+        )
+
+        self.assertIs(
+            fire.physical_time,
+            clock,
+        )
+
+        self.assertIs(
+            fire.physical_location,
+            location,
+        )
+
+    def test_world_physical_snapshots_keep_live_fire_identity(self):
+        universe = Universe()
+        layer = IdeaEntities(universe)
+
+        fire = layer.eternal_fire
+
+        clock = {
+            "history": ["original"],
+        }
+
+        location = {
+            "coordinates": {
+                "x": [2.0],
+            },
+        }
+
+        fire.physical_time = clock
+        fire.physical_location = location
+
+        layer.write_to_world()
+
+        boundary = universe.world[
+            "idea_entities"
+        ]
+
+        world_snapshot = boundary[
+            "eternal_fire"
+        ]
+
+        state_snapshot = boundary[
+            "idea_entities_state"
+        ]["eternal_fire"]
+
+        public_snapshot = layer.public_state[
+            "eternal_fire"
+        ]
+
+        self.assertIs(
+            layer.eternal_fire,
+            fire,
+        )
+
+        self.assertIs(
+            layer.idea_entities_state.eternal_fire,
+            fire,
+        )
+
+        self.assertIs(
+            universe.world["idea_entities_state"],
+            layer.idea_entities_state,
+        )
+
+        self.assertIs(
+            fire.physical_time,
+            clock,
+        )
+
+        self.assertIs(
+            fire.physical_location,
+            location,
+        )
+
+        world_snapshot["physical_time"][
+            "history"
+        ].append("snapshot_only")
+
+        world_snapshot["physical_location"][
+            "coordinates"
+        ]["x"].append(999.0)
+
+        self.assertEqual(
+            clock["history"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            location["coordinates"]["x"],
+            [2.0],
+        )
+
+        for snapshot in (
+            state_snapshot,
+            public_snapshot,
+        ):
+            self.assertEqual(
+                snapshot["physical_time"][
+                    "history"
+                ],
+                ["original"],
+            )
+
+            self.assertEqual(
+                snapshot["physical_location"][
+                    "coordinates"
+                ]["x"],
+                [2.0],
+            )
+
+        clock["history"].append(
+            "live_change"
+        )
+
+        location["coordinates"][
+            "x"
+        ].append(3.0)
+
+        self.assertEqual(
+            state_snapshot["physical_time"][
+                "history"
+            ],
+            ["original"],
+        )
+
+        self.assertEqual(
+            public_snapshot["physical_location"][
+                "coordinates"
+            ]["x"],
+            [2.0],
+        )
+
+        current = layer.public_state[
+            "eternal_fire"
+        ]
+
+        self.assertEqual(
+            current["physical_time"][
+                "history"
+            ],
+            ["original", "live_change"],
+        )
+
+        self.assertEqual(
+            current["physical_location"][
+                "coordinates"
+            ]["x"],
+            [2.0, 3.0],
+        )
+
+        self.assertIs(
+            layer.eternal_fire,
+            fire,
+        )
+
     def test_to_dict_is_deeply_detached(self):
         fire = EternalFirePotential()
         fire.actualized = True
