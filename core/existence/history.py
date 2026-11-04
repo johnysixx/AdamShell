@@ -25,6 +25,9 @@ class HistoryRecord:
         self.parent_branch_id = parent_branch_id
         self.created_by = created_by
         self.events = list(events)
+        self._recorded_events = deepcopy(
+            self.events
+        )
 
         self.actualized = [
             potential.public_state
@@ -52,7 +55,7 @@ class HistoryRecord:
             "branch_id": self.branch_id,
             "parent_branch_id": self.parent_branch_id,
             "created_by": self.created_by,
-            "events": deepcopy(self.events),
+            "events": deepcopy(self._recorded_events),
             "actualized": deepcopy(
                 self.actualized
             ),

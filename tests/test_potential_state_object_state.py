@@ -367,6 +367,162 @@ class PotentialStateObjectStateTests(
             1,
         )
 
+    def test_history_capture_ignores_source_event_mutation(self):
+        event = SimpleNamespace(
+            name="captured_event",
+            details={
+                "nested": {
+                    "count": 1,
+                },
+            },
+        )
+
+        record = HistoryRecord(
+            cycle_id="cycle_test",
+            events=[event],
+            potentials=[],
+        )
+
+        event.details["nested"]["count"] = 99
+
+        self.assertIs(
+            record.events[0],
+            event,
+        )
+
+        self.assertEqual(
+            record.events[0].details[
+                "nested"
+            ]["count"],
+            99,
+        )
+
+        snapshot = record.public_state
+
+        self.assertEqual(
+            snapshot["events"][0].details[
+                "nested"
+            ]["count"],
+            1,
+        )
+
+        snapshot["events"][0].details[
+            "nested"
+        ]["count"] = 200
+
+        self.assertEqual(
+            record.public_state["events"][0].details[
+                "nested"
+            ]["count"],
+            1,
+        )
+
+    def test_history_capture_preserves_event_aliases(self):
+        event = SimpleNamespace(
+            name="shared_event",
+            details={
+                "values": ["original"],
+            },
+        )
+
+        record = HistoryRecord(
+            cycle_id="cycle_test",
+            events=[event, event],
+            potentials=[],
+        )
+
+        event.details["values"].append(
+            "live_change"
+        )
+
+        snapshot = record.public_state
+
+        self.assertIs(
+            record.events[0],
+            event,
+        )
+
+        self.assertIs(
+            record.events[1],
+            event,
+        )
+
+        self.assertIs(
+            snapshot["events"][0],
+            snapshot["events"][1],
+        )
+
+        self.assertIsNot(
+            snapshot["events"][0],
+            event,
+        )
+
+        self.assertEqual(
+            snapshot["events"][0].details["values"],
+            ["original"],
+        )
+
+        snapshot["events"][0].details[
+            "values"
+        ].append("snapshot_only")
+
+        self.assertEqual(
+            snapshot["events"][1].details["values"],
+            ["original", "snapshot_only"],
+        )
+
+        self.assertEqual(
+            record.public_state["events"][0].details[
+                "values"
+            ],
+            ["original"],
+        )
+
+    def test_history_collection_captures_event_at_record_time(self):
+        event = SimpleNamespace(
+            name="collection_event",
+            details={
+                "numbers": [1],
+            },
+        )
+
+        cycle = ActualizationCycle(
+            cycle_id="cycle_test",
+        )
+
+        cycle.state = ActualizationCycleState.RESOLVED
+
+        history = History()
+
+        record = history.record_cycle(
+            cycle=cycle,
+            events=[event],
+        )
+
+        event.details["numbers"].append(2)
+
+        self.assertIs(
+            history.latest,
+            record,
+        )
+
+        self.assertIs(
+            record.events[0],
+            event,
+        )
+
+        self.assertEqual(
+            record.events[0].details["numbers"],
+            [1, 2],
+        )
+
+        self.assertEqual(
+            history.public_state["records"][0][
+                "events"
+            ][0].details["numbers"],
+            [1],
+        )
+
     def test_history_event_snapshot_is_detached(self):
         event = SimpleNamespace(
             name="test_event",
