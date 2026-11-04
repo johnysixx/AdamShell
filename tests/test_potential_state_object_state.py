@@ -6,6 +6,9 @@ from core.actualization.potential_state import (
     PotentialState,
 )
 from core.existence.history import HistoryRecord
+from core.actualization.potential_blueprint import (
+    PotentialBlueprint,
+)
 
 
 class PotentialStateObjectStateTests(
@@ -78,6 +81,83 @@ class PotentialStateObjectStateTests(
 
         with self.assertRaises(TypeError):
             potential.state = "actualized"
+
+    def test_blueprint_public_state_detaches_nested_context(self):
+        blueprint = PotentialBlueprint(
+            name="test",
+            probability=1.0,
+            action=None,
+            mandatory=False,
+            available=True,
+            context={
+                "nested": {
+                    "count": 1,
+                },
+            },
+        )
+
+        first = blueprint.public_state
+        second = blueprint.public_state
+
+        first["context"]["nested"]["count"] = 99
+
+        self.assertEqual(
+            blueprint.context["nested"]["count"],
+            1,
+        )
+
+        self.assertEqual(
+            second["context"]["nested"]["count"],
+            1,
+        )
+
+        self.assertEqual(
+            blueprint.public_state["context"]["nested"]["count"],
+            1,
+        )
+
+    def test_history_blueprint_snapshot_is_detached(self):
+        potential = Potential(
+            possibility=Possibility(
+                name="history_test",
+                probability=1.0,
+                mandatory=True,
+            ),
+            cycle_id="cycle_test",
+            context={
+                "nested": {
+                    "count": 1,
+                },
+            },
+        )
+
+        potential.mark_actualized()
+
+        record = HistoryRecord(
+            cycle_id="cycle_test",
+            events=[],
+            potentials=[potential],
+        )
+
+        snapshot = record.public_state
+
+        snapshot["potential_blueprints"][0][
+            "context"
+        ]["nested"]["count"] = 99
+
+        self.assertEqual(
+            record.potential_blueprints[0].context[
+                "nested"
+            ]["count"],
+            1,
+        )
+
+        self.assertEqual(
+            record.public_state["potential_blueprints"][0][
+                "context"
+            ]["nested"]["count"],
+            1,
+        )
 
     def test_history_record_classifies_enum_states(
         self

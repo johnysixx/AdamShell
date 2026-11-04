@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from .possibility import Possibility
 from .potential import Potential
 
@@ -70,7 +72,7 @@ class PotentialBlueprint:
             "mandatory": self.mandatory,
             "available": self.available,
             "source": self.source,
-            "context": dict(
-                self.context
+            "context": deepcopy(
+                dict(self.context)
             )
         }
