@@ -251,6 +251,126 @@ class IdeaEntitiesObjectStateTests(unittest.TestCase):
             EternalFirePotentialState.UNIGNITED,
         )
 
+    def test_nested_permissions_snapshot_is_detached(self):
+        state = IdeaEntitiesState()
+
+        state.permissions["nested"] = {
+            "allowed": ["create"],
+        }
+
+        first = state.to_dict()
+        second = state.to_dict()
+
+        first["permissions"]["nested"][
+            "allowed"
+        ].append("snapshot_only")
+
+        self.assertEqual(
+            state.permissions["nested"]["allowed"],
+            ["create"],
+        )
+
+        self.assertEqual(
+            second["permissions"]["nested"][
+                "allowed"
+            ],
+            ["create"],
+        )
+
+        self.assertEqual(
+            state.to_dict()["permissions"][
+                "nested"
+            ]["allowed"],
+            ["create"],
+        )
+
+        self.assertIsNot(
+            first["permissions"]["nested"],
+            state.permissions["nested"],
+        )
+
+    def test_permissions_snapshot_ignores_later_live_changes(self):
+        state = IdeaEntitiesState()
+
+        state.permissions["nested"] = {
+            "allowed": ["create"],
+        }
+
+        snapshot = state.to_dict()
+
+        state.permissions["nested"][
+            "allowed"
+        ].append("influence")
+
+        self.assertEqual(
+            snapshot["permissions"]["nested"][
+                "allowed"
+            ],
+            ["create"],
+        )
+
+        self.assertEqual(
+            state.to_dict()["permissions"][
+                "nested"
+            ]["allowed"],
+            ["create", "influence"],
+        )
+
+        self.assertTrue(
+            snapshot["permissions"]["can_influence"],
+        )
+
+    def test_live_permissions_identity_is_preserved(self):
+        universe, layer = self._layer()
+
+        state = layer.idea_entities_state
+
+        state.permissions["nested"] = {
+            "roles": ["observer"],
+        }
+
+        entity = layer.create_idea_entity(
+            name="permission_test",
+        )
+
+        self.assertIs(
+            layer.permissions,
+            state.permissions,
+        )
+
+        self.assertIs(
+            entity.permissions,
+            state.permissions,
+        )
+
+        self.assertIs(
+            universe.world["idea_entities"][
+                "permissions"
+            ],
+            state.permissions,
+        )
+
+        snapshot = state.to_dict()
+
+        snapshot["permissions"]["nested"][
+            "roles"
+        ].append("intruder")
+
+        self.assertEqual(
+            state.permissions["nested"]["roles"],
+            ["observer"],
+        )
+
+        self.assertEqual(
+            entity.permissions["nested"]["roles"],
+            ["observer"],
+        )
+
+        self.assertIs(
+            layer.idea_entities_state,
+            state,
+        )
+
     def test_to_dict_is_deeply_detached(self):
         state = IdeaEntitiesState()
         state.events.append(

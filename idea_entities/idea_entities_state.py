@@ -1,3 +1,4 @@
+from copy import deepcopy
 from dataclasses import dataclass, field
 
 from idea_entities.eternal_fire_potential import EternalFirePotential
@@ -41,6 +42,6 @@ class IdeaEntitiesState:
                 event.to_dict()
                 for event in self.event_history
             ],
-            "permissions": dict(self.permissions),
+            "permissions": deepcopy(dict(self.permissions)),
             "tick_count": self.tick_count,
         }
