@@ -20,6 +20,24 @@ from meeting_place.how_to_mix_drinks import (
 )
 
 
+class MutableSerializedObservedBarEvent:
+
+    def __init__(self):
+        self.name = "custom_bar_observation"
+
+        self.metadata = {
+            "history": {
+                "notes": ["original"],
+            },
+        }
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "metadata": self.metadata,
+        }
+
+
 class BartenderShiftChronicleTests(
     unittest.TestCase
 ):
@@ -423,6 +441,223 @@ class BartenderShiftChronicleTests(
                 'raspberry_rum',
                 'lemonade',
             ],
+        )
+
+    def test_observed_event_snapshot_detaches_nested_data(self):
+        observed = MutableSerializedObservedBarEvent()
+
+        entry = BartenderObservedEventEntry(
+            observed_event=observed,
+        )
+
+        first = entry.to_dict()
+        second = entry.to_dict()
+
+        first["observed_event"]["metadata"][
+            "history"
+        ]["notes"].append("snapshot_only")
+
+        self.assertEqual(
+            observed.metadata["history"]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            second["observed_event"]["metadata"][
+                "history"
+            ]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            entry.to_dict()["observed_event"][
+                "metadata"
+            ]["history"]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            first["kind"],
+            "ordinary",
+        )
+
+        self.assertEqual(
+            first["observed_event"]["name"],
+            "custom_bar_observation",
+        )
+
+        self.assertIs(
+            entry.observed_event,
+            observed,
+        )
+
+        self.assertIsNot(
+            first["observed_event"]["metadata"],
+            observed.metadata,
+        )
+
+    def test_observed_event_without_serializer_is_detached(self):
+        observed = {
+            "name": "unstructured_observation",
+            "details": {
+                "notes": ["original"],
+            },
+        }
+
+        entry = BartenderObservedEventEntry(
+            observed_event=observed,
+        )
+
+        snapshot = entry.to_dict()
+
+        observed["details"]["notes"].append(
+            "live_change"
+        )
+
+        self.assertEqual(
+            snapshot["observed_event"][
+                "details"
+            ]["notes"],
+            ["original"],
+        )
+
+        snapshot["observed_event"][
+            "details"
+        ]["notes"].append("snapshot_only")
+
+        self.assertEqual(
+            observed["details"]["notes"],
+            ["original", "live_change"],
+        )
+
+        current = entry.to_dict()
+
+        self.assertEqual(
+            current["observed_event"][
+                "details"
+            ]["notes"],
+            ["original", "live_change"],
+        )
+
+        self.assertIs(
+            entry.observed_event,
+            observed,
+        )
+
+        self.assertIsNot(
+            snapshot["observed_event"],
+            observed,
+        )
+
+    def test_shift_chronicle_snapshots_keep_live_event_identity(self):
+        counter = BarCounter()
+
+        bartender = Bartender(
+            counter.hidden_story_book
+        )
+
+        observed = MutableSerializedObservedBarEvent()
+
+        bartender.observe_event(
+            observed
+        )
+
+        chronicle = bartender.end_shift(
+            bar_day=1,
+            shift_start_tick=0,
+            shift_end_tick=24,
+        )[0]
+
+        stored = counter.hidden_story_book.read_entries()
+
+        self.assertIs(
+            stored[0],
+            chronicle,
+        )
+
+        self.assertIsInstance(
+            chronicle,
+            BartenderShiftChronicle,
+        )
+
+        entry = chronicle.events[0]
+
+        self.assertIsInstance(
+            entry,
+            BartenderObservedEventEntry,
+        )
+
+        self.assertIs(
+            entry.observed_event,
+            observed,
+        )
+
+        self.assertIsInstance(
+            chronicle.events,
+            tuple,
+        )
+
+        first = chronicle.to_dict()
+        second = chronicle.to_dict()
+
+        first["events"][0]["observed_event"][
+            "metadata"
+        ]["history"]["notes"].append(
+            "snapshot_only"
+        )
+
+        self.assertEqual(
+            observed.metadata["history"]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            second["events"][0]["observed_event"][
+                "metadata"
+            ]["history"]["notes"],
+            ["original"],
+        )
+
+        observed.metadata["history"]["notes"].append(
+            "live_change"
+        )
+
+        self.assertEqual(
+            second["events"][0]["observed_event"][
+                "metadata"
+            ]["history"]["notes"],
+            ["original"],
+        )
+
+        current = chronicle.to_dict()
+
+        self.assertEqual(
+            current["events"][0]["observed_event"][
+                "metadata"
+            ]["history"]["notes"],
+            ["original", "live_change"],
+        )
+
+        self.assertEqual(
+            first["events"][0]["observed_event"][
+                "metadata"
+            ]["history"]["notes"],
+            ["original", "snapshot_only"],
+        )
+
+        self.assertIs(
+            chronicle.events[0],
+            entry,
+        )
+
+        self.assertIs(
+            entry.observed_event,
+            observed,
+        )
+
+        self.assertIs(
+            counter.hidden_story_book.read_entries()[0],
+            chronicle,
         )
 
     def test_chronicle_methods_return_recorded_objects(

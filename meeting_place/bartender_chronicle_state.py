@@ -82,7 +82,7 @@ class BartenderObservedEventEntry:
         return {
             "kind": self.kind,
             "observed_event":
-                observed_event,
+                deepcopy(observed_event),
         }
 
 
