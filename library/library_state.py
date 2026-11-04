@@ -246,7 +246,9 @@ class LibraryState:
                 for event in self.events
             ],
             "visitors": [
-                visitor.to_dict()
+                deepcopy(
+                    visitor.to_dict()
+                )
                 for visitor in self.visitors
             ],
             "tick_count": self.tick_count,

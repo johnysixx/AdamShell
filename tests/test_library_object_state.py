@@ -40,6 +40,30 @@ class MutableSerializedLibraryEvent(LibraryEvent):
         return snapshot
 
 
+class MutableSerializedLibraryVisitor(LibraryVisitor):
+
+    def __init__(self):
+        super().__init__(
+            name="pilgrim",
+            visitor_type="pilgrim",
+        )
+
+        object.__setattr__(
+            self,
+            "metadata",
+            {
+                "history": {
+                    "notes": ["original"],
+                },
+            },
+        )
+
+    def to_dict(self):
+        snapshot = super().to_dict()
+        snapshot["metadata"] = self.metadata
+        return snapshot
+
+
 class LibraryObjectStateTests(unittest.TestCase):
 
     def _library(self):
@@ -751,6 +775,205 @@ class LibraryObjectStateTests(unittest.TestCase):
                 "metadata"
             ]["notes"]["entries"],
             ["original", "snapshot_only"],
+        )
+
+    def test_nested_visitor_snapshot_is_detached(self):
+        visitor = MutableSerializedLibraryVisitor()
+
+        state = LibraryState(
+            visitors=(visitor,),
+        )
+
+        first = state.to_dict()
+        second = state.to_dict()
+
+        first["visitors"][0]["metadata"][
+            "history"
+        ]["notes"].append("snapshot_only")
+
+        self.assertEqual(
+            visitor.metadata["history"]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            second["visitors"][0]["metadata"][
+                "history"
+            ]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            state.to_dict()["visitors"][0][
+                "metadata"
+            ]["history"]["notes"],
+            ["original"],
+        )
+
+        self.assertIs(
+            state.visitors[0],
+            visitor,
+        )
+
+        self.assertIsNot(
+            first["visitors"][0]["metadata"],
+            visitor.metadata,
+        )
+
+        self.assertIsInstance(
+            state.visitors,
+            tuple,
+        )
+
+    def test_visitor_snapshot_ignores_later_live_changes(self):
+        visitor = MutableSerializedLibraryVisitor()
+
+        state = LibraryState(
+            visitors=(visitor,),
+        )
+
+        snapshot = state.to_dict()
+
+        visitor.metadata["history"][
+            "notes"
+        ].append("live_change")
+
+        self.assertEqual(
+            snapshot["visitors"][0]["metadata"][
+                "history"
+            ]["notes"],
+            ["original"],
+        )
+
+        current = state.to_dict()
+
+        self.assertEqual(
+            current["visitors"][0]["metadata"][
+                "history"
+            ]["notes"],
+            ["original", "live_change"],
+        )
+
+        snapshot["visitors"].clear()
+
+        self.assertEqual(
+            state.visitors,
+            (visitor,),
+        )
+
+        self.assertIs(
+            state.visitors[0],
+            visitor,
+        )
+
+        standard = LibraryVisitor(
+            name="serpent",
+        )
+
+        self.assertEqual(
+            standard.to_dict(),
+            {
+                "name": "serpent",
+                "type": "visitor",
+            },
+        )
+
+    def test_world_visitor_snapshots_preserve_identity(self):
+        universe, library = self._library()
+
+        state = library.library_state
+        visitor = MutableSerializedLibraryVisitor()
+
+        self.assertTrue(
+            library.enter(visitor)
+        )
+
+        self.assertIs(
+            library.library_state,
+            state,
+        )
+
+        self.assertIs(
+            universe.world["library_state"],
+            state,
+        )
+
+        self.assertIs(
+            library.visitors,
+            state.visitors,
+        )
+
+        self.assertIs(
+            library.visitors[0],
+            visitor,
+        )
+
+        self.assertIsInstance(
+            library.visitors,
+            tuple,
+        )
+
+        world_snapshot = universe.world[
+            "library"
+        ]["library_state"]
+
+        public_snapshot = library.public_state[
+            "library_state"
+        ]
+
+        world_snapshot["visitors"][0]["metadata"][
+            "history"
+        ]["notes"].append("snapshot_only")
+
+        self.assertEqual(
+            visitor.metadata["history"]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            public_snapshot["visitors"][0][
+                "metadata"
+            ]["history"]["notes"],
+            ["original"],
+        )
+
+        visitor.metadata["history"][
+            "notes"
+        ].append("live_change")
+
+        self.assertEqual(
+            public_snapshot["visitors"][0][
+                "metadata"
+            ]["history"]["notes"],
+            ["original"],
+        )
+
+        current = library.public_state[
+            "library_state"
+        ]
+
+        self.assertEqual(
+            current["visitors"][0]["metadata"][
+                "history"
+            ]["notes"],
+            ["original", "live_change"],
+        )
+
+        self.assertEqual(
+            world_snapshot["visitors"][0][
+                "metadata"
+            ]["history"]["notes"],
+            ["original", "snapshot_only"],
+        )
+
+        self.assertIs(
+            library.visitors[0],
+            visitor,
+        )
+
+        self.assertIs(
+            state.visitors[0],
+            visitor,
         )
 
     def test_to_dict_is_detached_boundary(self):
