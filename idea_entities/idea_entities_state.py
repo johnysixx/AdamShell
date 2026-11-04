@@ -35,11 +35,11 @@ class IdeaEntitiesState:
             "idea_entities": list(self.idea_entities),
             "eternal_fire": self.eternal_fire.to_dict(),
             "events": [
-                event.to_dict()
+                deepcopy(event.to_dict())
                 for event in self.events
             ],
             "event_history": [
-                event.to_dict()
+                deepcopy(event.to_dict())
                 for event in self.event_history
             ],
             "permissions": deepcopy(dict(self.permissions)),

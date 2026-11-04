@@ -10,6 +10,29 @@ from idea_entities.eternal_fire_potential_state import (
 from universe.universe import Universe
 
 
+class MutableSerializedIdeaEvent(IdeaEntityEvent):
+
+    def __init__(self):
+        super().__init__(
+            name="test_idea_event",
+            participants=("serpent",),
+        )
+        object.__setattr__(
+            self,
+            "metadata",
+            {
+                "nested": {
+                    "notes": ["original"],
+                },
+            },
+        )
+
+    def to_dict(self):
+        snapshot = super().to_dict()
+        snapshot["metadata"] = self.metadata
+        return snapshot
+
+
 class IdeaEntitiesObjectStateTests(unittest.TestCase):
 
     def _layer(self):
@@ -370,6 +393,177 @@ class IdeaEntitiesObjectStateTests(unittest.TestCase):
             layer.idea_entities_state,
             state,
         )
+
+    def test_event_snapshots_detach_nested_serialized_data(self):
+        event = MutableSerializedIdeaEvent()
+
+        state = IdeaEntitiesState(
+            events=[event],
+            event_history=[event],
+        )
+
+        first = state.to_dict()
+        second = state.to_dict()
+
+        first["events"][0]["metadata"][
+            "nested"
+        ]["notes"].append("snapshot_only")
+
+        first["event_history"][0]["metadata"][
+            "nested"
+        ]["notes"].append("history_only")
+
+        self.assertEqual(
+            event.metadata["nested"]["notes"],
+            ["original"],
+        )
+
+        for collection in ("events", "event_history"):
+            self.assertEqual(
+                second[collection][0]["metadata"][
+                    "nested"
+                ]["notes"],
+                ["original"],
+            )
+
+            self.assertEqual(
+                state.to_dict()[collection][0][
+                    "metadata"
+                ]["nested"]["notes"],
+                ["original"],
+            )
+
+        self.assertIs(state.events[0], event)
+        self.assertIs(state.event_history[0], event)
+
+        self.assertIsNot(
+            first["events"][0]["metadata"],
+            event.metadata,
+        )
+
+        self.assertIsNot(
+            first["event_history"][0]["metadata"],
+            event.metadata,
+        )
+
+    def test_event_snapshots_ignore_later_live_changes(self):
+        event = MutableSerializedIdeaEvent()
+
+        state = IdeaEntitiesState(
+            events=[event],
+            event_history=[event],
+        )
+
+        snapshot = state.to_dict()
+
+        event.metadata["nested"]["notes"].append(
+            "live_change"
+        )
+
+        for collection in ("events", "event_history"):
+            self.assertEqual(
+                snapshot[collection][0]["metadata"][
+                    "nested"
+                ]["notes"],
+                ["original"],
+            )
+
+            self.assertEqual(
+                state.to_dict()[collection][0][
+                    "metadata"
+                ]["nested"]["notes"],
+                ["original", "live_change"],
+            )
+
+        snapshot["events"].clear()
+        snapshot["event_history"].clear()
+
+        self.assertEqual(len(state.events), 1)
+        self.assertEqual(len(state.event_history), 1)
+
+        self.assertIs(state.events[0], event)
+        self.assertIs(state.event_history[0], event)
+
+    def test_world_event_snapshots_preserve_live_identity(self):
+        universe, layer = self._layer()
+        event = MutableSerializedIdeaEvent()
+
+        layer.emit_event(event)
+
+        self.assertIs(layer.events[-1], event)
+        self.assertIs(layer.event_history[-1], event)
+
+        self.assertIs(
+            universe.world["idea_entities"]["events"][-1],
+            event,
+        )
+
+        self.assertIs(
+            universe.world["idea_entities"][
+                "event_history"
+            ][-1],
+            event,
+        )
+
+        self.assertIs(
+            universe.world["idea_entities_state"],
+            layer.idea_entities_state,
+        )
+
+        world_snapshot = universe.world[
+            "idea_entities"
+        ]["idea_entities_state"]
+
+        public_snapshot = layer.public_state[
+            "idea_entities_state"
+        ]
+
+        world_snapshot["events"][0]["metadata"][
+            "nested"
+        ]["notes"].append("snapshot_only")
+
+        world_snapshot["event_history"][0][
+            "metadata"
+        ]["nested"]["notes"].append("history_only")
+
+        self.assertEqual(
+            event.metadata["nested"]["notes"],
+            ["original"],
+        )
+
+        for collection in ("events", "event_history"):
+            self.assertEqual(
+                public_snapshot[collection][0][
+                    "metadata"
+                ]["nested"]["notes"],
+                ["original"],
+            )
+
+        event.metadata["nested"]["notes"].append(
+            "live_change"
+        )
+
+        self.assertEqual(
+            public_snapshot["events"][0]["metadata"][
+                "nested"
+            ]["notes"],
+            ["original"],
+        )
+
+        current = layer.public_state[
+            "idea_entities_state"
+        ]
+
+        for collection in ("events", "event_history"):
+            self.assertEqual(
+                current[collection][0]["metadata"][
+                    "nested"
+                ]["notes"],
+                ["original", "live_change"],
+            )
+
+        self.assertIs(layer.events[-1], event)
+        self.assertIs(layer.event_history[-1], event)
 
     def test_to_dict_is_deeply_detached(self):
         state = IdeaEntitiesState()
