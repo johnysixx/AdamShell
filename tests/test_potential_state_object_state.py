@@ -1,4 +1,5 @@
 import unittest
+from types import SimpleNamespace
 
 from core.actualization.possibility import Possibility
 from core.actualization.potential import Potential
@@ -364,6 +365,142 @@ class PotentialStateObjectStateTests(
                 "context"
             ]["nested"]["count"],
             1,
+        )
+
+    def test_history_event_snapshot_is_detached(self):
+        event = SimpleNamespace(
+            name="test_event",
+            details={
+                "nested": {
+                    "count": 1,
+                },
+            },
+        )
+
+        record = HistoryRecord(
+            cycle_id="cycle_test",
+            events=[event],
+            potentials=[],
+        )
+
+        first = record.public_state
+        second = record.public_state
+
+        first["events"][0].details[
+            "nested"
+        ]["count"] = 99
+
+        self.assertIs(record.events[0], event)
+
+        self.assertIsNot(
+            first["events"][0],
+            event,
+        )
+
+        self.assertEqual(
+            event.details["nested"]["count"],
+            1,
+        )
+
+        self.assertEqual(
+            second["events"][0].details[
+                "nested"
+            ]["count"],
+            1,
+        )
+
+    def test_history_collection_event_snapshot_is_detached(self):
+        event = SimpleNamespace(
+            name="collection_event",
+            details={
+                "observations": ["original"],
+            },
+        )
+
+        cycle = ActualizationCycle(
+            cycle_id="cycle_test",
+        )
+
+        cycle.state = ActualizationCycleState.RESOLVED
+
+        history = History()
+
+        record = history.record_cycle(
+            cycle=cycle,
+            events=[event],
+        )
+
+        snapshot = history.public_state
+
+        snapshot["records"][0]["events"][0].details[
+            "observations"
+        ].append("snapshot_only")
+
+        self.assertIs(history.latest, record)
+        self.assertIs(record.events[0], event)
+
+        self.assertEqual(
+            event.details["observations"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            history.public_state["records"][0][
+                "events"
+            ][0].details["observations"],
+            ["original"],
+        )
+
+    def test_history_event_snapshot_preserves_aliases(self):
+        event = SimpleNamespace(
+            name="shared_event",
+            details={
+                "values": [],
+            },
+        )
+
+        record = HistoryRecord(
+            cycle_id="cycle_test",
+            events=[event, event],
+            potentials=[],
+        )
+
+        snapshot = record.public_state
+
+        self.assertIs(
+            record.events[0],
+            event,
+        )
+
+        self.assertIs(
+            record.events[1],
+            event,
+        )
+
+        self.assertIs(
+            snapshot["events"][0],
+            snapshot["events"][1],
+        )
+
+        self.assertIsNot(
+            snapshot["events"][0],
+            event,
+        )
+
+        snapshot["events"][0].details[
+            "values"
+        ].append("snapshot_only")
+
+        self.assertEqual(
+            snapshot["events"][1].details[
+                "values"
+            ],
+            ["snapshot_only"],
+        )
+
+        self.assertEqual(
+            event.details["values"],
+            [],
         )
 
     def test_actualized_record_snapshot_is_independent(self):

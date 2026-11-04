@@ -52,7 +52,7 @@ class HistoryRecord:
             "branch_id": self.branch_id,
             "parent_branch_id": self.parent_branch_id,
             "created_by": self.created_by,
-            "events": list(self.events),
+            "events": deepcopy(self.events),
             "actualized": deepcopy(
                 self.actualized
             ),
