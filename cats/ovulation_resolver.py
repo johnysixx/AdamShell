@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from cats.cat import Cat
 
 @dataclass(slots=True, frozen=True)
 class CatOvulationStimulationRecordedEvent:
@@ -115,6 +116,11 @@ class CatOvulationResolver:
         self.history = []
 
     def record_stimulation(self, female, male=None, amount=1, day=None):
+        if male is not None and not isinstance(male, Cat):
+            raise TypeError(
+                "Ovulation stimulation male must be Cat or None."
+            )
+
         reproduction = female.reproduction
         amount = int(amount)
         if amount < 1:
@@ -127,15 +133,8 @@ class CatOvulationResolver:
             CatOvulationStimulationRecordedEvent(
                 female=female.name,
                 male=(
-                    getattr(
-                        male,
-                        'name',
-                        None,
-                    )
-                    if isinstance(
-                        male,
-                        dict,
-                    )
+                    male.name
+                    if male is not None
                     else None
                 ),
                 day=day,

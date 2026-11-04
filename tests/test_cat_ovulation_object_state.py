@@ -100,6 +100,47 @@ class CatOvulationObjectStateTests(
             False,
         )
 
+    def test_stimulation_records_canonical_male(self):
+        male = self.cats.create_cat(
+            name="ovulation_male",
+            color="white",
+            fur_length="short",
+            sex="male",
+        )
+
+        result = self.resolver.record_stimulation(
+            self.female,
+            male=male,
+            amount=1,
+            day=4,
+        )
+
+        self.assertEqual(result.male, male.name)
+        self.assertIs(self.resolver.history[-1], result)
+
+    def test_mapping_male_is_rejected_atomically(self):
+        before_stimulation = (
+            self.female.reproduction.ovulation_stimulation
+        )
+        before_history = tuple(self.resolver.history)
+
+        with self.assertRaisesRegex(TypeError, "Cat or None"):
+            self.resolver.record_stimulation(
+                self.female,
+                male={"name": "legacy_male"},
+                amount=1,
+                day=4,
+            )
+
+        self.assertEqual(
+            self.female.reproduction.ovulation_stimulation,
+            before_stimulation,
+        )
+        self.assertEqual(
+            tuple(self.resolver.history),
+            before_history,
+        )
+
     def test_resolution_history_uses_object_state(
         self
     ):
