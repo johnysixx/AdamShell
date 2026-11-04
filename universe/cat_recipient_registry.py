@@ -1,3 +1,6 @@
+from copy import deepcopy
+
+
 class CatRecipientRegistry:
 
     def __init__(self):
@@ -38,7 +41,7 @@ class CatRecipientRegistry:
             "type": "cat_recipient_registry",
             "recipient_count": len(self.recipients),
             "recipients": [
-                entity.to_dict()
+                deepcopy(entity.to_dict())
                 for entity in self.recipients
             ],
         }

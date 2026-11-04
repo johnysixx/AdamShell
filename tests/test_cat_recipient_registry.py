@@ -86,5 +86,74 @@ class CatRecipientRegistryTests(unittest.TestCase):
             },
         )
 
+
+    def test_nested_snapshot_does_not_mutate_entity(self):
+        registry = CatRecipientRegistry()
+        entity = SocialEntity(
+            id="alice",
+            type="human",
+            needs_cat=True,
+            metadata={
+                "preferences": {
+                    "milk": ["warm"],
+                },
+            },
+        )
+
+        registry.register(entity)
+        snapshot = registry.public_state
+
+        snapshot["recipients"][0][
+            "metadata"
+        ]["preferences"]["milk"].append("cold")
+
+        self.assertEqual(
+            entity.metadata["preferences"]["milk"],
+            ["warm"],
+        )
+
+        self.assertIs(
+            registry.find("alice"),
+            entity,
+        )
+
+        self.assertEqual(
+            registry.public_state["recipients"][0][
+                "metadata"
+            ]["preferences"]["milk"],
+            ["warm"],
+        )
+
+    def test_public_snapshots_are_independent(self):
+        registry = CatRecipientRegistry()
+        entity = SocialEntity(
+            id="alice",
+            type="human",
+            metadata={
+                "notes": ["first"],
+            },
+        )
+
+        registry.register(entity)
+
+        first = registry.public_state
+        second = registry.public_state
+
+        first["recipients"][0][
+            "metadata"
+        ]["notes"].append("changed")
+
+        self.assertEqual(
+            second["recipients"][0][
+                "metadata"
+            ]["notes"],
+            ["first"],
+        )
+
+        self.assertEqual(
+            entity.metadata["notes"],
+            ["first"],
+        )
+
 if __name__ == '__main__':
     unittest.main()
