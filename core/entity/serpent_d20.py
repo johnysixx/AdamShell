@@ -88,7 +88,7 @@ class SerpentResolvedConsequence:
         )
 
         result = (
-            to_dict()
+            deepcopy(to_dict())
             if callable(to_dict)
             else deepcopy(self.result)
         )

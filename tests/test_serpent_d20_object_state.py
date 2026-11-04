@@ -65,6 +65,21 @@ class FakeSerpentUniverse:
         return self.result
 
 
+class MutableSerializedSerpentOutcome:
+
+    def __init__(self):
+        self.metadata = {
+            "nested": {
+                "notes": ["original"],
+            },
+        }
+
+    def to_dict(self):
+        return {
+            "metadata": self.metadata,
+        }
+
+
 class SerpentD20ObjectStateTests(
     unittest.TestCase
 ):
@@ -313,6 +328,197 @@ class SerpentD20ObjectStateTests(
         self.assertIs(
             consequence.result,
             executor.universe.result,
+        )
+
+    def test_consequence_result_snapshot_is_detached(self):
+        outcome = MutableSerializedSerpentOutcome()
+
+        consequence = SerpentResolvedConsequence(
+            consequence="custom",
+            result=outcome,
+        )
+
+        stored = consequence.result
+
+        first = consequence.to_dict()
+        second = consequence.to_dict()
+
+        first["result"]["metadata"][
+            "nested"
+        ]["notes"].append("snapshot_only")
+
+        self.assertEqual(
+            stored.metadata["nested"]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            second["result"]["metadata"][
+                "nested"
+            ]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            consequence.to_dict()["result"][
+                "metadata"
+            ]["nested"]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            first["consequence"],
+            "custom",
+        )
+
+        self.assertIs(
+            consequence.result,
+            stored,
+        )
+
+        self.assertIsNot(
+            first["result"]["metadata"],
+            stored.metadata,
+        )
+
+        self.assertIsNot(
+            stored,
+            outcome,
+        )
+
+    def test_consequence_snapshot_ignores_live_result_changes(self):
+        consequence = SerpentResolvedConsequence(
+            consequence="custom",
+            result=MutableSerializedSerpentOutcome(),
+        )
+
+        stored = consequence.result
+        snapshot = consequence.to_dict()
+
+        stored.metadata["nested"]["notes"].append(
+            "live_change"
+        )
+
+        self.assertEqual(
+            snapshot["result"]["metadata"][
+                "nested"
+            ]["notes"],
+            ["original"],
+        )
+
+        current = consequence.to_dict()
+
+        self.assertEqual(
+            current["result"]["metadata"][
+                "nested"
+            ]["notes"],
+            ["original", "live_change"],
+        )
+
+        snapshot["result"]["metadata"][
+            "nested"
+        ]["notes"].append("snapshot_only")
+
+        self.assertEqual(
+            stored.metadata["nested"]["notes"],
+            ["original", "live_change"],
+        )
+
+        self.assertIs(
+            consequence.result,
+            stored,
+        )
+
+    def test_hidden_resolution_snapshot_keeps_object_identity(self):
+        consequence = SerpentResolvedConsequence(
+            consequence="custom",
+            result=MutableSerializedSerpentOutcome(),
+        )
+
+        stored = consequence.result
+
+        hidden = SerpentD20HiddenResolutionEvent(
+            roll_id="b40_hidden_roll",
+            value=7,
+            fire_threshold_reached=False,
+            possible_consequences=("custom",),
+            intensity="moderate",
+            all_effects_triggered=False,
+            resolved_consequences=(consequence,),
+        )
+
+        die = SerpentD20()
+        die.record_hidden_resolution(hidden)
+
+        self.assertIs(
+            die.hidden_resolution_for("b40_hidden_roll"),
+            hidden,
+        )
+
+        self.assertIs(
+            hidden.resolved_consequences[0],
+            consequence,
+        )
+
+        self.assertIs(
+            consequence.result,
+            stored,
+        )
+
+        first = hidden.to_dict()
+        second = hidden.to_dict()
+
+        first["resolved_consequences"][0][
+            "result"
+        ]["metadata"]["nested"]["notes"].append(
+            "snapshot_only"
+        )
+
+        self.assertEqual(
+            stored.metadata["nested"]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            second["resolved_consequences"][0][
+                "result"
+            ]["metadata"]["nested"]["notes"],
+            ["original"],
+        )
+
+        stored.metadata["nested"]["notes"].append(
+            "live_change"
+        )
+
+        self.assertEqual(
+            second["resolved_consequences"][0][
+                "result"
+            ]["metadata"]["nested"]["notes"],
+            ["original"],
+        )
+
+        current = hidden.to_dict()
+
+        self.assertEqual(
+            current["resolved_consequences"][0][
+                "result"
+            ]["metadata"]["nested"]["notes"],
+            ["original", "live_change"],
+        )
+
+        self.assertIs(
+            die._hidden_history[0],
+            hidden,
+        )
+
+        self.assertIs(
+            hidden.resolved_consequences[0],
+            consequence,
+        )
+
+        self.assertNotIn(
+            "resolved_consequences",
+            die.public_state,
         )
 
     def test_resolved_consequences_reject_mapping_state(
