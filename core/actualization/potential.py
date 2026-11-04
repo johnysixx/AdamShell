@@ -15,7 +15,9 @@ class Potential:
         self.possibility = possibility
         self.cycle_id = cycle_id
         self.source = source
-        self.context = context or {}
+        self.context = deepcopy(
+            dict(context or {})
+        )
 
         self.state = PotentialState.OPEN
 

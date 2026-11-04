@@ -48,6 +48,143 @@ class PotentialStateObjectStateTests(
             "open",
         )
 
+    def test_potential_captures_nested_context(self):
+        external_context = {
+            "nested": {
+                "values": ["original"],
+            },
+        }
+
+        potential = Potential(
+            possibility=Possibility(
+                name="capture_test",
+                probability=1.0,
+            ),
+            cycle_id="cycle_test",
+            context=external_context,
+        )
+
+        external_context["nested"]["values"].append(
+            "external_change"
+        )
+
+        self.assertEqual(
+            potential.context["nested"]["values"],
+            ["original"],
+        )
+
+        self.assertIsNot(
+            potential.context,
+            external_context,
+        )
+
+        self.assertIsNot(
+            potential.context["nested"],
+            external_context["nested"],
+        )
+
+    def test_potentials_do_not_share_input_context(self):
+        shared_context = {
+            "nested": {
+                "values": ["original"],
+            },
+        }
+
+        first = Potential(
+            possibility=Possibility(
+                name="first",
+                probability=1.0,
+            ),
+            cycle_id="cycle_test",
+            context=shared_context,
+        )
+
+        second = Potential(
+            possibility=Possibility(
+                name="second",
+                probability=1.0,
+            ),
+            cycle_id="cycle_test",
+            context=shared_context,
+        )
+
+        first.context["nested"]["values"].append(
+            "first_only"
+        )
+
+        self.assertEqual(
+            first.context["nested"]["values"],
+            ["original", "first_only"],
+        )
+
+        self.assertEqual(
+            second.context["nested"]["values"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            shared_context["nested"]["values"],
+            ["original"],
+        )
+
+        self.assertIsNot(
+            first.context["nested"],
+            second.context["nested"],
+        )
+
+    def test_history_uses_potential_owned_context(self):
+        external_context = {
+            "nested": {
+                "count": 1,
+            },
+        }
+
+        potential = Potential(
+            possibility=Possibility(
+                name="owned_history",
+                probability=1.0,
+                mandatory=True,
+            ),
+            cycle_id="cycle_test",
+            context=external_context,
+        )
+
+        external_context["nested"]["count"] = 99
+
+        potential.mark_actualized()
+
+        record = HistoryRecord(
+            cycle_id="cycle_test",
+            events=[],
+            potentials=[potential],
+        )
+
+        self.assertEqual(
+            potential.context["nested"]["count"],
+            1,
+        )
+
+        self.assertEqual(
+            record.actualized[0]["context"][
+                "nested"
+            ]["count"],
+            1,
+        )
+
+        self.assertEqual(
+            record.potential_blueprints[0].context[
+                "nested"
+            ]["count"],
+            1,
+        )
+
+        self.assertEqual(
+            record.public_state["actualized"][0][
+                "context"
+            ]["nested"]["count"],
+            1,
+        )
+
     def test_potential_public_state_detaches_nested_context(self):
         potential = Potential(
             possibility=Possibility(
