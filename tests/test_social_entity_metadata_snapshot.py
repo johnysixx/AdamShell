@@ -21,6 +21,197 @@ class SocialEntityMetadataSnapshotTests(
             },
         )
 
+    def test_metadata_assignment_detaches_external_value(self):
+        entity = self.make_entity()
+
+        external = {
+            "preferences": {
+                "notes": ["replacement"],
+            },
+        }
+
+        entity.metadata = external
+
+        self.assertIsNot(
+            entity.metadata,
+            external,
+        )
+
+        self.assertIsNot(
+            entity.metadata["preferences"],
+            external["preferences"],
+        )
+
+        external["preferences"][
+            "notes"
+        ].append("external_change")
+
+        self.assertEqual(
+            entity.metadata["preferences"]["notes"],
+            ["replacement"],
+        )
+
+        self.assertEqual(
+            entity.to_dict()["metadata"][
+                "preferences"
+            ]["notes"],
+            ["replacement"],
+        )
+
+        # Direct mutation of owned metadata remains allowed.
+        entity.metadata["preferences"][
+            "notes"
+        ].append("entity_change")
+
+        self.assertEqual(
+            entity.metadata["preferences"]["notes"],
+            ["replacement", "entity_change"],
+        )
+
+        self.assertEqual(
+            external["preferences"]["notes"],
+            ["replacement", "external_change"],
+        )
+
+    def test_metadata_reassignment_is_independent(self):
+        shared = {
+            "preferences": {
+                "notes": ["original"],
+            },
+        }
+
+        first = SocialEntity(
+            name="first",
+            type="human",
+        )
+
+        second = SocialEntity(
+            name="second",
+            type="human",
+        )
+
+        first.metadata = shared
+        second.metadata = shared
+
+        self.assertIsNot(
+            first.metadata,
+            second.metadata,
+        )
+
+        self.assertIsNot(
+            first.metadata["preferences"],
+            second.metadata["preferences"],
+        )
+
+        first.metadata["preferences"][
+            "notes"
+        ].append("first_only")
+
+        self.assertEqual(
+            second.metadata["preferences"]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            shared["preferences"]["notes"],
+            ["original"],
+        )
+
+        shared["preferences"][
+            "notes"
+        ].append("external_only")
+
+        self.assertEqual(
+            first.metadata["preferences"]["notes"],
+            ["original", "first_only"],
+        )
+
+        self.assertEqual(
+            second.metadata["preferences"]["notes"],
+            ["original"],
+        )
+
+    def test_assignment_preserves_typed_domain_references(self):
+        from core.entity.world_existence_state import (
+            WorldExistenceState,
+        )
+
+        existence = WorldExistenceState.of(
+            root_universe=70.0,
+        )
+
+        relationships = (
+            SocialRelationshipRegistry.from_mapping({
+                "lilith": {
+                    "affinity": 0.4,
+                    "pet_count": 2,
+                    "last_interaction": "pet",
+                },
+            })
+        )
+
+        entity = SocialEntity(
+            name="typed_guest",
+            type="human",
+            existence_by_world=existence,
+            social_relationships=relationships,
+        )
+
+        external = {
+            "preferences": {
+                "notes": ["original"],
+            },
+        }
+
+        entity.metadata = external
+
+        self.assertIs(
+            entity.existence_by_world,
+            existence,
+        )
+
+        self.assertIs(
+            entity.social_relationships,
+            relationships,
+        )
+
+        self.assertIs(
+            SocialEntity.from_mapping(entity),
+            entity,
+        )
+
+        snapshot = entity.to_dict()
+
+        snapshot["metadata"]["preferences"][
+            "notes"
+        ].append("snapshot_only")
+
+        snapshot["social_relationships"][
+            "lilith"
+        ]["affinity"] = 1.0
+
+        self.assertEqual(
+            entity.metadata["preferences"]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            external["preferences"]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            existence.percent_in("root_universe"),
+            70.0,
+        )
+
+        self.assertEqual(
+            relationships.relationship_for(
+                "lilith"
+            ).affinity,
+            0.4,
+        )
+
     def test_direct_constructor_captures_metadata(self):
         external = {
             "preferences": {

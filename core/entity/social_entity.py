@@ -206,6 +206,9 @@ class SocialRelationshipRegistry:
 class EntityObject:
 
     def __setattr__(self, name, value):
+        if name == "metadata":
+            value = deepcopy(value)
+
         if (
             name == "existence_by_world"
             and not isinstance(value, WorldExistenceState)
@@ -230,9 +233,6 @@ class EntityObject:
 
     def __init__(self, **state):
         for key, value in state.items():
-            if key == "metadata":
-                value = deepcopy(value)
-
             setattr(self, key, value)
 
     @classmethod
@@ -242,11 +242,6 @@ class EntityObject:
         if not isinstance(mapping, dict):
             raise TypeError('EntityObject.from_mapping requires dict input.')
         values = dict(mapping)
-
-        if "metadata" in values:
-            values["metadata"] = deepcopy(
-                values["metadata"]
-            )
 
         if isinstance(
             values.get("existence_by_world"),
