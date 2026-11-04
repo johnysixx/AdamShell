@@ -305,6 +305,252 @@ class EternalFirePotentialObjectStateTests(unittest.TestCase):
             ("serpent", "lilith"),
         )
 
+    def test_nested_guardian_snapshot_is_detached(self):
+        guardian = {
+            "name": "pazuzu",
+            "permissions": {
+                "roles": ["guardian"],
+            },
+        }
+
+        fire = EternalFirePotential()
+        fire.guardian = guardian
+
+        first = fire.to_dict()
+        second = fire.to_dict()
+
+        first["guardian"]["permissions"][
+            "roles"
+        ].append("snapshot_only")
+
+        self.assertEqual(
+            guardian["permissions"]["roles"],
+            ["guardian"],
+        )
+
+        self.assertEqual(
+            second["guardian"]["permissions"][
+                "roles"
+            ],
+            ["guardian"],
+        )
+
+        self.assertIs(
+            fire.guardian,
+            guardian,
+        )
+
+        self.assertIsNot(
+            first["guardian"],
+            guardian,
+        )
+
+        guardian["permissions"][
+            "roles"
+        ].append("live_change")
+
+        self.assertEqual(
+            second["guardian"]["permissions"][
+                "roles"
+            ],
+            ["guardian"],
+        )
+
+        self.assertEqual(
+            fire.to_dict()["guardian"][
+                "permissions"
+            ]["roles"],
+            ["guardian", "live_change"],
+        )
+
+    def test_nested_fuel_seekers_snapshots_are_detached(self):
+        seeker = {
+            "name": "serpent",
+            "metadata": {
+                "notes": ["original"],
+            },
+        }
+
+        fire = EternalFirePotential()
+        fire.fuel_seekers.append(seeker)
+
+        first = fire.to_dict()
+        second = fire.to_dict()
+
+        first["fuel_seekers"][0]["metadata"][
+            "notes"
+        ].append("snapshot_only")
+
+        self.assertEqual(
+            seeker["metadata"]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            second["fuel_seekers"][0][
+                "metadata"
+            ]["notes"],
+            ["original"],
+        )
+
+        self.assertIs(
+            fire.fuel_seekers[0],
+            seeker,
+        )
+
+        self.assertIsNot(
+            first["fuel_seekers"][0],
+            seeker,
+        )
+
+        seeker["metadata"][
+            "notes"
+        ].append("live_change")
+
+        self.assertEqual(
+            second["fuel_seekers"][0][
+                "metadata"
+            ]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            fire.to_dict()["fuel_seekers"][0][
+                "metadata"
+            ]["notes"],
+            ["original", "live_change"],
+        )
+
+    def test_world_fire_snapshots_preserve_live_role_identity(self):
+        universe = Universe()
+        layer = IdeaEntities(universe)
+
+        fire = layer.eternal_fire
+
+        guardian = {
+            "name": "pazuzu",
+            "notes": ["original"],
+        }
+
+        seeker = {
+            "name": "lilith",
+            "notes": ["original"],
+        }
+
+        fire.guardian = guardian
+        fire.fuel_seekers.append(seeker)
+
+        layer.write_to_world()
+
+        world_snapshot = universe.world[
+            "idea_entities"
+        ]["eternal_fire"]
+
+        state_snapshot = universe.world[
+            "idea_entities"
+        ]["idea_entities_state"]["eternal_fire"]
+
+        public_snapshot = layer.public_state[
+            "eternal_fire"
+        ]
+
+        self.assertIs(
+            layer.eternal_fire,
+            fire,
+        )
+
+        self.assertIs(
+            layer.idea_entities_state.eternal_fire,
+            fire,
+        )
+
+        self.assertIs(
+            fire.guardian,
+            guardian,
+        )
+
+        self.assertIs(
+            fire.fuel_seekers[0],
+            seeker,
+        )
+
+        world_snapshot["guardian"][
+            "notes"
+        ].append("snapshot_only")
+
+        world_snapshot["fuel_seekers"][0][
+            "notes"
+        ].append("snapshot_only")
+
+        self.assertEqual(
+            guardian["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            seeker["notes"],
+            ["original"],
+        )
+
+        for snapshot in (
+            state_snapshot,
+            public_snapshot,
+        ):
+            self.assertEqual(
+                snapshot["guardian"]["notes"],
+                ["original"],
+            )
+
+            self.assertEqual(
+                snapshot["fuel_seekers"][0][
+                    "notes"
+                ],
+                ["original"],
+            )
+
+        guardian["notes"].append(
+            "live_change"
+        )
+
+        seeker["notes"].append(
+            "live_change"
+        )
+
+        self.assertEqual(
+            state_snapshot["guardian"][
+                "notes"
+            ],
+            ["original"],
+        )
+
+        self.assertEqual(
+            public_snapshot["fuel_seekers"][0][
+                "notes"
+            ],
+            ["original"],
+        )
+
+        current = layer.public_state[
+            "eternal_fire"
+        ]
+
+        self.assertEqual(
+            current["guardian"]["notes"],
+            ["original", "live_change"],
+        )
+
+        self.assertEqual(
+            current["fuel_seekers"][0][
+                "notes"
+            ],
+            ["original", "live_change"],
+        )
+
+        self.assertIs(
+            layer.eternal_fire,
+            fire,
+        )
+
     def test_to_dict_is_deeply_detached(self):
         fire = EternalFirePotential()
         fire.actualized = True

@@ -1,3 +1,4 @@
+from copy import deepcopy
 from dataclasses import dataclass, field
 
 from idea_entities.eternal_fire_objects import (
@@ -134,11 +135,13 @@ class EternalFirePotential:
             public_state["meaning"] = self.meaning.to_dict()
 
         if self.guardian is not None:
-            public_state["guardian"] = self.guardian
+            public_state["guardian"] = deepcopy(
+                self.guardian
+            )
 
         if self.fuel_seekers:
-            public_state["fuel_seekers"] = list(
-                self.fuel_seekers
+            public_state["fuel_seekers"] = deepcopy(
+                list(self.fuel_seekers)
             )
 
         if self.fuel_consumed_last_step is not None:
