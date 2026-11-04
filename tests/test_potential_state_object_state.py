@@ -40,6 +40,80 @@ class PotentialStateObjectStateTests(
             "open",
         )
 
+    def test_potential_public_state_detaches_nested_context(self):
+        potential = Potential(
+            possibility=Possibility(
+                name="snapshot_test",
+                probability=1.0,
+                mandatory=True,
+            ),
+            cycle_id="cycle_test",
+            context={
+                "nested": {
+                    "values": ["original"],
+                },
+            },
+        )
+
+        first = potential.public_state
+        second = potential.public_state
+
+        first["context"]["nested"]["values"].append(
+            "snapshot_only"
+        )
+
+        self.assertEqual(
+            potential.context["nested"]["values"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            second["context"]["nested"]["values"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            potential.public_state["context"]["nested"]["values"],
+            ["original"],
+        )
+
+    def test_actualized_history_detaches_live_context(self):
+        potential = Potential(
+            possibility=Possibility(
+                name="history_snapshot_test",
+                probability=1.0,
+                mandatory=True,
+            ),
+            cycle_id="cycle_test",
+            context={
+                "nested": {
+                    "count": 1,
+                },
+            },
+        )
+
+        potential.mark_actualized()
+
+        record = HistoryRecord(
+            cycle_id="cycle_test",
+            events=[],
+            potentials=[potential],
+        )
+
+        potential.context["nested"]["count"] = 99
+
+        self.assertEqual(
+            record.actualized[0]["context"][
+                "nested"
+            ]["count"],
+            1,
+        )
+
+        self.assertEqual(
+            potential.context["nested"]["count"],
+            99,
+        )
+
     def test_mark_actualized_sets_enum(self):
         potential = self.make_potential()
 

@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from .potential_state import PotentialState
 
 
@@ -66,7 +68,7 @@ class Potential:
             "name": self.name,
             "cycle_id": self.cycle_id,
             "source": self.source,
-            "context": dict(self.context),
+            "context": deepcopy(dict(self.context)),
             "state": self.state.value,
             "available": self.is_available,
             "mandatory": self.possibility.mandatory,
