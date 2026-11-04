@@ -1369,6 +1369,316 @@ class EternalFirePotentialObjectStateTests(unittest.TestCase):
                 serpent_d20=SerpentD20(),
             )
 
+    def test_already_burning_history_tick_snapshot_is_detached(self):
+        tick = {
+            "logical": {
+                "steps": [1],
+            },
+        }
+
+        record = EternalFlameHistoryRecord.already_burning(
+            state="burning",
+            tick=tick,
+        )
+
+        first = record.to_dict()
+        second = record.to_dict()
+
+        first["tick"]["logical"]["steps"].append(
+            99
+        )
+
+        self.assertEqual(
+            tick["logical"]["steps"],
+            [1],
+        )
+
+        self.assertEqual(
+            second["tick"]["logical"]["steps"],
+            [1],
+        )
+
+        tick["logical"]["steps"].append(
+            2
+        )
+
+        self.assertEqual(
+            first["tick"]["logical"]["steps"],
+            [1, 99],
+        )
+
+        self.assertEqual(
+            second["tick"]["logical"]["steps"],
+            [1],
+        )
+
+        self.assertEqual(
+            record.to_dict()["tick"]["logical"]["steps"],
+            [1, 2],
+        )
+
+        self.assertIs(
+            record.tick,
+            tick,
+        )
+
+        self.assertEqual(
+            record.name,
+            "eternal_flame_already_burns",
+        )
+
+    def test_ignition_history_snapshots_detach_keeper_and_tick(self):
+        source = EternalFlameSourceIdea(
+            name="eternal_fire",
+            type="idea_focal_point",
+            state="burning",
+        )
+
+        keeper = {
+            "identity": {
+                "aliases": ["pazuzu"],
+            },
+        }
+
+        tick = {
+            "logical": {
+                "steps": [5],
+            },
+        }
+
+        record = EternalFlameHistoryRecord.ignited(
+            source_idea=source,
+            keeper=keeper,
+            tick=tick,
+        )
+
+        first = record.to_dict()
+        second = record.to_dict()
+
+        first["keeper"]["identity"][
+            "aliases"
+        ].append("snapshot_only")
+
+        first["tick"]["logical"][
+            "steps"
+        ].append(99)
+
+        self.assertEqual(
+            keeper["identity"]["aliases"],
+            ["pazuzu"],
+        )
+
+        self.assertEqual(
+            tick["logical"]["steps"],
+            [5],
+        )
+
+        self.assertEqual(
+            second["keeper"]["identity"]["aliases"],
+            ["pazuzu"],
+        )
+
+        self.assertEqual(
+            second["tick"]["logical"]["steps"],
+            [5],
+        )
+
+        keeper["identity"]["aliases"].append(
+            "live_change"
+        )
+
+        tick["logical"]["steps"].append(
+            6
+        )
+
+        self.assertEqual(
+            second["keeper"]["identity"]["aliases"],
+            ["pazuzu"],
+        )
+
+        self.assertEqual(
+            second["tick"]["logical"]["steps"],
+            [5],
+        )
+
+        current = record.to_dict()
+
+        self.assertEqual(
+            current["keeper"]["identity"]["aliases"],
+            ["pazuzu", "live_change"],
+        )
+
+        self.assertEqual(
+            current["tick"]["logical"]["steps"],
+            [5, 6],
+        )
+
+        self.assertIs(
+            record.keeper,
+            keeper,
+        )
+
+        self.assertIs(
+            record.tick,
+            tick,
+        )
+
+        self.assertIs(
+            record.source_idea,
+            source,
+        )
+
+        self.assertEqual(
+            first["source_idea"],
+            source.to_dict(),
+        )
+
+    def test_eternal_flame_history_snapshots_preserve_identity(self):
+        fire = EternalFirePotential()
+        fire.type = "idea_focal_point"
+        fire.state = EternalFirePotentialState.BURNING
+        fire.actualized = True
+
+        keeper = {
+            "metadata": {
+                "roles": ["guardian"],
+            },
+        }
+
+        tick = {
+            "metadata": {
+                "steps": [1],
+            },
+        }
+
+        flame = EternalFlame()
+
+        record = flame.ignite(
+            fire,
+            tick=tick,
+            keeper=keeper,
+        )
+
+        history = flame.history
+
+        first = flame.public_state
+        second = flame.public_state
+
+        self.assertIs(
+            flame.history,
+            history,
+        )
+
+        self.assertIs(
+            history[0],
+            record,
+        )
+
+        self.assertIs(
+            record.keeper,
+            keeper,
+        )
+
+        self.assertIs(
+            record.tick,
+            tick,
+        )
+
+        self.assertIs(
+            flame.keeper,
+            keeper,
+        )
+
+        self.assertIs(
+            flame.ignited_at_tick,
+            tick,
+        )
+
+        first["history"][0]["keeper"][
+            "metadata"
+        ]["roles"].append("snapshot_only")
+
+        first["history"][0]["tick"][
+            "metadata"
+        ]["steps"].append(99)
+
+        self.assertEqual(
+            keeper["metadata"]["roles"],
+            ["guardian"],
+        )
+
+        self.assertEqual(
+            tick["metadata"]["steps"],
+            [1],
+        )
+
+        self.assertEqual(
+            second["history"][0]["keeper"][
+                "metadata"
+            ]["roles"],
+            ["guardian"],
+        )
+
+        self.assertEqual(
+            second["history"][0]["tick"][
+                "metadata"
+            ]["steps"],
+            [1],
+        )
+
+        keeper["metadata"]["roles"].append(
+            "live_change"
+        )
+
+        tick["metadata"]["steps"].append(
+            2
+        )
+
+        self.assertEqual(
+            second["history"][0]["keeper"][
+                "metadata"
+            ]["roles"],
+            ["guardian"],
+        )
+
+        self.assertEqual(
+            second["history"][0]["tick"][
+                "metadata"
+            ]["steps"],
+            [1],
+        )
+
+        current = flame.public_state
+
+        self.assertEqual(
+            current["history"][0]["keeper"][
+                "metadata"
+            ]["roles"],
+            ["guardian", "live_change"],
+        )
+
+        self.assertEqual(
+            current["history"][0]["tick"][
+                "metadata"
+            ]["steps"],
+            [1, 2],
+        )
+
+        self.assertIs(
+            flame.history,
+            history,
+        )
+
+        self.assertIs(
+            flame.history[0],
+            record,
+        )
+
+        self.assertIs(
+            record.source_idea,
+            flame.source_idea,
+        )
+
     def test_eternal_flame_accepts_object_and_rejects_mapping(self):
         fire = EternalFirePotential()
         fire.type = "idea_focal_point"

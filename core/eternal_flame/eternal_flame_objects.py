@@ -1,3 +1,4 @@
+from copy import deepcopy
 from dataclasses import dataclass
 from enum import Enum
 
@@ -94,15 +95,15 @@ class EternalFlameHistoryRecord:
             return {
                 "name": self.name,
                 "state": self.state,
-                "tick": self.tick,
+                "tick": deepcopy(self.tick),
             }
 
         if self.name == "eternal_flame_ignited":
             return {
                 "name": self.name,
                 "source_idea": self.source_idea.to_dict(),
-                "keeper": self.keeper,
-                "tick": self.tick,
+                "keeper": deepcopy(self.keeper),
+                "tick": deepcopy(self.tick),
             }
 
         raise ValueError(
