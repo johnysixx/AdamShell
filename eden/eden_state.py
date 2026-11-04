@@ -76,7 +76,9 @@ class EdenState:
             "rules": deepcopy(
                 list(self.rules)
             ),
-            "observer": self.observer,
+            "observer": deepcopy(
+                self.observer
+            ),
             "relations": deepcopy(
                 list(self.relations)
             ),

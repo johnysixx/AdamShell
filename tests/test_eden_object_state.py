@@ -580,6 +580,199 @@ class EdenObjectStateTests(unittest.TestCase):
             1,
         )
 
+    def test_nested_observer_snapshot_is_detached(self):
+        observer = {
+            "name": "pazuzu",
+            "knowledge": {
+                "observations": ["original"],
+            },
+        }
+
+        state = EdenState(
+            observer=observer,
+        )
+
+        first = state.to_dict()
+        second = state.to_dict()
+
+        first["observer"]["knowledge"][
+            "observations"
+        ].append("snapshot_only")
+
+        self.assertEqual(
+            observer["knowledge"]["observations"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            second["observer"]["knowledge"][
+                "observations"
+            ],
+            ["original"],
+        )
+
+        self.assertEqual(
+            state.to_dict()["observer"][
+                "knowledge"
+            ]["observations"],
+            ["original"],
+        )
+
+        self.assertIs(
+            state.observer,
+            observer,
+        )
+
+        self.assertIsNot(
+            first["observer"],
+            observer,
+        )
+
+    def test_eden_observer_world_snapshot_is_stable(self):
+        universe, eden = self._eden()
+
+        observer = {
+            "name": "observer",
+            "knowledge": {
+                "notes": ["original"],
+            },
+        }
+
+        eden.observer = observer
+        eden.write_to_world()
+
+        self.assertIs(
+            eden.observer,
+            observer,
+        )
+
+        self.assertIs(
+            eden.eden_state.observer,
+            observer,
+        )
+
+        self.assertIs(
+            universe.world["eden_state"],
+            eden.eden_state,
+        )
+
+        snapshot = eden.public_state[
+            "eden_state"
+        ]
+
+        world_snapshot = universe.world[
+            "eden"
+        ]["eden_state"]
+
+        observer["knowledge"][
+            "notes"
+        ].append("live_change")
+
+        self.assertEqual(
+            snapshot["observer"]["knowledge"][
+                "notes"
+            ],
+            ["original"],
+        )
+
+        self.assertEqual(
+            world_snapshot["observer"][
+                "knowledge"
+            ]["notes"],
+            ["original"],
+        )
+
+        snapshot["observer"]["knowledge"][
+            "notes"
+        ].append("snapshot_only")
+
+        self.assertEqual(
+            observer["knowledge"]["notes"],
+            ["original", "live_change"],
+        )
+
+        self.assertEqual(
+            world_snapshot["observer"][
+                "knowledge"
+            ]["notes"],
+            ["original"],
+        )
+
+        current = eden.public_state[
+            "eden_state"
+        ]
+
+        self.assertEqual(
+            current["observer"]["knowledge"][
+                "notes"
+            ],
+            ["original", "live_change"],
+        )
+
+    def test_object_observer_shape_and_identity_are_preserved(self):
+        from types import SimpleNamespace
+
+        empty = EdenState()
+
+        self.assertIsNone(
+            empty.to_dict()["observer"]
+        )
+
+        observer = SimpleNamespace(
+            name="pazuzu",
+            knowledge={
+                "notes": ["original"],
+            },
+        )
+
+        state = EdenState(
+            observer=observer,
+        )
+
+        first = state.to_dict()
+        second = state.to_dict()
+
+        self.assertIsInstance(
+            first["observer"],
+            SimpleNamespace,
+        )
+
+        self.assertIsNot(
+            first["observer"],
+            observer,
+        )
+
+        self.assertIs(
+            state.observer,
+            observer,
+        )
+
+        self.assertEqual(
+            first["observer"].name,
+            "pazuzu",
+        )
+
+        first["observer"].knowledge[
+            "notes"
+        ].append("snapshot_only")
+
+        self.assertEqual(
+            observer.knowledge["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            second["observer"].knowledge[
+                "notes"
+            ],
+            ["original"],
+        )
+
+        self.assertIs(
+            state.observer,
+            observer,
+        )
+
     def test_to_dict_is_detached_boundary(self):
         state = EdenState()
         snapshot = state.to_dict()
