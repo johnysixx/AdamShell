@@ -17,5 +17,74 @@ class CatRecipientRegistryTests(unittest.TestCase):
         registry.register(entity)
         waiting = registry.waiting_for_cat()
         self.assertEqual(waiting, [entity])
+
+    def test_public_state_serializes_object_entities(self):
+        registry = CatRecipientRegistry()
+        entity = SocialEntity(
+            id="alice",
+            type="human",
+            needs_cat=True,
+        )
+
+        registry.register(entity)
+
+        snapshot = registry.public_state
+
+        self.assertEqual(
+            snapshot["type"],
+            "cat_recipient_registry",
+        )
+
+        self.assertEqual(
+            snapshot["recipient_count"],
+            1,
+        )
+
+        self.assertEqual(
+            snapshot["recipients"],
+            [{
+                "id": "alice",
+                "type": "human",
+                "needs_cat": True,
+            }],
+        )
+
+        self.assertIs(registry.find("alice"), entity)
+
+    def test_public_state_does_not_mutate_live_objects(self):
+        registry = CatRecipientRegistry()
+        entity = SocialEntity(
+            id="alice",
+            type="human",
+            needs_cat=True,
+        )
+
+        registry.register(entity)
+        snapshot = registry.public_state
+
+        snapshot["recipients"][0]["needs_cat"] = False
+        snapshot["recipients"].clear()
+
+        self.assertTrue(entity.needs_cat)
+        self.assertIs(registry.find("alice"), entity)
+        self.assertEqual(len(registry.recipients), 1)
+
+        updated = registry.public_state
+        self.assertTrue(
+            updated["recipients"][0]["needs_cat"]
+        )
+
+    def test_empty_registry_public_state(self):
+        registry = CatRecipientRegistry()
+
+        self.assertEqual(
+            registry.public_state,
+            {
+                "type": "cat_recipient_registry",
+                "recipient_count": 0,
+                "recipients": [],
+            },
+        )
+
 if __name__ == '__main__':
     unittest.main()

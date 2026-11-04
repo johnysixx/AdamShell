@@ -34,4 +34,11 @@ class CatRecipientRegistry:
 
     @property
     def public_state(self):
-        return {'type': 'cat_recipient_registry', 'recipient_count': len(self.recipients), 'recipients': [dict(entity) for entity in self.recipients]}
+        return {
+            "type": "cat_recipient_registry",
+            "recipient_count": len(self.recipients),
+            "recipients": [
+                entity.to_dict()
+                for entity in self.recipients
+            ],
+        }
