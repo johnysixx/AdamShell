@@ -19,6 +19,29 @@ from meeting_place.bar_objects import (
 )
 
 
+class MutableSerializedRecipeRequirement(
+    RecipeIngredientRequirement
+):
+
+    def __init__(self):
+        super().__init__(
+            shots=1,
+            consumed=False,
+            use="drop",
+        )
+
+        self.metadata = {
+            "history": {
+                "notes": ["original"],
+            },
+        }
+
+    def to_dict(self):
+        snapshot = super().to_dict()
+        snapshot["metadata"] = self.metadata
+        return snapshot
+
+
 class BarRecipeStockObjectStateTests(
     unittest.TestCase
 ):
@@ -156,6 +179,221 @@ class BarRecipeStockObjectStateTests(
             _ = requirement[
                 "shots"
             ]
+
+    def test_nested_ingredient_snapshot_is_detached(self):
+        requirement = MutableSerializedRecipeRequirement()
+
+        ingredients = {
+            "lemon": requirement,
+        }
+
+        recipe = DrinkRecipe(
+            name="singularity",
+            origin="test_recipe",
+            ingredients=ingredients,
+        )
+
+        first = recipe.to_dict()
+        second = recipe.to_dict()
+
+        first["ingredients"]["lemon"]["metadata"][
+            "history"
+        ]["notes"].append("snapshot_only")
+
+        self.assertEqual(
+            requirement.metadata["history"]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            second["ingredients"]["lemon"]["metadata"][
+                "history"
+            ]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            recipe.to_dict()["ingredients"]["lemon"][
+                "metadata"
+            ]["history"]["notes"],
+            ["original"],
+        )
+
+        self.assertIs(
+            recipe.ingredients,
+            ingredients,
+        )
+
+        self.assertIs(
+            recipe.ingredients["lemon"],
+            requirement,
+        )
+
+        self.assertIsNot(
+            first["ingredients"]["lemon"]["metadata"],
+            requirement.metadata,
+        )
+
+        self.assertEqual(
+            first["ingredients"]["lemon"]["use"],
+            "drop",
+        )
+
+    def test_ingredient_snapshot_ignores_live_changes(self):
+        requirement = MutableSerializedRecipeRequirement()
+
+        recipe = DrinkRecipe(
+            name="singularity",
+            origin="test_recipe",
+            ingredients={
+                "lemon": requirement,
+            },
+        )
+
+        snapshot = recipe.to_dict()
+
+        requirement.metadata["history"]["notes"].append(
+            "live_change"
+        )
+
+        self.assertEqual(
+            snapshot["ingredients"]["lemon"][
+                "metadata"
+            ]["history"]["notes"],
+            ["original"],
+        )
+
+        current = recipe.to_dict()
+
+        self.assertEqual(
+            current["ingredients"]["lemon"][
+                "metadata"
+            ]["history"]["notes"],
+            ["original", "live_change"],
+        )
+
+        snapshot["ingredients"]["lemon"][
+            "metadata"
+        ]["history"]["notes"].append(
+            "snapshot_only"
+        )
+
+        snapshot["ingredients"].clear()
+
+        self.assertEqual(
+            requirement.metadata["history"]["notes"],
+            ["original", "live_change"],
+        )
+
+        self.assertIs(
+            recipe.ingredients["lemon"],
+            requirement,
+        )
+
+        simple = DrinkRecipe(
+            name="simple_drink",
+            origin="test_recipe",
+            ingredients=["lemonade"],
+        )
+
+        self.assertEqual(
+            simple.to_dict()["ingredients"],
+            ["lemonade"],
+        )
+
+    def test_recipe_registry_preserves_ingredient_identity(self):
+        book = HowToMixDrinks()
+
+        recipe = book.recipes[
+            "vodka_with_lemon"
+        ]
+
+        ingredients = recipe.ingredients
+
+        requirement = MutableSerializedRecipeRequirement()
+
+        ingredients["lemon"] = requirement
+
+        original_vodka = ingredients["vodka"]
+
+        first = recipe.to_dict()
+        second = recipe.to_dict()
+
+        self.assertIs(
+            book.recipes["vodka_with_lemon"],
+            recipe,
+        )
+
+        self.assertIs(
+            recipe.ingredients,
+            ingredients,
+        )
+
+        self.assertIs(
+            recipe.ingredients["lemon"],
+            requirement,
+        )
+
+        self.assertIs(
+            recipe.ingredients["vodka"],
+            original_vodka,
+        )
+
+        first["ingredients"]["lemon"]["metadata"][
+            "history"
+        ]["notes"].append("snapshot_only")
+
+        self.assertEqual(
+            requirement.metadata["history"]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            second["ingredients"]["lemon"]["metadata"][
+                "history"
+            ]["notes"],
+            ["original"],
+        )
+
+        requirement.metadata["history"]["notes"].append(
+            "live_change"
+        )
+
+        self.assertEqual(
+            second["ingredients"]["lemon"]["metadata"][
+                "history"
+            ]["notes"],
+            ["original"],
+        )
+
+        current = recipe.to_dict()
+
+        self.assertEqual(
+            current["ingredients"]["lemon"]["metadata"][
+                "history"
+            ]["notes"],
+            ["original", "live_change"],
+        )
+
+        self.assertEqual(
+            current["ingredients"]["vodka"]["shots"],
+            1,
+        )
+
+        self.assertEqual(
+            current["ingredients"]["lemon"]["use"],
+            "drop",
+        )
+
+        self.assertIs(
+            book.recipes["vodka_with_lemon"],
+            recipe,
+        )
+
+        self.assertIs(
+            recipe.ingredients["lemon"],
+            requirement,
+        )
 
     def test_hidden_recipe_reveals_same_object_without_mapping_bridge(
         self

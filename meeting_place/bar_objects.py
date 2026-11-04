@@ -2605,7 +2605,7 @@ class DrinkRecipe:
         ):
             ingredients = {
                 name:
-                    requirement.to_dict()
+                    deepcopy(requirement.to_dict())
                 for name, requirement
                 in self.ingredients.items()
             }
