@@ -170,6 +170,111 @@ class QuantumEventBusObjectStateTests(
         with self.assertRaises(TypeError):
             _ = received[0]["payload"]
 
+    def test_subscriber_result_snapshot_is_detached(self):
+        class MutableResult:
+
+            def __init__(self):
+                self.values = {
+                    "nested": {
+                        "count": 1,
+                    },
+                }
+
+            def to_dict(self):
+                return {
+                    "values": self.values,
+                }
+
+        bus = QuantumEventBus()
+        original = MutableResult()
+
+        bus.subscribe(
+            "test_result",
+            lambda event: original,
+        )
+
+        publication = bus.publish(
+            "test_result",
+        )
+
+        self.assertIs(
+            publication.results[0],
+            original,
+        )
+
+        snapshot = publication.to_dict()
+
+        snapshot["results"][0][
+            "values"
+        ]["nested"]["count"] = 99
+
+        self.assertEqual(
+            original.values["nested"]["count"],
+            1,
+        )
+
+        self.assertEqual(
+            publication.to_dict()["results"][0][
+                "values"
+            ]["nested"]["count"],
+            1,
+        )
+
+    def test_serialized_results_are_independent(self):
+        class MutableResult:
+
+            def __init__(self):
+                self.tags = ["original"]
+
+            def to_dict(self):
+                return {
+                    "tags": self.tags,
+                }
+
+        original = MutableResult()
+
+        publication = QuantumEventPublicationResult(
+            event=QuantumEvent(
+                name="test_result",
+            ),
+            subscriber_count=2,
+            results=(
+                original,
+                original,
+            ),
+        )
+
+        snapshot = publication.to_dict()
+
+        snapshot["results"][0]["tags"].append(
+            "snapshot_only"
+        )
+
+        self.assertEqual(
+            snapshot["results"][0]["tags"],
+            ["original", "snapshot_only"],
+        )
+
+        self.assertEqual(
+            snapshot["results"][1]["tags"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            original.tags,
+            ["original"],
+        )
+
+        self.assertIs(
+            publication.results[0],
+            original,
+        )
+
+        self.assertIs(
+            publication.results[1],
+            original,
+        )
+
     def test_history_rejects_mapping_event(
         self
     ):

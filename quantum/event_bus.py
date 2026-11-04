@@ -13,7 +13,9 @@ def _serialize_quantum_value(value):
     )
 
     if callable(to_dict):
-        return to_dict()
+        return deepcopy(
+            to_dict()
+        )
 
     return deepcopy(value)
 
