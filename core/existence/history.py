@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from core.actualization import PotentialBlueprint
 from core.actualization.cycle_state import (
     ActualizationCycleState,
@@ -51,10 +53,10 @@ class HistoryRecord:
             "parent_branch_id": self.parent_branch_id,
             "created_by": self.created_by,
             "events": list(self.events),
-            "actualized": list(
+            "actualized": deepcopy(
                 self.actualized
             ),
-            "unrealized": list(
+            "unrealized": deepcopy(
                 self.unrealized
             ),
             "potential_blueprints": [

@@ -5,7 +5,14 @@ from core.actualization.potential import Potential
 from core.actualization.potential_state import (
     PotentialState,
 )
-from core.existence.history import HistoryRecord
+from core.existence.history import (
+    History,
+    HistoryRecord,
+)
+from core.actualization.cycle import ActualizationCycle
+from core.actualization.cycle_state import (
+    ActualizationCycleState,
+)
 from core.actualization.potential_blueprint import (
     PotentialBlueprint,
 )
@@ -357,6 +364,148 @@ class PotentialStateObjectStateTests(
                 "context"
             ]["nested"]["count"],
             1,
+        )
+
+    def test_actualized_record_snapshot_is_independent(self):
+        potential = Potential(
+            possibility=Possibility(
+                name="actualized_snapshot",
+                probability=1.0,
+                mandatory=True,
+            ),
+            cycle_id="cycle_test",
+            context={
+                "nested": {
+                    "values": ["original"],
+                },
+            },
+        )
+
+        potential.mark_actualized()
+
+        record = HistoryRecord(
+            cycle_id="cycle_test",
+            events=[],
+            potentials=[potential],
+        )
+
+        first = record.public_state
+        second = record.public_state
+
+        first["actualized"][0]["context"][
+            "nested"
+        ]["values"].append("snapshot_only")
+
+        self.assertEqual(
+            record.actualized[0]["context"][
+                "nested"
+            ]["values"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            second["actualized"][0]["context"][
+                "nested"
+            ]["values"],
+            ["original"],
+        )
+
+    def test_unrealized_record_snapshot_is_independent(self):
+        potential = Potential(
+            possibility=Possibility(
+                name="unrealized_snapshot",
+                probability=0.0,
+            ),
+            cycle_id="cycle_test",
+            context={
+                "nested": {
+                    "count": 1,
+                },
+            },
+        )
+
+        potential.mark_unrealized()
+
+        record = HistoryRecord(
+            cycle_id="cycle_test",
+            events=[],
+            potentials=[potential],
+        )
+
+        snapshot = record.public_state
+
+        snapshot["unrealized"][0]["context"][
+            "nested"
+        ]["count"] = 99
+
+        self.assertEqual(
+            record.unrealized[0]["context"][
+                "nested"
+            ]["count"],
+            1,
+        )
+
+        self.assertEqual(
+            record.public_state["unrealized"][0][
+                "context"
+            ]["nested"]["count"],
+            1,
+        )
+
+    def test_history_public_state_preserves_record(self):
+        potential = Potential(
+            possibility=Possibility(
+                name="history_snapshot",
+                probability=1.0,
+                mandatory=True,
+            ),
+            cycle_id="cycle_test",
+            context={
+                "nested": {
+                    "count": 1,
+                },
+            },
+        )
+
+        cycle = ActualizationCycle(
+            cycle_id="cycle_test",
+        )
+
+        cycle.add_potential(potential)
+        potential.mark_actualized()
+
+        cycle.state = ActualizationCycleState.RESOLVED
+
+        history = History()
+
+        record = history.record_cycle(
+            cycle=cycle,
+            events=[],
+        )
+
+        snapshot = history.public_state
+
+        snapshot["records"][0]["actualized"][0][
+            "context"
+        ]["nested"]["count"] = 99
+
+        self.assertEqual(
+            record.actualized[0]["context"][
+                "nested"
+            ]["count"],
+            1,
+        )
+
+        self.assertEqual(
+            history.public_state["records"][0][
+                "actualized"
+            ][0]["context"]["nested"]["count"],
+            1,
+        )
+
+        self.assertIs(
+            history.latest,
+            record,
         )
 
     def test_history_record_classifies_enum_states(
