@@ -2657,7 +2657,7 @@ class DrinkRecipe:
             result[
                 "tastings"
             ] = [
-                item.to_dict()
+                deepcopy(item.to_dict())
                 for item
                 in self.tastings
             ]
