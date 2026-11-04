@@ -71,61 +71,6 @@ class CatKnownPlaceDetails:
         )
 
 
-@dataclass(slots=True, frozen=True)
-class CatKnownPlaceDetails:
-
-    pair_id: str | None = None
-    exploration_stage: int | None = None
-
-    def __post_init__(
-        self,
-    ):
-        if self.pair_id is not None:
-            object.__setattr__(
-                self,
-                "pair_id",
-                str(
-                    self.pair_id
-                ),
-            )
-
-        if self.exploration_stage is not None:
-            object.__setattr__(
-                self,
-                "exploration_stage",
-                int(
-                    self.exploration_stage
-                ),
-            )
-
-    def merged_with(
-        self,
-        other,
-    ):
-        if not isinstance(
-            other,
-            CatKnownPlaceDetails,
-        ):
-            raise TypeError(
-                "Cat known place details merge "
-                "requires CatKnownPlaceDetails."
-            )
-
-        return CatKnownPlaceDetails(
-            pair_id=(
-                other.pair_id
-                if other.pair_id is not None
-                else self.pair_id
-            ),
-            exploration_stage=(
-                other.exploration_stage
-                if other.exploration_stage
-                is not None
-                else self.exploration_stage
-            ),
-        )
-
-
 @dataclass(slots=True)
 class CatKnownPlace:
 

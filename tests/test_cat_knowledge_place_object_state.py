@@ -1,5 +1,8 @@
 from core.entity.components import SpatialVector3
 import unittest
+import ast
+import inspect
+import cats.cat_knowledge_objects as knowledge_objects
 
 from cats.cat_knowledge import CatKnowledge
 from cats.cat_knowledge_objects import (
@@ -28,6 +31,27 @@ class CatKnowledgePlaceObjectStateTests(
                 color='black',
                 fur_length='short',
             )
+        )
+
+    def test_canonical_place_details_defined_once(self):
+        module = ast.parse(
+            inspect.getsource(knowledge_objects)
+        )
+
+        definitions = [
+            node
+            for node in module.body
+            if isinstance(node, ast.ClassDef)
+            and node.name == "CatKnownPlaceDetails"
+        ]
+
+        self.assertEqual(len(definitions), 1)
+
+        self.assertIs(
+            CatKnownPlace.__dataclass_fields__[
+                "details"
+            ].default_factory,
+            CatKnownPlaceDetails,
         )
 
     def test_known_place_is_object_state(
