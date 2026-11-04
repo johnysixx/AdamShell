@@ -12,6 +12,7 @@ from cats.cat_parentage_state import (
 )
 from cats.cat_maternal_care_result_state import (
     CatMaternalCareAssessment,
+    CatMaternalThreatState,
     CatMaternalCareDeniedResult,
     CatMaternalCareEvent,
     CatMaternalProtectionDeniedResult,
@@ -734,6 +735,11 @@ class CatMaternalCareSystem:
             kitten
         )
 
+        if not isinstance(threat, CatMaternalThreatState):
+            raise TypeError(
+                "Maternal threat requires CatMaternalThreatState."
+            )
+
         assessment = self.evaluate(
             mother,
             kitten,
@@ -749,20 +755,7 @@ class CatMaternalCareSystem:
                 )
             )
 
-        if isinstance(
-            threat,
-            dict,
-        ):
-            threat_name = threat.get(
-                "name"
-            )
-
-        else:
-            threat_name = getattr(
-                threat,
-                "name",
-                str(threat),
-            )
+        threat_name = threat.name
 
         mother.state = (
             "protecting_kitten"

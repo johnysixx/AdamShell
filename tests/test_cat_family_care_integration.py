@@ -3,6 +3,7 @@ from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat_family_system import CatFamilySystem
 from cats.cat_maternal_care_system import CatMaternalCareSystem
+from cats.cat_maternal_care_result_state import CatMaternalThreatState
 from cats.kitten_upbringing_result_state import (
     KittenDailyCareEvent,
 )
@@ -73,7 +74,7 @@ class CatFamilyCareIntegrationTests(unittest.TestCase):
 
     def test_mother_can_protect_kitten_from_threat(self):
         care = CatMaternalCareSystem(self.cats)
-        result = care.protect_from_threat(mother=self.mother, kitten=self.first, threat={'name': 'cronenberg'}, current_day=12)
+        result = care.protect_from_threat(mother=self.mother, kitten=self.first, threat=CatMaternalThreatState(name='cronenberg'), current_day=12)
         self.assertTrue(result.protected)
         self.assertEqual(self.mother.state, 'protecting_kitten')
         self.assertEqual(self.first.state, 'protected_by_mother')

@@ -121,6 +121,17 @@ class CatMaternalCareEvent:
 
 
 @dataclass(slots=True, frozen=True)
+class CatMaternalThreatState:
+    name: str
+
+    def __post_init__(self):
+        if not isinstance(self.name, str) or not self.name.strip():
+            raise TypeError(
+                "Maternal threat name must be a non-empty string."
+            )
+
+
+@dataclass(slots=True, frozen=True)
 class CatMaternalProtectionDeniedResult:
     mother: str
     kitten: str

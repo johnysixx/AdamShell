@@ -5,6 +5,7 @@ from cats.cat_family_system import (
 )
 from cats.cat_maternal_care_result_state import (
     CatMaternalCareAssessment,
+    CatMaternalThreatState,
     CatMaternalCareDeniedResult,
     CatMaternalCareEvent,
     CatMaternalProtectionDeniedResult,
@@ -241,10 +242,9 @@ class CatMaternalCareResultsObjectStateTests(
         result = self.care.protect_from_threat(
             self.mother,
             self.kitten,
-            threat={
-                "name":
-                    "cronenberg"
-            },
+            threat=CatMaternalThreatState(
+                name="cronenberg"
+            ),
             current_day=12,
         )
 
@@ -307,6 +307,33 @@ class CatMaternalCareResultsObjectStateTests(
             kitten_event,
         )
 
+    def test_mapping_threat_is_rejected_atomically(self):
+        def snapshot():
+            return (
+                self.mother.state,
+                self.kitten.state,
+                len(self.mother.social_interactions),
+                len(self.kitten.social_interactions),
+                len(self.cats.events),
+                self.mother.maternal_care.care_events,
+                self.kitten.maternal_care_received.protection_events,
+            )
+
+        before = snapshot()
+
+        with self.assertRaisesRegex(
+            TypeError,
+            "CatMaternalThreatState",
+        ):
+            self.care.protect_from_threat(
+                self.mother,
+                self.kitten,
+                threat={"name": "cronenberg"},
+                current_day=12,
+            )
+
+        self.assertEqual(snapshot(), before)
+
     def test_protection_denial_is_object(
         self
     ):
@@ -319,10 +346,9 @@ class CatMaternalCareResultsObjectStateTests(
         result = self.care.protect_from_threat(
             stranger,
             self.kitten,
-            threat={
-                "name":
-                    "cronenberg"
-            },
+            threat=CatMaternalThreatState(
+                name="cronenberg"
+            ),
         )
 
         self.assertIsInstance(
