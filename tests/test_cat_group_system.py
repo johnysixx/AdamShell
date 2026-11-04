@@ -2,6 +2,7 @@ import unittest
 from universe.universe import Universe
 from cats.cats import Cats
 from cats.cat_group_system import CatGroupSystem
+from cats.cat_group import CatGroup, CatGroupCulture
 from cats.cat_social_objects import (
     CatRelationship,
     CatRelationshipTrustEvent,
@@ -32,6 +33,39 @@ class CatGroupSystemTests(unittest.TestCase):
         group_id = self._create_group()
         self.assertTrue(self.first.group.member)
         self.assertEqual(self.first.group.group_id, group_id)
+
+    def test_group_culture_is_canonical_object(self):
+        group_id = self._create_group()
+
+        group = self.group_system.groups[group_id]
+
+        self.assertIsInstance(
+            group.culture,
+            CatGroupCulture,
+        )
+
+        self.assertIs(
+            group.culture,
+            self.group_system.groups[group_id].culture,
+        )
+
+    def test_constructor_rejects_mapping_culture(self):
+        with self.assertRaisesRegex(
+            TypeError,
+            "CatGroupCulture",
+        ):
+            CatGroup(
+                culture={
+                    "traits": {},
+                    "history": [],
+                }
+            )
+
+        with self.assertRaisesRegex(
+            TypeError,
+            "CatGroupCulture",
+        ):
+            CatGroup(culture=None)
 
     def test_neutral_cat_can_join_group(self):
         group_id = self._create_group()

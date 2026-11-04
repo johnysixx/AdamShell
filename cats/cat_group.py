@@ -98,14 +98,13 @@ class CatGroup(DomainObject):
             "culture"
         )
 
-        if isinstance(
+        if not isinstance(
             culture,
-            dict
+            CatGroupCulture,
         ):
-            values["culture"] = (
-                CatGroupCulture(
-                    **culture
-                )
+            raise TypeError(
+                "Cat group culture must use "
+                "CatGroupCulture."
             )
 
         group_memory = values.get(
