@@ -1,3 +1,6 @@
+from copy import deepcopy
+
+
 class Reality:
 
     def __init__(self):
@@ -62,14 +65,16 @@ class Reality:
                 self.natural_processes
             ),
             "natural_processes": [
-                getattr(
-                    process,
-                    "public_state",
-                    {
-                        "type": type(
-                            process
-                        ).__name__
-                    }
+                deepcopy(
+                    getattr(
+                        process,
+                        "public_state",
+                        {
+                            "type": type(
+                                process
+                            ).__name__
+                        }
+                    )
                 )
                 for process in self.natural_processes
             ]
