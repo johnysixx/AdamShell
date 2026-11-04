@@ -387,6 +387,199 @@ class EdenObjectStateTests(unittest.TestCase):
             ["original"],
         )
 
+    def test_nested_rules_snapshots_are_independent(self):
+        rule = {
+            "name": "eden_rule",
+            "conditions": {
+                "steps": ["original"],
+            },
+        }
+
+        state = EdenState(
+            rules=[rule],
+        )
+
+        first = state.to_dict()
+        second = state.to_dict()
+
+        first["rules"][0]["conditions"][
+            "steps"
+        ].append("snapshot_only")
+
+        self.assertEqual(
+            rule["conditions"]["steps"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            second["rules"][0][
+                "conditions"
+            ]["steps"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            state.to_dict()["rules"][0][
+                "conditions"
+            ]["steps"],
+            ["original"],
+        )
+
+        self.assertIs(
+            state.rules[0],
+            rule,
+        )
+
+        self.assertIsNot(
+            first["rules"][0],
+            rule,
+        )
+
+    def test_nested_relations_snapshots_are_independent(self):
+        relation = {
+            "participants": ["adam", "eva"],
+            "metadata": {
+                "history": ["original"],
+            },
+        }
+
+        state = EdenState(
+            relations=[relation],
+        )
+
+        first = state.to_dict()
+        second = state.to_dict()
+
+        first["relations"][0]["metadata"][
+            "history"
+        ].append("snapshot_only")
+
+        self.assertEqual(
+            relation["metadata"]["history"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            second["relations"][0][
+                "metadata"
+            ]["history"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            state.to_dict()["relations"][0][
+                "metadata"
+            ]["history"],
+            ["original"],
+        )
+
+        self.assertIs(
+            state.relations[0],
+            relation,
+        )
+
+        self.assertIsNot(
+            first["relations"][0],
+            relation,
+        )
+
+    def test_eden_public_snapshot_preserves_live_registries(self):
+        _, eden = self._eden()
+
+        rule = {
+            "name": "eden_rule",
+            "metadata": {
+                "flags": ["original"],
+            },
+        }
+
+        relation = {
+            "name": "eden_relation",
+            "metadata": {
+                "notes": ["original"],
+            },
+        }
+
+        eden.rules.append(rule)
+        eden.relations.append(relation)
+
+        self.assertIs(
+            eden.rules,
+            eden.eden_state.rules,
+        )
+
+        self.assertIs(
+            eden.relations,
+            eden.eden_state.relations,
+        )
+
+        self.assertIs(
+            eden.rules[0],
+            rule,
+        )
+
+        self.assertIs(
+            eden.relations[0],
+            relation,
+        )
+
+        snapshot = eden.public_state[
+            "eden_state"
+        ]
+
+        rule["metadata"]["flags"].append(
+            "live_change"
+        )
+
+        relation["metadata"]["notes"].append(
+            "live_change"
+        )
+
+        self.assertEqual(
+            snapshot["rules"][0][
+                "metadata"
+            ]["flags"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            snapshot["relations"][0][
+                "metadata"
+            ]["notes"],
+            ["original"],
+        )
+
+        current = eden.public_state[
+            "eden_state"
+        ]
+
+        self.assertEqual(
+            current["rules"][0][
+                "metadata"
+            ]["flags"],
+            ["original", "live_change"],
+        )
+
+        self.assertEqual(
+            current["relations"][0][
+                "metadata"
+            ]["notes"],
+            ["original", "live_change"],
+        )
+
+        snapshot["rules"].clear()
+        snapshot["relations"].clear()
+
+        self.assertEqual(
+            len(eden.rules),
+            1,
+        )
+
+        self.assertEqual(
+            len(eden.relations),
+            1,
+        )
+
     def test_to_dict_is_detached_boundary(self):
         state = EdenState()
         snapshot = state.to_dict()

@@ -73,9 +73,13 @@ class EdenState:
                 _snapshot_entity(animal)
                 for animal in self.animals
             ],
-            "rules": list(self.rules),
+            "rules": deepcopy(
+                list(self.rules)
+            ),
             "observer": self.observer,
-            "relations": list(self.relations),
+            "relations": deepcopy(
+                list(self.relations)
+            ),
             "day": self.day,
             "max_day": self.max_day,
             "tick_count": self.tick_count,
