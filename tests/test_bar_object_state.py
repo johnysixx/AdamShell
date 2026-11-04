@@ -96,6 +96,33 @@ class BarObjectStateTests(unittest.TestCase):
         box = self.bar.place_cat_d20_box(cat)
         self.assertIsInstance(box, CatD20Box)
 
+    def test_cat_d20_box_rejects_mapping_atomically(self):
+        before_box = getattr(self.bar, "cat_d20_box", None)
+        world = self.universe.world["meeting_place"]
+        before_present = "cat_d20_box" in world
+        before_world_box = world.get("cat_d20_box")
+
+        legacy = {
+            "name": "legacy_cat_d20",
+            "special_traits": ["d20_cat"],
+        }
+
+        with self.assertRaisesRegex(TypeError, "requires a cat"):
+            self.bar.place_cat_d20_box(legacy)
+
+        self.assertIs(
+            getattr(self.bar, "cat_d20_box", None),
+            before_box,
+        )
+        self.assertEqual(
+            "cat_d20_box" in world,
+            before_present,
+        )
+        self.assertIs(
+            world.get("cat_d20_box"),
+            before_world_box,
+        )
+
     def test_persistent_registries_remain_dictionaries(self):
         self.assertIsInstance(self.bar.drink_menu, dict)
         self.assertIsInstance(self.bar.new_drinks, dict)

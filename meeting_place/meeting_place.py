@@ -1549,7 +1549,7 @@ class MeetingPlace:
         )
 
     def place_cat_d20_box(self, cat):
-        if not isinstance(cat, (Cat, dict)):
+        if not isinstance(cat, Cat):
             raise TypeError('Cat D20 box requires a cat.')
         if 'd20_cat' not in getattr(cat, 'special_traits', []):
             raise ValueError('This box is reserved for Cat D20.')
