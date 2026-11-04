@@ -1,3 +1,6 @@
+from copy import deepcopy
+
+
 class UniverseManual:
 
     def __init__(self, universe_registry):
@@ -17,7 +20,7 @@ class UniverseManual:
             return None
 
         return {
-            universe_id: universe_data.copy()
+            universe_id: deepcopy(universe_data)
             for universe_id, universe_data
             in self._universe_registry.universes.items()
         }
