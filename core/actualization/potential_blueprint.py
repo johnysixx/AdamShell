@@ -22,8 +22,8 @@ class PotentialBlueprint:
         self.mandatory = mandatory
         self.available = available
         self.source = source
-        self.context = dict(
-            context or {}
+        self.context = deepcopy(
+            dict(context or {})
         )
 
     @classmethod
@@ -59,8 +59,8 @@ class PotentialBlueprint:
             possibility=possibility,
             cycle_id=cycle_id,
             source=self.source,
-            context=dict(
-                self.context
+            context=deepcopy(
+                dict(self.context)
             )
         )
 

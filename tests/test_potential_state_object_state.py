@@ -156,6 +156,132 @@ class PotentialStateObjectStateTests(
         with self.assertRaises(TypeError):
             potential.state = "actualized"
 
+    def test_blueprint_captures_nested_context(self):
+        original_context = {
+            "nested": {
+                "values": ["original"],
+            },
+        }
+
+        blueprint = PotentialBlueprint(
+            name="capture_test",
+            probability=1.0,
+            action=None,
+            mandatory=True,
+            available=True,
+            context=original_context,
+        )
+
+        original_context["nested"]["values"].append(
+            "changed"
+        )
+
+        self.assertEqual(
+            blueprint.context["nested"]["values"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            blueprint.public_state["context"][
+                "nested"
+            ]["values"],
+            ["original"],
+        )
+
+    def test_history_blueprint_ignores_live_context_changes(self):
+        potential = Potential(
+            possibility=Possibility(
+                name="history_capture",
+                probability=1.0,
+                mandatory=True,
+            ),
+            cycle_id="cycle_test",
+            context={
+                "nested": {
+                    "count": 1,
+                },
+            },
+        )
+
+        potential.mark_actualized()
+
+        record = HistoryRecord(
+            cycle_id="cycle_test",
+            events=[],
+            potentials=[potential],
+        )
+
+        potential.context["nested"]["count"] = 99
+
+        blueprint = record.potential_blueprints[0]
+
+        self.assertEqual(
+            blueprint.context["nested"]["count"],
+            1,
+        )
+
+        self.assertEqual(
+            record.public_state[
+                "potential_blueprints"
+            ][0]["context"]["nested"]["count"],
+            1,
+        )
+
+        restored = blueprint.create_potential(
+            cycle_id="cycle_replay",
+        )
+
+        self.assertEqual(
+            restored.context["nested"]["count"],
+            1,
+        )
+
+    def test_restored_potentials_have_independent_context(self):
+        blueprint = PotentialBlueprint(
+            name="replay_test",
+            probability=1.0,
+            action=None,
+            mandatory=True,
+            available=True,
+            context={
+                "nested": {
+                    "values": ["original"],
+                },
+            },
+        )
+
+        first = blueprint.create_potential(
+            cycle_id="cycle_a",
+        )
+
+        second = blueprint.create_potential(
+            cycle_id="cycle_b",
+        )
+
+        first.context["nested"]["values"].append(
+            "changed"
+        )
+
+        self.assertEqual(
+            first.context["nested"]["values"],
+            ["original", "changed"],
+        )
+
+        self.assertEqual(
+            second.context["nested"]["values"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            blueprint.context["nested"]["values"],
+            ["original"],
+        )
+
+        self.assertIsNot(
+            first.context["nested"],
+            second.context["nested"],
+        )
+
     def test_blueprint_public_state_detaches_nested_context(self):
         blueprint = PotentialBlueprint(
             name="test",
