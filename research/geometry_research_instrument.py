@@ -1,3 +1,6 @@
+from copy import deepcopy
+
+
 class GeometryResearchInstrument:
 
     def __init__(self):
@@ -41,7 +44,7 @@ class GeometryResearchInstrument:
             "measurement_count": len(
                 self.measurements
             ),
-            "last_measurement": (
+            "last_measurement": deepcopy(
                 self.last_measurement
             )
         }
