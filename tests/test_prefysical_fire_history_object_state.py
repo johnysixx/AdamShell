@@ -1,4 +1,5 @@
 import unittest
+from types import SimpleNamespace
 from core.entity.social_entity import SocialEntity
 
 from idea_entities import IdeaEntities
@@ -182,6 +183,221 @@ class PrefysicalFireHistoryObjectStateTests(
                 "temperature_state"
             ],
             "freezing",
+        )
+
+    def test_history_snapshot_detaches_nested_object(self):
+        payload = SimpleNamespace(
+            notes=["original"],
+        )
+
+        event = PrefysicalFireEvent(
+            name="nested_history_test",
+            layer="prefysical_fire",
+            logical_step=1,
+            participants=("serpent",),
+            details={
+                "metadata": payload,
+            },
+        )
+
+        self.origin.record_event(event)
+
+        first = self.origin.public_state
+        second = self.origin.public_state
+
+        first["history"][0]["details"][
+            "metadata"
+        ].notes.append("snapshot_only")
+
+        self.assertEqual(
+            payload.notes,
+            ["original"],
+        )
+
+        self.assertEqual(
+            second["history"][0]["details"][
+                "metadata"
+            ].notes,
+            ["original"],
+        )
+
+        self.assertEqual(
+            self.origin.public_state["history"][0][
+                "details"
+            ]["metadata"].notes,
+            ["original"],
+        )
+
+        self.assertIs(
+            self.origin.history[0],
+            event,
+        )
+
+        self.assertIs(
+            event.details["metadata"],
+            payload,
+        )
+
+        self.assertIsNot(
+            first["history"][0]["details"][
+                "metadata"
+            ],
+            payload,
+        )
+
+    def test_history_snapshot_ignores_later_live_changes(self):
+        payload = SimpleNamespace(
+            metadata={
+                "notes": ["original"],
+            },
+        )
+
+        event = PrefysicalFireEvent(
+            name="history_change_test",
+            layer="prefysical_fire",
+            logical_step=1,
+            participants=("lilith",),
+            details={
+                "payload": payload,
+            },
+        )
+
+        self.origin.record_event(event)
+
+        snapshot = self.origin.public_state
+
+        payload.metadata["notes"].append(
+            "live_change"
+        )
+
+        self.assertEqual(
+            snapshot["history"][0]["details"][
+                "payload"
+            ].metadata["notes"],
+            ["original"],
+        )
+
+        current = self.origin.public_state
+
+        self.assertEqual(
+            current["history"][0]["details"][
+                "payload"
+            ].metadata["notes"],
+            ["original", "live_change"],
+        )
+
+        snapshot["history"].clear()
+
+        self.assertEqual(
+            len(self.origin.history),
+            1,
+        )
+
+        self.assertIs(
+            self.origin.history[0],
+            event,
+        )
+
+        self.assertIs(
+            event.details["payload"],
+            payload,
+        )
+
+    def test_world_history_snapshot_preserves_event_identity(self):
+        payload = SimpleNamespace(
+            notes=["original"],
+        )
+
+        event = PrefysicalFireEvent(
+            name="world_history_test",
+            layer="prefysical_fire",
+            logical_step=1,
+            participants=("serpent", "lilith"),
+            details={
+                "metadata": payload,
+            },
+        )
+
+        self.origin.record_event(event)
+        self.idea_entities.write_to_world()
+
+        world_snapshot = self.universe.world[
+            "idea_entities"
+        ]["prefysical_fire_origin"]
+
+        public_snapshot = self.idea_entities.public_state[
+            "prefysical_fire_origin"
+        ]
+
+        origin_snapshot = self.origin.public_state
+
+        self.assertIs(
+            self.idea_entities.prefysical_fire_origin,
+            self.origin,
+        )
+
+        self.assertIs(
+            self.origin.history[0],
+            event,
+        )
+
+        self.assertIs(
+            event.details["metadata"],
+            payload,
+        )
+
+        world_snapshot["history"][0]["details"][
+            "metadata"
+        ].notes.append("snapshot_only")
+
+        self.assertEqual(
+            payload.notes,
+            ["original"],
+        )
+
+        for snapshot in (
+            public_snapshot,
+            origin_snapshot,
+        ):
+            self.assertEqual(
+                snapshot["history"][0]["details"][
+                    "metadata"
+                ].notes,
+                ["original"],
+            )
+
+        payload.notes.append(
+            "live_change"
+        )
+
+        self.assertEqual(
+            public_snapshot["history"][0][
+                "details"
+            ]["metadata"].notes,
+            ["original"],
+        )
+
+        self.assertEqual(
+            origin_snapshot["history"][0][
+                "details"
+            ]["metadata"].notes,
+            ["original"],
+        )
+
+        current = self.idea_entities.public_state[
+            "prefysical_fire_origin"
+        ]
+
+        self.assertEqual(
+            current["history"][0]["details"][
+                "metadata"
+            ].notes,
+            ["original", "live_change"],
+        )
+
+        self.assertIs(
+            self.origin.history[0],
+            event,
         )
 
     def test_history_rejects_mapping_event(

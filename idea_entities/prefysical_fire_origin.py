@@ -1,3 +1,4 @@
+from copy import deepcopy
 from dataclasses import dataclass, field
 from core.entity.social_entity import SocialEntity
 
@@ -1183,7 +1184,9 @@ class PrefysicalFireOrigin:
             "state": self.state.value,
 
             "history": [
-                event.to_dict()
+                deepcopy(
+                    event.to_dict()
+                )
                 for event in self.history
             ]
         }
