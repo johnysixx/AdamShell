@@ -26,6 +26,7 @@ from meeting_place.bar_basic_drink_service_state import (
 )
 from meeting_place.bar_basic_drinks_on_tab_state import (
     BarBasicDrinksOnTabResult,
+    BarOrderServedOnOpenTabEvent,
 )
 from meeting_place.bar_objects import (
     BarDrink,
@@ -544,6 +545,11 @@ class MeetingPlace:
         self,
         event
     ):
+        if isinstance(event, dict):
+            raise TypeError(
+                "MeetingPlace events cannot be dictionaries."
+            )
+
         self.events.append(
             event
         )
@@ -554,20 +560,6 @@ class MeetingPlace:
         ):
             self.back_room_black_box.record(
                 event=event.name,
-                data=event,
-                source='meeting_place',
-                tick=self.tick_count,
-            )
-
-        elif isinstance(
-            event,
-            dict,
-        ):
-            self.back_room_black_box.record(
-                event=event.get(
-                    'name',
-                    'meeting_place_event',
-                ),
                 data=event,
                 source='meeting_place',
                 tick=self.tick_count,
@@ -1735,7 +1727,11 @@ class MeetingPlace:
             self.bar_counter.cash_register.add_to_tab(entity=entity, drink=drink)
         receipt = self.bar_counter.cash_register.print_open_tab_receipt(entity)
         entity_name = self._get_entity_name(entity)
-        event = {'name': 'bar_order_served_on_open_tab', 'guest': entity_name, 'drinks': [drink.name for drink in drinks], 'receipt_number': receipt.receipt_number, 'paid': False}
+        event = BarOrderServedOnOpenTabEvent(
+            guest=entity_name,
+            drinks=tuple(drink.name for drink in drinks),
+            receipt_number=receipt.receipt_number,
+        )
         self.emit_event(event)
         return BarBasicDrinksOnTabResult(
             drinks=tuple(drinks),

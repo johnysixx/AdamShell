@@ -1,8 +1,40 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from meeting_place.bar_objects import BarDrink
 from meeting_place.bar_receipt_state import BarReceiptState
 from meeting_place.bar_payment_state import BarPaymentState
+
+
+
+@dataclass(frozen=True, slots=True)
+class BarOrderServedOnOpenTabEvent:
+    guest: str
+    drinks: tuple[str, ...]
+    receipt_number: int
+    name: str = field(
+        default="bar_order_served_on_open_tab",
+        init=False,
+    )
+    paid: bool = field(default=False, init=False)
+
+    def __post_init__(self):
+        if not isinstance(self.guest, str):
+            raise TypeError("Event guest must be a string.")
+        if not isinstance(self.drinks, tuple) or not all(
+            isinstance(drink, str) for drink in self.drinks
+        ):
+            raise TypeError("Event drinks must be a tuple of names.")
+        if not isinstance(self.receipt_number, int):
+            raise TypeError("Event receipt number must be an integer.")
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "guest": self.guest,
+            "drinks": list(self.drinks),
+            "receipt_number": self.receipt_number,
+            "paid": self.paid,
+        }
 
 
 @dataclass(slots=True, frozen=True)

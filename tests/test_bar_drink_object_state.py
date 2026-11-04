@@ -10,6 +10,7 @@ from meeting_place.bar_objects import (
 from meeting_place.bar_receipt_state import BarReceiptState
 from meeting_place.bar_basic_drinks_on_tab_state import (
     BarBasicDrinksOnTabResult,
+    BarOrderServedOnOpenTabEvent,
 )
 from meeting_place.meeting_place import MeetingPlace
 from multiverse import UniverseRegistry
@@ -56,6 +57,69 @@ class BarDrinkObjectStateTests(unittest.TestCase):
         self.assertEqual(
             [drink.name for drink in result.drinks],
             ["wine", "beer"],
+        )
+
+    def test_open_tab_event_is_immutable_object(self):
+        bar = self._meeting_place()
+        guest = SimpleNamespace(name="guest", type="human")
+
+        result = bar.serve_basic_drinks_on_tab(
+            entity=guest,
+            drink_names=["wine", "beer"],
+        )
+        event = bar.events[-1]
+
+        self.assertIsInstance(
+            event, BarOrderServedOnOpenTabEvent
+        )
+        self.assertEqual(
+            event.name, "bar_order_served_on_open_tab"
+        )
+        self.assertEqual(event.guest, "guest")
+        self.assertEqual(event.drinks, ("wine", "beer"))
+        self.assertEqual(
+            event.receipt_number,
+            result.receipt.receipt_number,
+        )
+        self.assertFalse(event.paid)
+        self.assertIs(bar.bartender.event_memory[-1], event)
+        self.assertIs(
+            bar.back_room_black_box.entries[-1].data,
+            event,
+        )
+        self.assertEqual(
+            bar.back_room_black_box.entries[-1].event,
+            event.name,
+        )
+
+        snapshot = event.to_dict()
+        snapshot["drinks"].append("rum")
+        self.assertEqual(event.drinks, ("wine", "beer"))
+
+        with self.assertRaises(TypeError):
+            _ = event["name"]
+
+    def test_meeting_place_rejects_mapping_event_atomically(self):
+        bar = self._meeting_place()
+
+        before = (
+            len(bar.events),
+            len(bar.bartender.event_memory),
+            len(bar.back_room_black_box.entries),
+        )
+
+        with self.assertRaises(TypeError):
+            bar.emit_event({
+                "name": "bar_order_served_on_open_tab",
+            })
+
+        self.assertEqual(
+            (
+                len(bar.events),
+                len(bar.bartender.event_memory),
+                len(bar.back_room_black_box.entries),
+            ),
+            before,
         )
 
     def test_drink_objects_have_no_mapping_api(self):
