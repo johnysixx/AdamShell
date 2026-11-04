@@ -17,6 +17,29 @@ from library.library_state import (
 from universe.universe import Universe
 
 
+class MutableSerializedLibraryEvent(LibraryEvent):
+
+    def __init__(self):
+        super().__init__(
+            name="custom_library_event",
+        )
+
+        object.__setattr__(
+            self,
+            "metadata",
+            {
+                "notes": {
+                    "entries": ["original"],
+                },
+            },
+        )
+
+    def to_dict(self):
+        snapshot = super().to_dict()
+        snapshot["metadata"] = self.metadata
+        return snapshot
+
+
 class LibraryObjectStateTests(unittest.TestCase):
 
     def _library(self):
@@ -560,6 +583,174 @@ class LibraryObjectStateTests(unittest.TestCase):
         self.assertEqual(
             library.library_state.door.state,
             "open",
+        )
+
+    def test_nested_library_event_snapshot_is_detached(self):
+        event = MutableSerializedLibraryEvent()
+
+        state = LibraryState(
+            events=[event],
+        )
+
+        first = state.to_dict()
+        second = state.to_dict()
+
+        first["events"][0]["metadata"][
+            "notes"
+        ]["entries"].append("snapshot_only")
+
+        self.assertEqual(
+            event.metadata["notes"]["entries"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            second["events"][0]["metadata"][
+                "notes"
+            ]["entries"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            state.to_dict()["events"][0][
+                "metadata"
+            ]["notes"]["entries"],
+            ["original"],
+        )
+
+        self.assertIs(
+            state.events[0],
+            event,
+        )
+
+        self.assertIsNot(
+            first["events"][0]["metadata"],
+            event.metadata,
+        )
+
+    def test_library_event_snapshot_ignores_live_changes(self):
+        event = MutableSerializedLibraryEvent()
+
+        state = LibraryState(
+            events=[event],
+        )
+
+        snapshot = state.to_dict()
+
+        event.metadata["notes"][
+            "entries"
+        ].append("live_change")
+
+        self.assertEqual(
+            snapshot["events"][0]["metadata"][
+                "notes"
+            ]["entries"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            state.to_dict()["events"][0][
+                "metadata"
+            ]["notes"]["entries"],
+            ["original", "live_change"],
+        )
+
+        snapshot["events"].clear()
+
+        self.assertEqual(
+            len(state.events),
+            1,
+        )
+
+        self.assertIs(
+            state.events[0],
+            event,
+        )
+
+    def test_world_library_event_snapshots_keep_identity(self):
+        universe, library = self._library()
+        state = library.library_state
+
+        event = MutableSerializedLibraryEvent()
+
+        library.emit_event(event)
+
+        self.assertIs(
+            library.library_state,
+            state,
+        )
+
+        self.assertIs(
+            library.events,
+            state.events,
+        )
+
+        self.assertIs(
+            library.events[0],
+            event,
+        )
+
+        self.assertIs(
+            universe.world["library_state"],
+            state,
+        )
+
+        world_snapshot = universe.world[
+            "library"
+        ]["library_state"]
+
+        public_snapshot = library.public_state[
+            "library_state"
+        ]
+
+        world_snapshot["events"][0]["metadata"][
+            "notes"
+        ]["entries"].append("snapshot_only")
+
+        self.assertEqual(
+            event.metadata["notes"]["entries"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            public_snapshot["events"][0][
+                "metadata"
+            ]["notes"]["entries"],
+            ["original"],
+        )
+
+        event.metadata["notes"][
+            "entries"
+        ].append("live_change")
+
+        self.assertEqual(
+            public_snapshot["events"][0][
+                "metadata"
+            ]["notes"]["entries"],
+            ["original"],
+        )
+
+        current = library.public_state[
+            "library_state"
+        ]
+
+        self.assertEqual(
+            current["events"][0]["metadata"][
+                "notes"
+            ]["entries"],
+            ["original", "live_change"],
+        )
+
+        self.assertIs(
+            state.events[0],
+            event,
+        )
+
+        self.assertEqual(
+            world_snapshot["events"][0][
+                "metadata"
+            ]["notes"]["entries"],
+            ["original", "snapshot_only"],
         )
 
     def test_to_dict_is_detached_boundary(self):

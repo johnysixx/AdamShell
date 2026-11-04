@@ -1,3 +1,4 @@
+from copy import deepcopy
 from dataclasses import dataclass, field
 
 
@@ -239,7 +240,9 @@ class LibraryState:
             "books": list(self.books),
             "catalog": list(self.catalog),
             "events": [
-                event.to_dict()
+                deepcopy(
+                    event.to_dict()
+                )
                 for event in self.events
             ],
             "visitors": [
