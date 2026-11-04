@@ -719,38 +719,35 @@ class CatExplorationPlanner:
                 )
 
             else:
-                for key in (
-                    "target_layer",
-                    "resolved_layer",
-                    "source_layer",
-                    "layer"
-                ):
-                    value = details.get(
-                        key
-                    )
-
-                    if value is not None:
-                        layers.append(
-                            str(
-                                value
-                            )
+                if (
+                    isinstance(details, dict)
+                    and any(
+                        key in details
+                        for key in (
+                            "target_layer",
+                            "resolved_layer",
+                            "source_layer",
+                            "layer",
+                            "resolved_position",
+                            "position",
                         )
+                    )
+                ):
+                    raise TypeError(
+                        "Cat exploration memory details "
+                        "must use canonical object state."
+                    )
 
                 if isinstance(
                     location,
-                    str
+                    str,
                 ):
                     layers.append(
                         location
                     )
 
-                raw_position = details.get(
-                    "resolved_position",
-                    details.get(
-                        "position",
-                        location,
-                    ),
-                )
+                raw_position = location
+
             if isinstance(
                 raw_position,
                 SpatialVector3,

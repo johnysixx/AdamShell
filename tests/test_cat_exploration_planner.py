@@ -157,6 +157,98 @@ class CatExplorationPlannerTests(
             history.reasons
         )
 
+    def test_mapping_layer_details_are_rejected(self):
+        self.cat.memory.remember(
+            event_type="successful_exploration",
+            location=SpatialVector3.zero(),
+            details={
+                "target_layer": "history",
+            },
+        )
+
+        with self.assertRaisesRegex(
+            TypeError,
+            "canonical object state",
+        ):
+            CatExplorationPlanner.choose_destination(
+                cat=self.cat,
+                universe=self.universe,
+            )
+
+    def test_mapping_position_details_are_rejected(self):
+        self.cat.memory.remember(
+            event_type="successful_exploration",
+            location="history",
+            details={
+                "position": {
+                    "x": 1.0,
+                    "y": 2.0,
+                    "z": 3.0,
+                },
+            },
+        )
+
+        with self.assertRaisesRegex(
+            TypeError,
+            "canonical object state",
+        ):
+            CatExplorationPlanner.collect_candidates(
+                cat=self.cat,
+                universe=self.universe,
+            )
+
+    def test_canonical_memory_position_is_preserved(self):
+        position = SpatialVector3(
+            x=7.0,
+            y=8.0,
+            z=9.0,
+        )
+
+        self.cat.memory.remember(
+            event_type="successful_exploration",
+            location=SpatialVector3.zero(),
+            details=CatExplorationMemoryDetails(
+                target_layer="history",
+                position=position,
+            ),
+        )
+
+        candidates = CatExplorationPlanner.collect_candidates(
+            cat=self.cat,
+            universe=self.universe,
+        )
+
+        remembered = next(
+            candidate
+            for candidate in candidates
+            if candidate.source == "memory"
+            and candidate.layer == "history"
+        )
+
+        self.assertEqual(
+            remembered.position,
+            position,
+        )
+
+    def test_empty_memory_details_preserve_location(self):
+        self.cat.memory.remember(
+            event_type="safe_at_bar",
+            location="history",
+        )
+
+        candidates = CatExplorationPlanner.collect_candidates(
+            cat=self.cat,
+            universe=self.universe,
+        )
+
+        self.assertTrue(
+            any(
+                candidate.source == "memory"
+                and candidate.layer == "history"
+                for candidate in candidates
+            )
+        )
+
     def test_mapping_memory_position_is_rejected(
         self
     ):
