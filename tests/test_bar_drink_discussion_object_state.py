@@ -28,6 +28,28 @@ from multiverse import UniverseRegistry
 from universe.universe import Universe
 
 
+class MutableSerializedBarDrinkIdea(
+    BarDrinkIdea
+):
+
+    def __init__(self):
+        super().__init__(
+            subject="wine",
+            source="lilith",
+        )
+
+        self.metadata = {
+            "history": {
+                "notes": ["original"],
+            },
+        }
+
+    def to_dict(self):
+        result = super().to_dict()
+        result["metadata"] = self.metadata
+        return result
+
+
 class BarDrinkDiscussionObjectStateTests(
     unittest.TestCase
 ):
@@ -517,6 +539,169 @@ class BarDrinkDiscussionObjectStateTests(
             discussion
             .current_hypothesis
             .acidity
+        )
+
+    def test_discussion_nested_idea_snapshot_is_detached(self):
+        idea = MutableSerializedBarDrinkIdea()
+
+        discussion = BarDrinkDiscussion(
+            ideas=[idea],
+        )
+
+        first = discussion.to_dict()
+        second = discussion.to_dict()
+
+        first["ideas"][0]["metadata"][
+            "history"
+        ]["notes"].append("snapshot_only")
+
+        self.assertEqual(
+            idea.metadata["history"]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            second["ideas"][0]["metadata"][
+                "history"
+            ]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            discussion.to_dict()["ideas"][0][
+                "metadata"
+            ]["history"]["notes"],
+            ["original"],
+        )
+
+        self.assertIs(
+            discussion.ideas[0],
+            idea,
+        )
+
+        self.assertIsNot(
+            first["ideas"][0]["metadata"],
+            idea.metadata,
+        )
+
+        self.assertEqual(
+            first["ideas"][0]["subject"],
+            "wine",
+        )
+
+    def test_discussion_snapshot_ignores_later_changes(self):
+        discussion = BarDrinkDiscussion()
+        idea = MutableSerializedBarDrinkIdea()
+
+        recorded = discussion.add_idea(idea)
+
+        ideas = discussion.ideas
+        snapshot = discussion.to_dict()
+
+        idea.metadata["history"]["notes"].append(
+            "live_change"
+        )
+
+        self.assertEqual(
+            snapshot["ideas"][0]["metadata"][
+                "history"
+            ]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            discussion.to_dict()["ideas"][0][
+                "metadata"
+            ]["history"]["notes"],
+            ["original", "live_change"],
+        )
+
+        snapshot["ideas"][0]["metadata"][
+            "history"
+        ]["notes"].append("snapshot_only")
+
+        snapshot["ideas"].clear()
+
+        self.assertEqual(
+            idea.metadata["history"]["notes"],
+            ["original", "live_change"],
+        )
+
+        self.assertIs(recorded, idea)
+        self.assertIs(discussion.ideas, ideas)
+        self.assertIs(discussion.ideas[0], idea)
+        self.assertEqual(len(discussion.ideas), 1)
+        self.assertFalse(discussion.resolved)
+
+    def test_day0_discussion_keeps_live_idea_identity(self):
+        universe = Universe()
+        universe.universe_registry = UniverseRegistry()
+
+        scene = Day0FirstBarShift(
+            universe=universe,
+            meeting_place=MeetingPlace(universe),
+            library=Library(universe),
+            gods=Gods(universe),
+            idea_entities=IdeaEntities(universe),
+        )
+
+        result = (
+            scene.advance_to_good_drink_discussion()
+        )
+
+        discussion = result.discussion
+        idea = MutableSerializedBarDrinkIdea()
+
+        recorded = discussion.add_idea(idea)
+
+        first = discussion.to_dict()
+        second = discussion.to_dict()
+
+        first["ideas"][-1]["metadata"][
+            "history"
+        ]["notes"].append("snapshot_only")
+
+        self.assertEqual(
+            idea.metadata["history"]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            second["ideas"][-1]["metadata"][
+                "history"
+            ]["notes"],
+            ["original"],
+        )
+
+        idea.metadata["history"]["notes"].append(
+            "live_change"
+        )
+
+        self.assertEqual(
+            second["ideas"][-1]["metadata"][
+                "history"
+            ]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            discussion.to_dict()["ideas"][-1][
+                "metadata"
+            ]["history"]["notes"],
+            ["original", "live_change"],
+        )
+
+        self.assertIs(recorded, idea)
+        self.assertIs(discussion.ideas[-1], idea)
+
+        self.assertIs(
+            scene.serpent_lilith_good_drink_discussion,
+            discussion,
+        )
+
+        self.assertIsInstance(
+            scene.meeting_place.events[-1],
+            SerpentLilithGoodDrinkDiscussionStartedEvent,
         )
 
     def test_scene_keeps_object_emits_object_and_serializes_history(

@@ -501,7 +501,7 @@ class BarDrinkDiscussion:
             ),
             "question": self.question,
             "ideas": [
-                idea.to_dict()
+                deepcopy(idea.to_dict())
                 for idea in self.ideas
             ],
             "resolved": self.resolved,
