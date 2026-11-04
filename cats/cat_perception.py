@@ -654,17 +654,6 @@ class CatPerception:
 
                 continue
 
-            if (
-                isinstance(
-                    details,
-                    dict,
-                )
-                and details.get(
-                    'box_id'
-                )
-                == box_id
-            ):
-                return True
         return False
 
     def _cronenberg_danger(self, cat, cronenbergs):

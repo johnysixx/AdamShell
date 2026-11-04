@@ -2,6 +2,9 @@ import unittest
 from core.entity.components import SpatialVector3
 from universe.universe import Universe
 from cats.cats import Cats
+from cats.cat_quantum_box_memory_details import (
+    CatQuantumBoxObservedMemoryDetails,
+)
 
 class CatPerceptionTests(unittest.TestCase):
 
@@ -43,9 +46,55 @@ class CatPerceptionTests(unittest.TestCase):
         box.position = SpatialVector3(x=2.0, y=0.0, z=0.0)
         first = self.cats.observe_cat(self.cat)
         self.assertIn(box.id, first.unexplored_boxes)
-        self.cat.memory.remember(event_type='box_explored', participants=[box.id], details={'box_id': box.id})
+        self.cat.memory.remember(
+            event_type='box_explored',
+            participants=[box.id],
+            details=CatQuantumBoxObservedMemoryDetails(
+                box_id=box.id,
+            ),
+        )
         second = self.cats.observe_cat(self.cat)
         self.assertNotIn(box.id, second.unexplored_boxes)
+
+    def test_canonical_box_details_without_participants(self):
+        box = self.universe.create_quantum_box()
+        box.position = SpatialVector3(x=2.0, y=0.0, z=0.0)
+
+        self.cat.memory.remember(
+            event_type='quantum_box_observed',
+            participants=[],
+            details=CatQuantumBoxObservedMemoryDetails(
+                box_id=box.id,
+            ),
+        )
+
+        result = self.cats.observe_cat(self.cat)
+        self.assertNotIn(box.id, result.unexplored_boxes)
+
+    def test_legacy_dict_details_do_not_mark_box_explored(self):
+        box = self.universe.create_quantum_box()
+        box.position = SpatialVector3(x=2.0, y=0.0, z=0.0)
+
+        self.cat.memory.remember(
+            event_type='quantum_box_observed',
+            participants=[],
+            details={'box_id': box.id},
+        )
+
+        result = self.cats.observe_cat(self.cat)
+        self.assertIn(box.id, result.unexplored_boxes)
+
+    def test_box_participant_marks_explored_without_details(self):
+        box = self.universe.create_quantum_box()
+        box.position = SpatialVector3(x=2.0, y=0.0, z=0.0)
+
+        self.cat.memory.remember(
+            event_type='box_entered',
+            participants=[box.id],
+        )
+
+        result = self.cats.observe_cat(self.cat)
+        self.assertNotIn(box.id, result.unexplored_boxes)
 
     def test_bar_is_visible_near_door(self):
         result = self.cats.observe_cat(self.cat)
