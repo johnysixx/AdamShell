@@ -6,6 +6,8 @@ from core.entity.serpent_d20 import (
     SerpentD20PublicRollEvent,
     SerpentResolvedConsequence,
 )
+from idea_entities import IdeaEntities
+from universe.universe import Universe
 from universe.quantum_tick_result_state import (
     UniverseQuantumTickResult,
 )
@@ -80,6 +82,36 @@ class MutableSerializedSerpentOutcome:
         }
 
 
+class MutableSerializedSerpentRoll(
+    SerpentD20PublicRollEvent
+):
+
+    def __init__(self):
+        super().__init__(
+            roll_id="b41_public_roll",
+            roller="serpent",
+            die="serpent_d20",
+            value=7,
+            roll_number=1,
+            universe_tick=12,
+        )
+
+        object.__setattr__(
+            self,
+            "metadata",
+            {
+                "history": {
+                    "notes": ["original"],
+                },
+            },
+        )
+
+    def to_dict(self):
+        snapshot = super().to_dict()
+        snapshot["metadata"] = self.metadata
+        return snapshot
+
+
 class SerpentD20ObjectStateTests(
     unittest.TestCase
 ):
@@ -147,6 +179,191 @@ class SerpentD20ObjectStateTests(
         self.assertEqual(
             event.value,
             7,
+        )
+
+    def test_public_roll_snapshot_detaches_nested_data(self):
+        die = SerpentD20()
+        event = MutableSerializedSerpentRoll()
+
+        die.record_public_roll(event)
+
+        first = die.public_state
+        second = die.public_state
+
+        first["public_history"][0]["metadata"][
+            "history"
+        ]["notes"].append("snapshot_only")
+
+        self.assertEqual(
+            event.metadata["history"]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            second["public_history"][0][
+                "metadata"
+            ]["history"]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            die.public_state["public_history"][0][
+                "metadata"
+            ]["history"]["notes"],
+            ["original"],
+        )
+
+        self.assertIs(
+            die.public_history[0],
+            event,
+        )
+
+        self.assertIsNot(
+            first["public_history"][0][
+                "metadata"
+            ],
+            event.metadata,
+        )
+
+        self.assertEqual(
+            first["public_history"][0]["value"],
+            7,
+        )
+
+    def test_public_roll_snapshot_ignores_later_live_changes(self):
+        die = SerpentD20()
+        event = MutableSerializedSerpentRoll()
+
+        die.record_public_roll(event)
+
+        snapshot = die.public_state
+
+        event.metadata["history"]["notes"].append(
+            "live_change"
+        )
+
+        self.assertEqual(
+            snapshot["public_history"][0][
+                "metadata"
+            ]["history"]["notes"],
+            ["original"],
+        )
+
+        current = die.public_state
+
+        self.assertEqual(
+            current["public_history"][0][
+                "metadata"
+            ]["history"]["notes"],
+            ["original", "live_change"],
+        )
+
+        snapshot["public_history"].clear()
+
+        self.assertEqual(
+            len(die.public_history),
+            1,
+        )
+
+        self.assertIs(
+            die.public_history[0],
+            event,
+        )
+
+        self.assertEqual(
+            die._hidden_history,
+            [],
+        )
+
+    def test_world_public_roll_snapshot_preserves_identity(self):
+        universe = Universe()
+        layer = IdeaEntities(universe)
+
+        die = layer.serpent_d20
+        event = MutableSerializedSerpentRoll()
+
+        die.record_public_roll(event)
+
+        layer.write_to_world()
+
+        world_snapshot = universe.world[
+            "idea_entities"
+        ]["serpent_d20"]
+
+        public_snapshot = layer.public_state[
+            "serpent_d20"
+        ]
+
+        self.assertIs(
+            layer.serpent_d20,
+            die,
+        )
+
+        self.assertIs(
+            die.public_history[0],
+            event,
+        )
+
+        world_snapshot["public_history"][0][
+            "metadata"
+        ]["history"]["notes"].append(
+            "snapshot_only"
+        )
+
+        self.assertEqual(
+            event.metadata["history"]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            public_snapshot["public_history"][0][
+                "metadata"
+            ]["history"]["notes"],
+            ["original"],
+        )
+
+        event.metadata["history"]["notes"].append(
+            "live_change"
+        )
+
+        self.assertEqual(
+            public_snapshot["public_history"][0][
+                "metadata"
+            ]["history"]["notes"],
+            ["original"],
+        )
+
+        current = layer.public_state[
+            "serpent_d20"
+        ]
+
+        self.assertEqual(
+            current["public_history"][0][
+                "metadata"
+            ]["history"]["notes"],
+            ["original", "live_change"],
+        )
+
+        self.assertEqual(
+            world_snapshot["public_history"][0][
+                "metadata"
+            ]["history"]["notes"],
+            ["original", "snapshot_only"],
+        )
+
+        self.assertNotIn(
+            "_hidden_history",
+            world_snapshot,
+        )
+
+        self.assertEqual(
+            die._hidden_history,
+            [],
+        )
+
+        self.assertIs(
+            die.public_history[0],
+            event,
         )
 
     def test_public_history_rejects_mapping_event(

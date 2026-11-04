@@ -398,7 +398,9 @@ class SerpentD20:
             "sides": self.sides,
             "roll_count": self.roll_count,
             "public_history": [
-                event.to_dict()
+                deepcopy(
+                    event.to_dict()
+                )
                 for event in self.public_history
             ]
         }
