@@ -1,6 +1,8 @@
 import unittest
 from universe.universe import Universe
 from gods.gods import Gods
+from library import Library
+from library.god_book import GodBook
 from library.god_book_library_status import (
     GodBookLibraryStatus,
 )
@@ -101,6 +103,241 @@ class GodBookTests(unittest.TestCase):
         self.assertIs(
             god.book.library_status,
             GodBookLibraryStatus.SHELVED,
+        )
+
+    def test_write_entry_detaches_nested_input_data(self):
+        book = GodBook(author="god")
+        entries = book.entries
+
+        source = {
+            "event": "first_record",
+            "details": {
+                "notes": ["original"],
+                "metadata": {
+                    "codes": [1],
+                },
+            },
+        }
+
+        book.write_entry(source)
+
+        self.assertIs(
+            book.entries,
+            entries,
+        )
+
+        self.assertIsNot(
+            book.entries[0],
+            source,
+        )
+
+        self.assertIsNot(
+            book.entries[0]["details"],
+            source["details"],
+        )
+
+        source["details"]["notes"].append(
+            "later_source_change"
+        )
+
+        source["details"]["metadata"][
+            "codes"
+        ].append(2)
+
+        self.assertEqual(
+            book.entries[0]["details"]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            book.entries[0]["details"][
+                "metadata"
+            ]["codes"],
+            [1],
+        )
+
+        self.assertEqual(
+            book.entries[0]["event"],
+            "first_record",
+        )
+
+    def test_book_entries_capture_separate_history_versions(self):
+        book = GodBook(author="god")
+        entries = book.entries
+
+        source = {
+            "event": "observation",
+            "details": {
+                "notes": ["original"],
+            },
+        }
+
+        book.write_entry(source)
+
+        first = book.entries[0]
+
+        source["details"]["notes"].append(
+            "later_source_change"
+        )
+
+        book.write_entry(source)
+
+        second = book.entries[1]
+
+        self.assertEqual(
+            first["details"]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            second["details"]["notes"],
+            ["original", "later_source_change"],
+        )
+
+        first["details"]["notes"].append(
+            "edited_first_entry"
+        )
+
+        self.assertEqual(
+            second["details"]["notes"],
+            ["original", "later_source_change"],
+        )
+
+        self.assertEqual(
+            source["details"]["notes"],
+            ["original", "later_source_change"],
+        )
+
+        self.assertIs(
+            book.entries,
+            entries,
+        )
+
+        self.assertIs(
+            book.entries[0],
+            first,
+        )
+
+        self.assertIs(
+            book.entries[1],
+            second,
+        )
+
+        self.assertIsNot(
+            first["details"],
+            second["details"],
+        )
+
+    def test_library_write_preserves_book_identity_and_history(self):
+        universe = Universe()
+        gods = Gods(universe)
+        library = Library(universe)
+
+        god = gods.create_god(
+            name="god",
+            role="librarian",
+        )
+
+        library.assign_librarian(god)
+        library.god_enters(god)
+
+        book = gods.create_book(god)
+
+        library.shelve_book(book)
+        library.check_out_for_edit(
+            book=book,
+            editor=god,
+        )
+
+        entries = book.entries
+
+        source = {
+            "event": "first_library_day",
+            "details": {
+                "witnesses": ["serpent"],
+                "metadata": {
+                    "notes": ["original"],
+                },
+            },
+        }
+
+        written = library.write_book_entry(
+            book=book,
+            editor=god,
+            entry=source,
+        )
+
+        self.assertTrue(written)
+
+        self.assertIs(
+            god.book,
+            book,
+        )
+
+        self.assertIs(
+            library.books[0],
+            book,
+        )
+
+        self.assertIs(
+            library.catalog[0],
+            book,
+        )
+
+        self.assertIs(
+            universe.world["library"][
+                "books"
+            ],
+            library.books,
+        )
+
+        self.assertIs(
+            book.entries,
+            entries,
+        )
+
+        source["details"]["witnesses"].append(
+            "later_source_change"
+        )
+
+        source["details"]["metadata"][
+            "notes"
+        ].append("later_source_change")
+
+        self.assertEqual(
+            book.entries[0]["details"][
+                "witnesses"
+            ],
+            ["serpent"],
+        )
+
+        self.assertEqual(
+            book.entries[0]["details"][
+                "metadata"
+            ]["notes"],
+            ["original"],
+        )
+
+        library.return_book(book)
+
+        self.assertIs(
+            book.library_status,
+            GodBookLibraryStatus.SHELVED,
+        )
+
+        self.assertIs(
+            library.catalog[0],
+            book,
+        )
+
+        self.assertIs(
+            book.entries,
+            entries,
+        )
+
+        self.assertEqual(
+            book.entries[0]["event"],
+            "first_library_day",
         )
 
     def test_god_can_transfer_energy_into_book_only_while_editing_it(self):

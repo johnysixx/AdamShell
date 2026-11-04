@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from library.god_book_library_status import (
     GodBookLibraryStatus,
 )
@@ -74,7 +76,7 @@ class GodBook:
         entry
     ):
         self.entries.append(
-            dict(entry)
+            deepcopy(dict(entry))
         )
 
     def receive_energy(
