@@ -1,3 +1,4 @@
+from copy import deepcopy
 from dataclasses import dataclass, field
 
 from core.entity.world_existence_state import (
@@ -262,6 +263,11 @@ class EntityObject:
 
     def to_dict(self):
         snapshot = dict(self.__dict__)
+
+        if "metadata" in snapshot:
+            snapshot["metadata"] = deepcopy(
+                snapshot["metadata"]
+            )
 
         if isinstance(
             snapshot.get("existence_by_world"),
