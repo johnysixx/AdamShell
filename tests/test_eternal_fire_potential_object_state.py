@@ -52,6 +52,22 @@ class FixedRng:
         return None
 
 
+class MutableSerializedFireInteraction:
+
+    def __init__(self):
+        self.metadata = {
+            "history": {
+                "notes": ["original"],
+            },
+        }
+
+    def to_dict(self):
+        return {
+            "name": "test_fire_interaction",
+            "metadata": self.metadata,
+        }
+
+
 class EternalFirePotentialObjectStateTests(unittest.TestCase):
 
     def _system(self):
@@ -1047,6 +1063,215 @@ class EternalFirePotentialObjectStateTests(unittest.TestCase):
         self.assertIs(
             layer.eternal_fire,
             fire,
+        )
+
+    def test_nested_interaction_snapshot_is_detached(self):
+        interaction = MutableSerializedFireInteraction()
+
+        fire = EternalFirePotential()
+        fire.interactions.append(interaction)
+
+        first = fire.to_dict()
+        second = fire.to_dict()
+
+        first["interactions"][0]["metadata"][
+            "history"
+        ]["notes"].append("snapshot_only")
+
+        self.assertEqual(
+            interaction.metadata["history"]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            second["interactions"][0]["metadata"][
+                "history"
+            ]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            fire.to_dict()["interactions"][0][
+                "metadata"
+            ]["history"]["notes"],
+            ["original"],
+        )
+
+        self.assertIs(
+            fire.interactions[0],
+            interaction,
+        )
+
+        self.assertIsNot(
+            first["interactions"][0]["metadata"],
+            interaction.metadata,
+        )
+
+    def test_interaction_snapshot_ignores_live_changes(self):
+        interaction = MutableSerializedFireInteraction()
+
+        fire = EternalFirePotential()
+        fire.interactions.append(interaction)
+
+        snapshot = fire.to_dict()
+
+        interaction.metadata["history"][
+            "notes"
+        ].append("live_change")
+
+        self.assertEqual(
+            snapshot["interactions"][0]["metadata"][
+                "history"
+            ]["notes"],
+            ["original"],
+        )
+
+        current = fire.to_dict()
+
+        self.assertEqual(
+            current["interactions"][0]["metadata"][
+                "history"
+            ]["notes"],
+            ["original", "live_change"],
+        )
+
+        snapshot["interactions"].clear()
+
+        self.assertEqual(
+            len(fire.interactions),
+            1,
+        )
+
+        self.assertIs(
+            fire.interactions[0],
+            interaction,
+        )
+
+    def test_world_interaction_snapshots_keep_event_identity(self):
+        universe = Universe()
+        layer = IdeaEntities(universe)
+
+        canonical = layer.record_fire_interaction(
+            name="fire_observed",
+            participants=["serpent"],
+            observer="lilith",
+        )
+
+        fire = layer.eternal_fire
+
+        interaction = MutableSerializedFireInteraction()
+        fire.interactions.append(interaction)
+
+        layer.write_to_world()
+
+        boundary = universe.world[
+            "idea_entities"
+        ]
+
+        world_snapshot = boundary[
+            "eternal_fire"
+        ]
+
+        state_snapshot = boundary[
+            "idea_entities_state"
+        ]["eternal_fire"]
+
+        public_snapshot = layer.public_state[
+            "eternal_fire"
+        ]
+
+        self.assertIs(
+            layer.eternal_fire,
+            fire,
+        )
+
+        self.assertIs(
+            layer.idea_entities_state.eternal_fire,
+            fire,
+        )
+
+        self.assertIs(
+            fire.interactions[0],
+            canonical,
+        )
+
+        self.assertIs(
+            layer.events[-1],
+            canonical,
+        )
+
+        self.assertIs(
+            layer.event_history[-1],
+            canonical,
+        )
+
+        self.assertIs(
+            fire.interactions[1],
+            interaction,
+        )
+
+        self.assertEqual(
+            world_snapshot["interactions"][0],
+            canonical.to_dict(),
+        )
+
+        world_snapshot["interactions"][1][
+            "metadata"
+        ]["history"]["notes"].append("snapshot_only")
+
+        self.assertEqual(
+            interaction.metadata["history"]["notes"],
+            ["original"],
+        )
+
+        for snapshot in (
+            state_snapshot,
+            public_snapshot,
+        ):
+            self.assertEqual(
+                snapshot["interactions"][1][
+                    "metadata"
+                ]["history"]["notes"],
+                ["original"],
+            )
+
+        interaction.metadata["history"][
+            "notes"
+        ].append("live_change")
+
+        self.assertEqual(
+            state_snapshot["interactions"][1][
+                "metadata"
+            ]["history"]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            public_snapshot["interactions"][1][
+                "metadata"
+            ]["history"]["notes"],
+            ["original"],
+        )
+
+        current = layer.public_state[
+            "eternal_fire"
+        ]
+
+        self.assertEqual(
+            current["interactions"][1][
+                "metadata"
+            ]["history"]["notes"],
+            ["original", "live_change"],
+        )
+
+        self.assertIs(
+            fire.interactions[0],
+            canonical,
+        )
+
+        self.assertIs(
+            fire.interactions[1],
+            interaction,
         )
 
     def test_to_dict_is_deeply_detached(self):

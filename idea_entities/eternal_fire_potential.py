@@ -117,7 +117,9 @@ class EternalFirePotential:
             "requires_maintenance": self.requires_maintenance,
             "maintainer": self.maintainer,
             "interactions": [
-                interaction.to_dict()
+                deepcopy(
+                    interaction.to_dict()
+                )
                 for interaction in self.interactions
             ],
         }
