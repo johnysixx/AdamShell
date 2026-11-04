@@ -2629,7 +2629,7 @@ class DrinkRecipe:
             "ingredients":
                 ingredients,
             "effects":
-                dict(self.effects),
+                deepcopy(dict(self.effects)),
             "votes_for":
                 self.votes_for,
             "votes_against":
