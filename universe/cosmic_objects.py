@@ -7,7 +7,9 @@ from types import MappingProxyType
 def _snapshot_component(value):
     to_dict = getattr(value, "to_dict", None)
     if callable(to_dict):
-        return to_dict()
+        return deepcopy(
+            to_dict()
+        )
     return deepcopy(value)
 
 
