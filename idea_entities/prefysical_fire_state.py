@@ -1,3 +1,4 @@
+from copy import deepcopy
 from dataclasses import dataclass, field
 
 
@@ -41,6 +42,10 @@ class PrefysicalFireRoles:
 
     def to_dict(self):
         return {
-            "fire_guardian": self.fire_guardian,
-            "fuel_seekers": list(self.fuel_seekers),
+            "fire_guardian": deepcopy(
+                self.fire_guardian
+            ),
+            "fuel_seekers": deepcopy(
+                list(self.fuel_seekers)
+            ),
         }

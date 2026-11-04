@@ -265,6 +265,207 @@ class PrefysicalFireOriginObjectStateTests(unittest.TestCase):
             ["lilith", "serpent"],
         )
 
+    def test_nested_fuel_seeker_snapshots_are_detached(self):
+        seeker = {
+            "name": "lilith",
+            "metadata": {
+                "notes": ["original"],
+            },
+        }
+
+        roles = PrefysicalFireRoles(
+            fuel_seekers=[seeker],
+        )
+
+        first = roles.to_dict()
+        second = roles.to_dict()
+
+        first["fuel_seekers"][0][
+            "metadata"
+        ]["notes"].append("snapshot_only")
+
+        self.assertEqual(
+            seeker["metadata"]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            second["fuel_seekers"][0][
+                "metadata"
+            ]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            roles.to_dict()["fuel_seekers"][0][
+                "metadata"
+            ]["notes"],
+            ["original"],
+        )
+
+        self.assertIs(
+            roles.fuel_seekers[0],
+            seeker,
+        )
+
+        self.assertIsNot(
+            first["fuel_seekers"][0],
+            seeker,
+        )
+
+    def test_nested_fire_guardian_snapshot_is_detached(self):
+        guardian = {
+            "name": "pazuzu",
+            "permissions": {
+                "roles": ["guardian"],
+            },
+        }
+
+        roles = PrefysicalFireRoles(
+            fire_guardian=guardian,
+        )
+
+        first = roles.to_dict()
+        second = roles.to_dict()
+
+        first["fire_guardian"][
+            "permissions"
+        ]["roles"].append("snapshot_only")
+
+        self.assertEqual(
+            guardian["permissions"]["roles"],
+            ["guardian"],
+        )
+
+        self.assertEqual(
+            second["fire_guardian"][
+                "permissions"
+            ]["roles"],
+            ["guardian"],
+        )
+
+        guardian["permissions"][
+            "roles"
+        ].append("live_change")
+
+        self.assertEqual(
+            second["fire_guardian"][
+                "permissions"
+            ]["roles"],
+            ["guardian"],
+        )
+
+        self.assertEqual(
+            roles.to_dict()["fire_guardian"][
+                "permissions"
+            ]["roles"],
+            ["guardian", "live_change"],
+        )
+
+        self.assertIs(
+            roles.fire_guardian,
+            guardian,
+        )
+
+    def test_public_state_preserves_live_fire_roles(self):
+        _, _, origin = self._origin(
+            begin=False
+        )
+
+        roles = origin.roles
+
+        guardian = {
+            "name": "pazuzu",
+            "notes": ["original"],
+        }
+
+        seeker = {
+            "name": "serpent",
+            "notes": ["original"],
+        }
+
+        roles.fire_guardian = guardian
+        roles.fuel_seekers.append(seeker)
+
+        first = origin.public_state
+        second = origin.public_state
+
+        self.assertIs(
+            origin.roles,
+            roles,
+        )
+
+        self.assertIs(
+            roles.fire_guardian,
+            guardian,
+        )
+
+        self.assertIs(
+            roles.fuel_seekers[0],
+            seeker,
+        )
+
+        first["roles"]["fire_guardian"][
+            "notes"
+        ].append("snapshot_only")
+
+        first["roles"]["fuel_seekers"][0][
+            "notes"
+        ].append("snapshot_only")
+
+        self.assertEqual(
+            guardian["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            seeker["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            second["roles"]["fire_guardian"][
+                "notes"
+            ],
+            ["original"],
+        )
+
+        self.assertEqual(
+            second["roles"]["fuel_seekers"][0][
+                "notes"
+            ],
+            ["original"],
+        )
+
+        guardian["notes"].append(
+            "live_change"
+        )
+
+        seeker["notes"].append(
+            "live_change"
+        )
+
+        current = origin.public_state
+
+        self.assertEqual(
+            current["roles"]["fire_guardian"][
+                "notes"
+            ],
+            ["original", "live_change"],
+        )
+
+        self.assertEqual(
+            current["roles"]["fuel_seekers"][0][
+                "notes"
+            ],
+            ["original", "live_change"],
+        )
+
+        self.assertIs(
+            origin.roles,
+            roles,
+        )
+
     def test_to_dict_snapshots_are_detached(self):
         materials = PrefysicalFireMaterials()
         conversion = PrefysicalFireEnergyConversion()
