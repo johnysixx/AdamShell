@@ -3,6 +3,7 @@ from dataclasses import FrozenInstanceError, replace
 
 from cats.genotype import (
     CatAutosomalAlleleRule,
+    CatOrangeAlleleRule,
     CatAutosomalGenotype,
     CatAutosomalInheritanceRecord,
     CatGenotype,
@@ -177,6 +178,111 @@ class CatGenotypeObjectStateTests(unittest.TestCase):
 
         self.assertTrue(
             CatGenotype.validate(self.mother)
+        )
+
+    def test_orange_allele_rule_is_immutable_object(self):
+        rule = CatGenotype.ORANGE_RULE
+
+        self.assertIsInstance(
+            rule,
+            CatOrangeAlleleRule,
+        )
+
+        self.assertEqual(
+            rule.allowed_alleles,
+            frozenset({"O", "o"}),
+        )
+
+        self.assertIsInstance(
+            rule.allowed_alleles,
+            frozenset,
+        )
+
+        for method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+            "to_dict",
+        ):
+            self.assertFalse(
+                hasattr(rule, method)
+            )
+
+        with self.assertRaises(TypeError):
+            _ = rule["allowed_alleles"]
+
+        with self.assertRaises(FrozenInstanceError):
+            rule.allowed_alleles = frozenset({"X"})
+
+        self.assertFalse(
+            hasattr(rule.allowed_alleles, "add")
+        )
+
+    def test_orange_allele_rule_rejects_invalid_values(self):
+        with self.assertRaises(TypeError):
+            CatOrangeAlleleRule({"O", "o"})
+
+        with self.assertRaises(ValueError):
+            CatOrangeAlleleRule(frozenset())
+
+        with self.assertRaises(TypeError):
+            CatOrangeAlleleRule(frozenset({42}))
+
+        with self.assertRaises(TypeError):
+            CatOrangeAlleleRule(frozenset({""}))
+
+    def test_orange_allele_rule_preserves_inheritance(self):
+        self.assertTrue(
+            CatGenotype.validate(self.mother)
+        )
+
+        self.assertTrue(
+            CatGenotype.validate(self.father)
+        )
+
+        daughter = CatGenotype.inherit(
+            self.mother,
+            self.father,
+            rng=FirstChoiceRng(),
+        )
+
+        self.assertEqual(
+            daughter.sex,
+            "female",
+        )
+
+        self.assertEqual(
+            daughter.orange_locus,
+            ("O", "o"),
+        )
+
+        self.assertTrue(
+            CatGenotype.validate(daughter)
+        )
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "Unsupported orange allele",
+        ):
+            CatGenotype.create_founder(
+                sex="female",
+                orange_locus=("O", "X"),
+            )
+
+        invalid_male = replace(
+            self.father,
+            orange_locus=("X",),
+        )
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "Unsupported orange allele",
+        ):
+            CatGenotype.validate(invalid_male)
+
+        self.assertTrue(
+            CatGenotype.validate(self.father)
         )
 
     def test_founder_is_cat_genotype_object(self):

@@ -3,6 +3,33 @@ from typing import ClassVar
 
 
 @dataclass(frozen=True, slots=True)
+class CatOrangeAlleleRule:
+    allowed_alleles: frozenset[str]
+
+    def __post_init__(self):
+        if not isinstance(
+            self.allowed_alleles,
+            frozenset,
+        ):
+            raise TypeError(
+                "Orange alleles must use a frozenset."
+            )
+
+        if not self.allowed_alleles:
+            raise ValueError(
+                "Orange allele set cannot be empty."
+            )
+
+        if any(
+            not isinstance(allele, str) or not allele
+            for allele in self.allowed_alleles
+        ):
+            raise TypeError(
+                "Orange alleles must be nonempty strings."
+            )
+
+
+@dataclass(frozen=True, slots=True)
 class CatAutosomalAlleleRule:
     locus: str
     allowed_alleles: frozenset[str]
@@ -184,10 +211,11 @@ class CatGenotype:
         ),
     )
 
-    ORANGE_ALLELES: ClassVar[set[str]] = {
-        "O",
-        "o",
-    }
+    ORANGE_RULE: ClassVar[CatOrangeAlleleRule] = (
+        CatOrangeAlleleRule(
+            frozenset({"O", "o"})
+        )
+    )
 
     def __post_init__(self):
         self.sex_chromosomes = tuple(
@@ -622,7 +650,7 @@ class CatGenotype:
             )
 
         if not set(orange).issubset(
-            cls.ORANGE_ALLELES
+            cls.ORANGE_RULE.allowed_alleles
         ):
             raise ValueError(
                 "Unsupported orange allele."
