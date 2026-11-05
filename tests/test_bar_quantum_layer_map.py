@@ -1,7 +1,10 @@
 ﻿import unittest
 
 from universe.universe import Universe
-from meeting_place.bar_geometry_terminal import BarGeometryTerminal
+from meeting_place.bar_geometry_terminal import (
+    BarGeometryTerminal,
+    BarQuantumLayerMapState,
+)
 
 
 class BarQuantumLayerMapTests(
@@ -62,6 +65,168 @@ class BarQuantumLayerMapTests(
             quantum_map
         )
 
+    def test_terminal_map_is_typed_object_state(self):
+        terminal = BarGeometryTerminal()
+        state = terminal.quantum_layer_map
+
+        self.assertIsInstance(
+            state,
+            BarQuantumLayerMapState,
+        )
+
+        self.assertIsNone(state.tick)
+        self.assertEqual(state.boxes, ())
+        self.assertEqual(state.space, {})
+
+        for method in ("get", "keys", "items", "values"):
+            self.assertFalse(
+                hasattr(state, method)
+            )
+
+        with self.assertRaises(TypeError):
+            _ = state["boxes"]
+
+        self.assertEqual(
+            terminal.public_state["quantum_layer_map"],
+            {
+                "tick": None,
+                "boxes": [],
+                "space": {},
+            },
+        )
+
+    def test_terminal_map_snapshots_are_detached(self):
+        terminal = BarGeometryTerminal()
+
+        source = {
+            "quantum_layer_map": {
+                "tick": 7,
+                "boxes": [
+                    {
+                        "id": "test_box",
+                        "metadata": {
+                            "tags": ["original"],
+                        },
+                    },
+                ],
+                "space": {
+                    "nested": {
+                        "value": 1,
+                    },
+                },
+            },
+        }
+
+        terminal.refresh(source)
+
+        state = terminal.quantum_layer_map
+        self.assertIsInstance(
+            state,
+            BarQuantumLayerMapState,
+        )
+
+        source["quantum_layer_map"]["boxes"][0][
+            "metadata"
+        ]["tags"].append("external")
+
+        source["quantum_layer_map"]["space"][
+            "nested"
+        ]["value"] = 99
+
+        self.assertEqual(
+            state.boxes[0]["metadata"]["tags"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            state.space["nested"]["value"],
+            1,
+        )
+
+        first = terminal.public_state["quantum_layer_map"]
+        second = terminal.public_state["quantum_layer_map"]
+
+        first["boxes"][0]["metadata"][
+            "tags"
+        ].append("snapshot_only")
+
+        first["space"]["nested"]["value"] = -1
+
+        self.assertEqual(
+            second["boxes"][0]["metadata"]["tags"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            second["space"]["nested"]["value"],
+            1,
+        )
+
+        self.assertEqual(
+            state.boxes[0]["metadata"]["tags"],
+            ["original"],
+        )
+
+    def test_terminal_refresh_replaces_typed_map_atomically(
+        self
+    ):
+        terminal = BarGeometryTerminal()
+
+        original = terminal.quantum_layer_map
+
+        terminal.refresh({
+            "quantum_layer_map": {
+                "tick": 2,
+                "boxes": [{"id": "first"}],
+                "space": {},
+            },
+        })
+
+        first_state = terminal.quantum_layer_map
+
+        self.assertIsNot(
+            first_state,
+            original,
+        )
+
+        terminal.refresh({
+            "quantum_layer_map": {
+                "tick": 3,
+                "boxes": [{"id": "second"}],
+                "space": {},
+            },
+        })
+
+        second_state = terminal.quantum_layer_map
+
+        self.assertIsNot(
+            second_state,
+            first_state,
+        )
+
+        self.assertEqual(
+            first_state.boxes[0]["id"],
+            "first",
+        )
+
+        self.assertEqual(
+            second_state.boxes[0]["id"],
+            "second",
+        )
+
+        with self.assertRaises(TypeError):
+            terminal.refresh({
+                "quantum_layer_map": {
+                    "boxes": [object()],
+                    "space": {},
+                },
+            })
+
+        self.assertIs(
+            terminal.quantum_layer_map,
+            second_state,
+        )
+
     def test_terminal_replaces_old_quantum_map(
         self
     ):
@@ -78,10 +243,7 @@ class BarQuantumLayerMapTests(
 
         first_ids = [
             box["id"]
-            for box in terminal
-            .quantum_layer_map[
-                "boxes"
-            ]
+            for box in terminal.quantum_layer_map.boxes
         ]
 
         self.assertIn(
@@ -104,10 +266,7 @@ class BarQuantumLayerMapTests(
 
         second_ids = [
             box["id"]
-            for box in terminal
-            .quantum_layer_map[
-                "boxes"
-            ]
+            for box in terminal.quantum_layer_map.boxes
         ]
 
         self.assertNotIn(

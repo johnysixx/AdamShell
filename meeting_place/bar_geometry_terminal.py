@@ -1,4 +1,71 @@
+from copy import deepcopy
+from dataclasses import dataclass, field
+
 from .bar_objects import GeometryStatusSign
+
+@dataclass(slots=True)
+class BarQuantumLayerMapState:
+    tick: int | None = None
+    boxes: tuple = ()
+    space: dict = field(default_factory=dict)
+
+    def __post_init__(self):
+        if not isinstance(self.boxes, tuple):
+            raise TypeError(
+                "Quantum map boxes must be a tuple."
+            )
+
+        if not all(
+            isinstance(box, dict)
+            for box in self.boxes
+        ):
+            raise TypeError(
+                "Quantum map requires serialized box snapshots."
+            )
+
+        if not isinstance(self.space, dict):
+            raise TypeError(
+                "Quantum map space snapshot must be a dictionary."
+            )
+
+        self.boxes = tuple(
+            deepcopy(box)
+            for box in self.boxes
+        )
+
+        self.space = deepcopy(self.space)
+
+    @classmethod
+    def from_snapshot(cls, snapshot):
+        if not isinstance(snapshot, dict):
+            raise TypeError(
+                "Quantum map input must be a snapshot."
+            )
+
+        boxes = snapshot.get("boxes", [])
+
+        if not isinstance(boxes, (list, tuple)):
+            raise TypeError(
+                "Quantum map box snapshots must be a sequence."
+            )
+
+        return cls(
+            tick=snapshot.get("tick"),
+            boxes=tuple(boxes),
+            space=snapshot.get("space", {}),
+        )
+
+    def to_dict(self):
+        return {
+            "tick": self.tick,
+            "boxes": deepcopy(
+                list(self.boxes)
+            ),
+            "space": deepcopy(
+                self.space
+            ),
+        }
+
 
 class BarGeometryTerminal:
 
@@ -27,11 +94,9 @@ class BarGeometryTerminal:
         self.total_quantum_box_count = 0
         self.total_cat_count = 0
 
-        self.quantum_layer_map = {
-            "tick": None,
-            "boxes": [],
-            "space": {}
-        }
+        self.quantum_layer_map = (
+            BarQuantumLayerMapState()
+        )
 
     def update_geometry(
         self,
@@ -102,27 +167,13 @@ class BarGeometryTerminal:
             )
         )
 
-        # Ziva mapa se vzdy kompletne prepise
-        # soucasnym stavem quantum layer.
-        self.quantum_layer_map = {
-            "tick": quantum_layer_map.get(
-                "tick"
-            ),
-            "boxes": [
-                dict(box)
-                for box
-                in quantum_layer_map.get(
-                    "boxes",
-                    []
-                )
-            ],
-            "space": dict(
-                quantum_layer_map.get(
-                    "space",
-                    {}
-                )
+        # Replace the previous map with a detached
+        # typed state built from the current snapshot.
+        self.quantum_layer_map = (
+            BarQuantumLayerMapState.from_snapshot(
+                quantum_layer_map
             )
-        }
+        )
 
     def cat_detected(
         self,
@@ -171,7 +222,7 @@ class BarGeometryTerminal:
                 self.configuration_seed
             ),
             "quantum_layer_map": (
-                self.quantum_layer_map
+                self.quantum_layer_map.to_dict()
             ),
             "status_sign": self.status_sign.to_dict(),
             "detected_cat_id": (
