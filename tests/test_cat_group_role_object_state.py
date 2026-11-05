@@ -1,4 +1,5 @@
 import unittest
+from dataclasses import FrozenInstanceError
 
 from universe.universe import Universe
 from cats.cats import Cats
@@ -6,7 +7,9 @@ from cats.cat_group_system import (
     CatGroupSystem,
 )
 from cats.cat_group_role_system import (
+    CatGroupRoleProfile,
     CatGroupRoleSystem,
+    CatGroupTraitWeight,
 )
 from cats.cat_group_role_registry import (
     CatGroupRoleHolderRecord,
@@ -102,6 +105,63 @@ class CatGroupRoleObjectStateTests(
             self.cat,
             "guardian",
         )
+
+    def test_role_profiles_store_typed_immutable_values(self):
+        expected = (
+            "storyteller",
+            "scout",
+            "guardian",
+            "kitten_teacher",
+            "scent_keeper",
+            "mediator",
+        )
+        self.assertEqual(tuple(self.roles.ROLE_PROFILES), expected)
+
+        for profile in self.roles.ROLE_PROFILES.values():
+            self.assertIsInstance(profile, CatGroupRoleProfile)
+            self.assertIsInstance(profile.trait_weights, tuple)
+            self.assertTrue(all(
+                isinstance(weight, CatGroupTraitWeight)
+                for weight in profile.trait_weights
+            ))
+            self.assertFalse(hasattr(profile, "get"))
+            with self.assertRaises(TypeError):
+                _ = profile["traits"]
+
+    def test_role_profile_parameters_preserve_original_weights(self):
+        profiles = self.roles.ROLE_PROFILES
+        self.assertEqual(
+            tuple((weight.trait, weight.weight)
+                  for weight in profiles["storyteller"].trait_weights),
+            (("sociability", 0.45), ("curiosity", 0.35)),
+        )
+        self.assertEqual(profiles["storyteller"].knowledge_weight, 0.2)
+        self.assertEqual(
+            tuple((weight.trait, weight.weight)
+                  for weight in profiles["scout"].trait_weights),
+            (("curiosity", 0.55), ("courage", 0.35)),
+        )
+        self.assertEqual(profiles["scout"].knowledge_weight, 0.1)
+        self.assertEqual(profiles["guardian"].influence_weight, 0.4)
+        self.assertEqual(profiles["kitten_teacher"].knowledge_weight, 0.35)
+        self.assertEqual(profiles["scent_keeper"].group_scent_weight, 0.5)
+        self.assertEqual(profiles["mediator"].influence_weight, 0.3)
+
+    def test_role_profiles_are_frozen_and_suitability_is_unchanged(self):
+        profile = self.roles.ROLE_PROFILES["guardian"]
+        weight = profile.trait_weights[0]
+        with self.assertRaises(FrozenInstanceError):
+            profile.influence_weight = 0.0
+        with self.assertRaises(FrozenInstanceError):
+            weight.weight = 0.0
+        with self.assertRaises(TypeError):
+            CatGroupRoleProfile(trait_weights={"courage": 0.6})
+
+        self.cat.personality.traits.courage = 1.0
+        self.cat.group.influence = 1.0
+        check = self.roles.suitability(self.group_id, self.cat, "guardian")
+        self.assertTrue(check.eligible)
+        self.assertEqual(check.score, 1.0)
 
     def test_state_has_no_mapping_api(
         self

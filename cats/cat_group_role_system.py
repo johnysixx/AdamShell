@@ -1,4 +1,5 @@
 from copy import deepcopy
+from dataclasses import dataclass
 
 from cats.cat_group_role_state import (
     CatGroupRoleAssignedEvent,
@@ -8,8 +9,76 @@ from cats.cat_group_role_state import (
     CatGroupRoleSuitabilityResult,
 )
 
+@dataclass(frozen=True, slots=True)
+class CatGroupTraitWeight:
+    trait: str
+    weight: float
+
+    def __post_init__(self):
+        if not isinstance(self.trait, str) or not self.trait:
+            raise TypeError("Role trait requires a nonempty name.")
+        if not isinstance(self.weight, (int, float)):
+            raise TypeError("Role trait weight must be numeric.")
+
+
+@dataclass(frozen=True, slots=True)
+class CatGroupRoleProfile:
+    trait_weights: tuple[CatGroupTraitWeight, ...]
+    knowledge_weight: float = 0.0
+    influence_weight: float = 0.0
+    group_scent_weight: float = 0.0
+
+    def __post_init__(self):
+        if not isinstance(self.trait_weights, tuple):
+            raise TypeError("Role trait weights must be a tuple.")
+        if not all(
+            isinstance(weight, CatGroupTraitWeight)
+            for weight in self.trait_weights
+        ):
+            raise TypeError("Role trait weights must be typed objects.")
+
+
 class CatGroupRoleSystem:
-    ROLE_PROFILES = {'storyteller': {'traits': {'sociability': 0.45, 'curiosity': 0.35}, 'knowledge_weight': 0.2}, 'scout': {'traits': {'curiosity': 0.55, 'courage': 0.35}, 'knowledge_weight': 0.1}, 'guardian': {'traits': {'courage': 0.6}, 'influence_weight': 0.4}, 'kitten_teacher': {'traits': {'sociability': 0.4}, 'knowledge_weight': 0.35}, 'scent_keeper': {'traits': {'sociability': 0.3}, 'group_scent_weight': 0.5}, 'mediator': {'traits': {'sociability': 0.55}, 'influence_weight': 0.3}}
+    ROLE_PROFILES = {
+        "storyteller": CatGroupRoleProfile(
+            trait_weights=(
+                CatGroupTraitWeight("sociability", 0.45),
+                CatGroupTraitWeight("curiosity", 0.35),
+            ),
+            knowledge_weight=0.2,
+        ),
+        "scout": CatGroupRoleProfile(
+            trait_weights=(
+                CatGroupTraitWeight("curiosity", 0.55),
+                CatGroupTraitWeight("courage", 0.35),
+            ),
+            knowledge_weight=0.1,
+        ),
+        "guardian": CatGroupRoleProfile(
+            trait_weights=(
+                CatGroupTraitWeight("courage", 0.6),
+            ),
+            influence_weight=0.4,
+        ),
+        "kitten_teacher": CatGroupRoleProfile(
+            trait_weights=(
+                CatGroupTraitWeight("sociability", 0.4),
+            ),
+            knowledge_weight=0.35,
+        ),
+        "scent_keeper": CatGroupRoleProfile(
+            trait_weights=(
+                CatGroupTraitWeight("sociability", 0.3),
+            ),
+            group_scent_weight=0.5,
+        ),
+        "mediator": CatGroupRoleProfile(
+            trait_weights=(
+                CatGroupTraitWeight("sociability", 0.55),
+            ),
+            influence_weight=0.3,
+        ),
+    }
 
     def __init__(self, group_system):
         self.group_system = group_system
@@ -47,12 +116,9 @@ class CatGroupRoleSystem:
         traits = cat.personality.traits
         score = 0.0
 
-        for trait, weight in (
-            profile.get(
-                "traits",
-                {},
-            ).items()
-        ):
+        for trait_weight in profile.trait_weights:
+            trait = trait_weight.trait
+            weight = trait_weight.weight
             score += (
                 self._number(
                     getattr(
@@ -68,29 +134,20 @@ class CatGroupRoleSystem:
             self._number(
                 cat.group.influence
             )
-            * profile.get(
-                "influence_weight",
-                0.0,
-            )
+            * profile.influence_weight
         )
 
         score += (
             cat.knowledge
             .role_knowledge_score()
-            * profile.get(
-                "knowledge_weight",
-                0.0,
-            )
+            * profile.knowledge_weight
         )
 
         score += (
             self._number(
                 cat.group.shared_scent
             )
-            * profile.get(
-                "group_scent_weight",
-                0.0,
-            )
+            * profile.group_scent_weight
         )
 
         score = min(
