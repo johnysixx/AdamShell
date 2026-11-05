@@ -2339,7 +2339,7 @@ class BarGuestKnowledge:
             )
 
             if value is not None:
-                result[name] = value.to_dict()
+                result[name] = deepcopy(value.to_dict())
 
         return result
 

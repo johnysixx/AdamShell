@@ -50,6 +50,29 @@ class MutableSerializedRememberedIdea(
         return snapshot
 
 
+class MutableSerializedWineAssessment(
+    BarWineAssessment
+):
+
+    def __init__(self):
+        super().__init__(
+            quality="bad",
+            body="watery",
+            comparison="water_with_grapes",
+        )
+
+        self.metadata = {
+            "history": {
+                "notes": ["original"],
+            },
+        }
+
+    def to_dict(self):
+        snapshot = super().to_dict()
+        snapshot["metadata"] = self.metadata
+        return snapshot
+
+
 class BarKnowledgeObjectStateTests(
     unittest.TestCase
 ):
@@ -457,6 +480,194 @@ class BarKnowledgeObjectStateTests(
         self._assert_object_only(
             assessment,
             "quality"
+        )
+
+    def test_guest_knowledge_nested_snapshot_is_detached(self):
+        assessment = MutableSerializedWineAssessment()
+
+        knowledge = BarGuestKnowledge(
+            existing_wine=assessment,
+            sweetness_explained=True,
+        )
+
+        first = knowledge.to_dict()
+        second = knowledge.to_dict()
+
+        first["existing_wine"]["metadata"][
+            "history"
+        ]["notes"].append("snapshot_only")
+
+        self.assertEqual(
+            assessment.metadata["history"]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            second["existing_wine"]["metadata"][
+                "history"
+            ]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            knowledge.to_dict()["existing_wine"][
+                "metadata"
+            ]["history"]["notes"],
+            ["original"],
+        )
+
+        self.assertTrue(first["sweetness_explained"])
+
+        self.assertEqual(
+            first["existing_wine"]["quality"],
+            "bad",
+        )
+
+        self.assertIs(
+            knowledge.existing_wine,
+            assessment,
+        )
+
+        self.assertIsNot(
+            first["existing_wine"]["metadata"],
+            assessment.metadata,
+        )
+
+    def test_guest_knowledge_snapshot_ignores_live_changes(self):
+        assessment = MutableSerializedWineAssessment()
+
+        knowledge = BarGuestKnowledge(
+            existing_wine=assessment,
+        )
+
+        snapshot = knowledge.to_dict()
+
+        assessment.metadata["history"]["notes"].append(
+            "live_change"
+        )
+
+        self.assertEqual(
+            snapshot["existing_wine"]["metadata"][
+                "history"
+            ]["notes"],
+            ["original"],
+        )
+
+        current = knowledge.to_dict()
+
+        self.assertEqual(
+            current["existing_wine"]["metadata"][
+                "history"
+            ]["notes"],
+            ["original", "live_change"],
+        )
+
+        snapshot["existing_wine"]["metadata"][
+            "history"
+        ]["notes"].append("snapshot_only")
+
+        snapshot["existing_wine"].clear()
+
+        self.assertEqual(
+            assessment.metadata["history"]["notes"],
+            ["original", "live_change"],
+        )
+
+        self.assertIs(
+            knowledge.existing_wine,
+            assessment,
+        )
+
+        self.assertEqual(
+            knowledge.to_dict()["existing_wine"][
+                "metadata"
+            ]["history"]["notes"],
+            ["original", "live_change"],
+        )
+
+    def test_day0_guest_knowledge_keeps_live_object_identity(self):
+        scene = self._scene()
+        scene.advance_to_god_at_table()
+
+        discussion = (
+            scene.serpent_lilith_good_drink_discussion
+        )
+
+        scene.serpent_explains_wine_discussion_to_god()
+
+        knowledge = scene.god.bar_knowledge
+        remembered = knowledge.wine_discussion
+
+        assessment = MutableSerializedWineAssessment()
+
+        knowledge.existing_wine = assessment
+
+        first = knowledge.to_dict()
+        second = knowledge.to_dict()
+
+        first["existing_wine"]["metadata"][
+            "history"
+        ]["notes"].append("snapshot_only")
+
+        self.assertEqual(
+            assessment.metadata["history"]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            second["existing_wine"]["metadata"][
+                "history"
+            ]["notes"],
+            ["original"],
+        )
+
+        assessment.metadata["history"]["notes"].append(
+            "live_change"
+        )
+
+        self.assertEqual(
+            second["existing_wine"]["metadata"][
+                "history"
+            ]["notes"],
+            ["original"],
+        )
+
+        current = knowledge.to_dict()
+
+        self.assertEqual(
+            current["existing_wine"]["metadata"][
+                "history"
+            ]["notes"],
+            ["original", "live_change"],
+        )
+
+        self.assertEqual(
+            current["existing_wine"]["comparison"],
+            "water_with_grapes",
+        )
+
+        self.assertTrue(
+            current["wine_discussion"]["heard"],
+        )
+
+        self.assertIs(
+            scene.god.bar_knowledge,
+            knowledge,
+        )
+
+        self.assertIs(
+            knowledge.wine_discussion,
+            remembered,
+        )
+
+        self.assertIs(
+            knowledge.existing_wine,
+            assessment,
+        )
+
+        self.assertIs(
+            scene.serpent_lilith_good_drink_discussion,
+            discussion,
         )
 
     def test_public_snapshot_is_detached(
