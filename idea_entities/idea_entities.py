@@ -61,7 +61,7 @@ class IdeaEntities:
             'prefysical_fire_origin': self.prefysical_fire_origin.public_state,
             'events': self.events,
             'event_history': self.event_history,
-            'permissions': self.permissions,
+            'permissions': self.permissions.to_dict(),
             'idea_entities_state': self.idea_entities_state.to_dict()
         }
 

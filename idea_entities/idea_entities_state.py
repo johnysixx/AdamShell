@@ -4,16 +4,48 @@ from dataclasses import dataclass, field
 from idea_entities.eternal_fire_potential import EternalFirePotential
 
 
-def _default_permissions():
-    return {
-        "can_exist_before_form": True,
-        "can_influence": True,
-        "can_become_process": True,
-    }
+@dataclass(slots=True, frozen=True)
+class IdeaEntitiesPermissions:
+    can_exist_before_form: bool = True
+    can_influence: bool = True
+    can_become_process: bool = True
+
+    def __post_init__(self):
+        for name in (
+            "can_exist_before_form",
+            "can_influence",
+            "can_become_process",
+        ):
+            if type(getattr(self, name)) is not bool:
+                raise TypeError(
+                    "Idea entity permission flags must be bool."
+                )
+
+    def to_dict(self):
+        return {
+            "can_exist_before_form": self.can_exist_before_form,
+            "can_influence": self.can_influence,
+            "can_become_process": self.can_become_process,
+        }
 
 
 @dataclass(slots=True)
 class IdeaEntitiesState:
+
+    def __setattr__(self, name, value):
+        if (
+            name == "permissions"
+            and not isinstance(
+                value,
+                IdeaEntitiesPermissions,
+            )
+        ):
+            raise TypeError(
+                "Idea entities permissions require "
+                "IdeaEntitiesPermissions."
+            )
+
+        object.__setattr__(self, name, value)
 
     layer_type: str = "entity_layer"
     status: str = "created"
@@ -23,8 +55,8 @@ class IdeaEntitiesState:
     )
     events: list = field(default_factory=list)
     event_history: list = field(default_factory=list)
-    permissions: dict = field(
-        default_factory=_default_permissions
+    permissions: IdeaEntitiesPermissions = field(
+        default_factory=IdeaEntitiesPermissions
     )
     tick_count: int = 0
 
@@ -42,6 +74,6 @@ class IdeaEntitiesState:
                 deepcopy(event.to_dict())
                 for event in self.event_history
             ],
-            "permissions": deepcopy(dict(self.permissions)),
+            "permissions": self.permissions.to_dict(),
             "tick_count": self.tick_count,
         }

@@ -1,8 +1,12 @@
 import unittest
 from copy import deepcopy
+from dataclasses import FrozenInstanceError, replace
 
 from idea_entities import IdeaEntities
-from idea_entities.idea_entities_state import IdeaEntitiesState
+from idea_entities.idea_entities_state import (
+    IdeaEntitiesPermissions,
+    IdeaEntitiesState,
+)
 from idea_entities.idea_event_state import IdeaEntityEvent
 from idea_entities.eternal_fire_potential_state import (
     EternalFirePotentialState,
@@ -68,13 +72,18 @@ class IdeaEntitiesObjectStateTests(unittest.TestCase):
         self.assertEqual(state.events, [])
         self.assertEqual(state.event_history, [])
         self.assertEqual(state.tick_count, 0)
-        self.assertEqual(
+        self.assertIsInstance(
             state.permissions,
-            {
-                "can_exist_before_form": True,
-                "can_influence": True,
-                "can_become_process": True,
-            },
+            IdeaEntitiesPermissions,
+        )
+        self.assertTrue(
+            state.permissions.can_exist_before_form
+        )
+        self.assertTrue(
+            state.permissions.can_influence
+        )
+        self.assertTrue(
+            state.permissions.can_become_process
         )
 
     def test_values_are_owned_by_same_state_object(self):
@@ -122,9 +131,21 @@ class IdeaEntitiesObjectStateTests(unittest.TestCase):
             boundary["event_history"],
             layer.event_history,
         )
-        self.assertIs(
+
+        self.assertEqual(
+            boundary["permissions"],
+            layer.permissions.to_dict(),
+        )
+
+        self.assertIsNot(
             boundary["permissions"],
             layer.permissions,
+        )
+
+        boundary["permissions"]["can_influence"] = False
+
+        self.assertTrue(
+            layer.permissions.can_influence
         )
 
     def test_entity_creation_mutates_same_state_object(self):
@@ -259,16 +280,24 @@ class IdeaEntitiesObjectStateTests(unittest.TestCase):
 
     def test_public_state_snapshot_is_detached(self):
         _, layer = self._layer()
+
         snapshot = layer.public_state["idea_entities_state"]
+        public = layer.public_state["permissions"]
 
         snapshot["events"].append("changed")
-        snapshot["permissions"][
-            "can_influence"
-        ] = False
+        snapshot["permissions"]["can_influence"] = False
         snapshot["eternal_fire"]["state"] = "changed"
+        public["can_influence"] = False
 
         self.assertEqual(layer.events, [])
-        self.assertTrue(layer.permissions["can_influence"])
+        self.assertTrue(
+            layer.permissions.can_influence
+        )
+        self.assertTrue(
+            layer.public_state["permissions"][
+                "can_influence"
+            ]
+        )
         self.assertIs(
             layer.eternal_fire.state,
             EternalFirePotentialState.UNIGNITED,
@@ -277,80 +306,58 @@ class IdeaEntitiesObjectStateTests(unittest.TestCase):
     def test_nested_permissions_snapshot_is_detached(self):
         state = IdeaEntitiesState()
 
-        state.permissions["nested"] = {
-            "allowed": ["create"],
-        }
-
         first = state.to_dict()
         second = state.to_dict()
 
-        first["permissions"]["nested"][
-            "allowed"
-        ].append("snapshot_only")
+        first["permissions"]["can_influence"] = False
 
-        self.assertEqual(
-            state.permissions["nested"]["allowed"],
-            ["create"],
+        self.assertTrue(
+            state.permissions.can_influence
         )
-
-        self.assertEqual(
-            second["permissions"]["nested"][
-                "allowed"
-            ],
-            ["create"],
+        self.assertTrue(
+            second["permissions"]["can_influence"]
         )
-
-        self.assertEqual(
-            state.to_dict()["permissions"][
-                "nested"
-            ]["allowed"],
-            ["create"],
+        self.assertTrue(
+            state.to_dict()["permissions"]["can_influence"]
         )
 
         self.assertIsNot(
-            first["permissions"]["nested"],
-            state.permissions["nested"],
+            first["permissions"],
+            second["permissions"],
         )
 
     def test_permissions_snapshot_ignores_later_live_changes(self):
         state = IdeaEntitiesState()
-
-        state.permissions["nested"] = {
-            "allowed": ["create"],
-        }
+        original = state.permissions
 
         snapshot = state.to_dict()
 
-        state.permissions["nested"][
-            "allowed"
-        ].append("influence")
-
-        self.assertEqual(
-            snapshot["permissions"]["nested"][
-                "allowed"
-            ],
-            ["create"],
+        state.permissions = replace(
+            original,
+            can_influence=False,
         )
 
-        self.assertEqual(
-            state.to_dict()["permissions"][
-                "nested"
-            ]["allowed"],
-            ["create", "influence"],
+        self.assertIsNot(
+            state.permissions,
+            original,
+        )
+        self.assertTrue(
+            original.can_influence
+        )
+        self.assertFalse(
+            state.permissions.can_influence
         )
 
         self.assertTrue(
-            snapshot["permissions"]["can_influence"],
+            snapshot["permissions"]["can_influence"]
+        )
+        self.assertFalse(
+            state.to_dict()["permissions"]["can_influence"]
         )
 
     def test_live_permissions_identity_is_preserved(self):
         universe, layer = self._layer()
-
         state = layer.idea_entities_state
-
-        state.permissions["nested"] = {
-            "roles": ["observer"],
-        }
 
         entity = layer.create_idea_entity(
             name="permission_test",
@@ -360,38 +367,145 @@ class IdeaEntitiesObjectStateTests(unittest.TestCase):
             layer.permissions,
             state.permissions,
         )
-
         self.assertIs(
             entity.permissions,
             state.permissions,
         )
+        self.assertIsInstance(
+            entity.permissions,
+            IdeaEntitiesPermissions,
+        )
 
-        self.assertIs(
-            universe.world["idea_entities"][
-                "permissions"
-            ],
+        boundary = universe.world[
+            "idea_entities"
+        ]["permissions"]
+
+        self.assertEqual(
+            boundary,
+            state.permissions.to_dict(),
+        )
+        self.assertIsNot(
+            boundary,
             state.permissions,
         )
 
-        snapshot = state.to_dict()
+        boundary["can_influence"] = False
 
-        snapshot["permissions"]["nested"][
-            "roles"
-        ].append("intruder")
-
-        self.assertEqual(
-            state.permissions["nested"]["roles"],
-            ["observer"],
+        self.assertTrue(
+            entity.permissions.can_influence
         )
-
-        self.assertEqual(
-            entity.permissions["nested"]["roles"],
-            ["observer"],
+        self.assertTrue(
+            state.permissions.can_influence
         )
-
         self.assertIs(
             layer.idea_entities_state,
             state,
+        )
+
+    def test_permissions_reject_mapping_runtime_state(self):
+        with self.assertRaises(TypeError):
+            IdeaEntitiesState(permissions={})
+
+        state = IdeaEntitiesState()
+        original = state.permissions
+
+        with self.assertRaises(TypeError):
+            state.permissions = {
+                "can_influence": True,
+            }
+
+        self.assertIs(
+            state.permissions,
+            original,
+        )
+
+        with self.assertRaises(TypeError):
+            IdeaEntitiesPermissions(can_influence=1)
+
+    def test_permissions_have_no_mapping_api_and_are_frozen(self):
+        permissions = IdeaEntitiesPermissions()
+
+        for method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+            "__getitem__",
+        ):
+            self.assertFalse(
+                hasattr(permissions, method)
+            )
+
+        with self.assertRaises(TypeError):
+            _ = permissions["can_influence"]
+
+        with self.assertRaises(FrozenInstanceError):
+            permissions.can_influence = False
+
+        changed = replace(
+            permissions,
+            can_influence=False,
+        )
+
+        self.assertTrue(
+            permissions.can_influence
+        )
+        self.assertFalse(
+            changed.can_influence
+        )
+        self.assertIsNot(
+            changed,
+            permissions,
+        )
+
+    def test_world_permission_boundary_tracks_object_replacement(self):
+        universe, layer = self._layer()
+
+        state = layer.idea_entities_state
+        original = state.permissions
+
+        before = universe.world[
+            "idea_entities"
+        ]["permissions"]
+
+        state.permissions = replace(
+            original,
+            can_influence=False,
+        )
+
+        layer.write_to_world()
+
+        after = universe.world[
+            "idea_entities"
+        ]["permissions"]
+
+        self.assertIs(
+            layer.permissions,
+            state.permissions,
+        )
+
+        self.assertTrue(
+            original.can_influence
+        )
+        self.assertTrue(
+            before["can_influence"]
+        )
+        self.assertFalse(
+            state.permissions.can_influence
+        )
+        self.assertFalse(
+            after["can_influence"]
+        )
+
+        after["can_influence"] = True
+
+        self.assertFalse(
+            layer.permissions.can_influence
+        )
+        self.assertFalse(
+            layer.public_state["permissions"][
+                "can_influence"
+            ]
         )
 
     def test_event_snapshots_detach_nested_serialized_data(self):
@@ -591,7 +705,7 @@ class IdeaEntitiesObjectStateTests(unittest.TestCase):
             state.event_history[0].name,
             "history",
         )
-        self.assertTrue(state.permissions["can_influence"])
+        self.assertTrue(state.permissions.can_influence)
         self.assertIs(
             state.eternal_fire.state,
             EternalFirePotentialState.UNIGNITED,
