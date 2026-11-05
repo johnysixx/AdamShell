@@ -132,8 +132,7 @@ class Day0BarArrivalTests(unittest.TestCase):
                 CatTraitDiceMappingResult(
                     cat_d20_value=1,
                     permutation_index=0,
-                    die_to_trait={},
-                    trait_to_die={},
+                    assignments=(),
                 )
             ),
             percentile= (

@@ -187,9 +187,9 @@ class CatBirthResolver:
                 "CatTraitDiceMappingResult object."
             )
 
-        for die_name, trait in (
-            mapping.die_to_trait.items()
-        ):
+        for assignment in mapping.assignments:
+            die_name = assignment.die
+            trait = assignment.trait
             selected_value = (
                 self._select_for_cat_birth(
                     options=trait_options[trait],
@@ -687,9 +687,6 @@ class CatBirthResolver:
                 "CatTraitDiceMappingResult object."
             )
 
-        die_to_trait = mapping.die_to_trait
-        trait_to_die = mapping.trait_to_die
-
         trait_options = {
             "color": (
                 self.universe
@@ -741,13 +738,11 @@ class CatBirthResolver:
                 validation.conflicting_trait
             )
 
-            reroll_die = (
-                trait_to_die.get(
-                    conflicting_trait
-                )
+            reroll_die = mapping.die_for_trait(
+                conflicting_trait
             )
 
-            trait = die_to_trait.get(
+            trait = mapping.trait_for_die(
                 reroll_die
             )
 

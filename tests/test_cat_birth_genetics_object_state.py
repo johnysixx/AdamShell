@@ -22,6 +22,7 @@ from cats.cat_birth_result_state import (
     CatBirthProfileResolvedEvent,
 )
 from cats.cat_trait_dice_mapping import (
+    CatTraitDieAssignment,
     CatTraitDiceMappingResult,
 )
 from meeting_place.dice_box import (
@@ -99,8 +100,7 @@ class CatBirthGeneticsObjectStateTests(unittest.TestCase):
         mapping = CatTraitDiceMappingResult(
             cat_d20_value=1,
             permutation_index=0,
-            die_to_trait={},
-            trait_to_die={},
+            assignments=(),
         )
 
         result = self.resolver._resolve_genetic_conflicts(
@@ -138,8 +138,12 @@ class CatBirthGeneticsObjectStateTests(unittest.TestCase):
         mapping = CatTraitDiceMappingResult(
             cat_d20_value=1,
             permutation_index=0,
-            die_to_trait={"d12": "color"},
-            trait_to_die={"color": "d12"},
+            assignments=(
+                CatTraitDieAssignment(
+                    die="d12",
+                    trait="color",
+                ),
+            ),
         )
 
         self.bar.dice_box.rotate_named_die = (
@@ -256,8 +260,7 @@ class CatBirthGeneticsObjectStateTests(unittest.TestCase):
             trait_dice_mapping=CatTraitDiceMappingResult(
                 cat_d20_value=1,
                 permutation_index=0,
-                die_to_trait={},
-                trait_to_die={},
+                assignments=(),
             ),
             percentile=(
                 CatBirthPercentileResult.single(

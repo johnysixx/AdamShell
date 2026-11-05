@@ -130,8 +130,7 @@ class CatBirthGibTests(
                 CatTraitDiceMappingResult(
                     cat_d20_value=1,
                     permutation_index=0,
-                    die_to_trait={},
-                    trait_to_die={},
+                    assignments=(),
                 )
             ),
             percentile= (

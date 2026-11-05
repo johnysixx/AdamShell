@@ -1,37 +1,65 @@
 from dataclasses import dataclass
 from itertools import permutations
-from types import MappingProxyType
-from typing import Mapping
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
+class CatTraitDieAssignment:
+    die: str
+    trait: str
+
+    def __post_init__(self):
+        if not isinstance(self.die, str) or not self.die:
+            raise TypeError(
+                "Trait assignment requires a die name."
+            )
+
+        if not isinstance(self.trait, str) or not self.trait:
+            raise TypeError(
+                "Trait assignment requires a trait name."
+            )
+
+
+@dataclass(frozen=True, slots=True)
 class CatTraitDiceMappingResult:
     cat_d20_value: int
     permutation_index: int
-    die_to_trait: Mapping[str, str]
-    trait_to_die: Mapping[str, str]
+    assignments: tuple[CatTraitDieAssignment, ...] = ()
 
     def __post_init__(self):
-        if not isinstance(self.die_to_trait, dict):
+        if (
+            not isinstance(self.assignments, tuple)
+            or any(
+                not isinstance(
+                    assignment,
+                    CatTraitDieAssignment,
+                )
+                for assignment in self.assignments
+            )
+        ):
             raise TypeError(
-                "die_to_trait must be a dict registry."
+                "Trait dice mapping requires "
+                "typed immutable assignments."
             )
 
-        if not isinstance(self.trait_to_die, dict):
-            raise TypeError(
-                "trait_to_die must be a dict registry."
+        dice = tuple(
+            assignment.die
+            for assignment in self.assignments
+        )
+
+        traits = tuple(
+            assignment.trait
+            for assignment in self.assignments
+        )
+
+        if len(dice) != len(set(dice)):
+            raise ValueError(
+                "Trait dice mapping contains duplicate dice."
             )
 
-        object.__setattr__(
-            self,
-            "die_to_trait",
-            MappingProxyType(dict(self.die_to_trait)),
-        )
-        object.__setattr__(
-            self,
-            "trait_to_die",
-            MappingProxyType(dict(self.trait_to_die)),
-        )
+        if len(traits) != len(set(traits)):
+            raise ValueError(
+                "Trait dice mapping contains duplicate traits."
+            )
 
     @property
     def name(self):
@@ -42,10 +70,18 @@ class CatTraitDiceMappingResult:
         return True
 
     def trait_for_die(self, die_name):
-        return self.die_to_trait.get(die_name)
+        for assignment in self.assignments:
+            if assignment.die == die_name:
+                return assignment.trait
+
+        return None
 
     def die_for_trait(self, trait):
-        return self.trait_to_die.get(trait)
+        for assignment in self.assignments:
+            if assignment.trait == trait:
+                return assignment.die
+
+        return None
 
 
 class CatTraitDiceMapping:
@@ -98,22 +134,20 @@ class CatTraitDiceMapping:
             ]
         )
 
-        die_to_trait = dict(
-            zip(
+        assignments = tuple(
+            CatTraitDieAssignment(
+                die=die_name,
+                trait=trait,
+            )
+            for die_name, trait
+            in zip(
                 self.DICE,
-                selected_traits
+                selected_traits,
             )
         )
-
-        trait_to_die = {
-            trait: die
-            for die, trait
-            in die_to_trait.items()
-        }
 
         return CatTraitDiceMappingResult(
             cat_d20_value=value,
             permutation_index=permutation_index,
-            die_to_trait=die_to_trait,
-            trait_to_die=trait_to_die,
+            assignments=assignments,
         )
