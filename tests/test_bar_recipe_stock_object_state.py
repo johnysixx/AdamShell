@@ -7,6 +7,8 @@ from meeting_place.meeting_place import (
     MeetingPlace
 )
 
+from meeting_place.back_room import BackRoom
+
 from meeting_place.how_to_mix_drinks import (
     HowToMixDrinks
 )
@@ -77,6 +79,141 @@ class BarRecipeStockObjectStateTests(
             _ = value[
                 "name"
             ]
+
+    def test_back_room_initial_stocks_are_domain_objects(self):
+        room = BackRoom(UniverseRegistry())
+
+        expected = (
+            "rum",
+            "whisky",
+            "vodka",
+            "gin",
+            "beer",
+            "wine",
+            "mead",
+            "apple_cider",
+        )
+
+        self.assertEqual(
+            tuple(room.bar_ingredients),
+            expected,
+        )
+
+        for name in expected:
+            stock = room.bar_ingredients[name]
+
+            self.assertIsInstance(
+                stock,
+                BarIngredientStock,
+            )
+
+            self.assertEqual(stock.name, name)
+            self.assertTrue(stock.available)
+            self.assertTrue(stock.fundamental)
+            self.assertTrue(stock.serve_directly)
+
+            self.assertEqual(
+                stock.category,
+                "basic_drink",
+            )
+
+            self.assertIsNone(stock.shots)
+            self._assert_object_only(stock)
+
+    def test_back_room_stock_instances_are_independent(self):
+        first = BackRoom(UniverseRegistry())
+        second = BackRoom(UniverseRegistry())
+
+        first_rum = first.bar_ingredients["rum"]
+        second_rum = second.bar_ingredients["rum"]
+        first_wine = first.bar_ingredients["wine"]
+
+        self.assertIsNot(
+            first_rum,
+            second_rum,
+        )
+
+        self.assertIsNot(
+            first_rum,
+            first_wine,
+        )
+
+        first_rum.available = False
+        first_rum.category = "temporarily_unavailable"
+
+        self.assertFalse(first_rum.available)
+
+        self.assertEqual(
+            first_rum.category,
+            "temporarily_unavailable",
+        )
+
+        self.assertTrue(second_rum.available)
+        self.assertTrue(first_wine.available)
+
+        self.assertEqual(
+            second_rum.category,
+            "basic_drink",
+        )
+
+        self.assertIs(
+            first.bar_ingredients["rum"],
+            first_rum,
+        )
+
+        self.assertIs(
+            second.bar_ingredients["rum"],
+            second_rum,
+        )
+
+    def test_bar_menu_keeps_canonical_stock_identity(self):
+        universe = Universe()
+        universe.universe_registry = UniverseRegistry()
+
+        bar = MeetingPlace(universe)
+
+        registry = bar.back_room.bar_ingredients
+        rum = registry["rum"]
+
+        self.assertIsInstance(
+            rum,
+            BarIngredientStock,
+        )
+
+        self.assertIs(
+            bar.drink_menu["rum"].stock,
+            rum,
+        )
+
+        bar.refresh_basic_drinks()
+
+        self.assertIs(
+            bar.back_room.bar_ingredients,
+            registry,
+        )
+
+        self.assertIs(
+            bar.drink_menu["rum"].stock,
+            rum,
+        )
+
+        self.assertIs(
+            registry["rum"],
+            rum,
+        )
+
+        snapshot = rum.to_dict()
+        snapshot["available"] = False
+        snapshot["category"] = "changed"
+
+        self.assertTrue(rum.available)
+
+        self.assertEqual(
+            rum.category,
+            "basic_drink",
+        )
+
+        self._assert_object_only(rum)
 
     def test_bar_stock_values_are_domain_objects(
         self

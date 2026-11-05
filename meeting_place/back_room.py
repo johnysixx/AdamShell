@@ -11,59 +11,62 @@ class BackRoom:
         self.type = "bar_internal_room"
 
         self.bar_ingredients = {
-            "rum": {
-                "available": True,
-                "fundamental": True,
-                "serve_directly": True,
-                "category": "basic_drink"
-            },
-            "whisky": {
-                "available": True,
-                "fundamental": True,
-                "serve_directly": True,
-                "category": "basic_drink"
-            },
-            "vodka": {
-                "available": True,
-                "fundamental": True,
-                "serve_directly": True,
-                "category": "basic_drink"
-            },
-            "gin": {
-                "available": True,
-                "fundamental": True,
-                "serve_directly": True,
-                "category": "basic_drink"
-            },
-            "beer": {
-                "available": True,
-                "fundamental": True,
-                "serve_directly": True,
-                "category": "basic_drink"
-            },
-            "wine": {
-                "available": True,
-                "fundamental": True,
-                "serve_directly": True,
-                "category": "basic_drink"
-            },
-            "mead": {
-                "available": True,
-                "fundamental": True,
-                "serve_directly": True,
-                "category": "basic_drink"
-            },
-            "apple_cider": {
-                "available": True,
-                "fundamental": True,
-                "serve_directly": True,
-                "category": "basic_drink"
-            }
-        }
-
-        self.bar_ingredients = {
-            name: BarIngredientStock(name=name, **state)
-            for name, state in self.bar_ingredients.items()
+            "rum": BarIngredientStock(
+                name="rum",
+                available=True,
+                fundamental=True,
+                serve_directly=True,
+                category="basic_drink",
+            ),
+            "whisky": BarIngredientStock(
+                name="whisky",
+                available=True,
+                fundamental=True,
+                serve_directly=True,
+                category="basic_drink",
+            ),
+            "vodka": BarIngredientStock(
+                name="vodka",
+                available=True,
+                fundamental=True,
+                serve_directly=True,
+                category="basic_drink",
+            ),
+            "gin": BarIngredientStock(
+                name="gin",
+                available=True,
+                fundamental=True,
+                serve_directly=True,
+                category="basic_drink",
+            ),
+            "beer": BarIngredientStock(
+                name="beer",
+                available=True,
+                fundamental=True,
+                serve_directly=True,
+                category="basic_drink",
+            ),
+            "wine": BarIngredientStock(
+                name="wine",
+                available=True,
+                fundamental=True,
+                serve_directly=True,
+                category="basic_drink",
+            ),
+            "mead": BarIngredientStock(
+                name="mead",
+                available=True,
+                fundamental=True,
+                serve_directly=True,
+                category="basic_drink",
+            ),
+            "apple_cider": BarIngredientStock(
+                name="apple_cider",
+                available=True,
+                fundamental=True,
+                serve_directly=True,
+                category="basic_drink",
+            ),
         }
 
         self.universe_manual = UniverseManual(
