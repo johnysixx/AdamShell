@@ -10,6 +10,9 @@ from meeting_place.lemon_tree_state import LemonTreeState
 from meeting_place.drink_recipe_status import (
     DrinkRecipeStatus,
 )
+from meeting_place.terminals import (
+    BarTerminalDefinition,
+)
 
 
 class BarObject(DomainObject):
@@ -1076,7 +1079,38 @@ class MeetingPlacePermissions(BarObject):
 
 
 class MeetingPlaceState(BarObject):
-    pass
+
+    def to_dict(self):
+        snapshot = super().to_dict()
+
+        terminals = self.terminals
+
+        if not isinstance(terminals, dict):
+            raise TypeError(
+                "Meeting place terminal registry "
+                "must be a named lookup registry."
+            )
+
+        for name, terminal in terminals.items():
+            if (
+                not isinstance(
+                    terminal,
+                    BarTerminalDefinition,
+                )
+                or terminal.name != name
+            ):
+                raise TypeError(
+                    "Meeting place terminal registry "
+                    "requires canonical terminal objects."
+                )
+
+        snapshot["terminals"] = {
+            name: terminal.to_dict()
+            for name, terminal
+            in terminals.items()
+        }
+
+        return snapshot
 
 
 class CatD20Box(BarObject):

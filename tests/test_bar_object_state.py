@@ -1,9 +1,11 @@
 import unittest
+from dataclasses import FrozenInstanceError
 
 from core.entity.domain_object import DomainObject
 from multiverse import UniverseRegistry
 from universe.universe import Universe
 from meeting_place.meeting_place import MeetingPlace
+from meeting_place.terminals import BarTerminalDefinition
 from meeting_place.bar_objects import (
     AmbientAroma,
     BackRoomAccess,
@@ -45,6 +47,160 @@ class BarObjectStateTests(unittest.TestCase):
         self.assertIsInstance(self.bar.access, MeetingPlaceAccess)
         self.assertIsInstance(self.bar.permissions, MeetingPlacePermissions)
         self.assertIsInstance(self.bar.state, MeetingPlaceState)
+
+    def test_terminal_registry_contains_typed_objects(self):
+        registry = self.bar.terminals.terminals
+
+        expected = (
+            "book_count_terminal",
+            "book_search_terminal",
+            "random_excerpt_terminal",
+            "bar_story_count_terminal",
+        )
+
+        self.assertEqual(
+            tuple(registry),
+            expected,
+        )
+
+        for name in expected:
+            terminal = registry[name]
+
+            self.assertIsInstance(
+                terminal,
+                BarTerminalDefinition,
+            )
+            self.assertEqual(
+                terminal.name,
+                name,
+            )
+            self.assertTrue(terminal.type)
+            self.assertTrue(terminal.purpose)
+
+            for method in (
+                "get",
+                "keys",
+                "items",
+                "values",
+                "__getitem__",
+            ):
+                self.assertFalse(
+                    hasattr(terminal, method)
+                )
+
+            with self.assertRaises(TypeError):
+                _ = terminal["type"]
+
+        book_count = registry["book_count_terminal"]
+
+        self.assertEqual(
+            book_count.type,
+            "display",
+        )
+        self.assertEqual(
+            book_count.purpose,
+            "show_library_book_count",
+        )
+
+        with self.assertRaises(FrozenInstanceError):
+            book_count.purpose = "changed"
+
+        with self.assertRaises(TypeError):
+            BarTerminalDefinition(
+                name="",
+                type="display",
+                purpose="invalid",
+            )
+
+    def test_terminal_snapshots_are_detached_from_objects(self):
+        registry = self.bar.terminals.terminals
+        terminal = registry["book_count_terminal"]
+
+        self.assertIs(
+            self.bar.state.terminals,
+            registry,
+        )
+
+        first = self.bar.state.to_dict()
+        second = self.bar.state.to_dict()
+
+        world = self.universe.world[
+            "meeting_place"
+        ]
+
+        self.assertEqual(
+            first["terminals"]["book_count_terminal"],
+            {
+                "type": "display",
+                "purpose": "show_library_book_count",
+            },
+        )
+
+        first["terminals"]["book_count_terminal"][
+            "purpose"
+        ] = "changed"
+
+        self.assertEqual(
+            terminal.purpose,
+            "show_library_book_count",
+        )
+
+        self.assertEqual(
+            second["terminals"]["book_count_terminal"][
+                "purpose"
+            ],
+            "show_library_book_count",
+        )
+
+        self.assertEqual(
+            world["terminals"]["book_count_terminal"][
+                "purpose"
+            ],
+            "show_library_book_count",
+        )
+
+        self.assertIs(
+            registry["book_count_terminal"],
+            terminal,
+        )
+
+        self.assertIsNot(
+            first["terminals"]["book_count_terminal"],
+            world["terminals"]["book_count_terminal"],
+        )
+
+    def test_terminal_registry_rejects_mapping_values(self):
+        registry = self.bar.terminals.terminals
+        original = registry["book_count_terminal"]
+
+        try:
+            registry["book_count_terminal"] = {
+                "type": "display",
+                "purpose": "legacy",
+            }
+
+            with self.assertRaises(TypeError):
+                self.bar.state.to_dict()
+
+        finally:
+            registry["book_count_terminal"] = original
+
+        self.assertIs(
+            registry["book_count_terminal"],
+            original,
+        )
+
+        self.assertEqual(
+            self.bar.state.to_dict()["terminals"][
+                "book_count_terminal"
+            ]["purpose"],
+            "show_library_book_count",
+        )
+
+        self.assertIs(
+            self.bar.state.terminals,
+            registry,
+        )
 
     def test_bar_counter_physical_objects_are_objects(self):
         self.assertIsInstance(self.bar.bar_counter.bar_cloth, BarCloth)
