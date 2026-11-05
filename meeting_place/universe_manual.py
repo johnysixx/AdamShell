@@ -1,4 +1,4 @@
-from copy import deepcopy
+from multiverse.registry import UniverseRegistryRecord
 
 
 class UniverseManual:
@@ -19,11 +19,28 @@ class UniverseManual:
         if reader_name != self.allowed_reader:
             return None
 
-        return {
-            universe_id: deepcopy(universe_data)
-            for universe_id, universe_data
-            in self._universe_registry.universes.items()
-        }
+        snapshot = {}
+
+        for universe_id, record in (
+            self._universe_registry.universes.items()
+        ):
+            if not isinstance(
+                record,
+                UniverseRegistryRecord,
+            ):
+                raise TypeError(
+                    "Universe manual requires "
+                    "UniverseRegistryRecord objects."
+                )
+
+            if record.id != universe_id:
+                raise ValueError(
+                    "Universe registry ID mismatch."
+                )
+
+            snapshot[universe_id] = record.to_dict()
+
+        return snapshot
 
     @property
     def public_state(self):
