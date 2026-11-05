@@ -2,6 +2,39 @@ from dataclasses import dataclass
 from typing import ClassVar
 
 
+@dataclass(frozen=True, slots=True)
+class CatAutosomalAlleleRule:
+    locus: str
+    allowed_alleles: frozenset[str]
+
+    def __post_init__(self):
+        if not isinstance(self.locus, str) or not self.locus:
+            raise TypeError(
+                "Autosomal allele rule requires a locus."
+            )
+
+        if not isinstance(
+            self.allowed_alleles,
+            frozenset,
+        ):
+            raise TypeError(
+                "Allowed alleles must be a frozenset."
+            )
+
+        if not self.allowed_alleles:
+            raise ValueError(
+                "Allowed alleles cannot be empty."
+            )
+
+        if any(
+            not isinstance(allele, str) or not allele
+            for allele in self.allowed_alleles
+        ):
+            raise TypeError(
+                "Allowed alleles must be nonempty strings."
+            )
+
+
 @dataclass(slots=True)
 class CatParentalContribution:
     from_mother: str | None
@@ -122,35 +155,34 @@ class CatGenotype:
     origin: str
     inheritance_record: CatInheritanceRecord | None = None
 
-    AUTOSOMAL_LOCI: ClassVar[dict[str, set[str]]] = {
-        "black": {
-            "B",
-            "b",
-            "bl",
-        },
-        "dilution": {
-            "D",
-            "d",
-        },
-        "agouti": {
-            "A",
-            "a",
-        },
-        "white_spotting": {
-            "S",
-            "s",
-        },
-        "colorpoint": {
-            "C",
-            "cb",
-            "cs",
-            "c",
-        },
-        "longhair": {
-            "L",
-            "l",
-        },
-    }
+    AUTOSOMAL_RULES: ClassVar[
+        tuple[CatAutosomalAlleleRule, ...]
+    ] = (
+        CatAutosomalAlleleRule(
+            "black",
+            frozenset({"B", "b", "bl"}),
+        ),
+        CatAutosomalAlleleRule(
+            "dilution",
+            frozenset({"D", "d"}),
+        ),
+        CatAutosomalAlleleRule(
+            "agouti",
+            frozenset({"A", "a"}),
+        ),
+        CatAutosomalAlleleRule(
+            "white_spotting",
+            frozenset({"S", "s"}),
+        ),
+        CatAutosomalAlleleRule(
+            "colorpoint",
+            frozenset({"C", "cb", "cs", "c"}),
+        ),
+        CatAutosomalAlleleRule(
+            "longhair",
+            frozenset({"L", "l"}),
+        ),
+    )
 
     ORANGE_ALLELES: ClassVar[set[str]] = {
         "O",
@@ -607,20 +639,18 @@ class CatGenotype:
                 "CatAutosomalGenotype."
             )
 
-        for locus, allowed in (
-            cls.AUTOSOMAL_LOCI.items()
-        ):
+        for rule in cls.AUTOSOMAL_RULES:
             alleles = getattr(
                 loci,
-                locus,
+                rule.locus,
             )
 
             if not set(alleles).issubset(
-                allowed
+                rule.allowed_alleles
             ):
                 raise ValueError(
                     f"Unsupported allele "
-                    f"at {locus}."
+                    f"at {rule.locus}."
                 )
 
         return True

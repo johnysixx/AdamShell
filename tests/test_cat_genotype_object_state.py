@@ -1,6 +1,8 @@
 import unittest
+from dataclasses import FrozenInstanceError, replace
 
 from cats.genotype import (
+    CatAutosomalAlleleRule,
     CatAutosomalGenotype,
     CatAutosomalInheritanceRecord,
     CatGenotype,
@@ -29,6 +31,152 @@ class CatGenotypeObjectStateTests(unittest.TestCase):
         self.father = CatGenotype.create_founder(
             sex="male",
             orange_locus=("o",),
+        )
+
+    def test_autosomal_rules_are_immutable_objects(self):
+        rules = CatGenotype.AUTOSOMAL_RULES
+
+        self.assertIsInstance(rules, tuple)
+        self.assertEqual(len(rules), 6)
+
+        self.assertEqual(
+            tuple(rule.locus for rule in rules),
+            (
+                "black",
+                "dilution",
+                "agouti",
+                "white_spotting",
+                "colorpoint",
+                "longhair",
+            ),
+        )
+
+        expected = (
+            frozenset({"B", "b", "bl"}),
+            frozenset({"D", "d"}),
+            frozenset({"A", "a"}),
+            frozenset({"S", "s"}),
+            frozenset({"C", "cb", "cs", "c"}),
+            frozenset({"L", "l"}),
+        )
+
+        self.assertEqual(
+            tuple(rule.allowed_alleles for rule in rules),
+            expected,
+        )
+
+        for rule in rules:
+            self.assertIsInstance(
+                rule,
+                CatAutosomalAlleleRule,
+            )
+
+            self.assertIsInstance(
+                rule.allowed_alleles,
+                frozenset,
+            )
+
+            for method in (
+                "get",
+                "keys",
+                "items",
+                "values",
+                "to_dict",
+            ):
+                self.assertFalse(
+                    hasattr(rule, method)
+                )
+
+            with self.assertRaises(TypeError):
+                _ = rule["locus"]
+
+        with self.assertRaises(FrozenInstanceError):
+            rules[0].locus = "changed"
+
+        self.assertFalse(
+            hasattr(rules[0].allowed_alleles, "add")
+        )
+
+    def test_autosomal_rule_rejects_invalid_values(self):
+        with self.assertRaises(TypeError):
+            CatAutosomalAlleleRule(
+                "",
+                frozenset({"B"}),
+            )
+
+        with self.assertRaises(TypeError):
+            CatAutosomalAlleleRule(
+                "black",
+                {"B"},
+            )
+
+        with self.assertRaises(ValueError):
+            CatAutosomalAlleleRule(
+                "black",
+                frozenset(),
+            )
+
+        with self.assertRaises(TypeError):
+            CatAutosomalAlleleRule(
+                "black",
+                frozenset({42}),
+            )
+
+        with self.assertRaises(TypeError):
+            CatAutosomalAlleleRule(
+                "black",
+                frozenset({""}),
+            )
+
+    def test_autosomal_rules_preserve_genotype_validation(self):
+        valid_loci = CatAutosomalGenotype(
+            black=("bl", "b"),
+            dilution=("d", "d"),
+            agouti=("A", "a"),
+            white_spotting=("S", "s"),
+            colorpoint=("cb", "cs"),
+            longhair=("l", "l"),
+        )
+
+        valid = CatGenotype.create_founder(
+            sex="female",
+            orange_locus=("O", "o"),
+            autosomal_loci=valid_loci,
+        )
+
+        self.assertTrue(
+            CatGenotype.validate(valid)
+        )
+
+        self.assertIs(
+            valid.autosomal_loci,
+            valid_loci,
+        )
+
+        for rule in CatGenotype.AUTOSOMAL_RULES:
+            invalid_loci = replace(
+                self.mother.autosomal_loci,
+                **{
+                    rule.locus: (
+                        "INVALID",
+                        "INVALID",
+                    ),
+                },
+            )
+
+            invalid = replace(
+                self.mother,
+                autosomal_loci=invalid_loci,
+            )
+
+            with self.assertRaisesRegex(
+                ValueError,
+                "Unsupported allele at " + rule.locus,
+            ):
+                CatGenotype.validate(invalid)
+
+        self.assertTrue(
+            CatGenotype.validate(self.mother)
         )
 
     def test_founder_is_cat_genotype_object(self):
