@@ -34,7 +34,7 @@ class BarMenuHomeScreen:
 
 @dataclass(slots=True, frozen=True)
 class BarMenuNewScreen:
-    drinks: dict
+    drinks: tuple[str, ...]
 
     screen: str = field(
         default="new",
@@ -42,26 +42,29 @@ class BarMenuNewScreen:
     )
 
     def __post_init__(self):
-        if not isinstance(
-            self.drinks,
-            dict,
+        if (
+            not isinstance(self.drinks, tuple)
+            or any(
+                not isinstance(name, str)
+                for name in self.drinks
+            )
         ):
             raise TypeError(
-                "Bar menu new-drinks screen "
-                "requires a drink registry dict."
+                "New-drinks screen requires "
+                "an immutable tuple of drink names."
             )
 
     def to_dict(self):
         return {
             "screen": self.screen,
-            "drinks": self.drinks,
+            "drinks": list(self.drinks),
         }
 
 
 @dataclass(slots=True, frozen=True)
 class BarMenuListScreen:
-    drinks: dict
-    new_drinks: dict
+    drinks: tuple[str, ...]
+    new_drinks: tuple[str, ...]
 
     screen: str = field(
         default="menu",
@@ -69,30 +72,32 @@ class BarMenuListScreen:
     )
 
     def __post_init__(self):
-        if not isinstance(
-            self.drinks,
-            dict,
+        for field_name in (
+            "drinks",
+            "new_drinks",
         ):
-            raise TypeError(
-                "Bar menu screen requires "
-                "a drink registry dict."
+            names = getattr(
+                self,
+                field_name,
             )
 
-        if not isinstance(
-            self.new_drinks,
-            dict,
-        ):
-            raise TypeError(
-                "Bar menu screen requires "
-                "a new-drink registry dict."
-            )
+            if (
+                not isinstance(names, tuple)
+                or any(
+                    not isinstance(name, str)
+                    for name in names
+                )
+            ):
+                raise TypeError(
+                    "Menu screens require "
+                    "immutable tuples of drink names."
+                )
 
     def to_dict(self):
         return {
             "screen": self.screen,
-            "drinks": self.drinks,
-            "new_drinks":
-                self.new_drinks,
+            "drinks": list(self.drinks),
+            "new_drinks": list(self.new_drinks),
         }
 
 

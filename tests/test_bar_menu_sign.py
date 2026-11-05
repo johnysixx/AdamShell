@@ -1,4 +1,5 @@
 ﻿import unittest
+from dataclasses import FrozenInstanceError
 
 from meeting_place.bar_menu_sign import (
     BarMenuSign
@@ -144,6 +145,223 @@ class BarMenuSignTests(unittest.TestCase):
             [
                 "menu"
             ]
+        )
+
+    def test_new_screen_uses_immutable_name_tuple(self):
+        screen = BarMenuNewScreen(
+            drinks=("singularity", "event_horizon"),
+        )
+
+        self.assertEqual(
+            screen.drinks,
+            ("singularity", "event_horizon"),
+        )
+
+        first = screen.to_dict()
+        second = screen.to_dict()
+
+        first["drinks"].append("intruder")
+
+        self.assertEqual(
+            screen.drinks,
+            ("singularity", "event_horizon"),
+        )
+
+        self.assertEqual(
+            second["drinks"],
+            ["singularity", "event_horizon"],
+        )
+
+        with self.assertRaises(TypeError):
+            BarMenuNewScreen(drinks={})
+
+        with self.assertRaises(TypeError):
+            BarMenuNewScreen(drinks=["singularity"])
+
+        with self.assertRaises(FrozenInstanceError):
+            screen.drinks = ()
+
+    def test_list_screen_uses_immutable_name_tuples(self):
+        screen = BarMenuListScreen(
+            drinks=("rum", "wine"),
+            new_drinks=("singularity",),
+        )
+
+        first = screen.to_dict()
+        second = screen.to_dict()
+
+        first["drinks"].clear()
+        first["new_drinks"].append("intruder")
+
+        self.assertEqual(
+            screen.drinks,
+            ("rum", "wine"),
+        )
+
+        self.assertEqual(
+            screen.new_drinks,
+            ("singularity",),
+        )
+
+        self.assertEqual(
+            second["drinks"],
+            ["rum", "wine"],
+        )
+
+        self.assertEqual(
+            second["new_drinks"],
+            ["singularity"],
+        )
+
+        with self.assertRaises(TypeError):
+            BarMenuListScreen(
+                drinks={},
+                new_drinks=(),
+            )
+
+        with self.assertRaises(TypeError):
+            BarMenuListScreen(
+                drinks=(),
+                new_drinks={},
+            )
+
+        with self.assertRaises(FrozenInstanceError):
+            screen.drinks = ()
+
+    def test_screen_boundary_cannot_mutate_live_registries(self):
+        drink_menu = {
+            "rum": self._menu_item("rum"),
+        }
+
+        new_drinks = {
+            "singularity": self._new_drink(),
+        }
+
+        sign = BarMenuSign(
+            drink_menu=drink_menu,
+            new_drinks=new_drinks,
+        )
+
+        exported = sign.open_section("menu")
+        screen = sign.current_screen
+
+        self.assertIsInstance(
+            screen,
+            BarMenuListScreen,
+        )
+
+        self.assertEqual(
+            screen.drinks,
+            ("rum",),
+        )
+
+        self.assertEqual(
+            screen.new_drinks,
+            ("singularity",),
+        )
+
+        exported["drinks"].clear()
+        exported["new_drinks"].append("intruder")
+
+        self.assertIs(
+            sign.drink_menu,
+            drink_menu,
+        )
+
+        self.assertIs(
+            sign.new_drinks,
+            new_drinks,
+        )
+
+        self.assertIn("rum", drink_menu)
+        self.assertIn("singularity", new_drinks)
+        self.assertNotIn("intruder", new_drinks)
+
+        self.assertEqual(
+            screen.to_dict()["drinks"],
+            ["rum"],
+        )
+
+        self.assertEqual(
+            screen.to_dict()["new_drinks"],
+            ["singularity"],
+        )
+
+        exported_new = sign.open_section("new")
+
+        self.assertIsInstance(
+            sign.current_screen,
+            BarMenuNewScreen,
+        )
+
+        exported_new["drinks"].clear()
+        exported_new["drinks"].append("intruder")
+
+        self.assertEqual(
+            sign.current_screen.drinks,
+            ("singularity",),
+        )
+
+        self.assertIn("singularity", new_drinks)
+        self.assertNotIn("intruder", new_drinks)
+
+    def test_menu_render_still_tracks_live_registries(self):
+        drink_menu = {}
+        new_drinks = {}
+
+        sign = BarMenuSign(
+            drink_menu=drink_menu,
+            new_drinks=new_drinks,
+        )
+
+        sign.open_section("new")
+        saved_new_screen = sign.current_screen
+
+        self.assertEqual(
+            saved_new_screen.drinks,
+            (),
+        )
+
+        new_drinks["singularity"] = self._new_drink()
+
+        self.assertIn(
+            "singularity",
+            sign.render(),
+        )
+
+        self.assertEqual(
+            saved_new_screen.drinks,
+            (),
+        )
+
+        sign.open_section("menu")
+        saved_menu_screen = sign.current_screen
+
+        drink_menu["rum"] = self._menu_item("rum")
+
+        rendered = sign.render()
+
+        self.assertIn("rum", rendered)
+        self.assertIn("singularity", rendered)
+
+        self.assertIs(
+            sign.drink_menu,
+            drink_menu,
+        )
+
+        self.assertIs(
+            sign.new_drinks,
+            new_drinks,
+        )
+
+        self.assertEqual(
+            saved_menu_screen.drinks,
+            (),
+        )
+
+        self.assertEqual(
+            saved_menu_screen.new_drinks,
+            ("singularity",),
         )
 
     def test_screen_history_uses_object_state(

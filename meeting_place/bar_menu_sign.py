@@ -123,13 +123,13 @@ class BarMenuSign:
     ):
         if section == "new":
             screen = BarMenuNewScreen(
-                drinks=self.new_drinks,
+                drinks=tuple(self.new_drinks),
             )
 
         elif section == "menu":
             screen = BarMenuListScreen(
-                drinks=self.drink_menu,
-                new_drinks=self.new_drinks,
+                drinks=tuple(self.drink_menu),
+                new_drinks=tuple(self.new_drinks),
             )
 
         else:
@@ -300,10 +300,7 @@ class BarMenuSign:
                 "",
             ]
 
-            for drink_name in (
-                self.current_screen
-                .drinks
-            ):
+            for drink_name in self.new_drinks:
                 lines.append(
                     f"- {drink_name}"
                 )
@@ -316,15 +313,8 @@ class BarMenuSign:
             self.current_screen,
             BarMenuListScreen,
         ):
-            drinks = (
-                self.current_screen
-                .drinks
-            )
-
-            new_drinks = (
-                self.current_screen
-                .new_drinks
-            )
+            drinks = self.drink_menu
+            new_drinks = self.new_drinks
 
             lines = [
                 "=== BAR MENU ===",
