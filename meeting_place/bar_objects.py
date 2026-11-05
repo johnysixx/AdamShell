@@ -2247,7 +2247,7 @@ class BarWineDiscussionKnowledge:
         return {
             "heard": self.heard,
             "ideas": [
-                idea.to_dict()
+                deepcopy(idea.to_dict())
                 for idea in self.ideas
             ],
         }

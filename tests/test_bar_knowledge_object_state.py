@@ -13,6 +13,8 @@ from gods import Gods
 from idea_entities import IdeaEntities
 from library import Library
 from meeting_place.bar_objects import (
+    BarDrinkDiscussion,
+    BarDrinkIdea,
     BarGuestKnowledge,
     BarTasteKnowledge,
     BarWagerKnowledge,
@@ -24,6 +26,28 @@ from meeting_place.meeting_place import (
 )
 from multiverse import UniverseRegistry
 from universe.universe import Universe
+
+
+class MutableSerializedRememberedIdea(
+    BarDrinkIdea
+):
+
+    def __init__(self):
+        super().__init__(
+            subject="wine",
+            source="serpent",
+        )
+
+        self.metadata = {
+            "history": {
+                "notes": ["original"],
+            },
+        }
+
+    def to_dict(self):
+        snapshot = super().to_dict()
+        snapshot["metadata"] = self.metadata
+        return snapshot
 
 
 class BarKnowledgeObjectStateTests(
@@ -146,6 +170,214 @@ class BarKnowledgeObjectStateTests(
         )
         self.assertTrue(
             knowledge.bitterness.understood
+        )
+
+    def test_wine_knowledge_idea_snapshot_is_detached(self):
+        idea = MutableSerializedRememberedIdea()
+        ideas = [idea]
+
+        knowledge = BarWineDiscussionKnowledge(
+            heard=True,
+            ideas=ideas,
+        )
+
+        first = knowledge.to_dict()
+        second = knowledge.to_dict()
+
+        first["ideas"][0]["metadata"][
+            "history"
+        ]["notes"].append("snapshot_only")
+
+        self.assertEqual(
+            idea.metadata["history"]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            second["ideas"][0]["metadata"][
+                "history"
+            ]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            knowledge.to_dict()["ideas"][0][
+                "metadata"
+            ]["history"]["notes"],
+            ["original"],
+        )
+
+        self.assertTrue(knowledge.heard)
+
+        self.assertIs(
+            knowledge.ideas,
+            ideas,
+        )
+
+        self.assertIs(
+            knowledge.ideas[0],
+            idea,
+        )
+
+        self.assertIsNot(
+            first["ideas"][0]["metadata"],
+            idea.metadata,
+        )
+
+    def test_captured_wine_memory_keeps_source_separate(self):
+        discussion = BarDrinkDiscussion()
+
+        source_idea = MutableSerializedRememberedIdea()
+
+        discussion.add_idea(source_idea)
+
+        remembered = (
+            BarWineDiscussionKnowledge
+            .from_discussion(discussion)
+        )
+
+        stored_idea = remembered.ideas[0]
+        snapshot = remembered.to_dict()
+
+        self.assertIsNot(
+            stored_idea,
+            source_idea,
+        )
+
+        self.assertIs(
+            discussion.ideas[0],
+            source_idea,
+        )
+
+        source_idea.metadata["history"][
+            "notes"
+        ].append("source_change")
+
+        self.assertEqual(
+            stored_idea.metadata["history"]["notes"],
+            ["original"],
+        )
+
+        stored_idea.metadata["history"][
+            "notes"
+        ].append("memory_change")
+
+        self.assertEqual(
+            snapshot["ideas"][0]["metadata"][
+                "history"
+            ]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            remembered.to_dict()["ideas"][0][
+                "metadata"
+            ]["history"]["notes"],
+            ["original", "memory_change"],
+        )
+
+        self.assertEqual(
+            source_idea.metadata["history"]["notes"],
+            ["original", "source_change"],
+        )
+
+        self.assertIs(
+            remembered.ideas[0],
+            stored_idea,
+        )
+
+        self.assertIs(
+            discussion.ideas[0],
+            source_idea,
+        )
+
+    def test_day0_god_knowledge_snapshot_preserves_identity(self):
+        scene = self._scene()
+
+        scene.advance_to_god_at_table()
+
+        discussion = (
+            scene.serpent_lilith_good_drink_discussion
+        )
+
+        scene.serpent_explains_wine_discussion_to_god()
+
+        knowledge = scene.god.bar_knowledge
+        remembered = knowledge.wine_discussion
+
+        idea = MutableSerializedRememberedIdea()
+
+        ideas = remembered.ideas
+        remembered.ideas.append(idea)
+
+        first = knowledge.to_dict()
+        second = knowledge.to_dict()
+
+        first["wine_discussion"]["ideas"][-1][
+            "metadata"
+        ]["history"]["notes"].append(
+            "snapshot_only"
+        )
+
+        self.assertEqual(
+            idea.metadata["history"]["notes"],
+            ["original"],
+        )
+
+        self.assertEqual(
+            second["wine_discussion"]["ideas"][-1][
+                "metadata"
+            ]["history"]["notes"],
+            ["original"],
+        )
+
+        idea.metadata["history"]["notes"].append(
+            "live_change"
+        )
+
+        self.assertEqual(
+            second["wine_discussion"]["ideas"][-1][
+                "metadata"
+            ]["history"]["notes"],
+            ["original"],
+        )
+
+        current = knowledge.to_dict()
+
+        self.assertEqual(
+            current["wine_discussion"]["ideas"][-1][
+                "metadata"
+            ]["history"]["notes"],
+            ["original", "live_change"],
+        )
+
+        self.assertTrue(
+            current["wine_discussion"]["heard"],
+        )
+
+        self.assertIs(
+            scene.god.bar_knowledge,
+            knowledge,
+        )
+
+        self.assertIs(
+            knowledge.wine_discussion,
+            remembered,
+        )
+
+        self.assertIs(
+            remembered.ideas,
+            ideas,
+        )
+
+        self.assertIs(
+            remembered.ideas[-1],
+            idea,
+        )
+
+        self.assertIs(
+            scene.serpent_lilith_good_drink_discussion,
+            discussion,
         )
 
     def test_discussion_knowledge_is_detached_copy(
