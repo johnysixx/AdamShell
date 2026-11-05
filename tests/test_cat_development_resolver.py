@@ -1,9 +1,14 @@
 import unittest
+from dataclasses import FrozenInstanceError
 
 from cats.cat_development_stage import CatDevelopmentStage
 from universe.universe import Universe
 from cats import Cats
-from cats.development_resolver import CatDevelopmentResolver
+from cats.development_resolver import (
+    CatDevelopmentResolver,
+    CatDevelopmentStageRule,
+    CatDevelopmentStageTransition,
+)
 from cats.reproduction import CatReproduction
 
 class CatDevelopmentResolverTests(unittest.TestCase):
@@ -15,6 +20,148 @@ class CatDevelopmentResolverTests(unittest.TestCase):
         self.kitten = self.cats.create_cat(name='kitten', color='black', fur_length='short', sex='female')
         self.resolver = CatDevelopmentResolver(self.universe)
         self.resolver.initialize_newborn(self.kitten, birth_day=10)
+
+    def test_stage_thresholds_use_immutable_objects(self):
+        rules = CatDevelopmentResolver.STAGES
+
+        self.assertIsInstance(rules, tuple)
+        self.assertEqual(len(rules), 6)
+
+        self.assertEqual(
+            tuple(
+                (rule.minimum_age_days, rule.stage)
+                for rule in rules
+            ),
+            (
+                (0, CatDevelopmentStage.NEWBORN),
+                (
+                    14,
+                    CatDevelopmentStage.SOCIALIZING_KITTEN,
+                ),
+                (
+                    49,
+                    CatDevelopmentStage.PLAYFUL_KITTEN,
+                ),
+                (
+                    98,
+                    CatDevelopmentStage.JUVENILE,
+                ),
+                (
+                    180,
+                    CatDevelopmentStage.ADOLESCENT,
+                ),
+                (
+                    365,
+                    CatDevelopmentStage.ADULT,
+                ),
+            ),
+        )
+
+        for rule in rules:
+            self.assertIsInstance(
+                rule,
+                CatDevelopmentStageRule,
+            )
+
+            for method in (
+                "get",
+                "keys",
+                "items",
+                "values",
+                "to_dict",
+            ):
+                self.assertFalse(
+                    hasattr(rule, method)
+                )
+
+            with self.assertRaises(TypeError):
+                _ = rule["stage"]
+
+        with self.assertRaises(FrozenInstanceError):
+            rules[0].minimum_age_days = 999
+
+    def test_stage_rule_rejects_invalid_values(self):
+        with self.assertRaises(TypeError):
+            CatDevelopmentStageRule(
+                "14",
+                CatDevelopmentStage.SOCIALIZING_KITTEN,
+            )
+
+        with self.assertRaises(TypeError):
+            CatDevelopmentStageRule(
+                True,
+                CatDevelopmentStage.NEWBORN,
+            )
+
+        with self.assertRaises(ValueError):
+            CatDevelopmentStageRule(
+                -1,
+                CatDevelopmentStage.NEWBORN,
+            )
+
+        with self.assertRaises(TypeError):
+            CatDevelopmentStageRule(
+                14,
+                "socializing_kitten",
+            )
+
+    def test_stage_rules_preserve_transition_history(self):
+        rules = CatDevelopmentResolver.STAGES
+
+        for index, rule in enumerate(rules):
+            self.assertIs(
+                self.resolver.stage_for_age(
+                    rule.minimum_age_days
+                ),
+                rule.stage,
+            )
+
+            if index > 0:
+                self.assertIs(
+                    self.resolver.stage_for_age(
+                        rule.minimum_age_days - 1
+                    ),
+                    rules[index - 1].stage,
+                )
+
+        self.assertIs(
+            self.resolver.stage_for_age(1000),
+            CatDevelopmentStage.ADULT,
+        )
+
+        first = self.resolver._collect_transitions(
+            previous_age=0,
+            new_age=365,
+        )
+
+        second = self.resolver._collect_transitions(
+            previous_age=0,
+            new_age=365,
+        )
+
+        self.assertEqual(
+            tuple(
+                (event.day, event.stage)
+                for event in first
+            ),
+            tuple(
+                (rule.minimum_age_days, rule.stage)
+                for rule in rules[1:]
+            ),
+        )
+
+        self.assertEqual(len(first), 5)
+
+        for event in first:
+            self.assertIsInstance(
+                event,
+                CatDevelopmentStageTransition,
+            )
+
+        self.assertIsNot(first[0], second[0])
+
+        with self.assertRaises(FrozenInstanceError):
+            first[0].day = 999
 
     def test_newborn_is_not_fertile(self):
         reproduction = self.kitten.reproduction

@@ -14,6 +14,32 @@ from cats.cat_parentage_state import (
 
 
 @dataclass(slots=True, frozen=True)
+class CatDevelopmentStageRule:
+    minimum_age_days: int
+    stage: CatDevelopmentStage
+
+    def __post_init__(self):
+        if type(self.minimum_age_days) is not int:
+            raise TypeError(
+                "Development threshold must be an integer."
+            )
+
+        if self.minimum_age_days < 0:
+            raise ValueError(
+                "Development threshold cannot be negative."
+            )
+
+        if not isinstance(
+            self.stage,
+            CatDevelopmentStage,
+        ):
+            raise TypeError(
+                "Development rule requires "
+                "CatDevelopmentStage."
+            )
+
+
+@dataclass(slots=True, frozen=True)
 class CatDevelopmentStageTransition:
 
     day: int
@@ -185,27 +211,27 @@ class CatDevelopmentResolver:
     ADULTHOOD_DAY = 365
 
     STAGES = (
-        (
+        CatDevelopmentStageRule(
             0,
             CatDevelopmentStage.NEWBORN,
         ),
-        (
+        CatDevelopmentStageRule(
             14,
             CatDevelopmentStage.SOCIALIZING_KITTEN,
         ),
-        (
+        CatDevelopmentStageRule(
             49,
             CatDevelopmentStage.PLAYFUL_KITTEN,
         ),
-        (
+        CatDevelopmentStageRule(
             98,
             CatDevelopmentStage.JUVENILE,
         ),
-        (
+        CatDevelopmentStageRule(
             180,
             CatDevelopmentStage.ADOLESCENT,
         ),
-        (
+        CatDevelopmentStageRule(
             365,
             CatDevelopmentStage.ADULT,
         ),
@@ -406,11 +432,9 @@ class CatDevelopmentResolver:
 
         stage = CatDevelopmentStage.NEWBORN
 
-        for minimum_age, candidate in (
-            cls.STAGES
-        ):
-            if age_days >= minimum_age:
-                stage = candidate
+        for rule in cls.STAGES:
+            if age_days >= rule.minimum_age_days:
+                stage = rule.stage
             else:
                 break
 
@@ -424,14 +448,13 @@ class CatDevelopmentResolver:
     ):
         return [
             CatDevelopmentStageTransition(
-                day=minimum_age,
-                stage=stage,
+                day=rule.minimum_age_days,
+                stage=rule.stage,
             )
-            for minimum_age, stage
-            in cls.STAGES
+            for rule in cls.STAGES
             if (
                 previous_age
-                < minimum_age
+                < rule.minimum_age_days
                 <= new_age
             )
         ]
