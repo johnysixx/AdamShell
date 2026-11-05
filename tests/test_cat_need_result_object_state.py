@@ -1,10 +1,12 @@
 import unittest
+from dataclasses import FrozenInstanceError
 
 from cats.cat_need_state import (
     CatNeedsAdvancedResult,
     CatNeedsSnapshot,
 )
 from cats.cat_need_system import (
+    CatNeedRate,
     CatNeedSystem,
 )
 from cats.cats import Cats
@@ -34,6 +36,91 @@ class CatNeedResultObjectStateTests(
                 color="black",
                 fur_length="short",
             )
+        )
+
+    def test_need_rates_are_typed_immutable_records(self):
+        rates = CatNeedSystem.RATES
+
+        self.assertIsInstance(rates, tuple)
+        self.assertEqual(
+            tuple(
+                (rate.need, rate.increment)
+                for rate in rates
+            ),
+            (
+                ("hunger", 0.025),
+                ("thirst", 0.035),
+                ("fatigue", 0.02),
+                ("safety", 0.0),
+                ("social", 0.018),
+                ("curiosity", 0.015),
+            ),
+        )
+
+        for rate in rates:
+            self.assertIsInstance(rate, CatNeedRate)
+            self.assertFalse(hasattr(rate, "get"))
+            self.assertFalse(hasattr(rate, "items"))
+
+            with self.assertRaises(TypeError):
+                _ = rate["increment"]
+
+    def test_need_rate_objects_reject_invalid_state(self):
+        rate = CatNeedRate(
+            need="hunger",
+            increment=0.025,
+        )
+
+        with self.assertRaises(FrozenInstanceError):
+            rate.increment = 9.0
+
+        with self.assertRaises(TypeError):
+            CatNeedRate("", 0.1)
+
+        with self.assertRaises(TypeError):
+            CatNeedRate("hunger", True)
+
+        with self.assertRaises(ValueError):
+            CatNeedRate("hunger", -0.1)
+
+        with self.assertRaises(ValueError):
+            CatNeedRate("hunger", float("nan"))
+
+    def test_need_rate_order_preserves_dominant_selection(self):
+        for rate in CatNeedSystem.RATES:
+            setattr(
+                self.cat.needs,
+                rate.need,
+                0.0,
+            )
+
+        result = CatNeedSystem.advance(self.cat)
+
+        for rate in CatNeedSystem.RATES:
+            self.assertAlmostEqual(
+                getattr(self.cat.needs, rate.need),
+                rate.increment,
+            )
+
+        self.assertEqual(result.dominant, "thirst")
+        self.assertEqual(
+            self.cat.needs.dominant,
+            "thirst",
+        )
+
+        for rate in CatNeedSystem.RATES:
+            setattr(
+                self.cat.needs,
+                rate.need,
+                1.0,
+            )
+
+        tied = CatNeedSystem.advance(self.cat)
+
+        self.assertEqual(tied.dominant, "hunger")
+        self.assertEqual(
+            self.cat.needs.dominant,
+            "hunger",
         )
 
     def assert_not_mapping(

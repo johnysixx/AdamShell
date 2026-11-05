@@ -1,25 +1,71 @@
+from dataclasses import dataclass
+from math import isfinite
+
 from cats.cat_need_state import (
     CatNeedsAdvancedResult,
     CatNeedsSnapshot,
 )
 
 
+@dataclass(frozen=True, slots=True)
+class CatNeedRate:
+    need: str
+    increment: float
+
+    def __post_init__(self):
+        if not isinstance(self.need, str) or not self.need:
+            raise TypeError("Need rate requires a name.")
+
+        if (
+            isinstance(self.increment, bool)
+            or not isinstance(self.increment, (int, float))
+        ):
+            raise TypeError("Need rate must be numeric.")
+
+        increment = float(self.increment)
+
+        if not isfinite(increment) or increment < 0:
+            raise ValueError(
+                "Need rate must be finite and nonnegative."
+            )
+
+        object.__setattr__(
+            self,
+            "increment",
+            increment,
+        )
+
+
 class CatNeedSystem:
-    RATES = {'hunger': 0.025, 'thirst': 0.035, 'fatigue': 0.02, 'safety': 0.0, 'social': 0.018, 'curiosity': 0.015}
+    RATES = (
+        CatNeedRate("hunger", 0.025),
+        CatNeedRate("thirst", 0.035),
+        CatNeedRate("fatigue", 0.02),
+        CatNeedRate("safety", 0.0),
+        CatNeedRate("social", 0.018),
+        CatNeedRate("curiosity", 0.015),
+    )
 
     @classmethod
     def advance(cls, cat):
         needs = cat.needs
         setattr(needs, 'tick', int(getattr(needs, 'tick', 0)) + 1)
-        for key, rate in cls.RATES.items():
-            setattr(needs, key, cls._clamp(float(getattr(needs, key, 0.0)) + rate))
+        for rate in cls.RATES:
+            setattr(
+                needs,
+                rate.need,
+                cls._clamp(
+                    float(getattr(needs, rate.need, 0.0))
+                    + rate.increment
+                ),
+            )
         dominant = max(
             cls.RATES,
-            key=lambda key: getattr(
+            key=lambda rate: getattr(
                 needs,
-                key,
+                rate.need,
             ),
-        )
+        ).need
 
         setattr(
             needs,
