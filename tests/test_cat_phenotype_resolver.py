@@ -1,4 +1,5 @@
 import unittest
+from dataclasses import FrozenInstanceError
 
 from cats.genotype import (
     CatAutosomalGenotype,
@@ -9,7 +10,8 @@ from cats.cat_birth_objects import (
     CatPhenotypeResult,
 )
 from cats.phenotype_resolver import (
-    CatPhenotypeResolver
+    CatDilutionRule,
+    CatPhenotypeResolver,
 )
 
 
@@ -115,6 +117,129 @@ class CatPhenotypeResolverTests(
             _ = result[
                 "profile"
             ]
+
+    def test_dilution_rules_are_immutable_objects(self):
+        rules = CatPhenotypeResolver.DILUTION_RULES
+
+        self.assertIsInstance(rules, tuple)
+
+        self.assertEqual(
+            tuple(
+                (rule.base_color, rule.diluted_color)
+                for rule in rules
+            ),
+            (
+                ("black", "blue"),
+                ("chocolate", "lilac"),
+                ("cinnamon", "fawn"),
+                ("orange", "cream"),
+                (
+                    "tortoiseshell",
+                    "blue_tortoiseshell",
+                ),
+            ),
+        )
+
+        for rule in rules:
+            self.assertIsInstance(
+                rule,
+                CatDilutionRule,
+            )
+
+            for method in (
+                "get",
+                "keys",
+                "items",
+                "values",
+                "to_dict",
+            ):
+                self.assertFalse(
+                    hasattr(rule, method)
+                )
+
+            with self.assertRaises(TypeError):
+                _ = rule["base_color"]
+
+        with self.assertRaises(FrozenInstanceError):
+            rules[0].diluted_color = "changed"
+
+    def test_dilution_rule_validation(self):
+        with self.assertRaises(TypeError):
+            CatDilutionRule(
+                "",
+                "blue",
+            )
+
+        with self.assertRaises(TypeError):
+            CatDilutionRule(
+                "black",
+                "",
+            )
+
+        with self.assertRaises(TypeError):
+            CatDilutionRule(
+                "black",
+                None,
+            )
+
+        with self.assertRaises(TypeError):
+            CatDilutionRule(
+                123,
+                "blue",
+            )
+
+    def test_typed_dilution_preserves_phenotypes(self):
+        resolver = CatPhenotypeResolver
+
+        for rule in resolver.DILUTION_RULES:
+            with self.subTest(color=rule.base_color):
+                self.assertEqual(
+                    resolver._diluted_color(
+                        rule.base_color
+                    ),
+                    rule.diluted_color,
+                )
+
+        self.assertEqual(
+            resolver._diluted_color("unknown"),
+            "unknown",
+        )
+
+        orange = self._genotype(
+            sex="male",
+            orange_locus=("O",),
+        )
+
+        diluted_orange = self._genotype(
+            sex="male",
+            orange_locus=("O",),
+            dilution=("d", "d"),
+        )
+
+        self.assertEqual(
+            resolver.resolve(orange).profile.color,
+            "orange",
+        )
+
+        self.assertEqual(
+            resolver.resolve(
+                diluted_orange
+            ).profile.color,
+            "cream",
+        )
+
+        diluted_tortoiseshell = self._genotype(
+            sex="female",
+            orange_locus=("O", "o"),
+            dilution=("d", "d"),
+        )
+
+        self.assertEqual(
+            resolver.resolve(
+                diluted_tortoiseshell
+            ).profile.color,
+            "blue_tortoiseshell",
+        )
 
     def test_dilute_black_cat_is_blue(self):
         genotype = self._genotype(

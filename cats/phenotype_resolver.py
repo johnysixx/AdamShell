@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 from cats.genotype import CatGenotype
 from cats.cat_birth_objects import (
     CatBirthProfile,
@@ -5,15 +7,37 @@ from cats.cat_birth_objects import (
 )
 
 
+@dataclass(frozen=True, slots=True)
+class CatDilutionRule:
+    base_color: str
+    diluted_color: str
+
+    def __post_init__(self):
+        for field_name in (
+            "base_color",
+            "diluted_color",
+        ):
+            value = getattr(self, field_name)
+
+            if not isinstance(value, str) or not value.strip():
+                raise TypeError(
+                    "Cat dilution rule requires "
+                    "nonempty color names."
+                )
+
+
 class CatPhenotypeResolver:
 
-    DILUTED_COLORS = {
-        "black": "blue",
-        "chocolate": "lilac",
-        "cinnamon": "fawn",
-        "orange": "cream",
-        "tortoiseshell": "blue_tortoiseshell"
-    }
+    DILUTION_RULES = (
+        CatDilutionRule("black", "blue"),
+        CatDilutionRule("chocolate", "lilac"),
+        CatDilutionRule("cinnamon", "fawn"),
+        CatDilutionRule("orange", "cream"),
+        CatDilutionRule(
+            "tortoiseshell",
+            "blue_tortoiseshell",
+        ),
+    )
 
     @classmethod
     def resolve(
@@ -50,10 +74,7 @@ class CatPhenotypeResolver:
         )
 
         color = (
-            cls.DILUTED_COLORS.get(
-                base_color,
-                base_color
-            )
+            cls._diluted_color(base_color)
             if diluted
             else base_color
         )
@@ -131,6 +152,17 @@ class CatPhenotypeResolver:
             colorpoint=colorpoint,
             genotype=genotype,
         )
+
+    @classmethod
+    def _diluted_color(
+        cls,
+        base_color,
+    ):
+        for rule in cls.DILUTION_RULES:
+            if rule.base_color == base_color:
+                return rule.diluted_color
+
+        return base_color
 
     @classmethod
     def _resolve_base_color(
