@@ -16,6 +16,105 @@ class FixedVialRng:
 
 class DiceVialObjectStateTests(unittest.TestCase):
 
+    def test_public_state_is_computed_not_stored(self):
+        vial = DiceVial()
+
+        self.assertNotIn(
+            "public_state",
+            vars(vial),
+        )
+
+        snapshot = vial.public_state
+
+        self.assertEqual(
+            snapshot["container"],
+            vial.container.to_dict(),
+        )
+        self.assertEqual(
+            snapshot["medium"],
+            vial.medium.to_dict(),
+        )
+        self.assertEqual(
+            snapshot["dice"],
+            vial.dice.to_dict(),
+        )
+
+        self.assertEqual(
+            snapshot["display_state"],
+            "displayed",
+        )
+        self.assertEqual(
+            snapshot["visibility_scope"],
+            "inside_bar_only",
+        )
+
+    def test_public_state_snapshots_are_detached(self):
+        vial = DiceVial()
+
+        first = vial.public_state
+        second = vial.public_state
+
+        first["container"]["state"] = "changed"
+        first["medium"]["state"] = "changed"
+        first["dice"]["state"] = "changed"
+
+        self.assertEqual(
+            second["container"]["state"],
+            "sealed",
+        )
+        self.assertEqual(
+            second["medium"]["state"],
+            "shimmering",
+        )
+        self.assertEqual(
+            second["dice"]["state"],
+            "floating",
+        )
+
+        self.assertEqual(
+            vial.container.state,
+            "sealed",
+        )
+        self.assertEqual(
+            vial.medium.state,
+            "shimmering",
+        )
+        self.assertEqual(
+            vial.dice.state,
+            "floating",
+        )
+
+    def test_public_state_reflects_live_objects(self):
+        vial = DiceVial()
+
+        before = vial.public_state
+
+        vial.container.state = "opened"
+
+        after = vial.public_state
+
+        self.assertEqual(
+            before["container"]["state"],
+            "sealed",
+        )
+        self.assertEqual(
+            after["container"]["state"],
+            "opened",
+        )
+
+        self.assertIsNot(
+            before["container"],
+            after["container"],
+        )
+
+        event = vial.roll(rng=FixedVialRng())
+
+        self.assertIs(
+            event,
+            vial.secret_event,
+        )
+        self.assertEqual(event.roll, 7)
+
     def test_roll_returns_stored_event_object(self):
         vial = DiceVial()
 

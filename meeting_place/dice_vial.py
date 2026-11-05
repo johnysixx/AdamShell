@@ -83,17 +83,6 @@ class DiceVial:
             state="floating"
         )
 
-        self.public_state = {
-            "name": self.name,
-            "type": self.type,
-            "location": self.location,
-            "container": self.container.to_dict(),
-            "medium": self.medium.to_dict(),
-            "dice": self.dice.to_dict(),
-            "display_state": "displayed",
-            "visibility_scope": "inside_bar_only"
-        }
-
         self._secret_roll = None
         self._secret_event = None
 
@@ -101,6 +90,19 @@ class DiceVial:
         UniverseLogger.boot(
             "D20 FLOATS IN GLOWING OILY LIQUID"
         )
+
+    @property
+    def public_state(self):
+        return {
+            "name": self.name,
+            "type": self.type,
+            "location": self.location,
+            "container": self.container.to_dict(),
+            "medium": self.medium.to_dict(),
+            "dice": self.dice.to_dict(),
+            "display_state": "displayed",
+            "visibility_scope": "inside_bar_only",
+        }
 
     def roll(self, rng=None):
         rng = rng or random
