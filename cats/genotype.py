@@ -62,7 +62,7 @@ class CatAutosomalAlleleRule:
             )
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, frozen=True)
 class CatParentalContribution:
     from_mother: str | None
     from_father: str | None
@@ -138,7 +138,7 @@ class CatAutosomalGenotype:
                 )
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, frozen=True)
 class CatInheritanceRecord:
     sex_chromosomes: CatParentalContribution
     orange_locus: CatParentalContribution

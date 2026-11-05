@@ -432,6 +432,202 @@ class CatGenotypeObjectStateTests(unittest.TestCase):
             "invalid_genotype",
         )
 
+    def test_parental_contribution_is_immutable(self):
+        contribution = CatParentalContribution(
+            from_mother="B",
+            from_father="b",
+        )
+
+        self.assertEqual(
+            contribution.from_mother,
+            "B",
+        )
+
+        self.assertEqual(
+            contribution.from_father,
+            "b",
+        )
+
+        for method in (
+            "get",
+            "keys",
+            "items",
+            "values",
+            "to_dict",
+        ):
+            self.assertFalse(
+                hasattr(contribution, method)
+            )
+
+        with self.assertRaises(TypeError):
+            _ = contribution["from_mother"]
+
+        with self.assertRaises(FrozenInstanceError):
+            contribution.from_mother = "changed"
+
+        with self.assertRaises(FrozenInstanceError):
+            contribution.from_father = "changed"
+
+        self.assertFalse(
+            hasattr(contribution, "__dict__")
+        )
+
+    def test_inheritance_history_is_deeply_immutable(self):
+        kitten = CatGenotype.inherit(
+            self.mother,
+            self.father,
+            rng=FirstChoiceRng(),
+        )
+
+        history = kitten.inheritance_record
+
+        self.assertIsInstance(
+            history,
+            CatInheritanceRecord,
+        )
+
+        contributions = (
+            history.sex_chromosomes,
+            history.orange_locus,
+            history.autosomal_loci.black,
+            history.autosomal_loci.dilution,
+            history.autosomal_loci.agouti,
+            history.autosomal_loci.white_spotting,
+            history.autosomal_loci.colorpoint,
+            history.autosomal_loci.longhair,
+        )
+
+        for contribution in contributions:
+            self.assertIsInstance(
+                contribution,
+                CatParentalContribution,
+            )
+
+            with self.assertRaises(FrozenInstanceError):
+                contribution.from_mother = "forged"
+
+        with self.assertRaises(FrozenInstanceError):
+            history.sex_chromosomes = None
+
+        with self.assertRaises(FrozenInstanceError):
+            history.orange_locus = None
+
+        with self.assertRaises(FrozenInstanceError):
+            history.autosomal_loci.black = None
+
+        self.assertFalse(
+            hasattr(history, "__dict__")
+        )
+
+        self.assertFalse(
+            hasattr(history, "to_dict")
+        )
+
+        with self.assertRaises(TypeError):
+            _ = history["orange_locus"]
+
+        replacement = replace(
+            history.orange_locus,
+            from_mother="o",
+        )
+
+        self.assertIsNot(
+            replacement,
+            history.orange_locus,
+        )
+
+        self.assertEqual(
+            history.orange_locus.from_mother,
+            "O",
+        )
+
+        self.assertEqual(
+            replacement.from_mother,
+            "o",
+        )
+
+    def test_frozen_history_preserves_inheritance_values(self):
+        first = CatGenotype.inherit(
+            self.mother,
+            self.father,
+            rng=FirstChoiceRng(),
+        )
+
+        second = CatGenotype.inherit(
+            self.mother,
+            self.father,
+            rng=FirstChoiceRng(),
+        )
+
+        self.assertEqual(
+            first.sex,
+            "female",
+        )
+
+        self.assertEqual(
+            first.orange_locus,
+            ("O", "o"),
+        )
+
+        self.assertEqual(
+            first.inheritance_record
+            .sex_chromosomes.from_mother,
+            "X",
+        )
+
+        self.assertEqual(
+            first.inheritance_record
+            .sex_chromosomes.from_father,
+            "X",
+        )
+
+        self.assertEqual(
+            first.inheritance_record
+            .orange_locus.from_mother,
+            "O",
+        )
+
+        self.assertEqual(
+            first.inheritance_record
+            .orange_locus.from_father,
+            "o",
+        )
+
+        self.assertEqual(
+            first.inheritance_record
+            .autosomal_loci.black.from_mother,
+            "B",
+        )
+
+        self.assertEqual(
+            first.inheritance_record
+            .autosomal_loci.black.from_father,
+            "B",
+        )
+
+        self.assertEqual(
+            first.inheritance_record,
+            second.inheritance_record,
+        )
+
+        self.assertIsNot(
+            first.inheritance_record,
+            second.inheritance_record,
+        )
+
+        self.assertIsNot(
+            first.inheritance_record.orange_locus,
+            second.inheritance_record.orange_locus,
+        )
+
+        self.assertTrue(
+            CatGenotype.validate(first)
+        )
+
+        self.assertTrue(
+            CatGenotype.validate(second)
+        )
+
     def test_genetics_domain_objects_have_no_serialization_api(self):
         kitten = CatGenotype.inherit(
             self.mother,
