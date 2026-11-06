@@ -1,4 +1,5 @@
 import unittest
+from dataclasses import FrozenInstanceError, replace
 
 from universe.universe import Universe
 from cats.cats import Cats
@@ -187,6 +188,102 @@ class CatNavigationDecisionObjectStateTests(
                     rng=FixedRng(0.25),
                 )
             )
+
+
+
+    def test_decision_state_is_frozen(self):
+        state = CatNavigationDecisionState(
+            route_id="route_test",
+            decision_roll=0.25,
+            acceptance_chance=0.7,
+            decision=CatNavigationDecision.ACCEPTED,
+            decided=True,
+        )
+
+        with self.assertRaises(FrozenInstanceError):
+            state.decision_roll = 0.9
+
+        with self.assertRaises(FrozenInstanceError):
+            state.decision = CatNavigationDecision.DECLINED
+
+        with self.assertRaises(FrozenInstanceError):
+            state.decided = False
+
+    def test_replacement_preserves_original(self):
+        original = CatNavigationDecisionState(
+            route_id="route_test",
+            decision_roll=0.25,
+            decision=CatNavigationDecision.ACCEPTED,
+            decided=True,
+        )
+
+        updated = replace(
+            original,
+            decision_roll=0.95,
+            decision=CatNavigationDecision.DECLINED,
+        )
+
+        self.assertIsNot(updated, original)
+        self.assertEqual(original.decision_roll, 0.25)
+        self.assertEqual(updated.decision_roll, 0.95)
+
+        self.assertIs(
+            original.decision,
+            CatNavigationDecision.ACCEPTED,
+        )
+
+        self.assertIs(
+            updated.decision,
+            CatNavigationDecision.DECLINED,
+        )
+
+    def test_decider_stores_frozen_snapshot(self):
+        self.cats.decide_navigation_offer(
+            self.cat,
+            rng=FixedRng(0.25),
+            acceptance_chance=0.7,
+        )
+
+        state = self.cat.last_navigation_decision
+
+        self.assertIsInstance(
+            state,
+            CatNavigationDecisionState,
+        )
+
+        with self.assertRaises(FrozenInstanceError):
+            state.acceptance_chance = 0.1
+
+    def test_repeated_decisions_preserve_history_value(self):
+        self.cats.decide_navigation_offer(
+            self.cat,
+            rng=FixedRng(0.25),
+            acceptance_chance=0.7,
+        )
+
+        first = self.cat.last_navigation_decision
+
+        self.cats.decide_navigation_offer(
+            self.cat,
+            rng=FixedRng(0.95),
+            acceptance_chance=0.7,
+        )
+
+        second = self.cat.last_navigation_decision
+
+        self.assertIsNot(first, second)
+        self.assertEqual(first.decision_roll, 0.25)
+        self.assertEqual(second.decision_roll, 0.95)
+
+        self.assertIs(
+            first.decision,
+            CatNavigationDecision.ACCEPTED,
+        )
+
+        self.assertIs(
+            second.decision,
+            CatNavigationDecision.DECLINED,
+        )
 
 
 if __name__ == '__main__':

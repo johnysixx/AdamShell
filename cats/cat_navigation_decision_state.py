@@ -5,7 +5,7 @@ from cats.cat_navigation_decision import (
 )
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, frozen=True)
 class CatNavigationDecisionState:
     route_id: str | None = None
     destination: object = None
