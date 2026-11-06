@@ -4,12 +4,14 @@ import random
 import unittest
 from contextlib import redirect_stdout
 from dataclasses import replace
+from unittest.mock import patch
 
 from core.word.chronicle import Chronicle
 from core.word.word import Word
 from universe.universe import Universe
 from universe.quantum_state import UniverseQuantumState
 from universe.universe_statistics import UniverseStatistics
+from universe.logger import UniverseLogger
 
 
 SYMBOLIC_FIELDS = (
@@ -711,6 +713,217 @@ class AtomicSymbolicQuantumReplayTests(unittest.TestCase):
             history,
         )
 
+        self.assertEqual(
+            self.fingerprint(target),
+            self.fingerprint(self.source),
+        )
+
+        self.assertEqual(
+            target.quantum_lifecycle_timeline(),
+            self.source.quantum_lifecycle_timeline(),
+        )
+
+
+
+    def test_invalid_quantum_history_emits_no_symbolic_logs(self):
+        target = self.make_target()
+        before = self.fingerprint(target)
+
+        clocks = tuple(self.source.quantum_clock_events)
+
+        with patch.object(
+            UniverseLogger,
+            "event",
+        ) as events:
+            with self.assertRaises(ValueError):
+                self.replay(
+                    target,
+                    clock_events=(clocks[0], clocks[0]),
+                )
+
+        events.assert_not_called()
+
+        self.assertEqual(
+            self.fingerprint(target),
+            before,
+        )
+
+    def test_failed_publication_emits_no_symbolic_logs(self):
+        class FaultyHistory(list):
+            def extend(self, values):
+                values = tuple(values)
+
+                if values:
+                    super().append(values[0])
+
+                raise RuntimeError(
+                    "A15 publication failure"
+                )
+
+        target = self.make_target()
+        history = FaultyHistory()
+        target.quantum_clock_events = history
+
+        before = self.fingerprint(target)
+
+        with patch.object(
+            UniverseLogger,
+            "event",
+        ) as events:
+            with self.assertRaisesRegex(
+                RuntimeError,
+                "A15 publication failure",
+            ):
+                self.replay(target)
+
+        events.assert_not_called()
+
+        self.assertEqual(
+            self.fingerprint(target),
+            before,
+        )
+
+        self.assertIs(
+            target.quantum_clock_events,
+            history,
+        )
+
+    def test_interrupted_publication_emits_no_symbolic_logs(self):
+        class InterruptedBoxes(list):
+            def extend(self, values):
+                values = tuple(values)
+
+                if values:
+                    super().append(values[0])
+
+                raise KeyboardInterrupt(
+                    "A15 interruption"
+                )
+
+        target = self.make_target()
+        boxes = InterruptedBoxes()
+        target.quantum_boxes = boxes
+
+        before = self.fingerprint(target)
+
+        with patch.object(
+            UniverseLogger,
+            "event",
+        ) as events:
+            with self.assertRaisesRegex(
+                KeyboardInterrupt,
+                "A15 interruption",
+            ):
+                self.replay(target)
+
+        events.assert_not_called()
+
+        self.assertEqual(
+            self.fingerprint(target),
+            before,
+        )
+
+        self.assertIs(target.quantum_boxes, boxes)
+
+    def test_success_logs_only_after_runtime_commit(self):
+        target = self.make_target()
+        observed = []
+
+        def observe(message):
+            observed.append(
+                (
+                    message,
+                    target.quantum_state.tick_count,
+                    len(target.quantum_boxes),
+                    len(target.quantum_events),
+                    len(target.quantum_clock_events),
+                    getattr(target, "light", None),
+                    getattr(target, "space", None),
+                )
+            )
+
+        with patch.object(
+            UniverseLogger,
+            "event",
+            side_effect=observe,
+        ):
+            self.replay(target)
+
+        self.assertEqual(
+            observed,
+            [
+                (
+                    "Light is created.",
+                    2, 1, 1, 2, True, True,
+                ),
+                (
+                    "Space is separated from chaos.",
+                    2, 1, 1, 2, True, True,
+                ),
+            ],
+        )
+
+        self.assertEqual(
+            self.fingerprint(target),
+            self.fingerprint(self.source),
+        )
+
+    def test_normal_chronicle_replay_still_logs_immediately(self):
+        target = self.make_target()
+        observed = []
+
+        def observe(message):
+            observed.append(
+                (
+                    message,
+                    getattr(target, "light", None),
+                    getattr(target, "space", None),
+                )
+            )
+
+        with patch.object(
+            UniverseLogger,
+            "event",
+            side_effect=observe,
+        ):
+            self.chronicle.replay(target)
+
+        self.assertEqual(
+            observed,
+            [
+                ("Light is created.", True, None),
+                (
+                    "Space is separated from chaos.",
+                    True,
+                    True,
+                ),
+            ],
+        )
+
+        self.assertTrue(target.light)
+        self.assertTrue(target.space)
+        self.assertEqual(target.quantum_boxes, [])
+
+    def test_logger_failure_happens_after_runtime_commit(self):
+        target = self.make_target()
+
+        with patch.object(
+            UniverseLogger,
+            "event",
+            side_effect=RuntimeError(
+                "A15 logger output failure"
+            ),
+        ) as events:
+            with self.assertRaisesRegex(
+                RuntimeError,
+                "A15 logger output failure",
+            ):
+                self.replay(target)
+
+        self.assertEqual(events.call_count, 1)
+
+        # A logging failure is outside the runtime
+        # transaction: the state is already committed.
         self.assertEqual(
             self.fingerprint(target),
             self.fingerprint(self.source),

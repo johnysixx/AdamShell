@@ -7,6 +7,7 @@ from universe.quantum_history_replayer import (
     UniverseQuantumHistoryReplayer,
 )
 from universe.quantum_state import UniverseQuantumState
+from universe.logger import UniverseLogger
 from universe.universe_statistics import UniverseStatistics
 
 
@@ -33,6 +34,7 @@ class _SymbolicReplayStage:
         # Reuse the canonical Universe.hear implementation
         # without constructing another Universe.
         self._hear = type(universe).hear
+        self.pending_events = []
 
         for name in _SYMBOLIC_FIELDS:
             if hasattr(universe, name):
@@ -43,7 +45,11 @@ class _SymbolicReplayStage:
                 )
 
     def hear(self, word):
-        self._hear(self, word)
+        self._hear(
+            self,
+            word,
+            _event_sink=self.pending_events.append,
+        )
 
 
 @dataclass(slots=True)
@@ -60,8 +66,9 @@ class AtomicSymbolicQuantumReplayer:
     Atomically prepare symbolic and quantum runtime replay.
 
     Runtime state is published only after both staged
-    reconstructions succeed. Global logging is outside
-    this transaction boundary.
+    reconstructions succeed. Symbolic event messages are
+    buffered and emitted after successful runtime commit.
+    Logger output itself is outside the rollback boundary.
     """
 
     @staticmethod
@@ -304,5 +311,12 @@ class AtomicSymbolicQuantumReplayer:
                     )
 
             raise
+
+        # Commit has completed. Do not emit symbolic events
+        # during preparation or during a rollback-capable
+        # publication. External logger failures happen
+        # after runtime commit and do not undo that commit.
+        for message in symbolic.pending_events:
+            UniverseLogger.event(message)
 
         return tuple(universe.quantum_boxes)

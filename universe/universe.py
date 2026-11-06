@@ -239,21 +239,29 @@ class Universe:
 
         return result
 
-    def hear(self, word):
+    def hear(self, word, *, _event_sink=None):
+        # Normal calls emit immediately. Transactional replay
+        # can collect the same canonical events until commit.
+        emit = (
+            UniverseLogger.event
+            if _event_sink is None
+            else _event_sink
+        )
+
         if word.name == 'LetThereBeLight':
             self.light = True
-            UniverseLogger.event('Light is created.')
+            emit('Light is created.')
         elif word.name == 'LetThereBeSpace':
             self.space = True
             self.chaos = False
             self.order = True
-            UniverseLogger.event('Space is separated from chaos.')
+            emit('Space is separated from chaos.')
         elif word.name == 'LetThereBeDeep':
             self.deep = True
-            UniverseLogger.event('The Deep emerges from void.')
+            emit('The Deep emerges from void.')
         elif word.name == 'RewriteRule':
             self.rules_modified = True
-            UniverseLogger.event('Reality rules are evolving...')
+            emit('Reality rules are evolving...')
 
     def register_conflicts(self, conflicts):
         if not conflicts:
