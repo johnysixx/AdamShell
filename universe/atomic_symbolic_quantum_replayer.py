@@ -99,6 +99,43 @@ class AtomicSymbolicQuantumReplayer:
                 "Combined replay requires UniverseStatistics."
             )
 
+        # The target must be an unused quantum lifecycle.
+        # Validating only the detached replay stage would
+        # miss existing target boxes and event streams.
+        collections = (
+            universe.quantum_boxes,
+            universe.quantum_events,
+            universe.quantum_clock_events,
+        )
+
+        if not all(
+            isinstance(collection, list)
+            for collection in collections
+        ):
+            raise TypeError(
+                "Combined replay requires list registries."
+            )
+
+        if (
+            universe.quantum_boxes
+            or universe.statistics.total_quantum_boxes_created
+            or universe.statistics.total_quantum_collapses
+            or universe.statistics.total_quantum_boxes_disappeared
+        ):
+            raise ValueError(
+                "Combined replay requires an empty "
+                "target box lifecycle."
+            )
+
+        if (
+            universe.quantum_events
+            or universe.quantum_clock_events
+        ):
+            raise ValueError(
+                "Combined replay requires empty "
+                "target history streams."
+            )
+
         # Freeze and validate the symbolic input before
         # executing either part of the transaction.
         words = tuple(chronicle.all())
@@ -136,43 +173,133 @@ class AtomicSymbolicQuantumReplayer:
             preserve_history=preserve_history,
         )
 
-        # All validation and reconstruction succeeded.
-        # Publish into existing canonical runtime objects.
-        universe.quantum_boxes.extend(
-            quantum.quantum_boxes
+        # Capture the target's original values before
+        # publishing anything. Do not serialize object
+        # graphs or replace canonical runtime containers.
+        box_before = tuple(universe.quantum_boxes)
+        box_events_before = tuple(universe.quantum_events)
+        clock_events_before = tuple(
+            universe.quantum_clock_events
         )
 
-        for name in _QUANTUM_STATISTICS:
-            setattr(
-                universe.statistics,
+        statistics_before = tuple(
+            (
                 name,
-                getattr(quantum.statistics, name),
+                getattr(universe.statistics, name),
             )
+            for name in _QUANTUM_STATISTICS
+        )
 
-        for item in fields(UniverseQuantumState):
-            setattr(
-                universe.quantum_state,
+        clock_before = tuple(
+            (
                 item.name,
                 getattr(
-                    quantum.quantum_state,
+                    universe.quantum_state,
                     item.name,
                 ),
             )
+            for item in fields(UniverseQuantumState)
+        )
 
-        if preserve_history:
-            universe.quantum_events.extend(
-                quantum.quantum_events
+        symbolic_before = tuple(
+            (
+                name,
+                name in vars(universe),
+                vars(universe).get(name),
             )
-            universe.quantum_clock_events.extend(
-                quantum.quantum_clock_events
+            for name in _SYMBOLIC_FIELDS
+        )
+
+        try:
+            # Publish into existing canonical objects.
+            universe.quantum_boxes.extend(
+                quantum.quantum_boxes
             )
 
-        for name in _SYMBOLIC_FIELDS:
-            if hasattr(symbolic, name):
+            for name in _QUANTUM_STATISTICS:
                 setattr(
-                    universe,
+                    universe.statistics,
                     name,
-                    getattr(symbolic, name),
+                    getattr(quantum.statistics, name),
                 )
+
+            for item in fields(UniverseQuantumState):
+                setattr(
+                    universe.quantum_state,
+                    item.name,
+                    getattr(
+                        quantum.quantum_state,
+                        item.name,
+                    ),
+                )
+
+            if preserve_history:
+                universe.quantum_events.extend(
+                    quantum.quantum_events
+                )
+                universe.quantum_clock_events.extend(
+                    quantum.quantum_clock_events
+                )
+
+            for name in _SYMBOLIC_FIELDS:
+                if hasattr(symbolic, name):
+                    setattr(
+                        universe,
+                        name,
+                        getattr(symbolic, name),
+                    )
+
+        except Exception:
+            # Bypass overridden list.extend methods that
+            # may have appended items before raising.
+            # Keep the original list instances intact.
+            list.__setitem__(
+                universe.quantum_boxes,
+                slice(None),
+                box_before,
+            )
+
+            list.__setitem__(
+                universe.quantum_events,
+                slice(None),
+                box_events_before,
+            )
+
+            list.__setitem__(
+                universe.quantum_clock_events,
+                slice(None),
+                clock_events_before,
+            )
+
+            # Bypass injected __setattr__ failures while
+            # restoring values on canonical state objects.
+            for name, value in statistics_before:
+                object.__setattr__(
+                    universe.statistics,
+                    name,
+                    value,
+                )
+
+            for name, value in clock_before:
+                object.__setattr__(
+                    universe.quantum_state,
+                    name,
+                    value,
+                )
+
+            for name, existed, value in symbolic_before:
+                if existed:
+                    object.__setattr__(
+                        universe,
+                        name,
+                        value,
+                    )
+                elif name in vars(universe):
+                    object.__delattr__(
+                        universe,
+                        name,
+                    )
+
+            raise
 
         return tuple(universe.quantum_boxes)
