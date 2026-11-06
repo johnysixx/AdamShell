@@ -1,4 +1,5 @@
 import unittest
+from dataclasses import FrozenInstanceError, replace
 from universe.aroma_composition import AromaComposition
 
 from universe.universe import Universe
@@ -162,6 +163,100 @@ class CatAromaRecognitionObjectTests(
             recognition.similarity,
             winner.similarity,
         )
+
+
+
+    def test_aroma_match_is_immutable(self):
+        match = CatAromaMatch(
+            identity="cat:pazuzu",
+            similarity=0.9,
+            confidence=0.8,
+            encounters=3,
+        )
+
+        for name, value in (
+            ("identity", "other"),
+            ("similarity", 0.1),
+            ("confidence", 0.2),
+            ("encounters", 9),
+        ):
+            with self.subTest(field=name):
+                with self.assertRaises(FrozenInstanceError):
+                    setattr(match, name, value)
+
+    def test_aroma_match_replacement_preserves_original(self):
+        original = CatAromaMatch(
+            identity="cat:pazuzu",
+            similarity=0.9,
+            confidence=0.8,
+            encounters=3,
+        )
+
+        updated = replace(
+            original,
+            confidence=0.95,
+            encounters=4,
+        )
+
+        self.assertIsNot(updated, original)
+        self.assertEqual(original.confidence, 0.8)
+        self.assertEqual(original.encounters, 3)
+        self.assertEqual(updated.confidence, 0.95)
+        self.assertEqual(updated.encounters, 4)
+
+    def test_recognition_produces_immutable_match(self):
+        components = AromaComposition.from_pairs(
+            ("cat", 1.0),
+            ("fur", 0.8),
+        )
+
+        CatKnowledge.learn_aroma(
+            cat=self.cat,
+            identity="cat:pazuzu",
+            components=components,
+            source="test",
+        )
+
+        recognition = CatKnowledge.recognize_aroma(
+            self.cat,
+            components,
+        )
+
+        self.assertTrue(recognition.recognized)
+        self.assertTrue(recognition.matches)
+
+        match = recognition.matches[0]
+
+        self.assertIsInstance(match, CatAromaMatch)
+        self.assertEqual(match.identity, "cat:pazuzu")
+
+        with self.assertRaises(FrozenInstanceError):
+            match.similarity = 0.0
+
+        self.assertEqual(
+            recognition.similarity,
+            match.similarity,
+        )
+
+    def test_aroma_match_has_value_equality(self):
+        first = CatAromaMatch(
+            identity="cat:pazuzu",
+            similarity=0.9,
+            confidence=0.8,
+            encounters=3,
+        )
+
+        second = CatAromaMatch(
+            identity="cat:pazuzu",
+            similarity=0.9,
+            confidence=0.8,
+            encounters=3,
+        )
+
+        self.assertIsNot(first, second)
+        self.assertEqual(first, second)
+        self.assertEqual(hash(first), hash(second))
+        self.assertEqual(len({first, second}), 1)
 
 
 if __name__ == "__main__":

@@ -10,7 +10,7 @@ from universe.aroma_composition import (
 )
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, frozen=True)
 class CatAromaMatch:
 
     identity: str
