@@ -148,17 +148,61 @@ class AllEntitiesAreObjectsTests(
                 cat
             )
 
+        # Canonical entities must remain domain objects.
         idea_entities = (
-            universe.world[
-                "idea_entities"
-            ][
-                "idea_entities"
-            ]
+            universe.idea_entities.idea_entities
         )
 
         for entity in idea_entities:
             self.assert_object_entity(
                 entity
+            )
+
+        # The world projection is a detached public index,
+        # not the canonical registry of runtime objects.
+        public_entries = universe.world[
+            "idea_entities"
+        ]["idea_entities"]
+
+        state_entries = universe.world[
+            "idea_entities"
+        ]["idea_entities_state"]["idea_entities"]
+
+        self.assertEqual(
+            len(public_entries),
+            len(idea_entities),
+        )
+
+        self.assertEqual(
+            public_entries,
+            state_entries,
+        )
+
+        for entity, entry in zip(
+            idea_entities,
+            public_entries,
+            strict=True,
+        ):
+            self.assertIsInstance(entry, dict)
+            self.assertIsNot(entity, entry)
+            self.assertEqual(entry["name"], entity.name)
+            self.assertEqual(entry["type"], entity.type)
+            self.assertEqual(entry["role"], entity.role)
+
+        # Mutating the public projection cannot change
+        # the canonical bootstrap-created entity.
+        if public_entries:
+            original_name = idea_entities[0].name
+            public_entries[0]["name"] = "modified_export"
+
+            self.assertEqual(
+                idea_entities[0].name,
+                original_name,
+            )
+
+            self.assertEqual(
+                state_entries[0]["name"],
+                original_name,
             )
 
         meeting_place = layers.get(

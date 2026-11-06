@@ -182,11 +182,26 @@ class IdeaEntitiesObjectStateTests(unittest.TestCase):
             ],
             state.idea_entities,
         )
+        expected_summary = {
+            "name": "serpent",
+            "type": "idea_entity",
+            "role": "primordial_idea_entity",
+            "state": "created",
+            "active": True,
+            "native_world": "idea_universe",
+            "existence_pct": 100.0,
+        }
+
         self.assertEqual(
             universe.world["idea_entities"][
                 "idea_entities_state"
             ]["idea_entities"],
-            [entity],
+            [expected_summary],
+        )
+
+        self.assertEqual(
+            universe.world["idea_entities"]["idea_entities"],
+            [expected_summary],
         )
 
     def test_events_and_tick_mutate_same_state_object(self):
@@ -933,6 +948,166 @@ class IdeaEntitiesObjectStateTests(unittest.TestCase):
         self.assertEqual(
             exported["idea_entities_state"]["event_history"][-1],
             event.to_dict(),
+        )
+
+
+
+    def test_entity_projection_contains_no_live_entity(self):
+        universe, layer = self._layer()
+
+        entity = layer.create_idea_entity(
+            name="a06_entity",
+            role="primordial_idea_entity",
+            active=True,
+            existence_pct=75.0,
+        )
+
+        canonical = layer.idea_entities_state
+        public = universe.world["idea_entities"]
+
+        self.assertIs(canonical.idea_entities[0], entity)
+
+        expected = {
+            "name": "a06_entity",
+            "type": "idea_entity",
+            "role": "primordial_idea_entity",
+            "state": "created",
+            "active": True,
+            "native_world": "idea_universe",
+            "existence_pct": 75.0,
+        }
+
+        self.assertEqual(
+            public["idea_entities"],
+            [expected],
+        )
+
+        self.assertEqual(
+            public["idea_entities_state"]["idea_entities"],
+            [expected],
+        )
+
+        self.assertIsNot(
+            public["idea_entities"][0],
+            entity,
+        )
+
+        self.assertNotIn(
+            "idea_entities_state",
+            universe.world,
+        )
+
+    def test_entity_projection_cannot_mutate_runtime(self):
+        universe, layer = self._layer()
+
+        entity = layer.create_idea_entity(
+            name="a06_isolation",
+            role="original_role",
+            active=True,
+        )
+
+        canonical = layer.idea_entities_state
+        public = universe.world["idea_entities"]
+
+        top = public["idea_entities"]
+        nested = public["idea_entities_state"]["idea_entities"]
+
+        self.assertIsNot(top, nested)
+        self.assertIsNot(top[0], nested[0])
+
+        top[0]["role"] = "intruder"
+        nested[0]["name"] = "intruder"
+
+        top.append({"name": "fake"})
+        nested.clear()
+
+        self.assertIs(canonical.idea_entities[0], entity)
+        self.assertEqual(len(canonical.idea_entities), 1)
+
+        self.assertEqual(entity.name, "a06_isolation")
+        self.assertEqual(entity.role, "original_role")
+
+        fresh = layer.public_state
+
+        self.assertEqual(
+            fresh["idea_entities"][0]["name"],
+            "a06_isolation",
+        )
+        self.assertEqual(
+            fresh["idea_entities"][0]["role"],
+            "original_role",
+        )
+
+    def test_entity_projection_tracks_refresh_not_live_mutation(self):
+        universe, layer = self._layer()
+
+        entity = layer.create_idea_entity(
+            name="a06_snapshot",
+            role="before",
+        )
+
+        first = universe.world["idea_entities"]
+
+        self.assertEqual(
+            first["idea_entities"][0]["role"],
+            "before",
+        )
+
+        entity.role = "after"
+
+        self.assertEqual(
+            first["idea_entities"][0]["role"],
+            "before",
+        )
+
+        layer.write_to_world()
+
+        second = universe.world["idea_entities"]
+
+        self.assertIsNot(first, second)
+
+        self.assertEqual(
+            second["idea_entities"][0]["role"],
+            "after",
+        )
+
+        self.assertEqual(
+            first["idea_entities"][0]["role"],
+            "before",
+        )
+
+        self.assertIs(
+            layer.idea_entities_state.idea_entities[0],
+            entity,
+        )
+
+    def test_invalid_entity_export_is_atomic(self):
+        universe, layer = self._layer()
+
+        original_view = universe.world["idea_entities"]
+        canonical = layer.idea_entities_state
+
+        bad_entity = {"name": "legacy_mapping"}
+        canonical.idea_entities.append(bad_entity)
+
+        try:
+            with self.assertRaises(TypeError):
+                layer.write_to_world()
+
+            self.assertIs(
+                universe.world["idea_entities"],
+                original_view,
+            )
+        finally:
+            canonical.idea_entities.remove(bad_entity)
+
+        self.assertEqual(canonical.idea_entities, [])
+
+        layer.write_to_world()
+
+        self.assertEqual(
+            universe.world["idea_entities"]["idea_entities"],
+            [],
         )
 
 

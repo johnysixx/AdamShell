@@ -1,7 +1,31 @@
 from copy import deepcopy
 from dataclasses import dataclass, field
 
+from core.entity.social_entity import SocialEntity
 from idea_entities.eternal_fire_potential import EternalFirePotential
+
+
+def _public_idea_entity_summary(entity):
+    """
+    Export a bounded, detached entity summary.
+
+    This is a public index entry, not a complete
+    runtime state or a replay checkpoint.
+    """
+    if not isinstance(entity, SocialEntity):
+        raise TypeError(
+            "Idea entity public export requires SocialEntity."
+        )
+
+    return {
+        "name": str(entity.name),
+        "type": str(entity.type),
+        "role": str(entity.role),
+        "state": str(entity.state),
+        "active": bool(entity.active),
+        "native_world": str(entity.native_world),
+        "existence_pct": float(entity.existence_pct),
+    }
 
 
 @dataclass(slots=True, frozen=True)
@@ -64,7 +88,10 @@ class IdeaEntitiesState:
         return {
             "type": self.layer_type,
             "state": self.status,
-            "idea_entities": list(self.idea_entities),
+            "idea_entities": [
+                _public_idea_entity_summary(entity)
+                for entity in self.idea_entities
+            ],
             "eternal_fire": self.eternal_fire.to_dict(),
             "events": [
                 deepcopy(event.to_dict())

@@ -61,7 +61,7 @@ class IdeaEntities:
         return {
             'type': self.idea_entities_state.layer_type,
             'state': self.idea_entities_state.status,
-            'idea_entities': list(self.idea_entities),
+            'idea_entities': deepcopy(state_snapshot['idea_entities']),
             'eternal_fire': self.eternal_fire.to_dict(),
             'serpent_d20': self.serpent_d20.public_state,
             'prefysical_fire_origin': (
