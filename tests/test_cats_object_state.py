@@ -54,10 +54,10 @@ class CatsObjectStateTests(unittest.TestCase):
 
         self.assertEqual(
             state.access_rules.access_via,
-            [
+            (
                 "boxes",
                 "cat_doors",
-            ],
+            ),
         )
 
     def test_values_are_owned_by_same_state_object(self):
