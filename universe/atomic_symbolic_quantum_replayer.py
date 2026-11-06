@@ -7,7 +7,9 @@ from universe.quantum_history_replayer import (
     UniverseQuantumHistoryReplayer,
 )
 from universe.quantum_state import UniverseQuantumState
-from universe.logger import UniverseLogger
+from universe.symbolic_replay_outbox import (
+    SymbolicReplayOutbox,
+)
 from universe.universe_statistics import UniverseStatistics
 
 
@@ -34,6 +36,7 @@ class _SymbolicReplayStage:
         # Reuse the canonical Universe.hear implementation
         # without constructing another Universe.
         self._hear = type(universe).hear
+        self._universe_id = universe.id
         self.pending_events = []
 
         for name in _SYMBOLIC_FIELDS:
@@ -44,11 +47,22 @@ class _SymbolicReplayStage:
                     getattr(universe, name),
                 )
 
-    def hear(self, word):
+    def hear(self, word, word_position):
+        def stage_event(message):
+            self.pending_events.append(
+                SymbolicReplayOutbox.new_event(
+                    universe_id=self._universe_id,
+                    word_id=word.id,
+                    word_position=word_position,
+                    sequence=len(self.pending_events),
+                    message=message,
+                )
+            )
+
         self._hear(
             self,
             word,
-            _event_sink=self.pending_events.append,
+            _event_sink=stage_event,
         )
 
 
@@ -67,8 +81,10 @@ class AtomicSymbolicQuantumReplayer:
 
     Runtime state is published only after both staged
     reconstructions succeed. Symbolic event messages are
-    buffered and emitted after successful runtime commit.
-    Logger output itself is outside the rollback boundary.
+    buffered as immutable outbox records during commit.
+    Delivery occurs only after successful runtime commit.
+    Delivery errors never roll back an already committed
+    runtime state.
     """
 
     @staticmethod
@@ -113,6 +129,7 @@ class AtomicSymbolicQuantumReplayer:
             universe.quantum_boxes,
             universe.quantum_events,
             universe.quantum_clock_events,
+            universe.symbolic_replay_outbox,
         )
 
         if not all(
@@ -143,6 +160,12 @@ class AtomicSymbolicQuantumReplayer:
                 "target history streams."
             )
 
+        if universe.symbolic_replay_outbox:
+            raise ValueError(
+                "Combined replay requires an empty "
+                "target symbolic delivery outbox."
+            )
+
         # Freeze and validate the symbolic input before
         # executing either part of the transaction.
         words = tuple(chronicle.all())
@@ -158,8 +181,8 @@ class AtomicSymbolicQuantumReplayer:
         # Stage the canonical symbolic semantics.
         symbolic = _SymbolicReplayStage(universe)
 
-        for word in words:
-            symbolic.hear(word)
+        for word_position, word in enumerate(words):
+            symbolic.hear(word, word_position)
 
         # Stage quantum replay using detached object state.
         # The existing quantum replayer performs validation,
@@ -187,6 +210,9 @@ class AtomicSymbolicQuantumReplayer:
         box_events_before = tuple(universe.quantum_events)
         clock_events_before = tuple(
             universe.quantum_clock_events
+        )
+        outbox_before = tuple(
+            universe.symbolic_replay_outbox
         )
 
         statistics_before = tuple(
@@ -256,6 +282,12 @@ class AtomicSymbolicQuantumReplayer:
                         getattr(symbolic, name),
                     )
 
+            # Include the delivery ledger in the same
+            # rollback-capable runtime transaction.
+            universe.symbolic_replay_outbox.extend(
+                symbolic.pending_events
+            )
+
         except BaseException:
             # Also roll back KeyboardInterrupt, SystemExit
             # and cancellation. Re-raise the original
@@ -279,6 +311,12 @@ class AtomicSymbolicQuantumReplayer:
                 universe.quantum_clock_events,
                 slice(None),
                 clock_events_before,
+            )
+
+            list.__setitem__(
+                universe.symbolic_replay_outbox,
+                slice(None),
+                outbox_before,
             )
 
             # Bypass injected __setattr__ failures while
@@ -312,11 +350,9 @@ class AtomicSymbolicQuantumReplayer:
 
             raise
 
-        # Commit has completed. Do not emit symbolic events
-        # during preparation or during a rollback-capable
-        # publication. External logger failures happen
-        # after runtime commit and do not undo that commit.
-        for message in symbolic.pending_events:
-            UniverseLogger.event(message)
+        # Runtime and outbox have both committed.
+        # Only delivery may fail now. Successful records
+        # are acknowledged; failed records remain pending.
+        SymbolicReplayOutbox.dispatch(universe)
 
         return tuple(universe.quantum_boxes)

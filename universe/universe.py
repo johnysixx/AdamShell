@@ -61,6 +61,9 @@ from universe.quantum_history_replayer import (
 from universe.atomic_symbolic_quantum_replayer import (
     AtomicSymbolicQuantumReplayer,
 )
+from universe.symbolic_replay_outbox import (
+    SymbolicReplayOutbox,
+)
 from universe.quantum_lifecycle_timeline import (
     UniverseQuantumLifecycleTimeline,
 )
@@ -135,6 +138,8 @@ class Universe:
         self.quantum_boxes = []
         self.quantum_events = []
         self.quantum_clock_events = []
+        self.symbolic_replay_outbox = []
+        self._symbolic_replay_dispatching = False
         self.cronenbergs = []
         self.cronenberg_count = 0
         self.quantum_event_bus = QuantumEventBus()
@@ -200,6 +205,10 @@ class Universe:
                 self, "rules_modified", None
             ),
         }
+        snapshot["symbolic_replay_outbox"] = [
+            event.to_dict()
+            for event in self.symbolic_replay_outbox
+        ]
         return snapshot
 
     def start_big_bang(self):
@@ -687,6 +696,25 @@ class Universe:
             clock_events=clock_events,
             preserve_history=preserve_history,
         )
+
+    @property
+    def pending_symbolic_replay_events(self):
+        return SymbolicReplayOutbox.pending(self)
+
+    def retry_symbolic_replay_events(self, *, sink=None):
+        """Retry pending deliveries without runtime replay.
+
+        Custom sinks receive immutable event records with IDs.
+        The default sink is UniverseLogger.event.
+        """
+        return SymbolicReplayOutbox.dispatch(
+            self,
+            sink=sink,
+        )
+
+    def restore_symbolic_replay_outbox(self, records):
+        """Rehydrate serialized delivery state."""
+        return SymbolicReplayOutbox.restore(self, records)
 
     def quantum_lifecycle_timeline(self):
         return UniverseQuantumLifecycleTimeline.merge(
