@@ -434,5 +434,286 @@ class QuantumHistoryReplayTests(unittest.TestCase):
                 )
 
 
+
+    def test_preserve_history_restores_resumable_timeline(self):
+        source = self.make_source(active=True)
+        target = self.make_target()
+
+        clock = target.quantum_state
+        statistics = target.statistics
+        boxes = target.quantum_boxes
+        box_history = target.quantum_events
+        clock_history = target.quantum_clock_events
+
+        target.replay_quantum_history(
+            box_events=source.quantum_events,
+            clock_events=source.quantum_clock_events,
+            preserve_history=True,
+        )
+
+        self.assertIs(target.quantum_state, clock)
+        self.assertIs(target.statistics, statistics)
+        self.assertIs(target.quantum_boxes, boxes)
+        self.assertIs(target.quantum_events, box_history)
+        self.assertIs(target.quantum_clock_events, clock_history)
+
+        self.assertEqual(
+            target.quantum_events,
+            source.quantum_events,
+        )
+        self.assertEqual(
+            target.quantum_clock_events,
+            source.quantum_clock_events,
+        )
+
+        self.assertIsNot(
+            target.quantum_events[0],
+            source.quantum_events[0],
+        )
+        self.assertIsNot(
+            target.quantum_events[0].position,
+            source.quantum_events[0].position,
+        )
+        self.assertIsNot(
+            target.quantum_clock_events[0],
+            source.quantum_clock_events[0],
+        )
+
+        self.assertEqual(
+            target.quantum_lifecycle_timeline(),
+            source.quantum_lifecycle_timeline(),
+        )
+
+        # Both universes continue from tick 2.
+        source.should_collapse_quantum_box = (
+            lambda _box: False
+        )
+        target.should_collapse_quantum_box = (
+            lambda _box: False
+        )
+
+        source.tick_quantum_unprotected()
+        target.tick_quantum_unprotected()
+
+        self.assertEqual(
+            [event.tick for event in target.quantum_clock_events],
+            [1, 2, 3],
+        )
+
+        self.assertEqual(
+            target.quantum_lifecycle_timeline(),
+            source.quantum_lifecycle_timeline(),
+        )
+
+        self.assertEqual(
+            target.quantum_state.to_dict(),
+            source.quantum_state.to_dict(),
+        )
+        self.assertEqual(
+            target.statistics.public_state,
+            source.statistics.public_state,
+        )
+        self.assertEqual(
+            [box.public_state for box in target.quantum_boxes],
+            [box.public_state for box in source.quantum_boxes],
+        )
+        self.assertEqual(
+            [box.age_ticks for box in target.quantum_boxes],
+            [box.age_ticks for box in source.quantum_boxes],
+        )
+
+        # The continued history can be replayed again.
+        third = self.make_target()
+
+        third.replay_quantum_history(
+            box_events=target.quantum_events,
+            clock_events=target.quantum_clock_events,
+            preserve_history=True,
+        )
+
+        self.assertEqual(
+            third.quantum_state.to_dict(),
+            target.quantum_state.to_dict(),
+        )
+        self.assertEqual(
+            third.quantum_lifecycle_timeline(),
+            target.quantum_lifecycle_timeline(),
+        )
+        self.assertEqual(
+            [box.age_ticks for box in third.quantum_boxes],
+            [box.age_ticks for box in target.quantum_boxes],
+        )
+
+    def test_preserve_history_accepts_generators(self):
+        source = self.make_source(active=True)
+        target = self.make_target()
+
+        target.replay_quantum_history(
+            box_events=iter(source.quantum_events),
+            clock_events=iter(source.quantum_clock_events),
+            preserve_history=True,
+        )
+
+        self.assertEqual(
+            target.quantum_events,
+            source.quantum_events,
+        )
+        self.assertEqual(
+            target.quantum_clock_events,
+            source.quantum_clock_events,
+        )
+
+    def test_preserve_history_detaches_input_collections(self):
+        source = self.make_source(active=True)
+        target = self.make_target()
+
+        expected_boxes = tuple(source.quantum_events)
+        expected_clock = tuple(source.quantum_clock_events)
+
+        target.replay_quantum_history(
+            box_events=source.quantum_events,
+            clock_events=source.quantum_clock_events,
+            preserve_history=True,
+        )
+
+        source.quantum_events.clear()
+        source.quantum_clock_events.clear()
+
+        self.assertEqual(
+            tuple(target.quantum_events),
+            expected_boxes,
+        )
+        self.assertEqual(
+            tuple(target.quantum_clock_events),
+            expected_clock,
+        )
+
+        self.assertEqual(
+            len(target.quantum_lifecycle_timeline()),
+            len(expected_boxes) + len(expected_clock),
+        )
+
+    def test_preserve_history_rejects_invalid_late_event_atomically(self):
+        source = self.make_source()
+        target = self.make_target()
+
+        events = tuple(source.quantum_events)
+
+        invalid = replace(
+            events[1],
+            result="impossible_result",
+        )
+
+        before_clock = target.quantum_state.to_dict()
+        before_stats = target.statistics.public_state
+        before_boxes = tuple(target.quantum_boxes)
+
+        with self.assertRaises(ValueError):
+            target.replay_quantum_history(
+                box_events=(
+                    events[0],
+                    invalid,
+                    *events[2:],
+                ),
+                clock_events=source.quantum_clock_events,
+                preserve_history=True,
+            )
+
+        self.assertEqual(
+            target.quantum_state.to_dict(),
+            before_clock,
+        )
+        self.assertEqual(
+            target.statistics.public_state,
+            before_stats,
+        )
+        self.assertEqual(
+            tuple(target.quantum_boxes),
+            before_boxes,
+        )
+        self.assertEqual(target.quantum_events, [])
+        self.assertEqual(target.quantum_clock_events, [])
+
+    def test_preserve_history_rejects_existing_history(self):
+        source = self.make_source()
+        target = self.make_target()
+
+        existing = source.quantum_clock_events[0]
+        target.quantum_clock_events.append(existing)
+
+        before_clock = target.quantum_state.to_dict()
+
+        with self.assertRaises(ValueError):
+            target.replay_quantum_history(
+                box_events=source.quantum_events,
+                clock_events=source.quantum_clock_events,
+                preserve_history=True,
+            )
+
+        self.assertEqual(
+            target.quantum_clock_events,
+            [existing],
+        )
+        self.assertEqual(
+            target.quantum_state.to_dict(),
+            before_clock,
+        )
+        self.assertEqual(target.quantum_boxes, [])
+
+    def test_preserve_history_copy_failure_is_atomic(self):
+        source = self.make_source(active=True)
+        target = self.make_target()
+
+        class UncopyableLayer:
+            def __deepcopy__(self, memo):
+                raise ValueError("History cannot be copied.")
+
+        event = replace(
+            source.quantum_events[0],
+            layer=UncopyableLayer(),
+        )
+
+        before_clock = target.quantum_state.to_dict()
+        before_statistics = target.statistics.public_state
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "History cannot be copied",
+        ):
+            target.replay_quantum_history(
+                box_events=(event,),
+                clock_events=source.quantum_clock_events,
+                preserve_history=True,
+            )
+
+        self.assertEqual(
+            target.quantum_state.to_dict(),
+            before_clock,
+        )
+        self.assertEqual(
+            target.statistics.public_state,
+            before_statistics,
+        )
+        self.assertEqual(target.quantum_boxes, [])
+        self.assertEqual(target.quantum_events, [])
+        self.assertEqual(target.quantum_clock_events, [])
+
+    def test_preserve_history_requires_bool(self):
+        source = self.make_source()
+        target = self.make_target()
+
+        with self.assertRaises(TypeError):
+            target.replay_quantum_history(
+                box_events=source.quantum_events,
+                clock_events=source.quantum_clock_events,
+                preserve_history="yes",
+            )
+
+        self.assertEqual(target.quantum_boxes, [])
+        self.assertEqual(target.quantum_events, [])
+        self.assertEqual(target.quantum_clock_events, [])
+        self.assertEqual(target.quantum_state.tick_count, 0)
+
+
 if __name__ == "__main__":
     unittest.main()

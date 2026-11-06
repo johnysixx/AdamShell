@@ -1,3 +1,4 @@
+from copy import deepcopy
 from dataclasses import dataclass, field, fields, replace
 
 from core.entity.quantum_box import QuantumBox
@@ -31,7 +32,13 @@ class UniverseQuantumHistoryReplayer:
     """Atomically restore box lifecycles and quantum clock."""
 
     @staticmethod
-    def replay(universe, *, box_events, clock_events):
+    def replay(
+        universe,
+        *,
+        box_events,
+        clock_events,
+        preserve_history=False,
+    ):
         try:
             box_events = tuple(box_events)
         except TypeError as error:
@@ -45,6 +52,20 @@ class UniverseQuantumHistoryReplayer:
             raise TypeError(
                 "Quantum clock history must be iterable."
             ) from error
+
+        if type(preserve_history) is not bool:
+            raise TypeError(
+                "preserve_history must be bool."
+            )
+
+        if preserve_history and (
+            universe.quantum_events
+            or universe.quantum_clock_events
+        ):
+            raise ValueError(
+                "Resumable replay requires empty "
+                "target history streams."
+            )
 
         statistics = universe.statistics
 
@@ -114,6 +135,13 @@ class UniverseQuantumHistoryReplayer:
                 last_tick - record.created_tick
             )
 
+        # Prepare detached historical records before
+        # publishing any reconstructed runtime state.
+        # A deepcopy failure must leave the target intact.
+        if preserve_history:
+            retained_box_events = deepcopy(box_events)
+            retained_clock_events = deepcopy(clock_events)
+
         # Both streams succeeded. Publish their state
         # without replacing existing Universe objects.
         universe.quantum_boxes.extend(
@@ -138,6 +166,14 @@ class UniverseQuantumHistoryReplayer:
                     staged.quantum_state,
                     item.name,
                 ),
+            )
+
+        if preserve_history:
+            universe.quantum_events.extend(
+                retained_box_events
+            )
+            universe.quantum_clock_events.extend(
+                retained_clock_events
             )
 
         return tuple(universe.quantum_boxes)

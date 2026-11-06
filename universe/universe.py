@@ -652,11 +652,13 @@ class Universe:
         *,
         box_events,
         clock_events,
+        preserve_history=False,
     ):
         return UniverseQuantumHistoryReplayer.replay(
             self,
             box_events=box_events,
             clock_events=clock_events,
+            preserve_history=preserve_history,
         )
 
     def quantum_lifecycle_timeline(self):
