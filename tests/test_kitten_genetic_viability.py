@@ -1,4 +1,5 @@
 import unittest
+from dataclasses import FrozenInstanceError
 
 from cats.genotype import (
     CatAutosomalGenotype,
@@ -10,6 +11,7 @@ from cats.phenotype_resolver import (
 from cats.kitten_viability_resolver import (
     KittenGeneticViabilityResolver,
     KittenGeneticViabilityResult,
+    KittenViabilityDetailRule,
     KittenInvalidGenotypeDetails,
     KittenLethalMutationDetails,
     KittenXXYGenotypeDetails,
@@ -36,6 +38,206 @@ class KittenGeneticViabilityTests(
             ),
             colorpoint=("C", "C"),
             longhair=("L", "L"),
+        )
+
+    def test_detail_rules_are_immutable_objects(self):
+        rules = KittenGeneticViabilityResult.DETAIL_RULES
+
+        self.assertIsInstance(
+            rules,
+            tuple,
+        )
+
+        self.assertEqual(
+            tuple(
+                (rule.reason, rule.details_type)
+                for rule in rules
+            ),
+            (
+                (
+                    "invalid_genotype",
+                    KittenInvalidGenotypeDetails,
+                ),
+                (
+                    "lethal_genetic_combination",
+                    KittenLethalMutationDetails,
+                ),
+                (
+                    "xxy_male",
+                    KittenXXYGenotypeDetails,
+                ),
+            ),
+        )
+
+        for rule in rules:
+            self.assertIsInstance(
+                rule,
+                KittenViabilityDetailRule,
+            )
+
+            for method in (
+                "get",
+                "keys",
+                "items",
+                "values",
+                "to_dict",
+            ):
+                self.assertFalse(
+                    hasattr(rule, method)
+                )
+
+            with self.assertRaises(TypeError):
+                _ = rule["reason"]
+
+            self.assertFalse(
+                hasattr(rule, "__dict__")
+            )
+
+        with self.assertRaises(FrozenInstanceError):
+            rules[0].reason = "changed"
+
+    def test_detail_rule_rejects_invalid_values(self):
+        with self.assertRaises(TypeError):
+            KittenViabilityDetailRule(
+                "",
+                KittenInvalidGenotypeDetails,
+            )
+
+        with self.assertRaises(TypeError):
+            KittenViabilityDetailRule(
+                None,
+                KittenInvalidGenotypeDetails,
+            )
+
+        with self.assertRaises(TypeError):
+            KittenViabilityDetailRule(
+                "invalid_genotype",
+                dict,
+            )
+
+        with self.assertRaises(TypeError):
+            KittenViabilityDetailRule(
+                "invalid_genotype",
+                None,
+            )
+
+        valid = KittenViabilityDetailRule(
+            "invalid_genotype",
+            KittenInvalidGenotypeDetails,
+        )
+
+        self.assertIs(
+            valid.details_type,
+            KittenInvalidGenotypeDetails,
+        )
+
+    def test_typed_rules_preserve_viability_validation(self):
+        valid_genotype = CatGenotype.create_founder(
+            sex="female",
+        )
+
+        detail_cases = (
+            (
+                "invalid_genotype",
+                KittenInvalidGenotypeDetails(
+                    error="invalid",
+                ),
+            ),
+            (
+                "lethal_genetic_combination",
+                KittenLethalMutationDetails(
+                    lethal_mutations=("lethal",),
+                ),
+            ),
+            (
+                "xxy_male",
+                KittenXXYGenotypeDetails(
+                    sex_chromosomes=("X", "X", "Y"),
+                ),
+            ),
+        )
+
+        for reason, details in detail_cases:
+            result = KittenGeneticViabilityResult(
+                status="nonviable",
+                viable=False,
+                rare=False,
+                reason=reason,
+                details=details,
+                special_traits=(),
+                genotype=valid_genotype,
+            )
+
+            self.assertEqual(
+                result.reason,
+                reason,
+            )
+
+            self.assertIs(
+                result.details,
+                details,
+            )
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "Unsupported kitten viability reason",
+        ):
+            KittenGeneticViabilityResult(
+                status="nonviable",
+                viable=False,
+                rare=False,
+                reason="unknown_reason",
+                details=None,
+                special_traits=(),
+                genotype=valid_genotype,
+            )
+
+        with self.assertRaisesRegex(
+            TypeError,
+            "Viability details do not match",
+        ):
+            KittenGeneticViabilityResult(
+                status="nonviable",
+                viable=False,
+                rare=False,
+                reason="xxy_male",
+                details=KittenInvalidGenotypeDetails(
+                    error="wrong_type",
+                ),
+                special_traits=(),
+                genotype=valid_genotype,
+            )
+
+        with self.assertRaisesRegex(
+            TypeError,
+            "Standard viability result",
+        ):
+            KittenGeneticViabilityResult(
+                status="standard",
+                viable=True,
+                rare=False,
+                reason=None,
+                details=KittenInvalidGenotypeDetails(
+                    error="unexpected",
+                ),
+                special_traits=(),
+                genotype=valid_genotype,
+            )
+
+        standard = KittenGeneticViabilityResolver.resolve(
+            valid_genotype,
+        )
+
+        self.assertIsNone(
+            standard.reason,
+        )
+
+        self.assertIsNone(
+            standard.details,
+        )
+
+        self.assertTrue(
+            standard.viable,
         )
 
     def test_standard_xy_male_is_standard(self):

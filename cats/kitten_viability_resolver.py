@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from typing import ClassVar
 
 from cats.genotype import CatGenotype
 
@@ -76,6 +77,33 @@ class KittenXXYGenotypeDetails:
         )
 
 
+@dataclass(frozen=True, slots=True)
+class KittenViabilityDetailRule:
+    reason: str
+    details_type: type
+
+    def __post_init__(self):
+        if not isinstance(
+            self.reason,
+            str,
+        ) or not self.reason.strip():
+            raise TypeError(
+                "Viability detail rule requires a reason."
+            )
+
+        allowed_types = (
+            KittenInvalidGenotypeDetails,
+            KittenLethalMutationDetails,
+            KittenXXYGenotypeDetails,
+        )
+
+        if self.details_type not in allowed_types:
+            raise TypeError(
+                "Viability detail rule requires "
+                "a supported details class."
+            )
+
+
 @dataclass(slots=True, frozen=True)
 class KittenGeneticViabilityResult:
 
@@ -93,6 +121,23 @@ class KittenGeneticViabilityResult:
 
     special_traits: tuple[str, ...]
     genotype: object
+
+    DETAIL_RULES: ClassVar[
+        tuple[KittenViabilityDetailRule, ...]
+    ] = (
+        KittenViabilityDetailRule(
+            "invalid_genotype",
+            KittenInvalidGenotypeDetails,
+        ),
+        KittenViabilityDetailRule(
+            "lethal_genetic_combination",
+            KittenLethalMutationDetails,
+        ),
+        KittenViabilityDetailRule(
+            "xxy_male",
+            KittenXXYGenotypeDetails,
+        ),
+    )
 
     name: str = field(
         default=(
@@ -137,18 +182,6 @@ class KittenGeneticViabilityResult:
             ),
         )
 
-        details_type_by_reason = {
-            "invalid_genotype": (
-                KittenInvalidGenotypeDetails
-            ),
-            "lethal_genetic_combination": (
-                KittenLethalMutationDetails
-            ),
-            "xxy_male": (
-                KittenXXYGenotypeDetails
-            ),
-        }
-
         if self.reason is None:
             if self.details is not None:
                 raise TypeError(
@@ -156,26 +189,29 @@ class KittenGeneticViabilityResult:
                     "cannot contain details."
                 )
 
-        elif self.reason in details_type_by_reason:
-            expected_type = (
-                details_type_by_reason[
-                    self.reason
-                ]
+        else:
+            matching_rule = next(
+                (
+                    rule
+                    for rule in self.DETAIL_RULES
+                    if rule.reason == self.reason
+                ),
+                None,
             )
+
+            if matching_rule is None:
+                raise ValueError(
+                    "Unsupported kitten viability reason."
+                )
 
             if not isinstance(
                 self.details,
-                expected_type,
+                matching_rule.details_type,
             ):
                 raise TypeError(
                     "Viability details do not match "
                     f"reason {self.reason!r}."
                 )
-
-        else:
-            raise ValueError(
-                "Unsupported kitten viability reason."
-            )
 
         if (
             self.reason != "invalid_genotype"
