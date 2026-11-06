@@ -20,7 +20,7 @@ class CatPerceptionFailure:
     observed: bool = False
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, frozen=True)
 class CatBarObservation:
     known: bool
     visible: bool
