@@ -64,6 +64,9 @@ from universe.atomic_symbolic_quantum_replayer import (
 from universe.symbolic_replay_outbox import (
     SymbolicReplayOutbox,
 )
+from universe.symbolic_replay_outbox_store import (
+    SymbolicReplayOutboxStore,
+)
 from universe.quantum_lifecycle_timeline import (
     UniverseQuantumLifecycleTimeline,
 )
@@ -688,6 +691,7 @@ class Universe:
         box_events,
         clock_events,
         preserve_history=True,
+        durable_outbox_path=None,
     ):
         return AtomicSymbolicQuantumReplayer.replay(
             self,
@@ -695,21 +699,52 @@ class Universe:
             box_events=box_events,
             clock_events=clock_events,
             preserve_history=preserve_history,
+            durable_outbox_path=durable_outbox_path,
         )
 
     @property
     def pending_symbolic_replay_events(self):
         return SymbolicReplayOutbox.pending(self)
 
-    def retry_symbolic_replay_events(self, *, sink=None):
+    def retry_symbolic_replay_events(
+        self, *, sink=None, durable_outbox_path=None,
+    ):
         """Retry pending deliveries without runtime replay.
 
         Custom sinks receive immutable event records with IDs.
         The default sink is UniverseLogger.event.
         """
+        persist_ack = None
+
+        if durable_outbox_path is not None:
+            SymbolicReplayOutboxStore.ensure_current(
+                self,
+                durable_outbox_path,
+            )
+
+            persist_ack = lambda index, event: (
+                SymbolicReplayOutboxStore.persist_ack(
+                    self,
+                    durable_outbox_path,
+                    index,
+                    event,
+                )
+            )
+
         return SymbolicReplayOutbox.dispatch(
             self,
             sink=sink,
+            persist_ack=persist_ack,
+        )
+
+    def save_symbolic_replay_outbox(self, path):
+        return SymbolicReplayOutboxStore.save(
+            self, path,
+        )
+
+    def load_symbolic_replay_outbox(self, path):
+        return SymbolicReplayOutboxStore.restore(
+            self, path,
         )
 
     def restore_symbolic_replay_outbox(self, records):

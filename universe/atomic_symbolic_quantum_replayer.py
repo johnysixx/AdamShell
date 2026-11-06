@@ -10,6 +10,9 @@ from universe.quantum_state import UniverseQuantumState
 from universe.symbolic_replay_outbox import (
     SymbolicReplayOutbox,
 )
+from universe.symbolic_replay_outbox_store import (
+    SymbolicReplayOutboxStore,
+)
 from universe.universe_statistics import UniverseStatistics
 
 
@@ -95,6 +98,7 @@ class AtomicSymbolicQuantumReplayer:
         box_events,
         clock_events,
         preserve_history=True,
+        durable_outbox_path=None,
     ):
         if not isinstance(chronicle, Chronicle):
             raise TypeError(
@@ -164,6 +168,11 @@ class AtomicSymbolicQuantumReplayer:
             raise ValueError(
                 "Combined replay requires an empty "
                 "target symbolic delivery outbox."
+            )
+
+        if durable_outbox_path is not None:
+            SymbolicReplayOutboxStore.prepare_new(
+                durable_outbox_path
             )
 
         # Freeze and validate the symbolic input before
@@ -353,6 +362,29 @@ class AtomicSymbolicQuantumReplayer:
         # Runtime and outbox have both committed.
         # Only delivery may fail now. Successful records
         # are acknowledged; failed records remain pending.
-        SymbolicReplayOutbox.dispatch(universe)
+        persist_ack = None
+
+        if durable_outbox_path is not None:
+            # Runtime is committed. Save before the
+            # first external delivery attempt.
+            SymbolicReplayOutboxStore.save(
+                universe,
+                durable_outbox_path,
+                require_new=True,
+            )
+
+            persist_ack = lambda index, event: (
+                SymbolicReplayOutboxStore.persist_ack(
+                    universe,
+                    durable_outbox_path,
+                    index,
+                    event,
+                )
+            )
+
+        SymbolicReplayOutbox.dispatch(
+            universe,
+            persist_ack=persist_ack,
+        )
 
         return tuple(universe.quantum_boxes)

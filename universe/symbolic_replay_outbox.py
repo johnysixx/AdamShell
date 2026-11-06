@@ -104,7 +104,9 @@ class SymbolicReplayOutbox:
         )
 
     @staticmethod
-    def dispatch(universe, *, sink=None):
+    def dispatch(
+        universe, *, sink=None, persist_ack=None,
+    ):
         records = universe.symbolic_replay_outbox
 
         if not isinstance(records, list):
@@ -112,6 +114,13 @@ class SymbolicReplayOutbox:
 
         if sink is not None and not callable(sink):
             raise TypeError("Delivery sink must be callable.")
+
+        if persist_ack is not None and not callable(
+            persist_ack
+        ):
+            raise TypeError(
+                "Ack persistence hook must be callable."
+            )
 
         if getattr(
             universe,
@@ -163,11 +172,18 @@ class SymbolicReplayOutbox:
                         "Outbox changed during delivery."
                     )
 
-                records[index] = replace(
+                acknowledged = replace(
                     event,
                     delivered=True,
                 )
 
+                if persist_ack is not None:
+                    # Persist before updating canonical memory.
+                    # The recipient must deduplicate by ID
+                    # if its acknowledgement is ambiguous.
+                    persist_ack(index, acknowledged)
+
+                records[index] = acknowledged
                 completed += 1
 
         finally:
