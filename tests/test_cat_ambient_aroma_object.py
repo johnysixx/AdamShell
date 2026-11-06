@@ -1,5 +1,6 @@
 from core.entity.components import SpatialVector3
 import unittest
+from dataclasses import FrozenInstanceError, replace
 from universe.aroma_composition import AromaComposition
 
 from multiverse import UniverseRegistry
@@ -165,6 +166,100 @@ class CatAmbientAromaObjectTests(
                 0
             ].identity,
             "raspberry_rum",
+        )
+
+
+
+    def test_ambient_record_is_immutable(self):
+        ambient = self.ambient()
+
+        with self.assertRaises(FrozenInstanceError):
+            ambient.source = "other"
+
+        with self.assertRaises(FrozenInstanceError):
+            ambient.components = AromaComposition.empty()
+
+        with self.assertRaises(FrozenInstanceError):
+            ambient.recognition = CatAromaRecognition()
+
+        with self.assertRaises(FrozenInstanceError):
+            ambient.recognition.recognized = True
+
+        with self.assertRaises(FrozenInstanceError):
+            ambient.components.entries[0].intensity = 9.0
+
+    def test_ambient_replacement_preserves_original(self):
+        original = self.ambient()
+
+        updated = replace(
+            original,
+            source="new_source",
+        )
+
+        self.assertIsNot(updated, original)
+        self.assertEqual(original.source, "raspberry_rum")
+        self.assertEqual(updated.source, "new_source")
+
+        self.assertIs(
+            updated.components,
+            original.components,
+        )
+
+        self.assertIs(
+            updated.recognition,
+            original.recognition,
+        )
+
+    def test_ambient_requires_canonical_objects(self):
+        composition = AromaComposition.from_pairs(
+            ("berry", 1.0),
+        )
+
+        with self.assertRaises(TypeError):
+            CatAmbientAroma(
+                source="invalid",
+                components={"berry": 1.0},
+                recognition=CatAromaRecognition(),
+            )
+
+        with self.assertRaises(TypeError):
+            CatAmbientAroma(
+                source="invalid",
+                components=composition,
+                recognition={"recognized": False},
+            )
+
+    def test_sniff_preserves_previous_ambient_snapshot(self):
+        first = self.ambient()
+
+        self.meeting_place.ambient_aroma.profile = (
+            AromaComposition.from_pairs(
+                ("ozone", 0.9),
+            )
+        )
+
+        second = self.ambient()
+
+        self.assertIsNot(first, second)
+
+        self.assertEqual(
+            first.components.amount("berry"),
+            1.0,
+        )
+
+        self.assertEqual(
+            first.components.amount("ozone"),
+            0.0,
+        )
+
+        self.assertEqual(
+            second.components.amount("ozone"),
+            0.9,
+        )
+
+        self.assertEqual(
+            second.components.amount("berry"),
+            0.0,
         )
 
 

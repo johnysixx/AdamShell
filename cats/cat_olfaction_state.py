@@ -85,7 +85,7 @@ class CatDetectedAroma:
         )
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, frozen=True)
 class CatAmbientAroma:
 
     source: str | None
@@ -93,14 +93,25 @@ class CatAmbientAroma:
     recognition: CatAromaRecognition
 
     def __post_init__(self):
-        self.components = (
+        object.__setattr__(
+            self,
+            "components",
             require_aroma_composition(
                 self.components,
                 field_name=(
                     "ambient aroma components"
                 ),
-            )
+            ),
         )
+
+        if not isinstance(
+            self.recognition,
+            CatAromaRecognition,
+        ):
+            raise TypeError(
+                "Ambient aroma recognition must "
+                "be CatAromaRecognition."
+            )
 
 
 @dataclass(slots=True)
