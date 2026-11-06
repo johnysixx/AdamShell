@@ -88,7 +88,7 @@ class CatVisibleBoxObservation:
         )
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, frozen=True)
 class CatScentTransferCandidate:
     box_id: object = None
     counterpart_box_id: object = None
@@ -104,8 +104,23 @@ class CatScentTransferCandidate:
 
 
     def __post_init__(self):
-        self.box_position = require_optional_spatial_vector(self.box_position, field_name="scent transfer box position")
-        self.counterpart_position = require_optional_spatial_vector(self.counterpart_position, field_name="scent transfer counterpart position")
+        object.__setattr__(
+            self,
+            "box_position",
+            require_optional_spatial_vector(
+                self.box_position,
+                field_name="scent transfer box position",
+            ),
+        )
+
+        object.__setattr__(
+            self,
+            "counterpart_position",
+            require_optional_spatial_vector(
+                self.counterpart_position,
+                field_name="scent transfer counterpart position",
+            ),
+        )
 
 
 @dataclass(slots=True)
