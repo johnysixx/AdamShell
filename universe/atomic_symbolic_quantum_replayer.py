@@ -249,7 +249,10 @@ class AtomicSymbolicQuantumReplayer:
                         getattr(symbolic, name),
                     )
 
-        except Exception:
+        except BaseException:
+            # Also roll back KeyboardInterrupt, SystemExit
+            # and cancellation. Re-raise the original
+            # interruption after restoring runtime state.
             # Bypass overridden list.extend methods that
             # may have appended items before raising.
             # Keep the original list instances intact.

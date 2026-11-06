@@ -1,3 +1,4 @@
+import asyncio
 import io
 import random
 import unittest
@@ -488,6 +489,237 @@ class AtomicSymbolicQuantumReplayTests(unittest.TestCase):
             )
 
         self.assertEqual(self.fingerprint(target), before)
+
+
+
+    def test_interruptions_roll_back_partial_publication(self):
+        class FaultOnExtend(list):
+            def __init__(self, failure):
+                super().__init__()
+                self.failure = failure
+
+            def extend(self, values):
+                values = tuple(values)
+
+                if values:
+                    super().append(values[0])
+
+                raise self.failure
+
+        cases = (
+            (
+                "quantum_boxes",
+                KeyboardInterrupt("A14 box interruption"),
+            ),
+            (
+                "quantum_events",
+                asyncio.CancelledError(
+                    "A14 history cancellation"
+                ),
+            ),
+            (
+                "quantum_clock_events",
+                SystemExit("A14 clock interruption"),
+            ),
+        )
+
+        source_before = self.fingerprint(self.source)
+
+        for collection_name, failure in cases:
+            with self.subTest(
+                collection=collection_name,
+                interruption=type(failure).__name__,
+            ):
+                target = self.make_target()
+
+                target.light = False
+                target.deep = "existing"
+
+                faulty = FaultOnExtend(failure)
+                setattr(target, collection_name, faulty)
+
+                before = self.fingerprint(target)
+
+                original_clock = target.quantum_state
+                original_statistics = target.statistics
+                original_boxes = target.quantum_boxes
+                original_events = target.quantum_events
+                original_clock_events = (
+                    target.quantum_clock_events
+                )
+
+                with self.assertRaises(
+                    type(failure)
+                ) as caught:
+                    self.replay(target)
+
+                self.assertIs(
+                    caught.exception,
+                    failure,
+                )
+
+                self.assertEqual(
+                    self.fingerprint(target),
+                    before,
+                )
+
+                self.assertIs(
+                    target.quantum_state,
+                    original_clock,
+                )
+                self.assertIs(
+                    target.statistics,
+                    original_statistics,
+                )
+                self.assertIs(
+                    target.quantum_boxes,
+                    original_boxes,
+                )
+                self.assertIs(
+                    target.quantum_events,
+                    original_events,
+                )
+                self.assertIs(
+                    target.quantum_clock_events,
+                    original_clock_events,
+                )
+
+                self.assertFalse(target.light)
+                self.assertEqual(target.deep, "existing")
+                self.assertNotIn("space", vars(target))
+
+        self.assertEqual(
+            self.fingerprint(self.source),
+            source_before,
+        )
+
+    def test_symbolic_interruption_rolls_back_every_scope(self):
+        class InterruptedUniverse(Universe):
+            def __setattr__(self, name, value):
+                object.__setattr__(self, name, value)
+
+                if (
+                    name == "space"
+                    and getattr(
+                        self,
+                        "_interrupt_symbolic",
+                        False,
+                    )
+                ):
+                    object.__setattr__(
+                        self,
+                        "_interrupt_symbolic",
+                        False,
+                    )
+                    raise KeyboardInterrupt(
+                        "A14 symbolic interruption"
+                    )
+
+        with redirect_stdout(io.StringIO()):
+            target = InterruptedUniverse(
+                universe_id="a14_symbolic"
+            )
+            target.enable_quantum_layer()
+
+        target._interrupt_symbolic = True
+
+        before = self.fingerprint(target)
+
+        clock = target.quantum_state
+        statistics = target.statistics
+        boxes = target.quantum_boxes
+        events = target.quantum_events
+        clock_events = target.quantum_clock_events
+
+        with self.assertRaisesRegex(
+            KeyboardInterrupt,
+            "A14 symbolic interruption",
+        ):
+            self.replay(target)
+
+        self.assertEqual(
+            self.fingerprint(target),
+            before,
+        )
+
+        self.assertIs(target.quantum_state, clock)
+        self.assertIs(target.statistics, statistics)
+        self.assertIs(target.quantum_boxes, boxes)
+        self.assertIs(target.quantum_events, events)
+        self.assertIs(
+            target.quantum_clock_events,
+            clock_events,
+        )
+
+        self.assertNotIn("light", vars(target))
+        self.assertNotIn("space", vars(target))
+
+    def test_retry_succeeds_after_interrupted_publication(self):
+        class InterruptOnce(list):
+            def __init__(self):
+                super().__init__()
+                self.should_interrupt = True
+
+            def extend(self, values):
+                values = tuple(values)
+
+                if self.should_interrupt:
+                    self.should_interrupt = False
+
+                    if values:
+                        super().append(values[0])
+
+                    raise KeyboardInterrupt(
+                        "A14 one-time interruption"
+                    )
+
+                super().extend(values)
+
+        target = self.make_target()
+
+        history = InterruptOnce()
+        target.quantum_clock_events = history
+
+        before = self.fingerprint(target)
+
+        with self.assertRaisesRegex(
+            KeyboardInterrupt,
+            "A14 one-time interruption",
+        ):
+            self.replay(target)
+
+        self.assertEqual(
+            self.fingerprint(target),
+            before,
+        )
+        self.assertIs(
+            target.quantum_clock_events,
+            history,
+        )
+
+        # Retry on the exact same canonical objects.
+        result = self.replay(target)
+
+        self.assertEqual(len(result), 1)
+        self.assertIs(
+            result[0],
+            target.quantum_boxes[0],
+        )
+
+        self.assertIs(
+            target.quantum_clock_events,
+            history,
+        )
+
+        self.assertEqual(
+            self.fingerprint(target),
+            self.fingerprint(self.source),
+        )
+
+        self.assertEqual(
+            target.quantum_lifecycle_timeline(),
+            self.source.quantum_lifecycle_timeline(),
+        )
 
 
 if __name__ == "__main__":
