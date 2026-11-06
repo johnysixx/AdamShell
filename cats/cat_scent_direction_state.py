@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from core.entity.components import SpatialVector3, require_optional_spatial_vector
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, frozen=True)
 class CatScentTrailDirection:
     inferred: bool = False
     reason: str | None = None
@@ -26,4 +26,4 @@ class CatScentTrailDirection:
 
     def __post_init__(self):
         for field_name in ("from_position", "to_position", "vector", "unit_vector"):
-            setattr(self, field_name, require_optional_spatial_vector(getattr(self, field_name), field_name=f"scent trail {field_name}"))
+            object.__setattr__(self, field_name, require_optional_spatial_vector(getattr(self, field_name), field_name=f"scent trail {field_name}"))

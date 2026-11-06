@@ -1,5 +1,6 @@
 from core.entity.components import SpatialVector3
 import unittest
+from dataclasses import FrozenInstanceError, replace
 from universe.aroma_composition import AromaComposition
 
 from universe.universe import Universe
@@ -152,6 +153,88 @@ class CatScentTrailDirectionObjectTests(
                 trail_direction={
                     'inferred': True,
                 },
+            )
+
+
+
+    def test_direction_is_immutable(self):
+        direction = CatScentTrailDirection(
+            inferred=True,
+            confidence=0.8,
+            unit_vector=SpatialVector3(
+                x=1.0, y=0.0, z=0.0
+            ),
+        )
+
+        with self.assertRaises(FrozenInstanceError):
+            direction.inferred = False
+
+        with self.assertRaises(FrozenInstanceError):
+            direction.confidence = 0.2
+
+        with self.assertRaises(FrozenInstanceError):
+            direction.unit_vector = None
+
+        with self.assertRaises(FrozenInstanceError):
+            direction.unit_vector.x = 5.0
+
+    def test_replacement_preserves_original_direction(self):
+        original = CatScentTrailDirection(
+            inferred=True,
+            confidence=0.8,
+            unit_vector=SpatialVector3(
+                x=1.0, y=0.0, z=0.0
+            ),
+        )
+
+        updated = replace(
+            original,
+            confidence=0.95,
+        )
+
+        self.assertIsNot(updated, original)
+        self.assertEqual(original.confidence, 0.8)
+        self.assertEqual(updated.confidence, 0.95)
+        self.assertEqual(
+            updated.unit_vector,
+            original.unit_vector,
+        )
+
+    def test_direction_rejects_mapping_vectors(self):
+        for field_name in (
+            "from_position",
+            "to_position",
+            "vector",
+            "unit_vector",
+        ):
+            with self.subTest(field_name=field_name):
+                with self.assertRaises(TypeError):
+                    CatScentTrailDirection(
+                        **{field_name: {"x": 1.0}}
+                    )
+
+    def test_direction_preserves_valid_spatial_objects(self):
+        position = SpatialVector3(
+            x=2.0, y=3.0, z=4.0
+        )
+
+        direction = CatScentTrailDirection(
+            inferred=True,
+            from_position=position,
+            to_position=position,
+            vector=position,
+            unit_vector=position,
+        )
+
+        for name in (
+            "from_position",
+            "to_position",
+            "vector",
+            "unit_vector",
+        ):
+            self.assertIs(
+                getattr(direction, name),
+                position,
             )
 
 
