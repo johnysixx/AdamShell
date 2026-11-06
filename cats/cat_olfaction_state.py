@@ -42,7 +42,7 @@ class CatAromaRecognition:
             )
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, frozen=True)
 class CatDetectedAroma:
 
     entity_id: object
@@ -57,32 +57,41 @@ class CatDetectedAroma:
     recognition: CatAromaRecognition
 
     def __post_init__(self):
-        self.position = (
+        object.__setattr__(
+            self,
+            "position",
             require_spatial_vector(
                 self.position,
-                field_name=(
-                    "detected aroma position"
-                ),
-            )
+                field_name="detected aroma position",
+            ),
         )
 
-        self.components = (
+        object.__setattr__(
+            self,
+            "components",
             require_aroma_composition(
                 self.components,
-                field_name=(
-                    "detected aroma components"
-                ),
-            )
+                field_name="detected aroma components",
+            ),
         )
 
-        self.raw_components = (
+        object.__setattr__(
+            self,
+            "raw_components",
             require_aroma_composition(
                 self.raw_components,
-                field_name=(
-                    "detected raw aroma components"
-                ),
-            )
+                field_name="detected raw aroma components",
+            ),
         )
+
+        if not isinstance(
+            self.recognition,
+            CatAromaRecognition,
+        ):
+            raise TypeError(
+                "Detected aroma recognition must "
+                "be CatAromaRecognition."
+            )
 
 
 @dataclass(slots=True, frozen=True)
