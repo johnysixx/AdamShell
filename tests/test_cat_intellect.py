@@ -38,17 +38,17 @@ class CatIntellectTests(unittest.TestCase):
         self.assertEqual(very_low.score, 40)
 
     def test_high_intellect_uses_fewer_finalists(self):
-        self.cat.intellect.score = 140
+        self.cat.intellect = CatIntellect.with_score(self.cat.intellect, 140)
         count = CatIntellect.decision_finalist_count(cat=self.cat, candidate_count=6)
         self.assertEqual(count, 2)
 
     def test_low_intellect_considers_more_options(self):
-        self.cat.intellect.score = 60
+        self.cat.intellect = CatIntellect.with_score(self.cat.intellect, 60)
         count = CatIntellect.decision_finalist_count(cat=self.cat, candidate_count=6)
         self.assertEqual(count, 5)
 
     def test_intellect_is_recorded_in_decision(self):
-        self.cat.intellect.score = 135
+        self.cat.intellect = CatIntellect.with_score(self.cat.intellect, 135)
         result = CatMind.decide(cat=self.cat, observations=CatPerceptionState(bar_known=True, bar_visible=True, unexplored_boxes=['box_alpha'], nearby_cats=['other_cat'], interesting_unknown=True), quantum_roll=20)
         self.assertEqual(result.intellect_score, 135)
         self.assertEqual(result.intellect_category, 'exceptional')

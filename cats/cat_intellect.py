@@ -1,8 +1,8 @@
 import random
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 
-@dataclass(slots=True)
+@dataclass(frozen=True, slots=True)
 class CatIntellectState:
 
     score: int
@@ -67,48 +67,38 @@ class CatIntellect:
         )
 
     @classmethod
-    def ensure_state(
-        cls,
-        cat
-    ):
-        intellect = getattr(
-            cat,
-            "intellect",
-            None
+    def with_score(cls, intellect, score):
+        if not isinstance(intellect, CatIntellectState):
+            raise TypeError("Cat intellect must be CatIntellectState.")
+
+        bounded = min(
+            cls.MAXIMUM_SCORE,
+            max(cls.MINIMUM_SCORE, int(score)),
         )
+
+        return replace(
+            intellect,
+            score=bounded,
+            normalized=cls.normalize(bounded),
+        )
+
+    @classmethod
+    def ensure_state(cls, cat):
+        intellect = getattr(cat, "intellect", None)
 
         if intellect is None:
             intellect = cls.create_state()
             cat.intellect = intellect
 
-        if not isinstance(
-            intellect,
-            CatIntellectState,
-        ):
-            raise TypeError(
-                "Cat intellect must be "
-                "CatIntellectState."
-            )
+        if not isinstance(intellect, CatIntellectState):
+            raise TypeError("Cat intellect must be CatIntellectState.")
 
-        score = int(
-            intellect.score
-        )
+        corrected = cls.with_score(intellect, intellect.score)
 
-        score = min(
-            cls.MAXIMUM_SCORE,
-            max(
-                cls.MINIMUM_SCORE,
-                score
-            )
-        )
-
-        intellect.score = score
-
-        intellect.normalized = (
-            cls.normalize(
-                score
-            )
-        )
+        if (corrected.score != intellect.score
+                or corrected.normalized != intellect.normalized):
+            cat.intellect = corrected
+            return corrected
 
         return intellect
 

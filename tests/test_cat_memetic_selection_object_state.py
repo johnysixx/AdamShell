@@ -2,6 +2,7 @@ import unittest
 
 from universe.universe import Universe
 from cats.cats import Cats
+from cats.cat_intellect import CatIntellect
 from cats.cat_group_system import (
     CatGroupSystem
 )
@@ -41,7 +42,7 @@ class CatMemeticSelectionObjectStateTests(
 
         self.cat.personality.traits.curiosity = 1.0
         self.cat.personality.traits.sociability = 1.0
-        self.cat.intellect.normalized = 1.0
+        self.cat.intellect = CatIntellect.with_score(self.cat.intellect, 160)
 
         self.groups = CatGroupSystem(
             self.cats
