@@ -77,9 +77,10 @@ class IdeaEntities:
 
     def write_to_world(self):
         self.universe.world['idea_entities'] = self.public_state
-        self.universe.world['idea_entities_state'] = (
-            self.idea_entities_state
-        )
+
+        # The canonical runtime state belongs to IdeaEntities.
+        # Remove any legacy world alias on projection refresh.
+        self.universe.world.pop('idea_entities_state', None)
 
     def update_archetype_manifestation_state(self, entity):
         existence_pct = getattr(entity, 'existence_pct', 0.0)

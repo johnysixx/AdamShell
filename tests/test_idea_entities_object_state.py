@@ -96,12 +96,12 @@ class IdeaEntitiesObjectStateTests(unittest.TestCase):
         self.assertIs(layer.event_history, state.event_history)
         self.assertIs(layer.permissions, state.permissions)
 
-    def test_world_keeps_object_and_dict_boundaries(self):
+    def test_world_exposes_export_not_canonical_state(self):
         universe, layer = self._layer()
 
-        self.assertIs(
-            universe.world["idea_entities_state"],
-            layer.idea_entities_state,
+        self.assertNotIn(
+            "idea_entities_state",
+            universe.world,
         )
         self.assertIsInstance(
             universe.world["idea_entities"],
@@ -159,9 +159,9 @@ class IdeaEntitiesObjectStateTests(unittest.TestCase):
         boundary["permissions"]["can_influence"] = False
         self.assertTrue(layer.permissions.can_influence)
 
-        self.assertIs(
-            universe.world["idea_entities_state"],
-            layer.idea_entities_state,
+        self.assertNotIn(
+            "idea_entities_state",
+            universe.world,
         )
 
     def test_entity_creation_mutates_same_state_object(self):
@@ -635,9 +635,9 @@ class IdeaEntitiesObjectStateTests(unittest.TestCase):
             event.to_dict(),
         )
 
-        self.assertIs(
-            universe.world["idea_entities_state"],
-            layer.idea_entities_state,
+        self.assertNotIn(
+            "idea_entities_state",
+            universe.world,
         )
 
         world_snapshot = universe.world[
@@ -752,8 +752,10 @@ class IdeaEntitiesObjectStateTests(unittest.TestCase):
         self.assertEqual(layer.event_history, [event])
 
         self.assertEqual(
-            universe.world["idea_entities_state"].events,
-            [event],
+            universe.world["idea_entities"][
+                "idea_entities_state"
+            ]["events"],
+            [event.to_dict()],
         )
 
     def test_world_event_payloads_are_detached(self):
@@ -812,6 +814,126 @@ class IdeaEntitiesObjectStateTests(unittest.TestCase):
             1,
         )
         self.assertEqual(layer.tick_count, 1)
+
+
+
+    def test_world_alias_stays_absent_during_lifecycle(self):
+        universe, layer = self._layer()
+        canonical = layer.idea_entities_state
+
+        self.assertNotIn(
+            "idea_entities_state",
+            universe.world,
+        )
+
+        entity = layer.create_idea_entity(
+            name="a05_entity",
+        )
+
+        event = layer.record_idea_event(
+            name="a05_event",
+            participants=("a05_entity",),
+        )
+
+        layer.tick()
+
+        self.assertIs(
+            layer.idea_entities_state,
+            canonical,
+        )
+        self.assertIs(
+            layer.state,
+            canonical,
+        )
+
+        self.assertIn(entity, canonical.idea_entities)
+        self.assertIn(event, canonical.event_history)
+        self.assertEqual(canonical.tick_count, 1)
+
+        self.assertNotIn(
+            "idea_entities_state",
+            universe.world,
+        )
+
+        exported = universe.world[
+            "idea_entities"
+        ]["idea_entities_state"]
+
+        self.assertIsInstance(exported, dict)
+        self.assertIsNot(exported, canonical)
+        self.assertEqual(exported["tick_count"], 1)
+
+        exported["tick_count"] = 999
+        exported["event_history"].clear()
+
+        self.assertEqual(canonical.tick_count, 1)
+        self.assertEqual(
+            canonical.event_history,
+            [event],
+        )
+
+    def test_refresh_removes_legacy_world_alias(self):
+        universe, layer = self._layer()
+        canonical = layer.idea_entities_state
+
+        # Simulate an old integration retaining the
+        # pre-A05 registry entry.
+        universe.world["idea_entities_state"] = canonical
+
+        self.assertIs(
+            universe.world["idea_entities_state"],
+            canonical,
+        )
+
+        layer.write_to_world()
+
+        self.assertNotIn(
+            "idea_entities_state",
+            universe.world,
+        )
+
+        self.assertIs(layer.idea_entities_state, canonical)
+
+        self.assertIsInstance(
+            universe.world["idea_entities"][
+                "idea_entities_state"
+            ],
+            dict,
+        )
+
+    def test_fire_interaction_keeps_world_alias_absent(self):
+        universe, layer = self._layer()
+        canonical = layer.idea_entities_state
+        fire = layer.eternal_fire
+
+        event = layer.record_fire_interaction(
+            name="a05_fire_observed",
+            participants=("serpent",),
+            observer="lilith",
+        )
+
+        self.assertIs(layer.idea_entities_state, canonical)
+        self.assertIs(layer.eternal_fire, fire)
+
+        self.assertIs(fire.interactions[-1], event)
+        self.assertIs(layer.event_history[-1], event)
+
+        self.assertNotIn(
+            "idea_entities_state",
+            universe.world,
+        )
+
+        exported = universe.world["idea_entities"]
+
+        self.assertEqual(
+            exported["eternal_fire"]["interactions"][-1],
+            event.to_dict(),
+        )
+
+        self.assertEqual(
+            exported["idea_entities_state"]["event_history"][-1],
+            event.to_dict(),
+        )
 
 
 if __name__ == "__main__":

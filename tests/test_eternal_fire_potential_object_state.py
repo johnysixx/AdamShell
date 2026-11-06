@@ -745,9 +745,9 @@ class EternalFirePotentialObjectStateTests(unittest.TestCase):
             fire,
         )
 
-        self.assertIs(
-            universe.world["idea_entities_state"],
-            layer.idea_entities_state,
+        self.assertNotIn(
+            "idea_entities_state",
+            universe.world,
         )
 
         self.assertIs(
@@ -1005,9 +1005,9 @@ class EternalFirePotentialObjectStateTests(unittest.TestCase):
             fire,
         )
 
-        self.assertIs(
-            universe.world["idea_entities_state"],
-            layer.idea_entities_state,
+        self.assertNotIn(
+            "idea_entities_state",
+            universe.world,
         )
 
         for name in fields:
