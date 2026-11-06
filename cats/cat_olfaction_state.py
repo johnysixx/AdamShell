@@ -19,16 +19,27 @@ class CatAromaMatch:
     encounters: int
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, frozen=True)
 class CatAromaRecognition:
 
     recognized: bool = False
     identity: str | None = None
     similarity: float = 0.0
 
-    matches: list = field(
-        default_factory=list
-    )
+    matches: tuple[CatAromaMatch, ...] = ()
+
+    def __post_init__(self):
+        if (
+            not isinstance(self.matches, tuple)
+            or any(
+                not isinstance(match, CatAromaMatch)
+                for match in self.matches
+            )
+        ):
+            raise TypeError(
+                "Aroma recognition matches must be "
+                "a tuple of CatAromaMatch objects."
+            )
 
 
 @dataclass(slots=True)

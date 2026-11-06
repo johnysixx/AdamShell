@@ -412,7 +412,7 @@ class CatKnowledge:
             recognized=True,
             identity=winner.identity,
             similarity=winner.similarity,
-            matches=matches,
+            matches=tuple(matches),
         )
 
     @classmethod
