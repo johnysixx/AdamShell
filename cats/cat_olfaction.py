@@ -164,7 +164,7 @@ class CatOlfaction:
         return CatOlfactionState(
             cat=cat.name,
             radius=radius,
-            detected_aromas=detected,
+            detected_aromas=tuple(detected),
             ambient_aroma=ambient,
             ozone_detected=ozone_detected,
             sniffed=True,

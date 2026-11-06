@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from core.entity.components import (
     SpatialVector3,
@@ -123,17 +123,15 @@ class CatAmbientAroma:
             )
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, frozen=True)
 class CatOlfactionState:
 
     cat: str | None = None
     radius: float = 0.0
 
-    detected_aromas: list[
-        CatDetectedAroma
-    ] = field(
-        default_factory=list
-    )
+    detected_aromas: tuple[
+        CatDetectedAroma, ...
+    ] = ()
 
     ambient_aroma: (
         CatAmbientAroma | None
@@ -141,6 +139,31 @@ class CatOlfactionState:
 
     ozone_detected: bool = False
     sniffed: bool = False
+
+    def __post_init__(self):
+        if (
+            not isinstance(self.detected_aromas, tuple)
+            or any(
+                not isinstance(item, CatDetectedAroma)
+                for item in self.detected_aromas
+            )
+        ):
+            raise TypeError(
+                "Cat olfaction detected aromas must "
+                "be a tuple of CatDetectedAroma objects."
+            )
+
+        if (
+            self.ambient_aroma is not None
+            and not isinstance(
+                self.ambient_aroma,
+                CatAmbientAroma,
+            )
+        ):
+            raise TypeError(
+                "Cat olfaction ambient aroma must "
+                "be CatAmbientAroma or None."
+            )
 
     @property
     def detected_count(self):
