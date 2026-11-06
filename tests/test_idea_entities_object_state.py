@@ -118,18 +118,37 @@ class IdeaEntitiesObjectStateTests(unittest.TestCase):
             dict,
         )
 
-    def test_public_registries_remain_live_boundaries(self):
+    def test_public_collections_are_detached(self):
         universe, layer = self._layer()
+
+        event = IdeaEntityEvent(
+            name="boundary_event",
+            participants=("serpent",),
+        )
+
+        layer.emit_event(event)
         boundary = universe.world["idea_entities"]
 
-        self.assertIs(
+        self.assertIsNot(
             boundary["idea_entities"],
             layer.idea_entities,
         )
-        self.assertIs(boundary["events"], layer.events)
-        self.assertIs(
+        self.assertIsNot(
+            boundary["events"],
+            layer.events,
+        )
+        self.assertIsNot(
             boundary["event_history"],
             layer.event_history,
+        )
+
+        self.assertEqual(
+            boundary["events"],
+            [event.to_dict()],
+        )
+        self.assertEqual(
+            boundary["event_history"],
+            [event.to_dict()],
         )
 
         self.assertEqual(
@@ -137,15 +156,12 @@ class IdeaEntitiesObjectStateTests(unittest.TestCase):
             layer.permissions.to_dict(),
         )
 
-        self.assertIsNot(
-            boundary["permissions"],
-            layer.permissions,
-        )
-
         boundary["permissions"]["can_influence"] = False
+        self.assertTrue(layer.permissions.can_influence)
 
-        self.assertTrue(
-            layer.permissions.can_influence
+        self.assertIs(
+            universe.world["idea_entities_state"],
+            layer.idea_entities_state,
         )
 
     def test_entity_creation_mutates_same_state_object(self):
@@ -160,7 +176,7 @@ class IdeaEntitiesObjectStateTests(unittest.TestCase):
 
         self.assertIs(layer.idea_entities_state, state)
         self.assertEqual(state.idea_entities, [entity])
-        self.assertIs(
+        self.assertIsNot(
             universe.world["idea_entities"][
                 "idea_entities"
             ],
@@ -229,9 +245,9 @@ class IdeaEntitiesObjectStateTests(unittest.TestCase):
 
         self.assertIs(layer.events[-1], event)
         self.assertIs(layer.event_history[-1], event)
-        self.assertIs(
+        self.assertEqual(
             universe.world["idea_entities"]["events"][-1],
-            event,
+            event.to_dict(),
         )
         self.assertIs(deepcopy(event), event)
 
@@ -607,16 +623,16 @@ class IdeaEntitiesObjectStateTests(unittest.TestCase):
         self.assertIs(layer.events[-1], event)
         self.assertIs(layer.event_history[-1], event)
 
-        self.assertIs(
+        self.assertEqual(
             universe.world["idea_entities"]["events"][-1],
-            event,
+            event.to_dict(),
         )
 
-        self.assertIs(
+        self.assertEqual(
             universe.world["idea_entities"][
                 "event_history"
             ][-1],
-            event,
+            event.to_dict(),
         )
 
         self.assertIs(
@@ -710,6 +726,92 @@ class IdeaEntitiesObjectStateTests(unittest.TestCase):
             state.eternal_fire.state,
             EternalFirePotentialState.UNIGNITED,
         )
+
+
+
+    def test_world_events_cannot_bypass_emitter(self):
+        universe, layer = self._layer()
+
+        event = IdeaEntityEvent(
+            name="legitimate_event",
+            participants=("serpent",),
+        )
+
+        layer.emit_event(event)
+
+        boundary = universe.world["idea_entities"]
+
+        boundary["events"].append(
+            {"name": "invalid_event"}
+        )
+        boundary["event_history"].append(
+            {"name": "invalid_history"}
+        )
+
+        self.assertEqual(layer.events, [event])
+        self.assertEqual(layer.event_history, [event])
+
+        self.assertEqual(
+            universe.world["idea_entities_state"].events,
+            [event],
+        )
+
+    def test_world_event_payloads_are_detached(self):
+        universe, layer = self._layer()
+
+        event = IdeaEntityEvent(
+            name="immutable_source",
+            participants=("serpent",),
+        )
+
+        layer.emit_event(event)
+
+        boundary = universe.world["idea_entities"]
+
+        boundary["events"][0]["participants"].append(
+            "intruder"
+        )
+        boundary["event_history"][0]["participants"].append(
+            "intruder"
+        )
+
+        self.assertEqual(
+            event.participants,
+            ("serpent",),
+        )
+
+        self.assertIs(layer.events[0], event)
+        self.assertIs(layer.event_history[0], event)
+
+        self.assertEqual(
+            layer.public_state["events"][0]["participants"],
+            ["serpent"],
+        )
+
+    def test_world_projection_has_snapshot_semantics(self):
+        universe, layer = self._layer()
+
+        old_view = universe.world["idea_entities"]
+
+        self.assertEqual(
+            old_view["idea_entities_state"]["tick_count"],
+            0,
+        )
+
+        layer.tick()
+
+        new_view = universe.world["idea_entities"]
+
+        self.assertIsNot(old_view, new_view)
+        self.assertEqual(
+            old_view["idea_entities_state"]["tick_count"],
+            0,
+        )
+        self.assertEqual(
+            new_view["idea_entities_state"]["tick_count"],
+            1,
+        )
+        self.assertEqual(layer.tick_count, 1)
 
 
 if __name__ == "__main__":

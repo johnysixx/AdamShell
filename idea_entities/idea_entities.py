@@ -1,3 +1,4 @@
+from copy import deepcopy
 from core.entity.departure_state import EntityDepartureIntent
 from core.entity.world_existence_state import (
     WorldExistenceState,
@@ -52,17 +53,26 @@ class IdeaEntities:
 
     @property
     def public_state(self):
+        # Export a point-in-time projection.
+        # Domain event collections remain owned by
+        # the canonical IdeaEntitiesState object.
+        state_snapshot = self.idea_entities_state.to_dict()
+
         return {
             'type': self.idea_entities_state.layer_type,
             'state': self.idea_entities_state.status,
-            'idea_entities': self.idea_entities,
+            'idea_entities': list(self.idea_entities),
             'eternal_fire': self.eternal_fire.to_dict(),
             'serpent_d20': self.serpent_d20.public_state,
-            'prefysical_fire_origin': self.prefysical_fire_origin.public_state,
-            'events': self.events,
-            'event_history': self.event_history,
+            'prefysical_fire_origin': (
+                self.prefysical_fire_origin.public_state
+            ),
+            'events': deepcopy(state_snapshot['events']),
+            'event_history': deepcopy(
+                state_snapshot['event_history']
+            ),
             'permissions': self.permissions.to_dict(),
-            'idea_entities_state': self.idea_entities_state.to_dict()
+            'idea_entities_state': state_snapshot,
         }
 
     def write_to_world(self):
