@@ -58,6 +58,9 @@ from universe.quantum_clock_replayer import (
 from universe.quantum_history_replayer import (
     UniverseQuantumHistoryReplayer,
 )
+from universe.atomic_symbolic_quantum_replayer import (
+    AtomicSymbolicQuantumReplayer,
+)
 from universe.quantum_lifecycle_timeline import (
     UniverseQuantumLifecycleTimeline,
 )
@@ -656,6 +659,22 @@ class Universe:
     ):
         return UniverseQuantumHistoryReplayer.replay(
             self,
+            box_events=box_events,
+            clock_events=clock_events,
+            preserve_history=preserve_history,
+        )
+
+    def replay_symbolic_quantum_history(
+        self,
+        *,
+        chronicle,
+        box_events,
+        clock_events,
+        preserve_history=True,
+    ):
+        return AtomicSymbolicQuantumReplayer.replay(
+            self,
+            chronicle=chronicle,
             box_events=box_events,
             clock_events=clock_events,
             preserve_history=preserve_history,
