@@ -15,6 +15,9 @@ from pathlib import Path
 from universe.symbolic_replay_outbox import (
     SymbolicReplayOutboxEvent,
 )
+from universe.symbolic_replay_file_lock import (
+    exclusive_inbox_lock,
+)
 
 _FORMAT = "adamshell.symbolic_replay_inbox"
 _VERSION = 1
@@ -84,9 +87,13 @@ class DurableSymbolicReplayInbox:
     was durably stored, or already exists with identical
     content.
 
-    This is a single-writer store. Multiple concurrent
-    processes require external locking or a transactional
-    database.
+    Concurrent acceptance is serialized by a stable
+    cross-process lock. A stale receiver cannot overwrite
+    a newer checkpoint. Identical already-persisted events
+    are acknowledged without another write.
+
+    Only cooperating writers on a filesystem supporting
+    the required OS file locks are protected.
     """
 
     def __init__(self, *, path, universe_id):
@@ -264,39 +271,47 @@ class DurableSymbolicReplayInbox:
                 temporary.unlink(missing_ok=True)
 
     def accept(self, event):
-        """Acknowledge a new or already-persisted event.
+        """Safely accept a new or previously persisted event.
 
-        Same ID with different content is a collision.
-        A failed checkpoint write is not acknowledged.
+        The OS lock covers the whole read-check-write cycle.
+        A duplicate ID is acknowledged without another write.
+        A stale writer with a different new event must reopen.
         """
         receipt = SymbolicReplayInboxReceipt.from_event(
             event
         )
 
-        current = self._read()
+        with exclusive_inbox_lock(self.path):
+            current = self._read()
 
-        if current != self._receipts:
-            raise ValueError(
-                "Inbox checkpoint changed; "
-                "reopen the receiver."
-            )
+            # Check duplicate identities first. A receiver
+            # created before another process's commit can
+            # still acknowledge the same exact event.
+            for stored in current:
+                if stored.id == receipt.id:
+                    if stored != receipt:
+                        raise ValueError(
+                            "Inbox event identity collision."
+                        )
 
-        for stored in current:
-            if stored.id == receipt.id:
-                if stored != receipt:
-                    raise ValueError(
-                        "Inbox event identity collision."
-                    )
+                    self._receipts = current
+                    return True
 
-                return True
+            # Preserve A18 stale-writer protection for a
+            # different newly received event.
+            if current != self._receipts:
+                raise ValueError(
+                    "Inbox checkpoint changed; "
+                    "reopen the receiver."
+                )
 
-        updated = current + (receipt,)
+            updated = current + (receipt,)
 
-        # The immutable receipt ledger is the receiver's
-        # effect. It commits in the same checkpoint as
-        # the accepted event identity.
-        self._write(updated)
+            # Commit the canonical receipt ledger before
+            # acknowledging the sender. A failed write
+            # leaves the event eligible for safe retry.
+            self._write(updated)
 
-        self._receipts = updated
+            self._receipts = updated
 
-        return True
+            return True
