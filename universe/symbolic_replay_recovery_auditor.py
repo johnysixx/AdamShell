@@ -187,6 +187,7 @@ class SymbolicReplayRecoveryAuditor:
     def restore(
         cls, universe, *, outbox_path, inbox_path,
         expected_batch_sha256=None,
+        required_receipt_ids=None,
     ):
         """Restore delivery state only after full audit.
 
@@ -205,6 +206,40 @@ class SymbolicReplayRecoveryAuditor:
             raise ValueError(
                 "Invalid expected batch lineage digest."
             )
+
+        # Optional evidence supplied by the caller.
+        # It must come from storage that cannot be
+        # rolled back with this checkpoint pair.
+        if required_receipt_ids is None:
+            required_receipts = None
+        else:
+            if type(required_receipt_ids) not in (
+                tuple, frozenset,
+            ):
+                raise TypeError(
+                    "Required receipt IDs must be an "
+                    "immutable tuple or frozenset."
+                )
+
+            if any(
+                type(identity) is not str or not identity
+                for identity in required_receipt_ids
+            ):
+                raise ValueError(
+                    "Invalid required receipt identity."
+                )
+
+            required_receipts = frozenset(
+                required_receipt_ids
+            )
+
+            if (
+                len(required_receipts)
+                != len(required_receipt_ids)
+            ):
+                raise ValueError(
+                    "Duplicate required receipt identity."
+                )
 
         records = universe.symbolic_replay_outbox
 
@@ -249,8 +284,27 @@ class SymbolicReplayRecoveryAuditor:
                         "Bootstrap outbox batch lineage mismatch."
                     )
 
-            # All checkpoint and cross-file checks
-            # have succeeded before memory publication.
+            # Both checkpoint locks are held here.
+            # A trusted external witness may establish
+            # that particular receipt IDs existed
+            # before a suspected local rollback.
+            if required_receipts is not None:
+                current_receipts = frozenset(
+                    receipt.id
+                    for receipt in receiver.receipts
+                )
+
+                if not required_receipts.issubset(
+                    current_receipts
+                ):
+                    raise ValueError(
+                        "Trusted receipt witness mismatch: "
+                        "required durable receipt missing."
+                    )
+
+            # All checkpoint, lineage and optional
+            # witness checks have succeeded before
+            # memory publication.
             SymbolicReplayOutbox.restore(
                 universe,
                 [
