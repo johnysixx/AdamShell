@@ -22,6 +22,9 @@ from universe.symbolic_replay_outbox import (
 from universe.symbolic_replay_outbox_store import (
     SymbolicReplayOutboxStore,
 )
+from universe.symbolic_replay_receipt_witness import (
+    SymbolicReplayReceiptWitness,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -188,6 +191,7 @@ class SymbolicReplayRecoveryAuditor:
         cls, universe, *, outbox_path, inbox_path,
         expected_batch_sha256=None,
         required_receipt_ids=None,
+        trusted_witness=None,
     ):
         """Restore delivery state only after full audit.
 
@@ -195,6 +199,16 @@ class SymbolicReplayRecoveryAuditor:
         The target outbox must be empty. Quantum and
         symbolic runtime state is never replayed here.
         """
+        if (
+            trusted_witness is not None
+            and type(trusted_witness)
+            is not SymbolicReplayReceiptWitness
+        ):
+            raise TypeError(
+                "Trusted witness must be a canonical "
+                "SymbolicReplayReceiptWitness."
+            )
+
         if expected_batch_sha256 is not None and (
             type(expected_batch_sha256) is not str
             or len(expected_batch_sha256) != 64
@@ -268,9 +282,13 @@ class SymbolicReplayRecoveryAuditor:
             inbox_path,
         ) as (report, events, receiver):
 
-            # This check runs while both checkpoint
-            # locks are held, before runtime publication.
-            if expected_batch_sha256 is not None:
+            # Both checkpoint locks are held here.
+            # Compute identity from the audited events,
+            # not from the caller's in-memory registry.
+            if (
+                expected_batch_sha256 is not None
+                or trusted_witness is not None
+            ):
                 actual_batch_sha256 = (
                     SymbolicReplayOutboxStore
                     .lineage_digest(
@@ -279,9 +297,42 @@ class SymbolicReplayRecoveryAuditor:
                     )
                 )
 
-                if actual_batch_sha256 != expected_batch_sha256:
+                if (
+                    expected_batch_sha256 is not None
+                    and actual_batch_sha256
+                    != expected_batch_sha256
+                ):
                     raise ValueError(
                         "Bootstrap outbox batch lineage mismatch."
+                    )
+
+            if trusted_witness is not None:
+                if (
+                    trusted_witness.universe_id
+                    != str(universe.id)
+                ):
+                    raise ValueError(
+                        "Trusted witness universe mismatch."
+                    )
+
+                if (
+                    trusted_witness.batch_sha256
+                    != actual_batch_sha256
+                ):
+                    raise ValueError(
+                        "Trusted witness batch lineage mismatch."
+                    )
+
+                persisted_receipt_ids = frozenset(
+                    receipt.id
+                    for receipt in receiver.receipts
+                )
+
+                if not frozenset(
+                    trusted_witness.receipt_ids
+                ).issubset(persisted_receipt_ids):
+                    raise ValueError(
+                        "Trusted witness missing confirmed receipt."
                     )
 
             # Both checkpoint locks are held here.
