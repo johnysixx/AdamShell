@@ -9,6 +9,9 @@ from universe.symbolic_replay_outbox import (
     SymbolicReplayOutbox,
     SymbolicReplayOutboxEvent,
 )
+from universe.symbolic_replay_file_lock import (
+    exclusive_inbox_lock,
+)
 
 
 _FORMAT = "adamshell.symbolic_replay_outbox"
@@ -16,10 +19,13 @@ _VERSION = 1
 
 
 class SymbolicReplayOutboxStore:
-    """Single-writer durable symbolic delivery checkpoint.
+    """Durable symbolic delivery checkpoint.
 
-    Uses atomic file replacement. Concurrent writers and
-    whole-runtime persistence are outside this boundary.
+    Cooperative writers use one cross-process file lock.
+    A durable dispatch holds that lock across validation,
+    external delivery and acknowledgement persistence.
+
+    Whole-runtime persistence is outside this boundary.
     """
 
     @staticmethod
@@ -229,6 +235,17 @@ class SymbolicReplayOutboxStore:
 
     @classmethod
     def save(cls, universe, path, *, require_new=False):
+        with exclusive_inbox_lock(path):
+            return cls._save_locked(
+                universe,
+                path,
+                require_new=require_new,
+            )
+
+    @classmethod
+    def _save_locked(
+        cls, universe, path, *, require_new=False,
+    ):
         path = Path(path)
 
         records = cls._records(
@@ -298,6 +315,28 @@ class SymbolicReplayOutboxStore:
         path,
         index,
         acknowledged,
+        *,
+        _lock_held=False,
+    ):
+        if _lock_held:
+            return cls._persist_ack_locked(
+                universe,
+                path,
+                index,
+                acknowledged,
+            )
+
+        with exclusive_inbox_lock(path):
+            return cls._persist_ack_locked(
+                universe,
+                path,
+                index,
+                acknowledged,
+            )
+
+    @classmethod
+    def _persist_ack_locked(
+        cls, universe, path, index, acknowledged,
     ):
         records = cls.ensure_current(universe, path)
 
@@ -324,3 +363,54 @@ class SymbolicReplayOutboxStore:
             path,
             cls._document(universe.id, updated),
         )
+
+    @classmethod
+    def dispatch(cls, universe, path, *, sink=None):
+        """Serialize durable delivery and its ACKs.
+
+        A stale sender is rejected before invoking the sink.
+        ACK callbacks reuse the already-held file lock.
+        """
+        with exclusive_inbox_lock(path):
+            cls.ensure_current(universe, path)
+
+            return SymbolicReplayOutbox.dispatch(
+                universe,
+                sink=sink,
+                persist_ack=lambda index, event: (
+                    cls.persist_ack(
+                        universe,
+                        path,
+                        index,
+                        event,
+                        _lock_held=True,
+                    )
+                ),
+            )
+
+    @classmethod
+    def publish_and_dispatch(cls, universe, path):
+        """Publish a new durable outbox before delivery.
+
+        The first checkpoint and every following ACK use
+        the same lock as existing durable senders.
+        """
+        with exclusive_inbox_lock(path):
+            cls._save_locked(
+                universe,
+                path,
+                require_new=True,
+            )
+
+            return SymbolicReplayOutbox.dispatch(
+                universe,
+                persist_ack=lambda index, event: (
+                    cls.persist_ack(
+                        universe,
+                        path,
+                        index,
+                        event,
+                        _lock_held=True,
+                    )
+                ),
+            )

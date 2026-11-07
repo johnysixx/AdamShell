@@ -714,27 +714,16 @@ class Universe:
         Custom sinks receive immutable event records with IDs.
         The default sink is UniverseLogger.event.
         """
-        persist_ack = None
-
         if durable_outbox_path is not None:
-            SymbolicReplayOutboxStore.ensure_current(
+            return SymbolicReplayOutboxStore.dispatch(
                 self,
                 durable_outbox_path,
-            )
-
-            persist_ack = lambda index, event: (
-                SymbolicReplayOutboxStore.persist_ack(
-                    self,
-                    durable_outbox_path,
-                    index,
-                    event,
-                )
+                sink=sink,
             )
 
         return SymbolicReplayOutbox.dispatch(
             self,
             sink=sink,
-            persist_ack=persist_ack,
         )
 
     def save_symbolic_replay_outbox(self, path):

@@ -362,29 +362,15 @@ class AtomicSymbolicQuantumReplayer:
         # Runtime and outbox have both committed.
         # Only delivery may fail now. Successful records
         # are acknowledged; failed records remain pending.
-        persist_ack = None
-
         if durable_outbox_path is not None:
-            # Runtime is committed. Save before the
-            # first external delivery attempt.
-            SymbolicReplayOutboxStore.save(
+            # Runtime has committed. Coordinate durable
+            # publication and external delivery with
+            # other processes using the same checkpoint.
+            SymbolicReplayOutboxStore.publish_and_dispatch(
                 universe,
                 durable_outbox_path,
-                require_new=True,
             )
-
-            persist_ack = lambda index, event: (
-                SymbolicReplayOutboxStore.persist_ack(
-                    universe,
-                    durable_outbox_path,
-                    index,
-                    event,
-                )
-            )
-
-        SymbolicReplayOutbox.dispatch(
-            universe,
-            persist_ack=persist_ack,
-        )
+        else:
+            SymbolicReplayOutbox.dispatch(universe)
 
         return tuple(universe.quantum_boxes)
