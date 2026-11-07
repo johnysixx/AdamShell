@@ -440,6 +440,7 @@ class SymbolicReplayBootstrap:
         manifest_path,
         required_receipt_ids=None,
         trusted_witness=None,
+        witness_authority=None,
     ):
         """Restore only after READY and successful A22 audit.
 
@@ -468,4 +469,5 @@ class SymbolicReplayBootstrap:
                 expected_batch_sha256=batch_sha256,
                 required_receipt_ids=required_receipt_ids,
                 trusted_witness=trusted_witness,
+                witness_authority=witness_authority,
             )

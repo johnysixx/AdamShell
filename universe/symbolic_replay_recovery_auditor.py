@@ -25,6 +25,10 @@ from universe.symbolic_replay_outbox_store import (
 from universe.symbolic_replay_receipt_witness import (
     SymbolicReplayReceiptWitness,
 )
+from universe.symbolic_replay_witness_authority import (
+    SymbolicReplayWitnessAuthority,
+    SymbolicReplayWitnessRevision,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -192,6 +196,7 @@ class SymbolicReplayRecoveryAuditor:
         expected_batch_sha256=None,
         required_receipt_ids=None,
         trusted_witness=None,
+        witness_authority=None,
     ):
         """Restore delivery state only after full audit.
 
@@ -207,6 +212,27 @@ class SymbolicReplayRecoveryAuditor:
             raise TypeError(
                 "Trusted witness must be a canonical "
                 "SymbolicReplayReceiptWitness."
+            )
+
+        if (
+            witness_authority is not None
+            and not isinstance(
+                witness_authority,
+                SymbolicReplayWitnessAuthority,
+            )
+        ):
+            raise TypeError(
+                "Witness authority must implement "
+                "SymbolicReplayWitnessAuthority."
+            )
+
+        if (
+            witness_authority is not None
+            and trusted_witness is not None
+        ):
+            raise ValueError(
+                "Provide trusted_witness or "
+                "witness_authority, not both."
             )
 
         if expected_batch_sha256 is not None and (
@@ -288,6 +314,7 @@ class SymbolicReplayRecoveryAuditor:
             if (
                 expected_batch_sha256 is not None
                 or trusted_witness is not None
+                or witness_authority is not None
             ):
                 actual_batch_sha256 = (
                     SymbolicReplayOutboxStore
@@ -305,6 +332,29 @@ class SymbolicReplayRecoveryAuditor:
                     raise ValueError(
                         "Bootstrap outbox batch lineage mismatch."
                     )
+
+            # The authority is queried inside the
+            # outbox/inbox lock scope, after checkpoint
+            # audit and before runtime publication.
+            # Failure must never fall back silently.
+            if witness_authority is not None:
+                current_revision = (
+                    witness_authority.read_current(
+                        universe_id=str(universe.id),
+                        batch_sha256=actual_batch_sha256,
+                    )
+                )
+
+                if (
+                    type(current_revision)
+                    is not SymbolicReplayWitnessRevision
+                ):
+                    raise TypeError(
+                        "Witness authority returned "
+                        "a noncanonical revision."
+                    )
+
+                trusted_witness = current_revision.witness
 
             if trusted_witness is not None:
                 if (
