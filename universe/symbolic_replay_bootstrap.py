@@ -232,6 +232,19 @@ class SymbolicReplayBootstrap:
 
         return document["state"]
 
+    @staticmethod
+    def _assert_initial_snapshot(
+        universe, registry, records,
+    ):
+        """Reject canonical registry drift during bootstrap."""
+        if (
+            universe.symbolic_replay_outbox is not registry
+            or tuple(registry) != records
+        ):
+            raise RuntimeError(
+                "Bootstrap outbox changed during initialization."
+            )
+
     @classmethod
     def initialize(
         cls,
@@ -271,8 +284,9 @@ class SymbolicReplayBootstrap:
                             "Bootstrap requires canonical outbox list."
                         )
 
+                    registry = universe.symbolic_replay_outbox
                     records = SymbolicReplayOutboxStore._records(
-                        universe.symbolic_replay_outbox
+                        registry
                     )
 
                     if any(event.delivered for event in records):
@@ -299,12 +313,29 @@ class SymbolicReplayBootstrap:
                         ),
                     )
 
-                    # Locks are already held, so do not
-                    # reacquire the non-reentrant lock.
-                    SymbolicReplayOutboxStore._save_locked(
-                        universe,
+                    # Reject changes before writing the
+                    # first checkpoint. Leave PREPARING intact
+                    # when canonical memory has drifted.
+                    cls._assert_initial_snapshot(
+                        universe, registry, records,
+                    )
+
+                    # Locks are already held. Save exactly
+                    # the immutable snapshot captured above;
+                    # do not reread the live registry.
+                    SymbolicReplayOutboxStore.prepare_new(
+                        outbox
+                    )
+                    SymbolicReplayOutboxStore._write(
                         outbox,
-                        require_new=True,
+                        SymbolicReplayOutboxStore._document(
+                            universe.id,
+                            records,
+                        ),
+                    )
+
+                    cls._assert_initial_snapshot(
+                        universe, registry, records,
                     )
 
                     receiver = DurableSymbolicReplayInbox(
@@ -315,6 +346,33 @@ class SymbolicReplayBootstrap:
                     # Explicit empty ledger initialization.
                     receiver._write(())
 
+                    cls._assert_initial_snapshot(
+                        universe, registry, records,
+                    )
+
+                    # Ensure the immutable disk checkpoint
+                    # matches the captured canonical records.
+                    persisted = SymbolicReplayOutboxStore.read(
+                        universe,
+                        outbox,
+                    )
+
+                    if persisted != records:
+                        raise ValueError(
+                            "Bootstrap checkpoint differs "
+                            "from initial snapshot."
+                        )
+
+                    report = (
+                        SymbolicReplayRecoveryAuditor
+                        ._validate_pair(
+                            universe, persisted, (),
+                        )
+                    )
+
+                    # READY is published only after all
+                    # checks have passed. A later mutation
+                    # cannot alter the persisted snapshot.
                     cls._write(
                         manifest,
                         cls._document(
@@ -323,11 +381,13 @@ class SymbolicReplayBootstrap:
                         ),
                     )
 
-                    report = (
-                        SymbolicReplayRecoveryAuditor
-                        ._validate_pair(
-                            universe, records, (),
-                        )
+                    # Detect a mutation injected while
+                    # the READY manifest was being written.
+                    # READY remains valid for recovery from
+                    # a fresh Universe, but no misleading
+                    # report is returned to this caller.
+                    cls._assert_initial_snapshot(
+                        universe, registry, records,
                     )
 
                     return report, receiver
