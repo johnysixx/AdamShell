@@ -378,12 +378,35 @@ class SymbolicReplayRecoveryAuditor:
                     for receipt in receiver.receipts
                 )
 
-                if not frozenset(
+                witnessed_ids = frozenset(
                     trusted_witness.receipt_ids
-                ).issubset(persisted_receipt_ids):
+                )
+
+                if not witnessed_ids.issubset(
+                    persisted_receipt_ids
+                ):
                     raise ValueError(
                         "Trusted witness missing confirmed receipt."
                     )
+
+                # A31 strict mode is enabled only when
+                # recovery queries the current authority.
+                # Preserve caller-supplied A27 witness
+                # semantics for legacy integrations.
+                if witness_authority is not None:
+                    delivered_ids = frozenset(
+                        event.id
+                        for event in events
+                        if event.delivered
+                    )
+
+                    if not delivered_ids.issubset(
+                        witnessed_ids
+                    ):
+                        raise ValueError(
+                            "Durable ACK missing trusted "
+                            "authority witness."
+                        )
 
             # Both checkpoint locks are held here.
             # A trusted external witness may establish

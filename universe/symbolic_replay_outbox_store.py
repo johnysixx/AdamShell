@@ -391,14 +391,28 @@ class SymbolicReplayOutboxStore:
         )
 
     @classmethod
-    def dispatch(cls, universe, path, *, sink=None):
+    def dispatch(
+        cls, universe, path, *, sink=None, preflight=None,
+    ):
         """Serialize durable delivery and its ACKs.
 
         A stale sender is rejected before invoking the sink.
         ACK callbacks reuse the already-held file lock.
         """
+        if preflight is not None and not callable(
+            preflight
+        ):
+            raise TypeError(
+                "Durable dispatch preflight must be callable."
+            )
+
         with exclusive_inbox_lock(path):
             cls.ensure_current(universe, path)
+
+            # Always run under the outbox lock, including
+            # an already completed durable batch.
+            if preflight is not None:
+                preflight()
 
             return SymbolicReplayOutbox.dispatch(
                 universe,

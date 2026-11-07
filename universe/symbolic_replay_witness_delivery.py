@@ -182,6 +182,32 @@ class SymbolicReplayWitnessDelivery:
                 "Witness authority ahead of local inbox."
             )
 
+    def _preflight(self):
+        """Validate all durable ACKs before dispatch.
+
+        The caller holds the outbox checkpoint lock.
+        This also executes when no event is pending.
+        """
+        current = self._current()
+        receipts = self._receipts()
+
+        self._require_receipts(current, receipts)
+
+        witnessed = frozenset(
+            current.witness.receipt_ids
+        )
+
+        delivered = frozenset(
+            event.id
+            for event in self._registry
+            if event.delivered
+        )
+
+        if not delivered.issubset(witnessed):
+            raise ValueError(
+                "Delivered outbox ACK missing witness."
+            )
+
     def _accept(self, event):
         # This callback is invoked only by durable
         # SymbolicReplayOutboxStore.dispatch().
@@ -276,8 +302,28 @@ class SymbolicReplayWitnessDelivery:
                 "Witness authority publication not confirmed."
             )
 
-        # Only now may SymbolicReplayOutbox.dispatch
-        # persist the ACK and update canonical memory.
+        # A canonical publish() response alone does
+        # not establish that the authority committed.
+        # Require a fresh authoritative read before ACK.
+        readback = self._current()
+        self._require_receipts(readback, persisted)
+
+        if (
+            readback.revision < published.revision
+            or not frozenset(
+                confirmed_ids
+            ).issubset(
+                readback.witness.receipt_ids
+            )
+        ):
+            raise ValueError(
+                "Witness authority publication "
+                "read-back mismatch."
+            )
+
+        # This relies on the authority contract:
+        # linearizable reads and durable CAS.
+        # It is not an external transaction.
         return True
 
     def dispatch(self):
@@ -311,4 +357,5 @@ class SymbolicReplayWitnessDelivery:
             self.universe,
             self.outbox_path,
             sink=self._accept,
+            preflight=self._preflight,
         )
