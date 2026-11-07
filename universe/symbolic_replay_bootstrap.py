@@ -29,7 +29,7 @@ from universe.symbolic_replay_recovery_auditor import (
 
 
 _FORMAT = "adamshell.symbolic_replay_bootstrap"
-_VERSION = 1
+_VERSION = 2
 
 
 class SymbolicReplayBootstrap:
@@ -93,7 +93,8 @@ class SymbolicReplayBootstrap:
 
     @classmethod
     def _document(
-        cls, universe, outbox, inbox, *, state,
+        cls, universe, outbox, inbox, *,
+        state, batch_sha256,
     ):
         payload = {
             "format": _FORMAT,
@@ -102,6 +103,7 @@ class SymbolicReplayBootstrap:
             "outbox_name": outbox.name,
             "inbox_name": inbox.name,
             "state": state,
+            "batch_sha256": batch_sha256,
         }
 
         return {
@@ -164,6 +166,19 @@ class SymbolicReplayBootstrap:
         ) as stream:
             document = json.load(stream)
 
+        # V1 has no immutable batch identity.
+        # Never silently treat it as a V2 manifest.
+        if (
+            type(document) is dict
+            and document.get("format") == _FORMAT
+            and type(document.get("version")) is int
+            and document["version"] == 1
+        ):
+            raise ValueError(
+                "Legacy bootstrap manifest v1 lacks batch "
+                "lineage; manual migration required."
+            )
+
         expected = {
             "format",
             "version",
@@ -171,6 +186,7 @@ class SymbolicReplayBootstrap:
             "outbox_name",
             "inbox_name",
             "state",
+            "batch_sha256",
             "sha256",
         }
 
@@ -190,6 +206,12 @@ class SymbolicReplayBootstrap:
             or type(document["outbox_name"]) is not str
             or type(document["inbox_name"]) is not str
             or type(document["state"]) is not str
+            or type(document["batch_sha256"]) is not str
+            or len(document["batch_sha256"]) != 64
+            or any(
+                char not in "0123456789abcdef"
+                for char in document["batch_sha256"]
+            )
         ):
             raise ValueError(
                 "Invalid bootstrap manifest fields."
@@ -204,6 +226,7 @@ class SymbolicReplayBootstrap:
                 "outbox_name",
                 "inbox_name",
                 "state",
+                "batch_sha256",
             )
         }
 
@@ -230,7 +253,10 @@ class SymbolicReplayBootstrap:
                 "Invalid bootstrap lifecycle state."
             )
 
-        return document["state"]
+        return (
+            document["state"],
+            document["batch_sha256"],
+        )
 
     @staticmethod
     def _assert_initial_snapshot(
@@ -303,6 +329,16 @@ class SymbolicReplayBootstrap:
                             "Cannot bootstrap during dispatch."
                         )
 
+                    # Capture immutable event identity
+                    # once, before the PREPARING marker.
+                    batch_sha256 = (
+                        SymbolicReplayOutboxStore
+                        .lineage_digest(
+                            universe.id,
+                            records,
+                        )
+                    )
+
                     # A persistent marker must predate
                     # every newly created checkpoint.
                     cls._write(
@@ -310,6 +346,7 @@ class SymbolicReplayBootstrap:
                         cls._document(
                             universe, outbox, inbox,
                             state="PREPARING",
+                            batch_sha256=batch_sha256,
                         ),
                     )
 
@@ -378,6 +415,7 @@ class SymbolicReplayBootstrap:
                         cls._document(
                             universe, outbox, inbox,
                             state="READY",
+                            batch_sha256=batch_sha256,
                         ),
                     )
 
@@ -411,7 +449,7 @@ class SymbolicReplayBootstrap:
         )
 
         with exclusive_inbox_lock(manifest):
-            state = cls._read(
+            state, batch_sha256 = cls._read(
                 universe, outbox, inbox, manifest,
             )
 
@@ -425,4 +463,5 @@ class SymbolicReplayBootstrap:
                 universe,
                 outbox_path=outbox,
                 inbox_path=inbox,
+                expected_batch_sha256=batch_sha256,
             )

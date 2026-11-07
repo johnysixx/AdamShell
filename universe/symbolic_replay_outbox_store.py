@@ -82,6 +82,32 @@ class SymbolicReplayOutboxStore:
         return hashlib.sha256(canonical).hexdigest()
 
     @classmethod
+    def lineage_digest(cls, universe_id, records):
+        """Hash immutable batch contents, excluding ACK flags.
+
+        A delivery acknowledgement changes `delivered`
+        but must not change this batch identity.
+        """
+        records = cls._records(records)
+
+        payload = {
+            "format": "adamshell.symbolic_replay_batch_identity",
+            "version": 1,
+            "universe_id": str(universe_id),
+            "events": [
+                {
+                    "id": event.id,
+                    "word_id": event.word_id,
+                    "sequence": event.sequence,
+                    "message": event.message,
+                }
+                for event in records
+            ],
+        }
+
+        return cls._checksum(payload)
+
+    @classmethod
     def _document(cls, universe_id, records):
         payload = cls._payload(
             universe_id,

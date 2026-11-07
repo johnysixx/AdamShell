@@ -186,6 +186,7 @@ class SymbolicReplayRecoveryAuditor:
     @classmethod
     def restore(
         cls, universe, *, outbox_path, inbox_path,
+        expected_batch_sha256=None,
     ):
         """Restore delivery state only after full audit.
 
@@ -193,6 +194,18 @@ class SymbolicReplayRecoveryAuditor:
         The target outbox must be empty. Quantum and
         symbolic runtime state is never replayed here.
         """
+        if expected_batch_sha256 is not None and (
+            type(expected_batch_sha256) is not str
+            or len(expected_batch_sha256) != 64
+            or any(
+                char not in "0123456789abcdef"
+                for char in expected_batch_sha256
+            )
+        ):
+            raise ValueError(
+                "Invalid expected batch lineage digest."
+            )
+
         records = universe.symbolic_replay_outbox
 
         if not isinstance(records, list):
@@ -219,6 +232,22 @@ class SymbolicReplayRecoveryAuditor:
             outbox_path,
             inbox_path,
         ) as (report, events, receiver):
+
+            # This check runs while both checkpoint
+            # locks are held, before runtime publication.
+            if expected_batch_sha256 is not None:
+                actual_batch_sha256 = (
+                    SymbolicReplayOutboxStore
+                    .lineage_digest(
+                        universe.id,
+                        events,
+                    )
+                )
+
+                if actual_batch_sha256 != expected_batch_sha256:
+                    raise ValueError(
+                        "Bootstrap outbox batch lineage mismatch."
+                    )
 
             # All checkpoint and cross-file checks
             # have succeeded before memory publication.
