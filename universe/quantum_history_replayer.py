@@ -142,38 +142,115 @@ class UniverseQuantumHistoryReplayer:
             retained_box_events = deepcopy(box_events)
             retained_clock_events = deepcopy(clock_events)
 
-        # Both streams succeeded. Publish their state
-        # without replacing existing Universe objects.
-        universe.quantum_boxes.extend(
-            staged.quantum_boxes
+        # Canonical registries must support in-place rollback.
+        registries = (
+            universe.quantum_boxes,
+            universe.quantum_events,
+            universe.quantum_clock_events,
         )
 
-        statistics.total_quantum_boxes_created = (
-            staged.statistics.total_quantum_boxes_created
-        )
-        statistics.total_quantum_collapses = (
-            staged.statistics.total_quantum_collapses
-        )
-        statistics.total_quantum_boxes_disappeared = (
-            staged.statistics.total_quantum_boxes_disappeared
+        if not all(
+            isinstance(registry, list)
+            for registry in registries
+        ):
+            raise TypeError(
+                "Combined quantum replay requires list registries."
+            )
+
+        # Snapshot the existing canonical objects before
+        # publishing any reconstructed state.
+        boxes_before = tuple(universe.quantum_boxes)
+        box_events_before = tuple(universe.quantum_events)
+        clock_events_before = tuple(
+            universe.quantum_clock_events
         )
 
-        for item in fields(UniverseQuantumState):
-            setattr(
-                state,
-                item.name,
-                getattr(
-                    staged.quantum_state,
+        statistic_names = (
+            "total_quantum_boxes_created",
+            "total_quantum_collapses",
+            "total_quantum_boxes_disappeared",
+        )
+
+        statistics_before = tuple(
+            (name, getattr(statistics, name))
+            for name in statistic_names
+        )
+
+        clock_before = tuple(
+            (item.name, getattr(state, item.name))
+            for item in fields(UniverseQuantumState)
+        )
+
+        try:
+            # Publish into the original canonical objects.
+            universe.quantum_boxes.extend(
+                staged.quantum_boxes
+            )
+
+            for name in statistic_names:
+                setattr(
+                    statistics,
+                    name,
+                    getattr(staged.statistics, name),
+                )
+
+            for item in fields(UniverseQuantumState):
+                setattr(
+                    state,
                     item.name,
-                ),
+                    getattr(
+                        staged.quantum_state,
+                        item.name,
+                    ),
+                )
+
+            if preserve_history:
+                universe.quantum_events.extend(
+                    retained_box_events
+                )
+                universe.quantum_clock_events.extend(
+                    retained_clock_events
+                )
+
+        except BaseException:
+            # A publication hook may append or assign
+            # successfully and then raise. Restore the
+            # original containers without invoking their
+            # potentially faulty overridden methods.
+            list.__setitem__(
+                universe.quantum_boxes,
+                slice(None),
+                boxes_before,
             )
 
-        if preserve_history:
-            universe.quantum_events.extend(
-                retained_box_events
+            list.__setitem__(
+                universe.quantum_events,
+                slice(None),
+                box_events_before,
             )
-            universe.quantum_clock_events.extend(
-                retained_clock_events
+
+            list.__setitem__(
+                universe.quantum_clock_events,
+                slice(None),
+                clock_events_before,
             )
+
+            # Bypass injected __setattr__ failures while
+            # preserving the original object identities.
+            for name, value in statistics_before:
+                object.__setattr__(
+                    statistics,
+                    name,
+                    value,
+                )
+
+            for name, value in clock_before:
+                object.__setattr__(
+                    state,
+                    name,
+                    value,
+                )
+
+            raise
 
         return tuple(universe.quantum_boxes)
