@@ -22,14 +22,6 @@ from universe.symbolic_replay_outbox import (
 from universe.symbolic_replay_outbox_store import (
     SymbolicReplayOutboxStore,
 )
-from universe.symbolic_replay_receipt_witness import (
-    SymbolicReplayReceiptWitness,
-)
-from universe.symbolic_replay_witness_authority import (
-    SymbolicReplayWitnessAuthority,
-    SymbolicReplayWitnessRevision,
-    enforce_trusted_floor,
-)
 
 
 @dataclass(frozen=True, slots=True)
@@ -196,9 +188,6 @@ class SymbolicReplayRecoveryAuditor:
         cls, universe, *, outbox_path, inbox_path,
         expected_batch_sha256=None,
         required_receipt_ids=None,
-        trusted_witness=None,
-        witness_authority=None,
-        trusted_floor=None,
     ):
         """Restore delivery state only after full audit.
 
@@ -206,54 +195,6 @@ class SymbolicReplayRecoveryAuditor:
         The target outbox must be empty. Quantum and
         symbolic runtime state is never replayed here.
         """
-        if (
-            trusted_witness is not None
-            and type(trusted_witness)
-            is not SymbolicReplayReceiptWitness
-        ):
-            raise TypeError(
-                "Trusted witness must be a canonical "
-                "SymbolicReplayReceiptWitness."
-            )
-
-        if (
-            witness_authority is not None
-            and not isinstance(
-                witness_authority,
-                SymbolicReplayWitnessAuthority,
-            )
-        ):
-            raise TypeError(
-                "Witness authority must implement "
-                "SymbolicReplayWitnessAuthority."
-            )
-
-        if (
-            witness_authority is not None
-            and trusted_witness is not None
-        ):
-            raise ValueError(
-                "Provide trusted_witness or "
-                "witness_authority, not both."
-            )
-
-        if (
-            trusted_floor is not None
-            and type(trusted_floor)
-            is not SymbolicReplayWitnessRevision
-        ):
-            raise TypeError(
-                "Trusted witness floor must be canonical."
-            )
-
-        if (
-            trusted_floor is not None
-            and witness_authority is None
-        ):
-            raise ValueError(
-                "Trusted witness floor requires authority."
-            )
-
         if expected_batch_sha256 is not None and (
             type(expected_batch_sha256) is not str
             or len(expected_batch_sha256) != 64
@@ -327,14 +268,9 @@ class SymbolicReplayRecoveryAuditor:
             inbox_path,
         ) as (report, events, receiver):
 
-            # Both checkpoint locks are held here.
-            # Compute identity from the audited events,
-            # not from the caller's in-memory registry.
-            if (
-                expected_batch_sha256 is not None
-                or trusted_witness is not None
-                or witness_authority is not None
-            ):
+            # This check runs while both checkpoint
+            # locks are held, before runtime publication.
+            if expected_batch_sha256 is not None:
                 actual_batch_sha256 = (
                     SymbolicReplayOutboxStore
                     .lineage_digest(
@@ -343,100 +279,10 @@ class SymbolicReplayRecoveryAuditor:
                     )
                 )
 
-                if (
-                    expected_batch_sha256 is not None
-                    and actual_batch_sha256
-                    != expected_batch_sha256
-                ):
+                if actual_batch_sha256 != expected_batch_sha256:
                     raise ValueError(
                         "Bootstrap outbox batch lineage mismatch."
                     )
-
-            # The authority is queried inside the
-            # outbox/inbox lock scope, after checkpoint
-            # audit and before runtime publication.
-            # Failure must never fall back silently.
-            if witness_authority is not None:
-                current_revision = (
-                    witness_authority.read_current(
-                        universe_id=str(universe.id),
-                        batch_sha256=actual_batch_sha256,
-                    )
-                )
-
-                if (
-                    type(current_revision)
-                    is not SymbolicReplayWitnessRevision
-                ):
-                    raise TypeError(
-                        "Witness authority returned "
-                        "a noncanonical revision."
-                    )
-
-                # Verify the independently supplied
-                # minimum while both checkpoint locks
-                # are held, before runtime publication.
-                if trusted_floor is not None:
-                    enforce_trusted_floor(
-                        current_revision,
-                        trusted_floor,
-                        universe_id=str(universe.id),
-                        batch_sha256=actual_batch_sha256,
-                    )
-
-                trusted_witness = current_revision.witness
-
-            if trusted_witness is not None:
-                if (
-                    trusted_witness.universe_id
-                    != str(universe.id)
-                ):
-                    raise ValueError(
-                        "Trusted witness universe mismatch."
-                    )
-
-                if (
-                    trusted_witness.batch_sha256
-                    != actual_batch_sha256
-                ):
-                    raise ValueError(
-                        "Trusted witness batch lineage mismatch."
-                    )
-
-                persisted_receipt_ids = frozenset(
-                    receipt.id
-                    for receipt in receiver.receipts
-                )
-
-                witnessed_ids = frozenset(
-                    trusted_witness.receipt_ids
-                )
-
-                if not witnessed_ids.issubset(
-                    persisted_receipt_ids
-                ):
-                    raise ValueError(
-                        "Trusted witness missing confirmed receipt."
-                    )
-
-                # A31 strict mode is enabled only when
-                # recovery queries the current authority.
-                # Preserve caller-supplied A27 witness
-                # semantics for legacy integrations.
-                if witness_authority is not None:
-                    delivered_ids = frozenset(
-                        event.id
-                        for event in events
-                        if event.delivered
-                    )
-
-                    if not delivered_ids.issubset(
-                        witnessed_ids
-                    ):
-                        raise ValueError(
-                            "Durable ACK missing trusted "
-                            "authority witness."
-                        )
 
             # Both checkpoint locks are held here.
             # A trusted external witness may establish
