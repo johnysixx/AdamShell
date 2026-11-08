@@ -36,6 +36,7 @@ from universe.symbolic_replay_receipt_witness import (
 from universe.symbolic_replay_witness_authority import (
     SymbolicReplayWitnessAuthority,
     SymbolicReplayWitnessRevision,
+    enforce_trusted_floor,
 )
 
 
@@ -58,6 +59,7 @@ class SymbolicReplayWitnessDelivery:
         outbox_path,
         receiver,
         witness_authority,
+        trusted_floor=None,
     ):
         if not isinstance(
             receiver,
@@ -75,6 +77,16 @@ class SymbolicReplayWitnessDelivery:
                 "Witness delivery requires witness authority."
             )
 
+        if (
+            trusted_floor is not None
+            and type(trusted_floor)
+            is not SymbolicReplayWitnessRevision
+        ):
+            raise TypeError(
+                "Trusted witness floor must be canonical."
+            )
+
+        self.trusted_floor = trusted_floor
         self.universe = universe
         self.receiver = receiver
         self.authority = witness_authority
@@ -144,6 +156,15 @@ class SymbolicReplayWitnessDelivery:
             raise ValueError(
                 "Witness authority contains unknown receipt."
             )
+
+        # Run on every current read: completed-batch
+        # preflight, pre-delivery and publication readback.
+        enforce_trusted_floor(
+            revision,
+            self.trusted_floor,
+            universe_id=self.universe_id,
+            batch_sha256=self.batch_sha256,
+        )
 
         return revision
 

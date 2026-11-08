@@ -28,6 +28,7 @@ from universe.symbolic_replay_receipt_witness import (
 from universe.symbolic_replay_witness_authority import (
     SymbolicReplayWitnessAuthority,
     SymbolicReplayWitnessRevision,
+    enforce_trusted_floor,
 )
 
 
@@ -197,6 +198,7 @@ class SymbolicReplayRecoveryAuditor:
         required_receipt_ids=None,
         trusted_witness=None,
         witness_authority=None,
+        trusted_floor=None,
     ):
         """Restore delivery state only after full audit.
 
@@ -233,6 +235,23 @@ class SymbolicReplayRecoveryAuditor:
             raise ValueError(
                 "Provide trusted_witness or "
                 "witness_authority, not both."
+            )
+
+        if (
+            trusted_floor is not None
+            and type(trusted_floor)
+            is not SymbolicReplayWitnessRevision
+        ):
+            raise TypeError(
+                "Trusted witness floor must be canonical."
+            )
+
+        if (
+            trusted_floor is not None
+            and witness_authority is None
+        ):
+            raise ValueError(
+                "Trusted witness floor requires authority."
             )
 
         if expected_batch_sha256 is not None and (
@@ -352,6 +371,17 @@ class SymbolicReplayRecoveryAuditor:
                     raise TypeError(
                         "Witness authority returned "
                         "a noncanonical revision."
+                    )
+
+                # Verify the independently supplied
+                # minimum while both checkpoint locks
+                # are held, before runtime publication.
+                if trusted_floor is not None:
+                    enforce_trusted_floor(
+                        current_revision,
+                        trusted_floor,
+                        universe_id=str(universe.id),
+                        batch_sha256=actual_batch_sha256,
                     )
 
                 trusted_witness = current_revision.witness

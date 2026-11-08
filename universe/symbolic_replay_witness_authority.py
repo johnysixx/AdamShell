@@ -41,6 +41,74 @@ class SymbolicReplayWitnessRevision:
             )
 
 
+def enforce_trusted_floor(
+    current,
+    trusted_floor,
+    *,
+    universe_id,
+    batch_sha256,
+):
+    """Check independently supplied minimum witness state.
+
+    The floor is caller-supplied evidence. This function
+    does NOT authenticate its provenance or freshness.
+
+    A floor obtained from the rolled-back checkpoint
+    cannot protect against rollback of that checkpoint.
+    """
+    if (
+        type(current)
+        is not SymbolicReplayWitnessRevision
+    ):
+        raise TypeError(
+            "Current witness revision must be canonical."
+        )
+
+    if (
+        current.witness.universe_id != universe_id
+        or current.witness.batch_sha256 != batch_sha256
+    ):
+        raise ValueError(
+            "Current witness authority scope mismatch."
+        )
+
+    if trusted_floor is None:
+        return current
+
+    if (
+        type(trusted_floor)
+        is not SymbolicReplayWitnessRevision
+    ):
+        raise TypeError(
+            "Trusted witness floor must be canonical."
+        )
+
+    if (
+        trusted_floor.witness.universe_id != universe_id
+        or trusted_floor.witness.batch_sha256
+        != batch_sha256
+    ):
+        raise ValueError(
+            "Trusted witness floor scope mismatch."
+        )
+
+    if current.revision < trusted_floor.revision:
+        raise ValueError(
+            "Witness authority below trusted floor."
+        )
+
+    if not frozenset(
+        trusted_floor.witness.receipt_ids
+    ).issubset(
+        current.witness.receipt_ids
+    ):
+        raise ValueError(
+            "Witness authority contradicts trusted floor."
+        )
+
+    return current
+
+
 class SymbolicReplayWitnessAuthority:
     """Interface and pure transition rule.
 

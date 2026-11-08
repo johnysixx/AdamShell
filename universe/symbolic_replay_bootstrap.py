@@ -441,6 +441,7 @@ class SymbolicReplayBootstrap:
         required_receipt_ids=None,
         trusted_witness=None,
         witness_authority=None,
+        trusted_floor=None,
     ):
         """Restore only after READY and successful A22 audit.
 
@@ -470,4 +471,5 @@ class SymbolicReplayBootstrap:
                 required_receipt_ids=required_receipt_ids,
                 trusted_witness=trusted_witness,
                 witness_authority=witness_authority,
+                trusted_floor=trusted_floor,
             )
