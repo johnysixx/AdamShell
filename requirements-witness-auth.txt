@@ -1,2 +1,0 @@
-# Optional dependency for A33 signed authority adapter and its tests.
-cryptography>=42,<47
