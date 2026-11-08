@@ -13,6 +13,9 @@ from contextlib import redirect_stdout
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+import pytest
+pytest.importorskip("cryptography", reason="Optional A34 Ed25519 integration")
+
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
@@ -282,6 +285,74 @@ class RealWitnessAuthorityIntegrationTests(unittest.TestCase):
                 witness_authority=authority,
             )
         self.assertEqual(target.symbolic_replay_outbox, [])
+
+    def test_committed_witness_survives_lost_publish_response(self):
+        sender, events, paths, receiver, digest, ledger = (
+            self.setup_batch("postcommit_failure")
+        )
+        floor = ledger.read_current(
+            universe_id=str(sender.id),
+            batch_sha256=digest,
+        )
+        url = self.start_server(ledger)
+        authority = self.authority(
+            self.make_source(url, token=self.token), floor,
+        )
+
+        class CommitThenFail:
+            def read_current(self, **kwargs):
+                return ledger.read_current(**kwargs)
+
+            def publish(self, witness, *, expected_revision):
+                ledger.publish(
+                    witness, expected_revision=expected_revision,
+                )
+                raise ConnectionResetError(
+                    "Simulated response lost after SQLite commit."
+                )
+
+        self.server.ledger = CommitThenFail()
+
+        runner = SymbolicReplayWitnessDelivery(
+            sender,
+            outbox_path=paths[0],
+            receiver=receiver,
+            witness_authority=authority,
+        )
+
+        with self.assertRaises(ConnectionError):
+            runner.dispatch()
+
+        self.assertEqual(len(receiver.receipts), 1)
+        self.assertEqual(
+            ledger.read_current(
+                universe_id=str(sender.id),
+                batch_sha256=digest,
+            ).revision.revision,
+            1,
+        )
+        self.assertFalse(
+            SymbolicReplayOutboxStore.read(
+                sender, paths[0],
+            )[0].delivered
+        )
+
+        # The next request sees the durable remote witness
+        # and completes the pending ACK without a second CAS.
+        self.server.ledger = ledger
+        self.assertEqual(runner.dispatch(), 1)
+        self.assertTrue(
+            SymbolicReplayOutboxStore.read(
+                sender, paths[0],
+            )[0].delivered
+        )
+        self.assertEqual(
+            ledger.read_current(
+                universe_id=str(sender.id),
+                batch_sha256=digest,
+            ).revision.revision,
+            1,
+        )
 
     def test_concurrent_remote_compare_and_swap(self):
         sender, events, paths, receiver, digest, ledger = (
