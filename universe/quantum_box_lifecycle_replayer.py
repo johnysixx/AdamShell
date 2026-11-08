@@ -54,17 +54,57 @@ class QuantumBoxLifecycleReplayer:
             else:
                 QuantumBoxLifecycleOperations.replay_disappeared(staged, event)
 
-        # Commit only after all events replay successfully.
-        universe.quantum_boxes.extend(staged.quantum_boxes)
+        # Canonical list state is required for in-place
+        # rollback without replacing the registry object.
+        boxes = universe.quantum_boxes
 
-        statistics.total_quantum_boxes_created = (
-            staged.statistics.total_quantum_boxes_created
-        )
-        statistics.total_quantum_collapses = (
-            staged.statistics.total_quantum_collapses
-        )
-        statistics.total_quantum_boxes_disappeared = (
-            staged.statistics.total_quantum_boxes_disappeared
+        if not isinstance(boxes, list):
+            raise TypeError(
+                "Quantum box registry must be a list."
+            )
+
+        boxes_before = tuple(boxes)
+
+        statistic_names = (
+            "total_quantum_boxes_created",
+            "total_quantum_collapses",
+            "total_quantum_boxes_disappeared",
         )
 
-        return tuple(universe.quantum_boxes)
+        statistics_before = tuple(
+            (name, getattr(statistics, name))
+            for name in statistic_names
+        )
+
+        try:
+            boxes.extend(staged.quantum_boxes)
+
+            for name in statistic_names:
+                setattr(
+                    statistics,
+                    name,
+                    getattr(staged.statistics, name),
+                )
+
+        except BaseException:
+            # A list extension may append successfully
+            # before raising. Restore its original contents
+            # using the built-in list implementation.
+            list.__setitem__(
+                boxes,
+                slice(None),
+                boxes_before,
+            )
+
+            # Restore the original statistics without
+            # invoking a potentially failing setter.
+            for name, value in statistics_before:
+                object.__setattr__(
+                    statistics,
+                    name,
+                    value,
+                )
+
+            raise
+
+        return tuple(boxes)

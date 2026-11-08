@@ -72,13 +72,35 @@ class UniverseQuantumClockReplayer:
                 observer=event.observer,
             )
 
-        # Commit only after the complete stream is valid.
-        # Preserve the identity of the original state object.
-        for item in fields(UniverseQuantumState):
-            setattr(
-                state,
+        # Snapshot the original canonical clock fields
+        # before publishing the fully validated replay.
+        original = tuple(
+            (
                 item.name,
-                getattr(staged, item.name),
+                getattr(state, item.name),
             )
+            for item in fields(UniverseQuantumState)
+        )
+
+        try:
+            for item in fields(UniverseQuantumState):
+                setattr(
+                    state,
+                    item.name,
+                    getattr(staged, item.name),
+                )
+
+        except BaseException:
+            # A setter may assign and then raise.
+            # Bypass the failing override during rollback,
+            # preserving the original state object's identity.
+            for name, value in original:
+                object.__setattr__(
+                    state,
+                    name,
+                    value,
+                )
+
+            raise
 
         return state
