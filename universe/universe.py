@@ -92,6 +92,9 @@ from universe.quantum_box_lifecycle_operations import (
 from universe.quantum_box_open_transaction import (
     QuantumBoxOpenTransaction,
 )
+from universe.quantum_tick_transaction import (
+    QuantumTickTransaction,
+)
 from universe.universe_tick_result_state import (
     UniverseTickPhaseCompletedResult,
     UniverseTickPhaseErrorResult,
@@ -835,6 +838,11 @@ class Universe:
         return cronenberg
 
     def tick_quantum_unprotected(self):
+        if not self.quantum_state.enabled:
+            return
+        return QuantumTickTransaction.execute(self)
+
+    def _tick_quantum_unprotected_impl(self):
         if not self.quantum_state.enabled:
             return
         self.quantum_state.advance_tick()
