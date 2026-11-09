@@ -101,6 +101,9 @@ from universe.cronenberg_publication_transaction import (
 from universe.cronenberg_encounter_batch_transaction import (
     CronenbergEncounterBatchTransaction,
 )
+from universe.entity_tick_transaction import (
+    EntityTickTransaction,
+)
 from universe.universe_tick_result_state import (
     UniverseTickPhaseCompletedResult,
     UniverseTickPhaseErrorResult,
@@ -1248,7 +1251,14 @@ class Universe:
             result = (
                 self._run_tick_operation(
                     phase="entities",
-                    operation=tick,
+                    operation=(
+                        lambda current_universe, _entity=entity, _tick=tick:
+                            EntityTickTransaction.execute(
+                                current_universe,
+                                _entity,
+                                lambda: _tick(current_universe),
+                            )
+                    ),
                     source_component=(
                         f"entity:{entity_name}"
                     ),

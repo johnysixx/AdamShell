@@ -1,0 +1,206 @@
+from dataclasses import fields, is_dataclass
+
+from universe.cronenberg_encounter_batch_transaction import (
+    CronenbergEncounterBatchTransaction,
+)
+
+
+class EntityRuntimeSnapshot:
+    """Capture supported in-memory entity object state."""
+
+    # Bounded traversal with identity-based cycle detection.
+    MAX_DEPTH = 16
+
+    def __init__(self, universe):
+        self.universe = universe
+        self.records = []
+        self.seen = set()
+
+        for entity in tuple(universe.entities):
+            self._capture(entity, 0)
+
+    def _capture(self, value, depth):
+        if depth > self.MAX_DEPTH:
+            return
+
+        if value is self.universe or value is None:
+            return
+
+        if isinstance(
+            value, (str, bytes, int, float, bool, complex)
+        ):
+            return
+
+        if callable(value):
+            return
+
+        identity = id(value)
+
+        if identity in self.seen:
+            return
+
+        # Immutable containers can contain mutable objects.
+        # Traverse their members without replacing the tuple
+        # or frozenset itself.
+        if isinstance(value, (tuple, frozenset)):
+            self.seen.add(identity)
+
+            for item in value:
+                self._capture(item, depth + 1)
+
+            return
+
+        if isinstance(value, list):
+            self.seen.add(identity)
+            previous = tuple(value)
+            self.records.append(
+                ("list", value, previous)
+            )
+
+            for item in previous:
+                self._capture(item, depth + 1)
+
+            return
+
+        if isinstance(value, dict):
+            self.seen.add(identity)
+            previous = tuple(value.items())
+            self.records.append(
+                ("dict", value, previous)
+            )
+
+            for key, item in previous:
+                self._capture(key, depth + 1)
+                self._capture(item, depth + 1)
+
+            return
+
+        if isinstance(value, set):
+            self.seen.add(identity)
+            previous = frozenset(value)
+            self.records.append(
+                ("set", value, previous)
+            )
+
+            for item in previous:
+                self._capture(item, depth + 1)
+
+            return
+
+        try:
+            attributes = vars(value)
+        except TypeError:
+            attributes = None
+
+        if isinstance(attributes, dict):
+            self.seen.add(identity)
+            previous = tuple(attributes.items())
+
+            self.records.append(
+                ("object", attributes, previous)
+            )
+
+            for name, item in previous:
+                if name in (
+                    "universe",
+                    "_universe",
+                ):
+                    continue
+
+                self._capture(item, depth + 1)
+
+            return
+
+        if is_dataclass(value) and not isinstance(
+            value, type
+        ):
+            self.seen.add(identity)
+            previous = tuple(
+                (field.name, getattr(value, field.name))
+                for field in fields(value)
+            )
+
+            self.records.append(
+                ("dataclass", value, previous)
+            )
+
+            for _, item in previous:
+                self._capture(item, depth + 1)
+
+    def restore(self):
+        # Restore nested records before their owners.
+        for kind, target, previous in reversed(
+            self.records
+        ):
+            if kind == "list":
+                list.__setitem__(
+                    target, slice(None), previous
+                )
+
+            elif kind == "dict":
+                dict.clear(target)
+                dict.update(target, previous)
+
+            elif kind == "set":
+                set.clear(target)
+                set.update(target, previous)
+
+            elif kind == "object":
+                dict.clear(target)
+                dict.update(target, previous)
+
+            elif kind == "dataclass":
+                for name, value in previous:
+                    object.__setattr__(
+                        target, name, value
+                    )
+
+
+class EntityTickTransaction:
+    """Rollback one failed entity tick, not the entire batch."""
+
+    @staticmethod
+    def execute(universe, entity, operation):
+        snapshot = EntityRuntimeSnapshot(universe)
+
+        attributes = getattr(entity, "__dict__", None)
+        ticks_before = None
+
+        if isinstance(attributes, dict):
+            value = attributes.get("ticks")
+
+            if type(value) is int:
+                ticks_before = value
+
+        try:
+            # Reuse the established universe-wide rollback
+            # for events, registries, RNG and quantum state.
+            return CronenbergEncounterBatchTransaction.execute(
+                universe,
+                operation,
+            )
+
+        except BaseException:
+            ticks_after = None
+
+            attributes = getattr(entity, "__dict__", None)
+
+            if isinstance(attributes, dict):
+                value = attributes.get("ticks")
+
+                if type(value) is int:
+                    ticks_after = value
+
+            # Roll back arbitrary direct entity mutations
+            # and supported nested mutable components.
+            snapshot.restore()
+
+            # Preserve the legacy attempt counter.
+            # Simulation state remains rolled back.
+            if (
+                ticks_before is not None
+                and ticks_after == ticks_before + 1
+            ):
+                entity.__dict__["ticks"] = ticks_after
+
+            raise
