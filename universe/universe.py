@@ -95,6 +95,9 @@ from universe.quantum_box_open_transaction import (
 from universe.quantum_tick_transaction import (
     QuantumTickTransaction,
 )
+from universe.cronenberg_publication_transaction import (
+    CronenbergPublicationTransaction,
+)
 from universe.universe_tick_result_state import (
     UniverseTickPhaseCompletedResult,
     UniverseTickPhaseErrorResult,
@@ -821,6 +824,13 @@ class Universe:
         return rng.random() < collapse_chance
 
     def create_cronenberg_from_quantum_error(self, error, source_component, source_operation):
+        return CronenbergPublicationTransaction.execute(
+            self,
+            lambda: self._a414_create_cronenberg_from_quantum_error_unprotected(error, source_component, source_operation),
+            participants=(),
+        )
+
+    def _a414_create_cronenberg_from_quantum_error_unprotected(self, error, source_component, source_operation):
         cronenberg = Cronenberg(error=error, source_component=source_component, source_operation=source_operation, quantum_tick=self.quantum_state.tick_count)
         self.cronenbergs.append(cronenberg)
         self.cronenberg_count += 1
@@ -943,6 +953,13 @@ class Universe:
         self.universe_history.append(snapshot)
 
     def resolve_quantum_pair_consumption(self, first, second):
+        return CronenbergPublicationTransaction.execute(
+            self,
+            lambda: self._a414_resolve_quantum_pair_consumption_unprotected(first, second),
+            participants=(first, second),
+        )
+
+    def _a414_resolve_quantum_pair_consumption_unprotected(self, first, second):
         if not first._is_quantum_counterpart_of(second):
             raise ValueError('Cronenbergs are not quantum counterparts.')
         if not first.active or not second.active:
@@ -1010,6 +1027,13 @@ class Universe:
         )
 
     def merge_cronenberg_quantum_pair(self, first, second, source='cronenberg_quantum_pair_encounter'):
+        return CronenbergPublicationTransaction.execute(
+            self,
+            lambda: self._a414_merge_cronenberg_quantum_pair_unprotected(first, second, source=source),
+            participants=(first, second),
+        )
+
+    def _a414_merge_cronenberg_quantum_pair_unprotected(self, first, second, source='cronenberg_quantum_pair_encounter'):
         if first is second:
             raise ValueError('Quantum merge requires two different Cronenbergs.')
         if first not in self.cronenbergs:
@@ -1072,6 +1096,13 @@ class Universe:
         )
 
     def create_cronenberg_quantum_counterpart(self, original, source='serpent_d20_hidden_roll'):
+        return CronenbergPublicationTransaction.execute(
+            self,
+            lambda: self._a414_create_cronenberg_quantum_counterpart_unprotected(original, source=source),
+            participants=(original,),
+        )
+
+    def _a414_create_cronenberg_quantum_counterpart_unprotected(self, original, source='serpent_d20_hidden_roll'):
         if original not in self.cronenbergs:
             raise ValueError('Original Cronenberg is not registered in this universe.')
         if not getattr(original, 'is_alive', False):
