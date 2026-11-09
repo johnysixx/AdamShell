@@ -98,6 +98,9 @@ from universe.quantum_tick_transaction import (
 from universe.cronenberg_publication_transaction import (
     CronenbergPublicationTransaction,
 )
+from universe.cronenberg_encounter_batch_transaction import (
+    CronenbergEncounterBatchTransaction,
+)
 from universe.universe_tick_result_state import (
     UniverseTickPhaseCompletedResult,
     UniverseTickPhaseErrorResult,
@@ -1173,6 +1176,12 @@ class Universe:
         return self.trigger_quantum_error(error=RuntimeError('Test quantum geometry failure.'), source_component='quantum_geometry_engine', source_operation='test_failure')
 
     def detect_cronenberg_pair_encounters(self):
+        return CronenbergEncounterBatchTransaction.execute(
+            self,
+            self._detect_cronenberg_pair_encounters_unprotected,
+        )
+
+    def _detect_cronenberg_pair_encounters_unprotected(self):
         active_cronenbergs = [cronenberg for cronenberg in self.cronenbergs if getattr(cronenberg, 'active', True) and cronenberg.is_alive and (cronenberg.quantum_state.pair_id is not None)]
         current_encounters = set()
         detected_events = []
