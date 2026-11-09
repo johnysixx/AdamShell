@@ -618,10 +618,61 @@ class Universe:
             tick=self.quantum_state.tick_count,
         )
 
-        self.quantum_boxes.append(box)
-        self.statistics.record_quantum_box_created()
-        self.quantum_events.append(creation_event)
-        UniverseLogger.event(f"QUANTUM BOX CREATED: {box.id} AT x={box.position.x:.3f} y={box.position.y:.3f} z={box.position.z:.3f}")
+        # Runtime and its creation history must commit
+        # together. Preserve the canonical registry objects.
+        boxes = self.quantum_boxes
+        events = self.quantum_events
+        statistics = self.statistics
+
+        if not isinstance(boxes, list) or not isinstance(
+            events, list
+        ):
+            raise TypeError(
+                "Quantum box creation requires list registries."
+            )
+
+        boxes_before = tuple(boxes)
+        events_before = tuple(events)
+        created_before = (
+            statistics.total_quantum_boxes_created
+        )
+
+        try:
+            boxes.append(box)
+            statistics.record_quantum_box_created()
+            events.append(creation_event)
+
+            UniverseLogger.event(
+                f"QUANTUM BOX CREATED: {box.id} "
+                f"AT x={box.position.x:.3f} "
+                f"y={box.position.y:.3f} "
+                f"z={box.position.z:.3f}"
+            )
+
+        except BaseException:
+            # An injected list operation may modify its
+            # contents before raising. Bypass overridden
+            # methods to restore the original contents.
+            list.__setitem__(
+                boxes,
+                slice(None),
+                boxes_before,
+            )
+            list.__setitem__(
+                events,
+                slice(None),
+                events_before,
+            )
+
+            # Preserve the statistics object's identity.
+            object.__setattr__(
+                statistics,
+                "total_quantum_boxes_created",
+                created_before,
+            )
+
+            raise
+
         return box
 
     def replay_quantum_box_created(self, event):
