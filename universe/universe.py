@@ -89,6 +89,9 @@ from universe.quantum_box_lifecycle_replayer import (
 from universe.quantum_box_lifecycle_operations import (
     QuantumBoxLifecycleOperations,
 )
+from universe.quantum_box_open_transaction import (
+    QuantumBoxOpenTransaction,
+)
 from universe.universe_tick_result_state import (
     UniverseTickPhaseCompletedResult,
     UniverseTickPhaseErrorResult,
@@ -445,7 +448,16 @@ class Universe:
             UniverseLogger.event(f"SPACETIME TICK={spacetime.time_axis.tick} DELTA={curvature_delta:.2f} CURVATURE={spacetime.curvature:.2f}")
 
     def open_quantum_box(self, box_id, observer=None, rng=None):
-        return self.quantum_error_boundary.execute(operation=lambda: self._open_quantum_box_unprotected(box_id=box_id, observer=observer, rng=rng), source_component='quantum_box', source_operation='open_quantum_box')
+        return self.quantum_error_boundary.execute(
+            operation=lambda: QuantumBoxOpenTransaction.execute(
+                self,
+                box_id=box_id,
+                observer=observer,
+                rng=rng,
+            ),
+            source_component="quantum_box",
+            source_operation="open_quantum_box",
+        )
 
     def _open_quantum_box_unprotected(self, box_id, observer=None, rng=None):
         box = next((quantum_box for quantum_box in self.quantum_boxes if quantum_box.id == box_id), None)
