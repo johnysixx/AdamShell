@@ -59,7 +59,9 @@ class UniversePhaseTransaction:
             "cronenberg_population_statistics",
             "cats_layer",
         ),
-        "history": (),
+        "history": (
+            "life_cycle_system",
+        ),
     }
 
     PROTECTED_PHASES = frozenset(ROOT_NAMES)
@@ -98,6 +100,15 @@ class UniversePhaseTransaction:
             for name in cls.SCALAR_FIELDS
         )
 
+        root_states = tuple(
+            (
+                name,
+                name in universe.__dict__,
+                universe.__dict__.get(name),
+            )
+            for name in cls.ROOT_NAMES[phase]
+        )
+
         roots = [
             getattr(universe, name, None)
             for name in cls.ROOT_NAMES[phase]
@@ -125,6 +136,16 @@ class UniversePhaseTransaction:
         except BaseException:
             # Restore phase-specific mutable objects.
             objects.restore()
+
+            # Restore canonical roots if the failed phase
+            # rebound an earlier committed object.
+            for name, existed, root in root_states:
+                if existed:
+                    object.__setattr__(
+                        universe, name, root
+                    )
+                else:
+                    universe.__dict__.pop(name, None)
 
             # Restore physical and energetic scalars.
             for name, existed, value in scalar_before:

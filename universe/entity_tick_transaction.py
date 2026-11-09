@@ -1,3 +1,4 @@
+import random
 from dataclasses import fields, is_dataclass
 
 from universe.cronenberg_encounter_batch_transaction import (
@@ -9,7 +10,7 @@ class EntityRuntimeSnapshot:
     """Capture supported in-memory entity object state."""
 
     # Bounded traversal with identity-based cycle detection.
-    MAX_DEPTH = 16
+    MAX_DEPTH = 32
 
     def __init__(self, universe):
         self.universe = universe
@@ -37,6 +38,14 @@ class EntityRuntimeSnapshot:
         identity = id(value)
 
         if identity in self.seen:
+            return
+
+        # Independent RNGs carry state outside __dict__.
+        if isinstance(value, random.Random):
+            self.seen.add(identity)
+            self.records.append(
+                ("rng", value, value.getstate())
+            )
             return
 
         # Immutable containers can contain mutable objects.
@@ -109,9 +118,7 @@ class EntityRuntimeSnapshot:
 
                 self._capture(item, depth + 1)
 
-            return
-
-        if is_dataclass(value) and not isinstance(
+        if attributes is None and is_dataclass(value) and not isinstance(
             value, type
         ):
             self.seen.add(identity)
@@ -126,6 +133,55 @@ class EntityRuntimeSnapshot:
 
             for _, item in previous:
                 self._capture(item, depth + 1)
+
+            return
+
+        # Ordinary __slots__ objects, including inherited
+        # slots and objects also defining __dict__.
+        slot_names = []
+
+        for cls in type(value).__mro__:
+            declared = cls.__dict__.get("__slots__", ())
+
+            if isinstance(declared, str):
+                declared = (declared,)
+
+            for name in declared:
+                if name in ("__dict__", "__weakref__"):
+                    continue
+
+                if name.startswith("__") and not name.endswith("__"):
+                    name = (
+                        "_" + cls.__name__.lstrip("_") + name
+                    )
+
+                if name not in slot_names:
+                    slot_names.append(name)
+
+        if slot_names:
+            self.seen.add(identity)
+            previous = []
+
+            for name in slot_names:
+                try:
+                    item = object.__getattribute__(
+                        value, name
+                    )
+                except AttributeError:
+                    previous.append((name, False, None))
+                else:
+                    previous.append((name, True, item))
+
+            previous = tuple(previous)
+            self.records.append(
+                ("slots", value, previous)
+            )
+
+            for name, existed, item in previous:
+                if existed and name not in (
+                    "universe", "_universe"
+                ):
+                    self._capture(item, depth + 1)
 
     def restore(self):
         # Restore nested records before their owners.
@@ -155,6 +211,23 @@ class EntityRuntimeSnapshot:
                         target, name, value
                     )
 
+            elif kind == "slots":
+                for name, existed, value in previous:
+                    if existed:
+                        object.__setattr__(
+                            target, name, value
+                        )
+                    else:
+                        try:
+                            object.__delattr__(
+                                target, name
+                            )
+                        except AttributeError:
+                            pass
+
+            elif kind == "rng":
+                target.setstate(previous)
+
 
 class EntityTickTransaction:
     """Rollback one failed entity tick, not the entire batch."""
@@ -166,6 +239,10 @@ class EntityTickTransaction:
         "physics",
         "life_cycle_system",
         "cats_layer",
+        "world",
+        "entity_memory",
+        "conflict_history",
+        "symbolic_replay_outbox",
     )
 
     COMMITTED_SCALARS = (
