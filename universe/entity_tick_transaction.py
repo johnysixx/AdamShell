@@ -159,9 +159,57 @@ class EntityRuntimeSnapshot:
 class EntityTickTransaction:
     """Rollback one failed entity tick, not the entire batch."""
 
+    PRIOR_PHASE_ROOTS = (
+        "layers",
+        "idea_universe",
+        "spacetime",
+        "physics",
+        "life_cycle_system",
+        "cats_layer",
+    )
+
+    COMMITTED_SCALARS = (
+        "universe_tick",
+        "entropy",
+        "pressure",
+        "energy_pool",
+        "classical_entropy_total",
+        "last_classical_entropy_delta",
+        "last_energy_gain",
+        "last_pressure_cost",
+        "last_energy_delta",
+        "conflict_pressure",
+        "physical_universe_started",
+    )
+
     @staticmethod
     def execute(universe, entity, operation):
         snapshot = EntityRuntimeSnapshot(universe)
+
+        # Earlier successful scheduler phases are committed.
+        # Capture their mutable runtime roots before this
+        # entity is allowed to modify them.
+        prior_roots = tuple(
+            (
+                name,
+                name in universe.__dict__,
+                universe.__dict__.get(name),
+            )
+            for name in EntityTickTransaction.PRIOR_PHASE_ROOTS
+        )
+
+        for _, existed, root in prior_roots:
+            if existed:
+                snapshot._capture(root, 0)
+
+        committed_scalars = tuple(
+            (
+                name,
+                name in universe.__dict__,
+                universe.__dict__.get(name),
+            )
+            for name in EntityTickTransaction.COMMITTED_SCALARS
+        )
 
         attributes = getattr(entity, "__dict__", None)
         ticks_before = None
@@ -194,6 +242,26 @@ class EntityTickTransaction:
             # Roll back arbitrary direct entity mutations
             # and supported nested mutable components.
             snapshot.restore()
+
+            # Restore original root references as well as
+            # their nested in-memory contents.
+            for name, existed, root in prior_roots:
+                if existed:
+                    object.__setattr__(
+                        universe, name, root
+                    )
+                else:
+                    universe.__dict__.pop(name, None)
+
+            # Preserve values committed by earlier phases,
+            # not partial mutations from this failed entity.
+            for name, existed, value in committed_scalars:
+                if existed:
+                    object.__setattr__(
+                        universe, name, value
+                    )
+                else:
+                    universe.__dict__.pop(name, None)
 
             # Preserve the legacy attempt counter.
             # Simulation state remains rolled back.
