@@ -104,6 +104,9 @@ from universe.cronenberg_encounter_batch_transaction import (
 from universe.entity_tick_transaction import (
     EntityTickTransaction,
 )
+from universe.universe_phase_transaction import (
+    UniversePhaseTransaction,
+)
 from universe.universe_tick_result_state import (
     UniverseTickPhaseCompletedResult,
     UniverseTickPhaseErrorResult,
@@ -1333,10 +1336,18 @@ class Universe:
         )
 
         try:
-            value = operation(
-                *args,
-                **kwargs,
-            )
+            if phase in UniversePhaseTransaction.PROTECTED_PHASES:
+                value = UniversePhaseTransaction.execute(
+                    self,
+                    phase,
+                    lambda: operation(*args, **kwargs),
+                    target=getattr(operation, '__self__', None),
+                )
+            else:
+                value = operation(
+                    *args,
+                    **kwargs,
+                )
 
             return (
                 UniverseTickPhaseCompletedResult(
