@@ -81,18 +81,39 @@ class ActualizationCycle:
             from .actualizer import Actualizer
             actualizer = Actualizer()
 
-        selected = actualizer.select(
-            self.potentials
+        # Restore internal cycle/potential states if resolution
+        # fails. External action side effects are not reversible
+        # at this boundary.
+        original_cycle_state = self.state
+        original_potentials = tuple(self.potentials)
+        original_states = tuple(
+            potential.state
+            for potential in original_potentials
         )
 
-        events = actualizer.actualize(
-            selected
-        )
+        try:
+            selected = actualizer.select(
+                self.potentials
+            )
 
-        for potential in self.open_potentials:
-            potential.mark_unrealized()
+            events = actualizer.actualize(
+                selected
+            )
 
-        self.state = ActualizationCycleState.RESOLVED
+            for potential in self.open_potentials:
+                potential.mark_unrealized()
+
+            self.state = ActualizationCycleState.RESOLVED
+
+        except Exception:
+            for potential, original_state in zip(
+                original_potentials,
+                original_states,
+            ):
+                potential.state = original_state
+
+            self.state = original_cycle_state
+            raise
 
         return events
 
