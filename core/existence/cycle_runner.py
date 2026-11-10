@@ -24,6 +24,16 @@ class ExistenceCycleRunner:
         self,
         cycle_id
     ):
+        # Reject duplicate cycles before generating potentials
+        # or executing any actualization actions.
+        if self.history.find_record(
+            cycle_id=cycle_id,
+        ) is not None:
+            raise ValueError(
+                "Cycle is already recorded "
+                "in this history branch."
+            )
+
         cycle = ActualizationCycle(
             cycle_id=cycle_id
         )

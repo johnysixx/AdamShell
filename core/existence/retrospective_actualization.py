@@ -33,6 +33,17 @@ class RetrospectiveActualization:
                 "have a different identifier."
             )
 
+        # Reject an existing target branch before replaying
+        # any potential actions.
+        if self.history.find_record(
+            cycle_id=cycle_id,
+            branch_id=new_branch_id,
+        ) is not None:
+            raise ValueError(
+                "Cycle is already recorded "
+                "in this history branch."
+            )
+
         cycle = self.replay.reopen_cycle(
             cycle_id=cycle_id,
             source_branch_id=source_branch_id
