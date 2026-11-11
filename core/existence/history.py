@@ -8,6 +8,9 @@ from .history_attempt_state import (
 from .history_attempt_journal import (
     SQLiteHistoryAttemptJournal,
 )
+from .history_record_archive import (
+    SQLiteHistoryRecordArchive,
+)
 
 from core.actualization import PotentialBlueprint
 from core.actualization.cycle_state import (
@@ -81,7 +84,16 @@ class HistoryRecord:
 
 class History:
 
-    def __init__(self, journal_path=None):
+    def __init__(
+        self,
+        journal_path=None,
+        durable_records=False,
+    ):
+        if durable_records and journal_path is None:
+            raise ValueError(
+                "Durable records require a journal path."
+            )
+
         self.records = []
         self._cycle_attempts = []
         self._journal = (
@@ -89,6 +101,16 @@ class History:
             if journal_path is not None
             else None
         )
+        self._record_archive = (
+            SQLiteHistoryRecordArchive(self._journal)
+            if durable_records
+            else None
+        )
+
+        if self._record_archive is not None:
+            self.records.extend(
+                self._record_archive.load_records()
+            )
 
     @property
     def unresolved_attempts(self):
@@ -178,6 +200,16 @@ class History:
                 "Cannot complete an unrecorded attempt."
             )
 
+        if self._record_archive is not None:
+            record = self.find_record(
+                cycle_id=attempt.cycle_id,
+                branch_id=attempt.branch_id,
+            )
+            return self._record_archive.complete_attempt(
+                attempt,
+                record,
+            )
+
         if self._journal is not None:
             return self._journal.complete_attempt(
                 attempt
@@ -210,6 +242,21 @@ class History:
                 "Only a resolved cycle "
                 "can become history."
             )
+
+        if self._record_archive is not None:
+            running = self.find_attempt(
+                cycle_id=cycle.cycle_id,
+                branch_id=branch_id,
+            )
+            if (
+                running is None
+                or running.status
+                is not HistoryAttemptStatus.RUNNING
+            ):
+                raise RuntimeError(
+                    "Durable history recording requires "
+                    "a running attempt."
+                )
 
         if any(
             record.cycle_id == cycle.cycle_id
