@@ -5,6 +5,9 @@ from .history_attempt_state import (
     HistoryAttempt,
     HistoryAttemptStatus,
 )
+from .history_attempt_journal import (
+    SQLiteHistoryAttemptJournal,
+)
 
 from core.actualization import PotentialBlueprint
 from core.actualization.cycle_state import (
@@ -78,15 +81,29 @@ class HistoryRecord:
 
 class History:
 
-    def __init__(self):
+    def __init__(self, journal_path=None):
         self.records = []
         self._cycle_attempts = []
+        self._journal = (
+            SQLiteHistoryAttemptJournal(journal_path)
+            if journal_path is not None
+            else None
+        )
 
     @property
     def unresolved_attempts(self):
+        if self._journal is not None:
+            return self._journal.unresolved_attempts()
+
         return tuple(self._cycle_attempts)
 
     def find_attempt(self, cycle_id, branch_id="root"):
+        if self._journal is not None:
+            return self._journal.find_attempt(
+                cycle_id=cycle_id,
+                branch_id=branch_id,
+            )
+
         for attempt in self._cycle_attempts:
             if (
                 attempt.cycle_id == cycle_id
@@ -104,6 +121,12 @@ class History:
             raise ValueError(
                 "Cycle is already recorded "
                 "in this history branch."
+            )
+
+        if self._journal is not None:
+            return self._journal.begin_attempt(
+                cycle_id=cycle_id,
+                branch_id=branch_id,
             )
 
         if self.find_attempt(
@@ -126,6 +149,11 @@ class History:
         return attempt
 
     def mark_attempt_in_doubt(self, attempt):
+        if self._journal is not None:
+            return self._journal.mark_attempt_in_doubt(
+                attempt
+            )
+
         for index, current in enumerate(
             self._cycle_attempts
         ):
@@ -148,6 +176,11 @@ class History:
         ) is None:
             raise RuntimeError(
                 "Cannot complete an unrecorded attempt."
+            )
+
+        if self._journal is not None:
+            return self._journal.complete_attempt(
+                attempt
             )
 
         for index, current in enumerate(
