@@ -53,16 +53,29 @@ class RetrospectiveActualization:
             selected_names=selected_names
         )
 
-        events = cycle.resolve(
-            actualizer=actualizer
-        )
-
-        record = self.history.record_cycle(
-            cycle=cycle,
-            events=events,
+        # The target branch must be reserved before
+        # any replayed action can execute.
+        attempt = self.history.begin_attempt(
+            cycle_id=cycle_id,
             branch_id=new_branch_id,
-            parent_branch_id=source_branch_id,
-            created_by=created_by
         )
 
+        try:
+            events = cycle.resolve(
+                actualizer=actualizer
+            )
+
+            record = self.history.record_cycle(
+                cycle=cycle,
+                events=events,
+                branch_id=new_branch_id,
+                parent_branch_id=source_branch_id,
+                created_by=created_by
+            )
+
+        except BaseException:
+            self.history.mark_attempt_in_doubt(attempt)
+            raise
+
+        self.history.complete_attempt(attempt)
         return record

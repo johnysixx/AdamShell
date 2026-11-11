@@ -1,4 +1,10 @@
 from copy import deepcopy
+from dataclasses import replace
+
+from .history_attempt_state import (
+    HistoryAttempt,
+    HistoryAttemptStatus,
+)
 
 from core.actualization import PotentialBlueprint
 from core.actualization.cycle_state import (
@@ -74,6 +80,86 @@ class History:
 
     def __init__(self):
         self.records = []
+        self._cycle_attempts = []
+
+    @property
+    def unresolved_attempts(self):
+        return tuple(self._cycle_attempts)
+
+    def find_attempt(self, cycle_id, branch_id="root"):
+        for attempt in self._cycle_attempts:
+            if (
+                attempt.cycle_id == cycle_id
+                and attempt.branch_id == branch_id
+            ):
+                return attempt
+
+        return None
+
+    def begin_attempt(self, cycle_id, branch_id="root"):
+        if self.find_record(
+            cycle_id=cycle_id,
+            branch_id=branch_id,
+        ) is not None:
+            raise ValueError(
+                "Cycle is already recorded "
+                "in this history branch."
+            )
+
+        if self.find_attempt(
+            cycle_id=cycle_id,
+            branch_id=branch_id,
+        ) is not None:
+            raise RuntimeError(
+                "Cycle attempt is in doubt or still running; "
+                "manual reconciliation required."
+            )
+
+        attempt = HistoryAttempt(
+            cycle_id=cycle_id,
+            branch_id=branch_id,
+            status=HistoryAttemptStatus.RUNNING,
+        )
+
+        self._cycle_attempts.append(attempt)
+
+        return attempt
+
+    def mark_attempt_in_doubt(self, attempt):
+        for index, current in enumerate(
+            self._cycle_attempts
+        ):
+            if current is attempt:
+                updated = replace(
+                    current,
+                    status=HistoryAttemptStatus.IN_DOUBT,
+                )
+                self._cycle_attempts[index] = updated
+                return updated
+
+        raise RuntimeError(
+            "Unknown history attempt."
+        )
+
+    def complete_attempt(self, attempt):
+        if self.find_record(
+            cycle_id=attempt.cycle_id,
+            branch_id=attempt.branch_id,
+        ) is None:
+            raise RuntimeError(
+                "Cannot complete an unrecorded attempt."
+            )
+
+        for index, current in enumerate(
+            self._cycle_attempts
+        ):
+            if current is attempt:
+                self._cycle_attempts.pop(index)
+                return
+
+        raise RuntimeError(
+            "Unknown history attempt."
+        )
 
     def record_cycle(
         self,
