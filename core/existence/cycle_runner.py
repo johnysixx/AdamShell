@@ -34,27 +34,39 @@ class ExistenceCycleRunner:
                 "in this history branch."
             )
 
-        cycle = ActualizationCycle(
-            cycle_id=cycle_id
+        # Reserve before collecting or executing potentials.
+        # An exception leaves the attempt in doubt.
+        attempt = self.history.begin_attempt(
+            cycle_id=cycle_id,
         )
 
-        potentials = (
-            self.reality.collect_potentials(
+        try:
+            cycle = ActualizationCycle(
                 cycle_id=cycle_id
             )
-        )
 
-        cycle.add_potentials(
-            potentials
-        )
+            potentials = (
+                self.reality.collect_potentials(
+                    cycle_id=cycle_id
+                )
+            )
 
-        events = cycle.resolve(
-            actualizer=self.actualizer
-        )
+            cycle.add_potentials(
+                potentials
+            )
 
-        record = self.history.record_cycle(
-            cycle=cycle,
-            events=events
-        )
+            events = cycle.resolve(
+                actualizer=self.actualizer
+            )
 
+            record = self.history.record_cycle(
+                cycle=cycle,
+                events=events
+            )
+
+        except BaseException:
+            self.history.mark_attempt_in_doubt(attempt)
+            raise
+
+        self.history.complete_attempt(attempt)
         return record
