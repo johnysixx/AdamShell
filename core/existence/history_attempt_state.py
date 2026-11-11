@@ -5,6 +5,7 @@ from enum import Enum
 class HistoryAttemptStatus(Enum):
     RUNNING = "running"
     IN_DOUBT = "in_doubt"
+    COMPLETED = "completed"
 
 
 @dataclass(frozen=True, slots=True)
