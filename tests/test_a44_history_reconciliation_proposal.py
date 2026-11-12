@@ -168,7 +168,7 @@ class A44EvidenceProposalTests(unittest.TestCase):
         assert item.retry_allowed is False
         assert item.mutation_allowed is False
 
-    def test_running_confirmed_effect_requires_review(self):
+    def test_running_unsigned_receipt_is_held(self):
         with tempfile.TemporaryDirectory() as folder:
             db = self.database(folder)
             history, attempt = self.running(db)
@@ -181,9 +181,9 @@ class A44EvidenceProposalTests(unittest.TestCase):
 
             self.assertEqual(
                 result.decision,
-                Decision.REVIEW_EFFECT_CONFIRMED,
+                Decision.HOLD_UNAUTHENTICATED_RECEIPT,
             )
-            self.assertEqual(result.receipt_id, "receipt-1")
+            self.assertIsNone(result.receipt_id)
             self.assertEqual(result.journal_status, "running")
             self.assertEqual(
                 history.find_attempt("cycle").status,
@@ -282,7 +282,7 @@ class A44EvidenceProposalTests(unittest.TestCase):
             self.assertIsNone(result.receipt_id)
             self.assert_no_action_authority(result)
 
-    def test_completed_record_is_review_only(self):
+    def test_completed_unsigned_receipt_is_held(self):
         with tempfile.TemporaryDirectory() as folder:
             db = self.database(folder)
             history = History(
@@ -299,7 +299,7 @@ class A44EvidenceProposalTests(unittest.TestCase):
 
             self.assertEqual(
                 result.decision,
-                Decision.REVIEW_ARCHIVED_COMPLETED,
+                Decision.HOLD_UNAUTHENTICATED_RECEIPT,
             )
             self.assertEqual(result.journal_status, "completed")
             self.assertEqual(len(result.snapshot_sha256), 64)

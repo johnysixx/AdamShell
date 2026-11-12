@@ -1,6 +1,6 @@
 """Fail-closed, data-only reconciliation proposals.
 
-The provider adapter is responsible for authenticating external evidence.
+Confirmed evidence requires a locally authenticated signed receipt.
 This module validates correlation, checks audit freshness, and never
 authorizes retry, modifies reservations, or executes external actions.
 """
@@ -11,6 +11,10 @@ from enum import Enum
 from .history_reconciliation_audit import (
     ReconciliationFinding,
     audit_history_database,
+)
+from .history_receipt_proof import (
+    SignedEffectReceipt,
+    verify_signed_receipt,
 )
 
 
@@ -26,6 +30,7 @@ class ProposalDecision(str, Enum):
     HOLD_NO_VERIFIER = "hold_no_verifier"
     HOLD_VERIFIER_ERROR = "hold_verifier_error"
     HOLD_INVALID_EVIDENCE = "hold_invalid_evidence"
+    HOLD_UNAUTHENTICATED_RECEIPT = "hold_unauthenticated_receipt"
     HOLD_IDENTITY_MISMATCH = "hold_identity_mismatch"
     HOLD_NO_RECEIPT = "hold_no_receipt"
     HOLD_UNCONFIRMED = "hold_unconfirmed"
@@ -42,6 +47,7 @@ class ExternalEvidence:
     source_id: str
     verdict: EvidenceVerdict
     receipt_id: str | None = None
+    signed_receipt: SignedEffectReceipt | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -96,6 +102,7 @@ def _classify_evidence(
     effect_id,
     expected_source_id,
     audit_entry,
+    trusted_provider_keys,
 ):
     if type(evidence) is not ExternalEvidence:
         return ProposalDecision.HOLD_INVALID_EVIDENCE, None
@@ -118,6 +125,20 @@ def _classify_evidence(
         ):
             return ProposalDecision.HOLD_INVALID_EVIDENCE, None
 
+        if not verify_signed_receipt(
+            evidence.signed_receipt,
+            cycle_id=cycle_id,
+            branch_id=branch_id,
+            effect_id=effect_id,
+            expected_source_id=expected_source_id,
+            receipt_id=evidence.receipt_id,
+            trusted_provider_keys=trusted_provider_keys,
+        ):
+            return (
+                ProposalDecision.HOLD_UNAUTHENTICATED_RECEIPT,
+                None,
+            )
+
         if (
             audit_entry.finding
             is ReconciliationFinding.ARCHIVED_COMPLETED
@@ -128,7 +149,10 @@ def _classify_evidence(
 
         return decision, evidence.receipt_id
 
-    if evidence.receipt_id is not None:
+    if (
+        evidence.receipt_id is not None
+        or evidence.signed_receipt is not None
+    ):
         return ProposalDecision.HOLD_INVALID_EVIDENCE, None
 
     if evidence.verdict is EvidenceVerdict.NOT_FOUND:
@@ -145,12 +169,14 @@ def propose_reconciliation(
     effect_id,
     expected_source_id,
     verifier=None,
+    trusted_provider_keys=None,
 ):
     """Return an immutable recommendation, never a write authority.
 
     verifier.verify(cycle_id=..., branch_id=..., effect_id=...)
-    must validate a receipt with the real external provider and return
-    ExternalEvidence. The string source_id alone is not authentication.
+    returns ExternalEvidence. CONFIRMED claims require a signed receipt
+    authenticated with a caller-pinned provider key.
+    A matching source_id string is not authentication.
     One confirmed effect does not prove that a full cycle completed.
     """
 
@@ -196,6 +222,7 @@ def propose_reconciliation(
                 effect_id,
                 expected_source_id,
                 entry,
+                trusted_provider_keys,
             )
 
     # A verifier may have changed the journal while consulting
