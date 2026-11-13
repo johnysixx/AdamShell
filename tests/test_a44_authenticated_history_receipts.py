@@ -15,7 +15,10 @@ from core.actualization.potential import Potential
 from core.existence.cycle_runner import ExistenceCycleRunner
 from core.existence.history import History
 from core.existence.history_receipt_proof import (
+    ProviderReceiptKeyRing,
+    ReceiptKeyStatus,
     SignedEffectReceipt,
+    TrustedReceiptKey,
 )
 from core.existence.history_reconciliation_proposal import (
     EvidenceVerdict,
@@ -30,6 +33,19 @@ SOURCE = "a44-trusted-test-provider"
 EFFECT = "effect-A"
 KEY = b"A44-TEST-ONLY-" + b"x" * 32
 DOMAIN = b"adam-shell/a44/effect-receipt/v1\x00"
+
+
+def legacy_ring(secret=KEY):
+    return ProviderReceiptKeyRing(
+        keys=(
+            TrustedReceiptKey(
+                "historical-v1",
+                secret,
+                ReceiptKeyStatus.VERIFY_ONLY,
+            ),
+        ),
+        legacy_key_id="historical-v1",
+    )
 
 
 def sign_receipt(
@@ -141,7 +157,7 @@ class A44AuthenticatedReceiptTests(unittest.TestCase):
         assert result.mutation_allowed is False
         return result
 
-    def test_valid_signed_running_receipt_is_review_only(self):
+    def test_raw_v1_key_is_held(self):
         with tempfile.TemporaryDirectory() as folder:
             db = Path(folder) / "history.db"
             self.begin(db, "cycle")
@@ -152,6 +168,27 @@ class A44AuthenticatedReceiptTests(unittest.TestCase):
                 "cycle",
                 signed_evidence(receipt),
                 {SOURCE: KEY},
+            )
+
+            self.assertEqual(
+                result.decision,
+                Decision.HOLD_UNAUTHENTICATED_RECEIPT,
+            )
+            self.assertIsNone(result.receipt_id)
+            self.assertFalse(result.retry_allowed)
+            self.assertFalse(result.mutation_allowed)
+
+    def test_valid_signed_running_receipt_is_review_only(self):
+        with tempfile.TemporaryDirectory() as folder:
+            db = Path(folder) / "history.db"
+            self.begin(db, "cycle")
+            receipt = sign_receipt()
+
+            result = self.propose(
+                db,
+                "cycle",
+                signed_evidence(receipt),
+                {SOURCE: legacy_ring()},
             )
 
             self.assertEqual(
@@ -184,7 +221,7 @@ class A44AuthenticatedReceiptTests(unittest.TestCase):
                 db,
                 "cycle",
                 signed_evidence(receipt),
-                {SOURCE: KEY},
+                {SOURCE: legacy_ring()},
             )
 
             self.assertEqual(
@@ -210,7 +247,7 @@ class A44AuthenticatedReceiptTests(unittest.TestCase):
                 db,
                 "cycle",
                 fabricated,
-                {SOURCE: KEY},
+                {SOURCE: legacy_ring()},
             )
 
             self.assertEqual(
@@ -233,7 +270,7 @@ class A44AuthenticatedReceiptTests(unittest.TestCase):
                 db,
                 "cycle",
                 signed_evidence(receipt),
-                {SOURCE: KEY},
+                {SOURCE: legacy_ring()},
             )
 
             self.assertEqual(
@@ -255,7 +292,7 @@ class A44AuthenticatedReceiptTests(unittest.TestCase):
                 db,
                 "cycle",
                 signed_evidence(receipt),
-                {SOURCE: KEY},
+                {SOURCE: legacy_ring()},
             )
 
             self.assertEqual(
@@ -278,7 +315,7 @@ class A44AuthenticatedReceiptTests(unittest.TestCase):
                 db,
                 "cycle_b",
                 copied,
-                {SOURCE: KEY},
+                {SOURCE: legacy_ring()},
             )
 
             self.assertEqual(
@@ -316,7 +353,7 @@ class A44AuthenticatedReceiptTests(unittest.TestCase):
                 db,
                 "cycle",
                 claimed,
-                {SOURCE: KEY},
+                {SOURCE: legacy_ring()},
             )
 
             self.assertEqual(
@@ -342,7 +379,7 @@ class A44AuthenticatedReceiptTests(unittest.TestCase):
                 db,
                 "cycle",
                 claimed,
-                {SOURCE: KEY},
+                {SOURCE: legacy_ring()},
             )
 
             self.assertEqual(
@@ -360,8 +397,8 @@ class A44AuthenticatedReceiptTests(unittest.TestCase):
             for keys in (
                 None,
                 {},
-                {SOURCE: b"short"},
-                {SOURCE: b"Z" * 32},
+                {SOURCE: legacy_ring(b"short")},
+                {SOURCE: legacy_ring(b"Z" * 32)},
             ):
                 result = self.propose(
                     db,
@@ -393,7 +430,7 @@ class A44AuthenticatedReceiptTests(unittest.TestCase):
                 db,
                 "cycle",
                 evidence,
-                {SOURCE: KEY},
+                {SOURCE: legacy_ring()},
             )
 
             self.assertEqual(
@@ -417,7 +454,7 @@ class A44AuthenticatedReceiptTests(unittest.TestCase):
                 db,
                 "cycle",
                 claimed,
-                {SOURCE: KEY},
+                {SOURCE: legacy_ring()},
             )
 
             self.assertEqual(
@@ -436,7 +473,7 @@ class A44AuthenticatedReceiptTests(unittest.TestCase):
                 db,
                 "cycle",
                 signed_evidence(sign_receipt()),
-                {SOURCE: KEY},
+                {SOURCE: legacy_ring()},
             )
 
             after = db.read_bytes()

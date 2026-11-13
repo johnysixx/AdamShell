@@ -13,7 +13,12 @@ from core.existence.history_receipt_inventory import (
     ReceiptRejectionReason as Rejection,
     inventory_receipt_observations,
 )
-from core.existence.history_receipt_proof import SignedEffectReceipt
+from core.existence.history_receipt_proof import (
+    ProviderReceiptKeyRing,
+    ReceiptKeyStatus,
+    SignedEffectReceipt,
+    TrustedReceiptKey,
+)
 from core.existence.history_reconciliation_proposal import (
     EvidenceVerdict,
     ExternalEvidence,
@@ -93,11 +98,24 @@ def observation(receipt, **changes):
     )
 
 
+def legacy_ring(secret=KEY):
+    return ProviderReceiptKeyRing(
+        keys=(
+            TrustedReceiptKey(
+                "historical-v1",
+                secret,
+                ReceiptKeyStatus.VERIFY_ONLY,
+            ),
+        ),
+        legacy_key_id="historical-v1",
+    )
+
+
 def inventory(*items, keys=None):
     return inventory_receipt_observations(
         items,
         trusted_provider_keys=(
-            {SOURCE: KEY} if keys is None else keys
+            {SOURCE: legacy_ring()} if keys is None else keys
         ),
     )
 
@@ -317,10 +335,25 @@ class A44HistoryReceiptInventoryTests(unittest.TestCase):
             Rejection.UNVERIFIED_RECEIPT,
         )
 
+    def test_direct_raw_key_is_rejected(self):
+        report = inventory(
+            observation(signed_receipt()),
+            keys={SOURCE: KEY},
+        )
+
+        self.assertEqual(
+            report.accepted_observations, 0
+        )
+        self.assertEqual(
+            report.rejected[0].reason,
+            Rejection.UNVERIFIED_RECEIPT,
+        )
+        self.assert_no_authority(report)
+
     def test_wrong_trusted_key_is_rejected(self):
         report = inventory(
             observation(signed_receipt()),
-            keys={SOURCE: b"Z" * 32},
+            keys={SOURCE: legacy_ring(b"Z" * 32)},
         )
 
         self.assertEqual(

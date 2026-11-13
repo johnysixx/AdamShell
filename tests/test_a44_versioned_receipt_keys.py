@@ -215,11 +215,23 @@ class A44VersionedReceiptKeyTests(unittest.TestCase):
         ])
         self.assertFalse(valid(issue(), malformed))
 
-    def test_v1_still_verifies_with_original_byte_key(self):
-        self.assertTrue(valid(
+    def test_v1_raw_bytes_key_is_rejected(self):
+        self.assertFalse(valid(
             issue(version=1, secret=OLD_KEY),
             OLD_KEY,
         ))
+
+    def test_v1_raw_bytes_rejected_by_inventory(self):
+        receipt = issue(version=1, secret=OLD_KEY)
+        report = inventory_receipt_observations(
+            [evidence(receipt)],
+            trusted_provider_keys={SOURCE: OLD_KEY},
+        )
+        self.assertEqual(report.accepted_observations, 0)
+        self.assertEqual(
+            report.rejected[0].reason,
+            ReceiptRejectionReason.UNVERIFIED_RECEIPT,
+        )
 
     def test_v1_explicit_legacy_key_verifies(self):
         self.assertTrue(valid(

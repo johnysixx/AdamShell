@@ -328,7 +328,7 @@ def verify_signed_receipt(
 ):
     """Fail-closed v1/v2 verification with caller-pinned trust anchors.
 
-    v1: legacy bytes remain compatible. A key ring requires one explicit
+    v1: caller-pinned key rings require an explicit
     legacy_key_id; other versions are NEVER tried.
     v2: key_id is signed and selects exactly one trusted provider key.
     Revoked keys never verify. This grants no execution/retry authority.
@@ -352,19 +352,21 @@ def verify_signed_receipt(
 
     provider_key = trusted_provider_keys.get(expected_source_id)
 
-    if type(provider_key) is ProviderReceiptKeyRing:
-        if provider_key.legacy_key_id is None:
-            return False
+    if type(provider_key) is not ProviderReceiptKeyRing:
+        return False
 
-        secret = _lookup_trusted_key(
-            provider_key,
-            provider_key.legacy_key_id,
-        )
+    if provider_key.legacy_key_id is None:
+        return False
 
-        if secret is None:
-            return False
+    secret = _lookup_trusted_key(
+        provider_key,
+        provider_key.legacy_key_id,
+    )
 
-        trusted_provider_keys = {expected_source_id: secret}
+    if secret is None:
+        return False
+
+    trusted_provider_keys = {expected_source_id: secret}
 
     # Original version-1 verifier and wire encoding are unchanged.
     return _verify_v1_receipt(
