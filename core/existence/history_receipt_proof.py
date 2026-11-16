@@ -332,6 +332,70 @@ class ProviderReceiptTrustRegistry:
         return None
 
 
+@dataclass(frozen=True, slots=True)
+class ProviderReceiptTrustLifecycle:
+    """Immutable, revisioned snapshot of a pinned provider catalog.
+
+    Revisions advance monotonically through advance().
+    Callers must use the current lifecycle's registry for verification.
+    This object does not provide durable anti-rollback protection.
+    """
+
+    revision: int
+    expected_source_ids: tuple[str, ...]
+    registry: ProviderReceiptTrustRegistry
+
+    def __post_init__(self):
+        if type(self.revision) is not int or self.revision < 1:
+            raise ValueError("Invalid provider catalog revision.")
+
+        if type(self.registry) is not ProviderReceiptTrustRegistry:
+            raise ValueError("Expected validated provider registry.")
+
+        # Enforce the pinned catalog even for direct construction.
+        ProviderReceiptTrustRegistry.from_pinned_sources(
+            dict(self.registry.providers),
+            expected_source_ids=self.expected_source_ids,
+        )
+
+    @classmethod
+    def start(cls, providers, *, expected_source_ids, revision):
+        """Create an initial revision from trusted caller input."""
+
+        registry = ProviderReceiptTrustRegistry.from_pinned_sources(
+            providers,
+            expected_source_ids=expected_source_ids,
+        )
+
+        return cls(
+            revision=revision,
+            expected_source_ids=expected_source_ids,
+            registry=registry,
+        )
+
+    def advance(self, providers, *, revision):
+        """Create a higher revision without mutating old snapshots."""
+
+        if (
+            type(revision) is not int
+            or revision <= self.revision
+        ):
+            raise ValueError(
+                "Provider catalog revision must increase."
+            )
+
+        registry = ProviderReceiptTrustRegistry.from_pinned_sources(
+            providers,
+            expected_source_ids=self.expected_source_ids,
+        )
+
+        return type(self)(
+            revision=revision,
+            expected_source_ids=self.expected_source_ids,
+            registry=registry,
+        )
+
+
 def _wire_v2(receipt):
     claims = (
         receipt.cycle_id,

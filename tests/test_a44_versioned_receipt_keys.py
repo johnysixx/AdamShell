@@ -180,6 +180,84 @@ class A44VersionedReceiptKeyTests(unittest.TestCase):
     def test_v2_cross_branch_claim_fails(self):
         self.assertFalse(valid(issue(branch="fork")))
 
+    def test_revisioned_provider_catalog_advances_monotonically(self):
+        from core.existence.history_receipt_proof import (
+            ProviderReceiptTrustLifecycle,
+        )
+
+        def verified(receipt, lifecycle):
+            return verify_signed_receipt(
+                receipt,
+                cycle_id=CYCLE,
+                branch_id="root",
+                effect_id=EFFECT,
+                expected_source_id=SOURCE,
+                receipt_id=receipt.receipt_id,
+                trusted_provider_keys=lifecycle.registry,
+            )
+
+        historical = issue(
+            key_id="k1",
+            secret=OLD_KEY,
+        )
+        current = issue()
+
+        initial = ProviderReceiptTrustLifecycle.start(
+            {SOURCE: ring(old=ReceiptKeyStatus.ACTIVE)},
+            expected_source_ids=(SOURCE,),
+            revision=1,
+        )
+
+        self.assertEqual(initial.revision, 1)
+        self.assertEqual(initial.expected_source_ids, (SOURCE,))
+        self.assertTrue(verified(historical, initial))
+
+        promoted = initial.advance(
+            {SOURCE: ring(old=ReceiptKeyStatus.REVOKED)},
+            revision=2,
+        )
+
+        self.assertEqual(promoted.revision, 2)
+        self.assertEqual(initial.revision, 1)
+
+        self.assertTrue(verified(historical, initial))
+        self.assertFalse(verified(historical, promoted))
+        self.assertTrue(verified(current, promoted))
+
+        for invalid_revision in (2, 1, 0, True, "3"):
+            with self.subTest(revision=invalid_revision):
+                with self.assertRaises(ValueError):
+                    promoted.advance(
+                        {SOURCE: ring()},
+                        revision=invalid_revision,
+                    )
+
+        with self.assertRaises(ValueError):
+            promoted.advance({}, revision=3)
+
+        unexpected_ring = ProviderReceiptKeyRing(keys=(
+            TrustedReceiptKey(
+                "k3",
+                OTHER_KEY,
+                ReceiptKeyStatus.ACTIVE,
+            ),
+        ))
+
+        with self.assertRaises(ValueError):
+            promoted.advance(
+                {
+                    SOURCE: ring(),
+                    "unexpected-provider": unexpected_ring,
+                },
+                revision=3,
+            )
+
+        self.assertEqual(promoted.revision, 2)
+        self.assertFalse(verified(historical, promoted))
+
+        with self.assertRaises(FrozenInstanceError):
+            promoted.revision = 3
+
     def test_pinned_sources_require_complete_catalog(self):
         second = "a44-second-provider"
         expected = (SOURCE, second)
