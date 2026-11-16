@@ -17,6 +17,7 @@ from core.existence.history_receipt_inventory import (
 )
 from core.existence.history_receipt_proof import (
     ProviderReceiptKeyRing,
+    ProviderReceiptTrustRegistry,
     ReceiptKeyStatus,
     SignedEffectReceipt,
     TrustedReceiptKey,
@@ -90,7 +91,14 @@ def ring(*, old=ReceiptKeyStatus.VERIFY_ONLY,
 
 
 def valid(receipt, keyring=None):
-    keys = {SOURCE: ring() if keyring is None else keyring}
+    keyring = ring() if keyring is None else keyring
+    try:
+        keys = ProviderReceiptTrustRegistry.from_mapping({
+            SOURCE: keyring,
+        })
+    except ValueError:
+        return False
+
     return verify_signed_receipt(
         receipt,
         cycle_id=CYCLE,
@@ -172,6 +180,57 @@ class A44VersionedReceiptKeyTests(unittest.TestCase):
     def test_v2_cross_branch_claim_fails(self):
         self.assertFalse(valid(issue(branch="fork")))
 
+    def test_trust_registry_rejects_shared_secret(self):
+        second = "a44-second-provider"
+        duplicate = ProviderReceiptKeyRing(keys=(
+            TrustedReceiptKey(
+                "k2", NEW_KEY, ReceiptKeyStatus.ACTIVE,
+            ),
+        ))
+
+        with self.assertRaises(ValueError):
+            ProviderReceiptTrustRegistry.from_mapping({
+                SOURCE: ring(),
+                second: duplicate,
+            })
+
+    def test_trust_registry_verifies_v1_v2_snapshot(self):
+        providers = {SOURCE: ring()}
+        registry = ProviderReceiptTrustRegistry.from_mapping(
+            providers
+        )
+
+        providers[SOURCE] = ring(
+            new=ReceiptKeyStatus.REVOKED
+        )
+
+        for receipt in (
+            issue(),
+            issue(version=1, secret=OLD_KEY),
+        ):
+            self.assertTrue(verify_signed_receipt(
+                receipt,
+                cycle_id=CYCLE,
+                branch_id="root",
+                effect_id=EFFECT,
+                expected_source_id=SOURCE,
+                receipt_id=receipt.receipt_id,
+                trusted_provider_keys=registry,
+            ))
+
+    def test_v2_unvalidated_provider_map_is_rejected(self):
+        receipt = issue()
+
+        self.assertFalse(verify_signed_receipt(
+            receipt,
+            cycle_id=CYCLE,
+            branch_id="root",
+            effect_id=EFFECT,
+            expected_source_id=SOURCE,
+            receipt_id=receipt.receipt_id,
+            trusted_provider_keys={SOURCE: ring()},
+        ))
+
     def test_v2_cross_provider_claim_fails(self):
         self.assertFalse(valid(issue(source="other-provider")))
 
@@ -184,7 +243,7 @@ class A44VersionedReceiptKeyTests(unittest.TestCase):
             effect_id=EFFECT,
             expected_source_id=SOURCE,
             receipt_id="forged",
-            trusted_provider_keys={SOURCE: ring()},
+            trusted_provider_keys=ProviderReceiptTrustRegistry.from_mapping({SOURCE: ring()}),
         ))
 
     def test_v2_invalid_key_id_is_rejected(self):
@@ -286,7 +345,7 @@ class A44VersionedReceiptKeyTests(unittest.TestCase):
                 db, cycle_id=CYCLE, branch_id="root",
                 effect_id=EFFECT, expected_source_id=SOURCE,
                 verifier=StaticVerifier(evidence(receipt)),
-                trusted_provider_keys={SOURCE: ring()},
+                trusted_provider_keys=ProviderReceiptTrustRegistry.from_mapping({SOURCE: ring()}),
             )
             self.assertEqual(
                 result.decision, ProposalDecision.REVIEW_EFFECT_CONFIRMED,
@@ -304,9 +363,9 @@ class A44VersionedReceiptKeyTests(unittest.TestCase):
                 db, cycle_id=CYCLE, branch_id="root",
                 effect_id=EFFECT, expected_source_id=SOURCE,
                 verifier=StaticVerifier(evidence(issue())),
-                trusted_provider_keys={
+                trusted_provider_keys=ProviderReceiptTrustRegistry.from_mapping({
                     SOURCE: ring(new=ReceiptKeyStatus.REVOKED),
-                },
+                }),
             )
             self.assertEqual(
                 result.decision,
@@ -320,7 +379,7 @@ class A44VersionedReceiptKeyTests(unittest.TestCase):
         new = issue()
         report = inventory_receipt_observations(
             [evidence(old), evidence(new), evidence(old)],
-            trusted_provider_keys={SOURCE: ring()},
+            trusted_provider_keys=ProviderReceiptTrustRegistry.from_mapping({SOURCE: ring()}),
         )
         self.assertEqual(report.accepted_observations, 3)
         self.assertEqual(report.groups[0].distinct_receipt_count, 2)
@@ -337,9 +396,9 @@ class A44VersionedReceiptKeyTests(unittest.TestCase):
     def test_revoked_inventory_evidence_is_rejected(self):
         report = inventory_receipt_observations(
             [evidence(issue())],
-            trusted_provider_keys={
+            trusted_provider_keys=ProviderReceiptTrustRegistry.from_mapping({
                 SOURCE: ring(new=ReceiptKeyStatus.REVOKED),
-            },
+            }),
         )
         self.assertEqual(report.accepted_observations, 0)
         self.assertEqual(len(report.rejected), 1)

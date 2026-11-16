@@ -224,6 +224,71 @@ def _lookup_trusted_key(ring, key_id):
     return selected.secret
 
 
+@dataclass(frozen=True, slots=True)
+class ProviderReceiptTrustRegistry:
+    """Validated snapshot of an authoritative provider key catalog."""
+
+    providers: tuple[tuple[str, ProviderReceiptKeyRing], ...]
+
+    def __post_init__(self):
+        if type(self.providers) is not tuple or not self.providers:
+            raise ValueError("Provider catalog must be a nonempty tuple.")
+
+        sources = set()
+        secrets = set()
+
+        for entry in self.providers:
+            if type(entry) is not tuple or len(entry) != 2:
+                raise ValueError("Malformed provider entry.")
+
+            source, ring = entry
+
+            if (
+                type(source) is not str
+                or not source
+                or len(source) > 1024
+                or source in sources
+                or type(ring) is not ProviderReceiptKeyRing
+                or type(ring.keys) is not tuple
+                or not ring.keys
+            ):
+                raise ValueError("Invalid provider registration.")
+
+            sources.add(source)
+            key_ids = set()
+
+            for key in ring.keys:
+                if (
+                    type(key) is not TrustedReceiptKey
+                    or not _valid_key_id(key.key_id)
+                    or key.key_id in key_ids
+                    or type(key.secret) is not bytes
+                    or len(key.secret) < 32
+                    or type(key.status) is not ReceiptKeyStatus
+                    or key.secret in secrets
+                ):
+                    raise ValueError("Invalid or duplicated provider key.")
+
+                key_ids.add(key.key_id)
+                secrets.add(key.secret)
+
+            if ring.legacy_key_id is not None:
+                if ring.legacy_key_id not in key_ids:
+                    raise ValueError("Unknown historical key binding.")
+
+    @classmethod
+    def from_mapping(cls, providers):
+        if not isinstance(providers, Mapping):
+            raise ValueError("Expected provider mapping.")
+        return cls(tuple(providers.items()))
+
+    def get(self, source_id):
+        for source, ring in self.providers:
+            if source == source_id:
+                return ring
+        return None
+
+
 def _wire_v2(receipt):
     claims = (
         receipt.cycle_id,
@@ -333,6 +398,11 @@ def verify_signed_receipt(
     v2: key_id is signed and selects exactly one trusted provider key.
     Revoked keys never verify. This grants no execution/retry authority.
     """
+    if type(trusted_provider_keys) is not ProviderReceiptTrustRegistry:
+        return False
+
+    trusted_provider_keys = dict(trusted_provider_keys.providers)
+
     if type(receipt) is VersionedSignedEffectReceipt:
         return _verify_v2_receipt(
             receipt,

@@ -15,6 +15,7 @@ from core.existence.history_receipt_inventory import (
 )
 from core.existence.history_receipt_proof import (
     ProviderReceiptKeyRing,
+    ProviderReceiptTrustRegistry,
     ReceiptKeyStatus,
     SignedEffectReceipt,
     TrustedReceiptKey,
@@ -111,11 +112,17 @@ def legacy_ring(secret=KEY):
     )
 
 
+def legacy_registry(secret=KEY):
+    return ProviderReceiptTrustRegistry.from_mapping({
+        SOURCE: legacy_ring(secret),
+    })
+
+
 def inventory(*items, keys=None):
     return inventory_receipt_observations(
         items,
         trusted_provider_keys=(
-            {SOURCE: legacy_ring()} if keys is None else keys
+            legacy_registry() if keys is None else keys
         ),
     )
 
@@ -353,7 +360,7 @@ class A44HistoryReceiptInventoryTests(unittest.TestCase):
     def test_wrong_trusted_key_is_rejected(self):
         report = inventory(
             observation(signed_receipt()),
-            keys={SOURCE: legacy_ring(b"Z" * 32)},
+            keys=legacy_registry(b"Z" * 32),
         )
 
         self.assertEqual(

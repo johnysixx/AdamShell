@@ -16,6 +16,7 @@ from core.existence.cycle_runner import ExistenceCycleRunner
 from core.existence.history import History
 from core.existence.history_receipt_proof import (
     ProviderReceiptKeyRing,
+    ProviderReceiptTrustRegistry,
     ReceiptKeyStatus,
     SignedEffectReceipt,
     TrustedReceiptKey,
@@ -46,6 +47,12 @@ def legacy_ring(secret=KEY):
         ),
         legacy_key_id="historical-v1",
     )
+
+
+def legacy_registry(secret=KEY):
+    return ProviderReceiptTrustRegistry.from_mapping({
+        SOURCE: legacy_ring(secret),
+    })
 
 
 def sign_receipt(
@@ -188,7 +195,7 @@ class A44AuthenticatedReceiptTests(unittest.TestCase):
                 db,
                 "cycle",
                 signed_evidence(receipt),
-                {SOURCE: legacy_ring()},
+                legacy_registry(),
             )
 
             self.assertEqual(
@@ -221,7 +228,7 @@ class A44AuthenticatedReceiptTests(unittest.TestCase):
                 db,
                 "cycle",
                 signed_evidence(receipt),
-                {SOURCE: legacy_ring()},
+                legacy_registry(),
             )
 
             self.assertEqual(
@@ -247,7 +254,7 @@ class A44AuthenticatedReceiptTests(unittest.TestCase):
                 db,
                 "cycle",
                 fabricated,
-                {SOURCE: legacy_ring()},
+                legacy_registry(),
             )
 
             self.assertEqual(
@@ -270,7 +277,7 @@ class A44AuthenticatedReceiptTests(unittest.TestCase):
                 db,
                 "cycle",
                 signed_evidence(receipt),
-                {SOURCE: legacy_ring()},
+                legacy_registry(),
             )
 
             self.assertEqual(
@@ -292,7 +299,7 @@ class A44AuthenticatedReceiptTests(unittest.TestCase):
                 db,
                 "cycle",
                 signed_evidence(receipt),
-                {SOURCE: legacy_ring()},
+                legacy_registry(),
             )
 
             self.assertEqual(
@@ -315,7 +322,7 @@ class A44AuthenticatedReceiptTests(unittest.TestCase):
                 db,
                 "cycle_b",
                 copied,
-                {SOURCE: legacy_ring()},
+                legacy_registry(),
             )
 
             self.assertEqual(
@@ -353,7 +360,7 @@ class A44AuthenticatedReceiptTests(unittest.TestCase):
                 db,
                 "cycle",
                 claimed,
-                {SOURCE: legacy_ring()},
+                legacy_registry(),
             )
 
             self.assertEqual(
@@ -379,7 +386,7 @@ class A44AuthenticatedReceiptTests(unittest.TestCase):
                 db,
                 "cycle",
                 claimed,
-                {SOURCE: legacy_ring()},
+                legacy_registry(),
             )
 
             self.assertEqual(
@@ -398,7 +405,7 @@ class A44AuthenticatedReceiptTests(unittest.TestCase):
                 None,
                 {},
                 {SOURCE: legacy_ring(b"short")},
-                {SOURCE: legacy_ring(b"Z" * 32)},
+                legacy_registry(b"Z" * 32),
             ):
                 result = self.propose(
                     db,
@@ -430,7 +437,7 @@ class A44AuthenticatedReceiptTests(unittest.TestCase):
                 db,
                 "cycle",
                 evidence,
-                {SOURCE: legacy_ring()},
+                legacy_registry(),
             )
 
             self.assertEqual(
@@ -454,7 +461,7 @@ class A44AuthenticatedReceiptTests(unittest.TestCase):
                 db,
                 "cycle",
                 claimed,
-                {SOURCE: legacy_ring()},
+                legacy_registry(),
             )
 
             self.assertEqual(
@@ -473,7 +480,7 @@ class A44AuthenticatedReceiptTests(unittest.TestCase):
                 db,
                 "cycle",
                 signed_evidence(sign_receipt()),
-                {SOURCE: legacy_ring()},
+                legacy_registry(),
             )
 
             after = db.read_bytes()
