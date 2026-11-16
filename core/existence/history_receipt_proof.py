@@ -277,6 +277,49 @@ class ProviderReceiptTrustRegistry:
                     raise ValueError("Unknown historical key binding.")
 
     @classmethod
+    def from_pinned_sources(cls, providers, *, expected_source_ids):
+        """Require an exact caller-pinned provider catalog snapshot."""
+
+        if not isinstance(providers, Mapping):
+            raise ValueError("Expected provider mapping.")
+
+        if (
+            type(expected_source_ids) is not tuple
+            or not expected_source_ids
+        ):
+            raise ValueError("Expected nonempty pinned provider tuple.")
+
+        expected = set()
+
+        for source in expected_source_ids:
+            if (
+                type(source) is not str
+                or not source
+                or len(source) > 1024
+                or source in expected
+            ):
+                raise ValueError("Invalid pinned provider identifier.")
+
+            expected.add(source)
+
+        # Snapshot exactly once before validating membership.
+        entries = tuple(providers.items())
+        actual = set()
+
+        for source, _ in entries:
+            if type(source) is not str:
+                raise ValueError("Invalid provider identifier.")
+            actual.add(source)
+
+        if len(entries) != len(expected) or actual != expected:
+            raise ValueError(
+                "Provider catalog does not match pinned sources."
+            )
+
+        # Reuse canonical key, status and global-secret validation.
+        return cls(entries)
+
+    @classmethod
     def from_mapping(cls, providers):
         if not isinstance(providers, Mapping):
             raise ValueError("Expected provider mapping.")

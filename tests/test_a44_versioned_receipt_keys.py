@@ -180,6 +180,43 @@ class A44VersionedReceiptKeyTests(unittest.TestCase):
     def test_v2_cross_branch_claim_fails(self):
         self.assertFalse(valid(issue(branch="fork")))
 
+    def test_pinned_sources_require_complete_catalog(self):
+        second = "a44-second-provider"
+        expected = (SOURCE, second)
+
+        second_ring = ProviderReceiptKeyRing(keys=(
+            TrustedReceiptKey(
+                "other-key", OTHER_KEY, ReceiptKeyStatus.ACTIVE,
+            ),
+        ))
+
+        full = {
+            SOURCE: ring(),
+            second: second_ring,
+        }
+
+        with self.assertRaises(ValueError):
+            ProviderReceiptTrustRegistry.from_pinned_sources(
+                {SOURCE: ring()},
+                expected_source_ids=expected,
+            )
+
+        registry = ProviderReceiptTrustRegistry.from_pinned_sources(
+            full,
+            expected_source_ids=expected,
+        )
+
+        self.assertEqual(
+            {source for source, _ in registry.providers},
+            set(expected),
+        )
+
+        with self.assertRaises(ValueError):
+            ProviderReceiptTrustRegistry.from_pinned_sources(
+                full,
+                expected_source_ids=(SOURCE,),
+            )
+
     def test_trust_registry_rejects_shared_secret(self):
         second = "a44-second-provider"
         duplicate = ProviderReceiptKeyRing(keys=(
