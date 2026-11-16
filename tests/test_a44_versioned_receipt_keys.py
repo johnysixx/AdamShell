@@ -217,6 +217,77 @@ class A44VersionedReceiptKeyTests(unittest.TestCase):
                 expected_source_ids=(SOURCE,),
             )
 
+    def test_pinned_sources_reject_invalid_pins(self):
+        providers = {SOURCE: ring()}
+
+        invalid_pins = (
+            (),
+            [],
+            [SOURCE],
+            (SOURCE, SOURCE),
+            (SOURCE, ""),
+            (SOURCE, 42),
+            (SOURCE, b"bytes"),
+            (SOURCE, "x" * 1025),
+        )
+
+        for pins in invalid_pins:
+            with self.subTest(pins=pins):
+                with self.assertRaises(ValueError):
+                    ProviderReceiptTrustRegistry.from_pinned_sources(
+                        providers,
+                        expected_source_ids=pins,
+                    )
+
+    def test_pinned_sources_reject_malformed_catalog(self):
+        second = "a44-second-provider"
+
+        duplicate_secret = ProviderReceiptKeyRing(keys=(
+            TrustedReceiptKey(
+                "other-key",
+                NEW_KEY,
+                ReceiptKeyStatus.ACTIVE,
+            ),
+        ))
+
+        cases = (
+            ("non-mapping", "invalid", (SOURCE,)),
+            ("raw-secret", {SOURCE: NEW_KEY}, (SOURCE,)),
+            (
+                "shared-secret",
+                {SOURCE: ring(), second: duplicate_secret},
+                (SOURCE, second),
+            ),
+        )
+
+        for name, providers, pins in cases:
+            with self.subTest(name=name):
+                with self.assertRaises(ValueError):
+                    ProviderReceiptTrustRegistry.from_pinned_sources(
+                        providers,
+                        expected_source_ids=pins,
+                    )
+
+    def test_pinned_sources_snapshot_is_detached(self):
+        original = ring()
+        providers = {SOURCE: original}
+
+        registry = ProviderReceiptTrustRegistry.from_pinned_sources(
+            providers,
+            expected_source_ids=(SOURCE,),
+        )
+
+        providers[SOURCE] = ring(
+            new=ReceiptKeyStatus.REVOKED,
+        )
+
+        self.assertIs(registry.get(SOURCE), original)
+        self.assertEqual(
+            registry.get(SOURCE).keys[1].status,
+            ReceiptKeyStatus.ACTIVE,
+        )
+        self.assertIsInstance(registry.providers, tuple)
+
     def test_trust_registry_rejects_shared_secret(self):
         second = "a44-second-provider"
         duplicate = ProviderReceiptKeyRing(keys=(
