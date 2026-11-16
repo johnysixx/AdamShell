@@ -18,6 +18,7 @@ from pathlib import Path
 
 from core.existence.history_receipt_proof import (
     ProviderReceiptTrustLifecycle,
+    verify_signed_receipt,
 )
 
 
@@ -246,6 +247,81 @@ class DurableProviderReceiptTrustFloor:
             raise ValueError(
                 "Catalog is not the current durable trust state."
             )
+
+    def verify_current_receipt(
+        self,
+        receipt,
+        *,
+        lifecycle,
+        cycle_id,
+        branch_id,
+        effect_id,
+        expected_source_id,
+        receipt_id,
+    ):
+        """Verify only against the current durable trust policy.
+
+        Serialize catalog publication and signature verification.
+        A stale or substituted catalog raises ValueError.
+        An invalid receipt under current trust returns False.
+        """
+
+        sources_digest, catalog_digest = _catalog_fingerprints(
+            lifecycle
+        )
+
+        try:
+            with closing(
+                self._connect(readonly=False)
+            ) as connection:
+
+                # This transaction blocks concurrent catalog writes.
+                connection.execute("BEGIN IMMEDIATE")
+
+                try:
+                    revision, stored_sources, stored_catalog = (
+                        _read_floor(connection)
+                    )
+
+                    if (
+                        lifecycle.revision != revision
+                        or not hmac.compare_digest(
+                            sources_digest,
+                            stored_sources,
+                        )
+                        or not hmac.compare_digest(
+                            catalog_digest,
+                            stored_catalog,
+                        )
+                    ):
+                        raise ValueError(
+                            "Catalog is not the current durable "
+                            "trust state."
+                        )
+
+                    # The write transaction remains active
+                    # throughout cryptographic verification.
+                    verified = verify_signed_receipt(
+                        receipt,
+                        cycle_id=cycle_id,
+                        branch_id=branch_id,
+                        effect_id=effect_id,
+                        expected_source_id=expected_source_id,
+                        receipt_id=receipt_id,
+                        trusted_provider_keys=lifecycle.registry,
+                    )
+
+                    connection.commit()
+                    return verified
+
+                except BaseException:
+                    connection.rollback()
+                    raise
+
+        except sqlite3.Error as exc:
+            raise ValueError(
+                "Atomic current-trust verification failed."
+            ) from exc
 
     def publish(self, lifecycle):
         sources_digest, digest = _catalog_fingerprints(
