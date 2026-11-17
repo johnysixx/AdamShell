@@ -384,6 +384,139 @@ class DurableProviderReceiptTrustFloor:
                 "Anchored trust verification unavailable."
             ) from exc
 
+    def verify_publication_guarded_receipt(
+        self,
+        receipt,
+        *,
+        lifecycle,
+        publication_anchor,
+        cycle_id,
+        branch_id,
+        effect_id,
+        expected_source_id,
+        receipt_id,
+    ):
+        """Verify against a committed, non-pending publication.
+
+        Keep the supplied publication lease and SQLite write
+        transaction active throughout signature verification.
+
+        This is an experimental API. The caller-supplied anchor
+        is not authenticated here. Production use requires a
+        trusted independent backend and an enforced authorization
+        boundary that prevents older API bypasses.
+        """
+
+        from core.existence.history_receipt_trust_publication_state import (
+            TrustPublicationFinding,
+            classify_publication_state,
+        )
+
+        expected_sources, expected_catalog = (
+            _catalog_fingerprints(lifecycle)
+        )
+
+        hold_publication = getattr(
+            publication_anchor,
+            "hold_publication",
+            None,
+        )
+
+        if not callable(hold_publication):
+            raise ValueError(
+                "Publication anchor is missing or invalid."
+            )
+
+        try:
+            # Obtain the publication lease before the SQLite
+            # transaction. The lease must also protect PREPARE.
+            with hold_publication() as publication_state:
+
+                if (
+                    type(publication_state) is not tuple
+                    or len(publication_state) != 2
+                ):
+                    raise ValueError(
+                        "Malformed publication anchor state."
+                    )
+
+                committed, pending = publication_state
+
+                with closing(
+                    self._connect(readonly=False)
+                ) as connection:
+
+                    connection.execute("BEGIN IMMEDIATE")
+
+                    try:
+                        sqlite_snapshot = _read_floor(
+                            connection
+                        )
+
+                        report = classify_publication_state(
+                            sqlite_snapshot=sqlite_snapshot,
+                            committed_anchor_snapshot=committed,
+                            pending_anchor_snapshot=pending,
+                        )
+
+                        if (
+                            report.finding
+                            is not TrustPublicationFinding.MATCHED_COMMITTED
+                        ):
+                            raise ValueError(
+                                "Trust publication is not "
+                                "committed and current."
+                            )
+
+                        (
+                            revision,
+                            stored_sources,
+                            stored_catalog,
+                        ) = sqlite_snapshot
+
+                        # Matching the anchor is necessary but
+                        # insufficient. The requested lifecycle
+                        # must also match the locked current row.
+                        if (
+                            lifecycle.revision != revision
+                            or not hmac.compare_digest(
+                                expected_sources,
+                                stored_sources,
+                            )
+                            or not hmac.compare_digest(
+                                expected_catalog,
+                                stored_catalog,
+                            )
+                        ):
+                            raise ValueError(
+                                "Requested provider trust catalog "
+                                "is not the committed current state."
+                            )
+
+                        # Both leases remain held through crypto.
+                        verified = verify_signed_receipt(
+                            receipt,
+                            cycle_id=cycle_id,
+                            branch_id=branch_id,
+                            effect_id=effect_id,
+                            expected_source_id=expected_source_id,
+                            receipt_id=receipt_id,
+                            trusted_provider_keys=lifecycle.registry,
+                        )
+
+                        connection.commit()
+                        return verified
+
+                    except BaseException:
+                        connection.rollback()
+                        raise
+
+        except (OSError, sqlite3.Error) as exc:
+            raise ValueError(
+                "Publication-guarded receipt verification "
+                "is unavailable."
+            ) from exc
+
     def verify_current_receipt(
         self,
         receipt,
