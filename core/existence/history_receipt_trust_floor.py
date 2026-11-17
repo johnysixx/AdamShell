@@ -3,6 +3,11 @@
 Protects ordinary restarts and concurrent publishers, not against
 an attacker who can restore or replace the database file.
 Verification must explicitly require the current catalog.
+
+The anchored verification gate accepts an externally supplied witness.
+It is not an authenticated trust root by itself. A durable independent
+backend and coordinated publication protocol are still required.
+The existing verify_current_receipt() API is not anchor-protected.
 """
 
 import hashlib
@@ -247,6 +252,137 @@ class DurableProviderReceiptTrustFloor:
             raise ValueError(
                 "Catalog is not the current durable trust state."
             )
+
+    def verify_anchored_current_receipt(
+        self,
+        receipt,
+        *,
+        lifecycle,
+        trusted_anchor,
+        cycle_id,
+        branch_id,
+        effect_id,
+        expected_source_id,
+        receipt_id,
+    ):
+        """Verify against SQLite and an independent locked witness.
+
+        The anchor must provide a trusted hold() context manager
+        yielding (revision, source_digest, catalog_digest).
+
+        This API does not authenticate the anchor or make it durable.
+        The backend must independently provide those guarantees.
+        Caller-controlled witnesses can bypass rollback checks.
+        This method does not coordinate publication to SQLite and
+        the independent witness.
+        """
+
+        expected_sources, expected_catalog = (
+            _catalog_fingerprints(lifecycle)
+        )
+
+        hold = getattr(trusted_anchor, "hold", None)
+
+        if not callable(hold):
+            raise ValueError(
+                "Trusted anchor is missing or invalid."
+            )
+
+        try:
+            # Keep the witness lease until verification completes.
+            with hold() as witness:
+
+                if (
+                    type(witness) is not tuple
+                    or len(witness) != 3
+                ):
+                    raise ValueError(
+                        "Malformed trusted anchor snapshot."
+                    )
+
+                anchor_revision, anchor_sources, anchor_catalog = (
+                    witness
+                )
+
+                if (
+                    type(anchor_revision) is not int
+                    or anchor_revision < 1
+                    or type(anchor_sources) is not str
+                    or _HEX_SHA256.fullmatch(
+                        anchor_sources
+                    ) is None
+                    or type(anchor_catalog) is not str
+                    or _HEX_SHA256.fullmatch(
+                        anchor_catalog
+                    ) is None
+                ):
+                    raise ValueError(
+                        "Invalid trusted anchor state."
+                    )
+
+                with closing(
+                    self._connect(readonly=False)
+                ) as connection:
+
+                    # Serialize SQLite publications while the
+                    # independently held anchor lease is active.
+                    connection.execute("BEGIN IMMEDIATE")
+
+                    try:
+                        (
+                            stored_revision,
+                            stored_sources,
+                            stored_catalog,
+                        ) = _read_floor(connection)
+
+                        if (
+                            lifecycle.revision != anchor_revision
+                            or stored_revision != anchor_revision
+                            or not hmac.compare_digest(
+                                expected_sources,
+                                anchor_sources,
+                            )
+                            or not hmac.compare_digest(
+                                expected_catalog,
+                                anchor_catalog,
+                            )
+                            or not hmac.compare_digest(
+                                stored_sources,
+                                anchor_sources,
+                            )
+                            or not hmac.compare_digest(
+                                stored_catalog,
+                                anchor_catalog,
+                            )
+                        ):
+                            raise ValueError(
+                                "Trust floor and independent "
+                                "anchor do not agree."
+                            )
+
+                        # The anchor lease and SQLite transaction
+                        # both remain held during verification.
+                        verified = verify_signed_receipt(
+                            receipt,
+                            cycle_id=cycle_id,
+                            branch_id=branch_id,
+                            effect_id=effect_id,
+                            expected_source_id=expected_source_id,
+                            receipt_id=receipt_id,
+                            trusted_provider_keys=lifecycle.registry,
+                        )
+
+                        connection.commit()
+                        return verified
+
+                    except BaseException:
+                        connection.rollback()
+                        raise
+
+        except (OSError, sqlite3.Error) as exc:
+            raise ValueError(
+                "Anchored trust verification unavailable."
+            ) from exc
 
     def verify_current_receipt(
         self,
