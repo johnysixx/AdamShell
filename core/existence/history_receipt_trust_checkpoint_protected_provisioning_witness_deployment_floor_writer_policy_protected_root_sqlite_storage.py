@@ -56,6 +56,129 @@ _STATE_SQL = (
 )
 
 
+# Explicit state schema versions.
+
+_STATE_SCHEMA_V1 = 0
+_STATE_SCHEMA_V2 = 2
+
+_SESSION_METADATA_SQL = (
+    "CREATE TABLE session_metadata ("
+    "singleton INTEGER PRIMARY KEY CHECK(singleton = 1), "
+    "enrollment BLOB, "
+    "history_digest TEXT NOT NULL)"
+)
+
+_CONSUMED_SESSIONS_SQL = (
+    "CREATE TABLE consumed_sessions ("
+    "session BLOB PRIMARY KEY NOT NULL "
+    "CHECK(typeof(session) = 'blob' AND length(session) = 32)) "
+    "WITHOUT ROWID"
+)
+
+_SESSION_HISTORY_DOMAIN = (
+    "AdamShell/A44/protected-root-session-history/v2"
+)
+
+
+def _session_history_digest(connection):
+
+    """Canonical commitment to the complete session set."""
+
+    digest = hashlib.sha256()
+
+    digest.update(
+        _SESSION_HISTORY_DOMAIN.encode("ascii")
+        + b"\x00"
+    )
+
+    count = 0
+
+    for (session,) in connection.execute(
+        "SELECT session FROM consumed_sessions "
+        "ORDER BY session"
+    ):
+
+        if type(session) is not bytes or len(session) != 32:
+
+            raise ValueError(
+                "Invalid consumed session record."
+            )
+
+        digest.update(session)
+        count += 1
+
+    digest.update(
+        count.to_bytes(8, "big")
+    )
+
+    return digest.hexdigest()
+
+
+def _state_schema_version(connection):
+
+    row = connection.execute(
+        "PRAGMA user_version"
+    ).fetchone()
+
+    if row not in (
+        (_STATE_SCHEMA_V1,),
+        (_STATE_SCHEMA_V2,),
+    ):
+
+        raise ValueError(
+            "Unsupported protected state schema version."
+        )
+
+    return row[0]
+
+
+def _validate_session_history(connection):
+
+    rows = connection.execute(
+        "SELECT singleton, enrollment, history_digest "
+        "FROM session_metadata"
+    ).fetchall()
+
+    if len(rows) != 1 or rows[0][0] != 1:
+
+        raise ValueError(
+            "Invalid session metadata singleton."
+        )
+
+    _, enrollment, expected = rows[0]
+
+    if enrollment is not None and (
+        type(enrollment) is not bytes
+        or not enrollment
+        or len(enrollment) > 8192
+    ):
+
+        raise ValueError(
+            "Invalid stored session enrollment."
+        )
+
+    versioned._require_digest(
+        expected,
+        "stored session history digest",
+    )
+
+    if _session_history_digest(connection) != expected:
+
+        raise ValueError(
+            "Stored session history digest mismatch."
+        )
+
+    if enrollment is None:
+
+        if connection.execute(
+            "SELECT 1 FROM consumed_sessions LIMIT 1"
+        ).fetchone() is not None:
+
+            raise ValueError(
+                "Unbound session registry contains records."
+            )
+
+
 @dataclass(frozen=True, slots=True)
 class _Storage:
 
@@ -360,15 +483,38 @@ def _validate_schema(connection, role):
         ("table", "root_metadata", _METADATA_SQL),
     }
 
+    schema_version = None
+
     if role == "state":
 
         expected.add(
             ("table", "root_state", _STATE_SQL)
         )
 
+        schema_version = (
+            _state_schema_version(connection)
+        )
+
+        if schema_version == _STATE_SCHEMA_V2:
+
+            expected.update({
+                (
+                    "table",
+                    "session_metadata",
+                    _SESSION_METADATA_SQL,
+                ),
+                (
+                    "table",
+                    "consumed_sessions",
+                    _CONSUMED_SESSIONS_SQL,
+                ),
+            })
+
     elif role != "fence":
 
-        raise ValueError("Invalid protected schema role.")
+        raise ValueError(
+            "Invalid protected schema role."
+        )
 
     actual = connection.execute(
         "SELECT type, name, sql FROM sqlite_master "
@@ -376,7 +522,14 @@ def _validate_schema(connection, role):
     ).fetchall()
 
     if len(actual) != len(expected) or set(actual) != expected:
-        raise ValueError("Unexpected protected database schema.")
+
+        raise ValueError(
+            "Unexpected protected database schema."
+        )
+
+    if schema_version == _STATE_SCHEMA_V2:
+
+        _validate_session_history(connection)
 
 
 def _metadata_record(connection, role):
@@ -484,6 +637,20 @@ def _initialize(connection, storage, role):
 
         connection.execute(
             "INSERT INTO root_state VALUES (1, NULL, NULL)"
+        )
+
+        connection.execute(_SESSION_METADATA_SQL)
+
+        connection.execute(_CONSUMED_SESSIONS_SQL)
+
+        connection.execute(
+            "INSERT INTO session_metadata VALUES (1, NULL, ?)",
+            (_session_history_digest(connection),),
+        )
+
+        connection.execute(
+            "PRAGMA user_version = "
+            + str(_STATE_SCHEMA_V2)
         )
 
     _validate_metadata(connection, storage, role)
